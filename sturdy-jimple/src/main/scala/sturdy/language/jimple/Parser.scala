@@ -1,14 +1,17 @@
 package sturdy.language.jimple
 
+import cats.parse.Parser.{backtrack, char, not}
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import JsonStringUtil.escapedString
 
 import scala.collection.*
+import scala.compiletime.ops.int.S
 import scala.language.{implicitConversions, postfixOps}
 
 object Parser:
 
-  def parse(source: String): Class =
-    classes.parseAll(source) match
+  def parse(source: String): Program =
+    programs.parseAll(source) match
       case Right(p) => p
       case Left(err) => throw new IllegalArgumentException(s"Parse error at ${source.slice(err.failedAtOffset, err.failedAtOffset+10)}: $err")
 
@@ -29,19 +32,18 @@ object Parser:
     val KVIRTUALINVOKE = "virtualinvoke"
     val KSTATICINVOKE = "staticinvoke"
     val KCASE = "case"
-    val KCATCH = ".catch"
+    val KCATCH = "catch"
     val KFROM = "from"
     val KTO = "to"
-    val KUSING = "using"
+    val KWITH = "with"
     val KCMP = "cmp"
     val KCMPG = "cmpg"
     val KCMPL = "cmpl"
-    val KUSHR = "ushr"
-    val KXOR = "xor"
-    val KLENGTH = "length"
+    val KLENGTHOF = "lengthof"
     val KINSTANCEOF ="instanceof"
     val KNEW = "new"
-    val KNEWMULTIARRAY = "new multiarray"
+    val KNEWARRAY = "newarray"
+    val KNEWMULTIARRAY = "newmultiarray"
     val KBREAKPOINT = "breakpoint"
     val KENTERMONITOR = "entermonitor"
     val KEXITMONITOR = "exitmonitor"
@@ -60,6 +62,22 @@ object Parser:
     val KPUBLIC = "public"
     val KPRIVATE = "private"
     val KSTATIC = "static"
+    val KFINAL = "final"
+    val KTHROWS = "throws"
+    val KTRANSIENT = "transient"
+    val KNATIVE = "native"
+    val KVOLATILE = "volatile"
+    val KINTERFACE = "interface"
+    val KABSTRACT = "abstract"
+    val KENUM = "enum"
+    val KSYNCHRONIZED = "synchronized"
+    val KINFINITY = "#Infinity"
+    val KNEGINFINITY = "#-Infinity"
+    val KINFINITYF = "#InfinityF"
+    val KNEGINFINITYF = "#-InfinityF"
+    val KNAN = "#NaN"
+    val KNANF = "#NaNF"
+    val KSTRICTFP = "strictfp"
   }
 
   import LanguageKeywords.*
@@ -83,15 +101,14 @@ object Parser:
     KCATCH,
     KFROM,
     KTO,
-    KUSING,
+    KWITH,
     KCMP,
     KCMPG,
     KCMPL,
-    KUSHR,
-    KXOR,
-    KLENGTH,
+    KLENGTHOF,
     KINSTANCEOF,
     KNEW,
+    KNEWARRAY,
     KNEWMULTIARRAY,
     KBREAKPOINT,
     KENTERMONITOR,
@@ -110,7 +127,23 @@ object Parser:
     KIMPLEMENTS,
     KPUBLIC,
     KPRIVATE,
-    KSTATIC
+    KSTATIC,
+    KFINAL,
+    KTHROWS,
+    KTRANSIENT,
+    KNATIVE,
+    KVOLATILE,
+    KINTERFACE,
+    KABSTRACT,
+    KENUM,
+    KSYNCHRONIZED,
+    KINFINITY,
+    KNEGINFINITY,
+    KINFINITYF,
+    KNEGINFINITYF,
+    KNAN,
+    KNANF,
+    KSTRICTFP
   )
 
   val lineComment: P[Unit] = P.string("//") *> P.charsWhile0(c => c != '\n' && c != '\r').void
@@ -118,7 +151,7 @@ object Parser:
   P.product01(P.charsWhile0(c => c != '*').void, P.string("*/") | P.char('*') ~ rec).void
   )
   val comment: P[Unit] = lineComment | blockComment
-  val whitespace: P[Unit] = (P.charIn(" \t\r\n").void | comment)
+  val whitespace: P[Unit] = P.charIn(" \t\r\n").void | comment
   val whitespaces0: P0[Unit] = whitespace.rep0.void
 
   def keyword(s: String): P[Unit] =
@@ -132,7 +165,7 @@ object Parser:
   val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).void
 
   val id: P[String] =
-    (letter ~ letterDigit.rep0)
+    ((letter | P.char('$') | P.char('_') | P.char('\'')) ~ (letterDigit | P.char('_') | P.char('$') | P.char('\'')).rep0 )
     .string
     .filter(!keywords(_)).backtrack
 
@@ -141,6 +174,11 @@ object Parser:
 
   val generatedIdentifier: P[String] =
     spaced((P.string("$") ~ id).string)
+
+  val specialID: P[String] =
+    ((P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')) | P.char('[')).rep ~
+      (P.char('/') ~ (P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')) | P.char('$') | P.char('\'') | P.char('_')).rep)
+        .rep0).string.backtrack
 
   def spaced[A](p: P[A]): P[A] =
     p <* whitespaces0
@@ -154,11 +192,15 @@ object Parser:
   def isPublic(s: String): Boolean =
     return s == "public"
 
+  val visibilities = Map(0 -> "public", 1 -> "private", 2 -> "protected")
+  def getVisibility(s: String, m: Int): Boolean =
+    return s == visibilities.apply(m)
+
   val int: P[Int] =
-    spaced(Numbers.signedIntString).map(_.toInt)
+    spaced(Numbers.bigInt).map(_.toInt).backtrack
 
   val long: P[Long] =
-    spaced(Numbers.jsonNumber).map(_.toLong)
+    spaced(Numbers.bigInt).map(_.toLong)
 
   val double: P[Double] =
     spaced(Numbers.jsonNumber).map(_.toDouble)
@@ -166,12 +208,15 @@ object Parser:
   val float: P[Float] =
     spaced(Numbers.jsonNumber).map(_.toFloat)
 
+  def isBackslashed: P0[String] =
+    ((P.not(P.string("\\")) ~ P.string("\"").peek)).string
+
   val string: P[String] =
-    spaced(P.string("\"") *> P.charsWhile0(c => c!= '\"') <* P.string("\""))
+    spaced(escapedString('"'))
 
   val className: P[String] =
     (P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).rep ~
-      (P.char('.') ~ P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).rep)
+      (P.char('.') ~ (P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')) | P.char('$') | P.char('\'') | P.char('_') | P.char('-')).rep)
         .rep0).string.backtrack
 
   val semi: P[Unit] =
@@ -200,25 +245,36 @@ object Parser:
         ret = ret :+ LocalDec(t, s)
       }
     }
-    return ret
+    ret
+
+  def addBrackets(s: String, i: Integer): String =
+    var ret = ""
+    for(j <- (0 until i))
+      ret = s.concat("[]")
+    ret
 
   val constants: P[Constant] =
-    (int <* P.not(P.char('.').peek)).backtrack.map(Constant.IntC.apply) |
+    (float <* spaced(P.ignoreCaseChar('f'))).map(Constant.FloatC.apply).backtrack |
+      (long <* (P.not(P.char('.').peek) ~ spaced(P.ignoreCaseChar('l')))).backtrack.map(Constant.LongC.apply) |
+      (int <* P.not(P.char('.').peek)).backtrack.map(Constant.IntC.apply) |
       double.map(Constant.DoubleC.apply) |
-      long.backtrack.map(Constant.LongC.apply) |
-      float.backtrack.map(Constant.FloatC.apply) |
       string.map(Constant.StringC.apply) |
-      keyword(KNULL).map(_ => Constant.NullC())
+      keyword(KNULL).map(_ => Constant.NullC()) |
+      keyword(KNANF).map(_ => Constant.FloatNanC()).backtrack |
+      keyword(KNAN).map(_ => Constant.NanC()) |
+      keyword(KNEGINFINITYF).map(_ => Constant.FloatNegInfinityC()).backtrack |
+      keyword(KNEGINFINITY).map(_ => Constant.NegInfinityC()).backtrack |
+      keyword(KINFINITYF).map(_ => Constant.FloatInfinityC()).backtrack |
+      keyword(KINFINITY).map(_ => Constant.InfinityC())
 
   val types: P[Type] =
-    keyword(KINT).map(_ => Type.IntT()) |
-      keyword(KLONG).map(_ => Type.LongT()) |
-      keyword(KFLOAT).map(_ => Type.FloatT()) |
-      keyword(KDOUBLE).map(_ => Type.DoubleT()) |
-      keyword(KVOID).map(_ => Type.VoidT()) |
-      (spaced(className) ~ op("[]").?).map{
-        case (s, None) => Type.RefT(s)
-        case (s, Some(x)) => Type.RefT(s+x)
+    (keyword(KINT) <* not(op('[')).peek).map(_ => Type.IntT()).backtrack |
+      (keyword(KLONG) <* not(op('[')).peek).map(_ => Type.LongT()).backtrack |
+      (keyword(KFLOAT) <* not(op('[')).peek).map(_ => Type.FloatT()).backtrack |
+      (keyword(KDOUBLE) <* not(op('[')).peek).map(_ => Type.DoubleT()).backtrack |
+      (keyword(KVOID) <* not(op('[')).peek).map(_ => Type.VoidT()).backtrack |
+      (spaced(className) ~ op("[]").rep0).map{
+        case (s, x) => Type.RefT(addBrackets(s, x.length))
       }
 
   val identityValues: P[IdentityVal] =
@@ -235,22 +291,23 @@ object Parser:
       keyword(KVIRTUALINVOKE).map(_ => InvokeType.VirtualI)
 
   val immediates: P[Immediate] =
-    constants.map(Immediate.ConstI.apply) |
-      (identifier | generatedIdentifier).map(s => Immediate.LocalI(Local(s))).backtrack
+    constants.map(Immediate.ConstI.apply)
+      | (keyword(KCLASS) *> inQuotes(specialID <* semi.?)).map(Immediate.ClassI.apply)
+      | (identifier | generatedIdentifier).map(s => Immediate.LocalI(Local(s))).backtrack
 
   val localDeclarations: P[Seq[LocalDec]] =
     ((types ~ (identifier | generatedIdentifier ) ~ ((op(',') *> (identifier | generatedIdentifier )).rep0)) <* semi)
       .backtrack.map {case ((t, id: String), ids) => calculateLocalDecs(t, id, ids) }
 
   val cases: P[Case] =
-    (keyword(KCASE) *> constants ~ (op(":") *> identifier))
+    (keyword(KCASE) *> constants ~ (op(":") *> keyword(KGOTO) *> identifier <* semi))
       .map {
         case (y: Constant.IntC, x) => Case(y, x)
         case _ => throw new IllegalArgumentException
       }
 
   val methodSignatures: P[MethodSignature] =
-    ((className <* op(':')) ~ types ~ (identifier | inDiamonds(identifier)) ~ inParens(types.rep0))
+    (spaced(className <* op(':')) ~ spaced(types) ~ (identifier | inDiamonds(identifier)) ~ inParens((types <* op(',').?).rep0))
       .map { case (((className, returnType), name), paramTypes) =>
         MethodSignature(name,paramTypes,returnType, className)
       }
@@ -262,7 +319,7 @@ object Parser:
     ((keyword(KCATCH) *> types) ~
       (keyword(KFROM) *> identifier) ~
       (keyword(KTO) *> identifier) ~
-      (keyword(KUSING) *> identifier))
+      (keyword(KWITH) *> identifier))
       .map {
         case (((excType: Type.RefT,from),to),using) =>
           ExceptionRange(excType, from, to, using)
@@ -272,18 +329,19 @@ object Parser:
   val binaryOperators: P[BinOp] =
     op('+').map(_ => BinOp.Add) |
       op('&').map(_ => BinOp.And) |
+      keyword(KCMPG).map(_ => BinOp.Cmpg).backtrack |
+      keyword(KCMPL).map(_ => BinOp.Cmpl).backtrack |
       keyword(KCMP).map(_ => BinOp.Cmp) |
-      keyword(KCMPG).map(_ => BinOp.Cmpg) |
-      keyword(KCMPL).map(_ => BinOp.Cmpl) |
       op('/').map(_ => BinOp.Div) |
       op('*').map(_ => BinOp.Mul) |
       op('|').map(_ => BinOp.Or) |
       op('%').map(_ => BinOp.Rem) |
-      op("<<").map(_ => BinOp.Shl) |
-      op(">>").map(_ => BinOp.Shr) |
+      op(">>>").map(_ => BinOp.Ushr).backtrack |
+      op("<<<").map(_ => BinOp.Ushl).backtrack |
+      op("<<").map(_ => BinOp.Shl).backtrack |
+      op(">>").map(_ => BinOp.Shr).backtrack |
       op('-').map(_ => BinOp.Sub) |
-      keyword(KUSHR).map(_ => BinOp.Ushr) |
-      keyword(KXOR).map(_ => BinOp.Xor)
+      op('^').map(_ => BinOp.Xor)
 
   val conditionalOperators: P[CondOp] =
     op("==").map(_ => CondOp.Eq) |
@@ -294,8 +352,10 @@ object Parser:
       op('<').map(_ => CondOp.Lt)
 
   val unaryOperators: P[UnOp] =
-    keyword(KLENGTH) *> immediates.map(UnOp.Length.apply) |
-      op('-') *> immediates.map(UnOp.Neg.apply)
+    keyword(KLENGTHOF).map(_ => UnOp.Length()) |
+      op('-').map(_ => UnOp.Neg()) |
+      op("neg").map(_ => UnOp.NegWord())
+
 
   val variables: P[Var] =
     (immediates ~ inBrackets(immediates)).backtrack.map((i1,i2) => Var.ArrayRefV(i1,i2)).backtrack |
@@ -304,7 +364,7 @@ object Parser:
       (identifier | generatedIdentifier).map(i => Var.LocalV(Local(i)))
 
   val expressions: P[Exp] =
-    (immediates ~ (binaryOperators) ~ immediates)
+    (immediates ~ binaryOperators ~ immediates)
       .backtrack.map {
         case ((i1,operator : BinOp),i2) => Exp.BinopE(i1, i2, operator) }|
       (immediates ~ conditionalOperators ~ immediates)
@@ -315,38 +375,40 @@ object Parser:
         .backtrack.map {
           case (i, t : Type.RefT) => Exp.InstanceOfE(i, t)
           case _ => throw new IllegalArgumentException } |
-      keyword(KSTATICINVOKE) *> (inDiamonds(methodSignatures) ~ inParens(immediates.rep0))
+      keyword(KSTATICINVOKE) *> (inDiamonds(methodSignatures) ~ inParens((immediates <* op(',').?).rep0))
         .map((m, ls) => Exp.StaticInvokeE(m, ls)) |
-      (invokeTypes ~ immediates ~ (op('.') *> inDiamonds(methodSignatures)) ~ inParens(immediates.rep0))
+      (invokeTypes ~ immediates ~ (op('.') *> inDiamonds(methodSignatures)) ~ inParens((immediates <* op(',').?).rep0))
         .map{
           case (((t, i), m), ls) => Exp.InvokeE(t, i, m, ls)
         } |
-      (keyword(KNEW) *> types ~ inBrackets(immediates)).backtrack.map((t,i) => Exp.NewArrayE(t, i)) |
-      (keyword(KNEW) *> types <* op("()"))
+      (keyword(KNEWARRAY) *> inParens(types) ~ inBrackets(immediates)).backtrack.map((t,i) => Exp.NewArrayE(t, i)) |
+      (keyword(KNEW) *> types <* op("()").?)
         .map{
           case t : Type.RefT => Exp.NewE(t)
           case _ => throw new IllegalArgumentException }
         .backtrack |
-      (keyword(KNEWMULTIARRAY) *> types ~ inBrackets(immediates).rep0 ~ op("[]").rep0)
+      (keyword(KNEWMULTIARRAY) *> inParens(types) ~ inBrackets(immediates.?).rep0)
         .map{
-          case ((t, dims), edims) => Exp.NewMultArrE(t, dims, edims.length)
+          case (t, dims) => Exp.NewMultArrE(t, dims)
         }.backtrack |
       (unaryOperators ~ immediates).map((operator, i) => Exp.UnopE(i, operator))
 
   val rValues: P[RVal] =
-    (immediates ~ inBrackets(immediates)).backtrack.map((i1,i2) => RVal.ArrayRefR(i1,i2)) |
-      constants.backtrack.map(RVal.ConstR.apply) |
+    (keyword(KCLASS) *> inQuotes(specialID <* semi.?)).map(n => RVal.ClassR(n)).backtrack |
+      (immediates ~ inBrackets(immediates)).backtrack.map((i1,i2) => RVal.ArrayRefR(i1,i2)) |
       expressions.map(e => RVal.ExpressionR(e)) |
-      ((immediates <* op(".")) ~ inBrackets(fieldSignatures)).backtrack.map((i,f) => RVal.InstanceFieldRefR(i,f)) |
+      constants.backtrack.map(RVal.ConstR.apply) |
+      ((immediates <* op(".")) ~ inDiamonds(fieldSignatures)).backtrack.map((i,f) => RVal.InstanceFieldRefR(i,f)) |
       inDiamonds(fieldSignatures).map(RVal.StaticFieldRefR.apply) |
-      identifier.map(i => RVal.LocalR(Local(i)))
+      (identifier | generatedIdentifier).map(i => RVal.LocalR(Local(i)))
 
   val identityStatements: P[Stmt.IdentityS] =
-    (identifier ~ (op(":=") *> identityValues <* semi)).backtrack.map((s, iv) => Stmt.IdentityS(Local(s), iv))
+    ((identifier | generatedIdentifier) ~ (op(":=") *> identityValues <* semi)).backtrack.map((s, iv) => Stmt.IdentityS(Local(s), iv))
 
   val statements: P[Stmt] =
     keyword(KBREAKPOINT) *> semi.map(_ => Stmt.BreakpointS()) |
       (variables ~ (op('=') *> rValues <* semi)).backtrack.map((l, r) => Stmt.AssignS(l, r)) |
+      ((identifier | generatedIdentifier) ~ (op(":=") *> identityValues <* semi)).backtrack.map{case (s, iv: IdentityVal.CaughtExcRef) => Stmt.ExceptionIdentityS(Local(s), iv)} |
       identityStatements |
       keyword(KENTERMONITOR) *> (immediates <* semi).map(Stmt.EnterMonitorS.apply) |
       keyword(KEXITMONITOR) *> (immediates <* semi).map(Stmt.ExitMonitorS.apply) |
@@ -359,7 +421,7 @@ object Parser:
         case e : (Exp.InvokeE | Exp.StaticInvokeE) => Stmt.InvokeS(e)
         case _ => throw new IllegalArgumentException } |
       (keyword(KLOOKUPSWITCH) *> inParens(immediates) ~ inBraces(cases.rep0 ~ (
-        keyword(KDEFAULT) *> semi *> keyword(KGOTO) *> identifier)))
+        keyword(KDEFAULT) *> op(':') *> keyword(KGOTO) *> identifier <* semi)) <* semi)
         .map {
           case (i, (ls, s)) => Stmt.LookupSwitchS(i, ls, s) } |
       keyword(KNOP) *> semi.map(_ => Stmt.NopS()) |
@@ -367,41 +429,67 @@ object Parser:
       (keywordNoSpace(KRETURN) *> semi).backtrack.map(_ => Stmt.ReturnVoidS()) |
       (keyword(KRETURN) *> (immediates <* semi)).map(Stmt.ReturnS.apply) |
       (keyword(KTABLESWITCH) *> inParens(immediates) ~ inBraces(cases.rep0 ~ (
-        keyword(KDEFAULT) *> semi *> keyword(KGOTO) *> identifier)))
+        keyword(KDEFAULT) *> op(':') *> keyword(KGOTO) *> identifier <* semi)) <* semi)
         .map {
         case (i, (ls, s)) => Stmt.TableSwitchS(i, ls, s) } |
       keyword(KTHROW) *> (immediates <* semi).map(Stmt.ThrowS.apply) |
-      (id <* op(':')).map((l) => Stmt.LabelS(l))
+      (id <* op(':')).map((l) => Stmt.LabelS(l)) |
+      (exceptionRanges <* semi).map(Stmt.CatchS.apply)
 
   val methodheaders: P[MethodHeader] =
-    (((op("public") | op("private") | P.anyChar.peek) ~ keyword(KSTATIC).?).with1
-      ~ types ~ (identifier | inDiamonds(identifier)) ~ inParens(types.rep0))
+    (((op("public") | op("private") | op("protected") | P.anyChar.peek) ~ keyword(KABSTRACT).? ~ keyword(KSTATIC).? ~ keyword(KFINAL).? ~ keyword(KSTRICTFP).? ~ keyword(KSYNCHRONIZED).? ~ keyword(KTRANSIENT).? ~ keyword(KVOLATILE).?).with1
+      ~ types ~ (identifier | inDiamonds(identifier)) ~ inParens((types <* op(',').?).rep0) ~ (keyword(KTHROWS) *> (types <* op(',').?).rep0).?)
       .map{
-        case ((((isP: Unit, None), ret), id), params) => MethodHeader(false, false, false, ret, id, params)
-        case ((((isP: Unit, Some(x)), ret), id), params) => MethodHeader(false, false, true, ret, id, params)
-        case ((((isP: String, None), ret), id), params) => MethodHeader(isPublic(isP), !isPublic(isP), false, ret, id, params)
-        case ((((isP: String, Some(x)), ret), id), params) => MethodHeader(isPublic(isP), !isPublic(isP), true, ret, id, params)
+        case (((((((((((isP: Unit, isAbstract), isStatic), isFinal), isStrict), isSynchronized), isTransient), isVolatile), ret), id), params), throws: Option[Seq[Type.RefT]]) => MethodHeader(false, false, false, isStatic.isDefined, isFinal.isDefined, isStrict.isDefined, isSynchronized.isDefined, isTransient.isDefined, isVolatile.isDefined, isAbstract.isDefined, ret, id, params, throws.getOrElse(Seq.empty[Type.RefT]))
+        case (((((((((((isP: String, isAbstract), isStatic), isFinal), isStrict), isSynchronized), isTransient), isVolatile), ret), id), params), throws: Option[Seq[Type.RefT]]) => MethodHeader(getVisibility(isP, 0), getVisibility(isP, 1), getVisibility(isP, 2), isStatic.isDefined, isFinal.isDefined, isStrict.isDefined, isSynchronized.isDefined, isTransient.isDefined,  isVolatile.isDefined, isAbstract.isDefined, ret, id, params, throws.getOrElse(Seq.empty[Type.RefT]))
         case _ => throw new IllegalArgumentException
-      }
-
-
-
-  val methods: P[Method] =
-    (methodheaders ~ inBraces(localDeclarations.rep0 ~ identityStatements.rep0 ~
-      statements.rep0 ~ exceptionRanges.rep0))
-      .map {
-        case (header, (((locals, idStmts), stmts), exceptions)) =>
-          Method(header, locals.flatten, idStmts, stmts, exceptions)
       }.backtrack
 
-  val classes: P[Class] =
-    keyword(KCLASS) *> (identifier ~ (keyword(KEXTENDS) *> types).? ~ (keyword(KIMPLEMENTS) *> types.rep).? ~ inBraces(methods.rep0))
-      .map{
-        case (((id, None), None), methods) => Class(id, None, Seq.empty[Type.RefT], methods)
-        case (((id, None), Some(impl): Option[Seq[Type.RefT]]), methods) => Class(id, None, impl, methods)
-        case (((id, Some(ext): Option[Type.RefT]), None), methods) => Class(id, Some(ext), Seq.empty[Type.RefT], methods)
-        case (((id, Some(ext): Option[Type.RefT]), Some(impl): Option[Seq[Type.RefT]]), methods) => Class(id, Some(ext), impl, methods)
+  val globalvars: P[ClassBodyElement.GlobalVarCB] =
+    (((op("public") | op("private") | op("protected") | P.anyChar.peek) ~ keyword(KSTATIC).? ~ keyword(KFINAL).? ~ keyword(KENUM).? ~ keyword(KTRANSIENT).? ~ keyword(KVOLATILE).?).with1 ~ types ~ identifier <* semi)
+      .backtrack.map{
+        case (((((((isP: Unit, isStatic), isFinal), isEnum), isTransient), isVolatile), t), id) => ClassBodyElement.GlobalVarCB(false, false, false, isStatic.isDefined, isFinal.isDefined, isEnum.isDefined, isTransient.isDefined, isVolatile.isDefined, t, id)
+        case (((((((isP: String, isStatic), isFinal), isEnum), isTransient), isVolatile), t), id) => ClassBodyElement.GlobalVarCB(getVisibility(isP, 0), getVisibility(isP, 1), getVisibility(isP, 2), isStatic.isDefined, isFinal.isDefined, isEnum.isDefined, isTransient.isDefined, isVolatile.isDefined, t, id)
+      }
+
+  val nativecalls: P[ClassBodyElement.NativeCallCB] =
+    (((op("public") | op("private") | op("protected") | P.anyChar.peek) ~ keyword(KSTATIC).? ~ keyword(KFINAL).? ~ keyword(KSYNCHRONIZED).? ~ (keyword(KNATIVE) *> keyword(KTRANSIENT).?)).with1 ~ types ~ identifier ~ inParens((types <* op(',').?).rep0) ~ (keyword(KTHROWS) *> (types <* op(',').?).rep0).? <* semi)
+      .backtrack.map {
+        case ((((((((isP: Unit, isStatic), isFinal), isSynchronized), isTransient), t), id), params), except: Option[Type.RefT]) => ClassBodyElement.NativeCallCB(false, false, false, isStatic.isDefined, isFinal.isDefined, isSynchronized.isDefined, isTransient.isDefined, t, id, params, except)
+        case ((((((((isP: String, isStatic), isFinal), isSynchronized), isTransient), t), id), params), except: Option[Type.RefT]) => ClassBodyElement.NativeCallCB(getVisibility(isP, 0), getVisibility(isP, 1), getVisibility(isP, 2), isStatic.isDefined, isFinal.isDefined, isSynchronized.isDefined, isTransient.isDefined, t, id, params, except)
+      }
+
+  val methods: P[ClassBodyElement.MethodCB] =
+    (methodheaders ~ inBraces(localDeclarations.rep0 ~ identityStatements.rep0 ~
+      statements.rep0 ~ exceptionRanges.rep0))
+      .backtrack.map {
+        case (header, (((locals, idStmts), stmts), exceptions)) =>
+          ClassBodyElement.MethodCB(header, locals.flatten, idStmts, stmts, exceptions)
+      }
+
+  val classbodyelements: P[ClassBodyElement] =
+    globalvars.backtrack
+      | nativecalls.backtrack
+      | (methodheaders <* semi).map(ClassBodyElement.MethodHeaderCB.apply).backtrack
+      | methods
+
+  val classes: P[Container.ClassC] =
+    ((((op("public") | op("private") | P.anyChar.peek) ~ keyword(KABSTRACT).? ~ keyword(KSTATIC).? ~ keyword(KFINAL).? ~ keyword(KENUM).?).with1 <* keyword(KCLASS)) ~ spaced(className) ~ (keyword(KEXTENDS) *> types).? ~ (keyword(KIMPLEMENTS) *> (types <* op(',').?).rep0).? ~ inBraces(classbodyelements.rep0) )
+        .map{
+        case ((((((((isP: Unit, isAbstract), isStatic), isFinal), isEnum), id), extend: Option[Type.RefT]), implement: Option[Seq[Type.RefT]]), body: Seq[ClassBodyElement]) => Container.ClassC(false, false, isAbstract.isDefined, isStatic.isDefined, isFinal.isDefined, isEnum.isDefined, id, extend, implement.getOrElse(Seq.empty[Type.RefT]), body)
+        case ((((((((isP: String, isAbstract), isStatic), isFinal), isEnum), id), extend: Option[Type.RefT]), implement: Option[Seq[Type.RefT]]), body: Seq[ClassBodyElement]) => Container.ClassC(getVisibility(isP, 0), getVisibility(isP, 1), isAbstract.isDefined, isStatic.isDefined, isFinal.isDefined, isEnum.isDefined, id, extend, implement.getOrElse(Seq.empty[Type.RefT]), body)
         case _ => throw new IllegalArgumentException
       }
 
-//  val program: P0[Program] = ???
+  val interfaces: P[Container.InterfaceC] =
+    ((((op("public") | op("private") | P.anyChar.peek) <* op("annotation").?).with1 <* keyword(KINTERFACE)) ~ spaced(className) ~ (keyword(KEXTENDS) *> types).? ~ (keyword(KIMPLEMENTS) *> (types <* op(',').?).rep0).? ~ inBraces(classbodyelements.rep0))
+        .map{
+        case ((((isP: Unit, id), extend: Option[Type.RefT]), implement: Option[Seq[Type.RefT]]), body: Seq[ClassBodyElement]) => Container.InterfaceC(false, false, id, extend, implement.getOrElse(Seq.empty[Type.RefT]), body)
+        case ((((isP: String, id), extend: Option[Type.RefT]), implement: Option[Seq[Type.RefT]]), body: Seq[ClassBodyElement]) => Container.InterfaceC(getVisibility(isP, 0), getVisibility(isP, 1), id, extend, implement.getOrElse(Seq.empty[Type.RefT]), body)
+      }
+
+  val containers: P[Container] =
+    (classes.backtrack | interfaces)
+
+  val programs: P0[Program] =
+    whitespaces0 *> containers.rep0.map(Program.apply) <* P.end
