@@ -10,16 +10,18 @@ import cats.data.NonEmptyList
 
 type Label = Identifier
 type Identifier = String
-type SizedDims = Seq[Immediate]
+type SizedDims = Seq[Option[Immediate]]
 type EmptyDims = Int  //(empty_dims = "[]" empty_dims | ;)
 
 enum Immediate:
   case ConstI(c: Constant)
   case LocalI(l: Local)
+  case ClassI(s: String)
 
   override def toString: String = this match
     case ConstI(c) => s"ConstI($c)"
     case LocalI(l) => s"LocalI($l)"
+    case ClassI(n) => s"ClassI($n)"
 
 enum RVal:
   case ArrayRefR(i1: Immediate, i2: Immediate)
@@ -28,6 +30,7 @@ enum RVal:
   case InstanceFieldRefR(i: Immediate, f: FieldSignature)
   case StaticFieldRefR(f: FieldSignature)
   case LocalR(l: Local)
+  case ClassR(s: String)
 //TODO: case NextNextStmtAddr
 
   override def toString: String = this match
@@ -37,6 +40,7 @@ enum RVal:
     case InstanceFieldRefR(i, f) => s"InstanceFieldRefR($i, $f)"
     case StaticFieldRefR(f) => s"StaticFieldRefR($f)"
     case LocalR(l) => s"LocalR($l)"
+    case ClassR(n) => s"ClassR($n)"
 
 enum Var:
   case ArrayRefV(i1: Immediate, i2: Immediate)
@@ -54,6 +58,7 @@ enum Stmt extends Labeled:
   case BreakpointS()
   case AssignS(v: Var, newVal: RVal)//variable = rvalue
   case IdentityS(l: Local, i: IdentityVal) //identity_value
+  case ExceptionIdentityS(l: Local, i: IdentityVal)
   case EnterMonitorS(i: Immediate)//"entermonitor" immediate
   case ExitMonitorS(i: Immediate)//"exitmonitor" immediate
   case GotoS(l: Label)//"goto" label
@@ -67,11 +72,13 @@ enum Stmt extends Labeled:
   case TableSwitchS(i: Immediate, cs: Seq[Case], l: Label)//"tableswitch(" immediate "){" cases "default: goto" label "}"
   case ThrowS(i: Immediate)//"throw" immediate
   case LabelS(l: Label)
+  case CatchS(e: ExceptionRange)
 
   override def toString: String = this match
     case BreakpointS() => s"BreakpointS()@${this.label}"
     case AssignS(v, newVal) => s"AssignS($v, $newVal)@${this.label}"
     case IdentityS(l, i) => s"IdentityS($l, $i)@${this.label}"
+    case ExceptionIdentityS(l, i) => s"ExceptionIdentityS($l, $i)@${this.label}"
     case EnterMonitorS(i) => s"EnterMonitorS($i)@${this.label}"
     case ExitMonitorS(i) => s"ExitMonitorS($i)@${this.label}"
     case GotoS(l) => s"GotoS($l)@${this.label}"
@@ -85,6 +92,7 @@ enum Stmt extends Labeled:
     case TableSwitchS(i, cs, l) => s"TableswitchS@${this.label}"
     case ThrowS(i) => s"ThrowS@${this.label}"
     case LabelS(l) => s"LabelS($l)@${this.label}"
+    case CatchS(e) => s"CatcHS($e)@${this.label}"
 
 
 enum Exp extends Labeled:
@@ -96,7 +104,7 @@ enum Exp extends Labeled:
   case InvokeE(t: InvokeType, i: Immediate, s: MethodSignature, l: Seq[Immediate])
   case NewArrayE(t: Type, i: Immediate)
   case NewE(t: Type.RefT)
-  case NewMultArrE(t: Type, dim: SizedDims, edim: EmptyDims )//"new multiarray" type sized_dims empty_dims
+  case NewMultArrE(t: Type, dims: SizedDims)//"new multiarray" type sized_dims empty_dims
   case UnopE(i: Immediate, op: UnOp)
 
   override def toString: String = this match
@@ -108,7 +116,7 @@ enum Exp extends Labeled:
     case InvokeE(t, i, s, l) => s"InvokeE($t, $i, $s, $l)@${this.label}"
     case NewArrayE(t, i) => s"NewArrayE($t, $i)@${this.label}"
     case NewE(t) => s"NewE($t)@${this.label}"
-    case NewMultArrE(t, dim, edim) => s"NewMultArrayE($t, $dim, $edim)@${this.label}"
+    case NewMultArrE(t, dim) => s"NewMultArrayE($t, $dim)@${this.label}"
     case UnopE(i, op) => s"UnOpE($i, $op)@${this.label}"
 
 
@@ -125,7 +133,8 @@ enum BinOp:
   case Shl
   case Shr
   case Sub
-  case Ushr //TODO: What are these?
+  case Ushr
+  case Ushl
   case Xor
 
   override def toString: String = this match
@@ -143,6 +152,7 @@ enum BinOp:
     case Sub => s"Sub"
     case Ushr => s"Ushr"
     case Xor => s"Xor"
+    case Ushl => s"Ushl"
 
 enum CondOp:
   case Eq
@@ -161,12 +171,14 @@ enum CondOp:
     case Lt => s"Lt"
 
 enum UnOp:
-  case Length(i: Immediate)
-  case Neg(i: Immediate)
+  case Length()
+  case Neg()
+  case NegWord()
 
   override def toString: String = this match
-    case Length(i) => s"Length($i)"
-    case Neg(i) => s"Neg($i)"
+    case Length() => s"Length()"
+    case Neg() => s"Neg()"
+    case NegWord() => s"NegWord()"
 
 enum InvokeType:
   case InterfaceI
@@ -185,6 +197,12 @@ enum Constant:
   case LongC(v: Long)
   case StringC(v: String)
   case NullC()
+  case InfinityC()
+  case NegInfinityC()
+  case NanC()
+  case FloatInfinityC()
+  case FloatNegInfinityC()
+  case FloatNanC()
 
   override def toString: String = this match
     case DoubleC(v) => s"DoubleC($v)"
@@ -193,6 +211,12 @@ enum Constant:
     case LongC(v) => s"LongC($v)"
     case StringC(v) => s"StringC($v)"
     case NullC() => s"NullC()"
+    case InfinityC() => s"InfinityC()"
+    case NegInfinityC() => s"NegInfinityC()"
+    case NanC() => s"NanC()"
+    case FloatInfinityC() => s"FloatInfinityC()"
+    case FloatNegInfinityC() => s"FloatNegInfinityC()"
+    case FloatNanC() => s"FloatNanC()"
 
 
 enum IdentityVal:
@@ -230,8 +254,6 @@ case class LocalDec(t: Type, name: Identifier)
 case class Case(i: Constant.IntC, l: Label)
 
 case class MethodSignature(id: Identifier, params: Seq[Type], ret: Type, classOrigin: String)
-//  override def toString: String = this match
-//    case MethodSignature(id, params, ret, classOrigin) => s"MethodSignature($id, $params, $ret, $classOrigin)"
 
 case class FieldSignature(id: Identifier, t: Type, classOrigin: String)
 
@@ -239,14 +261,30 @@ case class ExceptionRange(ref: Type.RefT, start: Label, end: Label, catchBlock: 
 
 case class Method(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
 
-case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isStatic: Boolean, ret: Type, id: Identifier, params: Seq[Type])
+case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isStrict: Boolean, isTransient: Boolean, isSynchronized: Boolean, isVolatile: Boolean, isAbstract: Boolean, ret: Type, id: Identifier, params: Seq[Type], throws: Seq[Type.RefT])
 
-
-case class Class(id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], methods: Seq[Method])//, globals: ???)
-
-case class Program(funs: Seq[String]):
-  def fold[A]: Seq[Char => ((Char, Char) => Char) => Char] =
-    funs.map(_.fold)
-
+case class Program(funs: Seq[Container])//:
+//  def fold[A]: Seq[Char => ((Char, Char) => Char) => Char] =
+//    funs.map(_.fold)
 
 case class Local(id: Identifier)
+
+enum Container:
+  case ClassC(isPublic: Boolean, isPrivate: Boolean, isAbstract: Boolean, isStatic: Boolean, isFinal: Boolean, isEnum: Boolean, id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], body: Seq[ClassBodyElement])
+  case InterfaceC(isPublic: Boolean, isPrivate: Boolean, id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], body: Seq[ClassBodyElement])
+
+  override def toString: String = this match
+    case ClassC(isPublic,isPrivate,isAbstract,isStatic,isFinal,isEnum,id,extend,implement,body) => s"ClassC($isPublic,$isPrivate,$isAbstract,$isStatic,$isFinal,$isEnum,$id,$extend,$implement,$body)"
+    case InterfaceC(isPublic, isPrivate, id, extend, implement, body) => s"InterfaceC($isPublic,$isPrivate,$id,$extend,$implement,$body)"
+
+enum ClassBodyElement:
+  case GlobalVarCB(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isEnum: Boolean, isTransient: Boolean, isVolatile: Boolean, t: Type, id: Identifier)
+  case NativeCallCB(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isSynchronized: Boolean, isNative: Boolean, t: Type, id: Identifier, params: Seq[Type], except: Option[Type.RefT])
+  case MethodCB(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
+  case MethodHeaderCB(header: MethodHeader)
+
+  override def toString: String = this match
+    case GlobalVarCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isEnum, isTransient, isVolatile, t, id) => s"GlobalVarCB($isPublic,$isPrivate,$isProtected,$isStatic,$isFinal,$isEnum,$isTransient,$isVolatile,$t,$id)"
+    case NativeCallCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isSynchronized, isNative, t, id, params, except) => s"NativeCallCB($isPublic,$isPrivate,$isProtected,$isStatic,$isFinal,$isSynchronized,$isNative,$t,$id,$params,$except)"
+    case MethodCB(header, locals, idStmts, stmts, excRanges) => s"MethodCB($header,$locals,$idStmts,$stmts,$excRanges)"
+    case MethodHeaderCB(header) => s"MethodHeaderCB($header)"
