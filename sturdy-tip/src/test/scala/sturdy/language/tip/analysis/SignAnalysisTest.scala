@@ -13,7 +13,7 @@ import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Program, Parser}
 
 import sturdy.effect.failure.given
-import sturdy.util.Labled
+import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.values.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given

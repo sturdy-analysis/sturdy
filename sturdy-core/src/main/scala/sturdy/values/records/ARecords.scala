@@ -17,9 +17,7 @@ given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: EffectStack): Re
     ARecord.Map(fields.toMap)
   override def lookupRecordField(rec: ARecord[F, V], field: F): V = rec match
     case ARecord.Top() => j.joinComputations(Top.top)(UnboundRecordField(field).failedLookup(rec))
-    case ARecord.Map(m) => m.get(field) match
-      case None => UnboundRecordField(field).failedLookup(rec)
-      case Some(v) => v
+    case ARecord.Map(m) => m.getOrElse(field, UnboundRecordField(field).failedLookup(rec))
   override def updateRecordField(rec: ARecord[F, V], field: F, newval: V): ARecord[F, V] = rec match
     case ARecord.Top() =>
       given Lazy[Join[V]] = implicitly

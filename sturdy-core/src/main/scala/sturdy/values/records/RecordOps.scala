@@ -7,6 +7,13 @@ case class UnboundRecordField[F](field: F) extends FailureKind:
   def failedLookup[R](rec: R)(using f: Failure) = f.fail(this, s"while reading $rec")
   def failedUpdate[R](rec: R)(using f: Failure) = f.fail(this, s"while updating $rec")
 
+/**
+ * Type class for value component representing records.
+ * 
+ * @tparam F field identifier
+ * @tparam V field values
+ * @tparam R record value
+ */
 trait RecordOps[F, V, R]:
   def makeRecord(fields: Seq[(F, V)]): R
   def lookupRecordField(rec: R, field: F): V
@@ -14,7 +21,7 @@ trait RecordOps[F, V, R]:
 
 given concreteRecordOps[F, V](using Failure): RecordOps[F, V, Map[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): Map[F, V] = fields.toMap
-  override def lookupRecordField(rec: Map[F, V], field: F): V = rec.get(field).getOrElse(UnboundRecordField(field).failedLookup(rec))
+  override def lookupRecordField(rec: Map[F, V], field: F): V = rec.getOrElse(field, UnboundRecordField(field).failedLookup(rec))
     override def updateRecordField(rec: Map[F, V], field: F, newval: V): Map[F, V] =
     val updated = rec + (field -> newval)
     if (rec.size == updated.size)

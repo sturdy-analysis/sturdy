@@ -82,7 +82,7 @@ case object UninitializedVariable extends FailureKind
 trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // value components - we require a NumericOps component and a Branching component
   val numericOps: NumericOps[V]
-  val branching: Branching[V,Unit]
+  val branching: Branching[V, Unit]
 
   // effect components - we require a store and a failure component
   val store: Store[V, J]

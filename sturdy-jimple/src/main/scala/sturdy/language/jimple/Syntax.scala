@@ -13,6 +13,8 @@ type Identifier = String
 type SizedDims = Seq[Option[Immediate]]
 type EmptyDims = Int  //(empty_dims = "[]" empty_dims | ;)
 
+// String.class
+
 enum Immediate:
   case ConstI(c: Constant)
   case LocalI(l: Local)
@@ -93,7 +95,6 @@ enum Stmt extends Labeled:
     case ThrowS(i) => s"ThrowS@${this.label}"
     case LabelS(l) => s"LabelS($l)@${this.label}"
     case CatchS(e) => s"CatcHS($e)@${this.label}"
-
 
 enum Exp extends Labeled:
   case BinopE(i1: Immediate, i2: Immediate, op: BinOp | CondOp)
@@ -191,7 +192,7 @@ enum InvokeType:
     case VirtualI => s"VirtualI"
 
 enum Constant:
-  case DoubleC(v:Double)
+  case DoubleC(v: Double)
   case FloatC(v: Float)
   case IntC(v: Int)
   case LongC(v: Long)

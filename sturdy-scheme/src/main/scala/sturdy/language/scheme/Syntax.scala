@@ -1,6 +1,6 @@
 package sturdy.language.scheme
 
-import sturdy.util.Labled
+import sturdy.util.Labeled
 
 enum Literal:
   case IntLit(i: Int)
@@ -84,7 +84,7 @@ object Body:
   def apply(exps: List[Exp]): Body = Body(List(), exps)
   def apply(e: Exp): Body = Body(List(), List(e))
 
-enum Exp extends Labled:
+enum Exp extends Labeled:
   case Lit(l: Literal)
   case Nil_
   case Cons_(e1: Exp, e2: Exp)

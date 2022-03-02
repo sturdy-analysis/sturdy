@@ -1,8 +1,8 @@
 package sturdy.language.tutorial
 
-import sturdy.util.Labled
+import sturdy.util.Labeled
 
-enum Exp extends Labled:
+enum Exp extends Labeled:
   case NumLit(n: Int)
   case Var(name: String)
   case Add(e1: Exp, e2: Exp)
@@ -11,7 +11,7 @@ enum Exp extends Labled:
   case Div(e1: Exp, e2: Exp)
   case Lt(e1: Exp, e2: Exp)
 
-enum Stm extends Labled:
+enum Stm extends Labeled:
   case Assign(name: String, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
   case While(cond: Exp, body: Stm)
