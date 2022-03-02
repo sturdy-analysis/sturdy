@@ -1,0 +1,1732 @@
+public class sun.awt.image.IntegerComponentRaster extends sun.awt.image.SunWritableRaster
+{
+    static final int TYPE_CUSTOM;
+    static final int TYPE_BYTE_SAMPLES;
+    static final int TYPE_USHORT_SAMPLES;
+    static final int TYPE_INT_SAMPLES;
+    static final int TYPE_BYTE_BANDED_SAMPLES;
+    static final int TYPE_USHORT_BANDED_SAMPLES;
+    static final int TYPE_INT_BANDED_SAMPLES;
+    static final int TYPE_BYTE_PACKED_SAMPLES;
+    static final int TYPE_USHORT_PACKED_SAMPLES;
+    static final int TYPE_INT_PACKED_SAMPLES;
+    static final int TYPE_INT_8BIT_SAMPLES;
+    static final int TYPE_BYTE_BINARY_SAMPLES;
+    protected int bandOffset;
+    protected int[] dataOffsets;
+    protected int scanlineStride;
+    protected int pixelStride;
+    protected int[] data;
+    protected int numDataElems;
+    int type;
+    private int maxX;
+    private int maxY;
+
+    private static native void initIDs();
+
+    public void <init>(java.awt.image.SampleModel, java.awt.Point)
+    {
+        java.awt.Rectangle $r3;
+        java.awt.Point r4;
+        java.awt.image.SampleModel r1;
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0, $i1, $i2, $i3;
+        java.awt.image.DataBuffer $r2;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        r1 := @parameter0: java.awt.image.SampleModel;
+
+        r4 := @parameter1: java.awt.Point;
+
+        $r2 = virtualinvoke r1.<java.awt.image.SampleModel: java.awt.image.DataBuffer createDataBuffer()>();
+
+        $r3 = new java.awt.Rectangle;
+
+        $i0 = r4.<java.awt.Point: int x>;
+
+        $i1 = r4.<java.awt.Point: int y>;
+
+        $i2 = virtualinvoke r1.<java.awt.image.SampleModel: int getWidth()>();
+
+        $i3 = virtualinvoke r1.<java.awt.image.SampleModel: int getHeight()>();
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        specialinvoke r0.<sun.awt.image.IntegerComponentRaster: void <init>(java.awt.image.SampleModel,java.awt.image.DataBuffer,java.awt.Rectangle,java.awt.Point,sun.awt.image.IntegerComponentRaster)>(r1, $r2, $r3, r4, null);
+
+        return;
+    }
+
+    public void <init>(java.awt.image.SampleModel, java.awt.image.DataBuffer, java.awt.Point)
+    {
+        java.awt.Rectangle $r3;
+        java.awt.Point r4;
+        java.awt.image.SampleModel r1;
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0, $i1, $i2, $i3;
+        java.awt.image.DataBuffer r2;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        r1 := @parameter0: java.awt.image.SampleModel;
+
+        r2 := @parameter1: java.awt.image.DataBuffer;
+
+        r4 := @parameter2: java.awt.Point;
+
+        $r3 = new java.awt.Rectangle;
+
+        $i0 = r4.<java.awt.Point: int x>;
+
+        $i1 = r4.<java.awt.Point: int y>;
+
+        $i2 = virtualinvoke r1.<java.awt.image.SampleModel: int getWidth()>();
+
+        $i3 = virtualinvoke r1.<java.awt.image.SampleModel: int getHeight()>();
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        specialinvoke r0.<sun.awt.image.IntegerComponentRaster: void <init>(java.awt.image.SampleModel,java.awt.image.DataBuffer,java.awt.Rectangle,java.awt.Point,sun.awt.image.IntegerComponentRaster)>(r1, r2, $r3, r4, null);
+
+        return;
+    }
+
+    public void <init>(java.awt.image.SampleModel, java.awt.image.DataBuffer, java.awt.Rectangle, java.awt.Point, sun.awt.image.IntegerComponentRaster)
+    {
+        java.awt.image.RasterFormatException $r8, $r15, $r16;
+        java.awt.Point r4;
+        java.awt.image.SampleModel r1;
+        byte $b26;
+        int[] $r7, $r10, $r11, $r12, $r13, $r14;
+        boolean $z0, $z1, z2;
+        java.awt.image.DataBuffer r2;
+        java.awt.Rectangle r3;
+        java.awt.image.DataBufferInt r6;
+        sun.awt.image.IntegerComponentRaster r0, r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, i25;
+        java.awt.image.SinglePixelPackedSampleModel r9;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        r1 := @parameter0: java.awt.image.SampleModel;
+
+        r2 := @parameter1: java.awt.image.DataBuffer;
+
+        r3 := @parameter2: java.awt.Rectangle;
+
+        r4 := @parameter3: java.awt.Point;
+
+        r5 := @parameter4: sun.awt.image.IntegerComponentRaster;
+
+        specialinvoke r0.<sun.awt.image.SunWritableRaster: void <init>(java.awt.image.SampleModel,java.awt.image.DataBuffer,java.awt.Rectangle,java.awt.Point,java.awt.image.WritableRaster)>(r1, r2, r3, r4, r5);
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i0 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i2 = $i1 + $i0;
+
+        r0.<sun.awt.image.IntegerComponentRaster: int maxX> = $i2;
+
+        $i4 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $i5 = $i4 + $i3;
+
+        r0.<sun.awt.image.IntegerComponentRaster: int maxY> = $i5;
+
+        $z0 = r2 instanceof java.awt.image.DataBufferInt;
+
+        if $z0 != 0 goto label1;
+
+        $r16 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r16.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("IntegerComponentRasters must haveinteger DataBuffers");
+
+        throw $r16;
+
+     label1:
+        r6 = (java.awt.image.DataBufferInt) r2;
+
+        $i6 = virtualinvoke r6.<java.awt.image.DataBufferInt: int getNumBanks()>();
+
+        if $i6 == 1 goto label2;
+
+        $r15 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r15.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("DataBuffer for IntegerComponentRasters must only have 1 bank.");
+
+        throw $r15;
+
+     label2:
+        $r7 = staticinvoke <sun.awt.image.IntegerComponentRaster: int[] stealData(java.awt.image.DataBufferInt,int)>(r6, 0);
+
+        r0.<sun.awt.image.IntegerComponentRaster: int[] data> = $r7;
+
+        $z1 = r1 instanceof java.awt.image.SinglePixelPackedSampleModel;
+
+        if $z1 == 0 goto label8;
+
+        r9 = (java.awt.image.SinglePixelPackedSampleModel) r1;
+
+        $r10 = virtualinvoke r9.<java.awt.image.SinglePixelPackedSampleModel: int[] getBitOffsets()>();
+
+        z2 = 0;
+
+        i25 = 1;
+
+     label3:
+        $i7 = lengthof $r10;
+
+        if i25 >= $i7 goto label5;
+
+        $i23 = $r10[i25];
+
+        $i24 = $i23 % 8;
+
+        if $i24 == 0 goto label4;
+
+        z2 = 1;
+
+     label4:
+        i25 = i25 + 1;
+
+        goto label3;
+
+     label5:
+        if z2 == 0 goto label6;
+
+        $b26 = 9;
+
+        goto label7;
+
+     label6:
+        $b26 = 10;
+
+     label7:
+        r0.<sun.awt.image.IntegerComponentRaster: int type> = $b26;
+
+        $i8 = virtualinvoke r9.<java.awt.image.SinglePixelPackedSampleModel: int getScanlineStride()>();
+
+        r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride> = $i8;
+
+        r0.<sun.awt.image.IntegerComponentRaster: int pixelStride> = 1;
+
+        $r11 = newarray (int)[1];
+
+        r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets> = $r11;
+
+        $r12 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i9 = virtualinvoke r6.<java.awt.image.DataBufferInt: int getOffset()>();
+
+        $r12[0] = $i9;
+
+        $r13 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i10 = $r13[0];
+
+        r0.<sun.awt.image.IntegerComponentRaster: int bandOffset> = $i10;
+
+        $i12 = r3.<java.awt.Rectangle: int x>;
+
+        $i11 = r4.<java.awt.Point: int x>;
+
+        $i21 = $i12 - $i11;
+
+        $i14 = r3.<java.awt.Rectangle: int y>;
+
+        $i13 = r4.<java.awt.Point: int y>;
+
+        $i22 = $i14 - $i13;
+
+        $r14 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i18 = $r14[0];
+
+        $i15 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i16 = $i22 * $i15;
+
+        $i17 = $i21 + $i16;
+
+        $i19 = $i18 + $i17;
+
+        $r14[0] = $i19;
+
+        $i20 = virtualinvoke r9.<java.awt.image.SinglePixelPackedSampleModel: int getNumDataElements()>();
+
+        r0.<sun.awt.image.IntegerComponentRaster: int numDataElems> = $i20;
+
+        goto label9;
+
+     label8:
+        $r8 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r8.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("IntegerComponentRasters must have SinglePixelPackedSampleModel");
+
+        throw $r8;
+
+     label9:
+        virtualinvoke r0.<sun.awt.image.IntegerComponentRaster: void verify()>();
+
+        return;
+    }
+
+    public int[] getDataOffsets()
+    {
+        int[] $r1, $r3, $r4;
+        sun.awt.image.IntegerComponentRaster r0;
+        java.lang.Object $r2;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $r1 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (int[]) $r2;
+
+        $r4 = (int[]) $r3;
+
+        return $r4;
+    }
+
+    public int getDataOffset(int)
+    {
+        int[] $r1;
+        sun.awt.image.IntegerComponentRaster r0;
+        int i0, $i1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i1 = $r1[i0];
+
+        return $i1;
+    }
+
+    public int getScanlineStride()
+    {
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $i0 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        return $i0;
+    }
+
+    public int getPixelStride()
+    {
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $i0 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        return $i0;
+    }
+
+    public int[] getDataStorage()
+    {
+        sun.awt.image.IntegerComponentRaster r0;
+        int[] $r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $r1 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        return $r1;
+    }
+
+    public java.lang.Object getDataElements(int, int, java.lang.Object)
+    {
+        int[] $r2, $r3, $r4, r6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, $i20;
+        sun.awt.image.IntegerComponentRaster r0;
+        java.lang.ArrayIndexOutOfBoundsException $r5;
+        java.lang.Object r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.Object;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i0 < $i1 goto label1;
+
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i2 < $i3 goto label1;
+
+        $i4 = r0.<sun.awt.image.IntegerComponentRaster: int maxX>;
+
+        if i0 >= $i4 goto label1;
+
+        $i5 = r0.<sun.awt.image.IntegerComponentRaster: int maxY>;
+
+        if i2 < $i5 goto label2;
+
+     label1:
+        $r5 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r5.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Coordinate out of bounds!");
+
+        throw $r5;
+
+     label2:
+        if r1 != null goto label3;
+
+        $i17 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        r6 = newarray (int)[$i17];
+
+        goto label4;
+
+     label3:
+        $r2 = (int[]) r1;
+
+        r6 = (int[]) $r2;
+
+     label4:
+        $i6 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i8 = i2 - $i6;
+
+        $i7 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i13 = $i8 * $i7;
+
+        $i9 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i11 = i0 - $i9;
+
+        $i10 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $i12 = $i11 * $i10;
+
+        $i18 = $i13 + $i12;
+
+        i19 = 0;
+
+     label5:
+        $i20 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if i19 >= $i20 goto label6;
+
+        $r4 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $r3 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i14 = $r3[i19];
+
+        $i15 = $i14 + $i18;
+
+        $i16 = $r4[$i15];
+
+        r6[i19] = $i16;
+
+        i19 = i19 + 1;
+
+        goto label5;
+
+     label6:
+        return r6;
+    }
+
+    public java.lang.Object getDataElements(int, int, int, int, java.lang.Object)
+    {
+        int[] $r2, $r3, $r4, r6;
+        boolean $z0;
+        int i0, $i1, i2, $i3, i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, i28, i29, i30, i31, i32, i33;
+        sun.awt.image.IntegerComponentRaster r0;
+        java.lang.ArrayIndexOutOfBoundsException $r5;
+        java.lang.Object r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i7 := @parameter3: int;
+
+        r1 := @parameter4: java.lang.Object;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i0 < $i1 goto label01;
+
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i2 < $i3 goto label01;
+
+        $i6 = i0 + i4;
+
+        $i5 = r0.<sun.awt.image.IntegerComponentRaster: int maxX>;
+
+        if $i6 > $i5 goto label01;
+
+        $i9 = i2 + i7;
+
+        $i8 = r0.<sun.awt.image.IntegerComponentRaster: int maxY>;
+
+        if $i9 <= $i8 goto label02;
+
+     label01:
+        $r5 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r5.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Coordinate out of bounds!");
+
+        throw $r5;
+
+     label02:
+        $z0 = r1 instanceof int[];
+
+        if $z0 == 0 goto label03;
+
+        $r4 = (int[]) r1;
+
+        r6 = (int[]) $r4;
+
+        goto label04;
+
+     label03:
+        $i10 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        $i11 = $i10 * i4;
+
+        $i12 = $i11 * i7;
+
+        r6 = newarray (int)[$i12];
+
+     label04:
+        $i13 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i15 = i2 - $i13;
+
+        $i14 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i20 = $i15 * $i14;
+
+        $i16 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i18 = i0 - $i16;
+
+        $i17 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $i19 = $i18 * $i17;
+
+        i28 = $i20 + $i19;
+
+        i29 = 0;
+
+        i30 = 0;
+
+     label05:
+        if i30 >= i7 goto label10;
+
+        i31 = i28;
+
+        i32 = 0;
+
+     label06:
+        if i32 >= i4 goto label09;
+
+        i33 = 0;
+
+     label07:
+        $i22 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if i33 >= $i22 goto label08;
+
+        $i24 = i29;
+
+        i29 = i29 + 1;
+
+        $r3 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $r2 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i25 = $r2[i33];
+
+        $i26 = $i25 + i31;
+
+        $i27 = $r3[$i26];
+
+        r6[$i24] = $i27;
+
+        i33 = i33 + 1;
+
+        goto label07;
+
+     label08:
+        i32 = i32 + 1;
+
+        $i23 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        i31 = i31 + $i23;
+
+        goto label06;
+
+     label09:
+        i30 = i30 + 1;
+
+        $i21 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        i28 = i28 + $i21;
+
+        goto label05;
+
+     label10:
+        return r6;
+    }
+
+    public void setDataElements(int, int, java.lang.Object)
+    {
+        int[] $r2, r3, $r4, $r5;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i16, $i17, $i18, i19;
+        sun.awt.image.IntegerComponentRaster r0;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+        java.lang.Object r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.Object;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i0 < $i1 goto label1;
+
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i2 < $i3 goto label1;
+
+        $i4 = r0.<sun.awt.image.IntegerComponentRaster: int maxX>;
+
+        if i0 >= $i4 goto label1;
+
+        $i5 = r0.<sun.awt.image.IntegerComponentRaster: int maxY>;
+
+        if i2 < $i5 goto label2;
+
+     label1:
+        $r6 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Coordinate out of bounds!");
+
+        throw $r6;
+
+     label2:
+        $r2 = (int[]) r1;
+
+        r3 = (int[]) $r2;
+
+        $i6 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i8 = i2 - $i6;
+
+        $i7 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i13 = $i8 * $i7;
+
+        $i9 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i11 = i0 - $i9;
+
+        $i10 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $i12 = $i11 * $i10;
+
+        i14 = $i13 + $i12;
+
+        i19 = 0;
+
+     label3:
+        $i15 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if i19 >= $i15 goto label4;
+
+        $r5 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $r4 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i16 = $r4[i19];
+
+        $i18 = $i16 + i14;
+
+        $i17 = r3[i19];
+
+        $r5[$i18] = $i17;
+
+        i19 = i19 + 1;
+
+        goto label3;
+
+     label4:
+        virtualinvoke r0.<sun.awt.image.IntegerComponentRaster: void markDirty()>();
+
+        return;
+    }
+
+    public void setDataElements(int, int, java.awt.image.Raster)
+    {
+        int i0, $i1, i2, i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.awt.image.Raster r0;
+        sun.awt.image.IntegerComponentRaster r1;
+        java.lang.ArrayIndexOutOfBoundsException $r2;
+
+        r1 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        r0 := @parameter2: java.awt.image.Raster;
+
+        $i1 = virtualinvoke r0.<java.awt.image.Raster: int getMinX()>();
+
+        i2 = i0 + $i1;
+
+        $i4 = virtualinvoke r0.<java.awt.image.Raster: int getMinY()>();
+
+        i5 = i3 + $i4;
+
+        $i6 = virtualinvoke r0.<java.awt.image.Raster: int getWidth()>();
+
+        $i7 = virtualinvoke r0.<java.awt.image.Raster: int getHeight()>();
+
+        $i8 = r1.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i2 < $i8 goto label1;
+
+        $i9 = r1.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i5 < $i9 goto label1;
+
+        $i11 = i2 + $i6;
+
+        $i10 = r1.<sun.awt.image.IntegerComponentRaster: int maxX>;
+
+        if $i11 > $i10 goto label1;
+
+        $i13 = i5 + $i7;
+
+        $i12 = r1.<sun.awt.image.IntegerComponentRaster: int maxY>;
+
+        if $i13 <= $i12 goto label2;
+
+     label1:
+        $r2 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Coordinate out of bounds!");
+
+        throw $r2;
+
+     label2:
+        specialinvoke r1.<sun.awt.image.IntegerComponentRaster: void setDataElements(int,int,int,int,java.awt.image.Raster)>(i2, i5, $i6, $i7, r0);
+
+        return;
+    }
+
+    private void setDataElements(int, int, int, int, java.awt.image.Raster)
+    {
+        int[] $r3, $r4, $r5;
+        boolean $z0;
+        int i0, $i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, i23, i24, i25, i26, i27, i28;
+        java.awt.image.Raster r0;
+        sun.awt.image.IntegerComponentRaster r2, r7;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+        java.lang.Object $r1, r8;
+
+        r2 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i4 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        i23 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r0 := @parameter4: java.awt.image.Raster;
+
+        if i23 <= 0 goto label1;
+
+        if i0 > 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.awt.image.Raster: int getMinX()>();
+
+        $i2 = virtualinvoke r0.<java.awt.image.Raster: int getMinY()>();
+
+        $z0 = r0 instanceof sun.awt.image.IntegerComponentRaster;
+
+        if $z0 == 0 goto label6;
+
+        $i7 = r2.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        if $i7 != 1 goto label6;
+
+        $i8 = r2.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if $i8 != 1 goto label6;
+
+        r7 = (sun.awt.image.IntegerComponentRaster) r0;
+
+        $i9 = virtualinvoke r7.<sun.awt.image.IntegerComponentRaster: int getNumDataElements()>();
+
+        if $i9 == 1 goto label3;
+
+        $r6 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Number of bands does not match");
+
+        throw $r6;
+
+     label3:
+        $r3 = virtualinvoke r7.<sun.awt.image.IntegerComponentRaster: int[] getDataStorage()>();
+
+        $i10 = virtualinvoke r7.<sun.awt.image.IntegerComponentRaster: int getScanlineStride()>();
+
+        i24 = virtualinvoke r7.<sun.awt.image.IntegerComponentRaster: int getDataOffset(int)>(0);
+
+        $r4 = r2.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i15 = $r4[0];
+
+        $i11 = r2.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i13 = i5 - $i11;
+
+        $i12 = r2.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i14 = $i13 * $i12;
+
+        $i18 = $i15 + $i14;
+
+        $i16 = r2.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i17 = i4 - $i16;
+
+        i25 = $i18 + $i17;
+
+        $i19 = virtualinvoke r7.<sun.awt.image.IntegerComponentRaster: int getPixelStride()>();
+
+        $i20 = r2.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        if $i19 != $i20 goto label6;
+
+        $i21 = r2.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        i26 = i23 * $i21;
+
+        i27 = 0;
+
+     label4:
+        if i27 >= i0 goto label5;
+
+        $r5 = r2.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, i24, $r5, i25, i26);
+
+        i24 = i24 + $i10;
+
+        $i22 = r2.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        i25 = i25 + $i22;
+
+        i27 = i27 + 1;
+
+        goto label4;
+
+     label5:
+        virtualinvoke r2.<sun.awt.image.IntegerComponentRaster: void markDirty()>();
+
+        return;
+
+     label6:
+        r8 = null;
+
+        i28 = 0;
+
+     label7:
+        if i28 >= i0 goto label8;
+
+        $i3 = $i2 + i28;
+
+        $r1 = virtualinvoke r0.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,int,int,java.lang.Object)>($i1, $i3, i23, 1, r8);
+
+        r8 = $r1;
+
+        $i6 = i5 + i28;
+
+        virtualinvoke r2.<sun.awt.image.IntegerComponentRaster: void setDataElements(int,int,int,int,java.lang.Object)>(i4, $i6, i23, 1, $r1);
+
+        i28 = i28 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    public void setDataElements(int, int, int, int, java.lang.Object)
+    {
+        int[] $r2, r3, $r4, $r5;
+        int i0, $i1, i2, $i3, i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, i25, i26, i27, i28, i29, i30;
+        sun.awt.image.IntegerComponentRaster r0;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+        java.lang.Object r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i7 := @parameter3: int;
+
+        r1 := @parameter4: java.lang.Object;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i0 < $i1 goto label1;
+
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i2 < $i3 goto label1;
+
+        $i6 = i0 + i4;
+
+        $i5 = r0.<sun.awt.image.IntegerComponentRaster: int maxX>;
+
+        if $i6 > $i5 goto label1;
+
+        $i9 = i2 + i7;
+
+        $i8 = r0.<sun.awt.image.IntegerComponentRaster: int maxY>;
+
+        if $i9 <= $i8 goto label2;
+
+     label1:
+        $r6 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("Coordinate out of bounds!");
+
+        throw $r6;
+
+     label2:
+        $r2 = (int[]) r1;
+
+        r3 = (int[]) $r2;
+
+        $i10 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i12 = i2 - $i10;
+
+        $i11 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i17 = $i12 * $i11;
+
+        $i13 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i15 = i0 - $i13;
+
+        $i14 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $i16 = $i15 * $i14;
+
+        i25 = $i17 + $i16;
+
+        i26 = 0;
+
+        i27 = 0;
+
+     label3:
+        if i27 >= i7 goto label8;
+
+        i28 = i25;
+
+        i29 = 0;
+
+     label4:
+        if i29 >= i4 goto label7;
+
+        i30 = 0;
+
+     label5:
+        $i19 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if i30 >= $i19 goto label6;
+
+        $r5 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $r4 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i21 = $r4[i30];
+
+        $i24 = $i21 + i28;
+
+        $i22 = i26;
+
+        i26 = i26 + 1;
+
+        $i23 = r3[$i22];
+
+        $r5[$i24] = $i23;
+
+        i30 = i30 + 1;
+
+        goto label5;
+
+     label6:
+        i29 = i29 + 1;
+
+        $i20 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        i28 = i28 + $i20;
+
+        goto label4;
+
+     label7:
+        i27 = i27 + 1;
+
+        $i18 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        i25 = i25 + $i18;
+
+        goto label3;
+
+     label8:
+        virtualinvoke r0.<sun.awt.image.IntegerComponentRaster: void markDirty()>();
+
+        return;
+    }
+
+    public java.awt.image.WritableRaster createWritableChild(int, int, int, int, int, int, int[])
+    {
+        java.awt.image.RasterFormatException $r1, $r2, $r9, $r10;
+        java.awt.Point $r7;
+        java.awt.image.SampleModel $r8, r11;
+        int[] r3;
+        java.awt.image.DataBuffer $r6;
+        java.awt.Rectangle $r5;
+        int i0, $i1, i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, i10, $i11, $i12, $i13, $i14, $i15, i16, i17, $i18, $i19, $i20, $i21, $i22, $i23;
+        sun.awt.image.IntegerComponentRaster r0, $r4;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i10 := @parameter3: int;
+
+        i16 := @parameter4: int;
+
+        i17 := @parameter5: int;
+
+        r3 := @parameter6: int[];
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        if i0 >= $i1 goto label1;
+
+        $r10 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r10.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("x lies outside raster");
+
+        throw $r10;
+
+     label1:
+        $i3 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        if i2 >= $i3 goto label2;
+
+        $r9 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r9.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("y lies outside raster");
+
+        throw $r9;
+
+     label2:
+        $i5 = i0 + i4;
+
+        if $i5 < i0 goto label3;
+
+        $i9 = i0 + i4;
+
+        $i7 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $i6 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i8 = $i7 + $i6;
+
+        if $i9 <= $i8 goto label4;
+
+     label3:
+        $r1 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r1.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("(x + width) is outside raster");
+
+        throw $r1;
+
+     label4:
+        $i11 = i2 + i10;
+
+        if $i11 < i2 goto label5;
+
+        $i15 = i2 + i10;
+
+        $i13 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i12 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $i14 = $i13 + $i12;
+
+        if $i15 <= $i14 goto label6;
+
+     label5:
+        $r2 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r2.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("(y + height) is outside raster");
+
+        throw $r2;
+
+     label6:
+        if r3 == null goto label7;
+
+        $r8 = r0.<sun.awt.image.IntegerComponentRaster: java.awt.image.SampleModel sampleModel>;
+
+        r11 = virtualinvoke $r8.<java.awt.image.SampleModel: java.awt.image.SampleModel createSubsetSampleModel(int[])>(r3);
+
+        goto label8;
+
+     label7:
+        r11 = r0.<sun.awt.image.IntegerComponentRaster: java.awt.image.SampleModel sampleModel>;
+
+     label8:
+        $i22 = i16 - i0;
+
+        $i23 = i17 - i2;
+
+        $r4 = new sun.awt.image.IntegerComponentRaster;
+
+        $r6 = r0.<sun.awt.image.IntegerComponentRaster: java.awt.image.DataBuffer dataBuffer>;
+
+        $r5 = new java.awt.Rectangle;
+
+        specialinvoke $r5.<java.awt.Rectangle: void <init>(int,int,int,int)>(i16, i17, i4, i10);
+
+        $r7 = new java.awt.Point;
+
+        $i18 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateX>;
+
+        $i21 = $i18 + $i22;
+
+        $i19 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateY>;
+
+        $i20 = $i19 + $i23;
+
+        specialinvoke $r7.<java.awt.Point: void <init>(int,int)>($i21, $i20);
+
+        specialinvoke $r4.<sun.awt.image.IntegerComponentRaster: void <init>(java.awt.image.SampleModel,java.awt.image.DataBuffer,java.awt.Rectangle,java.awt.Point,sun.awt.image.IntegerComponentRaster)>(r11, $r6, $r5, $r7, r0);
+
+        return $r4;
+    }
+
+    public java.awt.image.Raster createChild(int, int, int, int, int, int, int[])
+    {
+        int[] r1;
+        sun.awt.image.IntegerComponentRaster r0;
+        int i0, i1, i2, i3, i4, i5;
+        java.awt.image.WritableRaster $r2;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        r1 := @parameter6: int[];
+
+        $r2 = virtualinvoke r0.<sun.awt.image.IntegerComponentRaster: java.awt.image.WritableRaster createWritableChild(int,int,int,int,int,int,int[])>(i0, i1, i2, i3, i4, i5, r1);
+
+        return $r2;
+    }
+
+    public java.awt.image.WritableRaster createCompatibleWritableRaster(int, int)
+    {
+        java.awt.image.RasterFormatException $r0;
+        java.awt.Point $r9;
+        java.awt.image.SampleModel $r6, $r7;
+        int i0, i1;
+        sun.awt.image.IntegerComponentRaster r5, $r8;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4, $r10;
+
+        r5 := @this: sun.awt.image.IntegerComponentRaster;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 <= 0 goto label1;
+
+        if i1 > 0 goto label4;
+
+     label1:
+        $r0 = new java.awt.image.RasterFormatException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("negative ");
+
+        if i0 > 0 goto label2;
+
+        $r10 = "width";
+
+        goto label3;
+
+     label2:
+        $r10 = "height";
+
+     label3:
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r4);
+
+        throw $r0;
+
+     label4:
+        $r6 = r5.<sun.awt.image.IntegerComponentRaster: java.awt.image.SampleModel sampleModel>;
+
+        $r7 = virtualinvoke $r6.<java.awt.image.SampleModel: java.awt.image.SampleModel createCompatibleSampleModel(int,int)>(i0, i1);
+
+        $r8 = new sun.awt.image.IntegerComponentRaster;
+
+        $r9 = new java.awt.Point;
+
+        specialinvoke $r9.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        specialinvoke $r8.<sun.awt.image.IntegerComponentRaster: void <init>(java.awt.image.SampleModel,java.awt.Point)>($r7, $r9);
+
+        return $r8;
+    }
+
+    public java.awt.image.WritableRaster createCompatibleWritableRaster()
+    {
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0, $i1;
+        java.awt.image.WritableRaster $r1;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i0 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $r1 = virtualinvoke r0.<sun.awt.image.IntegerComponentRaster: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i1, $i0);
+
+        return $r1;
+    }
+
+    protected final void verify()
+    {
+        java.awt.image.RasterFormatException $r55, $r57, $r59, $r61, $r63, $r65, $r66, $r68, $r70;
+        byte $b11, $b21;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r16, $r17, $r24, $r25, $r26, $r32, $r34, $r39, $r40, $r44, $r46, $r47, $r52, $r53, $r56, $r58, $r60, $r62, $r64, $r67, $r69;
+        long $l8, $l9, $l10, $l18, $l19, $l20;
+        java.lang.String $r13, $r18, $r27, $r35, $r41, $r48, $r54;
+        int[] $r1, $r19, $r20, $r21, $r28, $r29, $r33, $r45;
+        sun.awt.image.IntegerComponentRaster r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i12, $i13, $i14, $i15, $i16, $i17, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, i57, i58, i59, i60, $i61, $i62;
+
+        r0 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $i0 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        if $i0 <= 0 goto label01;
+
+        $i1 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        if $i1 <= 0 goto label01;
+
+        $i4 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $i2 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i3 = 2147483647 / $i2;
+
+        if $i4 <= $i3 goto label02;
+
+     label01:
+        $r55 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r55.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("Invalid raster dimension");
+
+        throw $r55;
+
+     label02:
+        $r1 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i5 = $r1[0];
+
+        if $i5 >= 0 goto label03;
+
+        $r57 = new java.awt.image.RasterFormatException;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Data offset (");
+
+        $r45 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i55 = $r45[0];
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i55);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") must be >= 0");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r57.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r48);
+
+        throw $r57;
+
+     label03:
+        $i6 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $l9 = (long) $i6;
+
+        $i7 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateX>;
+
+        $l8 = (long) $i7;
+
+        $l10 = $l9 - $l8;
+
+        $b11 = $l10 cmp 0L;
+
+        $i61 = (int) $b11;
+
+        if $i61 < 0 goto label04;
+
+        $i16 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $l19 = (long) $i16;
+
+        $i17 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateY>;
+
+        $l18 = (long) $i17;
+
+        $l20 = $l19 - $l18;
+
+        $b21 = $l20 cmp 0L;
+
+        $i62 = (int) $b21;
+
+        if $i62 >= 0 goto label05;
+
+     label04:
+        $r59 = new java.awt.image.RasterFormatException;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incorrect origin/translate: (");
+
+        $i12 = r0.<sun.awt.image.IntegerComponentRaster: int minX>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $i13 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") / (");
+
+        $i14 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateX>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $i15 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateY>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r59.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r13);
+
+        throw $r59;
+
+     label05:
+        $i22 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        if $i22 < 0 goto label06;
+
+        $i26 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i24 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $i25 = 2147483647 / $i24;
+
+        if $i26 <= $i25 goto label07;
+
+     label06:
+        $r61 = new java.awt.image.RasterFormatException;
+
+        $r60 = new java.lang.StringBuilder;
+
+        specialinvoke $r60.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incorrect scanline stride: ");
+
+        $i23 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r61.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r18);
+
+        throw $r61;
+
+     label07:
+        $i27 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        if $i27 > 1 goto label08;
+
+        $i52 = r0.<sun.awt.image.IntegerComponentRaster: int minY>;
+
+        $i51 = r0.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateY>;
+
+        $i53 = $i52 - $i51;
+
+        if $i53 <= 0 goto label09;
+
+     label08:
+        $i29 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $r19 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $i28 = lengthof $r19;
+
+        if $i29 <= $i28 goto label09;
+
+        $r63 = new java.awt.image.RasterFormatException;
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incorrect scanline stride: ");
+
+        $i50 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i50);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r63.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r41);
+
+        throw $r63;
+
+     label09:
+        $i30 = r0.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $i32 = $i30 - 1;
+
+        $i31 = r0.<sun.awt.image.IntegerComponentRaster: int scanlineStride>;
+
+        $i54 = $i32 * $i31;
+
+        $i33 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        if $i33 < 0 goto label10;
+
+        $i36 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $i34 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i35 = 2147483647 / $i34;
+
+        if $i36 > $i35 goto label10;
+
+        $i38 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $r20 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $i37 = lengthof $r20;
+
+        if $i38 <= $i37 goto label11;
+
+     label10:
+        $r65 = new java.awt.image.RasterFormatException;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incorrect pixel stride: ");
+
+        $i56 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i56);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r65.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r54);
+
+        throw $r65;
+
+     label11:
+        $i39 = r0.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $i41 = $i39 - 1;
+
+        $i40 = r0.<sun.awt.image.IntegerComponentRaster: int pixelStride>;
+
+        i57 = $i41 * $i40;
+
+        $i42 = 2147483647 - $i54;
+
+        if i57 <= $i42 goto label12;
+
+        $r66 = new java.awt.image.RasterFormatException;
+
+        specialinvoke $r66.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>("Incorrect raster attributes");
+
+        throw $r66;
+
+     label12:
+        i58 = i57 + $i54;
+
+        i59 = 0;
+
+        i60 = 0;
+
+     label13:
+        $i43 = r0.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        if i60 >= $i43 goto label16;
+
+        $r28 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i46 = $r28[i60];
+
+        $i45 = 2147483647 - i58;
+
+        if $i46 <= $i45 goto label14;
+
+        $r68 = new java.awt.image.RasterFormatException;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incorrect band offset: ");
+
+        $r33 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i49 = $r33[i60];
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i49);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r68.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r35);
+
+        throw $r68;
+
+     label14:
+        $r29 = r0.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i47 = $r29[i60];
+
+        i48 = i58 + $i47;
+
+        if i48 <= i59 goto label15;
+
+        i59 = i48;
+
+     label15:
+        i60 = i60 + 1;
+
+        goto label13;
+
+     label16:
+        $r21 = r0.<sun.awt.image.IntegerComponentRaster: int[] data>;
+
+        $i44 = lengthof $r21;
+
+        if $i44 > i59 goto label17;
+
+        $r70 = new java.awt.image.RasterFormatException;
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Data array too small (should be > ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i59);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" )");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r70.<java.awt.image.RasterFormatException: void <init>(java.lang.String)>($r27);
+
+        throw $r70;
+
+     label17:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        int[] $r16;
+        sun.awt.image.IntegerComponentRaster r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r0, $r18;
+        java.lang.StringBuilder $r1, $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r17;
+
+        r3 := @this: sun.awt.image.IntegerComponentRaster;
+
+        $r0 = new java.lang.String;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IntegerComponentRaster: width = ");
+
+        $i0 = r3.<sun.awt.image.IntegerComponentRaster: int width>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" height = ");
+
+        $i1 = r3.<sun.awt.image.IntegerComponentRaster: int height>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" #Bands = ");
+
+        $i2 = r3.<sun.awt.image.IntegerComponentRaster: int numBands>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" #DataElements ");
+
+        $i3 = r3.<sun.awt.image.IntegerComponentRaster: int numDataElements>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" xOff = ");
+
+        $i4 = r3.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateX>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" yOff = ");
+
+        $i5 = r3.<sun.awt.image.IntegerComponentRaster: int sampleModelTranslateY>;
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataOffset[0] ");
+
+        $r16 = r3.<sun.awt.image.IntegerComponentRaster: int[] dataOffsets>;
+
+        $i6 = $r16[0];
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.String: void <init>(java.lang.String)>($r18);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        <sun.awt.image.IntegerComponentRaster: int TYPE_BYTE_BINARY_SAMPLES> = 11;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_INT_8BIT_SAMPLES> = 10;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_INT_PACKED_SAMPLES> = 9;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_USHORT_PACKED_SAMPLES> = 8;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_BYTE_PACKED_SAMPLES> = 7;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_INT_BANDED_SAMPLES> = 6;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_USHORT_BANDED_SAMPLES> = 5;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_BYTE_BANDED_SAMPLES> = 4;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_INT_SAMPLES> = 3;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_USHORT_SAMPLES> = 2;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_BYTE_SAMPLES> = 1;
+
+        <sun.awt.image.IntegerComponentRaster: int TYPE_CUSTOM> = 0;
+
+        staticinvoke <sun.awt.image.NativeLibLoader: void loadLibraries()>();
+
+        staticinvoke <sun.awt.image.IntegerComponentRaster: void initIDs()>();
+
+        return;
+    }
+}

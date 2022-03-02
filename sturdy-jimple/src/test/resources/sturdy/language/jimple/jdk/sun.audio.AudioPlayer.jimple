@@ -1,0 +1,166 @@
+public final class sun.audio.AudioPlayer extends java.lang.Thread
+{
+    private final sun.audio.AudioDevice devAudio;
+    private static final boolean DEBUG;
+    public static final sun.audio.AudioPlayer player;
+
+    private static java.lang.ThreadGroup getAudioThreadGroup()
+    {
+        java.lang.Thread $r0;
+        java.lang.ThreadGroup $r1, $r2, $r3, r4;
+
+        $r0 = staticinvoke <sun.audio.AudioPlayer: java.lang.Thread currentThread()>();
+
+        r4 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label1:
+        $r1 = virtualinvoke r4.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = virtualinvoke r4.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        if $r3 == null goto label2;
+
+        r4 = virtualinvoke r4.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        goto label1;
+
+     label2:
+        return r4;
+    }
+
+    private static sun.audio.AudioPlayer getAudioPlayer()
+    {
+        java.lang.Object $r1;
+        sun.audio.AudioPlayer$1 $r0;
+        sun.audio.AudioPlayer r2;
+
+        $r0 = new sun.audio.AudioPlayer$1;
+
+        specialinvoke $r0.<sun.audio.AudioPlayer$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (sun.audio.AudioPlayer) $r1;
+
+        return r2;
+    }
+
+    private void <init>()
+    {
+        sun.audio.AudioDevice $r2, $r3;
+        sun.audio.AudioPlayer r0;
+        java.lang.ThreadGroup $r1;
+
+        r0 := @this: sun.audio.AudioPlayer;
+
+        $r1 = staticinvoke <sun.audio.AudioPlayer: java.lang.ThreadGroup getAudioThreadGroup()>();
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>($r1, "Audio Player");
+
+        $r2 = <sun.audio.AudioDevice: sun.audio.AudioDevice device>;
+
+        r0.<sun.audio.AudioPlayer: sun.audio.AudioDevice devAudio> = $r2;
+
+        $r3 = r0.<sun.audio.AudioPlayer: sun.audio.AudioDevice devAudio>;
+
+        virtualinvoke $r3.<sun.audio.AudioDevice: void open()>();
+
+        return;
+    }
+
+    public synchronized void start(java.io.InputStream)
+    {
+        sun.audio.AudioDevice $r2;
+        sun.audio.AudioPlayer r0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.audio.AudioPlayer;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $r2 = r0.<sun.audio.AudioPlayer: sun.audio.AudioDevice devAudio>;
+
+        virtualinvoke $r2.<sun.audio.AudioDevice: void openChannel(java.io.InputStream)>(r1);
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        return;
+    }
+
+    public synchronized void stop(java.io.InputStream)
+    {
+        sun.audio.AudioDevice $r2;
+        sun.audio.AudioPlayer r0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.audio.AudioPlayer;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $r2 = r0.<sun.audio.AudioPlayer: sun.audio.AudioDevice devAudio>;
+
+        virtualinvoke $r2.<sun.audio.AudioDevice: void closeChannel(java.io.InputStream)>(r1);
+
+        return;
+    }
+
+    public void run()
+    {
+        sun.audio.AudioDevice $r1;
+        java.lang.Exception $r2;
+        sun.audio.AudioPlayer r0;
+
+        r0 := @this: sun.audio.AudioPlayer;
+
+        $r1 = r0.<sun.audio.AudioPlayer: sun.audio.AudioDevice devAudio>;
+
+        virtualinvoke $r1.<sun.audio.AudioDevice: void play()>();
+
+     label1:
+        staticinvoke <java.lang.Thread: void sleep(long)>(5000L);
+
+     label2:
+        goto label1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        goto label4;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    void <init>(sun.audio.AudioPlayer$1)
+    {
+        sun.audio.AudioPlayer$1 r1;
+        sun.audio.AudioPlayer r0;
+
+        r0 := @this: sun.audio.AudioPlayer;
+
+        r1 := @parameter0: sun.audio.AudioPlayer$1;
+
+        specialinvoke r0.<sun.audio.AudioPlayer: void <init>()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.audio.AudioPlayer $r0;
+
+        <sun.audio.AudioPlayer: boolean DEBUG> = 0;
+
+        $r0 = staticinvoke <sun.audio.AudioPlayer: sun.audio.AudioPlayer getAudioPlayer()>();
+
+        <sun.audio.AudioPlayer: sun.audio.AudioPlayer player> = $r0;
+
+        return;
+    }
+}

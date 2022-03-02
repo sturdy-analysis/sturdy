@@ -1,0 +1,192 @@
+class sun.rmi.transport.tcp.ConnectionAcceptor extends java.lang.Object implements java.lang.Runnable
+{
+    private sun.rmi.transport.tcp.TCPTransport transport;
+    private java.util.List queue;
+    private static int threadNum;
+
+    public void <init>(sun.rmi.transport.tcp.TCPTransport)
+    {
+        sun.rmi.transport.tcp.ConnectionAcceptor r0;
+        java.util.ArrayList $r1;
+        sun.rmi.transport.tcp.TCPTransport r2;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionAcceptor;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.TCPTransport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue> = $r1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionAcceptor: sun.rmi.transport.tcp.TCPTransport transport> = r2;
+
+        return;
+    }
+
+    public void startNewAcceptor()
+    {
+        sun.rmi.transport.tcp.ConnectionAcceptor r1;
+        java.lang.Thread r7;
+        int $i0, $i1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.Object $r6;
+        java.lang.String $r5;
+        sun.rmi.runtime.NewThreadAction $r0;
+
+        r1 := @this: sun.rmi.transport.tcp.ConnectionAcceptor;
+
+        $r0 = new sun.rmi.runtime.NewThreadAction;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Multiplex Accept-");
+
+        $i0 = <sun.rmi.transport.tcp.ConnectionAcceptor: int threadNum>;
+
+        $i1 = $i0 + 1;
+
+        <sun.rmi.transport.tcp.ConnectionAcceptor: int threadNum> = $i1;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<sun.rmi.runtime.NewThreadAction: void <init>(java.lang.Runnable,java.lang.String,boolean)>(r1, $r5, 1);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r7 = (java.lang.Thread) $r6;
+
+        virtualinvoke r7.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public void accept(sun.rmi.transport.Connection)
+    {
+        java.lang.Throwable $r5;
+        java.util.List $r1, $r3, $r4;
+        sun.rmi.transport.tcp.ConnectionAcceptor r0;
+        sun.rmi.transport.Connection r2;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionAcceptor;
+
+        r2 := @parameter0: sun.rmi.transport.Connection;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        $r4 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        virtualinvoke $r4.<java.lang.Object: void notify()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r7;
+        sun.rmi.transport.tcp.ConnectionAcceptor r0;
+        java.util.List $r1, $r2, $r6, $r9;
+        sun.rmi.transport.Connection r4;
+        java.lang.InterruptedException $r8;
+        int $i0;
+        java.lang.Object $r3;
+        sun.rmi.transport.tcp.TCPTransport $r5;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionAcceptor;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r9 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        $i0 = interfaceinvoke $r9.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label5;
+
+     label2:
+        $r6 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        virtualinvoke $r6.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r8 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionAcceptor: void startNewAcceptor()>();
+
+        $r2 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: java.util.List queue>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object remove(int)>(0);
+
+        r4 = (sun.rmi.transport.Connection) $r3;
+
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r7;
+
+     label9:
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionAcceptor: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        virtualinvoke $r5.<sun.rmi.transport.tcp.TCPTransport: void handleMessages(sun.rmi.transport.Connection,boolean)>(r4, 1);
+
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    static void <clinit>()
+    {
+        <sun.rmi.transport.tcp.ConnectionAcceptor: int threadNum> = 0;
+
+        return;
+    }
+}

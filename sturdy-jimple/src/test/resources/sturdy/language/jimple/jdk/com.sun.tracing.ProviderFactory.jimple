@@ -1,0 +1,204 @@
+public abstract class com.sun.tracing.ProviderFactory extends java.lang.Object
+{
+
+    protected void <init>()
+    {
+        com.sun.tracing.ProviderFactory r0;
+
+        r0 := @this: com.sun.tracing.ProviderFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public abstract com.sun.tracing.Provider createProvider(java.lang.Class);
+
+    public static com.sun.tracing.ProviderFactory getDefaultFactory()
+    {
+        sun.tracing.PrintStreamProviderFactory $r12;
+        java.lang.Object[] $r5;
+        sun.tracing.NullProviderFactory $r8;
+        java.lang.String[] $r9;
+        sun.security.action.GetPropertyAction $r1, $r15;
+        java.util.HashSet $r0;
+        int $i0, $i1, i2, i3;
+        java.lang.String r10, r14, $r17;
+        boolean $z0, $z1;
+        java.io.PrintStream $r11;
+        com.sun.tracing.ProviderFactory $r7;
+        sun.tracing.MultiplexProviderFactory $r3;
+        sun.tracing.dtrace.DTraceProviderFactory $r13;
+        com.sun.tracing.ProviderFactory[] $r4, $r6;
+        java.lang.Object $r2, $r16;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("com.sun.tracing.dtrace");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r14 = (java.lang.String) $r2;
+
+        if r14 == null goto label1;
+
+        $z1 = virtualinvoke r14.<java.lang.String: boolean equals(java.lang.Object)>("disable");
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        $z0 = staticinvoke <sun.tracing.dtrace.DTraceProviderFactory: boolean isSupported()>();
+
+        if $z0 == 0 goto label2;
+
+        $r13 = new sun.tracing.dtrace.DTraceProviderFactory;
+
+        specialinvoke $r13.<sun.tracing.dtrace.DTraceProviderFactory: void <init>()>();
+
+        virtualinvoke $r0.<java.util.HashSet: boolean add(java.lang.Object)>($r13);
+
+     label2:
+        $r15 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r15.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.tracing.stream");
+
+        $r16 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r15);
+
+        $r17 = (java.lang.String) $r16;
+
+        if $r17 == null goto label5;
+
+        $r9 = virtualinvoke $r17.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+        i2 = lengthof $r9;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= i2 goto label5;
+
+        r10 = $r9[i3];
+
+        $r11 = staticinvoke <com.sun.tracing.ProviderFactory: java.io.PrintStream getPrintStreamFromSpec(java.lang.String)>(r10);
+
+        if $r11 == null goto label4;
+
+        $r12 = new sun.tracing.PrintStreamProviderFactory;
+
+        specialinvoke $r12.<sun.tracing.PrintStreamProviderFactory: void <init>(java.io.PrintStream)>($r11);
+
+        virtualinvoke $r0.<java.util.HashSet: boolean add(java.lang.Object)>($r12);
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label5:
+        $i0 = virtualinvoke $r0.<java.util.HashSet: int size()>();
+
+        if $i0 != 0 goto label6;
+
+        $r8 = new sun.tracing.NullProviderFactory;
+
+        specialinvoke $r8.<sun.tracing.NullProviderFactory: void <init>()>();
+
+        return $r8;
+
+     label6:
+        $i1 = virtualinvoke $r0.<java.util.HashSet: int size()>();
+
+        if $i1 != 1 goto label7;
+
+        $r4 = newarray (com.sun.tracing.ProviderFactory)[1];
+
+        $r5 = virtualinvoke $r0.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r6 = (com.sun.tracing.ProviderFactory[]) $r5;
+
+        $r7 = $r6[0];
+
+        return $r7;
+
+     label7:
+        $r3 = new sun.tracing.MultiplexProviderFactory;
+
+        specialinvoke $r3.<sun.tracing.MultiplexProviderFactory: void <init>(java.util.Set)>($r0);
+
+        return $r3;
+    }
+
+    private static java.io.PrintStream getPrintStreamFromSpec(java.lang.String)
+    {
+        java.io.PrintStream $r7;
+        java.security.PrivilegedActionException $r8;
+        java.lang.IllegalAccessException $r10;
+        java.lang.AssertionError $r9, $r11, $r13;
+        java.lang.reflect.Field r5;
+        com.sun.tracing.ProviderFactory$1 $r3;
+        int $i0;
+        java.lang.Class $r2;
+        java.lang.Object $r4, $r6;
+        java.lang.ClassNotFoundException $r12;
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r1);
+
+        $r3 = new com.sun.tracing.ProviderFactory$1;
+
+        specialinvoke $r3.<com.sun.tracing.ProviderFactory$1: void <init>(java.lang.Class,java.lang.String,int)>($r2, r0, $i0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r3);
+
+        r5 = (java.lang.reflect.Field) $r4;
+
+        $r6 = virtualinvoke r5.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(null);
+
+        $r7 = (java.io.PrintStream) $r6;
+
+     label2:
+        return $r7;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>(java.lang.Object)>($r12);
+
+        throw $r13;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>(java.lang.Object)>($r10);
+
+        throw $r11;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>(java.lang.Object)>($r8);
+
+        throw $r9;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label4;
+        catch java.security.PrivilegedActionException from label1 to label2 with label5;
+    }
+}

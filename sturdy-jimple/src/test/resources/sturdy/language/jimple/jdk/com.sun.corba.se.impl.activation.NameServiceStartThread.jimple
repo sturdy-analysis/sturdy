@@ -1,0 +1,71 @@
+public class com.sun.corba.se.impl.activation.NameServiceStartThread extends java.lang.Thread
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private java.io.File dbDir;
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, java.io.File)
+    {
+        com.sun.corba.se.impl.activation.NameServiceStartThread r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        java.io.File r2;
+
+        r0 := @this: com.sun.corba.se.impl.activation.NameServiceStartThread;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: java.io.File;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.activation.NameServiceStartThread: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        r0.<com.sun.corba.se.impl.activation.NameServiceStartThread: java.io.File dbDir> = r2;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.io.PrintStream $r7;
+        org.omg.CosNaming.NamingContext $r4;
+        java.io.File $r2;
+        com.sun.corba.se.spi.orb.ORB $r3, $r5;
+        java.lang.Exception $r6;
+        com.sun.corba.se.impl.naming.pcosnaming.NameService $r0;
+        com.sun.corba.se.impl.activation.NameServiceStartThread r1;
+
+        r1 := @this: com.sun.corba.se.impl.activation.NameServiceStartThread;
+
+     label1:
+        $r0 = new com.sun.corba.se.impl.naming.pcosnaming.NameService;
+
+        $r3 = r1.<com.sun.corba.se.impl.activation.NameServiceStartThread: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = r1.<com.sun.corba.se.impl.activation.NameServiceStartThread: java.io.File dbDir>;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.naming.pcosnaming.NameService: void <init>(com.sun.corba.se.spi.orb.ORB,java.io.File)>($r3, $r2);
+
+        $r4 = virtualinvoke $r0.<com.sun.corba.se.impl.naming.pcosnaming.NameService: org.omg.CosNaming.NamingContext initialNamingContext()>();
+
+        $r5 = r1.<com.sun.corba.se.impl.activation.NameServiceStartThread: com.sun.corba.se.spi.orb.ORB orb>;
+
+        virtualinvoke $r5.<com.sun.corba.se.spi.orb.ORB: void register_initial_reference(java.lang.String,org.omg.CORBA.Object)>("NameService", $r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("NameService did not start successfully");
+
+        virtualinvoke $r6.<java.lang.Exception: void printStackTrace()>();
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

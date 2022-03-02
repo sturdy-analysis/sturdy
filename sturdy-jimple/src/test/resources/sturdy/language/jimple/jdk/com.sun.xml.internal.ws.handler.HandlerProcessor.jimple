@@ -1,0 +1,851 @@
+abstract class com.sun.xml.internal.ws.handler.HandlerProcessor extends java.lang.Object
+{
+    boolean isClient;
+    static final java.util.logging.Logger logger;
+    private java.util.List handlers;
+    com.sun.xml.internal.ws.api.WSBinding binding;
+    private int index;
+    private com.sun.xml.internal.ws.handler.HandlerTube owner;
+
+    protected void <init>(com.sun.xml.internal.ws.handler.HandlerTube, com.sun.xml.internal.ws.api.WSBinding, java.util.List)
+    {
+        java.util.List r4;
+        com.sun.xml.internal.ws.handler.HandlerTube r1;
+        int $i1;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        com.sun.xml.internal.ws.api.WSBinding r2;
+        java.util.ArrayList $r5;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.handler.HandlerTube;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.WSBinding;
+
+        r4 := @parameter2: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int index> = $i1;
+
+        r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: com.sun.xml.internal.ws.handler.HandlerTube owner> = r1;
+
+        if r4 != null goto label1;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r4 = $r5;
+
+     label1:
+        r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers> = r4;
+
+        r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: com.sun.xml.internal.ws.api.WSBinding binding> = r2;
+
+        return;
+    }
+
+    int getIndex()
+    {
+        int $i0;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        $i0 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int index>;
+
+        return $i0;
+    }
+
+    void setIndex(int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int index> = i0;
+
+        return;
+    }
+
+    public boolean callHandlersRequest(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction, com.sun.xml.internal.ws.handler.MessageUpdatableContext, boolean)
+    {
+        javax.xml.ws.ProtocolException $r11;
+        boolean z0, z1;
+        java.util.logging.Logger $r10, $r13;
+        java.util.List $r4, $r6, $r7, $r15;
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r2;
+        java.util.logging.Level $r9, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        java.lang.RuntimeException $r8;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        com.sun.xml.internal.ws.handler.HandlerProcessor$Direction r1, $r3, $r5, $r14;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction,com.sun.xml.internal.ws.handler.MessageUpdatableContext)>(r1, r2);
+
+     label01:
+        $r3 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r1 != $r3 goto label02;
+
+        $r7 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i8 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        $i9 = $i8 - 1;
+
+        z1 = specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessage(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, 0, $i9);
+
+        goto label03;
+
+     label02:
+        $r4 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $i1 = $i0 - 1;
+
+        z1 = specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessage(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i1, 0);
+
+     label03:
+        goto label09;
+
+     label04:
+        $r11 := @caughtexception;
+
+        $r13 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r12, "exception in handler chain", $r11);
+
+        if z0 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void insertFaultMessage(com.sun.xml.internal.ws.handler.MessageUpdatableContext,javax.xml.ws.ProtocolException)>(r2, $r11);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void reverseDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction,com.sun.xml.internal.ws.handler.MessageUpdatableContext)>(r1, r2);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setHandleFaultProperty()>();
+
+        $r14 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r1 != $r14 goto label05;
+
+        $i14 = virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int getIndex()>();
+
+        $i15 = $i14 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleFault(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i15, 0);
+
+        goto label06;
+
+     label05:
+        $i10 = virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int getIndex()>();
+
+        $i11 = $i10 + 1;
+
+        $r15 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i12 = interfaceinvoke $r15.<java.util.List: int size()>();
+
+        $i13 = $i12 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleFault(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i11, $i13);
+
+     label06:
+        return 0;
+
+     label07:
+        throw $r11;
+
+     label08:
+        $r8 := @caughtexception;
+
+        $r10 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r10.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r9, "exception in handler chain", $r8);
+
+        throw $r8;
+
+     label09:
+        if z1 != 0 goto label13;
+
+        if z0 == 0 goto label11;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void reverseDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction,com.sun.xml.internal.ws.handler.MessageUpdatableContext)>(r1, r2);
+
+        $r5 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r1 != $r5 goto label10;
+
+        $i6 = virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int getIndex()>();
+
+        $i7 = $i6 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessageReverse(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i7, 0);
+
+        goto label12;
+
+     label10:
+        $i2 = virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: int getIndex()>();
+
+        $i3 = $i2 + 1;
+
+        $r6 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i4 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        $i5 = $i4 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessageReverse(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i3, $i5);
+
+        goto label12;
+
+     label11:
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setHandleFalseProperty()>();
+
+     label12:
+        return 0;
+
+     label13:
+        return z1;
+
+        catch javax.xml.ws.ProtocolException from label01 to label03 with label04;
+        catch java.lang.RuntimeException from label01 to label03 with label08;
+    }
+
+    public void callHandlersResponse(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction, com.sun.xml.internal.ws.handler.MessageUpdatableContext, boolean)
+    {
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r2;
+        java.util.logging.Level $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        boolean z0;
+        java.lang.RuntimeException $r9;
+        java.util.logging.Logger $r11;
+        java.util.List $r4, $r5, $r7, $r8;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        com.sun.xml.internal.ws.handler.HandlerProcessor$Direction r1, $r3, $r6;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction,com.sun.xml.internal.ws.handler.MessageUpdatableContext)>(r1, r2);
+
+     label1:
+        if z0 == 0 goto label3;
+
+        $r6 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r1 != $r6 goto label2;
+
+        $r8 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i6 = interfaceinvoke $r8.<java.util.List: int size()>();
+
+        $i7 = $i6 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleFault(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, 0, $i7);
+
+        goto label5;
+
+     label2:
+        $r7 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i4 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        $i5 = $i4 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleFault(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i5, 0);
+
+        goto label5;
+
+     label3:
+        $r3 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r1 != $r3 goto label4;
+
+        $r5 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i2 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i3 = $i2 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessageReverse(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, 0, $i3);
+
+        goto label5;
+
+     label4:
+        $r4 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $i1 = $i0 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: boolean callHandleMessageReverse(com.sun.xml.internal.ws.handler.MessageUpdatableContext,int,int)>(r2, $i1, 0);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r11 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r10 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r10, "exception in handler chain", $r9);
+
+        throw $r9;
+
+     label7:
+        return;
+
+        catch java.lang.RuntimeException from label1 to label5 with label6;
+    }
+
+    private void reverseDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction, com.sun.xml.internal.ws.handler.MessageUpdatableContext)
+    {
+        java.lang.Boolean $r3, $r4;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r5;
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r2;
+        com.sun.xml.internal.ws.handler.HandlerProcessor$Direction r0, $r1;
+
+        r5 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        $r1 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r0 != $r1 goto label1;
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.handler.MessageUpdatableContext: java.lang.Object put(java.lang.String,java.lang.Object)>("javax.xml.ws.handler.message.outbound", $r4);
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.handler.MessageUpdatableContext: java.lang.Object put(java.lang.String,java.lang.Object)>("javax.xml.ws.handler.message.outbound", $r3);
+
+     label2:
+        return;
+    }
+
+    private void setDirection(com.sun.xml.internal.ws.handler.HandlerProcessor$Direction, com.sun.xml.internal.ws.handler.MessageUpdatableContext)
+    {
+        java.lang.Boolean $r3, $r4;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r5;
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r2;
+        com.sun.xml.internal.ws.handler.HandlerProcessor$Direction r0, $r1;
+
+        r5 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        $r1 = <com.sun.xml.internal.ws.handler.HandlerProcessor$Direction: com.sun.xml.internal.ws.handler.HandlerProcessor$Direction OUTBOUND>;
+
+        if r0 != $r1 goto label1;
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.handler.MessageUpdatableContext: java.lang.Object put(java.lang.String,java.lang.Object)>("javax.xml.ws.handler.message.outbound", $r4);
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.handler.MessageUpdatableContext: java.lang.Object put(java.lang.String,java.lang.Object)>("javax.xml.ws.handler.message.outbound", $r3);
+
+     label2:
+        return;
+    }
+
+    private void setHandleFaultProperty()
+    {
+        com.sun.xml.internal.ws.handler.HandlerTube $r1;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: com.sun.xml.internal.ws.handler.HandlerTube owner>;
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.handler.HandlerTube: void setHandleFault()>();
+
+        return;
+    }
+
+    private void setHandleFalseProperty()
+    {
+        com.sun.xml.internal.ws.handler.HandlerTube $r1;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: com.sun.xml.internal.ws.handler.HandlerTube owner>;
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.handler.HandlerTube: void setHandleFalse()>();
+
+        return;
+    }
+
+    abstract void insertFaultMessage(com.sun.xml.internal.ws.handler.MessageUpdatableContext, javax.xml.ws.ProtocolException);
+
+    private boolean callHandleMessage(com.sun.xml.internal.ws.handler.MessageUpdatableContext, int, int)
+    {
+        java.lang.RuntimeException $r8;
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r3;
+        java.util.List $r1, $r5;
+        javax.xml.ws.handler.Handler $r4, $r7;
+        int i0, i1, i2, $i4;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        java.lang.Object $r2, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 = i0;
+
+     label01:
+        if i0 <= i1 goto label05;
+
+     label02:
+        if i2 < i1 goto label08;
+
+        $r5 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r7 = (javax.xml.ws.handler.Handler) $r6;
+
+        $z1 = interfaceinvoke $r7.<javax.xml.ws.handler.Handler: boolean handleMessage(javax.xml.ws.handler.MessageContext)>(r3);
+
+        if $z1 != 0 goto label04;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setIndex(int)>(i2);
+
+     label03:
+        return 0;
+
+     label04:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label02;
+
+     label05:
+        if i2 > i1 goto label08;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r4 = (javax.xml.ws.handler.Handler) $r2;
+
+        $z0 = interfaceinvoke $r4.<javax.xml.ws.handler.Handler: boolean handleMessage(javax.xml.ws.handler.MessageContext)>(r3);
+
+        if $z0 != 0 goto label07;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setIndex(int)>(i2);
+
+     label06:
+        return 0;
+
+     label07:
+        i2 = i2 + 1;
+
+        goto label05;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setIndex(int)>(i2);
+
+        throw $r8;
+
+     label10:
+        return 1;
+
+        catch java.lang.RuntimeException from label01 to label03 with label09;
+        catch java.lang.RuntimeException from label04 to label06 with label09;
+        catch java.lang.RuntimeException from label07 to label08 with label09;
+    }
+
+    private boolean callHandleMessageReverse(com.sun.xml.internal.ws.handler.MessageUpdatableContext, int, int)
+    {
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r5;
+        int i0, $i1, i2, i3, $i5, $i7;
+        boolean $z0, $z1, $z2;
+        java.util.List $r1, $r2, $r3, $r7;
+        javax.xml.ws.handler.Handler $r6, $r9;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        java.lang.Object $r4, $r8;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r5 := @parameter0: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $i5 = (int) -1;
+
+        if i0 == $i5 goto label1;
+
+        $r2 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if i0 != $i1 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        i3 = i0;
+
+        if i0 <= i2 goto label5;
+
+     label3:
+        if i3 < i2 goto label7;
+
+        $r7 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r9 = (javax.xml.ws.handler.Handler) $r8;
+
+        $z2 = interfaceinvoke $r9.<javax.xml.ws.handler.Handler: boolean handleMessage(javax.xml.ws.handler.MessageContext)>(r5);
+
+        if $z2 != 0 goto label4;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setHandleFalseProperty()>();
+
+        return 0;
+
+     label4:
+        $i7 = (int) -1;
+
+        i3 = i3 + $i7;
+
+        goto label3;
+
+     label5:
+        if i3 > i2 goto label7;
+
+        $r3 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r6 = (javax.xml.ws.handler.Handler) $r4;
+
+        $z1 = interfaceinvoke $r6.<javax.xml.ws.handler.Handler: boolean handleMessage(javax.xml.ws.handler.MessageContext)>(r5);
+
+        if $z1 != 0 goto label6;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: void setHandleFalseProperty()>();
+
+        return 0;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        return 1;
+    }
+
+    private boolean callHandleFault(com.sun.xml.internal.ws.handler.MessageUpdatableContext, int, int)
+    {
+        com.sun.xml.internal.ws.handler.MessageUpdatableContext r5;
+        java.util.logging.Level $r11, $r14;
+        int i0, $i1, i2, i3, $i5, $i7;
+        boolean $z0, $z1, $z2;
+        java.lang.RuntimeException $r10, $r13;
+        java.util.logging.Logger $r12, $r15;
+        java.util.List $r1, $r2, $r3, $r7;
+        javax.xml.ws.handler.Handler $r6, $r9;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        java.lang.Object $r4, $r8;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r5 := @parameter0: com.sun.xml.internal.ws.handler.MessageUpdatableContext;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label01;
+
+        $i5 = (int) -1;
+
+        if i0 == $i5 goto label01;
+
+        $r2 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if i0 != $i1 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        i3 = i0;
+
+        if i0 <= i2 goto label08;
+
+     label03:
+        if i3 < i2 goto label06;
+
+        $r7 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r9 = (javax.xml.ws.handler.Handler) $r8;
+
+        $z2 = interfaceinvoke $r9.<javax.xml.ws.handler.Handler: boolean handleFault(javax.xml.ws.handler.MessageContext)>(r5);
+
+        if $z2 != 0 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $i7 = (int) -1;
+
+        i3 = i3 + $i7;
+
+        goto label03;
+
+     label06:
+        goto label13;
+
+     label07:
+        $r13 := @caughtexception;
+
+        $r15 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r15.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r14, "exception in handler chain", $r13);
+
+        throw $r13;
+
+     label08:
+        if i3 > i2 goto label11;
+
+        $r3 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r6 = (javax.xml.ws.handler.Handler) $r4;
+
+        $z1 = interfaceinvoke $r6.<javax.xml.ws.handler.Handler: boolean handleFault(javax.xml.ws.handler.MessageContext)>(r5);
+
+        if $z1 != 0 goto label10;
+
+     label09:
+        return 0;
+
+     label10:
+        i3 = i3 + 1;
+
+        goto label08;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r10 := @caughtexception;
+
+        $r12 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r12.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r11, "exception in handler chain", $r10);
+
+        throw $r10;
+
+     label13:
+        return 1;
+
+        catch java.lang.RuntimeException from label03 to label04 with label07;
+        catch java.lang.RuntimeException from label05 to label06 with label07;
+        catch java.lang.RuntimeException from label08 to label09 with label12;
+        catch java.lang.RuntimeException from label10 to label11 with label12;
+    }
+
+    void closeHandlers(javax.xml.ws.handler.MessageContext, int, int)
+    {
+        java.util.logging.Level $r10, $r13;
+        int i0, i1, i2, i3, $i5, $i7;
+        boolean $z0;
+        javax.xml.ws.handler.MessageContext r4;
+        java.lang.RuntimeException $r9, $r12;
+        java.util.logging.Logger $r11, $r14;
+        java.util.List $r1, $r2, $r6;
+        javax.xml.ws.handler.Handler $r5, $r8;
+        com.sun.xml.internal.ws.handler.HandlerProcessor r0;
+        java.lang.Object $r3, $r7;
+
+        r0 := @this: com.sun.xml.internal.ws.handler.HandlerProcessor;
+
+        r4 := @parameter0: javax.xml.ws.handler.MessageContext;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label01;
+
+        $i5 = (int) -1;
+
+        if i0 != $i5 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        if i0 <= i1 goto label09;
+
+        i2 = i0;
+
+     label03:
+        if i2 < i1 goto label08;
+
+     label04:
+        $r6 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r8 = (javax.xml.ws.handler.Handler) $r7;
+
+        interfaceinvoke $r8.<javax.xml.ws.handler.Handler: void close(javax.xml.ws.handler.MessageContext)>(r4);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r12 := @caughtexception;
+
+        $r14 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r13, "Exception ignored during close", $r12);
+
+     label07:
+        $i7 = (int) -1;
+
+        i2 = i2 + $i7;
+
+        goto label03;
+
+     label08:
+        goto label15;
+
+     label09:
+        i3 = i0;
+
+     label10:
+        if i3 > i1 goto label15;
+
+     label11:
+        $r2 = r0.<com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.List handlers>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r5 = (javax.xml.ws.handler.Handler) $r3;
+
+        interfaceinvoke $r5.<javax.xml.ws.handler.Handler: void close(javax.xml.ws.handler.MessageContext)>(r4);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r9 := @caughtexception;
+
+        $r11 = <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger>;
+
+        $r10 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r10, "Exception ignored during close", $r9);
+
+     label14:
+        i3 = i3 + 1;
+
+        goto label10;
+
+     label15:
+        return;
+
+        catch java.lang.RuntimeException from label04 to label05 with label06;
+        catch java.lang.RuntimeException from label11 to label12 with label13;
+    }
+
+    static void <clinit>()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("com.sun.xml.internal.ws.handler");
+
+        <com.sun.xml.internal.ws.handler.HandlerProcessor: java.util.logging.Logger logger> = $r0;
+
+        return;
+    }
+}

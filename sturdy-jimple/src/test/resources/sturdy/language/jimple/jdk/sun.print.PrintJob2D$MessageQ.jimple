@@ -1,0 +1,195 @@
+class sun.print.PrintJob2D$MessageQ extends java.lang.Object
+{
+    private java.lang.String qid;
+    private java.util.ArrayList queue;
+    final sun.print.PrintJob2D this$0;
+
+    void <init>(sun.print.PrintJob2D, java.lang.String)
+    {
+        sun.print.PrintJob2D r1;
+        java.lang.String r3;
+        sun.print.PrintJob2D$MessageQ r0;
+        java.util.ArrayList $r2;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+        r1 := @parameter0: sun.print.PrintJob2D;
+
+        r3 := @parameter1: java.lang.String;
+
+        r0.<sun.print.PrintJob2D$MessageQ: sun.print.PrintJob2D this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.print.PrintJob2D$MessageQ: java.lang.String qid> = "noname";
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue> = $r2;
+
+        r0.<sun.print.PrintJob2D$MessageQ: java.lang.String qid> = r3;
+
+        return;
+    }
+
+    synchronized void closeWhenEmpty()
+    {
+        java.lang.InterruptedException $r2;
+        int $i0;
+        sun.print.PrintJob2D$MessageQ r0;
+        java.util.ArrayList $r1, $r3;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+     label1:
+        $r3 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        if $r3 == null goto label5;
+
+        $r1 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label5;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(1000L);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue> = null;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    synchronized void close()
+    {
+        sun.print.PrintJob2D$MessageQ r0;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+        r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue> = null;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+    }
+
+    synchronized boolean append(java.awt.Graphics2D)
+    {
+        java.awt.Graphics2D r2;
+        sun.print.PrintJob2D$MessageQ r0;
+        java.util.ArrayList $r1, $r3;
+        boolean z0;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+        r2 := @parameter0: java.awt.Graphics2D;
+
+        z0 = 0;
+
+        $r1 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>(r2);
+
+        z0 = 1;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+     label1:
+        return z0;
+    }
+
+    synchronized java.awt.Graphics2D pop()
+    {
+        java.util.ArrayList $r1, $r2, $r3;
+        java.lang.InterruptedException $r5;
+        java.awt.Graphics2D r6;
+        int $i0;
+        java.lang.Object $r4;
+        sun.print.PrintJob2D$MessageQ r0;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+        r6 = null;
+
+     label1:
+        if r6 != null goto label5;
+
+        $r1 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        if $r1 == null goto label5;
+
+        $r2 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r3 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object remove(int)>(0);
+
+        r6 = (java.awt.Graphics2D) $r4;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(2000L);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r5 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        return r6;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    synchronized boolean isClosed()
+    {
+        sun.print.PrintJob2D$MessageQ r0;
+        java.util.ArrayList $r1;
+        boolean $z0;
+
+        r0 := @this: sun.print.PrintJob2D$MessageQ;
+
+        $r1 = r0.<sun.print.PrintJob2D$MessageQ: java.util.ArrayList queue>;
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+}

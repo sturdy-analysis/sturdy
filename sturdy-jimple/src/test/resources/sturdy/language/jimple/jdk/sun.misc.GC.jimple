@@ -1,0 +1,142 @@
+public class sun.misc.GC extends java.lang.Object
+{
+    private static final long NO_TARGET;
+    private static long latencyTarget;
+    private static java.lang.Thread daemon;
+    private static java.lang.Object lock;
+
+    private void <init>()
+    {
+        sun.misc.GC r0;
+
+        r0 := @this: sun.misc.GC;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static native long maxObjectInspectionAge();
+
+    private static void setLatencyTarget(long)
+    {
+        long l0;
+        java.lang.Object $r1;
+        java.lang.Thread $r0;
+
+        l0 := @parameter0: long;
+
+        <sun.misc.GC: long latencyTarget> = l0;
+
+        $r0 = <sun.misc.GC: java.lang.Thread daemon>;
+
+        if $r0 != null goto label1;
+
+        staticinvoke <sun.misc.GC$Daemon: void create()>();
+
+        goto label2;
+
+     label1:
+        $r1 = <sun.misc.GC: java.lang.Object lock>;
+
+        virtualinvoke $r1.<java.lang.Object: void notify()>();
+
+     label2:
+        return;
+    }
+
+    public static sun.misc.GC$LatencyRequest requestLatency(long)
+    {
+        sun.misc.GC$LatencyRequest $r0;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $r0 = new sun.misc.GC$LatencyRequest;
+
+        specialinvoke $r0.<sun.misc.GC$LatencyRequest: void <init>(long,sun.misc.GC$1)>(l0, null);
+
+        return $r0;
+    }
+
+    public static long currentLatencyTarget()
+    {
+        long l0, $l2;
+        byte $b1;
+
+        l0 = <sun.misc.GC: long latencyTarget>;
+
+        $b1 = l0 cmp 9223372036854775807L;
+
+        if $b1 != 0 goto label1;
+
+        $l2 = 0L;
+
+        goto label2;
+
+     label1:
+        $l2 = l0;
+
+     label2:
+        return $l2;
+    }
+
+    static java.lang.Object access$100()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.misc.GC: java.lang.Object lock>;
+
+        return $r0;
+    }
+
+    static long access$200()
+    {
+        long $l0;
+
+        $l0 = <sun.misc.GC: long latencyTarget>;
+
+        return $l0;
+    }
+
+    static java.lang.Thread access$302(java.lang.Thread)
+    {
+        java.lang.Thread r0;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        <sun.misc.GC: java.lang.Thread daemon> = r0;
+
+        return r0;
+    }
+
+    static void access$500(long)
+    {
+        long l0;
+
+        l0 := @parameter0: long;
+
+        staticinvoke <sun.misc.GC: void setLatencyTarget(long)>(l0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.GC$LatencyLock $r0;
+
+        <sun.misc.GC: long NO_TARGET> = 9223372036854775807L;
+
+        <sun.misc.GC: long latencyTarget> = 9223372036854775807L;
+
+        <sun.misc.GC: java.lang.Thread daemon> = null;
+
+        $r0 = new sun.misc.GC$LatencyLock;
+
+        specialinvoke $r0.<sun.misc.GC$LatencyLock: void <init>(sun.misc.GC$1)>(null);
+
+        <sun.misc.GC: java.lang.Object lock> = $r0;
+
+        return;
+    }
+}

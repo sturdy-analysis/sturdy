@@ -1,0 +1,700 @@
+public final class com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper extends java.lang.Object
+{
+    private static final boolean OLD_UTF8;
+
+    private void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void writeByte(java.lang.String, java.io.OutputStream, java.util.Map) throws java.io.IOException
+    {
+        java.io.OutputStream r3;
+        byte[] $r4, r5;
+        java.util.Map r0;
+        java.lang.Object $r2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: java.util.Map;
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r5 = (byte[]) $r2;
+
+        if r5 != null goto label1;
+
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper: byte[] getStringInUtf8(java.lang.String)>(r1);
+
+        r5 = $r4;
+
+        interfaceinvoke r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+     label1:
+        virtualinvoke r3.<java.io.OutputStream: void write(byte[])>(r5);
+
+        return;
+    }
+
+    public static void writeCodePointToUtf8(int, java.io.OutputStream) throws java.io.IOException
+    {
+        byte b4, $b11, b13, b14, b15, b16;
+        int i0, $i1, $i2, $i3, $i5, i6, $i7, $i8, $i9, $i10, i12, $i18, $i20, $i22, $i24, $i25, $i27, $i28, $i30;
+        boolean $z0, $z1;
+        java.io.OutputStream r0;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.io.OutputStream;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>(i0);
+
+        if $z0 == 0 goto label02;
+
+        $i18 = (int) 55296;
+
+        if i0 < $i18 goto label01;
+
+        $i20 = (int) 56319;
+
+        if i0 <= $i20 goto label02;
+
+     label01:
+        $i22 = (int) 56320;
+
+        if i0 < $i22 goto label03;
+
+        $i24 = (int) 57343;
+
+        if i0 > $i24 goto label03;
+
+     label02:
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(63);
+
+        return;
+
+     label03:
+        $z1 = <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper: boolean OLD_UTF8>;
+
+        if $z1 == 0 goto label04;
+
+        if i0 < 65536 goto label04;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(63);
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(63);
+
+        return;
+
+     label04:
+        if i0 >= 128 goto label05;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(i0);
+
+        return;
+
+     label05:
+        if i0 >= 2048 goto label06;
+
+        b4 = 1;
+
+        b16 = 1;
+
+        b15 = 1;
+
+        b14 = 1;
+
+        goto label11;
+
+     label06:
+        if i0 >= 65536 goto label07;
+
+        b4 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        b14 = 2;
+
+        goto label11;
+
+     label07:
+        if i0 >= 2097152 goto label08;
+
+        b4 = 3;
+
+        b16 = 3;
+
+        b15 = 3;
+
+        b14 = 3;
+
+        goto label11;
+
+     label08:
+        if i0 >= 67108864 goto label09;
+
+        b4 = 4;
+
+        b16 = 4;
+
+        b15 = 4;
+
+        b14 = 4;
+
+        goto label11;
+
+     label09:
+        if i0 > 2147483647 goto label10;
+
+        b4 = 5;
+
+        b16 = 5;
+
+        b15 = 5;
+
+        b14 = 5;
+
+        goto label11;
+
+     label10:
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(63);
+
+        return;
+
+     label11:
+        $i5 = 6 * b14;
+
+        i6 = $i5;
+
+        $i7 = 6 - b16;
+
+        $i8 = 254 << $i7;
+
+        $i9 = i0 >>> $i5;
+
+        $i10 = $i8 | $i9;
+
+        $b11 = (byte) $i10;
+
+        $i25 = (int) $b11;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i25);
+
+        i12 = b15 - 1;
+
+     label12:
+        if i12 < 0 goto label13;
+
+        $i27 = (int) -6;
+
+        i6 = i6 + $i27;
+
+        $i1 = i0 >>> i6;
+
+        $i2 = $i1 & 63;
+
+        $i3 = 128 | $i2;
+
+        b13 = (byte) $i3;
+
+        $i28 = (int) b13;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i28);
+
+        $i30 = (int) -1;
+
+        i12 = i12 + $i30;
+
+        goto label12;
+
+     label13:
+        return;
+    }
+
+    public static void writeStringToUtf8(java.lang.String, java.io.OutputStream) throws java.io.IOException
+    {
+        byte b7, $b14, b16, b17, b18, b19;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i8, i9, $i10, $i11, $i12, $i13, i15, $i21, $i23, $i25, $i27, $i28, $i30, $i31, $i33;
+        java.lang.String r0;
+        java.io.OutputStream r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i6 = 0;
+
+     label01:
+        if i6 >= $i0 goto label15;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int codePointAt(int)>(i6);
+
+        $i2 = staticinvoke <java.lang.Character: int charCount(int)>($i1);
+
+        i6 = i6 + $i2;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>($i1);
+
+        if $z0 == 0 goto label03;
+
+        $i21 = (int) 55296;
+
+        if $i1 < $i21 goto label02;
+
+        $i23 = (int) 56319;
+
+        if $i1 <= $i23 goto label03;
+
+     label02:
+        $i25 = (int) 56320;
+
+        if $i1 < $i25 goto label04;
+
+        $i27 = (int) 57343;
+
+        if $i1 > $i27 goto label04;
+
+     label03:
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>(63);
+
+        goto label01;
+
+     label04:
+        $z1 = <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper: boolean OLD_UTF8>;
+
+        if $z1 == 0 goto label05;
+
+        if $i1 < 65536 goto label05;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>(63);
+
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>(63);
+
+        goto label01;
+
+     label05:
+        if $i1 >= 128 goto label06;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>($i1);
+
+        goto label01;
+
+     label06:
+        if $i1 >= 2048 goto label07;
+
+        b7 = 1;
+
+        b19 = 1;
+
+        b18 = 1;
+
+        b17 = 1;
+
+        goto label12;
+
+     label07:
+        if $i1 >= 65536 goto label08;
+
+        b7 = 2;
+
+        b19 = 2;
+
+        b18 = 2;
+
+        b17 = 2;
+
+        goto label12;
+
+     label08:
+        if $i1 >= 2097152 goto label09;
+
+        b7 = 3;
+
+        b19 = 3;
+
+        b18 = 3;
+
+        b17 = 3;
+
+        goto label12;
+
+     label09:
+        if $i1 >= 67108864 goto label10;
+
+        b7 = 4;
+
+        b19 = 4;
+
+        b18 = 4;
+
+        b17 = 4;
+
+        goto label12;
+
+     label10:
+        if $i1 > 2147483647 goto label11;
+
+        b7 = 5;
+
+        b19 = 5;
+
+        b18 = 5;
+
+        b17 = 5;
+
+        goto label12;
+
+     label11:
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>(63);
+
+        goto label01;
+
+     label12:
+        $i8 = 6 * b17;
+
+        i9 = $i8;
+
+        $i10 = 6 - b18;
+
+        $i11 = 254 << $i10;
+
+        $i12 = $i1 >>> $i8;
+
+        $i13 = $i11 | $i12;
+
+        $b14 = (byte) $i13;
+
+        $i28 = (int) $b14;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>($i28);
+
+        i15 = b19 - 1;
+
+     label13:
+        if i15 < 0 goto label14;
+
+        $i30 = (int) -6;
+
+        i9 = i9 + $i30;
+
+        $i3 = $i1 >>> i9;
+
+        $i4 = $i3 & 63;
+
+        $i5 = 128 | $i4;
+
+        b16 = (byte) $i5;
+
+        $i31 = (int) b16;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(int)>($i31);
+
+        $i33 = (int) -1;
+
+        i15 = i15 + $i33;
+
+        goto label13;
+
+     label14:
+        goto label01;
+
+     label15:
+        return;
+    }
+
+    public static byte[] getStringInUtf8(java.lang.String)
+    {
+        byte[] r1, r2, r3;
+        byte $b10, b15, $b22, b25, b26, b27, b28;
+        boolean $z0, $z1, z2, z3, z4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i11, i12, $i13, i14, $i16, i17, $i18, $i19, $i20, $i21, $i23, i24, $i30, $i32, $i34, $i36, $i38, $i40;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        z2 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        r1 = newarray (byte)[$i0];
+
+        i11 = 0;
+
+        i12 = 0;
+
+     label01:
+        if i11 >= $i0 goto label16;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int codePointAt(int)>(i11);
+
+        $i2 = staticinvoke <java.lang.Character: int charCount(int)>($i1);
+
+        i11 = i11 + $i2;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>($i1);
+
+        if $z0 == 0 goto label03;
+
+        $i30 = (int) 55296;
+
+        if $i1 < $i30 goto label02;
+
+        $i32 = (int) 56319;
+
+        if $i1 <= $i32 goto label03;
+
+     label02:
+        $i34 = (int) 56320;
+
+        if $i1 < $i34 goto label04;
+
+        $i36 = (int) 57343;
+
+        if $i1 > $i36 goto label04;
+
+     label03:
+        $i13 = i12;
+
+        i12 = i12 + 1;
+
+        r1[$i13] = 63;
+
+        goto label01;
+
+     label04:
+        $z1 = <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper: boolean OLD_UTF8>;
+
+        if $z1 == 0 goto label05;
+
+        if $i1 < 65536 goto label05;
+
+        i14 = i12 + 1;
+
+        r1[i12] = 63;
+
+        i12 = i14 + 1;
+
+        r1[i14] = 63;
+
+        goto label01;
+
+     label05:
+        if $i1 >= 128 goto label06;
+
+        $i9 = i12;
+
+        i12 = i12 + 1;
+
+        $b10 = (byte) $i1;
+
+        r1[$i9] = $b10;
+
+        goto label01;
+
+     label06:
+        if z3 != 0 goto label07;
+
+        $i8 = 6 * $i0;
+
+        r2 = newarray (byte)[$i8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r2, 0, i12);
+
+        r1 = r2;
+
+        z2 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label07:
+        if $i1 >= 2048 goto label08;
+
+        b15 = 1;
+
+        b28 = 1;
+
+        b27 = 1;
+
+        b26 = 1;
+
+        goto label13;
+
+     label08:
+        if $i1 >= 65536 goto label09;
+
+        b15 = 2;
+
+        b28 = 2;
+
+        b27 = 2;
+
+        b26 = 2;
+
+        goto label13;
+
+     label09:
+        if $i1 >= 2097152 goto label10;
+
+        b15 = 3;
+
+        b28 = 3;
+
+        b27 = 3;
+
+        b26 = 3;
+
+        goto label13;
+
+     label10:
+        if $i1 >= 67108864 goto label11;
+
+        b15 = 4;
+
+        b28 = 4;
+
+        b27 = 4;
+
+        b26 = 4;
+
+        goto label13;
+
+     label11:
+        if $i1 > 2147483647 goto label12;
+
+        b15 = 5;
+
+        b28 = 5;
+
+        b27 = 5;
+
+        b26 = 5;
+
+        goto label13;
+
+     label12:
+        $i3 = i12;
+
+        i12 = i12 + 1;
+
+        r1[$i3] = 63;
+
+        goto label01;
+
+     label13:
+        $i16 = 6 * b27;
+
+        i17 = $i16;
+
+        $i18 = 6 - b28;
+
+        $i19 = 254 << $i18;
+
+        $i20 = $i1 >>> $i16;
+
+        $i21 = $i19 | $i20;
+
+        $b22 = (byte) $i21;
+
+        $i23 = i12;
+
+        i12 = i12 + 1;
+
+        r1[$i23] = $b22;
+
+        i24 = b26 - 1;
+
+     label14:
+        if i24 < 0 goto label15;
+
+        $i38 = (int) -6;
+
+        i17 = i17 + $i38;
+
+        $i4 = $i1 >>> i17;
+
+        $i5 = $i4 & 63;
+
+        $i6 = 128 | $i5;
+
+        b25 = (byte) $i6;
+
+        $i7 = i12;
+
+        i12 = i12 + 1;
+
+        r1[$i7] = b25;
+
+        $i40 = (int) -1;
+
+        i24 = i24 + $i40;
+
+        goto label14;
+
+     label15:
+        goto label01;
+
+     label16:
+        if z4 == 0 goto label17;
+
+        r3 = newarray (byte)[i12];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r3, 0, i12);
+
+        r1 = r3;
+
+     label17:
+        return r1;
+    }
+
+    public static java.lang.Boolean lambda$static$0()
+    {
+        java.lang.Boolean $r0;
+        boolean $z0;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean getBoolean(java.lang.String)>("com.sun.org.apache.xml.internal.security.c14n.oldUtf8");
+
+        $r0 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Boolean $r2;
+        java.lang.Object $r1;
+        java.security.PrivilegedAction $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper$lambda_static_0__17: java.security.PrivilegedAction bootstrap$()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        <com.sun.org.apache.xml.internal.security.c14n.implementations.UtfHelpper: boolean OLD_UTF8> = $z0;
+
+        return;
+    }
+}

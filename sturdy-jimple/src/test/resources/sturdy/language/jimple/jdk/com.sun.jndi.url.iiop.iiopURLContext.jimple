@@ -1,0 +1,119 @@
+public class com.sun.jndi.url.iiop.iiopURLContext extends com.sun.jndi.toolkit.url.GenericURLContext
+{
+
+    void <init>(java.util.Hashtable)
+    {
+        java.util.Hashtable r1;
+        com.sun.jndi.url.iiop.iiopURLContext r0;
+
+        r0 := @this: com.sun.jndi.url.iiop.iiopURLContext;
+
+        r1 := @parameter0: java.util.Hashtable;
+
+        specialinvoke r0.<com.sun.jndi.toolkit.url.GenericURLContext: void <init>(java.util.Hashtable)>(r1);
+
+        return;
+    }
+
+    protected javax.naming.spi.ResolveResult getRootURLContext(java.lang.String, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.spi.ResolveResult $r2;
+        java.lang.String r0;
+        java.util.Hashtable r1;
+        com.sun.jndi.url.iiop.iiopURLContext r3;
+
+        r3 := @this: com.sun.jndi.url.iiop.iiopURLContext;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Hashtable;
+
+        $r2 = staticinvoke <com.sun.jndi.url.iiop.iiopURLContextFactory: javax.naming.spi.ResolveResult getUsingURLIgnoreRest(java.lang.String,java.util.Hashtable)>(r0, r1);
+
+        return $r2;
+    }
+
+    protected javax.naming.Name getURLSuffix(java.lang.String, java.lang.String) throws javax.naming.NamingException
+    {
+        java.lang.String r0, $r7, $r12, r14;
+        com.sun.jndi.cosnaming.CorbanameUrl $r8;
+        boolean $z0, $z1, $z2;
+        java.net.MalformedURLException $r3, $r10;
+        javax.naming.Name $r2, $r9;
+        javax.naming.InvalidNameException $r11;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        com.sun.jndi.cosnaming.IiopUrl $r1;
+        com.sun.jndi.url.iiop.iiopURLContext r13;
+
+        r13 := @this: com.sun.jndi.url.iiop.iiopURLContext;
+
+        r14 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("iiop://");
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("iiopname://");
+
+        if $z1 == 0 goto label4;
+
+     label2:
+        $r1 = new com.sun.jndi.cosnaming.IiopUrl;
+
+        specialinvoke $r1.<com.sun.jndi.cosnaming.IiopUrl: void <init>(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke $r1.<com.sun.jndi.cosnaming.IiopUrl: javax.naming.Name getCosName()>();
+
+     label3:
+        return $r2;
+
+     label4:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("corbaname:");
+
+        if $z2 == 0 goto label6;
+
+        $r8 = new com.sun.jndi.cosnaming.CorbanameUrl;
+
+        specialinvoke $r8.<com.sun.jndi.cosnaming.CorbanameUrl: void <init>(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.cosnaming.CorbanameUrl: javax.naming.Name getCosName()>();
+
+     label5:
+        return $r9;
+
+     label6:
+        $r3 = new java.net.MalformedURLException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not a valid URL: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.net.MalformedURLException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.naming.InvalidNameException;
+
+        $r12 = virtualinvoke $r10.<java.net.MalformedURLException: java.lang.String getMessage()>();
+
+        specialinvoke $r11.<javax.naming.InvalidNameException: void <init>(java.lang.String)>($r12);
+
+        throw $r11;
+
+        catch java.net.MalformedURLException from label1 to label3 with label7;
+        catch java.net.MalformedURLException from label4 to label5 with label7;
+        catch java.net.MalformedURLException from label6 to label7 with label7;
+    }
+}

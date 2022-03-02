@@ -1,0 +1,311 @@
+public final class sun.security.provider.certpath.ssl.SSLServerCertStore extends java.security.cert.CertStoreSpi
+{
+    private final java.net.URI uri;
+    private static final sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager;
+    private static final javax.net.ssl.SSLSocketFactory socketFactory;
+    private static final javax.net.ssl.HostnameVerifier hostnameVerifier;
+
+    void <init>(java.net.URI) throws java.security.InvalidAlgorithmParameterException
+    {
+        sun.security.provider.certpath.ssl.SSLServerCertStore r0;
+        java.net.URI r1;
+
+        r0 := @this: sun.security.provider.certpath.ssl.SSLServerCertStore;
+
+        r1 := @parameter0: java.net.URI;
+
+        specialinvoke r0.<java.security.cert.CertStoreSpi: void <init>(java.security.cert.CertStoreParameters)>(null);
+
+        r0.<sun.security.provider.certpath.ssl.SSLServerCertStore: java.net.URI uri> = r1;
+
+        return;
+    }
+
+    public java.util.Collection engineGetCertificates(java.security.cert.CertSelector) throws java.security.cert.CertStoreException
+    {
+        java.lang.Throwable $r18, $r19;
+        java.net.URL $r2;
+        java.net.URLConnection $r3;
+        java.net.URI $r1;
+        sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager $r9, $r10, $r14, $r20, $r22, $r23, $r26;
+        javax.net.ssl.HostnameVerifier $r8;
+        boolean $z0, $z1;
+        javax.net.ssl.HttpsURLConnection r6;
+        java.util.Set $r4;
+        java.io.IOException $r16, $r21;
+        java.security.cert.CertSelector r12;
+        javax.net.ssl.SSLSocketFactory $r5, $r7;
+        java.security.cert.CertStoreException $r15, $r17;
+        java.util.List $r11, $r13, $r24, $r25;
+        sun.security.provider.certpath.ssl.SSLServerCertStore r0;
+
+        r0 := @this: sun.security.provider.certpath.ssl.SSLServerCertStore;
+
+        r12 := @parameter0: java.security.cert.CertSelector;
+
+     label01:
+        $r1 = r0.<sun.security.provider.certpath.ssl.SSLServerCertStore: java.net.URI uri>;
+
+        $r2 = virtualinvoke $r1.<java.net.URI: java.net.URL toURL()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $z0 = $r3 instanceof javax.net.ssl.HttpsURLConnection;
+
+        if $z0 == 0 goto label14;
+
+        $r5 = <sun.security.provider.certpath.ssl.SSLServerCertStore: javax.net.ssl.SSLSocketFactory socketFactory>;
+
+        if $r5 != null goto label02;
+
+        $r15 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r15.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("No initialized SSLSocketFactory");
+
+        throw $r15;
+
+     label02:
+        r6 = (javax.net.ssl.HttpsURLConnection) $r3;
+
+        $r7 = <sun.security.provider.certpath.ssl.SSLServerCertStore: javax.net.ssl.SSLSocketFactory socketFactory>;
+
+        virtualinvoke r6.<javax.net.ssl.HttpsURLConnection: void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)>($r7);
+
+        $r8 = <sun.security.provider.certpath.ssl.SSLServerCertStore: javax.net.ssl.HostnameVerifier hostnameVerifier>;
+
+        virtualinvoke r6.<javax.net.ssl.HttpsURLConnection: void setHostnameVerifier(javax.net.ssl.HostnameVerifier)>($r8);
+
+        $r9 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        entermonitor $r9;
+
+     label03:
+        virtualinvoke r6.<javax.net.ssl.HttpsURLConnection: void connect()>();
+
+        $r10 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        $r11 = staticinvoke <sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: java.util.List access$100(sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager)>($r10);
+
+        $r13 = staticinvoke <sun.security.provider.certpath.ssl.SSLServerCertStore: java.util.List getMatchingCerts(java.util.List,java.security.cert.CertSelector)>($r11, r12);
+
+     label04:
+        $r14 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        virtualinvoke $r14.<sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: void cleanup()>();
+
+        exitmonitor $r9;
+
+     label05:
+        return $r13;
+
+     label06:
+        $r21 := @caughtexception;
+
+        $r22 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        $z1 = staticinvoke <sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: boolean access$200(sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager)>($r22);
+
+        if $z1 == 0 goto label09;
+
+        $r23 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        $r24 = staticinvoke <sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: java.util.List access$100(sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager)>($r23);
+
+        $r25 = staticinvoke <sun.security.provider.certpath.ssl.SSLServerCertStore: java.util.List getMatchingCerts(java.util.List,java.security.cert.CertSelector)>($r24, r12);
+
+     label07:
+        $r26 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        virtualinvoke $r26.<sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: void cleanup()>();
+
+        exitmonitor $r9;
+
+     label08:
+        return $r25;
+
+     label09:
+        throw $r21;
+
+     label10:
+        $r19 := @caughtexception;
+
+     label11:
+        $r20 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        virtualinvoke $r20.<sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: void cleanup()>();
+
+        throw $r19;
+
+     label12:
+        $r18 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label13:
+        throw $r18;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r16 := @caughtexception;
+
+        $r17 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r17.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r16);
+
+        throw $r17;
+
+     label16:
+        $r4 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r4;
+
+        catch java.io.IOException from label03 to label04 with label06;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label03 to label05 with label12;
+        catch java.lang.Throwable from label06 to label08 with label12;
+        catch java.lang.Throwable from label09 to label13 with label12;
+        catch java.io.IOException from label01 to label05 with label15;
+        catch java.io.IOException from label06 to label08 with label15;
+        catch java.io.IOException from label09 to label14 with label15;
+    }
+
+    private static java.util.List getMatchingCerts(java.util.List, java.security.cert.CertSelector)
+    {
+        java.security.cert.X509Certificate r5;
+        java.util.Iterator $r3;
+        java.security.cert.CertSelector r0;
+        java.util.ArrayList $r1;
+        java.util.List r2;
+        int $i0;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.util.List;
+
+        r0 := @parameter1: java.security.cert.CertSelector;
+
+        if r0 != null goto label1;
+
+        return r2;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r3 = interfaceinvoke r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.security.cert.X509Certificate) $r4;
+
+        $z1 = interfaceinvoke r0.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r5);
+
+        if $z1 == 0 goto label3;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        return $r1;
+    }
+
+    public java.util.Collection engineGetCRLs(java.security.cert.CRLSelector) throws java.security.cert.CertStoreException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.provider.certpath.ssl.SSLServerCertStore r1;
+        java.security.cert.CRLSelector r2;
+
+        r1 := @this: sun.security.provider.certpath.ssl.SSLServerCertStore;
+
+        r2 := @parameter0: java.security.cert.CRLSelector;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    static java.security.cert.CertStore getInstance(java.net.URI) throws java.security.InvalidAlgorithmParameterException
+    {
+        sun.security.provider.certpath.ssl.SSLServerCertStore $r1;
+        java.net.URI r2;
+        sun.security.provider.certpath.ssl.SSLServerCertStore$CS $r0;
+
+        r2 := @parameter0: java.net.URI;
+
+        $r0 = new sun.security.provider.certpath.ssl.SSLServerCertStore$CS;
+
+        $r1 = new sun.security.provider.certpath.ssl.SSLServerCertStore;
+
+        specialinvoke $r1.<sun.security.provider.certpath.ssl.SSLServerCertStore: void <init>(java.net.URI)>(r2);
+
+        specialinvoke $r0.<sun.security.provider.certpath.ssl.SSLServerCertStore$CS: void <init>(java.security.cert.CertStoreSpi,java.security.Provider,java.lang.String,java.security.cert.CertStoreParameters)>($r1, null, "SSLServer", null);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        javax.net.ssl.SSLContext $r2;
+        java.security.GeneralSecurityException $r5;
+        javax.net.ssl.TrustManager[] $r3;
+        sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager $r0, $r4;
+        sun.security.provider.certpath.ssl.SSLServerCertStore$1 $r1;
+        javax.net.ssl.SSLSocketFactory r6;
+
+        $r0 = new sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager;
+
+        specialinvoke $r0.<sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager: void <init>(sun.security.provider.certpath.ssl.SSLServerCertStore$1)>(null);
+
+        <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager> = $r0;
+
+        $r1 = new sun.security.provider.certpath.ssl.SSLServerCertStore$1;
+
+        specialinvoke $r1.<sun.security.provider.certpath.ssl.SSLServerCertStore$1: void <init>()>();
+
+        <sun.security.provider.certpath.ssl.SSLServerCertStore: javax.net.ssl.HostnameVerifier hostnameVerifier> = $r1;
+
+     label1:
+        $r2 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("SSL");
+
+        $r3 = newarray (javax.net.ssl.TrustManager)[1];
+
+        $r4 = <sun.security.provider.certpath.ssl.SSLServerCertStore: sun.security.provider.certpath.ssl.SSLServerCertStore$GetChainTrustManager trustManager>;
+
+        $r3[0] = $r4;
+
+        virtualinvoke $r2.<javax.net.ssl.SSLContext: void init(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom)>(null, $r3, null);
+
+        r6 = virtualinvoke $r2.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        r6 = null;
+
+     label4:
+        <sun.security.provider.certpath.ssl.SSLServerCertStore: javax.net.ssl.SSLSocketFactory socketFactory> = r6;
+
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+}

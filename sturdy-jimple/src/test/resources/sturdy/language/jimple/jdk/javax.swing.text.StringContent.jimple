@@ -1,0 +1,693 @@
+public final class javax.swing.text.StringContent extends java.lang.Object implements javax.swing.text.AbstractDocument$Content, java.io.Serializable
+{
+    private static final char[] empty;
+    private char[] data;
+    private int count;
+    transient java.util.Vector marks;
+
+    public void <init>()
+    {
+        javax.swing.text.StringContent r0;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        specialinvoke r0.<javax.swing.text.StringContent: void <init>(int)>(10);
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        javax.swing.text.StringContent r0;
+        int i0;
+        char[] $r1, $r2;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if i0 >= 1 goto label1;
+
+        i0 = 1;
+
+     label1:
+        $r1 = newarray (char)[i0];
+
+        r0.<javax.swing.text.StringContent: char[] data> = $r1;
+
+        $r2 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        $r2[0] = 10;
+
+        r0.<javax.swing.text.StringContent: int count> = 1;
+
+        return;
+    }
+
+    public int length()
+    {
+        int $i0;
+        javax.swing.text.StringContent r0;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        $i0 = r0.<javax.swing.text.StringContent: int count>;
+
+        return $i0;
+    }
+
+    public javax.swing.undo.UndoableEdit insertString(int, java.lang.String) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.StringContent$InsertUndo $r5;
+        javax.swing.text.BadLocationException $r1;
+        java.util.Vector $r4;
+        javax.swing.text.StringContent r0;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        char[] $r3;
+        java.lang.String r2;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.String;
+
+        $i1 = r0.<javax.swing.text.StringContent: int count>;
+
+        if i0 >= $i1 goto label1;
+
+        if i0 >= 0 goto label2;
+
+     label1:
+        $r1 = new javax.swing.text.BadLocationException;
+
+        $i2 = r0.<javax.swing.text.StringContent: int count>;
+
+        specialinvoke $r1.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid location", $i2);
+
+        throw $r1;
+
+     label2:
+        $r3 = virtualinvoke r2.<java.lang.String: char[] toCharArray()>();
+
+        $i3 = lengthof $r3;
+
+        virtualinvoke r0.<javax.swing.text.StringContent: void replace(int,int,char[],int,int)>(i0, 0, $r3, 0, $i3);
+
+        $r4 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        if $r4 == null goto label3;
+
+        $i5 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        virtualinvoke r0.<javax.swing.text.StringContent: void updateMarksForInsert(int,int)>(i0, $i5);
+
+     label3:
+        $r5 = new javax.swing.text.StringContent$InsertUndo;
+
+        $i4 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        specialinvoke $r5.<javax.swing.text.StringContent$InsertUndo: void <init>(javax.swing.text.StringContent,int,int)>(r0, i0, $i4);
+
+        return $r5;
+    }
+
+    public javax.swing.undo.UndoableEdit remove(int, int) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.StringContent$RemoveUndo $r2;
+        javax.swing.text.BadLocationException $r5;
+        java.util.Vector $r4;
+        javax.swing.text.StringContent r0;
+        int i0, i1, $i2, $i3, $i4;
+        char[] $r3;
+        java.lang.String $r1;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = i0 + i1;
+
+        $i2 = r0.<javax.swing.text.StringContent: int count>;
+
+        if $i3 < $i2 goto label1;
+
+        $r5 = new javax.swing.text.BadLocationException;
+
+        $i4 = r0.<javax.swing.text.StringContent: int count>;
+
+        specialinvoke $r5.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid range", $i4);
+
+        throw $r5;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.swing.text.StringContent: java.lang.String getString(int,int)>(i0, i1);
+
+        $r2 = new javax.swing.text.StringContent$RemoveUndo;
+
+        specialinvoke $r2.<javax.swing.text.StringContent$RemoveUndo: void <init>(javax.swing.text.StringContent,int,java.lang.String)>(r0, i0, $r1);
+
+        $r3 = <javax.swing.text.StringContent: char[] empty>;
+
+        virtualinvoke r0.<javax.swing.text.StringContent: void replace(int,int,char[],int,int)>(i0, i1, $r3, 0, 0);
+
+        $r4 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        if $r4 == null goto label2;
+
+        virtualinvoke r0.<javax.swing.text.StringContent: void updateMarksForRemove(int,int)>(i0, i1);
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.String getString(int, int) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.BadLocationException $r3;
+        javax.swing.text.StringContent r0;
+        int i0, i1, $i2, $i3, $i4;
+        char[] $r2;
+        java.lang.String $r1;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = i0 + i1;
+
+        $i2 = r0.<javax.swing.text.StringContent: int count>;
+
+        if $i3 <= $i2 goto label1;
+
+        $r3 = new javax.swing.text.BadLocationException;
+
+        $i4 = r0.<javax.swing.text.StringContent: int count>;
+
+        specialinvoke $r3.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid range", $i4);
+
+        throw $r3;
+
+     label1:
+        $r1 = new java.lang.String;
+
+        $r2 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        specialinvoke $r1.<java.lang.String: void <init>(char[],int,int)>($r2, i0, i1);
+
+        return $r1;
+    }
+
+    public void getChars(int, int, javax.swing.text.Segment) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.BadLocationException $r3;
+        javax.swing.text.StringContent r0;
+        int i0, i1, $i2, $i3, $i4;
+        char[] $r2;
+        javax.swing.text.Segment r1;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.text.Segment;
+
+        $i3 = i0 + i1;
+
+        $i2 = r0.<javax.swing.text.StringContent: int count>;
+
+        if $i3 <= $i2 goto label1;
+
+        $r3 = new javax.swing.text.BadLocationException;
+
+        $i4 = r0.<javax.swing.text.StringContent: int count>;
+
+        specialinvoke $r3.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid location", $i4);
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        r1.<javax.swing.text.Segment: char[] array> = $r2;
+
+        r1.<javax.swing.text.Segment: int offset> = i0;
+
+        r1.<javax.swing.text.Segment: int count> = i1;
+
+        return;
+    }
+
+    public javax.swing.text.Position createPosition(int) throws javax.swing.text.BadLocationException
+    {
+        java.util.Vector $r1, $r3;
+        javax.swing.text.StringContent$StickyPosition $r2;
+        javax.swing.text.StringContent r0;
+        int i0;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.StringContent: java.util.Vector marks> = $r3;
+
+     label1:
+        $r2 = new javax.swing.text.StringContent$StickyPosition;
+
+        specialinvoke $r2.<javax.swing.text.StringContent$StickyPosition: void <init>(javax.swing.text.StringContent,int)>(r0, i0);
+
+        return $r2;
+    }
+
+    void replace(int, int, char[], int, int)
+    {
+        javax.swing.text.StringContent r0;
+        int i0, i1, i2, i3, i4, $i5, i6, i7, $i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18;
+        char[] $r1, $r2, $r3, r4, $r5, $r6, r7, $r8, $r9;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i3 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r4 := @parameter2: char[];
+
+        i11 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        i2 = i0 - i1;
+
+        i4 = i3 + i1;
+
+        $i5 = r0.<javax.swing.text.StringContent: int count>;
+
+        i6 = $i5 - i4;
+
+        i7 = i4 + i2;
+
+        $i8 = r0.<javax.swing.text.StringContent: int count>;
+
+        $i10 = $i8 + i2;
+
+        $r1 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        $i9 = lengthof $r1;
+
+        if $i10 < $i9 goto label1;
+
+        $r6 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        $i14 = lengthof $r6;
+
+        $i17 = 2 * $i14;
+
+        $i15 = r0.<javax.swing.text.StringContent: int count>;
+
+        $i16 = $i15 + i2;
+
+        $i18 = staticinvoke <java.lang.Math: int max(int,int)>($i17, $i16);
+
+        r7 = newarray (char)[$i18];
+
+        $r8 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 0, r7, 0, i3);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, i11, r7, i3, i0);
+
+        $r9 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, i4, r7, i7, i6);
+
+        r0.<javax.swing.text.StringContent: char[] data> = r7;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        $r2 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, i4, $r2, i7, i6);
+
+        $r5 = r0.<javax.swing.text.StringContent: char[] data>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, i11, $r5, i3, i0);
+
+     label2:
+        $i12 = r0.<javax.swing.text.StringContent: int count>;
+
+        $i13 = $i12 + i2;
+
+        r0.<javax.swing.text.StringContent: int count> = $i13;
+
+        return;
+    }
+
+    void resize(int)
+    {
+        javax.swing.text.StringContent r1;
+        int i0, $i1, $i2;
+        char[] r0, $r2;
+
+        r1 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (char)[i0];
+
+        $r2 = r1.<javax.swing.text.StringContent: char[] data>;
+
+        $i1 = r1.<javax.swing.text.StringContent: int count>;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r0, 0, $i2);
+
+        r1.<javax.swing.text.StringContent: char[] data> = r0;
+
+        return;
+    }
+
+    synchronized void updateMarksForInsert(int, int)
+    {
+        java.util.Vector $r1, $r2, $r5;
+        javax.swing.text.StringContent r0;
+        int $i0, i1, $i2, $i3, i4, i5, i6, $i8, $i10;
+        boolean $z0;
+        java.lang.Object $r3;
+        javax.swing.text.StringContent$PosRec r4;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i4 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i4 != 0 goto label1;
+
+        i4 = 1;
+
+     label1:
+        $r1 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        i5 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i6 = 0;
+
+     label2:
+        if i6 >= i5 goto label5;
+
+        $r2 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i6);
+
+        r4 = (javax.swing.text.StringContent$PosRec) $r3;
+
+        $z0 = r4.<javax.swing.text.StringContent$PosRec: boolean unused>;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        virtualinvoke $r5.<java.util.Vector: void removeElementAt(int)>(i6);
+
+        $i8 = (int) -1;
+
+        i6 = i6 + $i8;
+
+        $i10 = (int) -1;
+
+        i5 = i5 + $i10;
+
+        goto label4;
+
+     label3:
+        $i0 = r4.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        if $i0 < i4 goto label4;
+
+        $i2 = r4.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        $i3 = $i2 + i1;
+
+        r4.<javax.swing.text.StringContent$PosRec: int offset> = $i3;
+
+     label4:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    synchronized void updateMarksForRemove(int, int)
+    {
+        java.util.Vector $r1, $r2, $r5;
+        javax.swing.text.StringContent r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i10, $i12;
+        boolean $z0;
+        java.lang.Object $r3;
+        javax.swing.text.StringContent$PosRec r4;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        i7 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i7 goto label5;
+
+        $r2 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i8);
+
+        r4 = (javax.swing.text.StringContent$PosRec) $r3;
+
+        $z0 = r4.<javax.swing.text.StringContent$PosRec: boolean unused>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        virtualinvoke $r5.<java.util.Vector: void removeElementAt(int)>(i8);
+
+        $i10 = (int) -1;
+
+        i8 = i8 + $i10;
+
+        $i12 = (int) -1;
+
+        i7 = i7 + $i12;
+
+        goto label4;
+
+     label2:
+        $i3 = r4.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        $i2 = i0 + i1;
+
+        if $i3 < $i2 goto label3;
+
+        $i5 = r4.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        $i6 = $i5 - i1;
+
+        r4.<javax.swing.text.StringContent$PosRec: int offset> = $i6;
+
+        goto label4;
+
+     label3:
+        $i4 = r4.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        if $i4 < i0 goto label4;
+
+        r4.<javax.swing.text.StringContent$PosRec: int offset> = i0;
+
+     label4:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    protected java.util.Vector getPositionsInRange(java.util.Vector, int, int)
+    {
+        javax.swing.text.StringContent$UndoPosRef $r11;
+        java.util.Vector $r1, r2, r3, $r4, $r8, $r9, $r10;
+        javax.swing.text.StringContent r0;
+        int i0, i1, i2, $i3, $i4, i5, i6, $i8, $i10;
+        boolean $z0;
+        java.lang.Object $r5;
+        javax.swing.text.StringContent$PosRec r6;
+
+        r0 := @this: javax.swing.text.StringContent;
+
+        r2 := @parameter0: java.util.Vector;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        i5 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i2 = i0 + i1;
+
+        if r2 != null goto label1;
+
+        $r10 = new java.util.Vector;
+
+        $r9 = $r10;
+
+        specialinvoke $r10.<java.util.Vector: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r9 = r2;
+
+     label2:
+        r3 = $r9;
+
+        i6 = 0;
+
+     label3:
+        if i6 >= i5 goto label6;
+
+        $r4 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i6);
+
+        r6 = (javax.swing.text.StringContent$PosRec) $r5;
+
+        $z0 = r6.<javax.swing.text.StringContent$PosRec: boolean unused>;
+
+        if $z0 == 0 goto label4;
+
+        $r8 = r0.<javax.swing.text.StringContent: java.util.Vector marks>;
+
+        virtualinvoke $r8.<java.util.Vector: void removeElementAt(int)>(i6);
+
+        $i8 = (int) -1;
+
+        i6 = i6 + $i8;
+
+        $i10 = (int) -1;
+
+        i5 = i5 + $i10;
+
+        goto label5;
+
+     label4:
+        $i3 = r6.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        if $i3 < i0 goto label5;
+
+        $i4 = r6.<javax.swing.text.StringContent$PosRec: int offset>;
+
+        if $i4 > i2 goto label5;
+
+        $r11 = new javax.swing.text.StringContent$UndoPosRef;
+
+        specialinvoke $r11.<javax.swing.text.StringContent$UndoPosRef: void <init>(javax.swing.text.StringContent,javax.swing.text.StringContent$PosRec)>(r0, r6);
+
+        virtualinvoke r3.<java.util.Vector: void addElement(java.lang.Object)>($r11);
+
+     label5:
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label6:
+        return r3;
+    }
+
+    protected void updateUndoPositions(java.util.Vector)
+    {
+        javax.swing.text.StringContent$UndoPosRef r2;
+        java.util.Vector r0;
+        javax.swing.text.StringContent r4;
+        int $i0, i1, $i3;
+        java.lang.Object $r1;
+        javax.swing.text.StringContent$PosRec $r3;
+        boolean $z0;
+
+        r4 := @this: javax.swing.text.StringContent;
+
+        r0 := @parameter0: java.util.Vector;
+
+        $i0 = virtualinvoke r0.<java.util.Vector: int size()>();
+
+        i1 = $i0 - 1;
+
+     label1:
+        if i1 < 0 goto label4;
+
+        $r1 = virtualinvoke r0.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        r2 = (javax.swing.text.StringContent$UndoPosRef) $r1;
+
+        $r3 = r2.<javax.swing.text.StringContent$UndoPosRef: javax.swing.text.StringContent$PosRec rec>;
+
+        $z0 = $r3.<javax.swing.text.StringContent$PosRec: boolean unused>;
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<java.util.Vector: void removeElementAt(int)>(i1);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r2.<javax.swing.text.StringContent$UndoPosRef: void resetLocation()>();
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r0;
+
+        $r0 = newarray (char)[0];
+
+        <javax.swing.text.StringContent: char[] empty> = $r0;
+
+        return;
+    }
+}

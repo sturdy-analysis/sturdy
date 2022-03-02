@@ -1,0 +1,284 @@
+abstract class java.awt.ModalEventFilter extends java.lang.Object implements java.awt.EventFilter
+{
+    protected java.awt.Dialog modalDialog;
+    protected boolean disabled;
+
+    protected void <init>(java.awt.Dialog)
+    {
+        java.awt.Dialog r1;
+        java.awt.ModalEventFilter r0;
+
+        r0 := @this: java.awt.ModalEventFilter;
+
+        r1 := @parameter0: java.awt.Dialog;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog> = r1;
+
+        r0.<java.awt.ModalEventFilter: boolean disabled> = 0;
+
+        return;
+    }
+
+    java.awt.Dialog getModalDialog()
+    {
+        java.awt.Dialog $r1;
+        java.awt.ModalEventFilter r0;
+
+        r0 := @this: java.awt.ModalEventFilter;
+
+        $r1 = r0.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        return $r1;
+    }
+
+    public java.awt.EventFilter$FilterAction acceptEvent(java.awt.AWTEvent)
+    {
+        java.awt.Window $r4;
+        java.awt.EventFilter$FilterAction $r1, $r5, $r8;
+        java.awt.Component r7;
+        java.awt.AWTEvent r3;
+        int $i0;
+        java.lang.Object $r6;
+        java.awt.Dialog $r2;
+        java.awt.ModalEventFilter r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: java.awt.ModalEventFilter;
+
+        r3 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0.<java.awt.ModalEventFilter: boolean disabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        $z1 = virtualinvoke $r2.<java.awt.Dialog: boolean isVisible()>();
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        $r1 = <java.awt.EventFilter$FilterAction: java.awt.EventFilter$FilterAction ACCEPT>;
+
+        return $r1;
+
+     label2:
+        $i0 = virtualinvoke r3.<java.awt.AWTEvent: int getID()>();
+
+        if $i0 < 500 goto label3;
+
+        if $i0 <= 507 goto label5;
+
+     label3:
+        if $i0 < 1001 goto label4;
+
+        if $i0 <= 1001 goto label5;
+
+     label4:
+        if $i0 != 201 goto label9;
+
+     label5:
+        $r6 = virtualinvoke r3.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $z4 = $r6 instanceof sun.awt.ModalExclude;
+
+        if $z4 == 0 goto label6;
+
+        goto label9;
+
+     label6:
+        $z2 = $r6 instanceof java.awt.Component;
+
+        if $z2 == 0 goto label9;
+
+        r7 = (java.awt.Component) $r6;
+
+     label7:
+        if r7 == null goto label8;
+
+        $z3 = r7 instanceof java.awt.Window;
+
+        if $z3 != 0 goto label8;
+
+        r7 = virtualinvoke r7.<java.awt.Component: java.awt.Container getParent_NoClientCode()>();
+
+        goto label7;
+
+     label8:
+        if r7 == null goto label9;
+
+        $r4 = (java.awt.Window) r7;
+
+        $r5 = virtualinvoke r0.<java.awt.ModalEventFilter: java.awt.EventFilter$FilterAction acceptWindow(java.awt.Window)>($r4);
+
+        return $r5;
+
+     label9:
+        $r8 = <java.awt.EventFilter$FilterAction: java.awt.EventFilter$FilterAction ACCEPT>;
+
+        return $r8;
+    }
+
+    protected abstract java.awt.EventFilter$FilterAction acceptWindow(java.awt.Window);
+
+    void disable()
+    {
+        java.awt.ModalEventFilter r0;
+
+        r0 := @this: java.awt.ModalEventFilter;
+
+        r0.<java.awt.ModalEventFilter: boolean disabled> = 1;
+
+        return;
+    }
+
+    int compareTo(java.awt.ModalEventFilter)
+    {
+        java.awt.Dialog$ModalityType $r5, $r6;
+        int $i0, $i2, $i4;
+        java.awt.Container r9, r10;
+        java.awt.Dialog $r1, $r3, $r4, $r7, $r8, r11, r12;
+        java.awt.ModalEventFilter r0, r2;
+
+        r2 := @this: java.awt.ModalEventFilter;
+
+        r0 := @parameter0: java.awt.ModalEventFilter;
+
+        $r1 = virtualinvoke r0.<java.awt.ModalEventFilter: java.awt.Dialog getModalDialog()>();
+
+        r9 = r2.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+     label01:
+        if r9 == null goto label03;
+
+        if r9 != $r1 goto label02;
+
+        return 1;
+
+     label02:
+        r9 = virtualinvoke r9.<java.awt.Component: java.awt.Container getParent_NoClientCode()>();
+
+        goto label01;
+
+     label03:
+        r10 = $r1;
+
+     label04:
+        if r10 == null goto label06;
+
+        $r8 = r2.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        if r10 != $r8 goto label05;
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+     label05:
+        r10 = virtualinvoke r10.<java.awt.Component: java.awt.Container getParent_NoClientCode()>();
+
+        goto label04;
+
+     label06:
+        $r3 = r2.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        r11 = virtualinvoke $r3.<java.awt.Dialog: java.awt.Dialog getModalBlocker()>();
+
+     label07:
+        if r11 == null goto label09;
+
+        if r11 != $r1 goto label08;
+
+        $i4 = (int) -1;
+
+        return $i4;
+
+     label08:
+        r11 = virtualinvoke r11.<java.awt.Dialog: java.awt.Dialog getModalBlocker()>();
+
+        goto label07;
+
+     label09:
+        r12 = virtualinvoke $r1.<java.awt.Dialog: java.awt.Dialog getModalBlocker()>();
+
+     label10:
+        if r12 == null goto label12;
+
+        $r7 = r2.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        if r12 != $r7 goto label11;
+
+        return 1;
+
+     label11:
+        r12 = virtualinvoke r12.<java.awt.Dialog: java.awt.Dialog getModalBlocker()>();
+
+        goto label10;
+
+     label12:
+        $r4 = r2.<java.awt.ModalEventFilter: java.awt.Dialog modalDialog>;
+
+        $r5 = virtualinvoke $r4.<java.awt.Dialog: java.awt.Dialog$ModalityType getModalityType()>();
+
+        $r6 = virtualinvoke $r1.<java.awt.Dialog: java.awt.Dialog$ModalityType getModalityType()>();
+
+        $i0 = virtualinvoke $r5.<java.awt.Dialog$ModalityType: int compareTo(java.lang.Enum)>($r6);
+
+        return $i0;
+    }
+
+    static java.awt.ModalEventFilter createFilterForDialog(java.awt.Dialog)
+    {
+        java.awt.ModalEventFilter$DocumentModalEventFilter $r5;
+        java.awt.Dialog$ModalityType $r2;
+        java.awt.ModalEventFilter$ToolkitModalEventFilter $r3;
+        int[] $r1;
+        java.awt.ModalEventFilter$ApplicationModalEventFilter $r4;
+        int $i0, $i1;
+        java.awt.Dialog r0;
+
+        r0 := @parameter0: java.awt.Dialog;
+
+        $r1 = <java.awt.ModalEventFilter$1: int[] $SwitchMap$java$awt$Dialog$ModalityType>;
+
+        $r2 = virtualinvoke r0.<java.awt.Dialog: java.awt.Dialog$ModalityType getModalityType()>();
+
+        $i0 = virtualinvoke $r2.<java.awt.Dialog$ModalityType: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r5 = new java.awt.ModalEventFilter$DocumentModalEventFilter;
+
+        specialinvoke $r5.<java.awt.ModalEventFilter$DocumentModalEventFilter: void <init>(java.awt.Dialog)>(r0);
+
+        return $r5;
+
+     label2:
+        $r4 = new java.awt.ModalEventFilter$ApplicationModalEventFilter;
+
+        specialinvoke $r4.<java.awt.ModalEventFilter$ApplicationModalEventFilter: void <init>(java.awt.Dialog)>(r0);
+
+        return $r4;
+
+     label3:
+        $r3 = new java.awt.ModalEventFilter$ToolkitModalEventFilter;
+
+        specialinvoke $r3.<java.awt.ModalEventFilter$ToolkitModalEventFilter: void <init>(java.awt.Dialog)>(r0);
+
+        return $r3;
+
+     label4:
+        return null;
+    }
+}

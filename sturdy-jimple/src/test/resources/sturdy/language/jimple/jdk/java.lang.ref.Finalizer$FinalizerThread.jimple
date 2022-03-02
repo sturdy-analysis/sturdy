@@ -1,0 +1,78 @@
+class java.lang.ref.Finalizer$FinalizerThread extends java.lang.Thread
+{
+    private volatile boolean running;
+
+    void <init>(java.lang.ThreadGroup)
+    {
+        java.lang.ref.Finalizer$FinalizerThread r0;
+        java.lang.ThreadGroup r1;
+
+        r0 := @this: java.lang.ref.Finalizer$FinalizerThread;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>(r1, "Finalizer");
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.ref.Finalizer$FinalizerThread r0;
+        java.lang.ref.Finalizer $r6;
+        sun.misc.JavaLangAccess $r1;
+        java.lang.ref.ReferenceQueue $r4;
+        java.lang.ref.Reference $r5;
+        java.lang.InterruptedException $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.ref.Finalizer$FinalizerThread;
+
+        $z0 = r0.<java.lang.ref.Finalizer$FinalizerThread: boolean running>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = staticinvoke <sun.misc.VM: boolean isBooted()>();
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        staticinvoke <sun.misc.VM: void awaitBooted()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        $r1 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaLangAccess getJavaLangAccess()>();
+
+        r0.<java.lang.ref.Finalizer$FinalizerThread: boolean running> = 1;
+
+     label6:
+        $r4 = staticinvoke <java.lang.ref.Finalizer: java.lang.ref.ReferenceQueue access$000()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference remove()>();
+
+        $r6 = (java.lang.ref.Finalizer) $r5;
+
+        staticinvoke <java.lang.ref.Finalizer: void access$100(java.lang.ref.Finalizer,sun.misc.JavaLangAccess)>($r6, $r1);
+
+     label7:
+        goto label6;
+
+     label8:
+        $r2 := @caughtexception;
+
+        goto label6;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+        catch java.lang.InterruptedException from label6 to label7 with label8;
+    }
+}

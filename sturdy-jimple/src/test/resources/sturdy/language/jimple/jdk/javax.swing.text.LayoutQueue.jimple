@@ -1,0 +1,208 @@
+public class javax.swing.text.LayoutQueue extends java.lang.Object
+{
+    private static final java.lang.Object DEFAULT_QUEUE;
+    private java.util.Vector tasks;
+    private java.lang.Thread worker;
+
+    public void <init>()
+    {
+        javax.swing.text.LayoutQueue r0;
+        java.util.Vector $r1;
+
+        r0 := @this: javax.swing.text.LayoutQueue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.LayoutQueue: java.util.Vector tasks> = $r1;
+
+        return;
+    }
+
+    public static javax.swing.text.LayoutQueue getDefaultQueue()
+    {
+        java.lang.Throwable $r6;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r2, $r3, $r5;
+        javax.swing.text.LayoutQueue $r4, r7;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE>;
+
+        $r3 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r2);
+
+        r7 = (javax.swing.text.LayoutQueue) $r3;
+
+        if r7 != null goto label2;
+
+        $r4 = new javax.swing.text.LayoutQueue;
+
+        specialinvoke $r4.<javax.swing.text.LayoutQueue: void <init>()>();
+
+        r7 = $r4;
+
+        $r5 = <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE>;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return r7;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static void setDefaultQueue(javax.swing.text.LayoutQueue)
+    {
+        java.lang.Throwable $r4;
+        sun.awt.AppContext $r1;
+        java.lang.Object $r0, $r3;
+        javax.swing.text.LayoutQueue r2;
+
+        r2 := @parameter0: javax.swing.text.LayoutQueue;
+
+        $r0 = <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r3 = <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE>;
+
+        virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r2);
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public synchronized void addTask(java.lang.Runnable)
+    {
+        java.util.Vector $r3;
+        java.lang.Thread $r1, $r5;
+        javax.swing.text.LayoutQueue r0;
+        java.lang.Runnable r2;
+        javax.swing.text.LayoutQueue$LayoutThread $r4;
+
+        r0 := @this: javax.swing.text.LayoutQueue;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        $r1 = r0.<javax.swing.text.LayoutQueue: java.lang.Thread worker>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new javax.swing.text.LayoutQueue$LayoutThread;
+
+        specialinvoke $r4.<javax.swing.text.LayoutQueue$LayoutThread: void <init>(javax.swing.text.LayoutQueue)>(r0);
+
+        r0.<javax.swing.text.LayoutQueue: java.lang.Thread worker> = $r4;
+
+        $r5 = r0.<javax.swing.text.LayoutQueue: java.lang.Thread worker>;
+
+        virtualinvoke $r5.<java.lang.Thread: void start()>();
+
+     label1:
+        $r3 = r0.<javax.swing.text.LayoutQueue: java.util.Vector tasks>;
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>(r2);
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+    }
+
+    protected synchronized java.lang.Runnable waitForWork()
+    {
+        java.lang.Runnable r6;
+        java.util.Vector $r1, $r2, $r4;
+        java.lang.InterruptedException $r5;
+        int $i0;
+        javax.swing.text.LayoutQueue r0;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.text.LayoutQueue;
+
+     label1:
+        $r1 = r0.<javax.swing.text.LayoutQueue: java.util.Vector tasks>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label5;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r5 := @caughtexception;
+
+        return null;
+
+     label5:
+        $r2 = r0.<javax.swing.text.LayoutQueue: java.util.Vector tasks>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object firstElement()>();
+
+        r6 = (java.lang.Runnable) $r3;
+
+        $r4 = r0.<javax.swing.text.LayoutQueue: java.util.Vector tasks>;
+
+        virtualinvoke $r4.<java.util.Vector: void removeElementAt(int)>(0);
+
+        return r6;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <javax.swing.text.LayoutQueue: java.lang.Object DEFAULT_QUEUE> = $r0;
+
+        return;
+    }
+}

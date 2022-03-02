@@ -1,0 +1,3258 @@
+class java.net.SocksSocketImpl extends java.net.PlainSocketImpl implements java.net.SocksConsts
+{
+    private java.lang.String server;
+    private int serverPort;
+    private java.net.InetSocketAddress external_address;
+    private boolean useV4;
+    private java.net.Socket cmdsock;
+    private java.io.InputStream cmdIn;
+    private java.io.OutputStream cmdOut;
+    private boolean applicationSetProxy;
+    static final boolean $assertionsDisabled;
+
+    void <init>()
+    {
+        java.net.SocksSocketImpl r0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        specialinvoke r0.<java.net.PlainSocketImpl: void <init>(boolean)>(0);
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = null;
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = 1080;
+
+        r0.<java.net.SocksSocketImpl: boolean useV4> = 0;
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut> = null;
+
+        return;
+    }
+
+    void <init>(java.lang.String, int)
+    {
+        java.net.SocksSocketImpl r0;
+        int i0, $i1, $i3;
+        java.lang.String r1;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.net.PlainSocketImpl: void <init>(boolean)>(0);
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = null;
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = 1080;
+
+        r0.<java.net.SocksSocketImpl: boolean useV4> = 0;
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut> = null;
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = r1;
+
+        $i3 = (int) -1;
+
+        if i0 != $i3 goto label1;
+
+        $i1 = 1080;
+
+        goto label2;
+
+     label1:
+        $i1 = i0;
+
+     label2:
+        r0.<java.net.SocksSocketImpl: int serverPort> = $i1;
+
+        return;
+    }
+
+    void <init>(java.net.Proxy)
+    {
+        java.net.SocketAddress $r2;
+        java.net.SocksSocketImpl r0;
+        java.net.Proxy r1;
+        int $i0;
+        java.lang.String $r4;
+        java.net.InetSocketAddress r3;
+        boolean $z0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r1 := @parameter0: java.net.Proxy;
+
+        specialinvoke r0.<java.net.PlainSocketImpl: void <init>(boolean)>(0);
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = null;
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = 1080;
+
+        r0.<java.net.SocksSocketImpl: boolean useV4> = 0;
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn> = null;
+
+        r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut> = null;
+
+        $r2 = virtualinvoke r1.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $z0 = $r2 instanceof java.net.InetSocketAddress;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (java.net.InetSocketAddress) $r2;
+
+        $r4 = virtualinvoke r3.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = $r4;
+
+        $i0 = virtualinvoke r3.<java.net.InetSocketAddress: int getPort()>();
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = $i0;
+
+     label1:
+        return;
+    }
+
+    void setV4()
+    {
+        java.net.SocksSocketImpl r0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r0.<java.net.SocksSocketImpl: boolean useV4> = 1;
+
+        return;
+    }
+
+    private synchronized void privilegedConnect(java.lang.String, int, int) throws java.io.IOException
+    {
+        java.security.PrivilegedActionException $r3;
+        java.io.IOException $r5;
+        java.lang.Exception $r4;
+        java.net.SocksSocketImpl$1 $r0;
+        java.net.SocksSocketImpl r1;
+        int i0, i1;
+        java.lang.String r2;
+
+        r1 := @this: java.net.SocksSocketImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $r0 = new java.net.SocksSocketImpl$1;
+
+        specialinvoke $r0.<java.net.SocksSocketImpl$1: void <init>(java.net.SocksSocketImpl,java.lang.String,int,int)>(r1, r2, i0, i1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r5 = (java.io.IOException) $r4;
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private void superConnectServer(java.lang.String, int, int) throws java.io.IOException
+    {
+        java.net.SocksSocketImpl r0;
+        int i0, i1;
+        java.lang.String r2;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r2, i0);
+
+        specialinvoke r0.<java.net.PlainSocketImpl: void connect(java.net.SocketAddress,int)>($r1, i1);
+
+        return;
+    }
+
+    private static int remainingMillis(long) throws java.io.IOException
+    {
+        long l0, $l2, l3;
+        byte $b1, $b4;
+        java.net.SocketTimeoutException $r1;
+        int $i5, $i6;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l3 = l0 - $l2;
+
+        $b4 = l3 cmp 0L;
+
+        $i6 = (int) $b4;
+
+        if $i6 <= 0 goto label2;
+
+        $i5 = (int) l3;
+
+        return $i5;
+
+     label2:
+        $r1 = new java.net.SocketTimeoutException;
+
+        specialinvoke $r1.<java.net.SocketTimeoutException: void <init>()>();
+
+        throw $r1;
+    }
+
+    private int readSocksReply(java.io.InputStream, byte[]) throws java.io.IOException
+    {
+        byte[] r2;
+        java.net.SocksSocketImpl r0;
+        int $i0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: byte[];
+
+        $i0 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>(r1, r2, 0L);
+
+        return $i0;
+    }
+
+    private int readSocksReply(java.io.InputStream, byte[], long) throws java.io.IOException
+    {
+        byte[] r0;
+        long l1;
+        java.net.SocketException $r3;
+        java.net.SocketInputStream $r2;
+        java.net.SocksSocketImpl r6;
+        java.net.SocketTimeoutException $r4, $r5;
+        int i0, $i2, $i3, $i4, i5, i6;
+        java.io.InputStream r1;
+
+        r6 := @this: java.net.SocksSocketImpl;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r0 := @parameter1: byte[];
+
+        l1 := @parameter2: long;
+
+        i0 = lengthof r0;
+
+        i5 = 0;
+
+        i6 = 0;
+
+     label1:
+        if i5 >= i0 goto label7;
+
+        if i6 >= 3 goto label7;
+
+     label2:
+        $r2 = (java.net.SocketInputStream) r1;
+
+        $i2 = i0 - i5;
+
+        $i3 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l1);
+
+        $i4 = virtualinvoke $r2.<java.net.SocketInputStream: int read(byte[],int,int,int)>(r0, i5, $i2, $i3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r5 = new java.net.SocketTimeoutException;
+
+        specialinvoke $r5.<java.net.SocketTimeoutException: void <init>(java.lang.String)>("Connect timed out");
+
+        throw $r5;
+
+     label5:
+        if $i4 >= 0 goto label6;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Malformed reply from SOCKS server");
+
+        throw $r3;
+
+     label6:
+        i5 = i5 + $i4;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label7:
+        return i5;
+
+        catch java.net.SocketTimeoutException from label2 to label3 with label4;
+    }
+
+    private boolean authenticate(byte, java.io.InputStream, java.io.BufferedOutputStream) throws java.io.IOException
+    {
+        byte b0;
+        java.net.SocksSocketImpl r0;
+        java.io.InputStream r1;
+        java.io.BufferedOutputStream r2;
+        boolean $z0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        b0 := @parameter0: byte;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        r2 := @parameter2: java.io.BufferedOutputStream;
+
+        $z0 = specialinvoke r0.<java.net.SocksSocketImpl: boolean authenticate(byte,java.io.InputStream,java.io.BufferedOutputStream,long)>(b0, r1, r2, 0L);
+
+        return $z0;
+    }
+
+    private boolean authenticate(byte, java.io.InputStream, java.io.BufferedOutputStream, long) throws java.io.IOException
+    {
+        byte[] $r9, $r11, $r20;
+        long l2;
+        java.lang.AssertionError $r24, $r25;
+        sun.security.action.GetPropertyAction $r23;
+        java.io.BufferedOutputStream r8;
+        java.net.InetAddress $r2;
+        java.net.PasswordAuthentication r5;
+        java.net.SocksSocketImpl$2 $r21;
+        byte b0, $b3;
+        int $i1, $i4, $i5, $i6;
+        java.lang.String $r1, r18, r19, $r22;
+        boolean $z0, $z1;
+        java.net.SocksSocketImpl r0;
+        char[] $r13;
+        java.lang.Object $r4, $r7;
+        java.io.UnsupportedEncodingException $r14, $r16;
+        java.io.InputStream r10;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        b0 := @parameter0: byte;
+
+        r10 := @parameter1: java.io.InputStream;
+
+        r8 := @parameter2: java.io.BufferedOutputStream;
+
+        l2 := @parameter3: long;
+
+        if b0 != 0 goto label01;
+
+        return 1;
+
+     label01:
+        $i6 = (int) b0;
+
+        if $i6 != 2 goto label17;
+
+        r18 = null;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r1);
+
+        $r21 = new java.net.SocksSocketImpl$2;
+
+        specialinvoke $r21.<java.net.SocksSocketImpl$2: void <init>(java.net.SocksSocketImpl,java.net.InetAddress)>(r0, $r2);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r21);
+
+        r5 = (java.net.PasswordAuthentication) $r4;
+
+        if r5 == null goto label02;
+
+        r19 = virtualinvoke r5.<java.net.PasswordAuthentication: java.lang.String getUserName()>();
+
+        $r22 = new java.lang.String;
+
+        $r13 = virtualinvoke r5.<java.net.PasswordAuthentication: char[] getPassword()>();
+
+        specialinvoke $r22.<java.lang.String: void <init>(char[])>($r13);
+
+        r18 = $r22;
+
+        goto label03;
+
+     label02:
+        $r23 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r23.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("user.name");
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r23);
+
+        r19 = (java.lang.String) $r7;
+
+     label03:
+        if r19 != null goto label04;
+
+        return 0;
+
+     label04:
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(int)>(1);
+
+        $i1 = virtualinvoke r19.<java.lang.String: int length()>();
+
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(int)>($i1);
+
+     label05:
+        $r9 = virtualinvoke r19.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(byte[])>($r9);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r16 := @caughtexception;
+
+        $z1 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label08;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label08:
+        if r18 == null goto label13;
+
+        $i4 = virtualinvoke r18.<java.lang.String: int length()>();
+
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(int)>($i4);
+
+     label09:
+        $r11 = virtualinvoke r18.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(byte[])>($r11);
+
+     label10:
+        goto label14;
+
+     label11:
+        $r14 := @caughtexception;
+
+        $z0 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label12;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label12:
+        goto label14;
+
+     label13:
+        virtualinvoke r8.<java.io.BufferedOutputStream: void write(int)>(0);
+
+     label14:
+        virtualinvoke r8.<java.io.BufferedOutputStream: void flush()>();
+
+        $r20 = newarray (byte)[2];
+
+        $i5 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>(r10, $r20, l2);
+
+        if $i5 != 2 goto label15;
+
+        $b3 = $r20[1];
+
+        if $b3 == 0 goto label16;
+
+     label15:
+        virtualinvoke r8.<java.io.BufferedOutputStream: void close()>();
+
+        virtualinvoke r10.<java.io.InputStream: void close()>();
+
+        return 0;
+
+     label16:
+        return 1;
+
+     label17:
+        return 0;
+
+        catch java.io.UnsupportedEncodingException from label05 to label06 with label07;
+        catch java.io.UnsupportedEncodingException from label09 to label10 with label11;
+    }
+
+    private void connectV4(java.io.InputStream, java.io.OutputStream, java.net.InetSocketAddress, long) throws java.io.IOException
+    {
+        byte[] $r4, $r7, $r21;
+        java.net.InetAddress $r1, $r3;
+        byte $b8, $b9, $b10;
+        boolean $z0, $z1;
+        java.net.InetSocketAddress r0;
+        java.net.SocksSocketImpl r5;
+        java.lang.StringBuilder $r16, $r17, $r26;
+        java.io.UnsupportedEncodingException $r20;
+        long l6;
+        java.lang.AssertionError $r25;
+        java.net.SocketException r23, $r24, $r27, $r28, $r29, $r30, $r31, $r32;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i11, $i12;
+        java.lang.String $r6, $r18;
+        java.io.OutputStream r2;
+        java.io.InputStream r8;
+
+        r5 := @this: java.net.SocksSocketImpl;
+
+        r8 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: java.net.InetSocketAddress;
+
+        l6 := @parameter3: long;
+
+        $r1 = virtualinvoke r0.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z0 = $r1 instanceof java.net.Inet4Address;
+
+        if $z0 != 0 goto label01;
+
+        $r24 = new java.net.SocketException;
+
+        specialinvoke $r24.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS V4 requires IPv4 only addresses");
+
+        throw $r24;
+
+     label01:
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(4);
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(1);
+
+        $i0 = virtualinvoke r0.<java.net.InetSocketAddress: int getPort()>();
+
+        $i1 = $i0 >> 8;
+
+        $i2 = $i1 & 255;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i2);
+
+        $i3 = virtualinvoke r0.<java.net.InetSocketAddress: int getPort()>();
+
+        $i4 = $i3 >> 0;
+
+        $i5 = $i4 & 255;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i5);
+
+        $r3 = virtualinvoke r0.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r4 = virtualinvoke $r3.<java.net.InetAddress: byte[] getAddress()>();
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r4);
+
+        $r6 = specialinvoke r5.<java.net.SocksSocketImpl: java.lang.String getUserName()>();
+
+     label02:
+        $r7 = virtualinvoke $r6.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r7);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r20 := @caughtexception;
+
+        $z1 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label05;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label05:
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(0);
+
+        virtualinvoke r2.<java.io.OutputStream: void flush()>();
+
+        $r21 = newarray (byte)[8];
+
+        $i7 = specialinvoke r5.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>(r8, $r21, l6);
+
+        if $i7 == 8 goto label06;
+
+        $r27 = new java.net.SocketException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reply from SOCKS server has bad length: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.net.SocketException: void <init>(java.lang.String)>($r18);
+
+        throw $r27;
+
+     label06:
+        $b8 = $r21[0];
+
+        if $b8 == 0 goto label07;
+
+        $b10 = $r21[0];
+
+        $i11 = (int) $b10;
+
+        if $i11 == 4 goto label07;
+
+        $r28 = new java.net.SocketException;
+
+        specialinvoke $r28.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server has bad version");
+
+        throw $r28;
+
+     label07:
+        r23 = null;
+
+        $b9 = $r21[1];
+
+        $i12 = (int) $b9;
+
+        tableswitch($i12)
+        {
+            case 90: goto label08;
+            case 91: goto label09;
+            case 92: goto label10;
+            case 93: goto label11;
+            default: goto label12;
+        };
+
+     label08:
+        r5.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = r0;
+
+        goto label13;
+
+     label09:
+        $r29 = new java.net.SocketException;
+
+        specialinvoke $r29.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS request rejected");
+
+        r23 = $r29;
+
+        goto label13;
+
+     label10:
+        $r30 = new java.net.SocketException;
+
+        specialinvoke $r30.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS server couldn\'t reach destination");
+
+        r23 = $r30;
+
+        goto label13;
+
+     label11:
+        $r31 = new java.net.SocketException;
+
+        specialinvoke $r31.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS authentication failed");
+
+        r23 = $r31;
+
+        goto label13;
+
+     label12:
+        $r32 = new java.net.SocketException;
+
+        specialinvoke $r32.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server contains bad status");
+
+        r23 = $r32;
+
+     label13:
+        if r23 == null goto label14;
+
+        virtualinvoke r8.<java.io.InputStream: void close()>();
+
+        virtualinvoke r2.<java.io.OutputStream: void close()>();
+
+        throw r23;
+
+     label14:
+        return;
+
+        catch java.io.UnsupportedEncodingException from label02 to label03 with label04;
+    }
+
+    protected void connect(java.net.SocketAddress, int) throws java.io.IOException
+    {
+        byte[] $r11, r22, $r30, $r33, r99, $r100, r102, r103, r104, r105, r106;
+        byte $b3, $b7, $b8, $b9, $b16, $b17, b52, b53;
+        java.net.Proxy r97;
+        java.net.SocksSocketImpl r3;
+        java.lang.StringBuilder $r48, $r50, $r64, $r65, $r68, $r69, $r70, $r89, $r91, $r92, $r93, $r109, $r110, $r113, $r115;
+        long $l1, $l2, l45, l46, $l47;
+        java.io.IOException $r76, $r79, r96;
+        java.net.UnknownHostException $r119, $r120;
+        java.net.URISyntaxException $r81;
+        java.net.SocksSocketImpl$3 $r108;
+        java.net.Proxy$Type $r53, $r54;
+        int i0, $i4, $i5, $i6, $i10, $i11, $i12, $i13, $i14, $i15, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i48, $i49, $i50, $i51, $i54, $i56, $i57, $i58, $i60, $i61, $i62, $i63, $i64, $i65, $i66;
+        java.lang.Object $r39, $r52;
+        sun.net.SocksProxy $r61;
+        java.net.InetAddress $r9, $r10, $r29, $r41, $r71;
+        java.lang.AssertionError $r112, $r123;
+        java.io.BufferedOutputStream $r118;
+        java.net.SocketException r101, $r114, $r116, $r117, $r121, $r122, $r124, $r125, $r126, $r127, $r128, $r129, $r130, $r131, $r132, $r133, $r134, $r135, $r136, $r137, $r138, $r139;
+        java.lang.String $r4, $r8, $r31, $r32, $r37, $r40, $r44, $r49, $r51, $r58, $r66, $r72, $r73, $r78, $r84, r86, $r90, $r94, $r98;
+        java.net.SocketAddress r0, $r55, $r56, $r59, $r80;
+        java.net.ProxySelector r85;
+        java.net.URI r95, $r111;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15;
+        java.net.InetSocketAddress r2, $r57, $r60;
+        java.util.List $r42;
+        java.io.UnsupportedEncodingException $r74;
+        java.io.OutputStream $r6;
+        java.util.Iterator $r43;
+        java.lang.IllegalArgumentException $r107;
+        java.lang.SecurityManager $r83;
+        java.io.InputStream $r45;
+
+        r3 := @this: java.net.SocksSocketImpl;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        i0 := @parameter1: int;
+
+        if i0 != 0 goto label01;
+
+        l45 = 0L;
+
+        goto label04;
+
+     label01:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = (long) i0;
+
+        l46 = $l1 + $l2;
+
+        $b3 = l46 cmp 0L;
+
+        $i54 = (int) $b3;
+
+        if $i54 >= 0 goto label02;
+
+        $l47 = 9223372036854775807L;
+
+        goto label03;
+
+     label02:
+        $l47 = l46;
+
+     label03:
+        l45 = $l47;
+
+     label04:
+        $r83 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if r0 == null goto label05;
+
+        $z0 = r0 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label06;
+
+     label05:
+        $r107 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r107.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unsupported address type");
+
+        throw $r107;
+
+     label06:
+        r2 = (java.net.InetSocketAddress) r0;
+
+        if $r83 == null goto label08;
+
+        $z13 = virtualinvoke r2.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z13 == 0 goto label07;
+
+        $r73 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $i44 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke $r83.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r73, $i44);
+
+        goto label08;
+
+     label07:
+        $r71 = virtualinvoke r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r72 = virtualinvoke $r71.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i43 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke $r83.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r72, $i43);
+
+     label08:
+        $r84 = r3.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        if $r84 != null goto label25;
+
+        $r108 = new java.net.SocksSocketImpl$3;
+
+        specialinvoke $r108.<java.net.SocksSocketImpl$3: void <init>(java.net.SocksSocketImpl)>(r3);
+
+        $r39 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r108);
+
+        r85 = (java.net.ProxySelector) $r39;
+
+        if r85 != null goto label09;
+
+        $i42 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l45);
+
+        specialinvoke r3.<java.net.PlainSocketImpl: void connect(java.net.SocketAddress,int)>(r2, $i42);
+
+        return;
+
+     label09:
+        $r40 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        r86 = $r40;
+
+        $r41 = virtualinvoke r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z7 = $r41 instanceof java.net.Inet6Address;
+
+        if $z7 == 0 goto label10;
+
+        $z12 = virtualinvoke $r40.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z12 != 0 goto label10;
+
+        $i41 = virtualinvoke $r40.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        if $i41 < 0 goto label10;
+
+        $r109 = new java.lang.StringBuilder;
+
+        specialinvoke $r109.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r86 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label10:
+        $r111 = new java.net.URI;
+
+        $r110 = new java.lang.StringBuilder;
+
+        specialinvoke $r110.<java.lang.StringBuilder: void <init>()>();
+
+        $r89 = virtualinvoke $r110.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket://");
+
+        $r90 = staticinvoke <sun.net.www.ParseUtil: java.lang.String encodePath(java.lang.String)>(r86);
+
+        $r91 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r90);
+
+        $r92 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $i48 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i48);
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r111.<java.net.URI: void <init>(java.lang.String)>($r94);
+
+        r95 = $r111;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r81 := @caughtexception;
+
+        $z15 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z15 != 0 goto label13;
+
+        $r112 = new java.lang.AssertionError;
+
+        specialinvoke $r112.<java.lang.AssertionError: void <init>(java.lang.Object)>($r81);
+
+        throw $r112;
+
+     label13:
+        r95 = null;
+
+     label14:
+        r96 = null;
+
+        $r42 = virtualinvoke r85.<java.net.ProxySelector: java.util.List select(java.net.URI)>(r95);
+
+        $r43 = interfaceinvoke $r42.<java.util.List: java.util.Iterator iterator()>();
+
+        if $r43 == null goto label15;
+
+        $z8 = interfaceinvoke $r43.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 != 0 goto label16;
+
+     label15:
+        $i37 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l45);
+
+        specialinvoke r3.<java.net.PlainSocketImpl: void connect(java.net.SocketAddress,int)>(r2, $i37);
+
+        return;
+
+     label16:
+        $z9 = interfaceinvoke $r43.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label23;
+
+        $r52 = interfaceinvoke $r43.<java.util.Iterator: java.lang.Object next()>();
+
+        r97 = (java.net.Proxy) $r52;
+
+        if r97 == null goto label17;
+
+        $r53 = virtualinvoke r97.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r54 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r53 == $r54 goto label18;
+
+     label17:
+        $i38 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l45);
+
+        specialinvoke r3.<java.net.PlainSocketImpl: void connect(java.net.SocketAddress,int)>(r2, $i38);
+
+        return;
+
+     label18:
+        $r55 = virtualinvoke r97.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $z10 = $r55 instanceof java.net.InetSocketAddress;
+
+        if $z10 != 0 goto label19;
+
+        $r114 = new java.net.SocketException;
+
+        $r113 = new java.lang.StringBuilder;
+
+        specialinvoke $r113.<java.lang.StringBuilder: void <init>()>();
+
+        $r64 = virtualinvoke $r113.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown address type for proxy: ");
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r97);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r114.<java.net.SocketException: void <init>(java.lang.String)>($r66);
+
+        throw $r114;
+
+     label19:
+        $r56 = virtualinvoke r97.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r57 = (java.net.InetSocketAddress) $r56;
+
+        $r58 = virtualinvoke $r57.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        r3.<java.net.SocksSocketImpl: java.lang.String server> = $r58;
+
+        $r59 = virtualinvoke r97.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r60 = (java.net.InetSocketAddress) $r59;
+
+        $i39 = virtualinvoke $r60.<java.net.InetSocketAddress: int getPort()>();
+
+        r3.<java.net.SocksSocketImpl: int serverPort> = $i39;
+
+        $z11 = r97 instanceof sun.net.SocksProxy;
+
+        if $z11 == 0 goto label20;
+
+        $r61 = (sun.net.SocksProxy) r97;
+
+        $i40 = virtualinvoke $r61.<sun.net.SocksProxy: int protocolVersion()>();
+
+        if $i40 != 4 goto label20;
+
+        r3.<java.net.SocksSocketImpl: boolean useV4> = 1;
+
+     label20:
+        $r98 = r3.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        $i49 = r3.<java.net.SocksSocketImpl: int serverPort>;
+
+        $i50 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l45);
+
+        specialinvoke r3.<java.net.SocksSocketImpl: void privilegedConnect(java.lang.String,int,int)>($r98, $i49, $i50);
+
+     label21:
+        goto label23;
+
+     label22:
+        $r79 := @caughtexception;
+
+        $r80 = virtualinvoke r97.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        virtualinvoke r85.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>(r95, $r80, $r79);
+
+        r3.<java.net.SocksSocketImpl: java.lang.String server> = null;
+
+        $i56 = (int) -1;
+
+        r3.<java.net.SocksSocketImpl: int serverPort> = $i56;
+
+        r96 = $r79;
+
+        goto label16;
+
+     label23:
+        $r44 = r3.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        if $r44 != null goto label24;
+
+        $r116 = new java.net.SocketException;
+
+        $r115 = new java.lang.StringBuilder;
+
+        specialinvoke $r115.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r115.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t connect to SOCKS proxy:");
+
+        $r49 = virtualinvoke r96.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r50 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r116.<java.net.SocketException: void <init>(java.lang.String)>($r51);
+
+        throw $r116;
+
+     label24:
+        goto label28;
+
+     label25:
+        $r4 = r3.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        $i4 = r3.<java.net.SocksSocketImpl: int serverPort>;
+
+        $i5 = staticinvoke <java.net.SocksSocketImpl: int remainingMillis(long)>(l45);
+
+        specialinvoke r3.<java.net.SocksSocketImpl: void privilegedConnect(java.lang.String,int,int)>($r4, $i4, $i5);
+
+     label26:
+        goto label28;
+
+     label27:
+        $r76 := @caughtexception;
+
+        $r117 = new java.net.SocketException;
+
+        $r78 = virtualinvoke $r76.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r117.<java.net.SocketException: void <init>(java.lang.String)>($r78);
+
+        throw $r117;
+
+     label28:
+        $r118 = new java.io.BufferedOutputStream;
+
+        $r6 = r3.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut>;
+
+        specialinvoke $r118.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r6, 512);
+
+        $r45 = r3.<java.net.SocksSocketImpl: java.io.InputStream cmdIn>;
+
+        $z1 = r3.<java.net.SocksSocketImpl: boolean useV4>;
+
+        if $z1 == 0 goto label30;
+
+        $z6 = virtualinvoke r2.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z6 == 0 goto label29;
+
+        $r119 = new java.net.UnknownHostException;
+
+        $r37 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String toString()>();
+
+        specialinvoke $r119.<java.net.UnknownHostException: void <init>(java.lang.String)>($r37);
+
+        throw $r119;
+
+     label29:
+        specialinvoke r3.<java.net.SocksSocketImpl: void connectV4(java.io.InputStream,java.io.OutputStream,java.net.InetSocketAddress,long)>($r45, $r118, r2, l45);
+
+        return;
+
+     label30:
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(5);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(2);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(0);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(2);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void flush()>();
+
+        r99 = newarray (byte)[2];
+
+        $i6 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r99, l45);
+
+        if $i6 != 2 goto label31;
+
+        $b7 = r99[0];
+
+        $i57 = (int) $b7;
+
+        if $i57 == 5 goto label33;
+
+     label31:
+        $z2 = virtualinvoke r2.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z2 == 0 goto label32;
+
+        $r120 = new java.net.UnknownHostException;
+
+        $r8 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String toString()>();
+
+        specialinvoke $r120.<java.net.UnknownHostException: void <init>(java.lang.String)>($r8);
+
+        throw $r120;
+
+     label32:
+        specialinvoke r3.<java.net.SocksSocketImpl: void connectV4(java.io.InputStream,java.io.OutputStream,java.net.InetSocketAddress,long)>($r45, $r118, r2, l45);
+
+        return;
+
+     label33:
+        $b8 = r99[1];
+
+        $i58 = (int) $b8;
+
+        $i60 = (int) -1;
+
+        if $i58 != $i60 goto label34;
+
+        $r121 = new java.net.SocketException;
+
+        specialinvoke $r121.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS : No acceptable methods");
+
+        throw $r121;
+
+     label34:
+        $b9 = r99[1];
+
+        $z3 = specialinvoke r3.<java.net.SocksSocketImpl: boolean authenticate(byte,java.io.InputStream,java.io.BufferedOutputStream,long)>($b9, $r45, $r118, l45);
+
+        if $z3 != 0 goto label35;
+
+        $r122 = new java.net.SocketException;
+
+        specialinvoke $r122.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS : authentication failed");
+
+        throw $r122;
+
+     label35:
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(5);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(1);
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(0);
+
+        $z4 = virtualinvoke r2.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z4 == 0 goto label40;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(3);
+
+        $r31 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $i30 = virtualinvoke $r31.<java.lang.String: int length()>();
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i30);
+
+     label36:
+        $r32 = virtualinvoke r2.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(byte[])>($r33);
+
+     label37:
+        goto label39;
+
+     label38:
+        $r74 := @caughtexception;
+
+        $z14 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z14 != 0 goto label39;
+
+        $r123 = new java.lang.AssertionError;
+
+        specialinvoke $r123.<java.lang.AssertionError: void <init>()>();
+
+        throw $r123;
+
+     label39:
+        $i31 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i32 = $i31 >> 8;
+
+        $i33 = $i32 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i33);
+
+        $i34 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i35 = $i34 >> 0;
+
+        $i36 = $i35 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i36);
+
+        goto label42;
+
+     label40:
+        $r9 = virtualinvoke r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z5 = $r9 instanceof java.net.Inet6Address;
+
+        if $z5 == 0 goto label41;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(4);
+
+        $r29 = virtualinvoke r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r30 = virtualinvoke $r29.<java.net.InetAddress: byte[] getAddress()>();
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(byte[])>($r30);
+
+        $i24 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i25 = $i24 >> 8;
+
+        $i26 = $i25 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i26);
+
+        $i27 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i28 = $i27 >> 0;
+
+        $i29 = $i28 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i29);
+
+        goto label42;
+
+     label41:
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>(1);
+
+        $r10 = virtualinvoke r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r11 = virtualinvoke $r10.<java.net.InetAddress: byte[] getAddress()>();
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(byte[])>($r11);
+
+        $i10 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i11 = $i10 >> 8;
+
+        $i12 = $i11 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i12);
+
+        $i13 = virtualinvoke r2.<java.net.InetSocketAddress: int getPort()>();
+
+        $i14 = $i13 >> 0;
+
+        $i15 = $i14 & 255;
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void write(int)>($i15);
+
+     label42:
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void flush()>();
+
+        $r100 = newarray (byte)[4];
+
+        $i51 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, $r100, l45);
+
+        if $i51 == 4 goto label43;
+
+        $r124 = new java.net.SocketException;
+
+        specialinvoke $r124.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server has bad length");
+
+        throw $r124;
+
+     label43:
+        r101 = null;
+
+        $b16 = $r100[1];
+
+        $i61 = (int) $b16;
+
+        tableswitch($i61)
+        {
+            case 0: goto label44;
+            case 1: goto label52;
+            case 2: goto label53;
+            case 3: goto label54;
+            case 4: goto label55;
+            case 5: goto label56;
+            case 6: goto label57;
+            case 7: goto label58;
+            case 8: goto label59;
+            default: goto label60;
+        };
+
+     label44:
+        $b17 = $r100[3];
+
+        $i62 = (int) $b17;
+
+        tableswitch($i62)
+        {
+            case 1: goto label45;
+            case 2: goto label51;
+            case 3: goto label47;
+            case 4: goto label49;
+            default: goto label51;
+        };
+
+     label45:
+        r102 = newarray (byte)[4];
+
+        $i22 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r102, l45);
+
+        if $i22 == 4 goto label46;
+
+        $r125 = new java.net.SocketException;
+
+        specialinvoke $r125.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r125;
+
+     label46:
+        r103 = newarray (byte)[2];
+
+        $i23 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r103, l45);
+
+        if $i23 == 2 goto label60;
+
+        $r126 = new java.net.SocketException;
+
+        specialinvoke $r126.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r126;
+
+     label47:
+        b52 = $r100[1];
+
+        $i63 = (int) b52;
+
+        r22 = newarray (byte)[$i63];
+
+        $i20 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r22, l45);
+
+        $i64 = (int) b52;
+
+        if $i20 == $i64 goto label48;
+
+        $r127 = new java.net.SocketException;
+
+        specialinvoke $r127.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r127;
+
+     label48:
+        r104 = newarray (byte)[2];
+
+        $i21 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r104, l45);
+
+        if $i21 == 2 goto label60;
+
+        $r128 = new java.net.SocketException;
+
+        specialinvoke $r128.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r128;
+
+     label49:
+        b53 = $r100[1];
+
+        $i65 = (int) b53;
+
+        r105 = newarray (byte)[$i65];
+
+        $i18 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r105, l45);
+
+        $i66 = (int) b53;
+
+        if $i18 == $i66 goto label50;
+
+        $r129 = new java.net.SocketException;
+
+        specialinvoke $r129.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r129;
+
+     label50:
+        r106 = newarray (byte)[2];
+
+        $i19 = specialinvoke r3.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[],long)>($r45, r106, l45);
+
+        if $i19 == 2 goto label60;
+
+        $r130 = new java.net.SocketException;
+
+        specialinvoke $r130.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r130;
+
+     label51:
+        $r131 = new java.net.SocketException;
+
+        specialinvoke $r131.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server contains wrong code");
+
+        r101 = $r131;
+
+        goto label60;
+
+     label52:
+        $r132 = new java.net.SocketException;
+
+        specialinvoke $r132.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS server general failure");
+
+        r101 = $r132;
+
+        goto label60;
+
+     label53:
+        $r133 = new java.net.SocketException;
+
+        specialinvoke $r133.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Connection not allowed by ruleset");
+
+        r101 = $r133;
+
+        goto label60;
+
+     label54:
+        $r134 = new java.net.SocketException;
+
+        specialinvoke $r134.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Network unreachable");
+
+        r101 = $r134;
+
+        goto label60;
+
+     label55:
+        $r135 = new java.net.SocketException;
+
+        specialinvoke $r135.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Host unreachable");
+
+        r101 = $r135;
+
+        goto label60;
+
+     label56:
+        $r136 = new java.net.SocketException;
+
+        specialinvoke $r136.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Connection refused");
+
+        r101 = $r136;
+
+        goto label60;
+
+     label57:
+        $r137 = new java.net.SocketException;
+
+        specialinvoke $r137.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: TTL expired");
+
+        r101 = $r137;
+
+        goto label60;
+
+     label58:
+        $r138 = new java.net.SocketException;
+
+        specialinvoke $r138.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Command not supported");
+
+        r101 = $r138;
+
+        goto label60;
+
+     label59:
+        $r139 = new java.net.SocketException;
+
+        specialinvoke $r139.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: address type not supported");
+
+        r101 = $r139;
+
+     label60:
+        if r101 == null goto label61;
+
+        virtualinvoke $r45.<java.io.InputStream: void close()>();
+
+        virtualinvoke $r118.<java.io.BufferedOutputStream: void close()>();
+
+        throw r101;
+
+     label61:
+        r3.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = r2;
+
+        return;
+
+        catch java.net.URISyntaxException from label10 to label11 with label12;
+        catch java.io.IOException from label20 to label21 with label22;
+        catch java.io.IOException from label25 to label26 with label27;
+        catch java.io.UnsupportedEncodingException from label36 to label37 with label38;
+    }
+
+    private void bindV4(java.io.InputStream, java.io.OutputStream, java.net.InetAddress, int) throws java.io.IOException
+    {
+        byte[] $r4, $r21, r23;
+        java.net.InetAddress r0, r24;
+        byte $b8, $b9, $b10;
+        java.net.SocksSocketImpl$4 $r27;
+        boolean $z0, $z1, $z2;
+        java.net.InetSocketAddress $r32;
+        java.net.SocksSocketImpl r1;
+        java.lang.StringBuilder $r14, $r15, $r29;
+        java.io.UnsupportedEncodingException $r20;
+        java.lang.AssertionError $r28;
+        java.net.SocketException r25, $r26, $r30, $r31, $r33, $r34, $r35, $r36;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i11, $i12;
+        java.lang.String $r3, $r16;
+        java.io.OutputStream r2;
+        java.lang.Object $r18;
+        java.io.InputStream r5;
+
+        r1 := @this: java.net.SocksSocketImpl;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: java.net.InetAddress;
+
+        i0 := @parameter3: int;
+
+        $z0 = r0 instanceof java.net.Inet4Address;
+
+        if $z0 != 0 goto label01;
+
+        $r26 = new java.net.SocketException;
+
+        specialinvoke $r26.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS V4 requires IPv4 only addresses");
+
+        throw $r26;
+
+     label01:
+        specialinvoke r1.<java.net.PlainSocketImpl: void bind(java.net.InetAddress,int)>(r0, i0);
+
+        r23 = virtualinvoke r0.<java.net.InetAddress: byte[] getAddress()>();
+
+        $z1 = virtualinvoke r0.<java.net.InetAddress: boolean isAnyLocalAddress()>();
+
+        if $z1 == 0 goto label02;
+
+        $r27 = new java.net.SocksSocketImpl$4;
+
+        specialinvoke $r27.<java.net.SocksSocketImpl$4: void <init>(java.net.SocksSocketImpl)>(r1);
+
+        $r18 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r27);
+
+        r24 = (java.net.InetAddress) $r18;
+
+        r23 = virtualinvoke r24.<java.net.InetAddress: byte[] getAddress()>();
+
+     label02:
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(4);
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(2);
+
+        $i1 = specialinvoke r1.<java.net.PlainSocketImpl: int getLocalPort()>();
+
+        $i2 = $i1 >> 8;
+
+        $i3 = $i2 & 255;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i3);
+
+        $i4 = specialinvoke r1.<java.net.PlainSocketImpl: int getLocalPort()>();
+
+        $i5 = $i4 >> 0;
+
+        $i6 = $i5 & 255;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i6);
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>(r23);
+
+        $r3 = specialinvoke r1.<java.net.SocksSocketImpl: java.lang.String getUserName()>();
+
+     label03:
+        $r4 = virtualinvoke $r3.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r4);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r20 := @caughtexception;
+
+        $z2 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label06;
+
+        $r28 = new java.lang.AssertionError;
+
+        specialinvoke $r28.<java.lang.AssertionError: void <init>()>();
+
+        throw $r28;
+
+     label06:
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(0);
+
+        virtualinvoke r2.<java.io.OutputStream: void flush()>();
+
+        $r21 = newarray (byte)[8];
+
+        $i7 = specialinvoke r1.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>(r5, $r21);
+
+        if $i7 == 8 goto label07;
+
+        $r30 = new java.net.SocketException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reply from SOCKS server has bad length: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r30.<java.net.SocketException: void <init>(java.lang.String)>($r16);
+
+        throw $r30;
+
+     label07:
+        $b8 = $r21[0];
+
+        if $b8 == 0 goto label08;
+
+        $b10 = $r21[0];
+
+        $i11 = (int) $b10;
+
+        if $i11 == 4 goto label08;
+
+        $r31 = new java.net.SocketException;
+
+        specialinvoke $r31.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server has bad version");
+
+        throw $r31;
+
+     label08:
+        r25 = null;
+
+        $b9 = $r21[1];
+
+        $i12 = (int) $b9;
+
+        tableswitch($i12)
+        {
+            case 90: goto label09;
+            case 91: goto label10;
+            case 92: goto label11;
+            case 93: goto label12;
+            default: goto label13;
+        };
+
+     label09:
+        $r32 = new java.net.InetSocketAddress;
+
+        specialinvoke $r32.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r0, i0);
+
+        r1.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = $r32;
+
+        goto label14;
+
+     label10:
+        $r33 = new java.net.SocketException;
+
+        specialinvoke $r33.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS request rejected");
+
+        r25 = $r33;
+
+        goto label14;
+
+     label11:
+        $r34 = new java.net.SocketException;
+
+        specialinvoke $r34.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS server couldn\'t reach destination");
+
+        r25 = $r34;
+
+        goto label14;
+
+     label12:
+        $r35 = new java.net.SocketException;
+
+        specialinvoke $r35.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS authentication failed");
+
+        r25 = $r35;
+
+        goto label14;
+
+     label13:
+        $r36 = new java.net.SocketException;
+
+        specialinvoke $r36.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server contains bad status");
+
+        r25 = $r36;
+
+     label14:
+        if r25 == null goto label15;
+
+        virtualinvoke r5.<java.io.InputStream: void close()>();
+
+        virtualinvoke r2.<java.io.OutputStream: void close()>();
+
+        throw r25;
+
+     label15:
+        return;
+
+        catch java.io.UnsupportedEncodingException from label03 to label04 with label05;
+    }
+
+    protected synchronized void socksBind(java.net.InetSocketAddress) throws java.io.IOException
+    {
+        byte[] $r17, r31, $r41, $r44, r107, $r108, r110, r111, r112, r113, r114;
+        byte $b2, $b3, $b4, $b10, $b13, $b15, $b19, $b21, $b25, $b27, $b43, b46, b49;
+        java.net.Proxy r105;
+        java.net.SocksSocketImpl r0;
+        java.lang.StringBuilder $r13, $r14, $r57, $r59, $r75, $r76, $r79, $r80, $r81, $r97, $r99, $r100, $r101, $r116, $r117, $r120, $r124, $r132;
+        short $s14, $s16, $s20, $s22, $s26, $s28, $s60, $s62, $s66, $s68, $s72, $s74;
+        java.net.Inet4Address $r136;
+        java.net.URISyntaxException $r91;
+        java.net.SocksSocketImpl$5 $r115;
+        java.net.SocksSocketImpl$6 $r122;
+        java.net.SocksSocketImpl$7 $r126;
+        java.net.Proxy$Type $r64, $r65;
+        int $i0, $i1, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i17, $i18, $i23, $i24, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, i44, i45, i47, i48, i50, i51, $i53, $i54, $i55, $i57, $i58, $i59, $i61, $i63, $i64, $i65, $i67, $i69, $i70, $i71, $i73, $i75;
+        java.net.Inet6Address $r144;
+        java.lang.Object $r49, $r63;
+        sun.net.SocksProxy $r72;
+        java.net.InetAddress $r7, $r8, $r9, $r16, $r40, $r47, $r51;
+        java.lang.Exception $r84, $r87, r104;
+        java.lang.AssertionError $r119, $r131;
+        java.io.BufferedOutputStream $r128;
+        java.net.SocketException r109, $r121, $r123, $r125, $r127, $r129, $r130, $r133, $r134, $r135, $r138, $r139, $r142, $r143, $r146, $r147, $r148, $r149, $r150, $r151, $r152, $r153;
+        java.lang.String $r2, $r15, $r42, $r43, $r50, $r54, $r58, $r60, $r69, $r77, $r86, $r90, r94, $r98, $r102, $r140;
+        java.net.SocketAddress $r66, $r67, $r70, $r88;
+        java.net.ProxySelector r93;
+        java.net.URI r103, $r118;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.net.InetSocketAddress r6, $r68, $r71, $r137, $r141, $r145;
+        java.util.List $r52;
+        java.io.UnsupportedEncodingException $r82;
+        java.net.Socket $r1, $r10, $r19, $r61;
+        java.io.OutputStream $r5;
+        java.util.Iterator $r53;
+        java.io.InputStream $r62;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r6 := @parameter0: java.net.InetSocketAddress;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.Socket socket>;
+
+        if $r1 == null goto label01;
+
+        return;
+
+     label01:
+        $r2 = r0.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        if $r2 != null goto label19;
+
+        $r115 = new java.net.SocksSocketImpl$5;
+
+        specialinvoke $r115.<java.net.SocksSocketImpl$5: void <init>(java.net.SocksSocketImpl)>(r0);
+
+        $r49 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r115);
+
+        r93 = (java.net.ProxySelector) $r49;
+
+        if r93 != null goto label02;
+
+        return;
+
+     label02:
+        $r50 = virtualinvoke r6.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        r94 = $r50;
+
+        $r51 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z5 = $r51 instanceof java.net.Inet6Address;
+
+        if $z5 == 0 goto label03;
+
+        $z9 = virtualinvoke $r50.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z9 != 0 goto label03;
+
+        $i41 = virtualinvoke $r50.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        if $i41 < 0 goto label03;
+
+        $r116 = new java.lang.StringBuilder;
+
+        specialinvoke $r116.<java.lang.StringBuilder: void <init>()>();
+
+        $r79 = virtualinvoke $r116.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r94 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label03:
+        $r118 = new java.net.URI;
+
+        $r117 = new java.lang.StringBuilder;
+
+        specialinvoke $r117.<java.lang.StringBuilder: void <init>()>();
+
+        $r97 = virtualinvoke $r117.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("serversocket://");
+
+        $r98 = staticinvoke <sun.net.www.ParseUtil: java.lang.String encodePath(java.lang.String)>(r94);
+
+        $r99 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r98);
+
+        $r100 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $i42 = virtualinvoke r6.<java.net.InetSocketAddress: int getPort()>();
+
+        $r101 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i42);
+
+        $r102 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r118.<java.net.URI: void <init>(java.lang.String)>($r102);
+
+        r103 = $r118;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r91 := @caughtexception;
+
+        $z11 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z11 != 0 goto label06;
+
+        $r119 = new java.lang.AssertionError;
+
+        specialinvoke $r119.<java.lang.AssertionError: void <init>(java.lang.Object)>($r91);
+
+        throw $r119;
+
+     label06:
+        r103 = null;
+
+     label07:
+        r104 = null;
+
+        $r52 = virtualinvoke r93.<java.net.ProxySelector: java.util.List select(java.net.URI)>(r103);
+
+        $r53 = interfaceinvoke $r52.<java.util.List: java.util.Iterator iterator()>();
+
+        if $r53 == null goto label08;
+
+        $z6 = interfaceinvoke $r53.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 != 0 goto label09;
+
+     label08:
+        return;
+
+     label09:
+        $z12 = interfaceinvoke $r53.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label16;
+
+        $r63 = interfaceinvoke $r53.<java.util.Iterator: java.lang.Object next()>();
+
+        r105 = (java.net.Proxy) $r63;
+
+        if r105 == null goto label10;
+
+        $r64 = virtualinvoke r105.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r65 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r64 == $r65 goto label11;
+
+     label10:
+        return;
+
+     label11:
+        $r66 = virtualinvoke r105.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $z7 = $r66 instanceof java.net.InetSocketAddress;
+
+        if $z7 != 0 goto label12;
+
+        $r121 = new java.net.SocketException;
+
+        $r120 = new java.lang.StringBuilder;
+
+        specialinvoke $r120.<java.lang.StringBuilder: void <init>()>();
+
+        $r75 = virtualinvoke $r120.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown address type for proxy: ");
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r105);
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r121.<java.net.SocketException: void <init>(java.lang.String)>($r77);
+
+        throw $r121;
+
+     label12:
+        $r67 = virtualinvoke r105.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r68 = (java.net.InetSocketAddress) $r67;
+
+        $r69 = virtualinvoke $r68.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = $r69;
+
+        $r70 = virtualinvoke r105.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r71 = (java.net.InetSocketAddress) $r70;
+
+        $i39 = virtualinvoke $r71.<java.net.InetSocketAddress: int getPort()>();
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = $i39;
+
+        $z8 = r105 instanceof sun.net.SocksProxy;
+
+        if $z8 == 0 goto label13;
+
+        $r72 = (sun.net.SocksProxy) r105;
+
+        $i40 = virtualinvoke $r72.<sun.net.SocksProxy: int protocolVersion()>();
+
+        if $i40 != 4 goto label13;
+
+        r0.<java.net.SocksSocketImpl: boolean useV4> = 1;
+
+     label13:
+        $r122 = new java.net.SocksSocketImpl$6;
+
+        specialinvoke $r122.<java.net.SocksSocketImpl$6: void <init>(java.net.SocksSocketImpl)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r122);
+
+     label14:
+        goto label09;
+
+     label15:
+        $r87 := @caughtexception;
+
+        $r88 = virtualinvoke r105.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r123 = new java.net.SocketException;
+
+        $r90 = virtualinvoke $r87.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r123.<java.net.SocketException: void <init>(java.lang.String)>($r90);
+
+        virtualinvoke r93.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>(r103, $r88, $r123);
+
+        r0.<java.net.SocksSocketImpl: java.lang.String server> = null;
+
+        $i53 = (int) -1;
+
+        r0.<java.net.SocksSocketImpl: int serverPort> = $i53;
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        r104 = $r87;
+
+        goto label09;
+
+     label16:
+        $r54 = r0.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        if $r54 == null goto label17;
+
+        $r61 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        if $r61 != null goto label18;
+
+     label17:
+        $r125 = new java.net.SocketException;
+
+        $r124 = new java.lang.StringBuilder;
+
+        specialinvoke $r124.<java.lang.StringBuilder: void <init>()>();
+
+        $r57 = virtualinvoke $r124.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t connect to SOCKS proxy:");
+
+        $r58 = virtualinvoke r104.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r59 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r58);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r125.<java.net.SocketException: void <init>(java.lang.String)>($r60);
+
+        throw $r125;
+
+     label18:
+        goto label22;
+
+     label19:
+        $r126 = new java.net.SocksSocketImpl$7;
+
+        specialinvoke $r126.<java.net.SocksSocketImpl$7: void <init>(java.net.SocksSocketImpl)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r126);
+
+     label20:
+        goto label22;
+
+     label21:
+        $r84 := @caughtexception;
+
+        $r127 = new java.net.SocketException;
+
+        $r86 = virtualinvoke $r84.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r127.<java.net.SocketException: void <init>(java.lang.String)>($r86);
+
+        throw $r127;
+
+     label22:
+        $r128 = new java.io.BufferedOutputStream;
+
+        $r5 = r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut>;
+
+        specialinvoke $r128.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r5, 512);
+
+        $r62 = r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn>;
+
+        $z0 = r0.<java.net.SocksSocketImpl: boolean useV4>;
+
+        if $z0 == 0 goto label23;
+
+        $r47 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i38 = virtualinvoke r6.<java.net.InetSocketAddress: int getPort()>();
+
+        specialinvoke r0.<java.net.SocksSocketImpl: void bindV4(java.io.InputStream,java.io.OutputStream,java.net.InetAddress,int)>($r62, $r128, $r47, $i38);
+
+        return;
+
+     label23:
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(5);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(2);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(0);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(2);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void flush()>();
+
+        r107 = newarray (byte)[2];
+
+        $i0 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r107);
+
+        if $i0 != 2 goto label24;
+
+        $b2 = r107[0];
+
+        $i54 = (int) $b2;
+
+        if $i54 == 5 goto label25;
+
+     label24:
+        $r7 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i1 = virtualinvoke r6.<java.net.InetSocketAddress: int getPort()>();
+
+        specialinvoke r0.<java.net.SocksSocketImpl: void bindV4(java.io.InputStream,java.io.OutputStream,java.net.InetAddress,int)>($r62, $r128, $r7, $i1);
+
+        return;
+
+     label25:
+        $b3 = r107[1];
+
+        $i55 = (int) $b3;
+
+        $i57 = (int) -1;
+
+        if $i55 != $i57 goto label26;
+
+        $r129 = new java.net.SocketException;
+
+        specialinvoke $r129.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS : No acceptable methods");
+
+        throw $r129;
+
+     label26:
+        $b4 = r107[1];
+
+        $z1 = specialinvoke r0.<java.net.SocksSocketImpl: boolean authenticate(byte,java.io.InputStream,java.io.BufferedOutputStream)>($b4, $r62, $r128);
+
+        if $z1 != 0 goto label27;
+
+        $r130 = new java.net.SocketException;
+
+        specialinvoke $r130.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS : authentication failed");
+
+        throw $r130;
+
+     label27:
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(5);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(2);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(0);
+
+        $i5 = virtualinvoke r6.<java.net.InetSocketAddress: int getPort()>();
+
+        $z2 = virtualinvoke r6.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z2 == 0 goto label32;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(3);
+
+        $r42 = virtualinvoke r6.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $i33 = virtualinvoke $r42.<java.lang.String: int length()>();
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i33);
+
+     label28:
+        $r43 = virtualinvoke r6.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(byte[])>($r44);
+
+     label29:
+        goto label31;
+
+     label30:
+        $r82 := @caughtexception;
+
+        $z10 = <java.net.SocksSocketImpl: boolean $assertionsDisabled>;
+
+        if $z10 != 0 goto label31;
+
+        $r131 = new java.lang.AssertionError;
+
+        specialinvoke $r131.<java.lang.AssertionError: void <init>()>();
+
+        throw $r131;
+
+     label31:
+        $i34 = $i5 >> 8;
+
+        $i35 = $i34 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i35);
+
+        $i36 = $i5 >> 0;
+
+        $i37 = $i36 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i37);
+
+        goto label35;
+
+     label32:
+        $r8 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z3 = $r8 instanceof java.net.Inet4Address;
+
+        if $z3 == 0 goto label33;
+
+        $r40 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r41 = virtualinvoke $r40.<java.net.InetAddress: byte[] getAddress()>();
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(1);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(byte[])>($r41);
+
+        $i29 = $i5 >> 8;
+
+        $i30 = $i29 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i30);
+
+        $i31 = $i5 >> 0;
+
+        $i32 = $i31 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i32);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void flush()>();
+
+        goto label35;
+
+     label33:
+        $r9 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z4 = $r9 instanceof java.net.Inet6Address;
+
+        if $z4 == 0 goto label34;
+
+        $r16 = virtualinvoke r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r17 = virtualinvoke $r16.<java.net.InetAddress: byte[] getAddress()>();
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>(4);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(byte[])>($r17);
+
+        $i6 = $i5 >> 8;
+
+        $i7 = $i6 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i7);
+
+        $i8 = $i5 >> 0;
+
+        $i9 = $i8 & 255;
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void write(int)>($i9);
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void flush()>();
+
+        goto label35;
+
+     label34:
+        $r10 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        virtualinvoke $r10.<java.net.Socket: void close()>();
+
+        $r133 = new java.net.SocketException;
+
+        $r132 = new java.lang.StringBuilder;
+
+        specialinvoke $r132.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r132.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported address type : ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r133.<java.net.SocketException: void <init>(java.lang.String)>($r15);
+
+        throw $r133;
+
+     label35:
+        $r108 = newarray (byte)[4];
+
+        specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, $r108);
+
+        r109 = null;
+
+        $b43 = $r108[1];
+
+        $i58 = (int) $b43;
+
+        tableswitch($i58)
+        {
+            case 0: goto label36;
+            case 1: goto label47;
+            case 2: goto label48;
+            case 3: goto label49;
+            case 4: goto label50;
+            case 5: goto label51;
+            case 6: goto label52;
+            case 7: goto label53;
+            case 8: goto label54;
+            default: goto label55;
+        };
+
+     label36:
+        $b10 = $r108[3];
+
+        $i59 = (int) $b10;
+
+        tableswitch($i59)
+        {
+            case 1: goto label37;
+            case 2: goto label46;
+            case 3: goto label40;
+            case 4: goto label43;
+            default: goto label46;
+        };
+
+     label37:
+        r110 = newarray (byte)[4];
+
+        $i23 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r110);
+
+        if $i23 == 4 goto label38;
+
+        $r134 = new java.net.SocketException;
+
+        specialinvoke $r134.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r134;
+
+     label38:
+        r111 = newarray (byte)[2];
+
+        $i24 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r111);
+
+        if $i24 == 2 goto label39;
+
+        $r135 = new java.net.SocketException;
+
+        specialinvoke $r135.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r135;
+
+     label39:
+        $b25 = r111[0];
+
+        $s60 = (short) $b25;
+
+        $s26 = $s60 & 255;
+
+        $i61 = (int) $s26;
+
+        i44 = $i61 << 8;
+
+        $b27 = r111[1];
+
+        $s62 = (short) $b27;
+
+        $s28 = $s62 & 255;
+
+        $i63 = (int) $s28;
+
+        i45 = i44 + $i63;
+
+        $r137 = new java.net.InetSocketAddress;
+
+        $r136 = new java.net.Inet4Address;
+
+        specialinvoke $r136.<java.net.Inet4Address: void <init>(java.lang.String,byte[])>("", r110);
+
+        specialinvoke $r137.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r136, i45);
+
+        r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = $r137;
+
+        goto label46;
+
+     label40:
+        b46 = $r108[1];
+
+        $i64 = (int) b46;
+
+        r31 = newarray (byte)[$i64];
+
+        $i17 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r31);
+
+        $i65 = (int) b46;
+
+        if $i17 == $i65 goto label41;
+
+        $r138 = new java.net.SocketException;
+
+        specialinvoke $r138.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r138;
+
+     label41:
+        r112 = newarray (byte)[2];
+
+        $i18 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r112);
+
+        if $i18 == 2 goto label42;
+
+        $r139 = new java.net.SocketException;
+
+        specialinvoke $r139.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r139;
+
+     label42:
+        $b19 = r112[0];
+
+        $s66 = (short) $b19;
+
+        $s20 = $s66 & 255;
+
+        $i67 = (int) $s20;
+
+        i47 = $i67 << 8;
+
+        $b21 = r112[1];
+
+        $s68 = (short) $b21;
+
+        $s22 = $s68 & 255;
+
+        $i69 = (int) $s22;
+
+        i48 = i47 + $i69;
+
+        $r141 = new java.net.InetSocketAddress;
+
+        $r140 = new java.lang.String;
+
+        specialinvoke $r140.<java.lang.String: void <init>(byte[])>(r31);
+
+        specialinvoke $r141.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r140, i48);
+
+        r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = $r141;
+
+        goto label46;
+
+     label43:
+        b49 = $r108[1];
+
+        $i70 = (int) b49;
+
+        r113 = newarray (byte)[$i70];
+
+        $i11 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r113);
+
+        $i71 = (int) b49;
+
+        if $i11 == $i71 goto label44;
+
+        $r142 = new java.net.SocketException;
+
+        specialinvoke $r142.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r142;
+
+     label44:
+        r114 = newarray (byte)[2];
+
+        $i12 = specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>($r62, r114);
+
+        if $i12 == 2 goto label45;
+
+        $r143 = new java.net.SocketException;
+
+        specialinvoke $r143.<java.net.SocketException: void <init>(java.lang.String)>("Reply from SOCKS server badly formatted");
+
+        throw $r143;
+
+     label45:
+        $b13 = r114[0];
+
+        $s72 = (short) $b13;
+
+        $s14 = $s72 & 255;
+
+        $i73 = (int) $s14;
+
+        i50 = $i73 << 8;
+
+        $b15 = r114[1];
+
+        $s74 = (short) $b15;
+
+        $s16 = $s74 & 255;
+
+        $i75 = (int) $s16;
+
+        i51 = i50 + $i75;
+
+        $r145 = new java.net.InetSocketAddress;
+
+        $r144 = new java.net.Inet6Address;
+
+        specialinvoke $r144.<java.net.Inet6Address: void <init>(java.lang.String,byte[])>("", r113);
+
+        specialinvoke $r145.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r144, i51);
+
+        r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = $r145;
+
+     label46:
+        goto label55;
+
+     label47:
+        $r146 = new java.net.SocketException;
+
+        specialinvoke $r146.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS server general failure");
+
+        r109 = $r146;
+
+        goto label55;
+
+     label48:
+        $r147 = new java.net.SocketException;
+
+        specialinvoke $r147.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Bind not allowed by ruleset");
+
+        r109 = $r147;
+
+        goto label55;
+
+     label49:
+        $r148 = new java.net.SocketException;
+
+        specialinvoke $r148.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Network unreachable");
+
+        r109 = $r148;
+
+        goto label55;
+
+     label50:
+        $r149 = new java.net.SocketException;
+
+        specialinvoke $r149.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Host unreachable");
+
+        r109 = $r149;
+
+        goto label55;
+
+     label51:
+        $r150 = new java.net.SocketException;
+
+        specialinvoke $r150.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Connection refused");
+
+        r109 = $r150;
+
+        goto label55;
+
+     label52:
+        $r151 = new java.net.SocketException;
+
+        specialinvoke $r151.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: TTL expired");
+
+        r109 = $r151;
+
+        goto label55;
+
+     label53:
+        $r152 = new java.net.SocketException;
+
+        specialinvoke $r152.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Command not supported");
+
+        r109 = $r152;
+
+        goto label55;
+
+     label54:
+        $r153 = new java.net.SocketException;
+
+        specialinvoke $r153.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: address type not supported");
+
+        r109 = $r153;
+
+     label55:
+        if r109 == null goto label56;
+
+        virtualinvoke $r62.<java.io.InputStream: void close()>();
+
+        virtualinvoke $r128.<java.io.BufferedOutputStream: void close()>();
+
+        $r19 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        virtualinvoke $r19.<java.net.Socket: void close()>();
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        throw r109;
+
+     label56:
+        r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn> = $r62;
+
+        r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut> = $r128;
+
+        return;
+
+        catch java.net.URISyntaxException from label03 to label04 with label05;
+        catch java.lang.Exception from label13 to label14 with label15;
+        catch java.lang.Exception from label19 to label20 with label21;
+        catch java.io.UnsupportedEncodingException from label28 to label29 with label30;
+    }
+
+    protected void acceptFrom(java.net.SocketImpl, java.net.InetSocketAddress) throws java.io.IOException
+    {
+        byte[] r46, r47, r48;
+        java.net.InetAddress $r11, $r22;
+        java.net.SocksSocketImpl r0, $r27;
+        java.net.SocketException $r4, $r31, $r32, $r33, $r34, $r35, $r36, $r37, r44;
+        java.lang.String $r41;
+        java.net.Inet4Address $r43;
+        java.net.SocketInputStream $r16;
+        java.net.SocketImpl r5, $r7, $r10, $r13, $r15, $r18, $r21, $r24, $r26;
+        boolean $z0, $z1;
+        java.net.InetSocketAddress r3, $r38, $r40, $r42, r45;
+        java.net.Socket $r1, $r6, $r9, $r12, $r14, $r17, $r20, $r23, $r25, $r30;
+        java.net.PlainSocketImpl r49;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, i14, i15, i16, i17, i18;
+        java.io.OutputStream $r29;
+        java.net.Inet6Address $r39;
+        java.io.FileDescriptor $r8, $r19;
+        java.io.InputStream r2, $r28;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r5 := @parameter0: java.net.SocketImpl;
+
+        r3 := @parameter1: java.net.InetSocketAddress;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        r2 = r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn>;
+
+        virtualinvoke r0.<java.net.SocksSocketImpl: void socksBind(java.net.InetSocketAddress)>(r3);
+
+        virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        $i0 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        r44 = null;
+
+        r45 = null;
+
+        tableswitch($i0)
+        {
+            case 0: goto label02;
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label09;
+            case 4: goto label10;
+            case 5: goto label11;
+            case 6: goto label12;
+            case 7: goto label13;
+            case 8: goto label14;
+            default: goto label15;
+        };
+
+     label02:
+        $i5 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        tableswitch($i5)
+        {
+            case 1: goto label03;
+            case 2: goto label06;
+            case 3: goto label04;
+            case 4: goto label05;
+            default: goto label06;
+        };
+
+     label03:
+        r46 = newarray (byte)[4];
+
+        specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>(r2, r46);
+
+        $i11 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i13 = $i11 << 8;
+
+        $i12 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i14 = i13 + $i12;
+
+        $r42 = new java.net.InetSocketAddress;
+
+        $r43 = new java.net.Inet4Address;
+
+        specialinvoke $r43.<java.net.Inet4Address: void <init>(java.lang.String,byte[])>("", r46);
+
+        specialinvoke $r42.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r43, i14);
+
+        r45 = $r42;
+
+        goto label06;
+
+     label04:
+        $i8 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        r47 = newarray (byte)[$i8];
+
+        specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>(r2, r47);
+
+        $i9 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i15 = $i9 << 8;
+
+        $i10 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i16 = i15 + $i10;
+
+        $r40 = new java.net.InetSocketAddress;
+
+        $r41 = new java.lang.String;
+
+        specialinvoke $r41.<java.lang.String: void <init>(byte[])>(r47);
+
+        specialinvoke $r40.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r41, i16);
+
+        r45 = $r40;
+
+        goto label06;
+
+     label05:
+        r48 = newarray (byte)[16];
+
+        specialinvoke r0.<java.net.SocksSocketImpl: int readSocksReply(java.io.InputStream,byte[])>(r2, r48);
+
+        $i6 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i17 = $i6 << 8;
+
+        $i7 = virtualinvoke r2.<java.io.InputStream: int read()>();
+
+        i18 = i17 + $i7;
+
+        $r38 = new java.net.InetSocketAddress;
+
+        $r39 = new java.net.Inet6Address;
+
+        specialinvoke $r39.<java.net.Inet6Address: void <init>(java.lang.String,byte[])>("", r48);
+
+        specialinvoke $r38.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r39, i18);
+
+        r45 = $r38;
+
+     label06:
+        goto label15;
+
+     label07:
+        $r37 = new java.net.SocketException;
+
+        specialinvoke $r37.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS server general failure");
+
+        r44 = $r37;
+
+        goto label15;
+
+     label08:
+        $r36 = new java.net.SocketException;
+
+        specialinvoke $r36.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Accept not allowed by ruleset");
+
+        r44 = $r36;
+
+        goto label15;
+
+     label09:
+        $r35 = new java.net.SocketException;
+
+        specialinvoke $r35.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Network unreachable");
+
+        r44 = $r35;
+
+        goto label15;
+
+     label10:
+        $r34 = new java.net.SocketException;
+
+        specialinvoke $r34.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Host unreachable");
+
+        r44 = $r34;
+
+        goto label15;
+
+     label11:
+        $r33 = new java.net.SocketException;
+
+        specialinvoke $r33.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Connection refused");
+
+        r44 = $r33;
+
+        goto label15;
+
+     label12:
+        $r32 = new java.net.SocketException;
+
+        specialinvoke $r32.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: TTL expired");
+
+        r44 = $r32;
+
+        goto label15;
+
+     label13:
+        $r31 = new java.net.SocketException;
+
+        specialinvoke $r31.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: Command not supported");
+
+        r44 = $r31;
+
+        goto label15;
+
+     label14:
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("SOCKS: address type not supported");
+
+        r44 = $r4;
+
+     label15:
+        if r44 == null goto label16;
+
+        $r28 = r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn>;
+
+        virtualinvoke $r28.<java.io.InputStream: void close()>();
+
+        $r29 = r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut>;
+
+        virtualinvoke $r29.<java.io.OutputStream: void close()>();
+
+        $r30 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        virtualinvoke $r30.<java.net.Socket: void close()>();
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        throw r44;
+
+     label16:
+        $z0 = r5 instanceof java.net.SocksSocketImpl;
+
+        if $z0 == 0 goto label17;
+
+        $r27 = (java.net.SocksSocketImpl) r5;
+
+        $r27.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address> = r45;
+
+     label17:
+        $z1 = r5 instanceof java.net.PlainSocketImpl;
+
+        if $z1 == 0 goto label18;
+
+        r49 = (java.net.PlainSocketImpl) r5;
+
+        $r16 = (java.net.SocketInputStream) r2;
+
+        virtualinvoke r49.<java.net.PlainSocketImpl: void setInputStream(java.net.SocketInputStream)>($r16);
+
+        $r17 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r18 = virtualinvoke $r17.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $r19 = virtualinvoke $r18.<java.net.SocketImpl: java.io.FileDescriptor getFileDescriptor()>();
+
+        virtualinvoke r49.<java.net.PlainSocketImpl: void setFileDescriptor(java.io.FileDescriptor)>($r19);
+
+        $r20 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r21 = virtualinvoke $r20.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $r22 = virtualinvoke $r21.<java.net.SocketImpl: java.net.InetAddress getInetAddress()>();
+
+        virtualinvoke r49.<java.net.PlainSocketImpl: void setAddress(java.net.InetAddress)>($r22);
+
+        $r23 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r24 = virtualinvoke $r23.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $i3 = virtualinvoke $r24.<java.net.SocketImpl: int getPort()>();
+
+        virtualinvoke r49.<java.net.PlainSocketImpl: void setPort(int)>($i3);
+
+        $r25 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r26 = virtualinvoke $r25.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $i4 = virtualinvoke $r26.<java.net.SocketImpl: int getLocalPort()>();
+
+        virtualinvoke r49.<java.net.PlainSocketImpl: void setLocalPort(int)>($i4);
+
+        goto label19;
+
+     label18:
+        $r6 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r7 = virtualinvoke $r6.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $r8 = $r7.<java.net.SocketImpl: java.io.FileDescriptor fd>;
+
+        r5.<java.net.SocketImpl: java.io.FileDescriptor fd> = $r8;
+
+        $r9 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r10 = virtualinvoke $r9.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $r11 = $r10.<java.net.SocketImpl: java.net.InetAddress address>;
+
+        r5.<java.net.SocketImpl: java.net.InetAddress address> = $r11;
+
+        $r12 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r13 = virtualinvoke $r12.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $i1 = $r13.<java.net.SocketImpl: int port>;
+
+        r5.<java.net.SocketImpl: int port> = $i1;
+
+        $r14 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        $r15 = virtualinvoke $r14.<java.net.Socket: java.net.SocketImpl getImpl()>();
+
+        $i2 = $r15.<java.net.SocketImpl: int localport>;
+
+        r5.<java.net.SocketImpl: int localport> = $i2;
+
+     label19:
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        return;
+    }
+
+    protected java.net.InetAddress getInetAddress()
+    {
+        java.net.InetAddress $r2, $r4;
+        java.net.SocksSocketImpl r0;
+        java.net.InetSocketAddress $r1, $r3;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        return $r4;
+
+     label1:
+        $r2 = specialinvoke r0.<java.net.PlainSocketImpl: java.net.InetAddress getInetAddress()>();
+
+        return $r2;
+    }
+
+    protected int getPort()
+    {
+        java.net.SocksSocketImpl r0;
+        int $i0, $i1;
+        java.net.InetSocketAddress $r1, $r2;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        $i1 = virtualinvoke $r2.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i1;
+
+     label1:
+        $i0 = specialinvoke r0.<java.net.PlainSocketImpl: int getPort()>();
+
+        return $i0;
+    }
+
+    protected int getLocalPort()
+    {
+        java.net.Socket $r1;
+        java.net.SocksSocketImpl r0;
+        int $i0, $i1, $i2;
+        java.net.InetSocketAddress $r2, $r3;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.Socket socket>;
+
+        if $r1 == null goto label1;
+
+        $i2 = specialinvoke r0.<java.net.PlainSocketImpl: int getLocalPort()>();
+
+        return $i2;
+
+     label1:
+        $r2 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<java.net.SocksSocketImpl: java.net.InetSocketAddress external_address>;
+
+        $i1 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i1;
+
+     label2:
+        $i0 = specialinvoke r0.<java.net.PlainSocketImpl: int getLocalPort()>();
+
+        return $i0;
+    }
+
+    protected void close() throws java.io.IOException
+    {
+        java.net.Socket $r1, $r2;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        virtualinvoke $r2.<java.net.Socket: void close()>();
+
+     label1:
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = null;
+
+        specialinvoke r0.<java.net.PlainSocketImpl: void close()>();
+
+        return;
+    }
+
+    private java.lang.String getUserName()
+    {
+        java.net.SocksSocketImpl r0;
+        java.lang.Object $r2;
+        java.lang.SecurityException $r3;
+        java.lang.String r4;
+        sun.security.action.GetPropertyAction $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.SocksSocketImpl;
+
+        r4 = "";
+
+        $z0 = r0.<java.net.SocksSocketImpl: boolean applicationSetProxy>;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.name");
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("user.name");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r4 = (java.lang.String) $r2;
+
+     label5:
+        return r4;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    static void access$000(java.net.SocksSocketImpl, java.lang.String, int, int) throws java.io.IOException
+    {
+        java.net.SocksSocketImpl r0;
+        int i0, i1;
+        java.lang.String r1;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        r1 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.net.SocksSocketImpl: void superConnectServer(java.lang.String,int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    static java.io.InputStream access$102(java.net.SocksSocketImpl, java.io.InputStream)
+    {
+        java.net.SocksSocketImpl r0;
+        java.io.InputStream r1;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        r0.<java.net.SocksSocketImpl: java.io.InputStream cmdIn> = r1;
+
+        return r1;
+    }
+
+    static java.io.OutputStream access$202(java.net.SocksSocketImpl, java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        r0.<java.net.SocksSocketImpl: java.io.OutputStream cmdOut> = r1;
+
+        return r1;
+    }
+
+    static java.lang.String access$300(java.net.SocksSocketImpl)
+    {
+        java.lang.String $r1;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.lang.String server>;
+
+        return $r1;
+    }
+
+    static int access$400(java.net.SocksSocketImpl)
+    {
+        int $i0;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        $i0 = r0.<java.net.SocksSocketImpl: int serverPort>;
+
+        return $i0;
+    }
+
+    static java.net.Socket access$500(java.net.SocksSocketImpl)
+    {
+        java.net.Socket $r1;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        $r1 = r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock>;
+
+        return $r1;
+    }
+
+    static java.net.Socket access$502(java.net.SocksSocketImpl, java.net.Socket)
+    {
+        java.net.Socket r1;
+        java.net.SocksSocketImpl r0;
+
+        r0 := @parameter0: java.net.SocksSocketImpl;
+
+        r1 := @parameter1: java.net.Socket;
+
+        r0.<java.net.SocksSocketImpl: java.net.Socket cmdsock> = r1;
+
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Ljava/net/SocksSocketImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.net.SocksSocketImpl: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

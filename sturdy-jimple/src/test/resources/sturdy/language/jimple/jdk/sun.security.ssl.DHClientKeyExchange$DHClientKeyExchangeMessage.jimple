@@ -1,0 +1,232 @@
+final class sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage extends sun.security.ssl.SSLHandshake$HandshakeMessage
+{
+    private byte[] y;
+
+    void <init>(sun.security.ssl.HandshakeContext) throws java.io.IOException
+    {
+        byte[] $r6;
+        java.math.BigInteger $r5;
+        boolean $z0, $z1;
+        java.util.Iterator $r4;
+        sun.security.ssl.ClientHandshakeContext r2;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r0;
+        sun.security.ssl.TransportContext $r8;
+        java.util.List $r3;
+        javax.net.ssl.SSLException $r9;
+        javax.crypto.interfaces.DHPublicKey r13;
+        sun.security.ssl.Alert $r7;
+        sun.security.ssl.SSLPossession r12;
+        java.lang.Object $r10;
+        sun.security.ssl.DHKeyExchange$DHEPossession r11;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ClientHandshakeContext) r1;
+
+        r11 = null;
+
+        $r3 = r2.<sun.security.ssl.ClientHandshakeContext: java.util.List handshakePossessions>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r10 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (sun.security.ssl.SSLPossession) $r10;
+
+        $z1 = r12 instanceof sun.security.ssl.DHKeyExchange$DHEPossession;
+
+        if $z1 == 0 goto label2;
+
+        r11 = (sun.security.ssl.DHKeyExchange$DHEPossession) r12;
+
+        goto label3;
+
+     label2:
+        goto label1;
+
+     label3:
+        if r11 != null goto label4;
+
+        $r8 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r7 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r9 = virtualinvoke $r8.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r7, "No DHE credentials negotiated for client key exchange");
+
+        throw $r9;
+
+     label4:
+        r13 = r11.<sun.security.ssl.DHKeyExchange$DHEPossession: javax.crypto.interfaces.DHPublicKey publicKey>;
+
+        interfaceinvoke r13.<javax.crypto.interfaces.DHPublicKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r5 = interfaceinvoke r13.<javax.crypto.interfaces.DHPublicKey: java.math.BigInteger getY()>();
+
+        $r6 = staticinvoke <sun.security.ssl.Utilities: byte[] toByteArray(java.math.BigInteger)>($r5);
+
+        r0.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y> = $r6;
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r4;
+        sun.security.ssl.ServerHandshakeContext r2;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r0;
+        sun.security.ssl.TransportContext $r6, $r9;
+        java.nio.ByteBuffer r3;
+        javax.net.ssl.SSLException $r7, $r10;
+        int $i0;
+        sun.security.ssl.Alert $r5, $r8;
+        sun.security.ssl.HandshakeContext r1;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ServerHandshakeContext) r1;
+
+        $i0 = virtualinvoke r3.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 3 goto label1;
+
+        $r9 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r10 = virtualinvoke $r9.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r8, "Invalid DH ClientKeyExchange message: insufficient data");
+
+        throw $r10;
+
+     label1:
+        $r4 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r3);
+
+        r0.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y> = $r4;
+
+        $z0 = virtualinvoke r3.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r5 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r7 = virtualinvoke $r6.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r5, "Invalid DH ClientKeyExchange message: unknown extra data");
+
+        throw $r7;
+
+     label2:
+        return;
+    }
+
+    public sun.security.ssl.SSLHandshake handshakeType()
+    {
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r1;
+        sun.security.ssl.SSLHandshake $r0;
+
+        r1 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        $r0 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CLIENT_KEY_EXCHANGE>;
+
+        return $r0;
+    }
+
+    public int messageLength()
+    {
+        byte[] $r1;
+        int $i0, $i1;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r0;
+
+        r0 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        $r1 = r0.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 + 2;
+
+        return $i1;
+    }
+
+    public void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] $r2;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r1;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r1 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $r2 = r1.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>($r2);
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r5;
+        java.lang.Object[] $r3;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r4;
+        java.text.MessageFormat $r0;
+        java.util.Locale $r1;
+        java.lang.String $r6, $r7, $r8;
+        sun.misc.HexDumpEncoder $r2;
+
+        r4 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"DH ClientKeyExchange\": \'{\'\n  \"parameters\": \'{\'\n    \"dh_Yc\": \'{\'\n{0}\n    \'}\',\n  \'}\'\n\'}\'", $r1);
+
+        $r2 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r2.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r5 = r4.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y>;
+
+        $r6 = virtualinvoke $r2.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r5);
+
+        $r7 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r6, "      ");
+
+        $r3[0] = $r7;
+
+        $r8 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r3);
+
+        return $r8;
+    }
+
+    static byte[] access$200(sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage)
+    {
+        byte[] $r1;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage r0;
+
+        r0 := @parameter0: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        $r1 = r0.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] y>;
+
+        return $r1;
+    }
+}

@@ -1,0 +1,185 @@
+public class com.sun.corba.se.impl.ior.EncapsulationUtility extends java.lang.Object
+{
+
+    private void <init>()
+    {
+        com.sun.corba.se.impl.ior.EncapsulationUtility r0;
+
+        r0 := @this: com.sun.corba.se.impl.ior.EncapsulationUtility;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void readIdentifiableSequence(java.util.List, com.sun.corba.se.spi.ior.IdentifiableFactoryFinder, org.omg.CORBA_2_3.portable.InputStream)
+    {
+        java.util.List r3;
+        com.sun.corba.se.spi.ior.Identifiable $r2;
+        org.omg.CORBA_2_3.portable.InputStream r0;
+        int $i0, $i1, i2;
+        com.sun.corba.se.spi.ior.IdentifiableFactoryFinder r1;
+
+        r3 := @parameter0: java.util.List;
+
+        r1 := @parameter1: com.sun.corba.se.spi.ior.IdentifiableFactoryFinder;
+
+        r0 := @parameter2: org.omg.CORBA_2_3.portable.InputStream;
+
+        $i0 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: int read_long()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $i1 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: int read_long()>();
+
+        $r2 = interfaceinvoke r1.<com.sun.corba.se.spi.ior.IdentifiableFactoryFinder: com.sun.corba.se.spi.ior.Identifiable create(int,org.omg.CORBA_2_3.portable.InputStream)>($i1, r0);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public static void writeIdentifiableSequence(java.util.List, org.omg.CORBA_2_3.portable.OutputStream)
+    {
+        java.util.Iterator $r2;
+        com.sun.corba.se.spi.ior.Identifiable $r4, r5;
+        java.util.List r1;
+        org.omg.CORBA_2_3.portable.OutputStream r0;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r1 := @parameter0: java.util.List;
+
+        r0 := @parameter1: org.omg.CORBA_2_3.portable.OutputStream;
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>($i0);
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (com.sun.corba.se.spi.ior.Identifiable) $r3;
+
+        r5 = (com.sun.corba.se.spi.ior.Identifiable) $r4;
+
+        $i1 = interfaceinvoke r5.<com.sun.corba.se.spi.ior.Identifiable: int getId()>();
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>($i1);
+
+        interfaceinvoke r5.<com.sun.corba.se.spi.ior.Identifiable: void write(org.omg.CORBA_2_3.portable.OutputStream)>(r0);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public static void writeOutputStream(org.omg.CORBA_2_3.portable.OutputStream, org.omg.CORBA_2_3.portable.OutputStream)
+    {
+        byte[] $r2;
+        org.omg.CORBA_2_3.portable.OutputStream r0, r3;
+        int $i0, $i1;
+        com.sun.corba.se.impl.encoding.CDROutputStream $r1;
+
+        r0 := @parameter0: org.omg.CORBA_2_3.portable.OutputStream;
+
+        r3 := @parameter1: org.omg.CORBA_2_3.portable.OutputStream;
+
+        $r1 = (com.sun.corba.se.impl.encoding.CDROutputStream) r0;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CDROutputStream: byte[] toByteArray()>();
+
+        $i0 = lengthof $r2;
+
+        virtualinvoke r3.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>($i0);
+
+        $i1 = lengthof $r2;
+
+        virtualinvoke r3.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet_array(byte[],int,int)>($r2, 0, $i1);
+
+        return;
+    }
+
+    public static org.omg.CORBA_2_3.portable.InputStream getEncapsulationStream(org.omg.CORBA_2_3.portable.InputStream)
+    {
+        byte[] $r1;
+        org.omg.CORBA.ORB $r2;
+        org.omg.CORBA_2_3.portable.InputStream r0;
+        int $i0;
+        com.sun.corba.se.impl.encoding.EncapsInputStream $r3;
+
+        r0 := @parameter0: org.omg.CORBA_2_3.portable.InputStream;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.ior.EncapsulationUtility: byte[] readOctets(org.omg.CORBA_2_3.portable.InputStream)>(r0);
+
+        $r2 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: org.omg.CORBA.ORB orb()>();
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <sun.corba.EncapsInputStreamFactory: com.sun.corba.se.impl.encoding.EncapsInputStream newEncapsInputStream(org.omg.CORBA.ORB,byte[],int)>($r2, $r1, $i0);
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.encoding.EncapsInputStream: void consumeEndian()>();
+
+        return $r3;
+    }
+
+    public static byte[] readOctets(org.omg.CORBA_2_3.portable.InputStream)
+    {
+        int $i0;
+        byte[] r1;
+        org.omg.CORBA_2_3.portable.InputStream r0;
+
+        r0 := @parameter0: org.omg.CORBA_2_3.portable.InputStream;
+
+        $i0 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: int read_ulong()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_octet_array(byte[],int,int)>(r1, 0, $i0);
+
+        return r1;
+    }
+
+    public static void writeEncapsulation(com.sun.corba.se.spi.ior.WriteContents, org.omg.CORBA_2_3.portable.OutputStream)
+    {
+        org.omg.CORBA.ORB $r1;
+        org.omg.CORBA_2_3.portable.OutputStream r0;
+        com.sun.corba.se.spi.ior.WriteContents r4;
+        com.sun.corba.se.impl.encoding.EncapsOutputStream $r3;
+        com.sun.corba.se.spi.orb.ORB $r2;
+
+        r4 := @parameter0: com.sun.corba.se.spi.ior.WriteContents;
+
+        r0 := @parameter1: org.omg.CORBA_2_3.portable.OutputStream;
+
+        $r1 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.OutputStream: org.omg.CORBA.ORB orb()>();
+
+        $r2 = (com.sun.corba.se.spi.orb.ORB) $r1;
+
+        $r3 = staticinvoke <sun.corba.OutputStreamFactory: com.sun.corba.se.impl.encoding.EncapsOutputStream newEncapsOutputStream(com.sun.corba.se.spi.orb.ORB)>($r2);
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.encoding.EncapsOutputStream: void putEndian()>();
+
+        interfaceinvoke r4.<com.sun.corba.se.spi.ior.WriteContents: void writeContents(org.omg.CORBA_2_3.portable.OutputStream)>($r3);
+
+        staticinvoke <com.sun.corba.se.impl.ior.EncapsulationUtility: void writeOutputStream(org.omg.CORBA_2_3.portable.OutputStream,org.omg.CORBA_2_3.portable.OutputStream)>($r3, r0);
+
+        return;
+    }
+}

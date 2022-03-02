@@ -1,0 +1,207 @@
+final class java.util.concurrent.SynchronousQueue$TransferStack$SNode extends java.lang.Object
+{
+    volatile java.util.concurrent.SynchronousQueue$TransferStack$SNode next;
+    volatile java.util.concurrent.SynchronousQueue$TransferStack$SNode match;
+    volatile java.lang.Thread waiter;
+    java.lang.Object item;
+    int mode;
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long matchOffset;
+    private static final long nextOffset;
+
+    void <init>(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item> = r1;
+
+        return;
+    }
+
+    boolean casNext(java.util.concurrent.SynchronousQueue$TransferStack$SNode, java.util.concurrent.SynchronousQueue$TransferStack$SNode)
+    {
+        sun.misc.Unsafe $r4;
+        long $l0;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, r1, $r2, r3;
+        boolean $z0, $z1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r0 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r3 := @parameter1: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        $r2 = r1.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if r0 != $r2 goto label1;
+
+        $r4 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: long nextOffset>;
+
+        $z0 = virtualinvoke $r4.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l0, r0, r3);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    boolean tryMatch(java.util.concurrent.SynchronousQueue$TransferStack$SNode)
+    {
+        sun.misc.Unsafe $r4;
+        long $l0;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, $r1, r2, $r3;
+        java.lang.Thread r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r2 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        $r1 = r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode match>;
+
+        if $r1 != null goto label2;
+
+        $r4 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: long matchOffset>;
+
+        $z0 = virtualinvoke $r4.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, r2);
+
+        if $z0 == 0 goto label2;
+
+        r5 = r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Thread waiter>;
+
+        if r5 == null goto label1;
+
+        r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Thread waiter> = null;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void unpark(java.lang.Thread)>(r5);
+
+     label1:
+        return 1;
+
+     label2:
+        $r3 = r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode match>;
+
+        if $r3 != r2 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    void tryCancel()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        $r1 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: long matchOffset>;
+
+        virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, r0);
+
+        return;
+    }
+
+    boolean isCancelled()
+    {
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        $r1 = r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode match>;
+
+        if $r1 != r0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0, $r1, $r3;
+        java.lang.Error $r6;
+        long $l0, $l1;
+        java.lang.reflect.Field $r2, $r4;
+        java.lang.Exception $r5;
+        java.lang.Class r7, r8, r9;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE> = $r0;
+
+        r7 = class "Ljava/util/concurrent/SynchronousQueue$TransferStack$SNode;";
+
+        r9 = class "Ljava/util/concurrent/SynchronousQueue$TransferStack$SNode;";
+
+        r8 = class "Ljava/util/concurrent/SynchronousQueue$TransferStack$SNode;";
+
+        $r1 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE>;
+
+        $r2 = virtualinvoke r8.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("match");
+
+        $l0 = virtualinvoke $r1.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r2);
+
+        <java.util.concurrent.SynchronousQueue$TransferStack$SNode: long matchOffset> = $l0;
+
+        $r3 = <java.util.concurrent.SynchronousQueue$TransferStack$SNode: sun.misc.Unsafe UNSAFE>;
+
+        $r4 = virtualinvoke r9.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("next");
+
+        $l1 = virtualinvoke $r3.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r4);
+
+        <java.util.concurrent.SynchronousQueue$TransferStack$SNode: long nextOffset> = $l1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.Error;
+
+        specialinvoke $r6.<java.lang.Error: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

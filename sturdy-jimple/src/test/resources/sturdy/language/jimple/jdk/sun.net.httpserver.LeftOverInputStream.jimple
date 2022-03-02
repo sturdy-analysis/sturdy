@@ -1,0 +1,286 @@
+abstract class sun.net.httpserver.LeftOverInputStream extends java.io.FilterInputStream
+{
+    sun.net.httpserver.ExchangeImpl t;
+    sun.net.httpserver.ServerImpl server;
+    protected boolean closed;
+    protected boolean eof;
+    byte[] one;
+    static final boolean $assertionsDisabled;
+
+    public void <init>(sun.net.httpserver.ExchangeImpl, java.io.InputStream)
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        byte[] $r2;
+        sun.net.httpserver.ExchangeImpl r3;
+        sun.net.httpserver.ServerImpl $r4;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        r3 := @parameter0: sun.net.httpserver.ExchangeImpl;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.net.httpserver.LeftOverInputStream: boolean closed> = 0;
+
+        r0.<sun.net.httpserver.LeftOverInputStream: boolean eof> = 0;
+
+        $r2 = newarray (byte)[1];
+
+        r0.<sun.net.httpserver.LeftOverInputStream: byte[] one> = $r2;
+
+        r0.<sun.net.httpserver.LeftOverInputStream: sun.net.httpserver.ExchangeImpl t> = r3;
+
+        $r4 = virtualinvoke r3.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl getServerImpl()>();
+
+        r0.<sun.net.httpserver.LeftOverInputStream: sun.net.httpserver.ServerImpl server> = $r4;
+
+        return;
+    }
+
+    public boolean isDataBuffered() throws java.io.IOException
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        int $i0;
+        java.lang.AssertionError $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        $z0 = <sun.net.httpserver.LeftOverInputStream: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.net.httpserver.LeftOverInputStream: boolean eof>;
+
+        if $z1 != 0 goto label1;
+
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $i0 = specialinvoke r0.<java.io.FilterInputStream: int available()>();
+
+        if $i0 <= 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        long $l0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        $z0 = r0.<sun.net.httpserver.LeftOverInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<sun.net.httpserver.LeftOverInputStream: boolean closed> = 1;
+
+        $z1 = r0.<sun.net.httpserver.LeftOverInputStream: boolean eof>;
+
+        if $z1 != 0 goto label2;
+
+        $l0 = staticinvoke <sun.net.httpserver.ServerConfig: long getDrainAmount()>();
+
+        $z2 = virtualinvoke r0.<sun.net.httpserver.LeftOverInputStream: boolean drain(long)>($l0);
+
+        r0.<sun.net.httpserver.LeftOverInputStream: boolean eof> = $z2;
+
+     label2:
+        return;
+    }
+
+    public boolean isClosed()
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        $z0 = r0.<sun.net.httpserver.LeftOverInputStream: boolean closed>;
+
+        return $z0;
+    }
+
+    public boolean isEOF()
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        $z0 = r0.<sun.net.httpserver.LeftOverInputStream: boolean eof>;
+
+        return $z0;
+    }
+
+    protected abstract int readImpl(byte[], int, int) throws java.io.IOException;
+
+    public synchronized int read() throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        java.io.IOException $r4;
+        sun.net.httpserver.LeftOverInputStream r0;
+        short $s2, $s5;
+        byte $b1;
+        int $i0, $i4, $i6;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        $z0 = r0.<sun.net.httpserver.LeftOverInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("Stream is closed");
+
+        throw $r4;
+
+     label1:
+        $r1 = r0.<sun.net.httpserver.LeftOverInputStream: byte[] one>;
+
+        $i0 = virtualinvoke r0.<sun.net.httpserver.LeftOverInputStream: int readImpl(byte[],int,int)>($r1, 0, 1);
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label2;
+
+        if $i0 != 0 goto label3;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 = r0.<sun.net.httpserver.LeftOverInputStream: byte[] one>;
+
+        $b1 = $r2[0];
+
+        $s5 = (short) $b1;
+
+        $s2 = $s5 & 255;
+
+        $i6 = (int) $s2;
+
+        return $i6;
+    }
+
+    public synchronized int read(byte[], int, int) throws java.io.IOException
+    {
+        sun.net.httpserver.LeftOverInputStream r0;
+        byte[] r1;
+        int i0, i1, $i2;
+        java.io.IOException $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<sun.net.httpserver.LeftOverInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream is closed");
+
+        throw $r2;
+
+     label1:
+        $i2 = virtualinvoke r0.<sun.net.httpserver.LeftOverInputStream: int readImpl(byte[],int,int)>(r1, i0, i1);
+
+        return $i2;
+    }
+
+    public boolean drain(long) throws java.io.IOException
+    {
+        byte[] r0;
+        long l2, l4;
+        sun.net.httpserver.LeftOverInputStream r1;
+        byte $b0, $b3;
+        int $i1, $i5;
+
+        r1 := @this: sun.net.httpserver.LeftOverInputStream;
+
+        l4 := @parameter0: long;
+
+        r0 = newarray (byte)[2048];
+
+     label1:
+        $b0 = l4 cmp 0L;
+
+        $i5 = (int) $b0;
+
+        if $i5 <= 0 goto label3;
+
+        $i1 = virtualinvoke r1.<sun.net.httpserver.LeftOverInputStream: int readImpl(byte[],int,int)>(r0, 0, 2048);
+
+        l2 = (long) $i1;
+
+        $b3 = l2 cmp -1L;
+
+        if $b3 != 0 goto label2;
+
+        r1.<sun.net.httpserver.LeftOverInputStream: boolean eof> = 1;
+
+        return 1;
+
+     label2:
+        l4 = l4 - l2;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/httpserver/LeftOverInputStream;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.LeftOverInputStream: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

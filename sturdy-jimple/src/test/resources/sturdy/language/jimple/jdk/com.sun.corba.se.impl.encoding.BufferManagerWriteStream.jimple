@@ -1,0 +1,208 @@
+public class com.sun.corba.se.impl.encoding.BufferManagerWriteStream extends com.sun.corba.se.impl.encoding.BufferManagerWrite
+{
+    private int fragmentCount;
+
+    void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWrite: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: int fragmentCount> = 0;
+
+        return;
+    }
+
+    public boolean sentFragment()
+    {
+        int $i0;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: int fragmentCount>;
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getBufferSize()
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+        int $i0;
+        com.sun.corba.se.spi.orb.ORBData $r2;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i0 = interfaceinvoke $r2.<com.sun.corba.se.spi.orb.ORBData: int getGIOPFragmentSize()>();
+
+        return $i0;
+    }
+
+    public void overflow(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputObject $r5, $r9;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage $r7;
+        com.sun.corba.se.spi.protocol.PIHandler $r12;
+        org.omg.CORBA.SystemException $r10;
+        java.nio.ByteBuffer $r1, $r3;
+        com.sun.corba.se.spi.orb.ORB $r11;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r2;
+        int $i0;
+        java.lang.Object $r4, $r8;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo r0;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.Message $r6;
+
+        r2 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        r0 := @parameter0: com.sun.corba.se.impl.encoding.ByteBufferWithInfo;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        staticinvoke <com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase: void setFlag(java.nio.ByteBuffer,int)>($r1, 2);
+
+     label1:
+        specialinvoke r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: void sendFragment(boolean)>(0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r11 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r12.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r10);
+
+        throw $r10;
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>(0);
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        $i0 = virtualinvoke $r3.<java.nio.ByteBuffer: int limit()>();
+
+        r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int buflen> = $i0;
+
+        r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: boolean fragmented> = 1;
+
+        $r4 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: java.lang.Object outputObject>;
+
+        $r5 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r4;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.encoding.CDROutputObject: com.sun.corba.se.impl.protocol.giopmsgheaders.Message getMessageHeader()>();
+
+        $r7 = interfaceinvoke $r6.<com.sun.corba.se.impl.protocol.giopmsgheaders.Message: com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage createFragmentMessage()>();
+
+        $r8 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: java.lang.Object outputObject>;
+
+        $r9 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r8;
+
+        interfaceinvoke $r7.<com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage: void write(org.omg.CORBA.portable.OutputStream)>($r9);
+
+        return;
+
+        catch org.omg.CORBA.SystemException from label1 to label2 with label3;
+    }
+
+    private void sendFragment(boolean)
+    {
+        java.lang.Throwable $r7;
+        com.sun.corba.se.pept.protocol.MessageMediator $r3;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+        com.sun.corba.se.pept.transport.Connection $r4;
+        com.sun.corba.se.pept.encoding.OutputObject $r2, $r6;
+        int $i0, $i1;
+        java.lang.Object $r1, $r5;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: java.lang.Object outputObject>;
+
+        $r2 = (com.sun.corba.se.pept.encoding.OutputObject) $r1;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.pept.encoding.OutputObject: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Connection: void writeLock()>();
+
+     label1:
+        $r5 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: java.lang.Object outputObject>;
+
+        $r6 = (com.sun.corba.se.pept.encoding.OutputObject) $r5;
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Connection: void sendWithoutLock(com.sun.corba.se.pept.encoding.OutputObject)>($r6);
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: int fragmentCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: int fragmentCount> = $i1;
+
+     label2:
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Connection: void writeUnlock()>();
+
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Connection: void writeUnlock()>();
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void sendMessage()
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: void sendFragment(boolean)>(1);
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteStream: boolean sentFullMessage> = 1;
+
+        return;
+    }
+
+    public void close()
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteStream;
+
+        return;
+    }
+}

@@ -1,0 +1,2823 @@
+public class com.sun.jmx.snmp.daemon.SnmpInformRequest extends java.lang.Object implements com.sun.jmx.snmp.SnmpDefinitions
+{
+    private static com.sun.jmx.snmp.daemon.SnmpRequestCounter requestCounter;
+    private com.sun.jmx.snmp.SnmpVarBindList varBindList;
+    int errorStatus;
+    int errorIndex;
+    com.sun.jmx.snmp.SnmpVarBind[] internalVarBind;
+    java.lang.String reason;
+    private transient com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor;
+    private transient com.sun.jmx.snmp.daemon.SnmpSession informSession;
+    private com.sun.jmx.snmp.daemon.SnmpInformHandler callback;
+    com.sun.jmx.snmp.SnmpPdu requestPdu;
+    com.sun.jmx.snmp.SnmpPduRequestType responsePdu;
+    private static final int stBase;
+    public static final int stInProgress;
+    public static final int stWaitingToSend;
+    public static final int stWaitingForReply;
+    public static final int stReceivedReply;
+    public static final int stAborted;
+    public static final int stTimeout;
+    public static final int stInternalError;
+    public static final int stResultsAvailable;
+    public static final int stNeverUsed;
+    private int numTries;
+    private int timeout;
+    private int reqState;
+    private long prevPollTime;
+    private long nextPollTime;
+    private long waitTimeForResponse;
+    private java.util.Date debugDate;
+    private int requestId;
+    private int port;
+    private java.net.InetAddress address;
+    private java.lang.String communityString;
+
+    void <init>(com.sun.jmx.snmp.daemon.SnmpSession, com.sun.jmx.snmp.daemon.SnmpAdaptorServer, java.net.InetAddress, java.lang.String, int, com.sun.jmx.snmp.daemon.SnmpInformHandler) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        com.sun.jmx.snmp.daemon.SnmpAdaptorServer r3, $r8;
+        java.util.Date $r1;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler r6;
+        java.net.InetAddress r4;
+        com.sun.jmx.snmp.daemon.SnmpSession r2, $r7;
+        int i0, $i1;
+        java.lang.String r5;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r2 := @parameter0: com.sun.jmx.snmp.daemon.SnmpSession;
+
+        r3 := @parameter1: com.sun.jmx.snmp.daemon.SnmpAdaptorServer;
+
+        r4 := @parameter2: java.net.InetAddress;
+
+        r5 := @parameter3: java.lang.String;
+
+        i0 := @parameter4: int;
+
+        r6 := @parameter5: com.sun.jmx.snmp.daemon.SnmpInformHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int timeout> = 3000;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState> = 256;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime> = 0L;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long nextPollTime> = 0L;
+
+        $r1 = new java.util.Date;
+
+        specialinvoke $r1.<java.util.Date: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.util.Date debugDate> = $r1;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int requestId> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String communityString> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession> = r2;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor> = r3;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address> = r4;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String communityString> = r5;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port> = i0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = r6;
+
+        $r7 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        virtualinvoke $r7.<com.sun.jmx.snmp.daemon.SnmpSession: void addInformRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        $r8 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor>;
+
+        $i1 = virtualinvoke $r8.<com.sun.jmx.snmp.daemon.SnmpAdaptorServer: int getTimeout()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setTimeout(int)>($i1);
+
+        return;
+    }
+
+    public final synchronized int getRequestId()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int requestId>;
+
+        return $i0;
+    }
+
+    synchronized java.net.InetAddress getAddress()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.net.InetAddress $r1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address>;
+
+        return $r1;
+    }
+
+    public final synchronized int getRequestStatus()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        return $i0;
+    }
+
+    public final synchronized boolean isAborted()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        $i1 = $i0 & 16;
+
+        if $i1 != 16 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final synchronized boolean inProgress()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        $i1 = $i0 & 1;
+
+        if $i1 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final synchronized boolean isResultAvailable()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        if $i0 != 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final synchronized int getErrorStatus()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        return $i0;
+    }
+
+    public final synchronized int getErrorIndex()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        return $i0;
+    }
+
+    public final int getMaxTries()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpAdaptorServer $r1;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor>;
+
+        $i0 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpAdaptorServer: int getMaxTries()>();
+
+        return $i0;
+    }
+
+    public final synchronized int getNumTries()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        return $i0;
+    }
+
+    final synchronized void setTimeout(int)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int timeout> = i0;
+
+        return;
+    }
+
+    public final synchronized long getAbsNextPollTime()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long $l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $l0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long nextPollTime>;
+
+        return $l0;
+    }
+
+    public final synchronized long getAbsMaxTimeToWait()
+    {
+        byte $b1;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long $l0, $l2, $l3;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $l0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        return $l3;
+
+     label1:
+        $l2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long waitTimeForResponse>;
+
+        return $l2;
+    }
+
+    public final synchronized com.sun.jmx.snmp.SnmpVarBindList getResponseVarBindList()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.SnmpVarBindList $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList>;
+
+        return $r1;
+    }
+
+    public final boolean waitForCompletion(long)
+    {
+        java.lang.Throwable $r4;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long l0;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler r2, r6;
+        com.sun.jmx.snmp.daemon.SnmpSession $r1, $r3;
+        java.lang.InterruptedException $r5;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        l0 := @parameter0: long;
+
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z0 != 0 goto label01;
+
+        return 1;
+
+     label01:
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        $z1 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpSession: boolean thisSessionContext()>();
+
+        if $z1 == 0 goto label02;
+
+        r6 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = null;
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        virtualinvoke $r3.<com.sun.jmx.snmp.daemon.SnmpSession: void waitForResponse(com.sun.jmx.snmp.daemon.SnmpInformRequest,long)>(r0, l0);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = r6;
+
+        goto label11;
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        r2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+     label04:
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = null;
+
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(l0);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r5 := @caughtexception;
+
+     label07:
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = r2;
+
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r4;
+
+     label11:
+        $z2 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z2 != 0 goto label12;
+
+        $z3 = 1;
+
+        goto label13;
+
+     label12:
+        $z3 = 0;
+
+     label13:
+        return $z3;
+
+        catch java.lang.InterruptedException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final void cancelRequest()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = 225;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void stopRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void deleteRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void notifyClient()>();
+
+        return;
+    }
+
+    public final synchronized void notifyClient()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+    }
+
+    protected void finalize()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        return;
+    }
+
+    public static java.lang.String snmpErrorToString(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label01;
+            case 1: goto label02;
+            case 2: goto label03;
+            case 3: goto label04;
+            case 4: goto label05;
+            case 5: goto label06;
+            case 6: goto label07;
+            case 7: goto label08;
+            case 8: goto label09;
+            case 9: goto label10;
+            case 10: goto label11;
+            case 11: goto label12;
+            case 12: goto label13;
+            case 13: goto label14;
+            case 14: goto label15;
+            case 15: goto label16;
+            case 16: goto label17;
+            case 17: goto label18;
+            case 18: goto label19;
+            case 224: goto label20;
+            case 225: goto label21;
+            case 226: goto label22;
+            case 227: goto label23;
+            case 228: goto label24;
+            case 229: goto label25;
+            case 230: goto label26;
+            case 231: goto label27;
+            case 232: goto label28;
+            case 240: goto label29;
+            case 241: goto label30;
+            case 242: goto label31;
+            case 243: goto label32;
+            case 244: goto label33;
+            case 245: goto label34;
+            case 246: goto label35;
+            case 247: goto label37;
+            case 248: goto label38;
+            case 249: goto label36;
+            default: goto label39;
+        };
+
+     label01:
+        return "noError";
+
+     label02:
+        return "tooBig";
+
+     label03:
+        return "noSuchName";
+
+     label04:
+        return "badValue";
+
+     label05:
+        return "readOnly";
+
+     label06:
+        return "genErr";
+
+     label07:
+        return "noAccess";
+
+     label08:
+        return "wrongType";
+
+     label09:
+        return "wrongLength";
+
+     label10:
+        return "wrongEncoding";
+
+     label11:
+        return "wrongValue";
+
+     label12:
+        return "noCreation";
+
+     label13:
+        return "inconsistentValue";
+
+     label14:
+        return "resourceUnavailable";
+
+     label15:
+        return "commitFailed";
+
+     label16:
+        return "undoFailed";
+
+     label17:
+        return "authorizationError";
+
+     label18:
+        return "notWritable";
+
+     label19:
+        return "inconsistentName";
+
+     label20:
+        return "reqTimeout";
+
+     label21:
+        return "reqAborted";
+
+     label22:
+        return "rspDecodingError";
+
+     label23:
+        return "reqEncodingError";
+
+     label24:
+        return "reqPacketOverflow";
+
+     label25:
+        return "rspEndOfTable";
+
+     label26:
+        return "reqRefireAfterVbFix";
+
+     label27:
+        return "reqHandleTooBig";
+
+     label28:
+        return "reqTooBigImpossible";
+
+     label29:
+        return "reqInternalError";
+
+     label30:
+        return "reqSocketIOError";
+
+     label31:
+        return "reqUnknownError";
+
+     label32:
+        return "wrongSnmpVersion";
+
+     label33:
+        return "snmpUnknownPrincipal";
+
+     label34:
+        return "snmpAuthNotSupported";
+
+     label35:
+        return "snmpPrivNotSupported";
+
+     label36:
+        return "snmpBadSecurityLevel";
+
+     label37:
+        return "snmpUsmBadEngineId";
+
+     label38:
+        return "snmpUsmInvalidTimeliness";
+
+     label39:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown Error = ");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    synchronized void start(com.sun.jmx.snmp.SnmpVarBindList) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        com.sun.jmx.snmp.SnmpStatusException $r2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.SnmpVarBindList r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r1 := @parameter0: com.sun.jmx.snmp.SnmpVarBindList;
+
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.SnmpStatusException: void <init>(java.lang.String)>("Inform request already in progress.");
+
+        throw $r2;
+
+     label1:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setVarBindList(com.sun.jmx.snmp.SnmpVarBindList)>(r1);
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void initializeAndFire()>();
+
+        return;
+    }
+
+    private synchronized void initializeAndFire()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long $l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = null;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void startRequest(long)>($l0);
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setErrorStatusAndIndex(int,int)>(0, 0);
+
+        return;
+    }
+
+    private synchronized void startRequest(long)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        l0 := @parameter0: long;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long nextPollTime> = l0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime> = 0L;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void schedulePoll()>();
+
+        return;
+    }
+
+    private void schedulePoll()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpSession $r1;
+        com.sun.jmx.snmp.daemon.SnmpQManager $r2;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries> = 0;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void initNewRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(3);
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpSession: com.sun.jmx.snmp.daemon.SnmpQManager getSnmpQManager()>();
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SnmpQManager: void addRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        return;
+    }
+
+    void action()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.util.logging.Logger $r3, $r5;
+        java.util.logging.Level $r2, $r6;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Class $r4;
+        java.lang.String $r7;
+        java.lang.OutOfMemoryError $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        if $i0 != 0 goto label2;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void invokeOnReady()>();
+
+        goto label4;
+
+     label2:
+        $i1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $i2 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int getMaxTries()>();
+
+        if $i1 >= $i2 goto label3;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void invokeOnRetry()>();
+
+        goto label4;
+
+     label3:
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void invokeOnTimeout()>();
+
+     label4:
+        return;
+
+     label5:
+        $r1 := @caughtexception;
+
+        $i3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $i4 = $i3 + 1;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries> = $i4;
+
+        $r3 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z1 == 0 goto label6;
+
+        $r5 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r4 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r7 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r5.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r6, $r7, "action", "Inform request hit out of memory situation...");
+
+     label6:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        goto label1;
+
+        catch java.lang.OutOfMemoryError from label1 to label4 with label5;
+    }
+
+    private void invokeOnReady()
+    {
+        com.sun.jmx.snmp.SnmpPdu $r1, $r2, $r3;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu constructPduPacket()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu>;
+
+        if $r2 == null goto label2;
+
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean sendPdu()>();
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void queueResponse()>();
+
+     label2:
+        return;
+    }
+
+    private void invokeOnRetry()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void invokeOnReady()>();
+
+        return;
+    }
+
+    private void invokeOnTimeout()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = 224;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void queueResponse()>();
+
+        return;
+    }
+
+    private void queueResponse()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpSession $r1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpSession: void addResponse(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        return;
+    }
+
+    synchronized com.sun.jmx.snmp.SnmpPdu constructPduPacket()
+    {
+        byte[] $r3;
+        com.sun.jmx.snmp.SnmpPduRequest $r0, r19;
+        java.util.logging.Level $r5, $r7, $r11, $r15;
+        int $i0, $i1;
+        java.lang.String $r2, $r12, $r16, $r18;
+        boolean $z0, $z1;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        java.util.logging.Logger $r6, $r8, $r10, $r14;
+        java.lang.Exception $r17, r20;
+        java.lang.Class $r9, $r13;
+        com.sun.jmx.snmp.SnmpVarBind[] $r4;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r19 = null;
+
+        r20 = null;
+
+     label1:
+        $r0 = new com.sun.jmx.snmp.SnmpPduRequest;
+
+        specialinvoke $r0.<com.sun.jmx.snmp.SnmpPduRequest: void <init>()>();
+
+        r19 = $r0;
+
+        $i0 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port>;
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: int port> = $i0;
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: int type> = 166;
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: int version> = 1;
+
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String communityString>;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: byte[] community> = $r3;
+
+        $i1 = virtualinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int getRequestId()>();
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: int requestId> = $i1;
+
+        $r4 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        $r0.<com.sun.jmx.snmp.SnmpPduPacket: com.sun.jmx.snmp.SnmpVarBind[] varBindList> = $r4;
+
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r6.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        $r14 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r13 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r16 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r14.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r15, $r16, "constructPduPacket", "Packet built");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r17 := @caughtexception;
+
+        r20 = $r17;
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = 242;
+
+        $r18 = virtualinvoke $r17.<java.lang.Exception: java.lang.String getMessage()>();
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = $r18;
+
+     label4:
+        if r20 == null goto label6;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r8.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z1 == 0 goto label5;
+
+        $r10 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r9 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r12 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r10.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r11, $r12, "constructPduPacket", "Got unexpected exception", r20);
+
+     label5:
+        r19 = null;
+
+        specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void queueResponse()>();
+
+     label6:
+        return r19;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    boolean sendPdu()
+    {
+        byte[] r11;
+        java.lang.Integer $r6, $r10;
+        com.sun.jmx.snmp.SnmpPdu $r3;
+        com.sun.jmx.snmp.SnmpMsg $r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.jmx.snmp.daemon.SnmpAdaptorServer $r1, $r4, $r9;
+        java.util.logging.Logger $r13, $r15, $r24, $r27, $r32, $r35, $r42, $r45, $r47, $r51;
+        java.lang.Exception $r30;
+        java.lang.StringBuilder $r18, $r19, $r21;
+        com.sun.jmx.snmp.SnmpTooBigException $r40;
+        com.sun.jmx.snmp.SnmpPduPacket $r5;
+        java.util.logging.Level $r12, $r16, $r23, $r28, $r31, $r36, $r41, $r44, $r48, $r52;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r17, $r20, $r22, $r29, $r33, $r37, $r39, $r43, $r49, $r53;
+        com.sun.jmx.snmp.SnmpPduFactory $r2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.io.IOException $r38;
+        com.sun.jmx.snmp.SnmpMessage r8;
+        com.sun.jmx.snmp.SnmpStatusException $r25;
+        java.lang.Class $r14, $r26, $r34, $r46, $r50;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+     label01:
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpAdaptorServer: com.sun.jmx.snmp.SnmpPduFactory getPduFactory()>();
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu>;
+
+        $r5 = (com.sun.jmx.snmp.SnmpPduPacket) $r3;
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor>;
+
+        $r6 = virtualinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpAdaptorServer: java.lang.Integer getBufferSize()>();
+
+        $i0 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        $r7 = interfaceinvoke $r2.<com.sun.jmx.snmp.SnmpPduFactory: com.sun.jmx.snmp.SnmpMsg encodeSnmpPdu(com.sun.jmx.snmp.SnmpPdu,int)>($r5, $i0);
+
+        r8 = (com.sun.jmx.snmp.SnmpMessage) $r7;
+
+        if r8 != null goto label03;
+
+        $r24 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r24.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r23);
+
+        if $z1 == 0 goto label02;
+
+        $r27 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r28 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r26 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r29 = virtualinvoke $r26.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r27.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r28, $r29, "sendPdu", "pdu factory returned a null value");
+
+     label02:
+        $r25 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r25.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(242);
+
+        throw $r25;
+
+     label03:
+        $r9 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpAdaptorServer adaptor>;
+
+        $r10 = virtualinvoke $r9.<com.sun.jmx.snmp.daemon.SnmpAdaptorServer: java.lang.Integer getBufferSize()>();
+
+        $i1 = virtualinvoke $r10.<java.lang.Integer: int intValue()>();
+
+        r11 = newarray (byte)[$i1];
+
+        $i2 = virtualinvoke r8.<com.sun.jmx.snmp.SnmpMessage: int encodeMessage(byte[])>(r11);
+
+        $r13 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r13.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r12);
+
+        if $z0 == 0 goto label04;
+
+        $r15 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r14 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r17 = virtualinvoke $r14.<java.lang.Class: java.lang.String getName()>();
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dump : \n");
+
+        $r20 = virtualinvoke r8.<com.sun.jmx.snmp.SnmpMessage: java.lang.String printMessage()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r16, $r17, "sendPdu", $r22);
+
+     label04:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void sendPduPacket(byte[],int)>(r11, $i2);
+
+     label05:
+        return 1;
+
+     label06:
+        $r40 := @caughtexception;
+
+        $r42 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r41 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z3 = virtualinvoke $r42.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r41);
+
+        if $z3 == 0 goto label07;
+
+        $r51 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r52 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r50 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r53 = virtualinvoke $r50.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r51.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r52, $r53, "sendPdu", "Got unexpected exception", $r40);
+
+     label07:
+        $i3 = virtualinvoke $r40.<com.sun.jmx.snmp.SnmpTooBigException: int getVarBindCount()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setErrorStatusAndIndex(int,int)>(228, $i3);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        $r43 = virtualinvoke $r40.<com.sun.jmx.snmp.SnmpTooBigException: java.lang.String getMessage()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = $r43;
+
+        $r45 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r44 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z4 = virtualinvoke $r45.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r44);
+
+        if $z4 == 0 goto label08;
+
+        $r47 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r48 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r46 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r49 = virtualinvoke $r46.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r47.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r48, $r49, "sendPdu", "Packet Overflow while building inform request");
+
+     label08:
+        goto label12;
+
+     label09:
+        $r38 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setErrorStatusAndIndex(int,int)>(241, 0);
+
+        $r39 = virtualinvoke $r38.<java.io.IOException: java.lang.String getMessage()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = $r39;
+
+        goto label12;
+
+     label10:
+        $r30 := @caughtexception;
+
+        $r32 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r31 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r32.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r31);
+
+        if $z2 == 0 goto label11;
+
+        $r35 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r36 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r34 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r37 = virtualinvoke $r34.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r35.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r36, $r37, "sendPdu", "Got unexpected exception", $r30);
+
+     label11:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setErrorStatusAndIndex(int,int)>(242, 0);
+
+        $r33 = virtualinvoke $r30.<java.lang.Exception: java.lang.String getMessage()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = $r33;
+
+     label12:
+        return 0;
+
+        catch com.sun.jmx.snmp.SnmpTooBigException from label01 to label05 with label06;
+        catch java.io.IOException from label01 to label05 with label09;
+        catch java.lang.Exception from label01 to label05 with label10;
+    }
+
+    final void sendPduPacket(byte[], int) throws java.io.IOException
+    {
+        java.lang.Throwable $r24;
+        byte[] r5;
+        long $l2;
+        java.util.logging.Level $r0, $r9;
+        java.net.InetAddress $r6, $r13;
+        com.sun.jmx.snmp.daemon.SnmpSession $r3;
+        int i0, $i1, $i3;
+        java.lang.String $r10, $r14, $r21, $r23;
+        boolean $z0;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r2;
+        java.util.logging.Logger $r1, $r8;
+        com.sun.jmx.snmp.daemon.SnmpSocket $r4;
+        java.lang.Class $r7;
+        java.lang.StringBuilder $r11, $r12, $r15, $r16, $r17, $r18, $r19, $r20, $r22;
+
+        r2 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r5 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $r1 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r0 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r7 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r10 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Send to peer. Peer/Port : ");
+
+        $r13 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address>;
+
+        $r14 = virtualinvoke $r13.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i3 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Length = ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nDump : \n");
+
+        $r21 = staticinvoke <com.sun.jmx.snmp.SnmpMessage: java.lang.String dumpHexBuffer(byte[],int,int)>(r5, 0, i0);
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r9, $r10, "sendPduPacket", $r23);
+
+     label1:
+        $r3 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        $r4 = virtualinvoke $r3.<com.sun.jmx.snmp.daemon.SnmpSession: com.sun.jmx.snmp.daemon.SnmpSocket getSocket()>();
+
+        entermonitor $r4;
+
+     label2:
+        $r6 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address>;
+
+        $i1 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port>;
+
+        virtualinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpSocket: void sendPacket(byte[],int,java.net.InetAddress,int)>(r5, i0, $r6, $i1);
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        virtualinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestSentTime(long)>($l2);
+
+        exitmonitor $r4;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r24 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label5:
+        throw $r24;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void processResponse()
+    {
+        java.util.logging.Level $r0, $r6, $r13, $r19;
+        int $i0, $i1, $i2;
+        java.lang.String $r7, $r11, $r15, $r16, $r20;
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r2;
+        java.util.logging.Logger $r1, $r5, $r14, $r18;
+        java.lang.Exception $r12;
+        com.sun.jmx.snmp.SnmpPduRequestType $r3;
+        java.lang.Class $r4, $r17;
+        java.lang.StringBuilder $r8, $r9, $r10;
+
+        r2 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r0 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label01;
+
+        $r5 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r4 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r7 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("errstatus = ");
+
+        $i2 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r6, $r7, "processResponse", $r11);
+
+     label01:
+        $z1 = virtualinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: boolean inProgress()>();
+
+        if $z1 != 0 goto label02;
+
+        r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        return;
+
+     label02:
+        $i0 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        if $i0 < 240 goto label03;
+
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleInternalError(java.lang.String)>("Internal Error...");
+
+        return;
+
+     label03:
+        $r3 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu>;
+
+        virtualinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void parsePduPacket(com.sun.jmx.snmp.SnmpPduRequestType)>($r3);
+
+        $i1 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        lookupswitch($i1)
+        {
+            case 0: goto label04;
+            case 224: goto label06;
+            case 230: goto label12;
+            case 231: goto label10;
+            case 240: goto label08;
+            default: goto label14;
+        };
+
+     label04:
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleSuccess()>();
+
+     label05:
+        return;
+
+     label06:
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleTimeout()>();
+
+     label07:
+        return;
+
+     label08:
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleInternalError(java.lang.String)>("Unknown internal error.  deal with it later!");
+
+     label09:
+        return;
+
+     label10:
+        virtualinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setErrorStatusAndIndex(int,int)>(1, 0);
+
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleError(java.lang.String)>("Cannot handle too-big situation...");
+
+     label11:
+        return;
+
+     label12:
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void initializeAndFire()>();
+
+     label13:
+        return;
+
+     label14:
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleError(java.lang.String)>("Error status set in packet...!!");
+
+     label15:
+        return;
+
+     label16:
+        $r12 := @caughtexception;
+
+        $r14 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r14.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r13);
+
+        if $z2 == 0 goto label17;
+
+        $r18 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r19 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r17 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r20 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r18.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r19, $r20, "processResponse", "Got unexpected exception", $r12);
+
+     label17:
+        $r15 = virtualinvoke $r12.<java.lang.Exception: java.lang.String getMessage()>();
+
+        r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = $r15;
+
+        $r16 = r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason>;
+
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void handleInternalError(java.lang.String)>($r16);
+
+        return;
+
+        catch java.lang.Exception from label03 to label05 with label16;
+        catch java.lang.Exception from label06 to label07 with label16;
+        catch java.lang.Exception from label08 to label09 with label16;
+        catch java.lang.Exception from label10 to label11 with label16;
+        catch java.lang.Exception from label12 to label13 with label16;
+        catch java.lang.Exception from label14 to label15 with label16;
+    }
+
+    synchronized void parsePduPacket(com.sun.jmx.snmp.SnmpPduRequestType)
+    {
+        java.util.logging.Level $r2, $r6;
+        com.sun.jmx.snmp.SnmpPdu $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r7, $r13;
+        boolean $z0;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        java.util.logging.Logger $r3, $r5;
+        com.sun.jmx.snmp.SnmpPduRequestType r0;
+        java.lang.Class $r4;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r12;
+        com.sun.jmx.snmp.SnmpVarBind[] $r15;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0 := @parameter0: com.sun.jmx.snmp.SnmpPduRequestType;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $i0 = interfaceinvoke r0.<com.sun.jmx.snmp.SnmpPduRequestType: int getErrorStatus()>();
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = $i0;
+
+        $i1 = interfaceinvoke r0.<com.sun.jmx.snmp.SnmpPduRequestType: int getErrorIndex()>();
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex> = $i1;
+
+        $i2 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        if $i2 != 0 goto label2;
+
+        $r14 = (com.sun.jmx.snmp.SnmpPdu) r0;
+
+        $r15 = $r14.<com.sun.jmx.snmp.SnmpPdu: com.sun.jmx.snmp.SnmpVarBind[] varBindList>;
+
+        virtualinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void updateInternalVarBindWithResult(com.sun.jmx.snmp.SnmpVarBind[])>($r15);
+
+        return;
+
+     label2:
+        $i3 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        if $i3 == 0 goto label3;
+
+        $i6 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $i7 = $i6 - 1;
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex> = $i7;
+
+     label3:
+        $r3 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z0 == 0 goto label4;
+
+        $r5 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r4 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r7 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("received inform response. ErrorStatus/ErrorIndex = ");
+
+        $i4 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i5 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r6, $r7, "parsePduPacket", $r13);
+
+     label4:
+        return;
+    }
+
+    private void handleSuccess()
+    {
+        java.util.logging.Level $r1, $r8, $r11, $r15, $r18, $r22;
+        int $i0, $i1;
+        java.lang.String $r9, $r16, $r23;
+        com.sun.jmx.snmp.SnmpVarBindList $r5;
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler $r3, $r4;
+        java.util.logging.Logger $r2, $r7, $r12, $r14, $r19, $r21;
+        java.lang.Exception $r17;
+        java.lang.Class $r6, $r13, $r20;
+        java.lang.OutOfMemoryError $r10;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(128);
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r6 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r9 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r7.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r8, $r9, "handleSuccess", "Invoking user defined callback...");
+
+     label1:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void deleteRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void notifyClient()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+     label2:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $i1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $r5 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList getVarBindList()>();
+
+        interfaceinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpInformHandler: void processSnmpPollData(com.sun.jmx.snmp.daemon.SnmpInformRequest,int,int,com.sun.jmx.snmp.SnmpVarBindList)>(r0, $i0, $i1, $r5);
+
+     label3:
+        goto label8;
+
+     label4:
+        $r17 := @caughtexception;
+
+        $r19 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r19.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r18);
+
+        if $z2 == 0 goto label5;
+
+        $r21 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r20 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r23 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r21.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r22, $r23, "handleSuccess", "Exception generated by user callback", $r17);
+
+     label5:
+        goto label8;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r12 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r12.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r11);
+
+        if $z1 == 0 goto label7;
+
+        $r14 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r13 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r16 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r14.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r15, $r16, "handleSuccess", "OutOfMemory Error generated by user callback", $r10);
+
+     label7:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+        catch java.lang.OutOfMemoryError from label2 to label3 with label6;
+    }
+
+    private void handleTimeout()
+    {
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler $r3, $r4;
+        java.util.logging.Logger $r2, $r6, $r19, $r21, $r26, $r28;
+        java.lang.Exception $r24;
+        java.lang.StringBuilder $r9, $r10, $r12, $r13, $r14, $r15;
+        java.util.logging.Level $r1, $r7, $r18, $r22, $r25, $r29;
+        int $i0, $i1;
+        java.lang.String $r8, $r11, $r16, $r23, $r30;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.lang.Class $r5, $r20, $r27;
+        java.lang.OutOfMemoryError $r17;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(32);
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r5 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r8 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Snmp error/index = ");
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $r11 = staticinvoke <com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String snmpErrorToString(int)>($i0);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Invoking timeout user defined callback...");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r7, $r8, "handleTimeout", $r16);
+
+     label1:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void deleteRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void notifyClient()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+     label2:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        interfaceinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpInformHandler: void processSnmpPollTimeout(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+     label3:
+        goto label8;
+
+     label4:
+        $r24 := @caughtexception;
+
+        $r26 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r26.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r25);
+
+        if $z2 == 0 goto label5;
+
+        $r28 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r29 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r27 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r30 = virtualinvoke $r27.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r28.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r29, $r30, "handleTimeout", "Exception generated by user callback", $r24);
+
+     label5:
+        goto label8;
+
+     label6:
+        $r17 := @caughtexception;
+
+        $r19 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r19.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r18);
+
+        if $z1 == 0 goto label7;
+
+        $r21 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r20 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r23 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r21.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r22, $r23, "handleTimeout", "OutOfMemory Error generated by user callback", $r17);
+
+     label7:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+        catch java.lang.OutOfMemoryError from label2 to label3 with label6;
+    }
+
+    private void handleError(java.lang.String)
+    {
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler $r3, $r4;
+        java.util.logging.Logger $r2, $r7, $r22, $r24, $r29, $r31;
+        java.lang.Exception $r27;
+        java.lang.StringBuilder $r10, $r11, $r13, $r14, $r15, $r16, $r18;
+        java.util.logging.Level $r1, $r8, $r21, $r25, $r28, $r32;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r9, $r12, $r19, $r26, $r33, r34;
+        com.sun.jmx.snmp.SnmpVarBindList $r5, $r17;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.lang.Class $r6, $r23, $r30;
+        java.lang.OutOfMemoryError $r20;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r34 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(128);
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r6 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r9 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Snmp error/index = ");
+
+        $i2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $r12 = staticinvoke <com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String snmpErrorToString(int)>($i2);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Invoking error user defined callback...\n");
+
+        $r17 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList getVarBindList()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r8, $r9, "handleError", $r19);
+
+     label1:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void deleteRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void notifyClient()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+     label2:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        $i0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int getErrorStatus()>();
+
+        $i1 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int getErrorIndex()>();
+
+        $r5 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList getVarBindList()>();
+
+        interfaceinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpInformHandler: void processSnmpPollData(com.sun.jmx.snmp.daemon.SnmpInformRequest,int,int,com.sun.jmx.snmp.SnmpVarBindList)>(r0, $i0, $i1, $r5);
+
+     label3:
+        goto label8;
+
+     label4:
+        $r27 := @caughtexception;
+
+        $r29 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r28 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r29.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r28);
+
+        if $z2 == 0 goto label5;
+
+        $r31 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r32 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r30 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r33 = virtualinvoke $r30.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r31.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r32, $r33, "handleError", "Exception generated by user callback", $r27);
+
+     label5:
+        goto label8;
+
+     label6:
+        $r20 := @caughtexception;
+
+        $r22 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r21 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r22.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r21);
+
+        if $z1 == 0 goto label7;
+
+        $r24 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r23 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r26 = virtualinvoke $r23.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r24.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r25, $r26, "handleError", "OutOfMemory Error generated by user callback", $r20);
+
+     label7:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+        catch java.lang.OutOfMemoryError from label2 to label3 with label6;
+    }
+
+    private void handleInternalError(java.lang.String)
+    {
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.snmp.daemon.SnmpInformHandler $r4, $r6;
+        java.util.logging.Logger $r3, $r8, $r24, $r26, $r31, $r33;
+        java.lang.Exception $r29;
+        java.lang.StringBuilder $r11, $r12, $r14, $r15, $r16, $r17, $r19;
+        java.util.logging.Level $r2, $r9, $r23, $r27, $r30, $r34;
+        int $i0, $i1;
+        java.lang.String $r1, $r5, $r10, $r13, $r20, r21, $r28, $r35;
+        com.sun.jmx.snmp.SnmpVarBindList $r18;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.lang.Class $r7, $r25, $r32;
+        java.lang.OutOfMemoryError $r22;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r21 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(64);
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason>;
+
+        if $r1 != null goto label1;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason> = r21;
+
+     label1:
+        $r3 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r7 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r10 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Snmp error/index = ");
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus>;
+
+        $r13 = staticinvoke <com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String snmpErrorToString(int)>($i0);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex>;
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Invoking internal error user defined callback...\n");
+
+        $r18 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList getVarBindList()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r9, $r10, "handleInternalError", $r20);
+
+     label2:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void deleteRequest()>();
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void notifyClient()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPdu requestPdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = null;
+
+     label3:
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        if $r4 == null goto label4;
+
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpInformHandler callback>;
+
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String reason>;
+
+        interfaceinvoke $r6.<com.sun.jmx.snmp.daemon.SnmpInformHandler: void processSnmpInternalError(com.sun.jmx.snmp.daemon.SnmpInformRequest,java.lang.String)>(r0, $r5);
+
+     label4:
+        goto label9;
+
+     label5:
+        $r29 := @caughtexception;
+
+        $r31 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r30 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r31.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r30);
+
+        if $z2 == 0 goto label6;
+
+        $r33 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r34 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r32 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r35 = virtualinvoke $r32.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r33.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r34, $r35, "handleInternalError", "Exception generated by user callback", $r29);
+
+     label6:
+        goto label9;
+
+     label7:
+        $r22 := @caughtexception;
+
+        $r24 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r24.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r23);
+
+        if $z1 == 0 goto label8;
+
+        $r26 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r27 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r25 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r28 = virtualinvoke $r25.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r26.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r27, $r28, "handleInternalError", "OutOfMemory Error generated by user callback", $r22);
+
+     label8:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label9:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+        catch java.lang.OutOfMemoryError from label3 to label4 with label7;
+    }
+
+    void updateInternalVarBindWithResult(com.sun.jmx.snmp.SnmpVarBind[])
+    {
+        com.sun.jmx.snmp.SnmpValue $r6;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        com.sun.jmx.snmp.SnmpVarBind r4, r5;
+        int $i0, $i1, $i2, i3, i4;
+        com.sun.jmx.snmp.SnmpVarBind[] r0, $r2, $r3;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0 := @parameter0: com.sun.jmx.snmp.SnmpVarBind[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        i3 = 0;
+
+        i4 = 0;
+
+     label3:
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        $i1 = lengthof $r2;
+
+        if i4 >= $i1 goto label6;
+
+        $i2 = lengthof r0;
+
+        if i3 >= $i2 goto label6;
+
+        $r3 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        r4 = $r3[i4];
+
+        if r4 != null goto label4;
+
+        goto label5;
+
+     label4:
+        r5 = r0[i3];
+
+        $r6 = virtualinvoke r5.<com.sun.jmx.snmp.SnmpVarBind: com.sun.jmx.snmp.SnmpValue getSnmpValue()>();
+
+        virtualinvoke r4.<com.sun.jmx.snmp.SnmpVarBind: void setSnmpValue(com.sun.jmx.snmp.SnmpValue)>($r6);
+
+        i3 = i3 + 1;
+
+     label5:
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    final void invokeOnResponse(java.lang.Object)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        com.sun.jmx.snmp.SnmpPduRequestType $r2;
+        java.lang.Object r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label2;
+
+        $z0 = r0 instanceof com.sun.jmx.snmp.SnmpPduRequestType;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (com.sun.jmx.snmp.SnmpPduRequestType) r0;
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpPduRequestType responsePdu> = $r2;
+
+        goto label2;
+
+     label1:
+        return;
+
+     label2:
+        virtualinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(9);
+
+        specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void queueResponse()>();
+
+        return;
+    }
+
+    private void stopRequest()
+    {
+        java.lang.Throwable $r3, $r4;
+        com.sun.jmx.snmp.daemon.SnmpSession $r1;
+        com.sun.jmx.snmp.daemon.SnmpQManager $r2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(16);
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r4;
+
+     label05:
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpSession: com.sun.jmx.snmp.daemon.SnmpQManager getSnmpQManager()>();
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SnmpQManager: void removeRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        entermonitor r0;
+
+     label06:
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int requestId> = 0;
+
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r3;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    final synchronized void deleteRequest()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpSession $r1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpSession: void removeInformRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        return;
+    }
+
+    final synchronized com.sun.jmx.snmp.SnmpVarBindList getVarBindList()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.SnmpVarBindList $r1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList>;
+
+        return $r1;
+    }
+
+    final synchronized void setVarBindList(com.sun.jmx.snmp.SnmpVarBindList)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0, $i1, $i2;
+        com.sun.jmx.snmp.SnmpVarBindList r1, $r3, $r6, $r7;
+        com.sun.jmx.snmp.SnmpVarBind[] $r2, $r4, $r5, $r8;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        r1 := @parameter0: com.sun.jmx.snmp.SnmpVarBindList;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList> = r1;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        if $r2 == null goto label1;
+
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        $i1 = lengthof $r5;
+
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList>;
+
+        $i2 = virtualinvoke $r6.<com.sun.jmx.snmp.SnmpVarBindList: int size()>();
+
+        if $i1 == $i2 goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList>;
+
+        $i0 = virtualinvoke $r3.<com.sun.jmx.snmp.SnmpVarBindList: int size()>();
+
+        $r4 = newarray (com.sun.jmx.snmp.SnmpVarBind)[$i0];
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind> = $r4;
+
+     label2:
+        $r7 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBindList varBindList>;
+
+        $r8 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.SnmpVarBind[] internalVarBind>;
+
+        virtualinvoke $r7.<com.sun.jmx.snmp.SnmpVarBindList: void copyInto(java.lang.Object[])>($r8);
+
+        return;
+    }
+
+    final synchronized void setErrorStatusAndIndex(int, int)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorStatus> = i0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int errorIndex> = i1;
+
+        return;
+    }
+
+    final synchronized void setPrevPollTime(long)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        long l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        l0 := @parameter0: long;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime> = l0;
+
+        return;
+    }
+
+    final void setRequestSentTime(long)
+    {
+        long l2, $l6, $l7, $l8;
+        java.util.logging.Level $r1, $r7;
+        com.sun.jmx.snmp.daemon.SnmpSession $r3;
+        int $i0, $i1, $i3, $i4, $i5;
+        java.lang.String $r8;
+        boolean $z0;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        java.util.logging.Logger $r2, $r6;
+        com.sun.jmx.snmp.daemon.SnmpQManager $r4;
+        java.lang.Class $r5;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        l2 := @parameter0: long;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries> = $i1;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setPrevPollTime(long)>(l2);
+
+        $l7 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime>;
+
+        $i4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int timeout>;
+
+        $i3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $i5 = $i4 * $i3;
+
+        $l6 = (long) $i5;
+
+        $l8 = $l7 + $l6;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long waitTimeForResponse> = $l8;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: void setRequestStatus(int)>(5);
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r5 = class "Lcom/sun/jmx/snmp/daemon/SnmpInformRequest;";
+
+        $r8 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r6.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r7, $r8, "setRequestSentTime", "Inform request Successfully sent");
+
+     label1:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpSession informSession>;
+
+        $r4 = virtualinvoke $r3.<com.sun.jmx.snmp.daemon.SnmpSession: com.sun.jmx.snmp.daemon.SnmpQManager getSnmpQManager()>();
+
+        virtualinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpQManager: void addWaiting(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r0);
+
+        return;
+    }
+
+    final synchronized void initNewRequest()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        com.sun.jmx.snmp.daemon.SnmpRequestCounter $r1;
+        int $i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r1 = <com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpRequestCounter requestCounter>;
+
+        $i0 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SnmpRequestCounter: int getNewId()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int requestId> = $i0;
+
+        return;
+    }
+
+    long timeRemainingForAction(long)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int $i0;
+        long l1, $l2, $l3, $l4, $l5;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        l1 := @parameter0: long;
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        lookupswitch($i0)
+        {
+            case 3: goto label1;
+            case 5: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $l4 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long nextPollTime>;
+
+        $l5 = $l4 - l1;
+
+        return $l5;
+
+     label2:
+        $l2 = r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long waitTimeForResponse>;
+
+        $l3 = $l2 - l1;
+
+        return $l3;
+
+     label3:
+        return -1L;
+    }
+
+    static java.lang.String statusDescription(int)
+    {
+        int i0;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 3: goto label1;
+            case 5: goto label2;
+            case 9: goto label3;
+            case 16: goto label4;
+            case 32: goto label5;
+            case 64: goto label6;
+            case 128: goto label7;
+            case 256: goto label8;
+            default: goto label9;
+        };
+
+     label1:
+        return "Waiting to send.";
+
+     label2:
+        return "Waiting for reply.";
+
+     label3:
+        return "Response arrived.";
+
+     label4:
+        return "Aborted by user.";
+
+     label5:
+        return "Timeout Occured.";
+
+     label6:
+        return "Internal error.";
+
+     label7:
+        return "Results available";
+
+     label8:
+        return "Inform request in createAndWait state";
+
+     label9:
+        return "Unknown inform request state.";
+    }
+
+    final synchronized void setRequestStatus(int)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r0;
+        int i0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState> = i0;
+
+        return;
+    }
+
+    public synchronized java.lang.String toString()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        java.net.InetAddress $r5;
+        java.lang.StringBuffer $r0;
+        int $i0;
+        java.lang.StringBuilder $r3, $r4, $r7, $r8, $r9;
+        java.lang.String $r2, $r6, $r10, $r11;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>(int)>(300);
+
+        $r2 = specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String tostring()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nPeer/Port : ");
+
+        $r5 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.net.InetAddress address>;
+
+        $r6 = virtualinvoke $r5.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i0 = r1.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int port>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r10);
+
+        $r11 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    private synchronized java.lang.String tostring()
+    {
+        java.util.Date $r24, $r27;
+        byte $b8;
+        java.lang.StringBuilder $r2, $r4, $r7, $r9, $r12, $r13, $r14, $r15, $r16, $r17, $r20, $r21, $r26, $r29, $r31, $r33, $r34, $r35, $r36;
+        long $l7, $l9, $l10, $l11;
+        java.lang.StringBuffer $r32;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i12;
+        java.lang.String $r5, $r8, $r10, $r18, $r22, $r23, $r28, $r30;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r3;
+
+        r3 := @this: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r32 = new java.lang.StringBuffer;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("InformRequestId = ");
+
+        $i0 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int requestId>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.lang.StringBuffer: void <init>(java.lang.String)>($r5);
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("   Status = ");
+
+        $i1 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int reqState>;
+
+        $r8 = staticinvoke <com.sun.jmx.snmp.daemon.SnmpInformRequest: java.lang.String statusDescription(int)>($i1);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r10);
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Timeout/MaxTries/NumTries = ");
+
+        $i3 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int timeout>;
+
+        $i2 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $i4 = $i3 * $i2;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i5 = virtualinvoke r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int getMaxTries()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i6 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: int numTries>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r18);
+
+        $l7 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime>;
+
+        $b8 = $l7 cmp 0L;
+
+        $i12 = (int) $b8;
+
+        if $i12 <= 0 goto label1;
+
+        $r24 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.util.Date debugDate>;
+
+        $l11 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long prevPollTime>;
+
+        virtualinvoke $r24.<java.util.Date: void setTime(long)>($l11);
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nPrevPolled = ");
+
+        $r27 = r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: java.util.Date debugDate>;
+
+        $r28 = virtualinvoke $r27.<java.util.Date: java.lang.String toString()>();
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r30);
+
+        goto label2;
+
+     label1:
+        virtualinvoke $r32.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\nNeverPolled");
+
+     label2:
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" / RemainingTime(millis) = ");
+
+        $l9 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l10 = virtualinvoke r3.<com.sun.jmx.snmp.daemon.SnmpInformRequest: long timeRemainingForAction(long)>($l9);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l10);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r22);
+
+        $r23 = virtualinvoke $r32.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r23;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.jmx.snmp.daemon.SnmpRequestCounter $r0;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stNeverUsed> = 256;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stResultsAvailable> = 128;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stInternalError> = 64;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stTimeout> = 32;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stAborted> = 16;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stReceivedReply> = 9;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stWaitingForReply> = 5;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stWaitingToSend> = 3;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stInProgress> = 1;
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: int stBase> = 1;
+
+        $r0 = new com.sun.jmx.snmp.daemon.SnmpRequestCounter;
+
+        specialinvoke $r0.<com.sun.jmx.snmp.daemon.SnmpRequestCounter: void <init>()>();
+
+        <com.sun.jmx.snmp.daemon.SnmpInformRequest: com.sun.jmx.snmp.daemon.SnmpRequestCounter requestCounter> = $r0;
+
+        return;
+    }
+}

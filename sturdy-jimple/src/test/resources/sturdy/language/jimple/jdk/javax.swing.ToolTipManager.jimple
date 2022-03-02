@@ -1,0 +1,2159 @@
+public class javax.swing.ToolTipManager extends java.awt.event.MouseAdapter implements java.awt.event.MouseMotionListener
+{
+    javax.swing.Timer enterTimer;
+    javax.swing.Timer exitTimer;
+    javax.swing.Timer insideTimer;
+    java.lang.String toolTipText;
+    java.awt.Point preferredLocation;
+    javax.swing.JComponent insideComponent;
+    java.awt.event.MouseEvent mouseEvent;
+    boolean showImmediately;
+    private static final java.lang.Object TOOL_TIP_MANAGER_KEY;
+    transient javax.swing.Popup tipWindow;
+    private java.awt.Window window;
+    javax.swing.JToolTip tip;
+    private java.awt.Rectangle popupRect;
+    private java.awt.Rectangle popupFrameRect;
+    boolean enabled;
+    private boolean tipShowing;
+    private java.awt.event.FocusListener focusChangeListener;
+    private java.awt.event.MouseMotionListener moveBeforeEnterListener;
+    private java.awt.event.KeyListener accessibilityKeyListener;
+    private javax.swing.KeyStroke postTip;
+    private javax.swing.KeyStroke hideTip;
+    protected boolean lightWeightPopupEnabled;
+    protected boolean heavyWeightPopupEnabled;
+
+    void <init>()
+    {
+        javax.swing.KeyStroke $r12, $r13;
+        javax.swing.ToolTipManager$MoveBeforeEnterListener $r10;
+        javax.swing.ToolTipManager r0;
+        javax.swing.ToolTipManager$insideTimerAction $r2;
+        javax.swing.ToolTipManager$outsideTimerAction $r5;
+        javax.swing.ToolTipManager$AccessibilityKeyListener $r11;
+        javax.swing.ToolTipManager$stillInsideTimerAction $r8;
+        javax.swing.Timer $r1, $r3, $r4, $r6, $r7, $r9;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        specialinvoke r0.<java.awt.event.MouseAdapter: void <init>()>();
+
+        r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect> = null;
+
+        r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect> = null;
+
+        r0.<javax.swing.ToolTipManager: boolean enabled> = 1;
+
+        r0.<javax.swing.ToolTipManager: boolean tipShowing> = 0;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener> = null;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener> = null;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener> = null;
+
+        r0.<javax.swing.ToolTipManager: boolean lightWeightPopupEnabled> = 1;
+
+        r0.<javax.swing.ToolTipManager: boolean heavyWeightPopupEnabled> = 0;
+
+        $r1 = new javax.swing.Timer;
+
+        $r2 = new javax.swing.ToolTipManager$insideTimerAction;
+
+        specialinvoke $r2.<javax.swing.ToolTipManager$insideTimerAction: void <init>(javax.swing.ToolTipManager)>(r0);
+
+        specialinvoke $r1.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(750, $r2);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer> = $r1;
+
+        $r3 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r3.<javax.swing.Timer: void setRepeats(boolean)>(0);
+
+        $r4 = new javax.swing.Timer;
+
+        $r5 = new javax.swing.ToolTipManager$outsideTimerAction;
+
+        specialinvoke $r5.<javax.swing.ToolTipManager$outsideTimerAction: void <init>(javax.swing.ToolTipManager)>(r0);
+
+        specialinvoke $r4.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(500, $r5);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer> = $r4;
+
+        $r6 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r6.<javax.swing.Timer: void setRepeats(boolean)>(0);
+
+        $r7 = new javax.swing.Timer;
+
+        $r8 = new javax.swing.ToolTipManager$stillInsideTimerAction;
+
+        specialinvoke $r8.<javax.swing.ToolTipManager$stillInsideTimerAction: void <init>(javax.swing.ToolTipManager)>(r0);
+
+        specialinvoke $r7.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(4000, $r8);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer> = $r7;
+
+        $r9 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r9.<javax.swing.Timer: void setRepeats(boolean)>(0);
+
+        $r10 = new javax.swing.ToolTipManager$MoveBeforeEnterListener;
+
+        specialinvoke $r10.<javax.swing.ToolTipManager$MoveBeforeEnterListener: void <init>(javax.swing.ToolTipManager,javax.swing.ToolTipManager$1)>(r0, null);
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener> = $r10;
+
+        $r11 = new javax.swing.ToolTipManager$AccessibilityKeyListener;
+
+        specialinvoke $r11.<javax.swing.ToolTipManager$AccessibilityKeyListener: void <init>(javax.swing.ToolTipManager,javax.swing.ToolTipManager$1)>(r0, null);
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener> = $r11;
+
+        $r12 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(112, 2);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.KeyStroke postTip> = $r12;
+
+        $r13 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(27, 0);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.KeyStroke hideTip> = $r13;
+
+        return;
+    }
+
+    public void setEnabled(boolean)
+    {
+        javax.swing.ToolTipManager r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.ToolTipManager: boolean enabled> = z0;
+
+        if z0 != 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+     label1:
+        return;
+    }
+
+    public boolean isEnabled()
+    {
+        javax.swing.ToolTipManager r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $z0 = r0.<javax.swing.ToolTipManager: boolean enabled>;
+
+        return $z0;
+    }
+
+    public void setLightWeightPopupEnabled(boolean)
+    {
+        javax.swing.ToolTipManager r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.ToolTipManager: boolean lightWeightPopupEnabled> = z0;
+
+        return;
+    }
+
+    public boolean isLightWeightPopupEnabled()
+    {
+        javax.swing.ToolTipManager r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $z0 = r0.<javax.swing.ToolTipManager: boolean lightWeightPopupEnabled>;
+
+        return $z0;
+    }
+
+    public void setInitialDelay(int)
+    {
+        int i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r1.<javax.swing.Timer: void setInitialDelay(int)>(i0);
+
+        return;
+    }
+
+    public int getInitialDelay()
+    {
+        int $i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.Timer: int getInitialDelay()>();
+
+        return $i0;
+    }
+
+    public void setDismissDelay(int)
+    {
+        int i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r1.<javax.swing.Timer: void setInitialDelay(int)>(i0);
+
+        return;
+    }
+
+    public int getDismissDelay()
+    {
+        int $i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.Timer: int getInitialDelay()>();
+
+        return $i0;
+    }
+
+    public void setReshowDelay(int)
+    {
+        int i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r1.<javax.swing.Timer: void setInitialDelay(int)>(i0);
+
+        return;
+    }
+
+    public int getReshowDelay()
+    {
+        int $i0;
+        javax.swing.ToolTipManager r0;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.Timer: int getInitialDelay()>();
+
+        return $i0;
+    }
+
+    private java.awt.GraphicsConfiguration getDrawingGC(java.awt.Point)
+    {
+        java.awt.Rectangle $r5;
+        java.awt.GraphicsConfiguration r4;
+        javax.swing.ToolTipManager r7;
+        java.awt.GraphicsDevice r2;
+        java.awt.Point r6;
+        java.awt.GraphicsConfiguration[] $r3;
+        java.awt.GraphicsEnvironment $r0;
+        java.awt.GraphicsDevice[] $r1;
+        int i0, i1, i2, i3;
+        boolean $z0;
+
+        r7 := @this: javax.swing.ToolTipManager;
+
+        r6 := @parameter0: java.awt.Point;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice[] getScreenDevices()>();
+
+        i0 = lengthof $r1;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i0 goto label5;
+
+        r2 = $r1[i2];
+
+        $r3 = virtualinvoke r2.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration[] getConfigurations()>();
+
+        i1 = lengthof $r3;
+
+        i3 = 0;
+
+     label2:
+        if i3 >= i1 goto label4;
+
+        r4 = $r3[i3];
+
+        $r5 = virtualinvoke r4.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $z0 = virtualinvoke $r5.<java.awt.Rectangle: boolean contains(java.awt.Point)>(r6);
+
+        if $z0 == 0 goto label3;
+
+        return r4;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    void showTipWindow()
+    {
+        java.awt.GraphicsConfiguration $r9, $r32, r40;
+        javax.swing.ToolTipManager r0;
+        javax.swing.JToolTip $r14, $r20, $r46, $r47, $r49;
+        java.awt.event.MouseEvent $r8, $r11, $r12, $r30;
+        java.awt.KeyboardFocusManager $r37;
+        java.awt.Toolkit $r42;
+        java.awt.Insets $r43;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75;
+        javax.swing.Timer $r55;
+        java.lang.String $r3, $r4, $r48;
+        java.awt.Window $r19, $r21, $r22, $r23, $r24, $r38;
+        javax.swing.PopupFactory $r54;
+        java.awt.Point $r6, $r7, $r10, $r31, $r34, $r35, $r36, r39, $r51, r52;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.Dimension $r50;
+        java.awt.Rectangle $r13, $r26, $r28, $r29, $r41, $r53;
+        javax.swing.Popup $r16, $r17;
+        javax.swing.JComponent $r1, $r2, $r5, $r15, $r18, $r25, $r27, $r33, $r44, $r45;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r1 == null goto label01;
+
+        $r2 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JComponent: boolean isShowing()>();
+
+        if $z0 != 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r3 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("ToolTipManager.enableToolTipMode");
+
+        $r4 = "activeApplication";
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label03;
+
+        $r37 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r38 = virtualinvoke $r37.<java.awt.KeyboardFocusManager: java.awt.Window getFocusedWindow()>();
+
+        if $r38 != null goto label03;
+
+        return;
+
+     label03:
+        $z2 = r0.<javax.swing.ToolTipManager: boolean enabled>;
+
+        if $z2 == 0 goto label21;
+
+        $r5 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JComponent: java.awt.Point getLocationOnScreen()>();
+
+        $r7 = r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        if $r7 == null goto label04;
+
+        $r34 = new java.awt.Point;
+
+        $i53 = $r6.<java.awt.Point: int x>;
+
+        $r35 = r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        $i52 = $r35.<java.awt.Point: int x>;
+
+        $i57 = $i53 + $i52;
+
+        $i55 = $r6.<java.awt.Point: int y>;
+
+        $r36 = r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        $i54 = $r36.<java.awt.Point: int y>;
+
+        $i56 = $i55 + $i54;
+
+        specialinvoke $r34.<java.awt.Point: void <init>(int,int)>($i57, $i56);
+
+        r39 = $r34;
+
+        goto label05;
+
+     label04:
+        $r8 = r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent>;
+
+        r39 = virtualinvoke $r8.<java.awt.event.MouseEvent: java.awt.Point getLocationOnScreen()>();
+
+     label05:
+        $r9 = specialinvoke r0.<javax.swing.ToolTipManager: java.awt.GraphicsConfiguration getDrawingGC(java.awt.Point)>(r39);
+
+        r40 = $r9;
+
+        if $r9 != null goto label06;
+
+        $r30 = r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent>;
+
+        $r31 = virtualinvoke $r30.<java.awt.event.MouseEvent: java.awt.Point getLocationOnScreen()>();
+
+        r39 = $r31;
+
+        $r32 = specialinvoke r0.<javax.swing.ToolTipManager: java.awt.GraphicsConfiguration getDrawingGC(java.awt.Point)>($r31);
+
+        r40 = $r32;
+
+        if $r32 != null goto label06;
+
+        $r33 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        r40 = virtualinvoke $r33.<javax.swing.JComponent: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+     label06:
+        $r41 = virtualinvoke r40.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r42 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r43 = virtualinvoke $r42.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>(r40);
+
+        $i58 = $r41.<java.awt.Rectangle: int x>;
+
+        $i59 = $r43.<java.awt.Insets: int left>;
+
+        $i60 = $i58 + $i59;
+
+        $r41.<java.awt.Rectangle: int x> = $i60;
+
+        $i61 = $r41.<java.awt.Rectangle: int y>;
+
+        $i62 = $r43.<java.awt.Insets: int top>;
+
+        $i63 = $i61 + $i62;
+
+        $r41.<java.awt.Rectangle: int y> = $i63;
+
+        $i64 = $r41.<java.awt.Rectangle: int width>;
+
+        $i65 = $r43.<java.awt.Insets: int left>;
+
+        $i66 = $r43.<java.awt.Insets: int right>;
+
+        $i67 = $i65 + $i66;
+
+        $i68 = $i64 - $i67;
+
+        $r41.<java.awt.Rectangle: int width> = $i68;
+
+        $i69 = $r41.<java.awt.Rectangle: int height>;
+
+        $i70 = $r43.<java.awt.Insets: int top>;
+
+        $i71 = $r43.<java.awt.Insets: int bottom>;
+
+        $i72 = $i70 + $i71;
+
+        $i73 = $i69 - $i72;
+
+        $r41.<java.awt.Rectangle: int height> = $i73;
+
+        $r44 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $z3 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftToRight(java.awt.Component)>($r44);
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r45 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r46 = virtualinvoke $r45.<javax.swing.JComponent: javax.swing.JToolTip createToolTip()>();
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip> = $r46;
+
+        $r47 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $r48 = r0.<javax.swing.ToolTipManager: java.lang.String toolTipText>;
+
+        virtualinvoke $r47.<javax.swing.JToolTip: void setTipText(java.lang.String)>($r48);
+
+        $r49 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $r50 = virtualinvoke $r49.<javax.swing.JToolTip: java.awt.Dimension getPreferredSize()>();
+
+        $r51 = r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        if $r51 == null goto label07;
+
+        r52 = r39;
+
+        if $z3 != 0 goto label08;
+
+        $i50 = r39.<java.awt.Point: int x>;
+
+        $i49 = $r50.<java.awt.Dimension: int width>;
+
+        $i51 = $i50 - $i49;
+
+        r39.<java.awt.Point: int x> = $i51;
+
+        goto label08;
+
+     label07:
+        $r10 = new java.awt.Point;
+
+        $i0 = $r6.<java.awt.Point: int x>;
+
+        $r11 = r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent>;
+
+        $i1 = virtualinvoke $r11.<java.awt.event.MouseEvent: int getX()>();
+
+        $i2 = $i0 + $i1;
+
+        $i3 = $r6.<java.awt.Point: int y>;
+
+        $r12 = r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent>;
+
+        $i4 = virtualinvoke $r12.<java.awt.event.MouseEvent: int getY()>();
+
+        $i5 = $i3 + $i4;
+
+        $i6 = $i5 + 20;
+
+        specialinvoke $r10.<java.awt.Point: void <init>(int,int)>($i2, $i6);
+
+        r52 = $r10;
+
+        if $z3 != 0 goto label08;
+
+        $i44 = $r10.<java.awt.Point: int x>;
+
+        $i43 = $r50.<java.awt.Dimension: int width>;
+
+        $i45 = $i44 - $i43;
+
+        if $i45 < 0 goto label08;
+
+        $i47 = $r10.<java.awt.Point: int x>;
+
+        $i46 = $r50.<java.awt.Dimension: int width>;
+
+        $i48 = $i47 - $i46;
+
+        $r10.<java.awt.Point: int x> = $i48;
+
+     label08:
+        $r53 = r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect>;
+
+        if $r53 != null goto label09;
+
+        $r29 = new java.awt.Rectangle;
+
+        specialinvoke $r29.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect> = $r29;
+
+     label09:
+        $r13 = r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect>;
+
+        $i10 = r52.<java.awt.Point: int x>;
+
+        $i9 = r52.<java.awt.Point: int y>;
+
+        $i8 = $r50.<java.awt.Dimension: int width>;
+
+        $i7 = $r50.<java.awt.Dimension: int height>;
+
+        virtualinvoke $r13.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i10, $i9, $i8, $i7);
+
+        $i12 = r52.<java.awt.Point: int x>;
+
+        $i11 = $r41.<java.awt.Rectangle: int x>;
+
+        if $i12 >= $i11 goto label10;
+
+        $i42 = $r41.<java.awt.Rectangle: int x>;
+
+        r52.<java.awt.Point: int x> = $i42;
+
+        goto label11;
+
+     label10:
+        $i14 = r52.<java.awt.Point: int x>;
+
+        $i13 = $r41.<java.awt.Rectangle: int x>;
+
+        $i16 = $i14 - $i13;
+
+        $i15 = $r50.<java.awt.Dimension: int width>;
+
+        $i18 = $i16 + $i15;
+
+        $i17 = $r41.<java.awt.Rectangle: int width>;
+
+        if $i18 <= $i17 goto label11;
+
+        $i39 = $r41.<java.awt.Rectangle: int x>;
+
+        $i37 = $r41.<java.awt.Rectangle: int width>;
+
+        $i36 = $r50.<java.awt.Dimension: int width>;
+
+        $i38 = $i37 - $i36;
+
+        $i40 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i38);
+
+        $i41 = $i39 + $i40;
+
+        r52.<java.awt.Point: int x> = $i41;
+
+     label11:
+        $i74 = r52.<java.awt.Point: int y>;
+
+        $i75 = $r41.<java.awt.Rectangle: int y>;
+
+        if $i74 >= $i75 goto label12;
+
+        $i35 = $r41.<java.awt.Rectangle: int y>;
+
+        r52.<java.awt.Point: int y> = $i35;
+
+        goto label13;
+
+     label12:
+        $i20 = r52.<java.awt.Point: int y>;
+
+        $i19 = $r41.<java.awt.Rectangle: int y>;
+
+        $i22 = $i20 - $i19;
+
+        $i21 = $r50.<java.awt.Dimension: int height>;
+
+        $i24 = $i22 + $i21;
+
+        $i23 = $r41.<java.awt.Rectangle: int height>;
+
+        if $i24 <= $i23 goto label13;
+
+        $i32 = $r41.<java.awt.Rectangle: int y>;
+
+        $i30 = $r41.<java.awt.Rectangle: int height>;
+
+        $i29 = $r50.<java.awt.Dimension: int height>;
+
+        $i31 = $i30 - $i29;
+
+        $i33 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i31);
+
+        $i34 = $i32 + $i33;
+
+        r52.<java.awt.Point: int y> = $i34;
+
+     label13:
+        $r54 = staticinvoke <javax.swing.PopupFactory: javax.swing.PopupFactory getSharedInstance()>();
+
+        $z4 = r0.<javax.swing.ToolTipManager: boolean lightWeightPopupEnabled>;
+
+        if $z4 == 0 goto label17;
+
+        $r26 = r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect>;
+
+        $r25 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $i27 = specialinvoke r0.<javax.swing.ToolTipManager: int getPopupFitHeight(java.awt.Rectangle,java.awt.Component)>($r26, $r25);
+
+        $r28 = r0.<javax.swing.ToolTipManager: java.awt.Rectangle popupRect>;
+
+        $r27 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $i28 = specialinvoke r0.<javax.swing.ToolTipManager: int getPopupFitWidth(java.awt.Rectangle,java.awt.Component)>($r28, $r27);
+
+        if $i28 > 0 goto label14;
+
+        if $i27 <= 0 goto label15;
+
+     label14:
+        virtualinvoke $r54.<javax.swing.PopupFactory: void setPopupType(int)>(1);
+
+        goto label16;
+
+     label15:
+        virtualinvoke $r54.<javax.swing.PopupFactory: void setPopupType(int)>(0);
+
+     label16:
+        goto label18;
+
+     label17:
+        virtualinvoke $r54.<javax.swing.PopupFactory: void setPopupType(int)>(1);
+
+     label18:
+        $r15 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r14 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $i26 = r52.<java.awt.Point: int x>;
+
+        $i25 = r52.<java.awt.Point: int y>;
+
+        $r16 = virtualinvoke $r54.<javax.swing.PopupFactory: javax.swing.Popup getPopup(java.awt.Component,java.awt.Component,int,int)>($r15, $r14, $i26, $i25);
+
+        r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow> = $r16;
+
+        virtualinvoke $r54.<javax.swing.PopupFactory: void setPopupType(int)>(0);
+
+        $r17 = r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        virtualinvoke $r17.<javax.swing.Popup: void show()>();
+
+        $r18 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r19 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window windowForComponent(java.awt.Component)>($r18);
+
+        $r20 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $r21 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window windowForComponent(java.awt.Component)>($r20);
+
+        r0.<javax.swing.ToolTipManager: java.awt.Window window> = $r21;
+
+        $r22 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r22 == null goto label19;
+
+        $r23 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r23 == $r19 goto label19;
+
+        $r24 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        virtualinvoke $r24.<java.awt.Window: void addMouseListener(java.awt.event.MouseListener)>(r0);
+
+        goto label20;
+
+     label19:
+        r0.<javax.swing.ToolTipManager: java.awt.Window window> = null;
+
+     label20:
+        $r55 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r55.<javax.swing.Timer: void start()>();
+
+        r0.<javax.swing.ToolTipManager: boolean tipShowing> = 1;
+
+     label21:
+        return;
+    }
+
+    void hideTipWindow()
+    {
+        javax.swing.ToolTipManager r0;
+        java.awt.Window $r2, $r5;
+        javax.swing.Popup $r1, $r3;
+        javax.swing.Timer $r4;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r2 == null goto label1;
+
+        $r5 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        virtualinvoke $r5.<java.awt.Window: void removeMouseListener(java.awt.event.MouseListener)>(r0);
+
+        r0.<javax.swing.ToolTipManager: java.awt.Window window> = null;
+
+     label1:
+        $r3 = r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        virtualinvoke $r3.<javax.swing.Popup: void hide()>();
+
+        r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow> = null;
+
+        r0.<javax.swing.ToolTipManager: boolean tipShowing> = 0;
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip> = null;
+
+        $r4 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void stop()>();
+
+     label2:
+        return;
+    }
+
+    public static javax.swing.ToolTipManager sharedInstance()
+    {
+        javax.swing.ToolTipManager $r2, $r4;
+        java.lang.Object $r0, $r1, $r3;
+        boolean $z0;
+
+        $r0 = <javax.swing.ToolTipManager: java.lang.Object TOOL_TIP_MANAGER_KEY>;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.lang.Object appContextGet(java.lang.Object)>($r0);
+
+        $z0 = $r1 instanceof javax.swing.ToolTipManager;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (javax.swing.ToolTipManager) $r1;
+
+        return $r4;
+
+     label1:
+        $r2 = new javax.swing.ToolTipManager;
+
+        specialinvoke $r2.<javax.swing.ToolTipManager: void <init>()>();
+
+        $r3 = <javax.swing.ToolTipManager: java.lang.Object TOOL_TIP_MANAGER_KEY>;
+
+        staticinvoke <javax.swing.SwingUtilities: void appContextPut(java.lang.Object,java.lang.Object)>($r3, $r2);
+
+        return $r2;
+    }
+
+    public void registerComponent(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        java.awt.event.KeyListener $r4, $r5, $r6, $r9;
+        javax.swing.ToolTipManager r1;
+        javax.swing.JMenuItem $r8, $r11;
+        java.awt.event.MouseMotionListener $r2, $r3;
+        javax.swing.event.MenuKeyListener $r7, $r10;
+        boolean $z0;
+
+        r1 := @this: javax.swing.ToolTipManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseListener(java.awt.event.MouseListener)>(r1);
+
+        virtualinvoke r0.<javax.swing.JComponent: void addMouseListener(java.awt.event.MouseListener)>(r1);
+
+        $r2 = r1.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r2);
+
+        $r3 = r1.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        $z0 = r0 instanceof javax.swing.JMenuItem;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = (javax.swing.JMenuItem) r0;
+
+        $r6 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        $r7 = (javax.swing.event.MenuKeyListener) $r6;
+
+        virtualinvoke $r8.<javax.swing.JMenuItem: void removeMenuKeyListener(javax.swing.event.MenuKeyListener)>($r7);
+
+        $r11 = (javax.swing.JMenuItem) r0;
+
+        $r9 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        $r10 = (javax.swing.event.MenuKeyListener) $r9;
+
+        virtualinvoke $r11.<javax.swing.JMenuItem: void addMenuKeyListener(javax.swing.event.MenuKeyListener)>($r10);
+
+        goto label2;
+
+     label1:
+        $r4 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeKeyListener(java.awt.event.KeyListener)>($r4);
+
+        $r5 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void addKeyListener(java.awt.event.KeyListener)>($r5);
+
+     label2:
+        return;
+    }
+
+    public void unregisterComponent(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        java.awt.event.KeyListener $r3, $r4;
+        javax.swing.ToolTipManager r1;
+        javax.swing.JMenuItem $r6;
+        java.awt.event.MouseMotionListener $r2;
+        javax.swing.event.MenuKeyListener $r5;
+        boolean $z0;
+
+        r1 := @this: javax.swing.ToolTipManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseListener(java.awt.event.MouseListener)>(r1);
+
+        $r2 = r1.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r2);
+
+        $z0 = r0 instanceof javax.swing.JMenuItem;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (javax.swing.JMenuItem) r0;
+
+        $r4 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        $r5 = (javax.swing.event.MenuKeyListener) $r4;
+
+        virtualinvoke $r6.<javax.swing.JMenuItem: void removeMenuKeyListener(javax.swing.event.MenuKeyListener)>($r5);
+
+        goto label2;
+
+     label1:
+        $r3 = r1.<javax.swing.ToolTipManager: java.awt.event.KeyListener accessibilityKeyListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeKeyListener(java.awt.event.KeyListener)>($r3);
+
+     label2:
+        return;
+    }
+
+    public void mouseEntered(java.awt.event.MouseEvent)
+    {
+        javax.swing.ToolTipManager r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        specialinvoke r0.<javax.swing.ToolTipManager: void initiateToolTip(java.awt.event.MouseEvent)>(r1);
+
+        return;
+    }
+
+    private void initiateToolTip(java.awt.event.MouseEvent)
+    {
+        javax.swing.Popup $r11;
+        java.awt.Point $r8, $r14, $r15, $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r13, $r16;
+        javax.swing.Timer $r7, $r12, $r18;
+        boolean z0, $z1, $z2, $z3, $z4;
+        javax.swing.JComponent r5, $r9, $r10;
+        javax.swing.ToolTipManager r2;
+        java.awt.Window $r3;
+        java.awt.event.MouseEvent r0;
+        java.awt.event.MouseMotionListener $r6;
+        java.lang.Object $r1, $r4;
+
+        r2 := @this: javax.swing.ToolTipManager;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r3 = r2.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r1 != $r3 goto label01;
+
+        return;
+
+     label01:
+        $r4 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        r5 = (javax.swing.JComponent) $r4;
+
+        $r6 = r2.<javax.swing.ToolTipManager: java.awt.event.MouseMotionListener moveBeforeEnterListener>;
+
+        virtualinvoke r5.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r6);
+
+        $r7 = r2.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r7.<javax.swing.Timer: void stop()>();
+
+        $r8 = virtualinvoke r0.<java.awt.event.MouseEvent: java.awt.Point getPoint()>();
+
+        $i0 = $r8.<java.awt.Point: int x>;
+
+        if $i0 < 0 goto label02;
+
+        $i1 = $r8.<java.awt.Point: int x>;
+
+        $i2 = virtualinvoke r5.<javax.swing.JComponent: int getWidth()>();
+
+        if $i1 >= $i2 goto label02;
+
+        $i3 = $r8.<java.awt.Point: int y>;
+
+        if $i3 < 0 goto label02;
+
+        $i4 = $r8.<java.awt.Point: int y>;
+
+        $i5 = virtualinvoke r5.<javax.swing.JComponent: int getHeight()>();
+
+        if $i4 < $i5 goto label03;
+
+     label02:
+        return;
+
+     label03:
+        $r9 = r2.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r9 == null goto label04;
+
+        $r18 = r2.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r18.<javax.swing.Timer: void stop()>();
+
+     label04:
+        virtualinvoke r5.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>(r2);
+
+        virtualinvoke r5.<javax.swing.JComponent: void addMouseMotionListener(java.awt.event.MouseMotionListener)>(r2);
+
+        $r10 = r2.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r10 != r5 goto label05;
+
+        $z3 = 1;
+
+        goto label06;
+
+     label05:
+        $z3 = 0;
+
+     label06:
+        z0 = $z3;
+
+        r2.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = r5;
+
+        $r11 = r2.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        if $r11 == null goto label13;
+
+        r2.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = r0;
+
+        $z1 = r2.<javax.swing.ToolTipManager: boolean showImmediately>;
+
+        if $z1 == 0 goto label12;
+
+        $r13 = virtualinvoke r5.<javax.swing.JComponent: java.lang.String getToolTipText(java.awt.event.MouseEvent)>(r0);
+
+        $r14 = virtualinvoke r5.<javax.swing.JComponent: java.awt.Point getToolTipLocation(java.awt.event.MouseEvent)>(r0);
+
+        $r15 = r2.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        if $r15 == null goto label07;
+
+        $r17 = r2.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        $z4 = virtualinvoke $r17.<java.awt.Point: boolean equals(java.lang.Object)>($r14);
+
+        goto label09;
+
+     label07:
+        if $r14 != null goto label08;
+
+        $z4 = 1;
+
+        goto label09;
+
+     label08:
+        $z4 = 0;
+
+     label09:
+        if z0 == 0 goto label10;
+
+        $r16 = r2.<javax.swing.ToolTipManager: java.lang.String toolTipText>;
+
+        $z2 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label10;
+
+        if $z4 != 0 goto label11;
+
+     label10:
+        r2.<javax.swing.ToolTipManager: java.lang.String toolTipText> = $r13;
+
+        r2.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = $r14;
+
+        virtualinvoke r2.<javax.swing.ToolTipManager: void showTipWindow()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r12 = r2.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r12.<javax.swing.Timer: void start()>();
+
+     label13:
+        return;
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent)
+    {
+        javax.swing.Timer $r4, $r6;
+        javax.swing.ToolTipManager r0;
+        javax.swing.JToolTip $r18, $r19, $r20;
+        java.awt.Container $r15, $r25;
+        java.awt.Window $r2, $r10, $r22, $r27;
+        java.awt.event.MouseEvent r3;
+        java.awt.Point $r12, $r13, $r17, $r26, $r29;
+        boolean z0;
+        java.awt.Rectangle $r16;
+        javax.swing.Popup $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33;
+        javax.swing.JComponent $r1, $r5, $r7, $r9, $r11, $r14, $r23, $r24, $r28, $r30, $r31, $r33;
+        java.lang.Object $r21, $r32;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r3 := @parameter0: java.awt.event.MouseEvent;
+
+        z0 = 1;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r1 != null goto label1;
+
+     label1:
+        $r2 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r2 == null goto label4;
+
+        $r21 = virtualinvoke r3.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r22 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        if $r21 != $r22 goto label4;
+
+        $r23 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r23 == null goto label4;
+
+        $r24 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r25 = virtualinvoke $r24.<javax.swing.JComponent: java.awt.Container getTopLevelAncestor()>();
+
+        if $r25 == null goto label3;
+
+        $r26 = virtualinvoke r3.<java.awt.event.MouseEvent: java.awt.Point getPoint()>();
+
+        $r27 = r0.<javax.swing.ToolTipManager: java.awt.Window window>;
+
+        staticinvoke <javax.swing.SwingUtilities: void convertPointToScreen(java.awt.Point,java.awt.Component)>($r26, $r27);
+
+        $i22 = $r26.<java.awt.Point: int x>;
+
+        $i23 = virtualinvoke $r25.<java.awt.Container: int getX()>();
+
+        $i24 = $i22 - $i23;
+
+        $r26.<java.awt.Point: int x> = $i24;
+
+        $i25 = $r26.<java.awt.Point: int y>;
+
+        $i26 = virtualinvoke $r25.<java.awt.Container: int getY()>();
+
+        $i27 = $i25 - $i26;
+
+        $r26.<java.awt.Point: int y> = $i27;
+
+        $r28 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r29 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>(null, $r26, $r28);
+
+        $i28 = $r29.<java.awt.Point: int x>;
+
+        if $i28 < 0 goto label2;
+
+        $i29 = $r29.<java.awt.Point: int x>;
+
+        $r30 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $i30 = virtualinvoke $r30.<javax.swing.JComponent: int getWidth()>();
+
+        if $i29 >= $i30 goto label2;
+
+        $i31 = $r29.<java.awt.Point: int y>;
+
+        if $i31 < 0 goto label2;
+
+        $i32 = $r29.<java.awt.Point: int y>;
+
+        $r31 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $i33 = virtualinvoke $r31.<javax.swing.JComponent: int getHeight()>();
+
+        if $i32 >= $i33 goto label2;
+
+        z0 = 0;
+
+        goto label3;
+
+     label2:
+        z0 = 1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r32 = virtualinvoke r3.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r33 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r32 != $r33 goto label6;
+
+        $r8 = r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        if $r8 == null goto label6;
+
+        $r9 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r10 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>($r9);
+
+        if $r10 == null goto label6;
+
+        $r11 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r12 = virtualinvoke r3.<java.awt.event.MouseEvent: java.awt.Point getPoint()>();
+
+        $r13 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>($r11, $r12, $r10);
+
+        $r14 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r15 = virtualinvoke $r14.<javax.swing.JComponent: java.awt.Container getTopLevelAncestor()>();
+
+        $r16 = virtualinvoke $r15.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i1 = $r13.<java.awt.Point: int x>;
+
+        $i0 = $r16.<java.awt.Rectangle: int x>;
+
+        $i2 = $i1 + $i0;
+
+        $r13.<java.awt.Point: int x> = $i2;
+
+        $i4 = $r13.<java.awt.Point: int y>;
+
+        $i3 = $r16.<java.awt.Rectangle: int y>;
+
+        $i5 = $i4 + $i3;
+
+        $r13.<java.awt.Point: int y> = $i5;
+
+        $r17 = new java.awt.Point;
+
+        specialinvoke $r17.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        $r18 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        staticinvoke <javax.swing.SwingUtilities: void convertPointToScreen(java.awt.Point,java.awt.Component)>($r17, $r18);
+
+        $i6 = $r17.<java.awt.Point: int x>;
+
+        $r16.<java.awt.Rectangle: int x> = $i6;
+
+        $i7 = $r17.<java.awt.Point: int y>;
+
+        $r16.<java.awt.Rectangle: int y> = $i7;
+
+        $r19 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $i8 = virtualinvoke $r19.<javax.swing.JToolTip: int getWidth()>();
+
+        $r16.<java.awt.Rectangle: int width> = $i8;
+
+        $r20 = r0.<javax.swing.ToolTipManager: javax.swing.JToolTip tip>;
+
+        $i9 = virtualinvoke $r20.<javax.swing.JToolTip: int getHeight()>();
+
+        $r16.<java.awt.Rectangle: int height> = $i9;
+
+        $i11 = $r13.<java.awt.Point: int x>;
+
+        $i10 = $r16.<java.awt.Rectangle: int x>;
+
+        if $i11 < $i10 goto label5;
+
+        $i15 = $r13.<java.awt.Point: int x>;
+
+        $i13 = $r16.<java.awt.Rectangle: int x>;
+
+        $i12 = $r16.<java.awt.Rectangle: int width>;
+
+        $i14 = $i13 + $i12;
+
+        if $i15 >= $i14 goto label5;
+
+        $i17 = $r13.<java.awt.Point: int y>;
+
+        $i16 = $r16.<java.awt.Rectangle: int y>;
+
+        if $i17 < $i16 goto label5;
+
+        $i21 = $r13.<java.awt.Point: int y>;
+
+        $i19 = $r16.<java.awt.Rectangle: int y>;
+
+        $i18 = $r16.<java.awt.Rectangle: int height>;
+
+        $i20 = $i19 + $i18;
+
+        if $i21 >= $i20 goto label5;
+
+        z0 = 0;
+
+        goto label6;
+
+     label5:
+        z0 = 1;
+
+     label6:
+        if z0 == 0 goto label8;
+
+        $r4 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void stop()>();
+
+        $r5 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r5 == null goto label7;
+
+        $r7 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        virtualinvoke $r7.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>(r0);
+
+     label7:
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = null;
+
+        r0.<javax.swing.ToolTipManager: java.lang.String toolTipText> = null;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = null;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r6 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r6.<javax.swing.Timer: void restart()>();
+
+     label8:
+        return;
+    }
+
+    public void mousePressed(java.awt.event.MouseEvent)
+    {
+        javax.swing.ToolTipManager r0;
+        java.awt.event.MouseEvent r2;
+        javax.swing.Timer $r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r2 := @parameter0: java.awt.event.MouseEvent;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r1.<javax.swing.Timer: void stop()>();
+
+        r0.<javax.swing.ToolTipManager: boolean showImmediately> = 0;
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = null;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = null;
+
+        return;
+    }
+
+    public void mouseDragged(java.awt.event.MouseEvent)
+    {
+        javax.swing.ToolTipManager r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseMoved(java.awt.event.MouseEvent)
+    {
+        javax.swing.JComponent $r3, r6;
+        javax.swing.ToolTipManager r0;
+        java.awt.Point $r9;
+        java.awt.event.MouseEvent r1;
+        java.lang.Object $r2, $r5;
+        java.lang.String $r7, $r8;
+        boolean $z0, $z1;
+        javax.swing.Timer $r4, $r10;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $z0 = r0.<javax.swing.ToolTipManager: boolean tipShowing>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<javax.swing.ToolTipManager: void checkForTipChange(java.awt.event.MouseEvent)>(r1);
+
+        goto label4;
+
+     label1:
+        $z1 = r0.<javax.swing.ToolTipManager: boolean showImmediately>;
+
+        if $z1 == 0 goto label3;
+
+        $r5 = virtualinvoke r1.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        r6 = (javax.swing.JComponent) $r5;
+
+        $r7 = virtualinvoke r6.<javax.swing.JComponent: java.lang.String getToolTipText(java.awt.event.MouseEvent)>(r1);
+
+        r0.<javax.swing.ToolTipManager: java.lang.String toolTipText> = $r7;
+
+        $r8 = r0.<javax.swing.ToolTipManager: java.lang.String toolTipText>;
+
+        if $r8 == null goto label2;
+
+        $r9 = virtualinvoke r6.<javax.swing.JComponent: java.awt.Point getToolTipLocation(java.awt.event.MouseEvent)>(r1);
+
+        r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = $r9;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = r1;
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = r6;
+
+        $r10 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r10.<javax.swing.Timer: void stop()>();
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void showTipWindow()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r3 = (javax.swing.JComponent) $r2;
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = $r3;
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = r1;
+
+        r0.<javax.swing.ToolTipManager: java.lang.String toolTipText> = null;
+
+        $r4 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void restart()>();
+
+     label4:
+        return;
+    }
+
+    private void checkForTipChange(java.awt.event.MouseEvent)
+    {
+        javax.swing.Popup $r8;
+        java.awt.Point $r4, $r11;
+        java.lang.String $r3, $r12;
+        boolean $z0, $z1, $z2;
+        javax.swing.Timer $r6, $r7, $r9, $r10, $r13, $r14;
+        javax.swing.JComponent r2;
+        javax.swing.ToolTipManager r5;
+        java.awt.event.MouseEvent r0;
+        java.lang.Object $r1;
+
+        r5 := @this: javax.swing.ToolTipManager;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        r2 = (javax.swing.JComponent) $r1;
+
+        $r3 = virtualinvoke r2.<javax.swing.JComponent: java.lang.String getToolTipText(java.awt.event.MouseEvent)>(r0);
+
+        $r4 = virtualinvoke r2.<javax.swing.JComponent: java.awt.Point getToolTipLocation(java.awt.event.MouseEvent)>(r0);
+
+        if $r3 != null goto label01;
+
+        if $r4 == null goto label09;
+
+     label01:
+        r5.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = r0;
+
+        if $r3 == null goto label02;
+
+        $r12 = r5.<javax.swing.ToolTipManager: java.lang.String toolTipText>;
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z2 != 0 goto label03;
+
+     label02:
+        if $r3 != null goto label07;
+
+     label03:
+        if $r4 == null goto label04;
+
+        $r11 = r5.<javax.swing.ToolTipManager: java.awt.Point preferredLocation>;
+
+        $z1 = virtualinvoke $r4.<java.awt.Point: boolean equals(java.lang.Object)>($r11);
+
+        if $z1 != 0 goto label05;
+
+     label04:
+        if $r4 != null goto label07;
+
+     label05:
+        $r8 = r5.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        if $r8 == null goto label06;
+
+        $r10 = r5.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r10.<javax.swing.Timer: void restart()>();
+
+        goto label10;
+
+     label06:
+        $r9 = r5.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r9.<javax.swing.Timer: void restart()>();
+
+        goto label10;
+
+     label07:
+        r5.<javax.swing.ToolTipManager: java.lang.String toolTipText> = $r3;
+
+        r5.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = $r4;
+
+        $z0 = r5.<javax.swing.ToolTipManager: boolean showImmediately>;
+
+        if $z0 == 0 goto label08;
+
+        virtualinvoke r5.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        virtualinvoke r5.<javax.swing.ToolTipManager: void showTipWindow()>();
+
+        $r7 = r5.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r7.<javax.swing.Timer: void stop()>();
+
+        goto label10;
+
+     label08:
+        $r6 = r5.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r6.<javax.swing.Timer: void restart()>();
+
+        goto label10;
+
+     label09:
+        r5.<javax.swing.ToolTipManager: java.lang.String toolTipText> = null;
+
+        r5.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = null;
+
+        r5.<javax.swing.ToolTipManager: java.awt.event.MouseEvent mouseEvent> = null;
+
+        r5.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = null;
+
+        virtualinvoke r5.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r13 = r5.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r13.<javax.swing.Timer: void stop()>();
+
+        $r14 = r5.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r14.<javax.swing.Timer: void restart()>();
+
+     label10:
+        return;
+    }
+
+    static java.awt.Frame frameForComponent(java.awt.Component)
+    {
+        java.awt.Frame $r0;
+        java.awt.Component r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.Component;
+
+     label1:
+        $z0 = r1 instanceof java.awt.Frame;
+
+        if $z0 != 0 goto label2;
+
+        r1 = virtualinvoke r1.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label2:
+        $r0 = (java.awt.Frame) r1;
+
+        return $r0;
+    }
+
+    private java.awt.event.FocusListener createFocusChangeListener()
+    {
+        javax.swing.ToolTipManager$1 $r0;
+        javax.swing.ToolTipManager r1;
+
+        r1 := @this: javax.swing.ToolTipManager;
+
+        $r0 = new javax.swing.ToolTipManager$1;
+
+        specialinvoke $r0.<javax.swing.ToolTipManager$1: void <init>(javax.swing.ToolTipManager)>(r1);
+
+        return $r0;
+    }
+
+    private int getPopupFitWidth(java.awt.Rectangle, java.awt.Component)
+    {
+        java.awt.Rectangle r2, $r3, $r5, $r6, $r7, $r8, $r9, $r11;
+        java.awt.Point $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.awt.Container r10;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.ToolTipManager r1;
+        java.awt.Component r0;
+
+        r1 := @this: javax.swing.ToolTipManager;
+
+        r2 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Component;
+
+        if r0 == null goto label7;
+
+        r10 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label1:
+        if r10 == null goto label7;
+
+        $z0 = r10 instanceof javax.swing.JFrame;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r10 instanceof javax.swing.JDialog;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r10 instanceof javax.swing.JWindow;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r11 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i5 = specialinvoke r1.<javax.swing.ToolTipManager: int getWidthAdjust(java.awt.Rectangle,java.awt.Rectangle)>($r11, r2);
+
+        return $i5;
+
+     label3:
+        $z3 = r10 instanceof javax.swing.JApplet;
+
+        if $z3 != 0 goto label4;
+
+        $z4 = r10 instanceof javax.swing.JInternalFrame;
+
+        if $z4 == 0 goto label6;
+
+     label4:
+        $r3 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        if $r3 != null goto label5;
+
+        $r9 = new java.awt.Rectangle;
+
+        specialinvoke $r9.<java.awt.Rectangle: void <init>()>();
+
+        r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect> = $r9;
+
+     label5:
+        $r4 = virtualinvoke r10.<java.awt.Container: java.awt.Point getLocationOnScreen()>();
+
+        $r5 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        $i0 = $r4.<java.awt.Point: int x>;
+
+        $i1 = $r4.<java.awt.Point: int y>;
+
+        $r6 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i2 = $r6.<java.awt.Rectangle: int width>;
+
+        $r7 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i3 = $r7.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r5.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        $r8 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        $i4 = specialinvoke r1.<javax.swing.ToolTipManager: int getWidthAdjust(java.awt.Rectangle,java.awt.Rectangle)>($r8, r2);
+
+        return $i4;
+
+     label6:
+        r10 = virtualinvoke r10.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label7:
+        return 0;
+    }
+
+    private int getPopupFitHeight(java.awt.Rectangle, java.awt.Component)
+    {
+        java.awt.Rectangle r2, $r3, $r5, $r6, $r7, $r8, $r9, $r11;
+        java.awt.Point $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.awt.Container r10;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.ToolTipManager r1;
+        java.awt.Component r0;
+
+        r1 := @this: javax.swing.ToolTipManager;
+
+        r2 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Component;
+
+        if r0 == null goto label7;
+
+        r10 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label1:
+        if r10 == null goto label7;
+
+        $z0 = r10 instanceof javax.swing.JFrame;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r10 instanceof javax.swing.JDialog;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r10 instanceof javax.swing.JWindow;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r11 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i5 = specialinvoke r1.<javax.swing.ToolTipManager: int getHeightAdjust(java.awt.Rectangle,java.awt.Rectangle)>($r11, r2);
+
+        return $i5;
+
+     label3:
+        $z3 = r10 instanceof javax.swing.JApplet;
+
+        if $z3 != 0 goto label4;
+
+        $z4 = r10 instanceof javax.swing.JInternalFrame;
+
+        if $z4 == 0 goto label6;
+
+     label4:
+        $r3 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        if $r3 != null goto label5;
+
+        $r9 = new java.awt.Rectangle;
+
+        specialinvoke $r9.<java.awt.Rectangle: void <init>()>();
+
+        r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect> = $r9;
+
+     label5:
+        $r4 = virtualinvoke r10.<java.awt.Container: java.awt.Point getLocationOnScreen()>();
+
+        $r5 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        $i0 = $r4.<java.awt.Point: int x>;
+
+        $i1 = $r4.<java.awt.Point: int y>;
+
+        $r6 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i2 = $r6.<java.awt.Rectangle: int width>;
+
+        $r7 = virtualinvoke r10.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i3 = $r7.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r5.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        $r8 = r1.<javax.swing.ToolTipManager: java.awt.Rectangle popupFrameRect>;
+
+        $i4 = specialinvoke r1.<javax.swing.ToolTipManager: int getHeightAdjust(java.awt.Rectangle,java.awt.Rectangle)>($r8, r2);
+
+        return $i4;
+
+     label6:
+        r10 = virtualinvoke r10.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label7:
+        return 0;
+    }
+
+    private int getHeightAdjust(java.awt.Rectangle, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0, r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        javax.swing.ToolTipManager r2;
+
+        r2 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Rectangle;
+
+        $i1 = r0.<java.awt.Rectangle: int y>;
+
+        $i0 = r1.<java.awt.Rectangle: int y>;
+
+        if $i1 < $i0 goto label1;
+
+        $i11 = r0.<java.awt.Rectangle: int y>;
+
+        $i10 = r0.<java.awt.Rectangle: int height>;
+
+        $i15 = $i11 + $i10;
+
+        $i13 = r1.<java.awt.Rectangle: int y>;
+
+        $i12 = r1.<java.awt.Rectangle: int height>;
+
+        $i14 = $i13 + $i12;
+
+        if $i15 > $i14 goto label1;
+
+        return 0;
+
+     label1:
+        $i3 = r0.<java.awt.Rectangle: int y>;
+
+        $i2 = r0.<java.awt.Rectangle: int height>;
+
+        $i7 = $i3 + $i2;
+
+        $i5 = r1.<java.awt.Rectangle: int y>;
+
+        $i4 = r1.<java.awt.Rectangle: int height>;
+
+        $i6 = $i5 + $i4;
+
+        $i8 = $i7 - $i6;
+
+        $i9 = $i8 + 5;
+
+        return $i9;
+    }
+
+    private int getWidthAdjust(java.awt.Rectangle, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0, r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        javax.swing.ToolTipManager r2;
+
+        r2 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Rectangle;
+
+        $i1 = r0.<java.awt.Rectangle: int x>;
+
+        $i0 = r1.<java.awt.Rectangle: int x>;
+
+        if $i1 < $i0 goto label1;
+
+        $i11 = r0.<java.awt.Rectangle: int x>;
+
+        $i10 = r0.<java.awt.Rectangle: int width>;
+
+        $i15 = $i11 + $i10;
+
+        $i13 = r1.<java.awt.Rectangle: int x>;
+
+        $i12 = r1.<java.awt.Rectangle: int width>;
+
+        $i14 = $i13 + $i12;
+
+        if $i15 > $i14 goto label1;
+
+        return 0;
+
+     label1:
+        $i3 = r0.<java.awt.Rectangle: int x>;
+
+        $i2 = r0.<java.awt.Rectangle: int width>;
+
+        $i7 = $i3 + $i2;
+
+        $i5 = r1.<java.awt.Rectangle: int x>;
+
+        $i4 = r1.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 + $i4;
+
+        $i8 = $i7 - $i6;
+
+        $i9 = $i8 + 5;
+
+        return $i9;
+    }
+
+    private void show(javax.swing.JComponent)
+    {
+        java.awt.event.FocusListener $r11, $r12, $r14;
+        javax.swing.Popup $r1;
+        java.awt.Point $r9;
+        int $i0, $i1;
+        java.lang.String $r8;
+        javax.swing.Timer $r2, $r3, $r4;
+        javax.swing.JComponent r5, $r6, $r7, $r10, $r13;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r5 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.Popup tipWindow>;
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = null;
+
+        goto label3;
+
+     label1:
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r2 = r0.<javax.swing.ToolTipManager: javax.swing.Timer enterTimer>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void stop()>();
+
+        $r3 = r0.<javax.swing.ToolTipManager: javax.swing.Timer exitTimer>;
+
+        virtualinvoke $r3.<javax.swing.Timer: void stop()>();
+
+        $r4 = r0.<javax.swing.ToolTipManager: javax.swing.Timer insideTimer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void stop()>();
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = r5;
+
+        $r6 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        if $r6 == null goto label3;
+
+        $r7 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JComponent: java.lang.String getToolTipText()>();
+
+        r0.<javax.swing.ToolTipManager: java.lang.String toolTipText> = $r8;
+
+        $r9 = new java.awt.Point;
+
+        $r10 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $i0 = virtualinvoke $r10.<javax.swing.JComponent: int getHeight()>();
+
+        $i1 = $i0 + 10;
+
+        specialinvoke $r9.<java.awt.Point: void <init>(int,int)>(10, $i1);
+
+        r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = $r9;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void showTipWindow()>();
+
+        $r11 = r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener>;
+
+        if $r11 != null goto label2;
+
+        $r14 = specialinvoke r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener createFocusChangeListener()>();
+
+        r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener> = $r14;
+
+     label2:
+        $r13 = r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent>;
+
+        $r12 = r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener>;
+
+        virtualinvoke $r13.<javax.swing.JComponent: void addFocusListener(java.awt.event.FocusListener)>($r12);
+
+     label3:
+        return;
+    }
+
+    private void hide(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.awt.event.FocusListener $r2;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @this: javax.swing.ToolTipManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.ToolTipManager: void hideTipWindow()>();
+
+        $r2 = r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener>;
+
+        virtualinvoke r1.<javax.swing.JComponent: void removeFocusListener(java.awt.event.FocusListener)>($r2);
+
+        r0.<javax.swing.ToolTipManager: java.awt.Point preferredLocation> = null;
+
+        r0.<javax.swing.ToolTipManager: javax.swing.JComponent insideComponent> = null;
+
+        return;
+    }
+
+    static void access$200(javax.swing.ToolTipManager, java.awt.event.MouseEvent)
+    {
+        javax.swing.ToolTipManager r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        r1 := @parameter1: java.awt.event.MouseEvent;
+
+        specialinvoke r0.<javax.swing.ToolTipManager: void initiateToolTip(java.awt.event.MouseEvent)>(r1);
+
+        return;
+    }
+
+    static java.awt.event.FocusListener access$300(javax.swing.ToolTipManager)
+    {
+        java.awt.event.FocusListener $r1;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: java.awt.event.FocusListener focusChangeListener>;
+
+        return $r1;
+    }
+
+    static javax.swing.KeyStroke access$400(javax.swing.ToolTipManager)
+    {
+        javax.swing.KeyStroke $r1;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.KeyStroke hideTip>;
+
+        return $r1;
+    }
+
+    static void access$500(javax.swing.ToolTipManager, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        r1 := @parameter1: javax.swing.JComponent;
+
+        specialinvoke r0.<javax.swing.ToolTipManager: void hide(javax.swing.JComponent)>(r1);
+
+        return;
+    }
+
+    static javax.swing.KeyStroke access$600(javax.swing.ToolTipManager)
+    {
+        javax.swing.KeyStroke $r1;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        $r1 = r0.<javax.swing.ToolTipManager: javax.swing.KeyStroke postTip>;
+
+        return $r1;
+    }
+
+    static void access$700(javax.swing.ToolTipManager, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.ToolTipManager r0;
+
+        r0 := @parameter0: javax.swing.ToolTipManager;
+
+        r1 := @parameter1: javax.swing.JComponent;
+
+        specialinvoke r0.<javax.swing.ToolTipManager: void show(javax.swing.JComponent)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <javax.swing.ToolTipManager: java.lang.Object TOOL_TIP_MANAGER_KEY> = $r0;
+
+        return;
+    }
+}

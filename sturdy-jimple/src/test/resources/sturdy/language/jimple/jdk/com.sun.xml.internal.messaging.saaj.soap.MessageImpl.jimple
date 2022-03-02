@@ -1,0 +1,3908 @@
+public abstract class com.sun.xml.internal.messaging.saaj.soap.MessageImpl extends javax.xml.soap.SOAPMessage implements javax.xml.soap.SOAPConstants
+{
+    public static final java.lang.String CONTENT_ID;
+    public static final java.lang.String CONTENT_LOCATION;
+    protected static final java.util.logging.Logger log;
+    protected static final int PLAIN_XML_FLAG;
+    protected static final int MIME_MULTIPART_FLAG;
+    protected static final int SOAP1_1_FLAG;
+    protected static final int SOAP1_2_FLAG;
+    protected static final int MIME_MULTIPART_XOP_SOAP1_1_FLAG;
+    protected static final int MIME_MULTIPART_XOP_SOAP1_2_FLAG;
+    protected static final int XOP_FLAG;
+    protected static final int FI_ENCODED_FLAG;
+    protected javax.xml.soap.MimeHeaders headers;
+    protected com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType;
+    protected com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl soapPartImpl;
+    protected com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments;
+    protected boolean saved;
+    protected byte[] messageBytes;
+    protected int messageByteCount;
+    protected java.util.HashMap properties;
+    protected com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart;
+    protected boolean attachmentsInitialized;
+    protected boolean isFastInfoset;
+    protected boolean acceptFastInfoset;
+    protected com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp;
+    private boolean optimizeAttachmentProcessing;
+    private java.io.InputStream inputStreamAfterSaveChanges;
+    private static boolean switchOffBM;
+    private static boolean switchOffLazyAttachment;
+    private static boolean useMimePull;
+    private boolean lazyAttachments;
+    private static final java.util.Iterator nullIter;
+
+    private static boolean isSoap1_1Type(java.lang.String, java.lang.String)
+    {
+        java.lang.String r0, r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("text");
+
+        if $z0 == 0 goto label1;
+
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("xml");
+
+        if $z5 != 0 goto label3;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("text");
+
+        if $z1 == 0 goto label2;
+
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("xml-soap");
+
+        if $z4 != 0 goto label3;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("application");
+
+        if $z2 == 0 goto label4;
+
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("fastinfoset");
+
+        if $z3 == 0 goto label4;
+
+     label3:
+        $z6 = 1;
+
+        goto label5;
+
+     label4:
+        $z6 = 0;
+
+     label5:
+        return $z6;
+    }
+
+    private static boolean isEqualToSoap1_1Type(java.lang.String)
+    {
+        java.lang.String r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("text/xml");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("application/fastinfoset");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private static boolean isSoap1_2Type(java.lang.String, java.lang.String)
+    {
+        java.lang.String r0, r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("application");
+
+        if $z0 == 0 goto label2;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("soap+xml");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("soap+fastinfoset");
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private static boolean isEqualToSoap1_2Type(java.lang.String)
+    {
+        java.lang.String r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("application/soap+xml");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("application/soap+fastinfoset");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    protected void <init>()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void <init>(boolean,boolean)>(0, 0);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 1;
+
+        return;
+    }
+
+    protected void <init>(boolean, boolean)
+    {
+        java.util.HashMap $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r5;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r2, $r3;
+        java.lang.String $r4;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.xml.soap.SOAPMessage: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties> = $r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = z0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = z1;
+
+        $r2 = new javax.xml.soap.MimeHeaders;
+
+        specialinvoke $r2.<javax.xml.soap.MimeHeaders: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedAcceptHeader()>();
+
+        virtualinvoke $r3.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Accept", $r4);
+
+        $r5 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType> = $r5;
+
+        return;
+    }
+
+    protected void <init>(javax.xml.soap.SOAPMessage)
+    {
+        byte[] $r7;
+        java.util.HashMap $r1, $r8;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r9;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0, r3;
+        javax.xml.soap.MimeHeaders $r4;
+        int $i0;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl $r5;
+        javax.xml.soap.SOAPMessage r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: javax.xml.soap.SOAPMessage;
+
+        specialinvoke r0.<javax.xml.soap.SOAPMessage: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties> = $r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments> = 0;
+
+        $z0 = r2 instanceof com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        if $z0 != 0 goto label1;
+
+     label1:
+        r3 = (com.sun.xml.internal.messaging.saaj.soap.MessageImpl) r2;
+
+        $r4 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers> = $r4;
+
+        $r5 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl soapPartImpl>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl soapPartImpl> = $r5;
+
+        $r6 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments> = $r6;
+
+        $z1 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = $z1;
+
+        $r7 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: byte[] messageBytes>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: byte[] messageBytes> = $r7;
+
+        $i0 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount> = $i0;
+
+        $r8 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties> = $r8;
+
+        $r9 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType>;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType> = $r9;
+
+        return;
+    }
+
+    protected static boolean isSoap1_1Content(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 4;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected static boolean isSoap1_2Content(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 8;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isMimeMultipartXOPSoap1_2Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)
+    {
+        java.lang.String $r1, $r2, $r3, $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("type");
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("application/xop+xml");
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("start-info");
+
+        if $r3 != null goto label3;
+
+        return 0;
+
+     label3:
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z1 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_2Type(java.lang.String)>($r4);
+
+        return $z1;
+    }
+
+    private static boolean isMimeMultipartXOPSoap1_1Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)
+    {
+        java.lang.String $r1, $r2, $r3, $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("type");
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("application/xop+xml");
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("start-info");
+
+        if $r3 != null goto label3;
+
+        return 0;
+
+     label3:
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z1 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_1Type(java.lang.String)>($r4);
+
+        return $z1;
+    }
+
+    private static boolean isSOAPBodyXOPPackage(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getPrimaryType()>();
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getSubType()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application");
+
+        if $z0 == 0 goto label4;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("xop+xml");
+
+        if $z1 == 0 goto label4;
+
+        $r3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getTypeParameter(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0);
+
+        $z2 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_2Type(java.lang.String)>($r3);
+
+        if $z2 != 0 goto label1;
+
+        $z3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_1Type(java.lang.String)>($r3);
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+
+     label4:
+        return 0;
+    }
+
+    protected void <init>(javax.xml.soap.MimeHeaders, java.io.InputStream) throws com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl
+    {
+        java.util.HashMap $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r3, $r4, $r6;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders r2;
+        int $i0;
+        java.io.InputStream r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: javax.xml.soap.MimeHeaders;
+
+        r5 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<javax.xml.soap.SOAPMessage: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties> = $r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments> = 0;
+
+        $r3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType parseContentType(javax.xml.soap.MimeHeaders)>(r2);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType>;
+
+        $i0 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int identifyContentType(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r4);
+
+        $r6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType>;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void init(javax.xml.soap.MimeHeaders,int,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType,java.io.InputStream)>(r2, $i0, $r6, r5);
+
+        return;
+    }
+
+    private static com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType parseContentType(javax.xml.soap.MimeHeaders) throws com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl
+    {
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r2, $r6, $r9;
+        java.lang.Throwable $r7;
+        java.util.logging.Logger $r1, $r5, $r8;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r4;
+        javax.xml.soap.MimeHeaders r0;
+        java.lang.String $r3;
+
+        r0 := @parameter0: javax.xml.soap.MimeHeaders;
+
+        if r0 == null goto label1;
+
+        $r3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getContentType(javax.xml.soap.MimeHeaders)>(r0);
+
+        goto label2;
+
+     label1:
+        $r1 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r1.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0550.soap.null.headers");
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Cannot create message: Headers can\'t be null");
+
+        throw $r2;
+
+     label2:
+        if $r3 != null goto label3;
+
+        $r5 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0532.soap.no.Content-Type");
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Absent Content-Type");
+
+        throw $r6;
+
+     label3:
+        $r4 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r3);
+
+     label4:
+        return $r4;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r8.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0535.soap.cannot.internalize.message");
+
+        $r9 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r9.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to internalize message", $r7);
+
+        throw $r9;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    protected void <init>(javax.xml.soap.MimeHeaders, com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType, int, java.io.InputStream) throws com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders r2;
+        int i0;
+        java.util.HashMap $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r3;
+        java.io.InputStream r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: javax.xml.soap.MimeHeaders;
+
+        r3 := @parameter1: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        i0 := @parameter2: int;
+
+        r4 := @parameter3: java.io.InputStream;
+
+        specialinvoke r0.<javax.xml.soap.SOAPMessage: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties> = $r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments> = 0;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void init(javax.xml.soap.MimeHeaders,int,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType,java.io.InputStream)>(r2, i0, r3, r4);
+
+        return;
+    }
+
+    private void init(javax.xml.soap.MimeHeaders, int, com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType, java.io.InputStream) throws com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl
+    {
+        byte[] $r33;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r6, $r98;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream r78;
+        javax.xml.soap.MimeHeaders r1;
+        java.lang.Exception $r68;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r39;
+        java.lang.StringBuilder $r15, $r16, $r29, $r31, $r54, $r55, $r56, $r58, $r88, $r96, $r99;
+        java.lang.Throwable $r65;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r97, $r100, $r102, $r103;
+        java.lang.Object[] $r10;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart r77, $r94;
+        javax.xml.transform.stream.StreamSource $r90, $r101;
+        javax.xml.transform.Source $r46, $r86;
+        java.util.StringTokenizer $r87;
+        java.lang.String $r17, $r20, $r22, $r30, $r32, $r35, $r36, $r50, $r51, $r57, $r59, $r62, $r63, $r64, $r70, r72, r73, $r75, $r80, $r82, $r83, $r84;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r8, $r9, $r18, $r21, $r23, $r24, $r25, $r26, $r38, $r93;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19;
+        java.util.logging.Logger $r2, $r12, $r48, $r66;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePullMultipart r76, $r92;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart $r19, $r34, $r37, r74, r79, $r95;
+        java.lang.String[] $r47, $r60;
+        java.util.logging.Level $r11, $r49;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl$1 $r91;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPVersionMismatchException $r89;
+        javax.xml.soap.SOAPPart $r43, $r45, $r85;
+        java.io.InputStream r5, $r27, r71;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: javax.xml.soap.MimeHeaders;
+
+        i0 := @parameter1: int;
+
+        r6 := @parameter2: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        r5 := @parameter3: java.io.InputStream;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers> = r1;
+
+     label01:
+        $i1 = i0 & 16;
+
+        if $i1 <= 0 goto label02;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = 1;
+
+     label02:
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if $z0 != 0 goto label08;
+
+        $r60 = virtualinvoke r1.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>("Accept");
+
+        if $r60 == null goto label08;
+
+        i7 = 0;
+
+     label03:
+        $i6 = lengthof $r60;
+
+        if i7 >= $i6 goto label08;
+
+        $r87 = new java.util.StringTokenizer;
+
+        $r62 = $r60[i7];
+
+        specialinvoke $r87.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r62, ",");
+
+     label04:
+        $z13 = virtualinvoke $r87.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z13 == 0 goto label07;
+
+        $r63 = virtualinvoke $r87.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r64 = virtualinvoke $r63.<java.lang.String: java.lang.String trim()>();
+
+        $z14 = virtualinvoke $r64.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application/fastinfoset");
+
+        if $z14 != 0 goto label05;
+
+        $z15 = virtualinvoke $r64.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application/soap+fastinfoset");
+
+        if $z15 == 0 goto label06;
+
+     label05:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 1;
+
+        goto label07;
+
+     label06:
+        goto label04;
+
+     label07:
+        i7 = i7 + 1;
+
+        goto label03;
+
+     label08:
+        $z16 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isCorrectSoapVersion(int)>(i0);
+
+        if $z16 != 0 goto label09;
+
+        $r48 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        $r49 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r47 = newarray (java.lang.String)[2];
+
+        $r50 = virtualinvoke r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        $r47[0] = $r50;
+
+        $r51 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        $r47[1] = $r51;
+
+        virtualinvoke $r48.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r49, "SAAJ0533.soap.incorrect.Content-Type", $r47);
+
+        $r89 = new com.sun.xml.internal.messaging.saaj.soap.SOAPVersionMismatchException;
+
+        $r88 = new java.lang.StringBuilder;
+
+        specialinvoke $r88.<java.lang.StringBuilder: void <init>()>();
+
+        $r54 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot create message: incorrect content-type for SOAP version. Got: ");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Expected: ");
+
+        $r57 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        $r58 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r57);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r89.<com.sun.xml.internal.messaging.saaj.soap.SOAPVersionMismatchException: void <init>(java.lang.String)>($r59);
+
+        throw $r89;
+
+     label09:
+        $i2 = i0 & 1;
+
+        if $i2 == 0 goto label11;
+
+        $z12 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if $z12 == 0 goto label10;
+
+        $r45 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r46 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.FastInfosetReflection: javax.xml.transform.Source FastInfosetSource_new(java.io.InputStream)>(r5);
+
+        virtualinvoke $r45.<javax.xml.soap.SOAPPart: void setContent(javax.xml.transform.Source)>($r46);
+
+        goto label40;
+
+     label10:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initCharsetProperty(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r6);
+
+        $r43 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r90 = new javax.xml.transform.stream.StreamSource;
+
+        specialinvoke $r90.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>(r5);
+
+        virtualinvoke $r43.<javax.xml.soap.SOAPPart: void setContent(javax.xml.transform.Source)>($r90);
+
+        goto label40;
+
+     label11:
+        $i3 = i0 & 2;
+
+        if $i3 == 0 goto label39;
+
+        $r91 = new com.sun.xml.internal.messaging.saaj.soap.MessageImpl$1;
+
+        specialinvoke $r91.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl$1: void <init>(com.sun.xml.internal.messaging.saaj.soap.MessageImpl,java.io.InputStream,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0, r5, r6);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = null;
+
+        $z1 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean useMimePull>;
+
+        if $z1 == 0 goto label12;
+
+        $r92 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePullMultipart;
+
+        specialinvoke $r92.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePullMultipart: void <init>(javax.activation.DataSource,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r91, r6);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = $r92;
+
+        goto label14;
+
+     label12:
+        $z2 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z2 == 0 goto label13;
+
+        $r93 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        specialinvoke $r93.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void <init>(javax.activation.DataSource,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r91, r6);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = $r93;
+
+        goto label14;
+
+     label13:
+        $r94 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart;
+
+        specialinvoke $r94.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void <init>(javax.activation.DataSource,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r91, r6);
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart> = $r94;
+
+     label14:
+        $r70 = virtualinvoke r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("start");
+
+        r71 = null;
+
+        r72 = null;
+
+        r73 = null;
+
+        $z17 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z17 != 0 goto label15;
+
+        $z7 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment>;
+
+        if $z7 == 0 goto label24;
+
+     label15:
+        if $r70 != null goto label18;
+
+        $r23 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        r74 = virtualinvoke $r23.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getBodyPart(int)>(0);
+
+        i8 = 1;
+
+     label16:
+        $r24 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $i5 = virtualinvoke $r24.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: int getCount()>();
+
+        if i8 >= $i5 goto label17;
+
+        $r25 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAttachment(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart,int)>($r25, i8);
+
+        i8 = i8 + 1;
+
+        goto label16;
+
+     label17:
+        goto label34;
+
+     label18:
+        $r8 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        r74 = virtualinvoke $r8.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getBodyPart(java.lang.String)>($r70);
+
+        i9 = 0;
+
+     label19:
+        $r9 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $i4 = virtualinvoke $r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: int getCount()>();
+
+        if i9 >= $i4 goto label23;
+
+        $r18 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r19 = virtualinvoke $r18.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getBodyPart(int)>(i9);
+
+        $r20 = virtualinvoke $r19.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getContentID()>();
+
+        if $r20 == null goto label20;
+
+        $r22 = virtualinvoke $r20.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("^<", "");
+
+        $r75 = virtualinvoke $r22.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>(">$", "");
+
+        goto label21;
+
+     label20:
+        $r75 = null;
+
+     label21:
+        $z5 = virtualinvoke $r70.<java.lang.String: boolean equals(java.lang.Object)>($r20);
+
+        if $z5 != 0 goto label22;
+
+        $z6 = virtualinvoke $r70.<java.lang.String: boolean equals(java.lang.Object)>($r75);
+
+        if $z6 != 0 goto label22;
+
+        $r21 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAttachment(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart,int)>($r21, i9);
+
+     label22:
+        i9 = i9 + 1;
+
+        goto label19;
+
+     label23:
+        goto label34;
+
+     label24:
+        $z8 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean useMimePull>;
+
+        if $z8 == 0 goto label25;
+
+        $r38 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        r76 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePullMultipart) $r38;
+
+        $r39 = virtualinvoke r76.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePullMultipart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart readAndReturnSOAPPart()>();
+
+        $r95 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        specialinvoke $r95.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEPart)>($r39);
+
+        r74 = $r95;
+
+        r71 = virtualinvoke $r39.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: java.io.InputStream readOnce()>();
+
+        goto label34;
+
+     label25:
+        $r26 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        r77 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r26;
+
+        $r27 = virtualinvoke r77.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: java.io.InputStream initStream()>();
+
+        r78 = null;
+
+        $z9 = $r27 instanceof com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream;
+
+        if $z9 == 0 goto label26;
+
+        r78 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream) $r27;
+
+     label26:
+        $r96 = new java.lang.StringBuilder;
+
+        specialinvoke $r96.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--");
+
+        $r30 = virtualinvoke r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("boundary");
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r33 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.util.ASCIIUtility: byte[] getBytes(java.lang.String)>($r32);
+
+        if $r70 != null goto label27;
+
+        $r37 = virtualinvoke r77.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getNextPart(java.io.InputStream,byte[],com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream)>($r27, $r33, r78);
+
+        r74 = $r37;
+
+        virtualinvoke r77.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: boolean removeBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r37);
+
+        goto label34;
+
+     label27:
+        r79 = null;
+
+     label28:
+        $z10 = virtualinvoke $r70.<java.lang.String: boolean equals(java.lang.Object)>(r72);
+
+        if $z10 != 0 goto label31;
+
+        $z11 = virtualinvoke $r70.<java.lang.String: boolean equals(java.lang.Object)>(r73);
+
+        if $z11 != 0 goto label31;
+
+        $r34 = virtualinvoke r77.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getNextPart(java.io.InputStream,byte[],com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream)>($r27, $r33, r78);
+
+        r79 = $r34;
+
+        $r35 = virtualinvoke $r34.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getContentID()>();
+
+        r72 = $r35;
+
+        if $r35 == null goto label29;
+
+        $r36 = virtualinvoke $r35.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("^<", "");
+
+        $r80 = virtualinvoke $r36.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>(">$", "");
+
+        goto label30;
+
+     label29:
+        $r80 = null;
+
+     label30:
+        r73 = $r80;
+
+        goto label28;
+
+     label31:
+        r74 = r79;
+
+        virtualinvoke r77.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: boolean removeBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>(r79);
+
+     label32:
+        goto label34;
+
+     label33:
+        $r68 := @caughtexception;
+
+        $r97 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r97.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.Throwable)>($r68);
+
+        throw $r97;
+
+     label34:
+        if r71 != null goto label35;
+
+        if r74 == null goto label35;
+
+        r71 = virtualinvoke r74.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream getInputStream()>();
+
+     label35:
+        $r98 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r82 = virtualinvoke r74.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getContentType()>();
+
+        specialinvoke $r98.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r82);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initCharsetProperty(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r98);
+
+        $r83 = virtualinvoke $r98.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getBaseType()>();
+
+        $r84 = virtualinvoke $r83.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z18 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_1Type(java.lang.String)>($r84);
+
+        if $z18 != 0 goto label36;
+
+        $z3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_2Type(java.lang.String)>($r84);
+
+        if $z3 != 0 goto label36;
+
+        $z4 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isSOAPBodyXOPPackage(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r98);
+
+        if $z4 != 0 goto label36;
+
+        $r12 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = $r84;
+
+        virtualinvoke $r12.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r11, "SAAJ0549.soap.part.invalid.Content-Type", $r10);
+
+        $r100 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r99 = new java.lang.StringBuilder;
+
+        specialinvoke $r99.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad Content-Type for SOAP Part : ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r84);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r100.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r17);
+
+        throw $r100;
+
+     label36:
+        $r85 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void setMimeHeaders(javax.xml.soap.SOAPPart,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r85, r74);
+
+        $z19 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if $z19 == 0 goto label37;
+
+        $r86 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.FastInfosetReflection: javax.xml.transform.Source FastInfosetSource_new(java.io.InputStream)>(r71);
+
+        goto label38;
+
+     label37:
+        $r101 = new javax.xml.transform.stream.StreamSource;
+
+        $r86 = $r101;
+
+        specialinvoke $r101.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>(r71);
+
+     label38:
+        virtualinvoke $r85.<javax.xml.soap.SOAPPart: void setContent(javax.xml.transform.Source)>($r86);
+
+        goto label40;
+
+     label39:
+        $r2 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r2.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0534.soap.unknown.Content-Type");
+
+        $r102 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r102.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Unrecognized Content-Type");
+
+        throw $r102;
+
+     label40:
+        goto label42;
+
+     label41:
+        $r65 := @caughtexception;
+
+        $r66 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r66.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0535.soap.cannot.internalize.message");
+
+        $r103 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r103.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to internalize message", $r65);
+
+        throw $r103;
+
+     label42:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+
+        catch java.lang.Exception from label28 to label32 with label33;
+        catch java.lang.Throwable from label01 to label40 with label41;
+    }
+
+    public boolean isFastInfoset()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        return $z0;
+    }
+
+    public boolean acceptFastInfoset()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset>;
+
+        return $z0;
+    }
+
+    public void setIsFastInfoset(boolean)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if z0 == $z1 goto label2;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset> = z0;
+
+        $z2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if $z2 == 0 goto label1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean acceptFastInfoset> = 1;
+
+     label1:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+     label2:
+        return;
+    }
+
+    public java.lang.Object getProperty(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        java.lang.String r1, $r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (java.lang.String) $r3;
+
+        return $r4;
+    }
+
+    public void setProperty(java.lang.String, java.lang.Object)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.Object r2;
+        java.util.HashMap $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void verify(java.lang.String,java.lang.Object)>(r1, r2);
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.HashMap properties>;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    private void verify(java.lang.String, java.lang.Object)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl $r6, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.logging.Logger $r23, $r29;
+        java.lang.Exception $r21, $r27;
+        java.lang.StringBuilder $r17, $r18, $r19;
+        java.lang.Object[] $r22, $r28;
+        java.util.logging.Level $r24, $r30;
+        java.lang.String r0, $r5, $r7, $r10, $r11, $r12, $r13, $r14, $r20, $r25, $r31;
+        java.lang.RuntimeException $r16, $r26, $r32;
+        javax.xml.soap.SOAPPart $r2, $r8;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r1;
+        java.lang.Object r4;
+        javax.xml.soap.SOAPEnvelope $r3, $r9;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("javax.xml.soap.write-xml-declaration");
+
+        if $z0 == 0 goto label06;
+
+        $r7 = "true";
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+        if $z2 != 0 goto label01;
+
+        $r14 = "false";
+
+        $z5 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+        if $z5 != 0 goto label01;
+
+        $r16 = new java.lang.RuntimeException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" must have value false or true");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.RuntimeException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label01:
+        $r8 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r9 = virtualinvoke $r8.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r15 = (com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl) $r9;
+
+        $r11 = "true";
+
+        $r10 = (java.lang.String) r4;
+
+        $z3 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+        if $z3 == 0 goto label02;
+
+        virtualinvoke $r15.<com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl: void setOmitXmlDecl(java.lang.String)>("no");
+
+        goto label03;
+
+     label02:
+        $r13 = "false";
+
+        $r12 = (java.lang.String) r4;
+
+        $z4 = virtualinvoke $r13.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r12);
+
+        if $z4 == 0 goto label03;
+
+        virtualinvoke $r15.<com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl: void setOmitXmlDecl(java.lang.String)>("yes");
+
+     label03:
+        goto label05;
+
+     label04:
+        $r27 := @caughtexception;
+
+        $r29 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        $r30 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r28 = newarray (java.lang.Object)[2];
+
+        $r31 = virtualinvoke $r27.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r28[0] = $r31;
+
+        $r28[1] = "javax.xml.soap.write-xml-declaration";
+
+        virtualinvoke $r29.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r30, "SAAJ0591.soap.exception.in.set.property", $r28);
+
+        $r32 = new java.lang.RuntimeException;
+
+        specialinvoke $r32.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r27);
+
+        throw $r32;
+
+     label05:
+        return;
+
+     label06:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("javax.xml.soap.character-set-encoding");
+
+        if $z1 == 0 goto label10;
+
+     label07:
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r6 = (com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl) $r3;
+
+        $r5 = (java.lang.String) r4;
+
+        virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.soap.impl.EnvelopeImpl: void setCharsetEncoding(java.lang.String)>($r5);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r21 := @caughtexception;
+
+        $r23 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r22 = newarray (java.lang.Object)[2];
+
+        $r25 = virtualinvoke $r21.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r22[0] = $r25;
+
+        $r22[1] = "javax.xml.soap.character-set-encoding";
+
+        virtualinvoke $r23.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r24, "SAAJ0591.soap.exception.in.set.property", $r22);
+
+        $r26 = new java.lang.RuntimeException;
+
+        specialinvoke $r26.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r21);
+
+        throw $r26;
+
+     label10:
+        return;
+
+        catch java.lang.Exception from label01 to label03 with label04;
+        catch java.lang.Exception from label07 to label08 with label09;
+    }
+
+    protected abstract boolean isCorrectSoapVersion(int);
+
+    protected abstract java.lang.String getExpectedContentType();
+
+    protected abstract java.lang.String getExpectedAcceptHeader();
+
+    static int identifyContentType(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType) throws com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $b10, $b11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        java.util.logging.Logger $r5, $r14, $r23;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12, $r16, $r17, $r18, $r19, $r20;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r6, $r15, $r24;
+        java.lang.String $r1, $r2, $r3, $r4, $r13, $r21, $r22;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getPrimaryType()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getSubType()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("multipart");
+
+        if $z0 == 0 goto label10;
+
+        $z8 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("related");
+
+        if $z8 == 0 goto label09;
+
+        $r22 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getTypeParameter(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0);
+
+        $z9 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_1Type(java.lang.String)>($r22);
+
+        if $z9 == 0 goto label03;
+
+        $z14 = virtualinvoke $r22.<java.lang.String: boolean equals(java.lang.Object)>("application/fastinfoset");
+
+        if $z14 == 0 goto label01;
+
+        $b4 = 16;
+
+        goto label02;
+
+     label01:
+        $b4 = 0;
+
+     label02:
+        $b2 = $b4 | 2;
+
+        $b3 = $b2 | 4;
+
+        return $b3;
+
+     label03:
+        $z10 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isEqualToSoap1_2Type(java.lang.String)>($r22);
+
+        if $z10 == 0 goto label06;
+
+        $z13 = virtualinvoke $r22.<java.lang.String: boolean equals(java.lang.Object)>("application/soap+fastinfoset");
+
+        if $z13 == 0 goto label04;
+
+        $b5 = 16;
+
+        goto label05;
+
+     label04:
+        $b5 = 0;
+
+     label05:
+        $b0 = $b5 | 2;
+
+        $b1 = $b0 | 8;
+
+        return $b1;
+
+     label06:
+        $z11 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isMimeMultipartXOPSoap1_1Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0);
+
+        if $z11 == 0 goto label07;
+
+        return 6;
+
+     label07:
+        $z12 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isMimeMultipartXOPSoap1_2Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0);
+
+        if $z12 == 0 goto label08;
+
+        return 10;
+
+     label08:
+        $r23 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r23.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0536.soap.content-type.mustbe.multipart");
+
+        $r24 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r24.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Content-Type needs to be Multipart/Related and with \"type=text/xml\" or \"type=application/soap+xml\"");
+
+        throw $r24;
+
+     label09:
+        $r14 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0537.soap.invalid.content-type");
+
+        $r15 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid Content-Type: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r21);
+
+        throw $r15;
+
+     label10:
+        $z1 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isSoap1_1Type(java.lang.String,java.lang.String)>($r2, $r4);
+
+        if $z1 == 0 goto label13;
+
+        $z6 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application");
+
+        if $z6 == 0 goto label11;
+
+        $z7 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("fastinfoset");
+
+        if $z7 == 0 goto label11;
+
+        $b6 = 16;
+
+        goto label12;
+
+     label11:
+        $b6 = 0;
+
+     label12:
+        $b7 = $b6 | 1;
+
+        $b8 = $b7 | 4;
+
+        return $b8;
+
+     label13:
+        $z2 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isSoap1_2Type(java.lang.String,java.lang.String)>($r2, $r4);
+
+        if $z2 == 0 goto label16;
+
+        $z4 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application");
+
+        if $z4 == 0 goto label14;
+
+        $z5 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("soap+fastinfoset");
+
+        if $z5 == 0 goto label14;
+
+        $b9 = 16;
+
+        goto label15;
+
+     label14:
+        $b9 = 0;
+
+     label15:
+        $b10 = $b9 | 1;
+
+        $b11 = $b10 | 8;
+
+        return $b11;
+
+     label16:
+        $z3 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isSOAPBodyXOPPackage(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>(r0);
+
+        if $z3 == 0 goto label17;
+
+        return 13;
+
+     label17:
+        $r5 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0537.soap.invalid.content-type");
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid Content-Type:");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Is this an error message instead of a SOAP response?");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r13);
+
+        throw $r6;
+    }
+
+    private static java.lang.String getTypeParameter(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)
+    {
+        java.lang.String $r1, $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("type");
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        return $r2;
+
+     label1:
+        return "text/xml";
+    }
+
+    public javax.xml.soap.MimeHeaders getMimeHeaders()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        return $r1;
+    }
+
+    static final java.lang.String getContentType(javax.xml.soap.MimeHeaders)
+    {
+        javax.xml.soap.MimeHeaders r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+
+        r0 := @parameter0: javax.xml.soap.MimeHeaders;
+
+        $r1 = virtualinvoke r0.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>("Content-Type");
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r1[0];
+
+        return $r2;
+    }
+
+    public java.lang.String getContentType()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r2 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getContentType(javax.xml.soap.MimeHeaders)>($r1);
+
+        return $r2;
+    }
+
+    public void setContentType(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        virtualinvoke $r2.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", r1);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    private com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r1;
+        java.lang.Exception $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r2, $r3, r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r5 = null;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getContentType()>();
+
+        if $r1 != null goto label3;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType>;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r1);
+
+        r5 = $r2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        return r5;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public java.lang.String getBaseType()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getBaseType()>();
+
+        return $r2;
+    }
+
+    public void setBaseType(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r3;
+        java.lang.String r2, $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("type", r2);
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r4 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r3.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r4);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    public java.lang.String getAction()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("action");
+
+        return $r2;
+    }
+
+    public void setAction(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r3;
+        java.lang.String r2, $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("action", r2);
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r4 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r3.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r4);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    public java.lang.String getCharset()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("charset");
+
+        return $r2;
+    }
+
+    public void setCharset(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r3;
+        java.lang.String r2, $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("charset", r2);
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r4 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r3.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r4);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    private final void needsSave()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 0;
+
+        return;
+    }
+
+    public boolean saveRequired()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved>;
+
+        if $z0 == 1 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public java.lang.String getContentDescription()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r1;
+        int $i0;
+        java.lang.String[] $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>("Content-Description");
+
+        if $r2 == null goto label1;
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label1;
+
+        $r3 = $r2[0];
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public void setContentDescription(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        virtualinvoke $r2.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Description", r1);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    public abstract javax.xml.soap.SOAPPart getSOAPPart();
+
+    public void removeAllAttachments()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1, $r2;
+        java.lang.RuntimeException $r4;
+        java.lang.Exception $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 == null goto label5;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: void clear()>();
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public int countAttachments()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        int $i0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1, $r2;
+        java.lang.RuntimeException $r4;
+        java.lang.Exception $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 == null goto label5;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $i0 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int size()>();
+
+        return $i0;
+
+     label5:
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void addAttachmentPart(javax.xml.soap.AttachmentPart)
+    {
+        javax.xml.soap.AttachmentPart r2;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1, $r3, $r4;
+        java.lang.RuntimeException $r6;
+        java.lang.Exception $r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r2 := @parameter0: javax.xml.soap.AttachmentPart;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.RuntimeException;
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 != null goto label5;
+
+        $r4 = new com.sun.xml.internal.messaging.saaj.util.FinalArrayList;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments> = $r4;
+
+     label5:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: boolean add(java.lang.Object)>(r2);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.util.Iterator getAttachments()
+    {
+        java.util.Iterator $r3, $r4;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1, $r2;
+        java.lang.RuntimeException $r6;
+        java.lang.Exception $r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.RuntimeException;
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 != null goto label5;
+
+        $r4 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator nullIter>;
+
+        return $r4;
+
+     label5:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.util.Iterator iterator()>();
+
+        return $r3;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void setFinalContentType(java.lang.String)
+    {
+        java.lang.String[] $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r1, $r9, r10;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r7;
+        java.lang.String $r2, $r4, $r5, r6, $r8;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r6 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType contentType()>();
+
+        r10 = $r1;
+
+        if $r1 != null goto label1;
+
+        $r9 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>()>();
+
+        r10 = $r9;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String[] split(java.lang.String)>("/");
+
+        $r4 = $r3[0];
+
+        virtualinvoke r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setPrimaryType(java.lang.String)>($r4);
+
+        $r5 = $r3[1];
+
+        virtualinvoke r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setSubType(java.lang.String)>($r5);
+
+        virtualinvoke r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("charset", r6);
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r8 = virtualinvoke r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r7.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r8);
+
+        return;
+    }
+
+    public java.util.Iterator getAttachments(javax.xml.soap.MimeHeaders)
+    {
+        java.util.Iterator $r4;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders r3;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1;
+        java.lang.RuntimeException $r6;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator $r2;
+        java.lang.Exception $r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r3 := @parameter0: javax.xml.soap.MimeHeaders;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.RuntimeException;
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 != null goto label5;
+
+        $r4 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator nullIter>;
+
+        return $r4;
+
+     label5:
+        $r2 = new com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator: void <init>(com.sun.xml.internal.messaging.saaj.soap.MessageImpl,javax.xml.soap.MimeHeaders)>(r0, r3);
+
+        return $r2;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void removeAttachments(javax.xml.soap.MimeHeaders)
+    {
+        javax.xml.soap.MimeHeaders r3;
+        int $i0, $i1, i2;
+        boolean $z0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r1, $r4, $r5, $r6, $r8, $r10, $r12;
+        java.lang.RuntimeException $r14;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator $r2;
+        java.lang.Exception $r13;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.Object $r7, $r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r3 := @parameter0: javax.xml.soap.MimeHeaders;
+
+     label01:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.RuntimeException;
+
+        specialinvoke $r14.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label04:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r1 != null goto label05;
+
+        return;
+
+     label05:
+        $r2 = new com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl$MimeMatchingIterator: void <init>(com.sun.xml.internal.messaging.saaj.soap.MessageImpl,javax.xml.soap.MimeHeaders)>(r0, r3);
+
+     label06:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r10 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $r11 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $i1 = virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int indexOf(java.lang.Object)>($r11);
+
+        $r12 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        virtualinvoke $r12.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.lang.Object set(int,java.lang.Object)>($i1, null);
+
+        goto label06;
+
+     label07:
+        $r4 = new com.sun.xml.internal.messaging.saaj.util.FinalArrayList;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: void <init>()>();
+
+        i2 = 0;
+
+     label08:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $i0 = virtualinvoke $r5.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int size()>();
+
+        if i2 >= $i0 goto label10;
+
+        $r6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.lang.Object get(int)>(i2);
+
+        if $r7 == null goto label09;
+
+        $r8 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.lang.Object get(int)>(i2);
+
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: boolean add(java.lang.Object)>($r9);
+
+     label09:
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label10:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments> = $r4;
+
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+    }
+
+    public javax.xml.soap.AttachmentPart createAttachmentPart()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r1;
+        com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl $r0;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r0 = new com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl;
+
+        specialinvoke $r0.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void <init>()>();
+
+        return $r0;
+    }
+
+    public javax.xml.soap.AttachmentPart getAttachment(javax.xml.soap.SOAPElement) throws javax.xml.soap.SOAPException
+    {
+        javax.xml.soap.Node $r5;
+        java.lang.RuntimeException $r8;
+        java.lang.Exception $r7;
+        javax.xml.soap.SOAPElement r1;
+        javax.xml.soap.AttachmentPart $r4;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r2, $r3, $r6, r9, r10;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: javax.xml.soap.SOAPElement;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAllAttachments()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label4:
+        $r2 = interfaceinvoke r1.<javax.xml.soap.SOAPElement: java.lang.String getAttribute(java.lang.String)>("href");
+
+        $r3 = "";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label8;
+
+        $r5 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.Node getValueNodeStrict(javax.xml.soap.SOAPElement)>(r1);
+
+        r9 = null;
+
+        if $r5 == null goto label5;
+
+        r9 = interfaceinvoke $r5.<javax.xml.soap.Node: java.lang.String getValue()>();
+
+     label5:
+        if r9 == null goto label6;
+
+        $r6 = "";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r9);
+
+        if $z1 == 0 goto label7;
+
+     label6:
+        return null;
+
+     label7:
+        r10 = r9;
+
+        goto label9;
+
+     label8:
+        r10 = $r2;
+
+     label9:
+        $r4 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.AttachmentPart getAttachmentPart(java.lang.String)>(r10);
+
+        return $r4;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private javax.xml.soap.Node getValueNodeStrict(javax.xml.soap.SOAPElement)
+    {
+        javax.xml.soap.SOAPElement r0;
+        short $s0;
+        org.w3c.dom.Node $r1, $r3;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r4;
+        int $i1;
+        javax.xml.soap.Node r2;
+
+        r4 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: javax.xml.soap.SOAPElement;
+
+        $r1 = interfaceinvoke r0.<javax.xml.soap.SOAPElement: org.w3c.dom.Node getFirstChild()>();
+
+        r2 = (javax.xml.soap.Node) $r1;
+
+        if r2 == null goto label2;
+
+        $r3 = interfaceinvoke r2.<javax.xml.soap.Node: org.w3c.dom.Node getNextSibling()>();
+
+        if $r3 != null goto label1;
+
+        $s0 = interfaceinvoke r2.<javax.xml.soap.Node: short getNodeType()>();
+
+        $i1 = (int) $s0;
+
+        if $i1 != 3 goto label1;
+
+        return r2;
+
+     label1:
+        return null;
+
+     label2:
+        return null;
+    }
+
+    private javax.xml.soap.AttachmentPart getAttachmentPart(java.lang.String) throws javax.xml.soap.SOAPException
+    {
+        javax.xml.soap.MimeHeaders $r29, $r30;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r21;
+        java.lang.Exception $r18;
+        java.lang.StringBuilder $r9, $r12, $r13, $r28;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r31;
+        java.lang.Object[] $r19;
+        java.util.logging.Level $r20;
+        int $i0, $i1, $i3;
+        java.lang.String $r6, $r7, $r10, $r11, $r14, r23;
+        java.util.Iterator $r2, $r4, $r16;
+        javax.xml.soap.AttachmentPart $r24, r25, $r26, r27;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r1;
+        java.lang.Object $r3, $r5, $r17;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r23 := @parameter0: java.lang.String;
+
+     label01:
+        $z0 = virtualinvoke r23.<java.lang.String: boolean startsWith(java.lang.String)>("cid:");
+
+        if $z0 == 0 goto label04;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(60);
+
+        $r10 = "cid:";
+
+        $i1 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r11 = virtualinvoke r23.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(62);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r23 = $r14;
+
+        $r29 = new javax.xml.soap.MimeHeaders;
+
+        specialinvoke $r29.<javax.xml.soap.MimeHeaders: void <init>()>();
+
+        virtualinvoke $r29.<javax.xml.soap.MimeHeaders: void addHeader(java.lang.String,java.lang.String)>("Content-ID", $r14);
+
+        $r16 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator getAttachments(javax.xml.soap.MimeHeaders)>($r29);
+
+        if $r16 != null goto label02;
+
+        $r24 = null;
+
+        goto label03;
+
+     label02:
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        $r24 = (javax.xml.soap.AttachmentPart) $r17;
+
+     label03:
+        r25 = $r24;
+
+        goto label07;
+
+     label04:
+        $r30 = new javax.xml.soap.MimeHeaders;
+
+        specialinvoke $r30.<javax.xml.soap.MimeHeaders: void <init>()>();
+
+        virtualinvoke $r30.<javax.xml.soap.MimeHeaders: void addHeader(java.lang.String,java.lang.String)>("Content-Location", r23);
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator getAttachments(javax.xml.soap.MimeHeaders)>($r30);
+
+        if $r2 != null goto label05;
+
+        $r26 = null;
+
+        goto label06;
+
+     label05:
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r26 = (javax.xml.soap.AttachmentPart) $r3;
+
+     label06:
+        r25 = $r26;
+
+     label07:
+        if r25 != null goto label10;
+
+        $r4 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator getAttachments()>();
+
+     label08:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r27 = (javax.xml.soap.AttachmentPart) $r5;
+
+        $r6 = virtualinvoke r27.<javax.xml.soap.AttachmentPart: java.lang.String getContentId()>();
+
+        if $r6 == null goto label09;
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int indexOf(java.lang.String)>("=");
+
+        $i3 = (int) -1;
+
+        if $i0 <= $i3 goto label09;
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int,int)>(1, $i0);
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r23);
+
+        if $z2 == 0 goto label09;
+
+        r25 = r27;
+
+        goto label10;
+
+     label09:
+        goto label08;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r18 := @caughtexception;
+
+        $r21 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        $r20 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r19 = newarray (java.lang.Object)[1];
+
+        $r19[0] = r23;
+
+        virtualinvoke $r21.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r20, "SAAJ0590.soap.unable.to.locate.attachment", $r19);
+
+        $r31 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r31.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.Throwable)>($r18);
+
+        throw $r31;
+
+     label12:
+        return r25;
+
+        catch java.lang.Exception from label01 to label10 with label11;
+    }
+
+    private final java.io.InputStream getHeaderBytes() throws java.io.IOException
+    {
+        javax.xml.soap.SOAPPart $r1;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl r2;
+        java.io.InputStream $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        r2 = (com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl) $r1;
+
+        $r3 = virtualinvoke r2.<com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: java.io.InputStream getContentAsStream()>();
+
+        return $r3;
+    }
+
+    private java.lang.String convertToSingleLine(java.lang.String)
+    {
+        char $c1;
+        java.lang.StringBuffer $r4;
+        int $i0, i2, $i3, $i4, $i5;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r3;
+        java.lang.String r1, $r2;
+
+        r3 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r4 = new java.lang.StringBuffer;
+
+        specialinvoke $r4.<java.lang.StringBuffer: void <init>()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i2 >= $i0 goto label3;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        if $i3 == 13 goto label2;
+
+        $i4 = (int) $c1;
+
+        if $i4 == 10 goto label2;
+
+        $i5 = (int) $c1;
+
+        if $i5 == 9 goto label2;
+
+        virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    private com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart getMimeMessage() throws javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl $r15, $r36;
+        javax.xml.soap.SOAPException $r42;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r3, $r6, $r10;
+        javax.xml.soap.MimeHeaders $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.logging.Logger $r40;
+        java.lang.Throwable $r39;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r41;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart $r18, $r21, $r24, $r26, $r27, $r29, $r30, $r32;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart $r2, $r16, $r37;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl r43;
+        java.lang.String $r4, $r5, $r8, $r9, $r12, $r13, $r31, $r38;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r17, $r20, $r23, $r25, $r28, r44, $r45;
+        java.util.Iterator $r34, $r46;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r19, $r33;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList $r7;
+        javax.xml.soap.SOAPPart $r1;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.Object $r14, $r35;
+        java.io.InputStream $r22;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+     label01:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        r43 = (com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl) $r1;
+
+        $r2 = virtualinvoke r43.<com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getMimePart()>();
+
+        $r3 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        specialinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r4);
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isFastInfoset>;
+
+        if $z0 != 0 goto label02;
+
+        $r38 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String initCharset()>();
+
+        virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("charset", $r38);
+
+     label02:
+        $r5 = virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r5);
+
+        $z1 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z1 != 0 goto label06;
+
+        $z2 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment>;
+
+        if $z2 != 0 goto label06;
+
+        $r17 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        if $r17 == null goto label06;
+
+        $z3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized>;
+
+        if $z3 != 0 goto label06;
+
+        $r18 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart;
+
+        specialinvoke $r18.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void <init>()>();
+
+        r44 = $r18;
+
+        virtualinvoke $r18.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r2);
+
+        $r19 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r19 == null goto label04;
+
+        $r33 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $r34 = virtualinvoke $r33.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.util.Iterator iterator()>();
+
+     label03:
+        $z7 = interfaceinvoke $r34.<java.util.Iterator: boolean hasNext()>();
+
+        if $z7 == 0 goto label04;
+
+        $r35 = interfaceinvoke $r34.<java.util.Iterator: java.lang.Object next()>();
+
+        $r36 = (com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl) $r35;
+
+        $r37 = virtualinvoke $r36.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getMimePart()>();
+
+        virtualinvoke $r18.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r37);
+
+        goto label03;
+
+     label04:
+        $r20 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r21 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r20;
+
+        $r22 = virtualinvoke $r21.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: java.io.InputStream getInputStream()>();
+
+        $r23 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r24 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r23;
+
+        $z4 = virtualinvoke $r24.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: boolean lastBodyPartFound()>();
+
+        if $z4 != 0 goto label05;
+
+        $r25 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r26 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r25;
+
+        $z5 = virtualinvoke $r26.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: boolean isEndOfStream()>();
+
+        if $z5 != 0 goto label05;
+
+        $r27 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r18;
+
+        virtualinvoke $r27.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void setInputStream(java.io.InputStream)>($r22);
+
+        $r30 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r18;
+
+        $r28 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r29 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r28;
+
+        $r31 = virtualinvoke $r29.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: java.lang.String getBoundary()>();
+
+        virtualinvoke $r30.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void setBoundary(java.lang.String)>($r31);
+
+        $r32 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r18;
+
+        $z6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments>;
+
+        virtualinvoke $r32.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void setLazyAttachments(boolean)>($z6);
+
+     label05:
+        goto label08;
+
+     label06:
+        $r45 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        specialinvoke $r45.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void <init>()>();
+
+        r44 = $r45;
+
+        virtualinvoke $r45.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r2);
+
+        $r46 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator getAttachments()>();
+
+     label07:
+        $z8 = interfaceinvoke $r46.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 == 0 goto label08;
+
+        $r14 = interfaceinvoke $r46.<java.util.Iterator: java.lang.Object next()>();
+
+        $r15 = (com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl) $r14;
+
+        $r16 = virtualinvoke $r15.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getMimePart()>();
+
+        virtualinvoke $r45.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r16);
+
+        goto label07;
+
+     label08:
+        $r6 = virtualinvoke r44.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType getContentType()>();
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList getParameterList()>();
+
+        $r8 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        virtualinvoke $r7.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("type", $r8);
+
+        $r9 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("boundary");
+
+        virtualinvoke $r7.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("boundary", $r9);
+
+        $r10 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String,java.lang.String,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList)>("multipart", "related", $r7);
+
+        $r11 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r12 = virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        $r13 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String convertToSingleLine(java.lang.String)>($r12);
+
+        virtualinvoke $r11.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r13);
+
+     label09:
+        return r44;
+
+     label10:
+        $r42 := @caughtexception;
+
+        throw $r42;
+
+     label11:
+        $r39 := @caughtexception;
+
+        $r40 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r40.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0538.soap.cannot.convert.msg.to.multipart.obj");
+
+        $r41 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r41.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to convert SOAP message into a MimeMultipart object", $r39);
+
+        throw $r41;
+
+        catch javax.xml.soap.SOAPException from label01 to label09 with label10;
+        catch java.lang.Throwable from label01 to label09 with label11;
+    }
+
+    private java.lang.String initCharset()
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.MimeHeaders $r1;
+        java.lang.String[] $r2;
+        java.lang.Object $r3;
+        java.lang.String $r4, $r5, r6;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r6 = null;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders getMimeHeaders()>();
+
+        $r2 = virtualinvoke $r1.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>("Content-Type");
+
+        if $r2 == null goto label1;
+
+        $r4 = $r2[0];
+
+        if $r4 == null goto label1;
+
+        $r5 = $r2[0];
+
+        r6 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getCharsetString(java.lang.String)>($r5);
+
+     label1:
+        if r6 != null goto label2;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.Object getProperty(java.lang.String)>("javax.xml.soap.character-set-encoding");
+
+        r6 = (java.lang.String) $r3;
+
+     label2:
+        if r6 == null goto label3;
+
+        return r6;
+
+     label3:
+        return "utf-8";
+    }
+
+    private java.lang.String getCharsetString(java.lang.String)
+    {
+        int $i0;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r5;
+        java.lang.String r0, $r2, $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList $r1;
+        java.lang.Exception $r4;
+
+        r5 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>(";");
+
+        if $i0 >= 0 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        specialinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void <init>(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: java.lang.String get(java.lang.String)>("charset");
+
+     label4:
+        return $r3;
+
+     label5:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public void saveChanges() throws javax.xml.soap.SOAPException
+    {
+        java.lang.Throwable $r11;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r13, $r16;
+        byte[] $r9;
+        int $i0, $i1, $i2, $i3, i4;
+        javax.xml.soap.MimeHeaders $r7;
+        java.lang.String $r1, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r4, $r5, $r10;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r2, $r3;
+        java.io.IOException $r14;
+        java.util.logging.Logger $r12, $r15;
+        com.sun.xml.internal.messaging.saaj.util.ByteInputStream r17;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.io.InputStream $r6;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String initCharset()>();
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r2 != null goto label01;
+
+        $i3 = 0;
+
+        goto label02;
+
+     label01:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        $i3 = virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int size()>();
+
+     label02:
+        i4 = $i3;
+
+        if $i3 != 0 goto label03;
+
+        $z4 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z4 != 0 goto label03;
+
+        $z5 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment>;
+
+        if $z5 != 0 goto label03;
+
+        $z6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized>;
+
+        if $z6 != 0 goto label03;
+
+        $r10 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        if $r10 == null goto label03;
+
+        i4 = 1;
+
+     label03:
+        if i4 != 0 goto label10;
+
+        $z1 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean hasXOPContent()>();
+
+        if $z1 != 0 goto label10;
+
+     label04:
+        $r6 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream getHeaderBytes()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 0;
+
+        $z2 = <com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: boolean lazyContentLength>;
+
+        if $z2 == 0 goto label05;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges> = $r6;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r14 := @caughtexception;
+
+        $r15 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r15.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0539.soap.cannot.get.header.stream");
+
+        $r16 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r16.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to get header stream in saveChanges: ", $r14);
+
+        throw $r16;
+
+     label07:
+        $z3 = $r6 instanceof com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
+
+        if $z3 == 0 goto label08;
+
+        r17 = (com.sun.xml.internal.messaging.saaj.util.ByteInputStream) $r6;
+
+        $r9 = virtualinvoke r17.<com.sun.xml.internal.messaging.saaj.util.ByteInputStream: byte[] getBytes()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: byte[] messageBytes> = $r9;
+
+        $i2 = virtualinvoke r17.<com.sun.xml.internal.messaging.saaj.util.ByteInputStream: int getCount()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount> = $i2;
+
+     label08:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void setFinalContentType(java.lang.String)>($r1);
+
+        $i0 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        if $i0 <= 0 goto label09;
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        virtualinvoke $r7.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Length", $r8);
+
+     label09:
+        goto label12;
+
+     label10:
+        $z0 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean hasXOPContent()>();
+
+        if $z0 == 0 goto label11;
+
+        $r5 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart getXOPMessage()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = $r5;
+
+        goto label12;
+
+     label11:
+        $r4 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart getMimeMessage()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp> = $r4;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r11 := @caughtexception;
+
+        $r12 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r12.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0540.soap.err.saving.multipart.msg");
+
+        $r13 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r13.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Error during saving a multipart message", $r11);
+
+        throw $r13;
+
+     label14:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saved> = 1;
+
+        return;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label12 with label13;
+    }
+
+    private com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart getXOPMessage() throws javax.xml.soap.SOAPException
+    {
+        java.lang.Throwable $r17;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r19;
+        com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl $r15;
+        javax.xml.soap.SOAPException $r20;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart $r4, $r16;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r5, $r10, $r22;
+        javax.xml.soap.MimeHeaders $r23;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl r3;
+        java.lang.String $r6, $r7, $r8, $r12, $r13, $r21, $r24, $r25;
+        boolean $z0, $z1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r0;
+        java.util.Iterator $r9;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList $r11;
+        java.util.logging.Logger $r18;
+        javax.xml.soap.SOAPPart $r2;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r1;
+        java.lang.Object $r14;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+     label1:
+        $r0 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        specialinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void <init>()>();
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        r3 = (com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl) $r2;
+
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getMimePart()>();
+
+        $r5 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>("application/xop+xml");
+
+        $r6 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        virtualinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("type", $r6);
+
+        $r7 = specialinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String initCharset()>();
+
+        virtualinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("charset", $r7);
+
+        $r8 = virtualinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r8);
+
+        virtualinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r4);
+
+        $r9 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator getAttachments()>();
+
+     label2:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r14 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r15 = (com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl) $r14;
+
+        $r16 = virtualinvoke $r15.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getMimePart()>();
+
+        virtualinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void addBodyPart(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r16);
+
+        goto label2;
+
+     label3:
+        $r10 = virtualinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType getContentType()>();
+
+        $r11 = virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList getParameterList()>();
+
+        $r12 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getExpectedContentType()>();
+
+        virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("start-info", $r12);
+
+        virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("type", "application/xop+xml");
+
+        $z1 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isCorrectSoapVersion(int)>(8);
+
+        if $z1 == 0 goto label4;
+
+        $r13 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getAction()>();
+
+        if $r13 == null goto label4;
+
+        virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("action", $r13);
+
+     label4:
+        $r21 = virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("boundary");
+
+        virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList: void set(java.lang.String,java.lang.String)>("boundary", $r21);
+
+        $r22 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r22.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String,java.lang.String,com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList)>("Multipart", "Related", $r11);
+
+        $r23 = r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r24 = virtualinvoke $r22.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        $r25 = specialinvoke r1.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String convertToSingleLine(java.lang.String)>($r24);
+
+        virtualinvoke $r23.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r25);
+
+     label5:
+        return $r0;
+
+     label6:
+        $r20 := @caughtexception;
+
+        throw $r20;
+
+     label7:
+        $r17 := @caughtexception;
+
+        $r18 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r18.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0538.soap.cannot.convert.msg.to.multipart.obj");
+
+        $r19 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r19.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to convert SOAP message into a MimeMultipart object", $r17);
+
+        throw $r19;
+
+        catch javax.xml.soap.SOAPException from label1 to label5 with label6;
+        catch java.lang.Throwable from label1 to label5 with label7;
+    }
+
+    private boolean hasXOPContent() throws com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.lang.String $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String getContentType()>();
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r1);
+
+        $z0 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isMimeMultipartXOPSoap1_1Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z1 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isMimeMultipartXOPSoap1_2Package(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        $z2 = staticinvoke <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isSOAPBodyXOPPackage(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)>($r2);
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+    }
+
+    public void writeTo(java.io.OutputStream) throws javax.xml.soap.SOAPException, java.io.IOException
+    {
+        byte[] $r13, r20;
+        javax.xml.soap.MimeHeaders $r3, $r5, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.logging.Logger $r18;
+        java.lang.Exception $r17;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r21;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart $r9, $r10;
+        java.lang.String[] $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.lang.String $r16;
+        java.io.OutputStream r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r2, $r6, $r7, $r8, $r12;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        java.io.InputStream $r11, $r14;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean saveRequired()>();
+
+        if $z0 == 0 goto label01;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing> = 1;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void saveChanges()>();
+
+     label01:
+        $z1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean optimizeAttachmentProcessing>;
+
+        if $z1 != 0 goto label06;
+
+        $z6 = <com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: boolean lazyContentLength>;
+
+        if $z6 == 0 goto label05;
+
+        $i2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        if $i2 > 0 goto label05;
+
+        r20 = newarray (byte)[1024];
+
+     label02:
+        $r14 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.io.InputStream inputStreamAfterSaveChanges>;
+
+        $i3 = virtualinvoke $r14.<java.io.InputStream: int read(byte[])>(r20);
+
+        $i9 = (int) -1;
+
+        if $i3 == $i9 goto label03;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(byte[],int,int)>(r20, 0, $i3);
+
+        $i6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        $i7 = $i6 + $i3;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount> = $i7;
+
+        goto label02;
+
+     label03:
+        $i4 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        if $i4 <= 0 goto label04;
+
+        $r15 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $i5 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        $r16 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i5);
+
+        virtualinvoke $r15.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("Content-Length", $r16);
+
+     label04:
+        goto label10;
+
+     label05:
+        $r13 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: byte[] messageBytes>;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int messageByteCount>;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(byte[],int,int)>($r13, 0, $i1);
+
+        goto label10;
+
+     label06:
+        $z2 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean hasXOPContent()>();
+
+        if $z2 == 0 goto label07;
+
+        $r12 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp>;
+
+        virtualinvoke $r12.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void writeTo(java.io.OutputStream)>(r1);
+
+        goto label08;
+
+     label07:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void writeTo(java.io.OutputStream)>(r1);
+
+        $z3 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z3 != 0 goto label08;
+
+        $z4 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment>;
+
+        if $z4 != 0 goto label08;
+
+        $r6 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        if $r6 == null goto label08;
+
+        $z5 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized>;
+
+        if $z5 != 0 goto label08;
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r10 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r7;
+
+        $r8 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart mmp>;
+
+        $r9 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart) $r8;
+
+        $r11 = virtualinvoke $r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.BMMimeMultipart: void setInputStream(java.io.InputStream)>($r11);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r17 := @caughtexception;
+
+        $r18 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log>;
+
+        virtualinvoke $r18.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0540.soap.err.saving.multipart.msg");
+
+        $r21 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r21.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Error during saving a multipart message", $r17);
+
+        throw $r21;
+
+     label10:
+        $z7 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean isCorrectSoapVersion(int)>(4);
+
+        if $z7 == 0 goto label12;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        $r4 = virtualinvoke $r3.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>("SOAPAction");
+
+        if $r4 == null goto label11;
+
+        $i0 = lengthof $r4;
+
+        if $i0 != 0 goto label12;
+
+     label11:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.MimeHeaders headers>;
+
+        virtualinvoke $r5.<javax.xml.soap.MimeHeaders: void setHeader(java.lang.String,java.lang.String)>("SOAPAction", "\"\"");
+
+     label12:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: byte[] messageBytes> = null;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+
+        catch java.lang.Exception from label06 to label08 with label09;
+    }
+
+    public javax.xml.soap.SOAPBody getSOAPBody() throws javax.xml.soap.SOAPException
+    {
+        javax.xml.soap.SOAPPart $r1;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.SOAPBody $r3;
+        javax.xml.soap.SOAPEnvelope $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r2 = virtualinvoke $r1.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r3 = interfaceinvoke $r2.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPBody getBody()>();
+
+        return $r3;
+    }
+
+    public javax.xml.soap.SOAPHeader getSOAPHeader() throws javax.xml.soap.SOAPException
+    {
+        javax.xml.soap.SOAPPart $r1;
+        javax.xml.soap.SOAPHeader $r3;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        javax.xml.soap.SOAPEnvelope $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r2 = virtualinvoke $r1.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r3 = interfaceinvoke $r2.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPHeader getHeader()>();
+
+        return $r3;
+    }
+
+    private void initializeAllAttachments() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException, javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r1, $r3, $r4;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r2, $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart $r5;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        int $i0, i1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        $z0 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $z2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized>;
+
+        if $z2 != 0 goto label3;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        if $r1 != null goto label4;
+
+     label3:
+        return;
+
+     label4:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        if $r2 != null goto label5;
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.util.FinalArrayList;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments> = $r6;
+
+     label5:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $i0 = virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: int getCount()>();
+
+        i1 = 0;
+
+     label6:
+        if i1 >= $i0 goto label7;
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart multiPart>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getBodyPart(int)>(i1);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void initializeAttachment(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label6;
+
+     label7:
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean attachmentsInitialized> = 1;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void needsSave()>();
+
+        return;
+    }
+
+    private void initializeAttachment(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart) throws javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl $r0;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r1;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r4;
+        javax.activation.DataHandler $r2;
+
+        r3 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r0 = new com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl;
+
+        specialinvoke $r0.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void <init>()>();
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        virtualinvoke $r0.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void setDataHandler(javax.activation.DataHandler)>($r2);
+
+        staticinvoke <com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void copyMimeHeaders(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart,com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl)>(r1, $r0);
+
+        $r4 = r3.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: com.sun.xml.internal.messaging.saaj.util.FinalArrayList attachments>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: boolean add(java.lang.Object)>($r0);
+
+        return;
+    }
+
+    private void initializeAttachment(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart, int) throws java.lang.Exception
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart r0;
+        com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl $r2;
+        int i0;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart $r1;
+        javax.activation.DataHandler $r3;
+
+        r4 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart getBodyPart(int)>(i0);
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void setDataHandler(javax.activation.DataHandler)>($r3);
+
+        staticinvoke <com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl: void copyMimeHeaders(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart,com.sun.xml.internal.messaging.saaj.soap.AttachmentPartImpl)>($r1, $r2);
+
+        virtualinvoke r4.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void addAttachmentPart(javax.xml.soap.AttachmentPart)>($r2);
+
+        return;
+    }
+
+    private void setMimeHeaders(javax.xml.soap.SOAPPart, com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart) throws java.lang.Exception
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r1;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.Header r4;
+        javax.xml.soap.SOAPPart r0;
+        int $i0, i1;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r7;
+        java.lang.Object $r3;
+        java.lang.String $r5, $r6;
+
+        r7 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: javax.xml.soap.SOAPPart;
+
+        r1 := @parameter1: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        virtualinvoke r0.<javax.xml.soap.SOAPPart: void removeAllMimeHeaders()>();
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.util.FinalArrayList getAllHeaders()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r4 = (com.sun.xml.internal.messaging.saaj.packaging.mime.Header) $r3;
+
+        $r5 = interfaceinvoke r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.Header: java.lang.String getName()>();
+
+        $r6 = interfaceinvoke r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.Header: java.lang.String getValue()>();
+
+        virtualinvoke r0.<javax.xml.soap.SOAPPart: void addMimeHeader(java.lang.String,java.lang.String)>($r5, $r6);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void initCharsetProperty(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType)
+    {
+        javax.xml.soap.SOAPPart $r3;
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r2;
+        com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl $r4;
+        java.lang.String $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType r0;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("charset");
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke r2.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r4 = (com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl) $r3;
+
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.soap.SOAPPartImpl: void setSourceCharsetEncoding(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("utf-8");
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r2.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: void setProperty(java.lang.String,java.lang.Object)>("javax.xml.soap.character-set-encoding", $r1);
+
+     label1:
+        return;
+    }
+
+    public void setLazyAttachments(boolean)
+    {
+        com.sun.xml.internal.messaging.saaj.soap.MessageImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.soap.MessageImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean lazyAttachments> = z0;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Iterator $r4;
+        java.util.logging.Logger $r0;
+        java.util.List $r3;
+        java.lang.String $r1, $r2;
+        boolean $z0, $z1, $z2;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int FI_ENCODED_FLAG> = 16;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int XOP_FLAG> = 13;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int MIME_MULTIPART_XOP_SOAP1_2_FLAG> = 10;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int MIME_MULTIPART_XOP_SOAP1_1_FLAG> = 6;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int SOAP1_2_FLAG> = 8;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int SOAP1_1_FLAG> = 4;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int MIME_MULTIPART_FLAG> = 2;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: int PLAIN_XML_FLAG> = 1;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String CONTENT_LOCATION> = "Content-Location";
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.lang.String CONTENT_ID> = "Content-ID";
+
+        $r0 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String,java.lang.String)>("com.sun.xml.internal.messaging.saaj.soap", "com.sun.xml.internal.messaging.saaj.soap.LocalStrings");
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.logging.Logger log> = $r0;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM> = 0;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment> = 0;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean useMimePull> = 0;
+
+        $r1 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.SAAJUtil: java.lang.String getSystemProperty(java.lang.String)>("saaj.mime.optimization");
+
+        if $r1 == null goto label1;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("false");
+
+        if $z1 == 0 goto label1;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffBM> = 1;
+
+     label1:
+        $r2 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.SAAJUtil: java.lang.String getSystemProperty(java.lang.String)>("saaj.lazy.mime.optimization");
+
+        if $r2 == null goto label2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("false");
+
+        if $z0 == 0 goto label2;
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean switchOffLazyAttachment> = 1;
+
+     label2:
+        $z2 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.SAAJUtil: boolean getSystemBoolean(java.lang.String)>("saaj.use.mimepull");
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: boolean useMimePull> = $z2;
+
+        $r3 = <java.util.Collections: java.util.List EMPTY_LIST>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+        <com.sun.xml.internal.messaging.saaj.soap.MessageImpl: java.util.Iterator nullIter> = $r4;
+
+        return;
+    }
+}

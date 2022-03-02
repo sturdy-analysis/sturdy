@@ -1,0 +1,424 @@
+class sun.misc.Launcher$ExtClassLoader extends java.net.URLClassLoader
+{
+    private static volatile sun.misc.Launcher$ExtClassLoader instance;
+
+    public static sun.misc.Launcher$ExtClassLoader getExtClassLoader() throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        sun.misc.Launcher$ExtClassLoader $r0, $r1, $r2, $r3;
+
+        $r0 = <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader instance>;
+
+        if $r0 != null goto label6;
+
+        entermonitor class "Lsun/misc/Launcher$ExtClassLoader;";
+
+     label1:
+        $r2 = <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader instance>;
+
+        if $r2 != null goto label2;
+
+        $r3 = staticinvoke <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader createExtClassLoader()>();
+
+        <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader instance> = $r3;
+
+     label2:
+        exitmonitor class "Lsun/misc/Launcher$ExtClassLoader;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Lsun/misc/Launcher$ExtClassLoader;";
+
+     label5:
+        throw $r4;
+
+     label6:
+        $r1 = <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader instance>;
+
+        return $r1;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static sun.misc.Launcher$ExtClassLoader createExtClassLoader() throws java.io.IOException
+    {
+        sun.misc.Launcher$ExtClassLoader$1 $r0;
+        java.security.PrivilegedActionException $r3;
+        sun.misc.Launcher$ExtClassLoader $r2;
+        java.lang.Object $r1;
+        java.io.IOException $r5;
+        java.lang.Exception $r4;
+
+     label1:
+        $r0 = new sun.misc.Launcher$ExtClassLoader$1;
+
+        specialinvoke $r0.<sun.misc.Launcher$ExtClassLoader$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        $r2 = (sun.misc.Launcher$ExtClassLoader) $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r5 = (java.io.IOException) $r4;
+
+        throw $r5;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    void addExtURL(java.net.URL)
+    {
+        sun.misc.Launcher$ExtClassLoader r0;
+        java.net.URL r1;
+
+        r0 := @this: sun.misc.Launcher$ExtClassLoader;
+
+        r1 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<java.net.URLClassLoader: void addURL(java.net.URL)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.io.File[]) throws java.io.IOException
+    {
+        java.net.URL[] $r2;
+        sun.misc.Launcher$ExtClassLoader r0;
+        sun.misc.URLClassPath $r5;
+        sun.misc.JavaNetAccess $r4;
+        java.net.URLStreamHandlerFactory $r3;
+        java.io.File[] r1;
+
+        r0 := @this: sun.misc.Launcher$ExtClassLoader;
+
+        r1 := @parameter0: java.io.File[];
+
+        $r2 = staticinvoke <sun.misc.Launcher$ExtClassLoader: java.net.URL[] getExtURLs(java.io.File[])>(r1);
+
+        $r3 = staticinvoke <sun.misc.Launcher: java.net.URLStreamHandlerFactory access$200()>();
+
+        specialinvoke r0.<java.net.URLClassLoader: void <init>(java.net.URL[],java.lang.ClassLoader,java.net.URLStreamHandlerFactory)>($r2, null, $r3);
+
+        $r4 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaNetAccess getJavaNetAccess()>();
+
+        $r5 = interfaceinvoke $r4.<sun.misc.JavaNetAccess: sun.misc.URLClassPath getURLClassPath(java.net.URLClassLoader)>(r0);
+
+        virtualinvoke $r5.<sun.misc.URLClassPath: void initLookupCache(java.lang.ClassLoader)>(r0);
+
+        return;
+    }
+
+    private static java.io.File[] getExtDirs()
+    {
+        java.io.File $r3;
+        java.util.StringTokenizer $r1;
+        int $i0, i1;
+        java.lang.String $r0, $r2, $r4;
+        java.io.File[] r5;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.ext.dirs");
+
+        if $r0 == null goto label3;
+
+        $r1 = new java.util.StringTokenizer;
+
+        $r2 = <java.io.File: java.lang.String pathSeparator>;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r0, $r2);
+
+        $i0 = virtualinvoke $r1.<java.util.StringTokenizer: int countTokens()>();
+
+        r5 = newarray (java.io.File)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = new java.io.File;
+
+        $r4 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        r5[i1] = $r3;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        goto label4;
+
+     label3:
+        r5 = newarray (java.io.File)[0];
+
+     label4:
+        return r5;
+    }
+
+    private static java.net.URL[] getExtURLs(java.io.File[]) throws java.io.IOException
+    {
+        java.net.URL $r8;
+        java.lang.String[] $r3;
+        java.net.URL[] r9;
+        java.util.Vector $r0;
+        int $i0, $i1, $i2, i3, i4;
+        java.lang.String $r4, $r6;
+        boolean $z0;
+        java.io.File $r2, $r5, $r7;
+        java.io.File[] r1;
+
+        r1 := @parameter0: java.io.File[];
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i3 >= $i0 goto label5;
+
+        $r2 = r1[i3];
+
+        $r3 = virtualinvoke $r2.<java.io.File: java.lang.String[] list()>();
+
+        if $r3 == null goto label4;
+
+        i4 = 0;
+
+     label2:
+        $i2 = lengthof $r3;
+
+        if i4 >= $i2 goto label4;
+
+        $r4 = $r3[i4];
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("meta-index");
+
+        if $z0 != 0 goto label3;
+
+        $r5 = new java.io.File;
+
+        $r7 = r1[i3];
+
+        $r6 = $r3[i4];
+
+        specialinvoke $r5.<java.io.File: void <init>(java.io.File,java.lang.String)>($r7, $r6);
+
+        $r8 = staticinvoke <sun.misc.Launcher: java.net.URL getFileURL(java.io.File)>($r5);
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r8);
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label5:
+        $i1 = virtualinvoke $r0.<java.util.Vector: int size()>();
+
+        r9 = newarray (java.net.URL)[$i1];
+
+        virtualinvoke $r0.<java.util.Vector: void copyInto(java.lang.Object[])>(r9);
+
+        return r9;
+    }
+
+    public java.lang.String findLibrary(java.lang.String)
+    {
+        java.net.URL $r3;
+        java.net.URISyntaxException $r15;
+        java.net.URL[] $r2;
+        int $i0, i1;
+        java.lang.String $r0, $r5, $r8, $r10, $r13, r16;
+        java.net.URI $r4;
+        java.nio.file.Path $r6;
+        boolean $z0, $z1, $z2;
+        sun.misc.Launcher$ExtClassLoader r1;
+        java.io.File $r7, $r9, $r11, $r12, $r14, r17, $r18, r19;
+
+        r1 := @this: sun.misc.Launcher$ExtClassLoader;
+
+        r16 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String mapLibraryName(java.lang.String)>(r16);
+
+        $r2 = specialinvoke r1.<java.net.URLClassLoader: java.net.URL[] getURLs()>();
+
+        r17 = null;
+
+        i1 = 0;
+
+     label01:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label11;
+
+     label02:
+        $r3 = $r2[i1];
+
+        $r4 = virtualinvoke $r3.<java.net.URL: java.net.URI toURI()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r15 := @caughtexception;
+
+        goto label10;
+
+     label05:
+        $r5 = virtualinvoke $r4.<java.net.URI: java.lang.String getAuthority()>();
+
+        if $r5 != null goto label06;
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.net.URI)>($r4);
+
+        $r18 = virtualinvoke $r14.<java.io.File: java.io.File getParentFile()>();
+
+        goto label07;
+
+     label06:
+        $r6 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.net.URI)>($r4);
+
+        $r7 = interfaceinvoke $r6.<java.nio.file.Path: java.io.File toFile()>();
+
+        $r18 = virtualinvoke $r7.<java.io.File: java.io.File getParentFile()>();
+
+     label07:
+        r19 = $r18;
+
+        if $r18 == null goto label09;
+
+        $z0 = virtualinvoke $r18.<java.io.File: boolean equals(java.lang.Object)>(r17);
+
+        if $z0 != 0 goto label09;
+
+        $r8 = staticinvoke <sun.misc.VM: java.lang.String getSavedProperty(java.lang.String)>("os.arch");
+
+        if $r8 == null goto label08;
+
+        $r11 = new java.io.File;
+
+        $r12 = new java.io.File;
+
+        specialinvoke $r12.<java.io.File: void <init>(java.io.File,java.lang.String)>($r18, $r8);
+
+        specialinvoke $r11.<java.io.File: void <init>(java.io.File,java.lang.String)>($r12, $r0);
+
+        $z2 = virtualinvoke $r11.<java.io.File: boolean exists()>();
+
+        if $z2 == 0 goto label08;
+
+        $r13 = virtualinvoke $r11.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        return $r13;
+
+     label08:
+        $r9 = new java.io.File;
+
+        specialinvoke $r9.<java.io.File: void <init>(java.io.File,java.lang.String)>(r19, $r0);
+
+        $z1 = virtualinvoke $r9.<java.io.File: boolean exists()>();
+
+        if $z1 == 0 goto label09;
+
+        $r10 = virtualinvoke $r9.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        return $r10;
+
+     label09:
+        r17 = r19;
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label11:
+        return null;
+
+        catch java.net.URISyntaxException from label02 to label03 with label04;
+    }
+
+    private static java.security.AccessControlContext getContext(java.io.File[]) throws java.io.IOException
+    {
+        java.security.AccessControlContext $r6;
+        java.net.URL $r4;
+        sun.misc.PathPermissions $r0;
+        java.security.ProtectionDomain[] $r7;
+        java.security.ProtectionDomain $r2;
+        java.security.cert.Certificate[] $r5;
+        java.security.CodeSource $r3;
+        java.io.File[] r1;
+
+        r1 := @parameter0: java.io.File[];
+
+        $r0 = new sun.misc.PathPermissions;
+
+        specialinvoke $r0.<sun.misc.PathPermissions: void <init>(java.io.File[])>(r1);
+
+        $r2 = new java.security.ProtectionDomain;
+
+        $r3 = new java.security.CodeSource;
+
+        $r4 = virtualinvoke $r0.<sun.misc.PathPermissions: java.net.URL getCodeBase()>();
+
+        $r5 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r3.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r4, $r5);
+
+        specialinvoke $r2.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r3, $r0);
+
+        $r6 = new java.security.AccessControlContext;
+
+        $r7 = newarray (java.security.ProtectionDomain)[1];
+
+        $r7[0] = $r2;
+
+        specialinvoke $r6.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r7);
+
+        return $r6;
+    }
+
+    static java.io.File[] access$100()
+    {
+        java.io.File[] $r0;
+
+        $r0 = staticinvoke <sun.misc.Launcher$ExtClassLoader: java.io.File[] getExtDirs()>();
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        staticinvoke <java.lang.ClassLoader: boolean registerAsParallelCapable()>();
+
+        <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader instance> = null;
+
+        return;
+    }
+}

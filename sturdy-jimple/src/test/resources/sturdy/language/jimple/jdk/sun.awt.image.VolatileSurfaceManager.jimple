@@ -1,0 +1,570 @@
+public abstract class sun.awt.image.VolatileSurfaceManager extends sun.awt.image.SurfaceManager implements sun.awt.DisplayChangedListener
+{
+    protected sun.awt.image.SunVolatileImage vImg;
+    protected sun.java2d.SurfaceData sdAccel;
+    protected sun.java2d.SurfaceData sdBackup;
+    protected sun.java2d.SurfaceData sdCurrent;
+    protected sun.java2d.SurfaceData sdPrevious;
+    protected boolean lostSurface;
+    protected java.lang.Object context;
+
+    protected void <init>(sun.awt.image.SunVolatileImage, java.lang.Object)
+    {
+        sun.awt.image.SunVolatileImage r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+        java.lang.Object r2;
+        sun.java2d.SunGraphicsEnvironment $r4;
+        java.awt.GraphicsEnvironment $r3;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r1 := @parameter0: sun.awt.image.SunVolatileImage;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<sun.awt.image.SurfaceManager: void <init>()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg> = r1;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: java.lang.Object context> = r2;
+
+        $r3 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $z0 = $r3 instanceof sun.java2d.SunGraphicsEnvironment;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (sun.java2d.SunGraphicsEnvironment) $r3;
+
+        virtualinvoke $r4.<sun.java2d.SunGraphicsEnvironment: void addDisplayChangedListener(sun.awt.DisplayChangedListener)>(r0);
+
+     label1:
+        return;
+    }
+
+    public void initialize()
+    {
+        sun.awt.image.SunVolatileImage $r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+        sun.java2d.SurfaceData $r2, $r3, $r4, $r5, $r6;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $z0 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isAccelerationEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData initAcceleratedSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel> = $r3;
+
+        $r4 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r4 == null goto label1;
+
+        $r5 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r5;
+
+     label1:
+        $r6 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        if $r6 != null goto label2;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $i0 = virtualinvoke $r1.<sun.awt.image.SunVolatileImage: int getForcedAccelSurfaceType()>();
+
+        if $i0 != 0 goto label2;
+
+        $r2 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r2;
+
+     label2:
+        return;
+    }
+
+    public sun.java2d.SurfaceData getPrimarySurfaceData()
+    {
+        sun.java2d.SurfaceData $r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        return $r1;
+    }
+
+    protected abstract boolean isAccelerationEnabled();
+
+    public int validate(java.awt.GraphicsConfiguration)
+    {
+        sun.awt.image.VolatileSurfaceManager r0;
+        byte b0, b1, b2, b3;
+        boolean z0, $z1, $z2, $z3;
+        java.awt.GraphicsConfiguration r6;
+        sun.java2d.InvalidPipeException $r15;
+        sun.java2d.SurfaceData $r1, $r2, $r3, $r4, $r5, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r16;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r6 := @parameter0: java.awt.GraphicsConfiguration;
+
+        b0 = 0;
+
+        b3 = 0;
+
+        b2 = 0;
+
+        b1 = 0;
+
+        z0 = r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface> = 0;
+
+        $z1 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isAccelerationEnabled()>();
+
+        if $z1 == 0 goto label08;
+
+        $z2 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isConfigValid(java.awt.GraphicsConfiguration)>(r6);
+
+        if $z2 != 0 goto label01;
+
+        b0 = 2;
+
+        b3 = 2;
+
+        b2 = 2;
+
+        b1 = 2;
+
+        goto label09;
+
+     label01:
+        $r7 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r7 != null goto label03;
+
+        $r11 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData initAcceleratedSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel> = $r11;
+
+        $r12 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r12 == null goto label02;
+
+        $r14 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r14;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup> = null;
+
+        b0 = 1;
+
+        b3 = 1;
+
+        b2 = 1;
+
+        b1 = 1;
+
+        goto label09;
+
+     label02:
+        $r13 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r13;
+
+        goto label09;
+
+     label03:
+        $r8 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        $z3 = virtualinvoke $r8.<sun.java2d.SurfaceData: boolean isSurfaceLost()>();
+
+        if $z3 == 0 goto label07;
+
+     label04:
+        virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: void restoreAcceleratedSurface()>();
+
+        $r9 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r9;
+
+        $r10 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        virtualinvoke $r10.<sun.java2d.SurfaceData: void setSurfaceLost(boolean)>(0);
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup> = null;
+
+        b0 = 1;
+
+        b3 = 1;
+
+        b2 = 1;
+
+        b1 = 1;
+
+     label05:
+        goto label09;
+
+     label06:
+        $r15 := @caughtexception;
+
+        $r16 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r16;
+
+        goto label09;
+
+     label07:
+        if z0 == 0 goto label09;
+
+        b0 = 1;
+
+        b3 = 1;
+
+        b2 = 1;
+
+        b1 = 1;
+
+        goto label09;
+
+     label08:
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r1 == null goto label09;
+
+        $r5 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r5;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel> = null;
+
+        b0 = 1;
+
+        b3 = 1;
+
+        b2 = 1;
+
+        b1 = 1;
+
+     label09:
+        if b1 == 2 goto label10;
+
+        $r3 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        $r2 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdPrevious>;
+
+        if $r3 == $r2 goto label10;
+
+        $r4 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdPrevious> = $r4;
+
+        b0 = 1;
+
+        b3 = 1;
+
+        b2 = 1;
+
+     label10:
+        if b2 != 1 goto label11;
+
+        virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: void initContents()>();
+
+     label11:
+        return b3;
+
+        catch sun.java2d.InvalidPipeException from label04 to label05 with label06;
+    }
+
+    public boolean contentsLost()
+    {
+        sun.awt.image.VolatileSurfaceManager r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $z0 = r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface>;
+
+        return $z0;
+    }
+
+    protected abstract sun.java2d.SurfaceData initAcceleratedSurface();
+
+    protected sun.java2d.SurfaceData getBackupSurface()
+    {
+        sun.awt.image.SunVolatileImage $r3;
+        sun.awt.image.VolatileSurfaceManager r0;
+        java.awt.image.BufferedImage $r4;
+        sun.java2d.SurfaceData $r1, $r2, $r8;
+        sun.java2d.StateTrackableDelegate $r7;
+        java.awt.image.WritableRaster $r5;
+        java.awt.image.DataBuffer $r6;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.image.SunVolatileImage: java.awt.image.BufferedImage getBackupImage()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.image.WritableRaster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r7 = staticinvoke <sun.awt.image.SunWritableRaster: sun.java2d.StateTrackableDelegate stealTrackable(java.awt.image.DataBuffer)>($r6);
+
+        virtualinvoke $r7.<sun.java2d.StateTrackableDelegate: void setUntrackable()>();
+
+        $r8 = staticinvoke <sun.awt.image.BufImgSurfaceData: sun.java2d.SurfaceData createData(java.awt.image.BufferedImage)>($r4);
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup> = $r8;
+
+     label1:
+        $r2 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup>;
+
+        return $r2;
+    }
+
+    public void initContents()
+    {
+        sun.awt.image.SunVolatileImage $r2, $r4, $r5;
+        sun.awt.image.VolatileSurfaceManager r0;
+        sun.java2d.SurfaceData $r1;
+        java.awt.Graphics2D $r3;
+        int $i0, $i1;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $r3 = virtualinvoke $r2.<sun.awt.image.SunVolatileImage: java.awt.Graphics2D createGraphics()>();
+
+        $r4 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $i0 = virtualinvoke $r4.<sun.awt.image.SunVolatileImage: int getWidth()>();
+
+        $r5 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $i1 = virtualinvoke $r5.<sun.awt.image.SunVolatileImage: int getHeight()>();
+
+        virtualinvoke $r3.<java.awt.Graphics: void clearRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+     label1:
+        return;
+    }
+
+    public sun.java2d.SurfaceData restoreContents()
+    {
+        sun.java2d.SurfaceData $r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $r1 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        return $r1;
+    }
+
+    public void acceleratedSurfaceLost()
+    {
+        sun.awt.image.VolatileSurfaceManager r0;
+        sun.java2d.SurfaceData $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $z0 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isAccelerationEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent>;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r2 != $r1 goto label1;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface> = 1;
+
+     label1:
+        return;
+    }
+
+    protected void restoreAcceleratedSurface()
+    {
+        sun.awt.image.VolatileSurfaceManager r0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        return;
+    }
+
+    public void displayChanged()
+    {
+        sun.awt.image.SunVolatileImage $r2;
+        sun.awt.image.VolatileSurfaceManager r0;
+        sun.java2d.SurfaceData $r1, r3, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        $z0 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isAccelerationEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface> = 1;
+
+        $r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        if $r1 == null goto label2;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdBackup> = null;
+
+        r3 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel> = null;
+
+        virtualinvoke r3.<sun.java2d.SurfaceData: void invalidate()>();
+
+        $r4 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData getBackupSurface()>();
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdCurrent> = $r4;
+
+     label2:
+        $r2 = r0.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        virtualinvoke $r2.<sun.awt.image.SunVolatileImage: void updateGraphicsConfig()>();
+
+        return;
+    }
+
+    public void paletteChanged()
+    {
+        sun.awt.image.VolatileSurfaceManager r0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface> = 1;
+
+        return;
+    }
+
+    protected boolean isConfigValid(java.awt.GraphicsConfiguration)
+    {
+        sun.awt.image.SunVolatileImage $r3;
+        java.awt.GraphicsConfiguration r0, $r4;
+        sun.awt.image.VolatileSurfaceManager r2;
+        java.awt.GraphicsDevice $r1, $r5;
+        boolean $z0;
+
+        r2 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r0 := @parameter0: java.awt.GraphicsConfiguration;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r3 = r2.<sun.awt.image.VolatileSurfaceManager: sun.awt.image.SunVolatileImage vImg>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.image.SunVolatileImage: java.awt.GraphicsConfiguration getGraphicsConfig()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        if $r1 != $r5 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public java.awt.ImageCapabilities getCapabilities(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+        sun.awt.image.VolatileSurfaceManager$AcceleratedImageCapabilities $r4;
+        java.awt.ImageCapabilities $r2, $r3, $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $z0 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isConfigValid(java.awt.GraphicsConfiguration)>(r1);
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke r0.<sun.awt.image.VolatileSurfaceManager: boolean isAccelerationEnabled()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = new sun.awt.image.VolatileSurfaceManager$AcceleratedImageCapabilities;
+
+        $r3 = $r4;
+
+        specialinvoke $r4.<sun.awt.image.VolatileSurfaceManager$AcceleratedImageCapabilities: void <init>(sun.awt.image.VolatileSurfaceManager)>(r0);
+
+        goto label2;
+
+     label1:
+        $r5 = new java.awt.ImageCapabilities;
+
+        $r3 = $r5;
+
+        specialinvoke $r5.<java.awt.ImageCapabilities: void <init>(boolean)>(0);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r2 = specialinvoke r0.<sun.awt.image.SurfaceManager: java.awt.ImageCapabilities getCapabilities(java.awt.GraphicsConfiguration)>(r1);
+
+        return $r2;
+    }
+
+    public void flush()
+    {
+        sun.java2d.SurfaceData r1;
+        sun.awt.image.VolatileSurfaceManager r0;
+
+        r0 := @this: sun.awt.image.VolatileSurfaceManager;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: boolean lostSurface> = 1;
+
+        r1 = r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel>;
+
+        r0.<sun.awt.image.VolatileSurfaceManager: sun.java2d.SurfaceData sdAccel> = null;
+
+        if r1 == null goto label1;
+
+        virtualinvoke r1.<sun.java2d.SurfaceData: void flush()>();
+
+     label1:
+        return;
+    }
+}

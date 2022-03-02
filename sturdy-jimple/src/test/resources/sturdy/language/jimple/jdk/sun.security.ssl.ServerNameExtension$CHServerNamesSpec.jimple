@@ -1,0 +1,344 @@
+final class sun.security.ssl.ServerNameExtension$CHServerNamesSpec extends java.lang.Object implements sun.security.ssl.SSLExtension$SSLExtensionSpec
+{
+    static final int NAME_HEADER_LENGTH;
+    final java.util.List serverNames;
+
+    private void <init>(java.util.List)
+    {
+        java.util.List r2, $r3;
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec r0;
+        java.util.ArrayList $r1;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        r2 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(java.util.Collection)>(r2);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r1);
+
+        r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames> = $r3;
+
+        return;
+    }
+
+    private void <init>(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r6;
+        javax.net.ssl.SNIHostName $r15;
+        javax.net.ssl.SNIServerName r46;
+        java.lang.Integer $r8;
+        java.nio.ByteBuffer r1;
+        boolean $z0;
+        javax.net.ssl.SSLProtocolException $r2, $r10, $r16, $r17, $r19, $r29, $r31, $r45;
+        java.util.Collection $r5;
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec r0;
+        java.lang.StringBuilder $r11, $r12, $r13, $r20, $r21, $r22, $r23, $r25, $r26, $r32, $r33, $r34, $r35, $r38, $r39, $r41, $r42;
+        java.lang.Throwable $r28, $r44;
+        java.util.ArrayList $r4;
+        java.util.LinkedHashMap $r3;
+        java.nio.charset.Charset $r37;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r14, $r24, $r27, $r36, $r40, $r43;
+        java.lang.IllegalArgumentException $r18, $r30;
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec$UnknownServerName $r7;
+        java.lang.Object $r9;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 2 goto label01;
+
+        $r17 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r17.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid server_name extension: insufficient data");
+
+        throw $r17;
+
+     label01:
+        $i1 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r1);
+
+        if $i1 == 0 goto label02;
+
+        $i2 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i1 == $i2 goto label03;
+
+     label02:
+        $r2 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r2.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid server_name extension: incomplete data");
+
+        throw $r2;
+
+     label03:
+        $r3 = new java.util.LinkedHashMap;
+
+        specialinvoke $r3.<java.util.LinkedHashMap: void <init>()>();
+
+     label04:
+        $z0 = virtualinvoke r1.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z0 == 0 goto label13;
+
+        $i3 = staticinvoke <sun.security.ssl.Record: int getInt8(java.nio.ByteBuffer)>(r1);
+
+        $r6 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r1);
+
+        if $i3 != 0 goto label08;
+
+        $i6 = lengthof $r6;
+
+        if $i6 != 0 goto label05;
+
+        $r16 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r16.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Empty HostName in server_name extension");
+
+        throw $r16;
+
+     label05:
+        $r15 = new javax.net.ssl.SNIHostName;
+
+        specialinvoke $r15.<javax.net.ssl.SNIHostName: void <init>(byte[])>($r6);
+
+        r46 = $r15;
+
+     label06:
+        goto label11;
+
+     label07:
+        $r30 := @caughtexception;
+
+        $r31 = new javax.net.ssl.SSLProtocolException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal server name, type=host_name(");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("), name=");
+
+        $r36 = new java.lang.String;
+
+        $r37 = <java.nio.charset.StandardCharsets: java.nio.charset.Charset UTF_8>;
+
+        specialinvoke $r36.<java.lang.String: void <init>(byte[],java.nio.charset.Charset)>($r6, $r37);
+
+        $r38 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", value={");
+
+        $r40 = staticinvoke <sun.security.ssl.Utilities: java.lang.String toHexString(byte[])>($r6);
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r43);
+
+        $r44 = virtualinvoke $r31.<javax.net.ssl.SSLProtocolException: java.lang.Throwable initCause(java.lang.Throwable)>($r30);
+
+        $r45 = (javax.net.ssl.SSLProtocolException) $r44;
+
+        throw $r45;
+
+     label08:
+        $r7 = new sun.security.ssl.ServerNameExtension$CHServerNamesSpec$UnknownServerName;
+
+        specialinvoke $r7.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec$UnknownServerName: void <init>(int,byte[])>($i3, $r6);
+
+        r46 = $r7;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r18 := @caughtexception;
+
+        $r19 = new javax.net.ssl.SSLProtocolException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal server name, type=(");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("), value={");
+
+        $r24 = staticinvoke <sun.security.ssl.Utilities: java.lang.String toHexString(byte[])>($r6);
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r27);
+
+        $r28 = virtualinvoke $r19.<javax.net.ssl.SSLProtocolException: java.lang.Throwable initCause(java.lang.Throwable)>($r18);
+
+        $r29 = (javax.net.ssl.SSLProtocolException) $r28;
+
+        throw $r29;
+
+     label11:
+        $i4 = virtualinvoke r46.<javax.net.ssl.SNIServerName: int getType()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i4);
+
+        $r9 = interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, r46);
+
+        if $r9 == null goto label12;
+
+        $r10 = new javax.net.ssl.SSLProtocolException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Duplicated server name of type ");
+
+        $i5 = virtualinvoke r46.<javax.net.ssl.SNIServerName: int getType()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+     label12:
+        goto label04;
+
+     label13:
+        $r4 = new java.util.ArrayList;
+
+        $r5 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(java.util.Collection)>($r5);
+
+        r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames> = $r4;
+
+        return;
+
+        catch java.lang.IllegalArgumentException from label05 to label06 with label07;
+        catch java.lang.IllegalArgumentException from label08 to label09 with label10;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.Iterator $r5;
+        javax.net.ssl.SNIServerName r8;
+        java.util.List $r1, $r2, $r4;
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec r0;
+        java.lang.StringBuilder $r3;
+        java.lang.Object $r7;
+        java.lang.String $r6, $r9;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        $r1 = r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames>;
+
+        $z0 = interfaceinvoke $r2.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return "<no server name indicator specified>";
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>(int)>(512);
+
+        $r4 = r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames>;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (javax.net.ssl.SNIServerName) $r7;
+
+        $r9 = virtualinvoke r8.<javax.net.ssl.SNIServerName: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        goto label3;
+
+     label4:
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    void <init>(java.nio.ByteBuffer, sun.security.ssl.ServerNameExtension$1) throws java.io.IOException
+    {
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec r0;
+        sun.security.ssl.ServerNameExtension$1 r2;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: sun.security.ssl.ServerNameExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: void <init>(java.nio.ByteBuffer)>(r1);
+
+        return;
+    }
+
+    void <init>(java.util.List, sun.security.ssl.ServerNameExtension$1)
+    {
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec r0;
+        sun.security.ssl.ServerNameExtension$1 r2;
+        java.util.List r1;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 := @parameter1: sun.security.ssl.ServerNameExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: void <init>(java.util.List)>(r1);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.ssl.ServerNameExtension$CHServerNamesSpec: int NAME_HEADER_LENGTH> = 3;
+
+        return;
+    }
+}

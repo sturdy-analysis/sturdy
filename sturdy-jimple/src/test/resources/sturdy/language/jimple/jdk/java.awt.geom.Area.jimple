@@ -1,0 +1,1073 @@
+public class java.awt.geom.Area extends java.lang.Object implements java.awt.Shape, java.lang.Cloneable
+{
+    private static java.util.Vector EmptyCurves;
+    private java.util.Vector curves;
+    private java.awt.geom.Rectangle2D cachedBounds;
+
+    public void <init>()
+    {
+        java.util.Vector $r1;
+        java.awt.geom.Area r0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.awt.geom.Area: java.util.Vector EmptyCurves>;
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r1;
+
+        return;
+    }
+
+    public void <init>(java.awt.Shape)
+    {
+        java.awt.Shape r1;
+        java.util.Vector $r3, $r5;
+        java.awt.geom.Area r0, $r4;
+        boolean $z0;
+        java.awt.geom.PathIterator $r2;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r1 := @parameter0: java.awt.Shape;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $z0 = r1 instanceof java.awt.geom.Area;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (java.awt.geom.Area) r1;
+
+        $r5 = $r4.<java.awt.geom.Area: java.util.Vector curves>;
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r5;
+
+        goto label2;
+
+     label1:
+        $r2 = interfaceinvoke r1.<java.awt.Shape: java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)>(null);
+
+        $r3 = staticinvoke <java.awt.geom.Area: java.util.Vector pathToCurves(java.awt.geom.PathIterator)>($r2);
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r3;
+
+     label2:
+        return;
+    }
+
+    private static java.util.Vector pathToCurves(java.awt.geom.PathIterator)
+    {
+        double[] r2;
+        java.awt.geom.PathIterator r1;
+        java.util.Vector $r0, $r4, $r5;
+        int $i0, $i1;
+        boolean $z0;
+        double $d0, $d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11;
+        sun.awt.geom.AreaOp$NZWindOp $r3;
+        sun.awt.geom.AreaOp$EOWindOp $r6;
+        sun.awt.geom.AreaOp r7;
+
+        r1 := @parameter0: java.awt.geom.PathIterator;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        $i0 = interfaceinvoke r1.<java.awt.geom.PathIterator: int getWindingRule()>();
+
+        r2 = newarray (double)[23];
+
+        d2 = 0.0;
+
+        d3 = 0.0;
+
+        d4 = 0.0;
+
+        d5 = 0.0;
+
+     label01:
+        $z0 = interfaceinvoke r1.<java.awt.geom.PathIterator: boolean isDone()>();
+
+        if $z0 != 0 goto label08;
+
+        $i1 = interfaceinvoke r1.<java.awt.geom.PathIterator: int currentSegment(double[])>(r2);
+
+        tableswitch($i1)
+        {
+            case 0: goto label02;
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label05;
+            case 4: goto label06;
+            default: goto label07;
+        };
+
+     label02:
+        staticinvoke <sun.awt.geom.Curve: void insertLine(java.util.Vector,double,double,double,double)>($r0, d4, d5, d2, d3);
+
+        $d0 = r2[0];
+
+        d2 = $d0;
+
+        d4 = $d0;
+
+        $d1 = r2[1];
+
+        d3 = $d1;
+
+        d5 = $d1;
+
+        staticinvoke <sun.awt.geom.Curve: void insertMove(java.util.Vector,double,double)>($r0, $d0, $d1);
+
+        goto label07;
+
+     label03:
+        d6 = r2[0];
+
+        d7 = r2[1];
+
+        staticinvoke <sun.awt.geom.Curve: void insertLine(java.util.Vector,double,double,double,double)>($r0, d4, d5, d6, d7);
+
+        d4 = d6;
+
+        d5 = d7;
+
+        goto label07;
+
+     label04:
+        d8 = r2[2];
+
+        d9 = r2[3];
+
+        staticinvoke <sun.awt.geom.Curve: void insertQuad(java.util.Vector,double,double,double[])>($r0, d4, d5, r2);
+
+        d4 = d8;
+
+        d5 = d9;
+
+        goto label07;
+
+     label05:
+        d10 = r2[4];
+
+        d11 = r2[5];
+
+        staticinvoke <sun.awt.geom.Curve: void insertCubic(java.util.Vector,double,double,double[])>($r0, d4, d5, r2);
+
+        d4 = d10;
+
+        d5 = d11;
+
+        goto label07;
+
+     label06:
+        staticinvoke <sun.awt.geom.Curve: void insertLine(java.util.Vector,double,double,double,double)>($r0, d4, d5, d2, d3);
+
+        d4 = d2;
+
+        d5 = d3;
+
+     label07:
+        interfaceinvoke r1.<java.awt.geom.PathIterator: void next()>();
+
+        goto label01;
+
+     label08:
+        staticinvoke <sun.awt.geom.Curve: void insertLine(java.util.Vector,double,double,double,double)>($r0, d4, d5, d2, d3);
+
+        if $i0 != 0 goto label09;
+
+        $r6 = new sun.awt.geom.AreaOp$EOWindOp;
+
+        specialinvoke $r6.<sun.awt.geom.AreaOp$EOWindOp: void <init>()>();
+
+        r7 = $r6;
+
+        goto label10;
+
+     label09:
+        $r3 = new sun.awt.geom.AreaOp$NZWindOp;
+
+        specialinvoke $r3.<sun.awt.geom.AreaOp$NZWindOp: void <init>()>();
+
+        r7 = $r3;
+
+     label10:
+        $r4 = <java.awt.geom.Area: java.util.Vector EmptyCurves>;
+
+        $r5 = virtualinvoke r7.<sun.awt.geom.AreaOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r0, $r4);
+
+        return $r5;
+    }
+
+    public void add(java.awt.geom.Area)
+    {
+        sun.awt.geom.AreaOp$AddOp $r1;
+        java.util.Vector $r3, $r4, $r5;
+        java.awt.geom.Area r0, r2;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.Area;
+
+        $r1 = new sun.awt.geom.AreaOp$AddOp;
+
+        specialinvoke $r1.<sun.awt.geom.AreaOp$AddOp: void <init>()>();
+
+        $r4 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = r2.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r1.<sun.awt.geom.AreaOp$AddOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r4, $r3);
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r5;
+
+        specialinvoke r0.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public void subtract(java.awt.geom.Area)
+    {
+        java.util.Vector $r3, $r4, $r5;
+        java.awt.geom.Area r0, r2;
+        sun.awt.geom.AreaOp$SubOp $r1;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.Area;
+
+        $r1 = new sun.awt.geom.AreaOp$SubOp;
+
+        specialinvoke $r1.<sun.awt.geom.AreaOp$SubOp: void <init>()>();
+
+        $r4 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = r2.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r1.<sun.awt.geom.AreaOp$SubOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r4, $r3);
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r5;
+
+        specialinvoke r0.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public void intersect(java.awt.geom.Area)
+    {
+        java.util.Vector $r3, $r4, $r5;
+        java.awt.geom.Area r0, r2;
+        sun.awt.geom.AreaOp$IntOp $r1;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.Area;
+
+        $r1 = new sun.awt.geom.AreaOp$IntOp;
+
+        specialinvoke $r1.<sun.awt.geom.AreaOp$IntOp: void <init>()>();
+
+        $r4 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = r2.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r1.<sun.awt.geom.AreaOp$IntOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r4, $r3);
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r5;
+
+        specialinvoke r0.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public void exclusiveOr(java.awt.geom.Area)
+    {
+        java.util.Vector $r3, $r4, $r5;
+        java.awt.geom.Area r0, r2;
+        sun.awt.geom.AreaOp$XorOp $r1;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.Area;
+
+        $r1 = new sun.awt.geom.AreaOp$XorOp;
+
+        specialinvoke $r1.<sun.awt.geom.AreaOp$XorOp: void <init>()>();
+
+        $r4 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = r2.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r1.<sun.awt.geom.AreaOp$XorOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r4, $r3);
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r5;
+
+        specialinvoke r0.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public void reset()
+    {
+        java.util.Vector $r1;
+        java.awt.geom.Area r0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.geom.Area: java.util.Vector curves> = $r1;
+
+        specialinvoke r0.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public boolean isEmpty()
+    {
+        java.util.Vector $r1;
+        java.awt.geom.Area r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isPolygonal()
+    {
+        java.util.Vector $r1;
+        java.util.Enumeration $r2;
+        java.awt.geom.Area r0;
+        sun.awt.geom.Curve $r4;
+        int $i0;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r4 = (sun.awt.geom.Curve) $r3;
+
+        $i0 = virtualinvoke $r4.<sun.awt.geom.Curve: int getOrder()>();
+
+        if $i0 <= 1 goto label1;
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    public boolean isRectangular()
+    {
+        java.awt.geom.Area r0;
+        sun.awt.geom.Curve r4, r7;
+        java.util.Vector $r1, $r2, $r5;
+        byte $b3, $b4, $b5, $b6;
+        int $i0, $i1, $i2;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        java.lang.Object $r3, $r6;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        if $i0 <= 3 goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object get(int)>(1);
+
+        r4 = (sun.awt.geom.Curve) $r3;
+
+        $r5 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object get(int)>(2);
+
+        r7 = (sun.awt.geom.Curve) $r6;
+
+        $i1 = virtualinvoke r4.<sun.awt.geom.Curve: int getOrder()>();
+
+        if $i1 != 1 goto label3;
+
+        $i2 = virtualinvoke r7.<sun.awt.geom.Curve: int getOrder()>();
+
+        if $i2 == 1 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $d0 = virtualinvoke r4.<sun.awt.geom.Curve: double getXTop()>();
+
+        $d1 = virtualinvoke r4.<sun.awt.geom.Curve: double getXBot()>();
+
+        $b3 = $d0 cmpl $d1;
+
+        if $b3 != 0 goto label5;
+
+        $d2 = virtualinvoke r7.<sun.awt.geom.Curve: double getXTop()>();
+
+        $d3 = virtualinvoke r7.<sun.awt.geom.Curve: double getXBot()>();
+
+        $b4 = $d2 cmpl $d3;
+
+        if $b4 == 0 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        $d4 = virtualinvoke r4.<sun.awt.geom.Curve: double getYTop()>();
+
+        $d5 = virtualinvoke r7.<sun.awt.geom.Curve: double getYTop()>();
+
+        $b5 = $d4 cmpl $d5;
+
+        if $b5 != 0 goto label7;
+
+        $d6 = virtualinvoke r4.<sun.awt.geom.Curve: double getYBot()>();
+
+        $d7 = virtualinvoke r7.<sun.awt.geom.Curve: double getYBot()>();
+
+        $b6 = $d6 cmpl $d7;
+
+        if $b6 == 0 goto label8;
+
+     label7:
+        return 0;
+
+     label8:
+        return 1;
+    }
+
+    public boolean isSingular()
+    {
+        java.util.Enumeration $r3;
+        java.awt.geom.Area r0;
+        sun.awt.geom.Curve $r5;
+        java.util.Vector $r1, $r2;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 >= 3 goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.util.Enumeration elements()>();
+
+        interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = (sun.awt.geom.Curve) $r4;
+
+        $i1 = virtualinvoke $r5.<sun.awt.geom.Curve: int getOrder()>();
+
+        if $i1 != 0 goto label2;
+
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    private void invalidateBounds()
+    {
+        java.awt.geom.Area r0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D cachedBounds> = null;
+
+        return;
+    }
+
+    private java.awt.geom.Rectangle2D getCachedBounds()
+    {
+        java.awt.geom.Area r0;
+        sun.awt.geom.Curve r6, $r10;
+        java.awt.geom.Rectangle2D $r1, $r11;
+        java.util.Vector $r3, $r4, $r7, $r8;
+        int $i0, $i1, i2;
+        java.awt.geom.Rectangle2D$Double $r2;
+        double $d0, $d1;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D cachedBounds>;
+
+        if $r1 == null goto label1;
+
+        $r11 = r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D cachedBounds>;
+
+        return $r11;
+
+     label1:
+        $r2 = new java.awt.geom.Rectangle2D$Double;
+
+        specialinvoke $r2.<java.awt.geom.Rectangle2D$Double: void <init>()>();
+
+        $r3 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r4 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object get(int)>(0);
+
+        r6 = (sun.awt.geom.Curve) $r5;
+
+        $d0 = virtualinvoke r6.<sun.awt.geom.Curve: double getX0()>();
+
+        $d1 = virtualinvoke r6.<sun.awt.geom.Curve: double getY0()>();
+
+        virtualinvoke $r2.<java.awt.geom.Rectangle2D: void setRect(double,double,double,double)>($d0, $d1, 0.0, 0.0);
+
+        i2 = 1;
+
+     label2:
+        $r7 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $i1 = virtualinvoke $r7.<java.util.Vector: int size()>();
+
+        if i2 >= $i1 goto label3;
+
+        $r8 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r9 = virtualinvoke $r8.<java.util.Vector: java.lang.Object get(int)>(i2);
+
+        $r10 = (sun.awt.geom.Curve) $r9;
+
+        virtualinvoke $r10.<sun.awt.geom.Curve: void enlarge(java.awt.geom.Rectangle2D)>($r2);
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D cachedBounds> = $r2;
+
+        return $r2;
+    }
+
+    public java.awt.geom.Rectangle2D getBounds2D()
+    {
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D $r1, $r2;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = specialinvoke r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D getCachedBounds()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: java.awt.geom.Rectangle2D getBounds2D()>();
+
+        return $r2;
+    }
+
+    public java.awt.Rectangle getBounds()
+    {
+        java.awt.Rectangle $r2;
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D $r1;
+
+        r0 := @this: java.awt.geom.Area;
+
+        $r1 = specialinvoke r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D getCachedBounds()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: java.awt.Rectangle getBounds()>();
+
+        return $r2;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.awt.geom.Area $r0, r1;
+
+        r1 := @this: java.awt.geom.Area;
+
+        $r0 = new java.awt.geom.Area;
+
+        specialinvoke $r0.<java.awt.geom.Area: void <init>(java.awt.Shape)>(r1);
+
+        return $r0;
+    }
+
+    public boolean equals(java.awt.geom.Area)
+    {
+        java.util.Vector $r3, $r4, $r5;
+        java.awt.geom.Area r0, r1;
+        sun.awt.geom.AreaOp$XorOp $r2;
+        boolean $z0;
+
+        r1 := @this: java.awt.geom.Area;
+
+        r0 := @parameter0: java.awt.geom.Area;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r0 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = new sun.awt.geom.AreaOp$XorOp;
+
+        specialinvoke $r2.<sun.awt.geom.AreaOp$XorOp: void <init>()>();
+
+        $r4 = r1.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r5 = virtualinvoke $r2.<sun.awt.geom.AreaOp$XorOp: java.util.Vector calculate(java.util.Vector,java.util.Vector)>($r4, $r3);
+
+        $z0 = virtualinvoke $r5.<java.util.Vector: boolean isEmpty()>();
+
+        return $z0;
+    }
+
+    public void transform(java.awt.geom.AffineTransform)
+    {
+        java.util.Vector $r3;
+        java.awt.geom.Area r1;
+        java.awt.geom.AffineTransform r0;
+        java.lang.NullPointerException $r4;
+        java.awt.geom.PathIterator $r2;
+
+        r1 := @this: java.awt.geom.Area;
+
+        r0 := @parameter0: java.awt.geom.AffineTransform;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("transform must not be null");
+
+        throw $r4;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.awt.geom.Area: java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)>(r0);
+
+        $r3 = staticinvoke <java.awt.geom.Area: java.util.Vector pathToCurves(java.awt.geom.PathIterator)>($r2);
+
+        r1.<java.awt.geom.Area: java.util.Vector curves> = $r3;
+
+        specialinvoke r1.<java.awt.geom.Area: void invalidateBounds()>();
+
+        return;
+    }
+
+    public java.awt.geom.Area createTransformedArea(java.awt.geom.AffineTransform)
+    {
+        java.awt.geom.AffineTransform r2;
+        java.awt.geom.Area $r0, r1;
+
+        r1 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.AffineTransform;
+
+        $r0 = new java.awt.geom.Area;
+
+        specialinvoke $r0.<java.awt.geom.Area: void <init>(java.awt.Shape)>(r1);
+
+        virtualinvoke $r0.<java.awt.geom.Area: void transform(java.awt.geom.AffineTransform)>(r2);
+
+        return $r0;
+    }
+
+    public boolean contains(double, double)
+    {
+        java.util.Enumeration $r3;
+        java.awt.geom.Area r0;
+        sun.awt.geom.Curve r5;
+        java.awt.geom.Rectangle2D $r1;
+        java.util.Vector $r2;
+        int $i0, $i1, i2;
+        java.lang.Object $r4;
+        double d0, d1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.awt.geom.Area;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $r1 = specialinvoke r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D getCachedBounds()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: boolean contains(double,double)>(d0, d1);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.util.Enumeration elements()>();
+
+        i2 = 0;
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (sun.awt.geom.Curve) $r4;
+
+        $i1 = virtualinvoke r5.<sun.awt.geom.Curve: int crossingsFor(double,double)>(d0, d1);
+
+        i2 = i2 + $i1;
+
+        goto label2;
+
+     label3:
+        $i0 = i2 & 1;
+
+        if $i0 != 1 goto label4;
+
+        $z2 = 1;
+
+        goto label5;
+
+     label4:
+        $z2 = 0;
+
+     label5:
+        return $z2;
+    }
+
+    public boolean contains(java.awt.geom.Point2D)
+    {
+        java.awt.geom.Point2D r1;
+        java.awt.geom.Area r0;
+        double $d0, $d1;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r1 := @parameter0: java.awt.geom.Point2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Point2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Point2D: double getY()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Area: boolean contains(double,double)>($d0, $d1);
+
+        return $z0;
+    }
+
+    public boolean contains(double, double, double, double)
+    {
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D $r1;
+        java.util.Vector $r2;
+        byte $b0, $b1;
+        int $i2, $i3;
+        double d0, d1, d2, d3, $d4, $d5, $d6;
+        boolean $z0, $z1, $z2;
+        sun.awt.geom.Crossings $r3;
+
+        r0 := @this: java.awt.geom.Area;
+
+        d2 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        $b0 = d0 cmpg 0.0;
+
+        $i2 = (int) $b0;
+
+        if $i2 < 0 goto label1;
+
+        $b1 = d1 cmpg 0.0;
+
+        $i3 = (int) $b1;
+
+        if $i3 >= 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = specialinvoke r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D getCachedBounds()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: boolean contains(double,double,double,double)>(d2, d3, d0, d1);
+
+        if $z0 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r2 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $d5 = d2 + d0;
+
+        $d4 = d3 + d1;
+
+        $r3 = staticinvoke <sun.awt.geom.Crossings: sun.awt.geom.Crossings findCrossings(java.util.Vector,double,double,double,double)>($r2, d2, d3, $d5, $d4);
+
+        if $r3 == null goto label4;
+
+        $d6 = d3 + d1;
+
+        $z1 = virtualinvoke $r3.<sun.awt.geom.Crossings: boolean covers(double,double)>(d3, $d6);
+
+        if $z1 == 0 goto label4;
+
+        $z2 = 1;
+
+        goto label5;
+
+     label4:
+        $z2 = 0;
+
+     label5:
+        return $z2;
+    }
+
+    public boolean contains(java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D r1;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r1 := @parameter0: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Area: boolean contains(double,double,double,double)>($d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public boolean intersects(double, double, double, double)
+    {
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D $r1;
+        java.util.Vector $r2;
+        byte $b0, $b1;
+        int $i2, $i3;
+        double d0, d1, d2, d3, $d4, $d5;
+        boolean $z0, $z1, $z2;
+        sun.awt.geom.Crossings $r3;
+
+        r0 := @this: java.awt.geom.Area;
+
+        d2 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        $b0 = d0 cmpg 0.0;
+
+        $i2 = (int) $b0;
+
+        if $i2 < 0 goto label1;
+
+        $b1 = d1 cmpg 0.0;
+
+        $i3 = (int) $b1;
+
+        if $i3 >= 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = specialinvoke r0.<java.awt.geom.Area: java.awt.geom.Rectangle2D getCachedBounds()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: boolean intersects(double,double,double,double)>(d2, d3, d0, d1);
+
+        if $z0 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r2 = r0.<java.awt.geom.Area: java.util.Vector curves>;
+
+        $d5 = d2 + d0;
+
+        $d4 = d3 + d1;
+
+        $r3 = staticinvoke <sun.awt.geom.Crossings: sun.awt.geom.Crossings findCrossings(java.util.Vector,double,double,double,double)>($r2, d2, d3, $d5, $d4);
+
+        if $r3 == null goto label4;
+
+        $z1 = virtualinvoke $r3.<sun.awt.geom.Crossings: boolean isEmpty()>();
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        $z2 = 1;
+
+        goto label6;
+
+     label5:
+        $z2 = 0;
+
+     label6:
+        return $z2;
+    }
+
+    public boolean intersects(java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Area r0;
+        java.awt.geom.Rectangle2D r1;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Area;
+
+        r1 := @parameter0: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Area: boolean intersects(double,double,double,double)>($d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)
+    {
+        java.awt.geom.AreaIterator $r0;
+        java.util.Vector $r3;
+        java.awt.geom.Area r1;
+        java.awt.geom.AffineTransform r2;
+
+        r1 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.AffineTransform;
+
+        $r0 = new java.awt.geom.AreaIterator;
+
+        $r3 = r1.<java.awt.geom.Area: java.util.Vector curves>;
+
+        specialinvoke $r0.<java.awt.geom.AreaIterator: void <init>(java.util.Vector,java.awt.geom.AffineTransform)>($r3, r2);
+
+        return $r0;
+    }
+
+    public java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform, double)
+    {
+        java.awt.geom.Area r1;
+        java.awt.geom.FlatteningPathIterator $r0;
+        java.awt.geom.AffineTransform r2;
+        java.awt.geom.PathIterator $r3;
+        double d0;
+
+        r1 := @this: java.awt.geom.Area;
+
+        r2 := @parameter0: java.awt.geom.AffineTransform;
+
+        d0 := @parameter1: double;
+
+        $r0 = new java.awt.geom.FlatteningPathIterator;
+
+        $r3 = virtualinvoke r1.<java.awt.geom.Area: java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)>(r2);
+
+        specialinvoke $r0.<java.awt.geom.FlatteningPathIterator: void <init>(java.awt.geom.PathIterator,double)>($r3, d0);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Vector $r0;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        <java.awt.geom.Area: java.util.Vector EmptyCurves> = $r0;
+
+        return;
+    }
+}

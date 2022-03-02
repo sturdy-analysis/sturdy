@@ -1,0 +1,727 @@
+public class sun.net.NetworkClient extends java.lang.Object
+{
+    public static final int DEFAULT_READ_TIMEOUT;
+    public static final int DEFAULT_CONNECT_TIMEOUT;
+    protected java.net.Proxy proxy;
+    protected java.net.Socket serverSocket;
+    public java.io.PrintStream serverOutput;
+    public java.io.InputStream serverInput;
+    protected static int defaultSoTimeout;
+    protected static int defaultConnectTimeout;
+    protected int readTimeout;
+    protected int connectTimeout;
+    protected static java.lang.String encoding;
+
+    private static boolean isASCIISuperset(java.lang.String) throws java.lang.Exception
+    {
+        byte[] $r1, $r3;
+        java.lang.String r0, r2;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.!~*\'();/?:@&=+$,";
+
+        $r1 = newarray (byte)[81];
+
+        $r1[0] = 48;
+
+        $r1[1] = 49;
+
+        $r1[2] = 50;
+
+        $r1[3] = 51;
+
+        $r1[4] = 52;
+
+        $r1[5] = 53;
+
+        $r1[6] = 54;
+
+        $r1[7] = 55;
+
+        $r1[8] = 56;
+
+        $r1[9] = 57;
+
+        $r1[10] = 65;
+
+        $r1[11] = 66;
+
+        $r1[12] = 67;
+
+        $r1[13] = 68;
+
+        $r1[14] = 69;
+
+        $r1[15] = 70;
+
+        $r1[16] = 71;
+
+        $r1[17] = 72;
+
+        $r1[18] = 73;
+
+        $r1[19] = 74;
+
+        $r1[20] = 75;
+
+        $r1[21] = 76;
+
+        $r1[22] = 77;
+
+        $r1[23] = 78;
+
+        $r1[24] = 79;
+
+        $r1[25] = 80;
+
+        $r1[26] = 81;
+
+        $r1[27] = 82;
+
+        $r1[28] = 83;
+
+        $r1[29] = 84;
+
+        $r1[30] = 85;
+
+        $r1[31] = 86;
+
+        $r1[32] = 87;
+
+        $r1[33] = 88;
+
+        $r1[34] = 89;
+
+        $r1[35] = 90;
+
+        $r1[36] = 97;
+
+        $r1[37] = 98;
+
+        $r1[38] = 99;
+
+        $r1[39] = 100;
+
+        $r1[40] = 101;
+
+        $r1[41] = 102;
+
+        $r1[42] = 103;
+
+        $r1[43] = 104;
+
+        $r1[44] = 105;
+
+        $r1[45] = 106;
+
+        $r1[46] = 107;
+
+        $r1[47] = 108;
+
+        $r1[48] = 109;
+
+        $r1[49] = 110;
+
+        $r1[50] = 111;
+
+        $r1[51] = 112;
+
+        $r1[52] = 113;
+
+        $r1[53] = 114;
+
+        $r1[54] = 115;
+
+        $r1[55] = 116;
+
+        $r1[56] = 117;
+
+        $r1[57] = 118;
+
+        $r1[58] = 119;
+
+        $r1[59] = 120;
+
+        $r1[60] = 121;
+
+        $r1[61] = 122;
+
+        $r1[62] = 45;
+
+        $r1[63] = 95;
+
+        $r1[64] = 46;
+
+        $r1[65] = 33;
+
+        $r1[66] = 126;
+
+        $r1[67] = 42;
+
+        $r1[68] = 39;
+
+        $r1[69] = 40;
+
+        $r1[70] = 41;
+
+        $r1[71] = 59;
+
+        $r1[72] = 47;
+
+        $r1[73] = 63;
+
+        $r1[74] = 58;
+
+        $r1[75] = 64;
+
+        $r1[76] = 38;
+
+        $r1[77] = 61;
+
+        $r1[78] = 43;
+
+        $r1[79] = 36;
+
+        $r1[80] = 44;
+
+        $r3 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>(r2);
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r3, $r1);
+
+        return $z0;
+    }
+
+    public void openServer(java.lang.String, int) throws java.io.IOException, java.net.UnknownHostException
+    {
+        java.net.Socket $r1, $r3, $r6, $r10;
+        java.io.BufferedInputStream $r9;
+        java.io.BufferedOutputStream $r5;
+        sun.net.NetworkClient r0;
+        int i0;
+        java.lang.InternalError $r13;
+        java.lang.String r2, $r8, $r15, $r18;
+        java.io.PrintStream $r4;
+        java.io.OutputStream $r7;
+        java.lang.StringBuilder $r14, $r16, $r17;
+        java.io.UnsupportedEncodingException $r12;
+        java.io.InputStream $r11;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<sun.net.NetworkClient: void closeServer()>();
+
+     label1:
+        $r3 = virtualinvoke r0.<sun.net.NetworkClient: java.net.Socket doConnect(java.lang.String,int)>(r2, i0);
+
+        r0.<sun.net.NetworkClient: java.net.Socket serverSocket> = $r3;
+
+     label2:
+        $r4 = new java.io.PrintStream;
+
+        $r5 = new java.io.BufferedOutputStream;
+
+        $r6 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        $r7 = virtualinvoke $r6.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r5.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r7);
+
+        $r8 = <sun.net.NetworkClient: java.lang.String encoding>;
+
+        specialinvoke $r4.<java.io.PrintStream: void <init>(java.io.OutputStream,boolean,java.lang.String)>($r5, 1, $r8);
+
+        r0.<sun.net.NetworkClient: java.io.PrintStream serverOutput> = $r4;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.InternalError;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = <sun.net.NetworkClient: java.lang.String encoding>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("encoding not found");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r18, $r12);
+
+        throw $r13;
+
+     label5:
+        $r9 = new java.io.BufferedInputStream;
+
+        $r10 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        $r11 = virtualinvoke $r10.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r9.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r11);
+
+        r0.<sun.net.NetworkClient: java.io.InputStream serverInput> = $r9;
+
+        return;
+
+        catch java.io.UnsupportedEncodingException from label2 to label3 with label4;
+    }
+
+    protected java.net.Socket doConnect(java.lang.String, int) throws java.io.IOException, java.net.UnknownHostException
+    {
+        java.net.Socket $r12, r16;
+        java.net.Proxy$Type $r7, $r8, $r10, $r11;
+        sun.net.NetworkClient r0;
+        java.net.Proxy $r1, $r6, $r9, $r13;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.String r3;
+        java.net.InetSocketAddress $r2, $r4, $r5;
+        sun.net.NetworkClient$2 $r14;
+        java.lang.Object $r15;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        r3 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<sun.net.NetworkClient: java.net.Proxy proxy>;
+
+        if $r1 == null goto label3;
+
+        $r6 = r0.<sun.net.NetworkClient: java.net.Proxy proxy>;
+
+        $r7 = virtualinvoke $r6.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r8 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r7 != $r8 goto label1;
+
+        $r14 = new sun.net.NetworkClient$2;
+
+        specialinvoke $r14.<sun.net.NetworkClient$2: void <init>(sun.net.NetworkClient)>(r0);
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        r16 = (java.net.Socket) $r15;
+
+        goto label4;
+
+     label1:
+        $r9 = r0.<sun.net.NetworkClient: java.net.Proxy proxy>;
+
+        $r10 = virtualinvoke $r9.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r11 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r10 != $r11 goto label2;
+
+        r16 = virtualinvoke r0.<sun.net.NetworkClient: java.net.Socket createSocket()>();
+
+        goto label4;
+
+     label2:
+        $r12 = new java.net.Socket;
+
+        $r13 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        specialinvoke $r12.<java.net.Socket: void <init>(java.net.Proxy)>($r13);
+
+        r16 = $r12;
+
+        goto label4;
+
+     label3:
+        r16 = virtualinvoke r0.<sun.net.NetworkClient: java.net.Socket createSocket()>();
+
+     label4:
+        $i7 = r0.<sun.net.NetworkClient: int connectTimeout>;
+
+        if $i7 < 0 goto label5;
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r3, i1);
+
+        $i6 = r0.<sun.net.NetworkClient: int connectTimeout>;
+
+        virtualinvoke r16.<java.net.Socket: void connect(java.net.SocketAddress,int)>($r5, $i6);
+
+        goto label7;
+
+     label5:
+        $i0 = <sun.net.NetworkClient: int defaultConnectTimeout>;
+
+        if $i0 <= 0 goto label6;
+
+        $r4 = new java.net.InetSocketAddress;
+
+        specialinvoke $r4.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r3, i1);
+
+        $i5 = <sun.net.NetworkClient: int defaultConnectTimeout>;
+
+        virtualinvoke r16.<java.net.Socket: void connect(java.net.SocketAddress,int)>($r4, $i5);
+
+        goto label7;
+
+     label6:
+        $r2 = new java.net.InetSocketAddress;
+
+        specialinvoke $r2.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r3, i1);
+
+        virtualinvoke r16.<java.net.Socket: void connect(java.net.SocketAddress)>($r2);
+
+     label7:
+        $i8 = r0.<sun.net.NetworkClient: int readTimeout>;
+
+        if $i8 < 0 goto label8;
+
+        $i4 = r0.<sun.net.NetworkClient: int readTimeout>;
+
+        virtualinvoke r16.<java.net.Socket: void setSoTimeout(int)>($i4);
+
+        goto label9;
+
+     label8:
+        $i2 = <sun.net.NetworkClient: int defaultSoTimeout>;
+
+        if $i2 <= 0 goto label9;
+
+        $i3 = <sun.net.NetworkClient: int defaultSoTimeout>;
+
+        virtualinvoke r16.<java.net.Socket: void setSoTimeout(int)>($i3);
+
+     label9:
+        return r16;
+    }
+
+    protected java.net.Socket createSocket() throws java.io.IOException
+    {
+        java.net.Socket $r0;
+        sun.net.NetworkClient r1;
+
+        r1 := @this: sun.net.NetworkClient;
+
+        $r0 = new java.net.Socket;
+
+        specialinvoke $r0.<java.net.Socket: void <init>()>();
+
+        return $r0;
+    }
+
+    protected java.net.InetAddress getLocalAddress() throws java.io.IOException
+    {
+        java.net.InetAddress $r4;
+        java.net.Socket $r1;
+        sun.net.NetworkClient r0;
+        sun.net.NetworkClient$3 $r2;
+        java.lang.Object $r3;
+        java.io.IOException $r5;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        $r1 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>("not connected");
+
+        throw $r5;
+
+     label1:
+        $r2 = new sun.net.NetworkClient$3;
+
+        specialinvoke $r2.<sun.net.NetworkClient$3: void <init>(sun.net.NetworkClient)>(r0);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.net.InetAddress) $r3;
+
+        return $r4;
+    }
+
+    public void closeServer() throws java.io.IOException
+    {
+        java.net.Socket $r1;
+        sun.net.NetworkClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        $z0 = virtualinvoke r0.<sun.net.NetworkClient: boolean serverIsOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+        r0.<sun.net.NetworkClient: java.net.Socket serverSocket> = null;
+
+        r0.<sun.net.NetworkClient: java.io.InputStream serverInput> = null;
+
+        r0.<sun.net.NetworkClient: java.io.PrintStream serverOutput> = null;
+
+        return;
+    }
+
+    public boolean serverIsOpen()
+    {
+        java.net.Socket $r1;
+        sun.net.NetworkClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        $r1 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void <init>(java.lang.String, int) throws java.io.IOException
+    {
+        sun.net.NetworkClient r0;
+        java.net.Proxy $r1;
+        int i0, $i2, $i4;
+        java.lang.String r2;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        r0.<sun.net.NetworkClient: java.net.Proxy proxy> = $r1;
+
+        r0.<sun.net.NetworkClient: java.net.Socket serverSocket> = null;
+
+        $i2 = (int) -1;
+
+        r0.<sun.net.NetworkClient: int readTimeout> = $i2;
+
+        $i4 = (int) -1;
+
+        r0.<sun.net.NetworkClient: int connectTimeout> = $i4;
+
+        virtualinvoke r0.<sun.net.NetworkClient: void openServer(java.lang.String,int)>(r2, i0);
+
+        return;
+    }
+
+    public void <init>()
+    {
+        sun.net.NetworkClient r0;
+        java.net.Proxy $r1;
+        int $i1, $i3;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        r0.<sun.net.NetworkClient: java.net.Proxy proxy> = $r1;
+
+        r0.<sun.net.NetworkClient: java.net.Socket serverSocket> = null;
+
+        $i1 = (int) -1;
+
+        r0.<sun.net.NetworkClient: int readTimeout> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<sun.net.NetworkClient: int connectTimeout> = $i3;
+
+        return;
+    }
+
+    public void setConnectTimeout(int)
+    {
+        int i0;
+        sun.net.NetworkClient r0;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.net.NetworkClient: int connectTimeout> = i0;
+
+        return;
+    }
+
+    public int getConnectTimeout()
+    {
+        int $i0;
+        sun.net.NetworkClient r0;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        $i0 = r0.<sun.net.NetworkClient: int connectTimeout>;
+
+        return $i0;
+    }
+
+    public void setReadTimeout(int)
+    {
+        java.net.Socket $r1, $r2;
+        sun.net.NetworkClient r0;
+        int i0, $i2;
+        java.io.IOException $r3;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        i0 := @parameter0: int;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label1;
+
+        i0 = <sun.net.NetworkClient: int defaultSoTimeout>;
+
+     label1:
+        $r1 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        if $r1 == null goto label5;
+
+        if i0 < 0 goto label5;
+
+     label2:
+        $r2 = r0.<sun.net.NetworkClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r2.<java.net.Socket: void setSoTimeout(int)>(i0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        r0.<sun.net.NetworkClient: int readTimeout> = i0;
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public int getReadTimeout()
+    {
+        int $i0;
+        sun.net.NetworkClient r0;
+
+        r0 := @this: sun.net.NetworkClient;
+
+        $i0 = r0.<sun.net.NetworkClient: int readTimeout>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r1;
+        java.lang.Exception $r5;
+        int[] $r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r3, $r4;
+        sun.net.NetworkClient$1 $r2;
+        boolean $z0;
+
+        <sun.net.NetworkClient: int DEFAULT_CONNECT_TIMEOUT> = -1;
+
+        <sun.net.NetworkClient: int DEFAULT_READ_TIMEOUT> = -1;
+
+        $r0 = newarray (int)[2];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = null;
+
+        $r2 = new sun.net.NetworkClient$1;
+
+        specialinvoke $r2.<sun.net.NetworkClient$1: void <init>(int[],java.lang.String[])>($r0, $r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $i0 = $r0[0];
+
+        if $i0 == 0 goto label1;
+
+        $i3 = $r0[0];
+
+        <sun.net.NetworkClient: int defaultSoTimeout> = $i3;
+
+     label1:
+        $i1 = $r0[1];
+
+        if $i1 == 0 goto label2;
+
+        $i2 = $r0[1];
+
+        <sun.net.NetworkClient: int defaultConnectTimeout> = $i2;
+
+     label2:
+        $r3 = $r1[0];
+
+        <sun.net.NetworkClient: java.lang.String encoding> = $r3;
+
+     label3:
+        $r4 = <sun.net.NetworkClient: java.lang.String encoding>;
+
+        $z0 = staticinvoke <sun.net.NetworkClient: boolean isASCIISuperset(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label4;
+
+        <sun.net.NetworkClient: java.lang.String encoding> = "ISO8859_1";
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        <sun.net.NetworkClient: java.lang.String encoding> = "ISO8859_1";
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+}

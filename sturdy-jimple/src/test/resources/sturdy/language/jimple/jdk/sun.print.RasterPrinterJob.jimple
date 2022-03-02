@@ -1,0 +1,5081 @@
+public abstract class sun.print.RasterPrinterJob extends java.awt.print.PrinterJob
+{
+    protected static final int PRINTER;
+    protected static final int FILE;
+    protected static final int STREAM;
+    protected static final int MAX_UNKNOWN_PAGES;
+    protected static final int PD_ALLPAGES;
+    protected static final int PD_SELECTION;
+    protected static final int PD_PAGENUMS;
+    protected static final int PD_NOSELECTION;
+    private static final int MAX_BAND_SIZE;
+    private static final float DPI;
+    private static final java.lang.String FORCE_PIPE_PROP;
+    private static final java.lang.String FORCE_RASTER;
+    private static final java.lang.String FORCE_PDL;
+    private static final java.lang.String SHAPE_TEXT_PROP;
+    public static boolean forcePDL;
+    public static boolean forceRaster;
+    public static boolean shapeTextProp;
+    private int cachedBandWidth;
+    private int cachedBandHeight;
+    private java.awt.image.BufferedImage cachedBand;
+    private int mNumCopies;
+    private boolean mCollate;
+    private int mFirstPage;
+    private int mLastPage;
+    private java.awt.print.Paper previousPaper;
+    protected java.awt.print.Pageable mDocument;
+    private java.lang.String mDocName;
+    protected boolean performingPrinting;
+    protected boolean userCancelled;
+    private java.io.FilePermission printToFilePermission;
+    private java.util.ArrayList redrawList;
+    private int copiesAttr;
+    private java.lang.String jobNameAttr;
+    private java.lang.String userNameAttr;
+    private javax.print.attribute.standard.PageRanges pageRangesAttr;
+    protected javax.print.attribute.standard.Sides sidesAttr;
+    protected java.lang.String destinationAttr;
+    protected boolean noJobSheet;
+    protected int mDestType;
+    protected java.lang.String mDestination;
+    protected boolean collateAttReq;
+    protected boolean landscapeRotates270;
+    protected javax.print.attribute.PrintRequestAttributeSet attributes;
+    protected javax.print.PrintService myService;
+    public static boolean debugPrint;
+    private int deviceWidth;
+    private int deviceHeight;
+    private java.awt.geom.AffineTransform defaultDeviceTransform;
+    private sun.print.PrinterGraphicsConfig pgConfig;
+    private sun.print.DialogOnTop onTop;
+    private long parentWindowID;
+
+    public void <init>()
+    {
+        java.awt.print.Book $r3;
+        sun.print.RasterPrinterJob r0;
+        int $i1, $i3;
+        java.util.ArrayList $r4;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        specialinvoke r0.<java.awt.print.PrinterJob: void <init>()>();
+
+        r0.<sun.print.RasterPrinterJob: int cachedBandWidth> = 0;
+
+        r0.<sun.print.RasterPrinterJob: int cachedBandHeight> = 0;
+
+        r0.<sun.print.RasterPrinterJob: java.awt.image.BufferedImage cachedBand> = null;
+
+        r0.<sun.print.RasterPrinterJob: int mNumCopies> = 1;
+
+        r0.<sun.print.RasterPrinterJob: boolean mCollate> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<sun.print.RasterPrinterJob: int mFirstPage> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<sun.print.RasterPrinterJob: int mLastPage> = $i3;
+
+        $r3 = new java.awt.print.Book;
+
+        specialinvoke $r3.<java.awt.print.Book: void <init>()>();
+
+        r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument> = $r3;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String mDocName> = "Java Printing";
+
+        r0.<sun.print.RasterPrinterJob: boolean performingPrinting> = 0;
+
+        r0.<sun.print.RasterPrinterJob: boolean userCancelled> = 0;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.print.RasterPrinterJob: java.util.ArrayList redrawList> = $r4;
+
+        r0.<sun.print.RasterPrinterJob: boolean noJobSheet> = 0;
+
+        r0.<sun.print.RasterPrinterJob: int mDestType> = 1;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String mDestination> = "";
+
+        r0.<sun.print.RasterPrinterJob: boolean collateAttReq> = 0;
+
+        r0.<sun.print.RasterPrinterJob: boolean landscapeRotates270> = 0;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes> = null;
+
+        r0.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop> = null;
+
+        r0.<sun.print.RasterPrinterJob: long parentWindowID> = 0L;
+
+        return;
+    }
+
+    protected abstract double getXRes();
+
+    protected abstract double getYRes();
+
+    protected abstract double getPhysicalPrintableX(java.awt.print.Paper);
+
+    protected abstract double getPhysicalPrintableY(java.awt.print.Paper);
+
+    protected abstract double getPhysicalPrintableWidth(java.awt.print.Paper);
+
+    protected abstract double getPhysicalPrintableHeight(java.awt.print.Paper);
+
+    protected abstract double getPhysicalPageWidth(java.awt.print.Paper);
+
+    protected abstract double getPhysicalPageHeight(java.awt.print.Paper);
+
+    protected abstract void startPage(java.awt.print.PageFormat, java.awt.print.Printable, int, boolean) throws java.awt.print.PrinterException;
+
+    protected abstract void endPage(java.awt.print.PageFormat, java.awt.print.Printable, int) throws java.awt.print.PrinterException;
+
+    protected abstract void printBand(byte[], int, int, int, int) throws java.awt.print.PrinterException;
+
+    public void saveState(java.awt.geom.AffineTransform, java.awt.Shape, java.awt.geom.Rectangle2D, double, double)
+    {
+        java.awt.Shape r3;
+        sun.print.RasterPrinterJob$GraphicsState $r0;
+        java.awt.geom.Rectangle2D r4;
+        java.awt.geom.AffineTransform r2;
+        java.util.ArrayList $r5;
+        sun.print.RasterPrinterJob r1;
+        double d0, d1;
+
+        r1 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: java.awt.geom.AffineTransform;
+
+        r3 := @parameter1: java.awt.Shape;
+
+        r4 := @parameter2: java.awt.geom.Rectangle2D;
+
+        d0 := @parameter3: double;
+
+        d1 := @parameter4: double;
+
+        $r0 = new sun.print.RasterPrinterJob$GraphicsState;
+
+        specialinvoke $r0.<sun.print.RasterPrinterJob$GraphicsState: void <init>(sun.print.RasterPrinterJob,sun.print.RasterPrinterJob$1)>(r1, null);
+
+        $r0.<sun.print.RasterPrinterJob$GraphicsState: java.awt.geom.AffineTransform theTransform> = r2;
+
+        $r0.<sun.print.RasterPrinterJob$GraphicsState: java.awt.Shape theClip> = r3;
+
+        $r0.<sun.print.RasterPrinterJob$GraphicsState: java.awt.geom.Rectangle2D region> = r4;
+
+        $r0.<sun.print.RasterPrinterJob$GraphicsState: double sx> = d0;
+
+        $r0.<sun.print.RasterPrinterJob$GraphicsState: double sy> = d1;
+
+        $r5 = r1.<sun.print.RasterPrinterJob: java.util.ArrayList redrawList>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>($r0);
+
+        return;
+    }
+
+    protected static javax.print.PrintService lookupDefaultPrintService()
+    {
+        javax.print.PrintService $r0, $r1;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r2, $r3, $r4;
+        javax.print.PrintService[] $r5;
+        int $i0;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <javax.print.PrintServiceLookup: javax.print.PrintService lookupDefaultPrintService()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z0 = interfaceinvoke $r0.<javax.print.PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z1 = interfaceinvoke $r0.<javax.print.PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r3);
+
+        if $z1 == 0 goto label1;
+
+        return $r0;
+
+     label1:
+        $r4 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $r5 = staticinvoke <javax.print.PrintServiceLookup: javax.print.PrintService[] lookupPrintServices(javax.print.DocFlavor,javax.print.attribute.AttributeSet)>($r4, null);
+
+        $i0 = lengthof $r5;
+
+        if $i0 <= 0 goto label2;
+
+        $r1 = $r5[0];
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    public javax.print.PrintService getPrintService()
+    {
+        javax.print.PrintService $r1, $r2, $r5, $r6, $r10, $r11;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r3, $r7;
+        javax.print.PrintService[] $r4;
+        java.awt.print.PrinterException $r8, $r9;
+        sun.print.RasterPrinterJob r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.PrintService myService>;
+
+        if $r1 != null goto label8;
+
+        $r2 = staticinvoke <javax.print.PrintServiceLookup: javax.print.PrintService lookupDefaultPrintService()>();
+
+        if $r2 == null goto label4;
+
+        $r7 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z0 = interfaceinvoke $r2.<javax.print.PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r7);
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPrintService(javax.print.PrintService)>($r2);
+
+        r0.<sun.print.RasterPrinterJob: javax.print.PrintService myService> = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+     label4:
+        $r10 = r0.<sun.print.RasterPrinterJob: javax.print.PrintService myService>;
+
+        if $r10 != null goto label8;
+
+        $r3 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $r4 = staticinvoke <javax.print.PrintServiceLookup: javax.print.PrintService[] lookupPrintServices(javax.print.DocFlavor,javax.print.attribute.AttributeSet)>($r3, null);
+
+        $i0 = lengthof $r4;
+
+        if $i0 <= 0 goto label8;
+
+     label5:
+        $r5 = $r4[0];
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPrintService(javax.print.PrintService)>($r5);
+
+        $r6 = $r4[0];
+
+        r0.<sun.print.RasterPrinterJob: javax.print.PrintService myService> = $r6;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r8 := @caughtexception;
+
+     label8:
+        $r11 = r0.<sun.print.RasterPrinterJob: javax.print.PrintService myService>;
+
+        return $r11;
+
+        catch java.awt.print.PrinterException from label1 to label2 with label3;
+        catch java.awt.print.PrinterException from label5 to label6 with label7;
+    }
+
+    public void setPrintService(javax.print.PrintService) throws java.awt.print.PrinterException
+    {
+        sun.print.RasterPrinterJob r9;
+        javax.print.attribute.PrintServiceAttribute $r1, $r10;
+        java.lang.String $r7, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        javax.print.attribute.standard.PrinterStateReason $r12;
+        javax.print.PrintService r0;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r8, $r18;
+        java.awt.print.PrinterException $r3, $r13, $r16, $r17;
+        javax.print.attribute.standard.PrinterStateReasons r11;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        javax.print.attribute.standard.PrinterState $r2, $r15;
+
+        r9 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: javax.print.PrintService;
+
+        if r0 != null goto label1;
+
+        $r17 = new java.awt.print.PrinterException;
+
+        specialinvoke $r17.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Service cannot be null");
+
+        throw $r17;
+
+     label1:
+        $z0 = r0 instanceof javax.print.StreamPrintService;
+
+        if $z0 != 0 goto label2;
+
+        $r14 = interfaceinvoke r0.<javax.print.PrintService: java.lang.String getName()>();
+
+        if $r14 != null goto label2;
+
+        $r16 = new java.awt.print.PrinterException;
+
+        specialinvoke $r16.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Null PrintService name.");
+
+        throw $r16;
+
+     label2:
+        $r1 = interfaceinvoke r0.<javax.print.PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterState;");
+
+        $r15 = (javax.print.attribute.standard.PrinterState) $r1;
+
+        $r2 = <javax.print.attribute.standard.PrinterState: javax.print.attribute.standard.PrinterState STOPPED>;
+
+        if $r15 != $r2 goto label3;
+
+        $r10 = interfaceinvoke r0.<javax.print.PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterStateReasons;");
+
+        r11 = (javax.print.attribute.standard.PrinterStateReasons) $r10;
+
+        if r11 == null goto label3;
+
+        $r12 = <javax.print.attribute.standard.PrinterStateReason: javax.print.attribute.standard.PrinterStateReason SHUTDOWN>;
+
+        $z2 = virtualinvoke r11.<javax.print.attribute.standard.PrinterStateReasons: boolean containsKey(java.lang.Object)>($r12);
+
+        if $z2 == 0 goto label3;
+
+        $r13 = new java.awt.print.PrinterException;
+
+        specialinvoke $r13.<java.awt.print.PrinterException: void <init>(java.lang.String)>("PrintService is no longer available.");
+
+        throw $r13;
+
+     label3:
+        $r18 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z3 = interfaceinvoke r0.<javax.print.PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r18);
+
+        if $z3 == 0 goto label4;
+
+        $r8 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z1 = interfaceinvoke r0.<javax.print.PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r8);
+
+        if $z1 == 0 goto label4;
+
+        r9.<sun.print.RasterPrinterJob: javax.print.PrintService myService> = r0;
+
+        goto label5;
+
+     label4:
+        $r3 = new java.awt.print.PrinterException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not a 2D print service: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.awt.print.PrinterException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label5:
+        return;
+    }
+
+    private java.awt.print.PageFormat attributeToPageFormat(javax.print.PrintService, javax.print.attribute.PrintRequestAttributeSet)
+    {
+        javax.print.attribute.standard.Media $r10;
+        sun.print.RasterPrinterJob r0;
+        java.awt.print.PageFormat $r1;
+        javax.print.attribute.PrintRequestAttributeSet r3;
+        javax.print.attribute.standard.MediaSize $r11;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9;
+        java.awt.print.Paper $r12;
+        float[] $r13;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15;
+        javax.print.attribute.standard.OrientationRequested $r5, $r6, r8;
+        javax.print.PrintService r2;
+        javax.print.attribute.standard.MediaPrintableArea $r15, r16;
+        java.lang.Object $r7;
+        javax.print.attribute.Attribute $r4, $r9, $r14;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: javax.print.PrintService;
+
+        r3 := @parameter1: javax.print.attribute.PrintRequestAttributeSet;
+
+        $r1 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.PageFormat defaultPage()>();
+
+        if r2 != null goto label1;
+
+        return $r1;
+
+     label1:
+        $r4 = interfaceinvoke r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        r8 = (javax.print.attribute.standard.OrientationRequested) $r4;
+
+        if r8 != null goto label2;
+
+        $r7 = interfaceinvoke r2.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        r8 = (javax.print.attribute.standard.OrientationRequested) $r7;
+
+     label2:
+        $r5 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        if r8 != $r5 goto label3;
+
+        virtualinvoke $r1.<java.awt.print.PageFormat: void setOrientation(int)>(2);
+
+        goto label5;
+
+     label3:
+        $r6 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        if r8 != $r6 goto label4;
+
+        virtualinvoke $r1.<java.awt.print.PageFormat: void setOrientation(int)>(0);
+
+        goto label5;
+
+     label4:
+        virtualinvoke $r1.<java.awt.print.PageFormat: void setOrientation(int)>(1);
+
+     label5:
+        $r9 = interfaceinvoke r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r10 = (javax.print.attribute.standard.Media) $r9;
+
+        $r11 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.MediaSize getMediaSize(javax.print.attribute.standard.Media,javax.print.PrintService,java.awt.print.PageFormat)>($r10, r2, $r1);
+
+        $r12 = new java.awt.print.Paper;
+
+        specialinvoke $r12.<java.awt.print.Paper: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<javax.print.attribute.standard.MediaSize: float[] getSize(int)>(1);
+
+        $f8 = $r13[0];
+
+        $d8 = (double) $f8;
+
+        $d9 = $d8 * 72.0;
+
+        $d10 = $d9 / 25400.0;
+
+        $d11 = staticinvoke <java.lang.Math: double rint(double)>($d10);
+
+        $f9 = $r13[1];
+
+        $d12 = (double) $f9;
+
+        $d13 = $d12 * 72.0;
+
+        $d14 = $d13 / 25400.0;
+
+        $d15 = staticinvoke <java.lang.Math: double rint(double)>($d14);
+
+        virtualinvoke $r12.<java.awt.print.Paper: void setSize(double,double)>($d11, $d15);
+
+        $r14 = interfaceinvoke r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/MediaPrintableArea;");
+
+        $r15 = (javax.print.attribute.standard.MediaPrintableArea) $r14;
+
+        r16 = $r15;
+
+        if $r15 != null goto label6;
+
+        r16 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.MediaPrintableArea getDefaultPrintableArea(java.awt.print.PageFormat,double,double)>($r1, $d11, $d15);
+
+     label6:
+        $f0 = virtualinvoke r16.<javax.print.attribute.standard.MediaPrintableArea: float getX(int)>(25400);
+
+        $f1 = $f0 * 72.0F;
+
+        $d0 = (double) $f1;
+
+        $d1 = staticinvoke <java.lang.Math: double rint(double)>($d0);
+
+        $f2 = virtualinvoke r16.<javax.print.attribute.standard.MediaPrintableArea: float getY(int)>(25400);
+
+        $f3 = $f2 * 72.0F;
+
+        $d2 = (double) $f3;
+
+        $d3 = staticinvoke <java.lang.Math: double rint(double)>($d2);
+
+        $f4 = virtualinvoke r16.<javax.print.attribute.standard.MediaPrintableArea: float getWidth(int)>(25400);
+
+        $f5 = $f4 * 72.0F;
+
+        $d4 = (double) $f5;
+
+        $d5 = staticinvoke <java.lang.Math: double rint(double)>($d4);
+
+        $f6 = virtualinvoke r16.<javax.print.attribute.standard.MediaPrintableArea: float getHeight(int)>(25400);
+
+        $f7 = $f6 * 72.0F;
+
+        $d6 = (double) $f7;
+
+        $d7 = staticinvoke <java.lang.Math: double rint(double)>($d6);
+
+        virtualinvoke $r12.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>($d1, $d3, $d5, $d7);
+
+        virtualinvoke $r1.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r12);
+
+        return $r1;
+    }
+
+    protected javax.print.attribute.standard.MediaSize getMediaSize(javax.print.attribute.standard.Media, javax.print.PrintService, java.awt.print.PageFormat)
+    {
+        javax.print.attribute.standard.MediaSizeName $r0;
+        javax.print.PrintService r2;
+        javax.print.attribute.standard.MediaSize $r1, $r7;
+        javax.print.attribute.standard.Media r6;
+        sun.print.RasterPrinterJob r4;
+        java.lang.Object $r3;
+        java.awt.print.PageFormat r5;
+        boolean $z0;
+
+        r4 := @this: sun.print.RasterPrinterJob;
+
+        r6 := @parameter0: javax.print.attribute.standard.Media;
+
+        r2 := @parameter1: javax.print.PrintService;
+
+        r5 := @parameter2: java.awt.print.PageFormat;
+
+        if r6 != null goto label1;
+
+        $r3 = interfaceinvoke r2.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        r6 = (javax.print.attribute.standard.Media) $r3;
+
+     label1:
+        $z0 = r6 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z0 != 0 goto label2;
+
+        r6 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LETTER>;
+
+     label2:
+        $r0 = (javax.print.attribute.standard.MediaSizeName) r6;
+
+        $r1 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r0);
+
+        if $r1 == null goto label3;
+
+        $r7 = $r1;
+
+        goto label4;
+
+     label3:
+        $r7 = <javax.print.attribute.standard.MediaSize$NA: javax.print.attribute.standard.MediaSize LETTER>;
+
+     label4:
+        return $r7;
+    }
+
+    protected javax.print.attribute.standard.MediaPrintableArea getDefaultPrintableArea(java.awt.print.PageFormat, double, double)
+    {
+        byte $b0, $b1;
+        sun.print.RasterPrinterJob r1;
+        int $i2, $i3;
+        java.awt.print.PageFormat r2;
+        double d0, d1, $d2, $d3, $d4, $d5, d6, d7, d8, d9;
+        javax.print.attribute.standard.MediaPrintableArea $r3;
+        float $f0, $f1, $f2, $f3;
+
+        r1 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: java.awt.print.PageFormat;
+
+        d0 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        $b0 = d0 cmpl 432.0;
+
+        $i2 = (int) $b0;
+
+        if $i2 < 0 goto label1;
+
+        d6 = 72.0;
+
+        d7 = d0 - 144.0;
+
+        goto label2;
+
+     label1:
+        d6 = d0 / 6.0;
+
+        d7 = d0 * 0.75;
+
+     label2:
+        $b1 = d1 cmpl 432.0;
+
+        $i3 = (int) $b1;
+
+        if $i3 < 0 goto label3;
+
+        d8 = 72.0;
+
+        d9 = d1 - 144.0;
+
+        goto label4;
+
+     label3:
+        d8 = d1 / 6.0;
+
+        d9 = d1 * 0.75;
+
+     label4:
+        $r3 = new javax.print.attribute.standard.MediaPrintableArea;
+
+        $d2 = d6 / 72.0;
+
+        $f3 = (float) $d2;
+
+        $d3 = d8 / 72.0;
+
+        $f2 = (float) $d3;
+
+        $d4 = d7 / 72.0;
+
+        $f1 = (float) $d4;
+
+        $d5 = d9 / 72.0;
+
+        $f0 = (float) $d5;
+
+        specialinvoke $r3.<javax.print.attribute.standard.MediaPrintableArea: void <init>(float,float,float,float,int)>($f3, $f2, $f1, $f0, 25400);
+
+        return $r3;
+    }
+
+    protected void updatePageAttributes(javax.print.PrintService, java.awt.print.PageFormat)
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r4;
+        javax.print.PrintService r2;
+        java.awt.print.PageFormat r3;
+        javax.print.attribute.HashPrintRequestAttributeSet $r5;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: javax.print.PrintService;
+
+        r3 := @parameter1: java.awt.print.PageFormat;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        specialinvoke $r5.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes> = $r5;
+
+     label1:
+        $r4 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void updateAttributesWithPageFormat(javax.print.PrintService,java.awt.print.PageFormat,javax.print.attribute.PrintRequestAttributeSet)>(r2, r3, $r4);
+
+        return;
+    }
+
+    protected void updateAttributesWithPageFormat(javax.print.PrintService, java.awt.print.PageFormat, javax.print.attribute.PrintRequestAttributeSet)
+    {
+        javax.print.attribute.standard.Media r17;
+        byte $b0, $b1;
+        sun.print.RasterPrinterJob r16;
+        java.awt.print.PageFormat r1;
+        boolean $z0;
+        javax.print.attribute.PrintRequestAttributeSet r2;
+        float $f0, f1, $f2, f3, $f4, $f5, $f6, $f7, f8, f9;
+        java.awt.print.Paper $r3, $r4, $r9, $r10, $r11, $r12;
+        int $i2, $i3, $i4;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15;
+        javax.print.attribute.standard.OrientationRequested r18;
+        javax.print.attribute.standard.Media[] $r6, r7;
+        javax.print.PrintService r0;
+        java.lang.IllegalArgumentException $r14, $r15;
+        javax.print.attribute.standard.MediaPrintableArea $r19;
+        java.lang.Object $r5, $r8;
+
+        r16 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: javax.print.PrintService;
+
+        r1 := @parameter1: java.awt.print.PageFormat;
+
+        r2 := @parameter2: javax.print.attribute.PrintRequestAttributeSet;
+
+        if r0 == null goto label01;
+
+        if r1 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r3 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d0 = virtualinvoke $r3.<java.awt.print.Paper: double getWidth()>();
+
+        $d1 = $d0 * 25400.0;
+
+        $d2 = $d1 / 72.0;
+
+        $d3 = staticinvoke <java.lang.Math: double rint(double)>($d2);
+
+        $f0 = (float) $d3;
+
+        f1 = $f0 / 25400.0F;
+
+        $r4 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d4 = virtualinvoke $r4.<java.awt.print.Paper: double getHeight()>();
+
+        $d5 = $d4 * 25400.0;
+
+        $d6 = $d5 / 72.0;
+
+        $d7 = staticinvoke <java.lang.Math: double rint(double)>($d6);
+
+        $f2 = (float) $d7;
+
+        f3 = $f2 / 25400.0F;
+
+        $r5 = interfaceinvoke r0.<javax.print.PrintService: java.lang.Object getSupportedAttributeValues(java.lang.Class,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(class "Ljavax/print/attribute/standard/Media;", null, null);
+
+        $r6 = (javax.print.attribute.standard.Media[]) $r5;
+
+        r7 = (javax.print.attribute.standard.Media[]) $r6;
+
+        r17 = null;
+
+     label03:
+        r17 = staticinvoke <sun.print.CustomMediaSizeName: javax.print.attribute.standard.MediaSizeName findMedia(javax.print.attribute.standard.Media[],float,float,int)>(r7, f1, f3, 25400);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r15 := @caughtexception;
+
+     label06:
+        if r17 == null goto label07;
+
+        $z0 = interfaceinvoke r0.<javax.print.PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(r17, null, null);
+
+        if $z0 != 0 goto label08;
+
+     label07:
+        $r8 = interfaceinvoke r0.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        r17 = (javax.print.attribute.standard.Media) $r8;
+
+     label08:
+        $i2 = virtualinvoke r1.<java.awt.print.PageFormat: int getOrientation()>();
+
+        lookupswitch($i2)
+        {
+            case 0: goto label09;
+            case 2: goto label10;
+            default: goto label11;
+        };
+
+     label09:
+        r18 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        goto label12;
+
+     label10:
+        r18 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        goto label12;
+
+     label11:
+        r18 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested PORTRAIT>;
+
+     label12:
+        if r17 == null goto label13;
+
+        interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>(r17);
+
+     label13:
+        interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>(r18);
+
+        $r9 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d8 = virtualinvoke $r9.<java.awt.print.Paper: double getImageableX()>();
+
+        $d9 = $d8 / 72.0;
+
+        $f4 = (float) $d9;
+
+        f8 = $f4;
+
+        $r10 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d10 = virtualinvoke $r10.<java.awt.print.Paper: double getImageableWidth()>();
+
+        $d11 = $d10 / 72.0;
+
+        $f5 = (float) $d11;
+
+        $r11 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d12 = virtualinvoke $r11.<java.awt.print.Paper: double getImageableY()>();
+
+        $d13 = $d12 / 72.0;
+
+        $f6 = (float) $d13;
+
+        f9 = $f6;
+
+        $r12 = virtualinvoke r1.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $d14 = virtualinvoke $r12.<java.awt.print.Paper: double getImageableHeight()>();
+
+        $d15 = $d14 / 72.0;
+
+        $f7 = (float) $d15;
+
+        $b0 = $f4 cmpg 0.0F;
+
+        $i3 = (int) $b0;
+
+        if $i3 >= 0 goto label14;
+
+        f8 = 0.0F;
+
+     label14:
+        $b1 = $f6 cmpg 0.0F;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label15;
+
+        f9 = 0.0F;
+
+     label15:
+        $r19 = new javax.print.attribute.standard.MediaPrintableArea;
+
+        specialinvoke $r19.<javax.print.attribute.standard.MediaPrintableArea: void <init>(float,float,float,float,int)>(f8, f9, $f5, $f7, 25400);
+
+        interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r19);
+
+     label16:
+        goto label18;
+
+     label17:
+        $r14 := @caughtexception;
+
+     label18:
+        return;
+
+        catch java.lang.IllegalArgumentException from label03 to label04 with label05;
+        catch java.lang.IllegalArgumentException from label15 to label16 with label17;
+    }
+
+    public java.awt.print.PageFormat pageDialog(java.awt.print.PageFormat) throws java.awt.HeadlessException
+    {
+        java.awt.GraphicsDevice $r1;
+        java.awt.GraphicsEnvironment $r0;
+        sun.print.RasterPrinterJob$1 $r3;
+        javax.print.attribute.standard.DialogTypeSelection r10, $r11, $r15;
+        sun.print.RasterPrinterJob r4;
+        java.awt.HeadlessException $r17;
+        java.awt.print.PageFormat r7, r18;
+        boolean $z0;
+        java.awt.GraphicsConfiguration $r2;
+        javax.print.attribute.PrintRequestAttributeSet $r8, $r12, $r13, $r14, $r16;
+        javax.print.PrintService r6;
+        java.lang.Object $r5;
+        javax.print.attribute.Attribute $r9;
+
+        r4 := @this: sun.print.RasterPrinterJob;
+
+        r7 := @parameter0: java.awt.print.PageFormat;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r17 = new java.awt.HeadlessException;
+
+        specialinvoke $r17.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r17;
+
+     label1:
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r3 = new sun.print.RasterPrinterJob$1;
+
+        specialinvoke $r3.<sun.print.RasterPrinterJob$1: void <init>(sun.print.RasterPrinterJob,java.awt.GraphicsConfiguration)>(r4, $r2);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r6 = (javax.print.PrintService) $r5;
+
+        if r6 != null goto label2;
+
+        return r7;
+
+     label2:
+        virtualinvoke r4.<sun.print.RasterPrinterJob: void updatePageAttributes(javax.print.PrintService,java.awt.print.PageFormat)>(r6, r7);
+
+        $r8 = r4.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r9 = interfaceinvoke $r8.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/DialogTypeSelection;");
+
+        r10 = (javax.print.attribute.standard.DialogTypeSelection) $r9;
+
+        $r11 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection NATIVE>;
+
+        if r10 != $r11 goto label3;
+
+        $r13 = r4.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        interfaceinvoke $r13.<javax.print.attribute.PrintRequestAttributeSet: boolean remove(java.lang.Class)>(class "Ljavax/print/attribute/standard/DialogTypeSelection;");
+
+        $r14 = r4.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        r18 = virtualinvoke r4.<sun.print.RasterPrinterJob: java.awt.print.PageFormat pageDialog(javax.print.attribute.PrintRequestAttributeSet)>($r14);
+
+        $r16 = r4.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r15 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection NATIVE>;
+
+        interfaceinvoke $r16.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r15);
+
+        goto label4;
+
+     label3:
+        $r12 = r4.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        r18 = virtualinvoke r4.<sun.print.RasterPrinterJob: java.awt.print.PageFormat pageDialog(javax.print.attribute.PrintRequestAttributeSet)>($r12);
+
+     label4:
+        if r18 != null goto label5;
+
+        return r7;
+
+     label5:
+        return r18;
+    }
+
+    public java.awt.print.PageFormat pageDialog(javax.print.attribute.PrintRequestAttributeSet) throws java.awt.HeadlessException
+    {
+        sun.print.ServiceDialog $r13;
+        java.awt.GraphicsEnvironment $r4;
+        sun.print.RasterPrinterJob r9;
+        java.awt.HeadlessException $r20;
+        java.awt.print.PageFormat $r18, $r19, $r21;
+        boolean $z0, $z1, $z2;
+        java.awt.GraphicsConfiguration $r6;
+        javax.print.attribute.PrintRequestAttributeSet r0, $r15;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r14;
+        java.awt.Rectangle $r7;
+        java.awt.GraphicsDevice $r5;
+        sun.print.RasterPrinterJob$2 $r8;
+        javax.print.attribute.standard.DialogTypeSelection r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, i8;
+        javax.print.PrintService r11, $r17;
+        sun.print.DialogOnTop $r12, $r16;
+        java.lang.Object $r10;
+        javax.print.attribute.Attribute $r1;
+
+        r9 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: javax.print.attribute.PrintRequestAttributeSet;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r20 = new java.awt.HeadlessException;
+
+        specialinvoke $r20.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r20;
+
+     label1:
+        $r1 = interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/DialogTypeSelection;");
+
+        r2 = (javax.print.attribute.standard.DialogTypeSelection) $r1;
+
+        $r3 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection NATIVE>;
+
+        if r2 != $r3 goto label3;
+
+        $r17 = virtualinvoke r9.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        $r18 = specialinvoke r9.<sun.print.RasterPrinterJob: java.awt.print.PageFormat attributeToPageFormat(javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet)>($r17, r0);
+
+        specialinvoke r9.<sun.print.RasterPrinterJob: void setParentWindowID(javax.print.attribute.PrintRequestAttributeSet)>(r0);
+
+        $r19 = virtualinvoke r9.<sun.print.RasterPrinterJob: java.awt.print.PageFormat pageDialog(java.awt.print.PageFormat)>($r18);
+
+        specialinvoke r9.<sun.print.RasterPrinterJob: void clearParentWindowID()>();
+
+        if $r19 != $r18 goto label2;
+
+        return null;
+
+     label2:
+        virtualinvoke r9.<sun.print.RasterPrinterJob: void updateAttributesWithPageFormat(javax.print.PrintService,java.awt.print.PageFormat,javax.print.attribute.PrintRequestAttributeSet)>($r17, $r19, r0);
+
+        return $r19;
+
+     label3:
+        $r4 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $i2 = $r7.<java.awt.Rectangle: int x>;
+
+        $i0 = $r7.<java.awt.Rectangle: int width>;
+
+        $i1 = $i0 / 3;
+
+        i8 = $i2 + $i1;
+
+        $i5 = $r7.<java.awt.Rectangle: int y>;
+
+        $i3 = $r7.<java.awt.Rectangle: int height>;
+
+        $i4 = $i3 / 3;
+
+        i6 = $i5 + $i4;
+
+        $r8 = new sun.print.RasterPrinterJob$2;
+
+        specialinvoke $r8.<sun.print.RasterPrinterJob$2: void <init>(sun.print.RasterPrinterJob,java.awt.GraphicsConfiguration)>(r9, $r6);
+
+        $r10 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r8);
+
+        r11 = (javax.print.PrintService) $r10;
+
+        if r11 != null goto label4;
+
+        return null;
+
+     label4:
+        $r12 = r9.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop>;
+
+        if $r12 == null goto label5;
+
+        $r16 = r9.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop>;
+
+        interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r16);
+
+     label5:
+        $r13 = new sun.print.ServiceDialog;
+
+        $r14 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        specialinvoke $r13.<sun.print.ServiceDialog: void <init>(java.awt.GraphicsConfiguration,int,int,javax.print.PrintService,javax.print.DocFlavor,javax.print.attribute.PrintRequestAttributeSet,java.awt.Frame)>($r6, i8, i6, r11, $r14, r0, null);
+
+        virtualinvoke $r13.<sun.print.ServiceDialog: void show()>();
+
+        $i7 = virtualinvoke $r13.<sun.print.ServiceDialog: int getStatus()>();
+
+        if $i7 != 1 goto label7;
+
+        $r15 = virtualinvoke $r13.<sun.print.ServiceDialog: javax.print.attribute.PrintRequestAttributeSet getAttributes()>();
+
+        $z1 = interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean containsKey(java.lang.Class)>(class "Lsun/print/SunAlternateMedia;");
+
+        if $z1 == 0 goto label6;
+
+        $z2 = interfaceinvoke $r15.<javax.print.attribute.PrintRequestAttributeSet: boolean containsKey(java.lang.Class)>(class "Lsun/print/SunAlternateMedia;");
+
+        if $z2 != 0 goto label6;
+
+        interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean remove(java.lang.Class)>(class "Lsun/print/SunAlternateMedia;");
+
+     label6:
+        interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean addAll(javax.print.attribute.AttributeSet)>($r15);
+
+        $r21 = specialinvoke r9.<sun.print.RasterPrinterJob: java.awt.print.PageFormat attributeToPageFormat(javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet)>(r11, r0);
+
+        return $r21;
+
+     label7:
+        return null;
+    }
+
+    protected java.awt.print.PageFormat getPageFormatFromAttributes()
+    {
+        java.awt.print.Paper $r10, $r11;
+        sun.print.RasterPrinterJob r0;
+        int $i0;
+        java.awt.print.PageFormat $r6, $r7;
+        boolean $z0, $z1, z2;
+        double $d0, $d1, $d2, $d3, $d4, $d5;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r2, $r5, $r8, $r12, $r14;
+        javax.print.PrintService $r4;
+        javax.print.attribute.Attribute $r9, $r13, $r15;
+        java.awt.print.Pageable $r3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $z0 = interfaceinvoke $r2.<javax.print.attribute.PrintRequestAttributeSet: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable getPageable()>();
+
+        $z1 = $r3 instanceof sun.print.OpenBook;
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r4 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        $r5 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r6 = specialinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.PageFormat attributeToPageFormat(javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet)>($r4, $r5);
+
+        $r7 = interfaceinvoke $r3.<java.awt.print.Pageable: java.awt.print.PageFormat getPageFormat(int)>(0);
+
+        if $r7 == null goto label6;
+
+        $r8 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r9 = interfaceinvoke $r8.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        if $r9 != null goto label3;
+
+        $i0 = virtualinvoke $r7.<java.awt.print.PageFormat: int getOrientation()>();
+
+        virtualinvoke $r6.<java.awt.print.PageFormat: void setOrientation(int)>($i0);
+
+     label3:
+        $r10 = virtualinvoke $r6.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $r11 = virtualinvoke $r7.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        z2 = 0;
+
+        $r12 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r13 = interfaceinvoke $r12.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/MediaSizeName;");
+
+        if $r13 != null goto label4;
+
+        $d4 = virtualinvoke $r11.<java.awt.print.Paper: double getWidth()>();
+
+        $d5 = virtualinvoke $r11.<java.awt.print.Paper: double getHeight()>();
+
+        virtualinvoke $r10.<java.awt.print.Paper: void setSize(double,double)>($d4, $d5);
+
+        z2 = 1;
+
+     label4:
+        $r14 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r15 = interfaceinvoke $r14.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/MediaPrintableArea;");
+
+        if $r15 != null goto label5;
+
+        $d0 = virtualinvoke $r11.<java.awt.print.Paper: double getImageableX()>();
+
+        $d1 = virtualinvoke $r11.<java.awt.print.Paper: double getImageableY()>();
+
+        $d2 = virtualinvoke $r11.<java.awt.print.Paper: double getImageableWidth()>();
+
+        $d3 = virtualinvoke $r11.<java.awt.print.Paper: double getImageableHeight()>();
+
+        virtualinvoke $r10.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>($d0, $d1, $d2, $d3);
+
+        z2 = 1;
+
+     label5:
+        if z2 == 0 goto label6;
+
+        virtualinvoke $r6.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r10);
+
+     label6:
+        return $r6;
+    }
+
+    public boolean printDialog(javax.print.attribute.PrintRequestAttributeSet) throws java.awt.HeadlessException
+    {
+        javax.print.StreamPrintServiceFactory $r16;
+        java.awt.GraphicsEnvironment $r4;
+        javax.print.PrintService[] $r13, $r14, r24;
+        sun.print.RasterPrinterJob r8;
+        java.awt.HeadlessException $r18;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.GraphicsConfiguration $r6;
+        javax.print.attribute.PrintRequestAttributeSet r0;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r21, $r27;
+        java.awt.print.PrinterException $r19, $r23;
+        java.awt.Rectangle $r25;
+        java.awt.GraphicsDevice $r5;
+        sun.print.PrinterJobWrapper $r26;
+        sun.print.RasterPrinterJob$3 $r7;
+        sun.print.RasterPrinterJob$4 $r11;
+        javax.print.attribute.standard.DialogTypeSelection r2, $r3;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        javax.print.PrintService r10, $r22, r28;
+        java.lang.IllegalArgumentException $r20;
+        javax.print.StreamPrintService $r17;
+        java.lang.Object $r9, $r12;
+        javax.print.attribute.Attribute $r1;
+        javax.print.StreamPrintServiceFactory[] $r15;
+
+        r8 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: javax.print.attribute.PrintRequestAttributeSet;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label01;
+
+        $r18 = new java.awt.HeadlessException;
+
+        specialinvoke $r18.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r18;
+
+     label01:
+        $r1 = interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/DialogTypeSelection;");
+
+        r2 = (javax.print.attribute.standard.DialogTypeSelection) $r1;
+
+        $r3 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection NATIVE>;
+
+        if r2 != $r3 goto label06;
+
+        r8.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes> = r0;
+
+     label02:
+        virtualinvoke r8.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>("calling setAttributes in printDialog");
+
+        virtualinvoke r8.<sun.print.RasterPrinterJob: void setAttributes(javax.print.attribute.PrintRequestAttributeSet)>(r0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r23 := @caughtexception;
+
+     label05:
+        specialinvoke r8.<sun.print.RasterPrinterJob: void setParentWindowID(javax.print.attribute.PrintRequestAttributeSet)>(r0);
+
+        $z3 = virtualinvoke r8.<sun.print.RasterPrinterJob: boolean printDialog()>();
+
+        specialinvoke r8.<sun.print.RasterPrinterJob: void clearParentWindowID()>();
+
+        r8.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes> = r0;
+
+        return $z3;
+
+     label06:
+        $r4 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r7 = new sun.print.RasterPrinterJob$3;
+
+        specialinvoke $r7.<sun.print.RasterPrinterJob$3: void <init>(sun.print.RasterPrinterJob,java.awt.GraphicsConfiguration)>(r8, $r6);
+
+        $r9 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        r10 = (javax.print.PrintService) $r9;
+
+        if r10 != null goto label07;
+
+        return 0;
+
+     label07:
+        $z1 = r10 instanceof javax.print.StreamPrintService;
+
+        if $z1 == 0 goto label10;
+
+        $r15 = staticinvoke <sun.print.RasterPrinterJob: javax.print.StreamPrintServiceFactory[] lookupStreamPrintServices(java.lang.String)>(null);
+
+        $i1 = lengthof $r15;
+
+        r24 = newarray (javax.print.StreamPrintService)[$i1];
+
+        i3 = 0;
+
+     label08:
+        $i2 = lengthof $r15;
+
+        if i3 >= $i2 goto label09;
+
+        $r16 = $r15[i3];
+
+        $r17 = virtualinvoke $r16.<javax.print.StreamPrintServiceFactory: javax.print.StreamPrintService getPrintService(java.io.OutputStream)>(null);
+
+        r24[i3] = $r17;
+
+        i3 = i3 + 1;
+
+        goto label08;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r11 = new sun.print.RasterPrinterJob$4;
+
+        specialinvoke $r11.<sun.print.RasterPrinterJob$4: void <init>(sun.print.RasterPrinterJob)>(r8);
+
+        $r12 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r11);
+
+        $r13 = (javax.print.PrintService[]) $r12;
+
+        r24 = (javax.print.PrintService[]) $r13;
+
+        if r24 == null goto label11;
+
+        $i0 = lengthof r24;
+
+        if $i0 != 0 goto label12;
+
+     label11:
+        $r14 = newarray (javax.print.PrintService)[1];
+
+        r24 = $r14;
+
+        $r14[0] = r10;
+
+     label12:
+        $r25 = virtualinvoke $r6.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $i4 = $r25.<java.awt.Rectangle: int x>;
+
+        $i5 = $r25.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 / 3;
+
+        $i7 = $i4 + $i6;
+
+        $i8 = $r25.<java.awt.Rectangle: int y>;
+
+        $i9 = $r25.<java.awt.Rectangle: int height>;
+
+        $i10 = $i9 / 3;
+
+        $i11 = $i8 + $i10;
+
+        $r26 = new sun.print.PrinterJobWrapper;
+
+        specialinvoke $r26.<sun.print.PrinterJobWrapper: void <init>(java.awt.print.PrinterJob)>(r8);
+
+        interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r26);
+
+     label13:
+        $r27 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        r28 = staticinvoke <javax.print.ServiceUI: javax.print.PrintService printDialog(java.awt.GraphicsConfiguration,int,int,javax.print.PrintService[],javax.print.PrintService,javax.print.DocFlavor,javax.print.attribute.PrintRequestAttributeSet)>($r6, $i7, $i11, r24, r10, $r27, r0);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r20 := @caughtexception;
+
+        $r22 = r24[0];
+
+        $r21 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        r28 = staticinvoke <javax.print.ServiceUI: javax.print.PrintService printDialog(java.awt.GraphicsConfiguration,int,int,javax.print.PrintService[],javax.print.PrintService,javax.print.DocFlavor,javax.print.attribute.PrintRequestAttributeSet)>($r6, $i7, $i11, r24, $r22, $r21, r0);
+
+     label16:
+        interfaceinvoke r0.<javax.print.attribute.PrintRequestAttributeSet: boolean remove(java.lang.Class)>(class "Lsun/print/PrinterJobWrapper;");
+
+        if r28 != null goto label17;
+
+        return 0;
+
+     label17:
+        $z2 = interfaceinvoke r10.<javax.print.PrintService: boolean equals(java.lang.Object)>(r28);
+
+        if $z2 != 0 goto label21;
+
+     label18:
+        virtualinvoke r8.<sun.print.RasterPrinterJob: void setPrintService(javax.print.PrintService)>(r28);
+
+     label19:
+        goto label21;
+
+     label20:
+        $r19 := @caughtexception;
+
+        r8.<sun.print.RasterPrinterJob: javax.print.PrintService myService> = r28;
+
+     label21:
+        return 1;
+
+        catch java.awt.print.PrinterException from label02 to label03 with label04;
+        catch java.lang.IllegalArgumentException from label13 to label14 with label15;
+        catch java.awt.print.PrinterException from label18 to label19 with label20;
+    }
+
+    public boolean printDialog() throws java.awt.HeadlessException
+    {
+        javax.print.attribute.standard.Copies $r1, $r16;
+        javax.print.attribute.HashPrintRequestAttributeSet $r0;
+        sun.print.RasterPrinterJob r2;
+        int $i0, $i1;
+        java.awt.HeadlessException $r17;
+        java.lang.String $r4, $r10, $r13, $r15, $r24;
+        java.net.URI $r12, $r23;
+        javax.print.attribute.standard.Destination $r14, r21;
+        boolean $z0, $z1;
+        javax.print.PrintService $r9, $r19;
+        java.io.File $r11, $r22;
+        java.lang.Exception $r18;
+        javax.print.attribute.standard.JobName $r3, r6;
+        java.lang.Object $r20;
+        javax.print.attribute.Attribute $r5, $r7, $r8;
+
+        r2 := @this: sun.print.RasterPrinterJob;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r17 = new java.awt.HeadlessException;
+
+        specialinvoke $r17.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r17;
+
+     label1:
+        $r0 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        specialinvoke $r0.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        $r1 = new javax.print.attribute.standard.Copies;
+
+        $i0 = virtualinvoke r2.<sun.print.RasterPrinterJob: int getCopies()>();
+
+        specialinvoke $r1.<javax.print.attribute.standard.Copies: void <init>(int)>($i0);
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r1);
+
+        $r3 = new javax.print.attribute.standard.JobName;
+
+        $r4 = virtualinvoke r2.<sun.print.RasterPrinterJob: java.lang.String getJobName()>();
+
+        specialinvoke $r3.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>($r4, null);
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r3);
+
+        $z1 = virtualinvoke r2.<sun.print.RasterPrinterJob: boolean printDialog(javax.print.attribute.PrintRequestAttributeSet)>($r0);
+
+        if $z1 == 0 goto label9;
+
+        $r5 = interfaceinvoke $r0.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/JobName;");
+
+        r6 = (javax.print.attribute.standard.JobName) $r5;
+
+        if r6 == null goto label2;
+
+        $r15 = virtualinvoke r6.<javax.print.attribute.standard.JobName: java.lang.String getValue()>();
+
+        virtualinvoke r2.<sun.print.RasterPrinterJob: void setJobName(java.lang.String)>($r15);
+
+     label2:
+        $r7 = interfaceinvoke $r0.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Copies;");
+
+        $r16 = (javax.print.attribute.standard.Copies) $r7;
+
+        if $r16 == null goto label3;
+
+        $i1 = virtualinvoke $r16.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        virtualinvoke r2.<sun.print.RasterPrinterJob: void setCopies(int)>($i1);
+
+     label3:
+        $r8 = interfaceinvoke $r0.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        $r14 = (javax.print.attribute.standard.Destination) $r8;
+
+        if $r14 == null goto label8;
+
+     label4:
+        r2.<sun.print.RasterPrinterJob: int mDestType> = 1;
+
+        $r11 = new java.io.File;
+
+        $r12 = virtualinvoke $r14.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        specialinvoke $r11.<java.io.File: void <init>(java.net.URI)>($r12);
+
+        $r13 = virtualinvoke $r11.<java.io.File: java.lang.String getPath()>();
+
+        r2.<sun.print.RasterPrinterJob: java.lang.String mDestination> = $r13;
+
+     label5:
+        goto label9;
+
+     label6:
+        $r18 := @caughtexception;
+
+        r2.<sun.print.RasterPrinterJob: java.lang.String mDestination> = "out.prn";
+
+        $r19 = virtualinvoke r2.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r19 == null goto label7;
+
+        $r20 = interfaceinvoke $r19.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        r21 = (javax.print.attribute.standard.Destination) $r20;
+
+        if r21 == null goto label7;
+
+        $r22 = new java.io.File;
+
+        $r23 = virtualinvoke r21.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        specialinvoke $r22.<java.io.File: void <init>(java.net.URI)>($r23);
+
+        $r24 = virtualinvoke $r22.<java.io.File: java.lang.String getPath()>();
+
+        r2.<sun.print.RasterPrinterJob: java.lang.String mDestination> = $r24;
+
+     label7:
+        goto label9;
+
+     label8:
+        r2.<sun.print.RasterPrinterJob: int mDestType> = 0;
+
+        $r9 = virtualinvoke r2.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r9 == null goto label9;
+
+        $r10 = interfaceinvoke $r9.<javax.print.PrintService: java.lang.String getName()>();
+
+        r2.<sun.print.RasterPrinterJob: java.lang.String mDestination> = $r10;
+
+     label9:
+        return $z1;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public void setPrintable(java.awt.print.Printable)
+    {
+        sun.print.RasterPrinterJob r0;
+        java.awt.print.Printable r4;
+        java.awt.print.PageFormat $r2, $r3;
+        sun.print.OpenBook $r1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r4 := @parameter0: java.awt.print.Printable;
+
+        $r1 = new sun.print.OpenBook;
+
+        $r2 = new java.awt.print.PageFormat;
+
+        specialinvoke $r2.<java.awt.print.PageFormat: void <init>()>();
+
+        $r3 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.PageFormat defaultPage(java.awt.print.PageFormat)>($r2);
+
+        specialinvoke $r1.<sun.print.OpenBook: void <init>(java.awt.print.PageFormat,java.awt.print.Printable)>($r3, r4);
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPageable(java.awt.print.Pageable)>($r1);
+
+        return;
+    }
+
+    public void setPrintable(java.awt.print.Printable, java.awt.print.PageFormat)
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.PrintService $r4;
+        java.awt.print.Printable r3;
+        java.awt.print.PageFormat r2;
+        sun.print.OpenBook $r1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r3 := @parameter0: java.awt.print.Printable;
+
+        r2 := @parameter1: java.awt.print.PageFormat;
+
+        $r1 = new sun.print.OpenBook;
+
+        specialinvoke $r1.<sun.print.OpenBook: void <init>(java.awt.print.PageFormat,java.awt.print.Printable)>(r2, r3);
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPageable(java.awt.print.Pageable)>($r1);
+
+        $r4 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void updatePageAttributes(javax.print.PrintService,java.awt.print.PageFormat)>($r4, r2);
+
+        return;
+    }
+
+    public void setPageable(java.awt.print.Pageable) throws java.lang.NullPointerException
+    {
+        java.lang.NullPointerException $r1;
+        sun.print.RasterPrinterJob r2;
+        java.awt.print.Pageable r0;
+
+        r2 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.print.Pageable;
+
+        if r0 == null goto label1;
+
+        r2.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument> = r0;
+
+        goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    protected void initPrinter()
+    {
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        return;
+    }
+
+    protected boolean isSupportedValue(javax.print.attribute.Attribute, javax.print.attribute.PrintRequestAttributeSet)
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.PrintRequestAttributeSet r3;
+        javax.print.PrintService $r1;
+        javax.print.attribute.Attribute r2;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: javax.print.attribute.Attribute;
+
+        r3 := @parameter1: javax.print.attribute.PrintRequestAttributeSet;
+
+        $r1 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if r2 == null goto label1;
+
+        if $r1 == null goto label1;
+
+        $r4 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z0 = interfaceinvoke $r1.<javax.print.PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(r2, $r4, r3);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    protected void setAttributes(javax.print.attribute.PrintRequestAttributeSet) throws java.awt.print.PrinterException
+    {
+        javax.print.attribute.standard.Media $r75;
+        byte b8;
+        java.awt.print.Printable $r16;
+        javax.print.attribute.standard.Destination $r66, r67;
+        javax.print.attribute.PrintRequestAttributeSet r2;
+        java.lang.StringBuilder $r33, $r37, $r54, $r58, $r86, $r88;
+        float[] $r22;
+        javax.print.attribute.standard.JobSheets $r31, $r69;
+        java.awt.print.Pageable $r15, $r81;
+        int[] $r41, $r42;
+        sun.print.RasterPrinterJob r0;
+        java.lang.SecurityException $r50;
+        javax.print.attribute.standard.Fidelity r4, $r49;
+        javax.print.attribute.standard.MediaSize $r23;
+        java.awt.print.PrinterException $r85;
+        javax.print.attribute.standard.MediaSizeName r83;
+        java.awt.print.Paper $r19;
+        javax.print.attribute.standard.Sides $r43, $r61, $r62;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i9, $i10, $i12, $i14;
+        java.lang.Object $r18, $r24, $r52;
+        javax.print.attribute.standard.MediaPrintableArea[] $r25, $r26, $r27, $r28;
+        javax.print.attribute.AttributeSet $r46;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r45;
+        java.lang.Exception $r51;
+        javax.print.attribute.standard.SheetCollate $r44, $r47;
+        javax.print.attribute.standard.RequestingUserName $r73;
+        javax.print.attribute.standard.Copies $r64;
+        java.lang.String $r12, $r13, $r14, $r29, $r30, $r36, $r38, $r57, $r59;
+        javax.print.attribute.standard.OrientationRequested $r20, $r21, $r77;
+        javax.print.attribute.standard.MediaPrintableArea $r79, r80;
+        java.io.File $r87, $r89;
+        int[][] $r40;
+        sun.print.SunPageSelection $r10, $r11;
+        java.awt.print.PageFormat $r17, r82, $r84;
+        java.net.URI $r35, $r56;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, z19, z20, z21, z22, z23, z24, z25;
+        javax.print.attribute.standard.JobName $r71;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, f7, $f8, f9;
+        javax.print.attribute.standard.PageRanges $r7, $r8, $r39;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9;
+        javax.print.PrintService $r1;
+        javax.print.attribute.Attribute $r3, $r5, $r6, $r9, $r60, $r63, $r65, $r68, $r70, $r72, $r74, $r76, $r78;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r2 := @parameter0: javax.print.attribute.PrintRequestAttributeSet;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setCollated(boolean)>(0);
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.Sides sidesAttr> = null;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr> = null;
+
+        r0.<sun.print.RasterPrinterJob: int copiesAttr> = 0;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr> = null;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr> = null;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String destinationAttr> = null;
+
+        r0.<sun.print.RasterPrinterJob: boolean collateAttReq> = 0;
+
+        $r1 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if r2 == null goto label01;
+
+        if $r1 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        z7 = 0;
+
+        z25 = 0;
+
+        z24 = 0;
+
+        z23 = 0;
+
+        z22 = 0;
+
+        z21 = 0;
+
+        z20 = 0;
+
+        z19 = 0;
+
+        $r3 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Fidelity;");
+
+        r4 = (javax.print.attribute.standard.Fidelity) $r3;
+
+        if r4 == null goto label03;
+
+        $r49 = <javax.print.attribute.standard.Fidelity: javax.print.attribute.standard.Fidelity FIDELITY_TRUE>;
+
+        if r4 != $r49 goto label03;
+
+        z7 = 1;
+
+        z25 = 1;
+
+        z24 = 1;
+
+        z23 = 1;
+
+        z22 = 1;
+
+        z21 = 1;
+
+        z20 = 1;
+
+        z19 = 1;
+
+     label03:
+        if z19 != 1 goto label04;
+
+        $r45 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $r46 = interfaceinvoke $r1.<javax.print.PrintService: javax.print.attribute.AttributeSet getUnsupportedAttributes(javax.print.DocFlavor,javax.print.attribute.AttributeSet)>($r45, r2);
+
+        if $r46 == null goto label04;
+
+        $r85 = new java.awt.print.PrinterException;
+
+        specialinvoke $r85.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Fidelity cannot be satisfied");
+
+        throw $r85;
+
+     label04:
+        $r5 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/SheetCollate;");
+
+        $r47 = (javax.print.attribute.standard.SheetCollate) $r5;
+
+        $z0 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r47, r2);
+
+        if $z0 == 0 goto label07;
+
+        $r44 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate COLLATED>;
+
+        if $r47 != $r44 goto label05;
+
+        $z8 = 1;
+
+        goto label06;
+
+     label05:
+        $z8 = 0;
+
+     label06:
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setCollated(boolean)>($z8);
+
+     label07:
+        $r60 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Sides;");
+
+        $r61 = (javax.print.attribute.standard.Sides) $r60;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.Sides sidesAttr> = $r61;
+
+        $r62 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.Sides sidesAttr>;
+
+        $z9 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r62, r2);
+
+        if $z9 != 0 goto label08;
+
+        $r43 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides ONE_SIDED>;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.Sides sidesAttr> = $r43;
+
+     label08:
+        $r6 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/PageRanges;");
+
+        $r7 = (javax.print.attribute.standard.PageRanges) $r6;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr> = $r7;
+
+        $r8 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr>;
+
+        $z1 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r8, r2);
+
+        if $z1 != 0 goto label09;
+
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr> = null;
+
+        goto label11;
+
+     label09:
+        $r9 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunPageSelection;");
+
+        $r11 = (sun.print.SunPageSelection) $r9;
+
+        $r10 = <sun.print.SunPageSelection: sun.print.SunPageSelection RANGE>;
+
+        if $r11 != $r10 goto label10;
+
+        $r39 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr>;
+
+        $r40 = virtualinvoke $r39.<javax.print.attribute.standard.PageRanges: int[][] getMembers()>();
+
+        $r41 = $r40[0];
+
+        $i4 = $r41[0];
+
+        $i7 = $i4 - 1;
+
+        $r42 = $r40[0];
+
+        $i5 = $r42[1];
+
+        $i6 = $i5 - 1;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPageRange(int,int)>($i7, $i6);
+
+        goto label11;
+
+     label10:
+        $i12 = (int) -1;
+
+        $i14 = (int) -1;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPageRange(int,int)>($i12, $i14);
+
+     label11:
+        $r63 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Copies;");
+
+        $r64 = (javax.print.attribute.standard.Copies) $r63;
+
+        $z10 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r64, r2);
+
+        if $z10 != 0 goto label12;
+
+        if z22 != 0 goto label13;
+
+        if $r64 == null goto label13;
+
+     label12:
+        $i0 = virtualinvoke $r64.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        r0.<sun.print.RasterPrinterJob: int copiesAttr> = $i0;
+
+        $i1 = r0.<sun.print.RasterPrinterJob: int copiesAttr>;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setCopies(int)>($i1);
+
+        goto label14;
+
+     label13:
+        $i3 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getCopies()>();
+
+        r0.<sun.print.RasterPrinterJob: int copiesAttr> = $i3;
+
+     label14:
+        $r65 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        $r66 = (javax.print.attribute.standard.Destination) $r65;
+
+        $z11 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r66, r2);
+
+        if $z11 == 0 goto label18;
+
+     label15:
+        $r86 = new java.lang.StringBuilder;
+
+        specialinvoke $r86.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r87 = new java.io.File;
+
+        $r35 = virtualinvoke $r66.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        $r36 = virtualinvoke $r35.<java.net.URI: java.lang.String getSchemeSpecificPart()>();
+
+        specialinvoke $r87.<java.io.File: void <init>(java.lang.String)>($r36);
+
+        $r37 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r87);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String destinationAttr> = $r38;
+
+     label16:
+        goto label18;
+
+     label17:
+        $r51 := @caughtexception;
+
+        $r52 = interfaceinvoke $r1.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        r67 = (javax.print.attribute.standard.Destination) $r52;
+
+        if r67 == null goto label18;
+
+        $r88 = new java.lang.StringBuilder;
+
+        specialinvoke $r88.<java.lang.StringBuilder: void <init>()>();
+
+        $r54 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r89 = new java.io.File;
+
+        $r56 = virtualinvoke r67.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        $r57 = virtualinvoke $r56.<java.net.URI: java.lang.String getSchemeSpecificPart()>();
+
+        specialinvoke $r89.<java.io.File: void <init>(java.lang.String)>($r57);
+
+        $r58 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r89);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String destinationAttr> = $r59;
+
+     label18:
+        $r68 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/JobSheets;");
+
+        $r69 = (javax.print.attribute.standard.JobSheets) $r68;
+
+        if $r69 == null goto label21;
+
+        $r31 = <javax.print.attribute.standard.JobSheets: javax.print.attribute.standard.JobSheets NONE>;
+
+        if $r69 != $r31 goto label19;
+
+        $z12 = 1;
+
+        goto label20;
+
+     label19:
+        $z12 = 0;
+
+     label20:
+        r0.<sun.print.RasterPrinterJob: boolean noJobSheet> = $z12;
+
+     label21:
+        $r70 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/JobName;");
+
+        $r71 = (javax.print.attribute.standard.JobName) $r70;
+
+        $z13 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r71, r2);
+
+        if $z13 != 0 goto label22;
+
+        if z21 != 0 goto label23;
+
+        if $r71 == null goto label23;
+
+     label22:
+        $r12 = virtualinvoke $r71.<javax.print.attribute.standard.JobName: java.lang.String getValue()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr> = $r12;
+
+        $r13 = r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr>;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setJobName(java.lang.String)>($r13);
+
+        goto label24;
+
+     label23:
+        $r30 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.lang.String getJobName()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr> = $r30;
+
+     label24:
+        $r72 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/RequestingUserName;");
+
+        $r73 = (javax.print.attribute.standard.RequestingUserName) $r72;
+
+        $z14 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r73, r2);
+
+        if $z14 != 0 goto label25;
+
+        if z23 != 0 goto label26;
+
+        if $r73 == null goto label26;
+
+     label25:
+        $r14 = virtualinvoke $r73.<javax.print.attribute.standard.RequestingUserName: java.lang.String getValue()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr> = $r14;
+
+        goto label29;
+
+     label26:
+        $r29 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.lang.String getUserName()>();
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr> = $r29;
+
+     label27:
+        goto label29;
+
+     label28:
+        $r50 := @caughtexception;
+
+        r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr> = "";
+
+     label29:
+        $r74 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r75 = (javax.print.attribute.standard.Media) $r74;
+
+        $r76 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        $r77 = (javax.print.attribute.standard.OrientationRequested) $r76;
+
+        $r78 = interfaceinvoke r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/MediaPrintableArea;");
+
+        $r79 = (javax.print.attribute.standard.MediaPrintableArea) $r78;
+
+        r80 = $r79;
+
+        if $r77 != null goto label30;
+
+        if $r75 != null goto label30;
+
+        if $r79 == null goto label43;
+
+     label30:
+        $r81 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable getPageable()>();
+
+        $z15 = $r81 instanceof sun.print.OpenBook;
+
+        if $z15 == 0 goto label43;
+
+        $r15 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable getPageable()>();
+
+        $r16 = interfaceinvoke $r15.<java.awt.print.Pageable: java.awt.print.Printable getPrintable(int)>(0);
+
+        $r17 = interfaceinvoke $r15.<java.awt.print.Pageable: java.awt.print.PageFormat getPageFormat(int)>(0);
+
+        $r18 = virtualinvoke $r17.<java.awt.print.PageFormat: java.lang.Object clone()>();
+
+        r82 = (java.awt.print.PageFormat) $r18;
+
+        $r19 = virtualinvoke r82.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        if $r79 != null goto label31;
+
+        if $r75 == null goto label31;
+
+        $z5 = interfaceinvoke $r1.<javax.print.PrintService: boolean isAttributeCategorySupported(java.lang.Class)>(class "Ljavax/print/attribute/standard/MediaPrintableArea;");
+
+        if $z5 == 0 goto label31;
+
+        $r24 = interfaceinvoke $r1.<javax.print.PrintService: java.lang.Object getSupportedAttributeValues(java.lang.Class,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(class "Ljavax/print/attribute/standard/MediaPrintableArea;", null, r2);
+
+        $z6 = $r24 instanceof javax.print.attribute.standard.MediaPrintableArea[];
+
+        if $z6 == 0 goto label31;
+
+        $r25 = (javax.print.attribute.standard.MediaPrintableArea[]) $r24;
+
+        $r26 = (javax.print.attribute.standard.MediaPrintableArea[]) $r25;
+
+        $i2 = lengthof $r26;
+
+        if $i2 <= 0 goto label31;
+
+        $r27 = (javax.print.attribute.standard.MediaPrintableArea[]) $r24;
+
+        $r28 = (javax.print.attribute.standard.MediaPrintableArea[]) $r27;
+
+        r80 = $r28[0];
+
+     label31:
+        $z16 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r77, r2);
+
+        if $z16 != 0 goto label32;
+
+        if z20 != 0 goto label36;
+
+        if $r77 == null goto label36;
+
+     label32:
+        $r20 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        $z2 = virtualinvoke $r77.<java.lang.Object: boolean equals(java.lang.Object)>($r20);
+
+        if $z2 == 0 goto label33;
+
+        b8 = 2;
+
+        goto label35;
+
+     label33:
+        $r21 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        $z3 = virtualinvoke $r77.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        if $z3 == 0 goto label34;
+
+        b8 = 0;
+
+        goto label35;
+
+     label34:
+        b8 = 1;
+
+     label35:
+        virtualinvoke r82.<java.awt.print.PageFormat: void setOrientation(int)>(b8);
+
+     label36:
+        $z17 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>($r75, r2);
+
+        if $z17 != 0 goto label37;
+
+        if z24 != 0 goto label38;
+
+        if $r75 == null goto label38;
+
+     label37:
+        $z4 = $r75 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z4 == 0 goto label38;
+
+        r83 = (javax.print.attribute.standard.MediaSizeName) $r75;
+
+        $r23 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>(r83);
+
+        if $r23 == null goto label38;
+
+        $f6 = virtualinvoke $r23.<javax.print.attribute.standard.MediaSize: float getX(int)>(25400);
+
+        f7 = $f6 * 72.0F;
+
+        $f8 = virtualinvoke $r23.<javax.print.attribute.standard.MediaSize: float getY(int)>(25400);
+
+        f9 = $f8 * 72.0F;
+
+        $d5 = (double) f7;
+
+        $d4 = (double) f9;
+
+        virtualinvoke $r19.<java.awt.print.Paper: void setSize(double,double)>($d5, $d4);
+
+        if r80 != null goto label38;
+
+        $d6 = (double) f7;
+
+        $d9 = $d6 - 144.0;
+
+        $d7 = (double) f9;
+
+        $d8 = $d7 - 144.0;
+
+        virtualinvoke $r19.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(72.0, 72.0, $d9, $d8);
+
+     label38:
+        $z18 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isSupportedValue(javax.print.attribute.Attribute,javax.print.attribute.PrintRequestAttributeSet)>(r80, r2);
+
+        if $z18 != 0 goto label39;
+
+        if z25 != 0 goto label42;
+
+        if r80 == null goto label42;
+
+     label39:
+        $r22 = virtualinvoke r80.<javax.print.attribute.standard.MediaPrintableArea: float[] getPrintableArea(int)>(25400);
+
+        i9 = 0;
+
+     label40:
+        $i10 = lengthof $r22;
+
+        if i9 >= $i10 goto label41;
+
+        $f4 = $r22[i9];
+
+        $f5 = $f4 * 72.0F;
+
+        $r22[i9] = $f5;
+
+        i9 = i9 + 1;
+
+        goto label40;
+
+     label41:
+        $f0 = $r22[0];
+
+        $d3 = (double) $f0;
+
+        $f1 = $r22[1];
+
+        $d2 = (double) $f1;
+
+        $f2 = $r22[2];
+
+        $d1 = (double) $f2;
+
+        $f3 = $r22[3];
+
+        $d0 = (double) $f3;
+
+        virtualinvoke $r19.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>($d3, $d2, $d1, $d0);
+
+     label42:
+        virtualinvoke r82.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r19);
+
+        $r84 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.PageFormat validatePage(java.awt.print.PageFormat)>(r82);
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setPrintable(java.awt.print.Printable,java.awt.print.PageFormat)>($r16, $r84);
+
+        goto label44;
+
+     label43:
+        r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes> = r2;
+
+     label44:
+        return;
+
+        catch java.lang.Exception from label15 to label16 with label17;
+        catch java.lang.SecurityException from label26 to label27 with label28;
+    }
+
+    protected void spoolToService(javax.print.PrintService, javax.print.attribute.PrintRequestAttributeSet) throws java.awt.print.PrinterException
+    {
+        javax.print.attribute.PrintRequestAttributeSet r10;
+        javax.print.PrintService r0;
+        javax.print.PrintException $r7;
+        javax.print.attribute.HashPrintRequestAttributeSet $r5;
+        javax.print.DocPrintJob $r1;
+        sun.print.PageableDoc $r2;
+        java.awt.print.PrinterException $r6, $r8;
+        sun.print.RasterPrinterJob r3;
+        java.lang.String $r9;
+        java.awt.print.Pageable $r4;
+
+        r3 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: javax.print.PrintService;
+
+        r10 := @parameter1: javax.print.attribute.PrintRequestAttributeSet;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.awt.print.PrinterException;
+
+        specialinvoke $r6.<java.awt.print.PrinterException: void <init>(java.lang.String)>("No print service found.");
+
+        throw $r6;
+
+     label1:
+        $r1 = interfaceinvoke r0.<javax.print.PrintService: javax.print.DocPrintJob createPrintJob()>();
+
+        $r2 = new sun.print.PageableDoc;
+
+        $r4 = virtualinvoke r3.<sun.print.RasterPrinterJob: java.awt.print.Pageable getPageable()>();
+
+        specialinvoke $r2.<sun.print.PageableDoc: void <init>(java.awt.print.Pageable)>($r4);
+
+        if r10 != null goto label2;
+
+        $r5 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        specialinvoke $r5.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        r10 = $r5;
+
+     label2:
+        interfaceinvoke $r1.<javax.print.DocPrintJob: void print(javax.print.Doc,javax.print.attribute.PrintRequestAttributeSet)>($r2, r10);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new java.awt.print.PrinterException;
+
+        $r9 = virtualinvoke $r7.<javax.print.PrintException: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.awt.print.PrinterException: void <init>(java.lang.String)>($r9);
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch javax.print.PrintException from label2 to label3 with label4;
+    }
+
+    public void print() throws java.awt.print.PrinterException
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.PrintRequestAttributeSet $r1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void print(javax.print.attribute.PrintRequestAttributeSet)>($r1);
+
+        return;
+    }
+
+    protected void debug_println(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        sun.print.RasterPrinterJob r6;
+        java.lang.StringBuilder $r0, $r2, $r4, $r5, $r7;
+        java.lang.String r3, $r8;
+        boolean $z0;
+
+        r6 := @this: sun.print.RasterPrinterJob;
+
+        r3 := @parameter0: java.lang.String;
+
+        $z0 = <sun.print.RasterPrinterJob: boolean debugPrint>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RasterPrinterJob ");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label1:
+        return;
+    }
+
+    public void print(javax.print.attribute.PrintRequestAttributeSet) throws java.awt.print.PrinterException
+    {
+        javax.print.attribute.PrintRequestAttributeSet r9;
+        java.lang.StringBuilder $r3, $r4, $r14, $r15, $r16, $r17, $r22, $r23, $r47, $r48, $r49, $r50, $r52, $r56, $r57, $r58;
+        javax.print.attribute.standard.PrinterState r7, $r8;
+        java.lang.Throwable $r37, $r38, $r39, $r40;
+        javax.print.attribute.PrintServiceAttribute $r6, $r33, $r42;
+        java.lang.String $r5, $r12, $r18, $r24, $r31, $r51;
+        java.awt.print.Pageable $r19, $r25, $r29, $r30;
+        sun.print.SunPageSelection $r28, r45;
+        sun.print.RasterPrinterJob r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8, z9, z10;
+        java.awt.print.PrinterException $r53, $r54, $r55;
+        javax.print.attribute.standard.PrinterStateReasons r41;
+        javax.print.attribute.standard.PageRanges $r20, $r26;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, i11, i12, i13, $i15, $i17, $i19, $i21;
+        javax.print.attribute.standard.PrinterStateReason $r34;
+        javax.print.PrintService $r1;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r43, $r44;
+        java.lang.Class $r11;
+        javax.print.attribute.Attribute $r27;
+        sun.print.SunPrinterJobService $r10;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r9 := @parameter0: javax.print.attribute.PrintRequestAttributeSet;
+
+        $r1 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("psvc = ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r5);
+
+        if $r1 != null goto label01;
+
+        $r53 = new java.awt.print.PrinterException;
+
+        specialinvoke $r53.<java.awt.print.PrinterException: void <init>(java.lang.String)>("No print service found.");
+
+        throw $r53;
+
+     label01:
+        $r6 = interfaceinvoke $r1.<javax.print.PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterState;");
+
+        r7 = (javax.print.attribute.standard.PrinterState) $r6;
+
+        $r8 = <javax.print.attribute.standard.PrinterState: javax.print.attribute.standard.PrinterState STOPPED>;
+
+        if r7 != $r8 goto label02;
+
+        $r33 = interfaceinvoke $r1.<javax.print.PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterStateReasons;");
+
+        r41 = (javax.print.attribute.standard.PrinterStateReasons) $r33;
+
+        if r41 == null goto label02;
+
+        $r34 = <javax.print.attribute.standard.PrinterStateReason: javax.print.attribute.standard.PrinterStateReason SHUTDOWN>;
+
+        $z6 = virtualinvoke r41.<javax.print.attribute.standard.PrinterStateReasons: boolean containsKey(java.lang.Object)>($r34);
+
+        if $z6 == 0 goto label02;
+
+        $r54 = new java.awt.print.PrinterException;
+
+        specialinvoke $r54.<java.awt.print.PrinterException: void <init>(java.lang.String)>("PrintService is no longer available.");
+
+        throw $r54;
+
+     label02:
+        $r42 = interfaceinvoke $r1.<javax.print.PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterIsAcceptingJobs;");
+
+        $r43 = (javax.print.attribute.standard.PrinterIsAcceptingJobs) $r42;
+
+        $r44 = <javax.print.attribute.standard.PrinterIsAcceptingJobs: javax.print.attribute.standard.PrinterIsAcceptingJobs NOT_ACCEPTING_JOBS>;
+
+        if $r43 != $r44 goto label03;
+
+        $r55 = new java.awt.print.PrinterException;
+
+        specialinvoke $r55.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Printer is not accepting job.");
+
+        throw $r55;
+
+     label03:
+        $z0 = $r1 instanceof sun.print.SunPrinterJobService;
+
+        if $z0 == 0 goto label04;
+
+        $r10 = (sun.print.SunPrinterJobService) $r1;
+
+        $r11 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z1 = interfaceinvoke $r10.<sun.print.SunPrinterJobService: boolean usesClass(java.lang.Class)>($r11);
+
+        if $z1 == 0 goto label04;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void setAttributes(javax.print.attribute.PrintRequestAttributeSet)>(r9);
+
+        $r12 = r0.<sun.print.RasterPrinterJob: java.lang.String destinationAttr>;
+
+        if $r12 == null goto label05;
+
+        $r31 = r0.<sun.print.RasterPrinterJob: java.lang.String destinationAttr>;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void validateDestination(java.lang.String)>($r31);
+
+        goto label05;
+
+     label04:
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void spoolToService(javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet)>($r1, r9);
+
+        return;
+
+     label05:
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void initPrinter()>();
+
+        $i0 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getCollatedCopies()>();
+
+        $i1 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getNoncollatedCopies()>();
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getCollatedCopies()  ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" getNoncollatedCopies() ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r18);
+
+        $r19 = r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument>;
+
+        $i2 = interfaceinvoke $r19.<java.awt.print.Pageable: int getNumberOfPages()>();
+
+        if $i2 != 0 goto label06;
+
+        return;
+
+     label06:
+        $i3 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getFirstPage()>();
+
+        $i4 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getLastPage()>();
+
+        i9 = $i4;
+
+        $i15 = (int) -1;
+
+        if $i4 != $i15 goto label07;
+
+        $r29 = r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument>;
+
+        $i7 = interfaceinvoke $r29.<java.awt.print.Pageable: int getNumberOfPages()>();
+
+        $i17 = (int) -1;
+
+        if $i7 == $i17 goto label07;
+
+        $r30 = r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument>;
+
+        $i8 = interfaceinvoke $r30.<java.awt.print.Pageable: int getNumberOfPages()>();
+
+        i9 = $i8 - 1;
+
+     label07:
+        entermonitor r0;
+
+     label08:
+        r0.<sun.print.RasterPrinterJob: boolean performingPrinting> = 1;
+
+        r0.<sun.print.RasterPrinterJob: boolean userCancelled> = 0;
+
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r40 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r40;
+
+     label12:
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void startDoc()>();
+
+        $z2 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isCancelled()>();
+
+        if $z2 == 0 goto label13;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void cancelDoc()>();
+
+     label13:
+        z8 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        if r9 == null goto label14;
+
+        $r27 = interfaceinvoke r9.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunPageSelection;");
+
+        r45 = (sun.print.SunPageSelection) $r27;
+
+        if r45 == null goto label14;
+
+        $r28 = <sun.print.SunPageSelection: sun.print.SunPageSelection RANGE>;
+
+        if r45 == $r28 goto label14;
+
+        z8 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+     label14:
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("after startDoc rangeSelected? ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z10);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" numNonCollatedCopies ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r51);
+
+        i10 = 0;
+
+     label15:
+        if i10 >= $i0 goto label24;
+
+        i11 = $i3;
+
+        i12 = 0;
+
+     label16:
+        if i11 <= i9 goto label17;
+
+        $i19 = (int) -1;
+
+        if i9 != $i19 goto label23;
+
+     label17:
+        if i12 != 0 goto label23;
+
+        $r20 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr>;
+
+        if $r20 == null goto label19;
+
+        if z9 == 0 goto label19;
+
+        $r26 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.standard.PageRanges pageRangesAttr>;
+
+        $i5 = virtualinvoke $r26.<javax.print.attribute.standard.PageRanges: int next(int)>(i11);
+
+        $i21 = (int) -1;
+
+        if $i5 != $i21 goto label18;
+
+        goto label23;
+
+     label18:
+        $i6 = i11 + 1;
+
+        if $i5 == $i6 goto label19;
+
+        goto label22;
+
+     label19:
+        i13 = 0;
+
+     label20:
+        if i13 >= $i1 goto label22;
+
+        if i12 != 0 goto label22;
+
+        $z5 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isCancelled()>();
+
+        if $z5 == 0 goto label21;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void cancelDoc()>();
+
+     label21:
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("printPage ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i11);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r24);
+
+        $r25 = r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument>;
+
+        i12 = virtualinvoke r0.<sun.print.RasterPrinterJob: int printPage(java.awt.print.Pageable,int)>($r25, i11);
+
+        i13 = i13 + 1;
+
+        goto label20;
+
+     label22:
+        i11 = i11 + 1;
+
+        goto label16;
+
+     label23:
+        i10 = i10 + 1;
+
+        goto label15;
+
+     label24:
+        $z3 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isCancelled()>();
+
+        if $z3 == 0 goto label25;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void cancelDoc()>();
+
+     label25:
+        r0.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper> = null;
+
+        entermonitor r0;
+
+     label26:
+        $z4 = r0.<sun.print.RasterPrinterJob: boolean performingPrinting>;
+
+        if $z4 == 0 goto label27;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void endDoc()>();
+
+     label27:
+        r0.<sun.print.RasterPrinterJob: boolean performingPrinting> = 0;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label28:
+        goto label31;
+
+     label29:
+        $r39 := @caughtexception;
+
+        exitmonitor r0;
+
+     label30:
+        throw $r39;
+
+     label31:
+        goto label40;
+
+     label32:
+        $r38 := @caughtexception;
+
+     label33:
+        r0.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper> = null;
+
+        entermonitor r0;
+
+     label34:
+        $z7 = r0.<sun.print.RasterPrinterJob: boolean performingPrinting>;
+
+        if $z7 == 0 goto label35;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void endDoc()>();
+
+     label35:
+        r0.<sun.print.RasterPrinterJob: boolean performingPrinting> = 0;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label36:
+        goto label39;
+
+     label37:
+        $r37 := @caughtexception;
+
+        exitmonitor r0;
+
+     label38:
+        throw $r37;
+
+     label39:
+        throw $r38;
+
+     label40:
+        return;
+
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label26 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+        catch java.lang.Throwable from label07 to label25 with label32;
+        catch java.lang.Throwable from label34 to label36 with label37;
+        catch java.lang.Throwable from label37 to label38 with label37;
+        catch java.lang.Throwable from label32 to label33 with label32;
+    }
+
+    protected void validateDestination(java.lang.String) throws java.awt.print.PrinterException
+    {
+        sun.print.RasterPrinterJob r10;
+        java.lang.SecurityException $r3;
+        java.lang.String r0, $r9, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.io.IOException $r4;
+        java.io.File $r1, $r2;
+        java.awt.print.PrinterException $r5, $r11;
+        java.lang.StringBuilder $r6, $r7, $r8, $r12, $r13, $r14;
+
+        r10 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>(r0);
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.io.File: boolean createNewFile()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r5 = new java.awt.print.PrinterException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot write to file:");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.awt.print.PrinterException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label5:
+        $r3 := @caughtexception;
+
+     label6:
+        $r2 = virtualinvoke $r1.<java.io.File: java.io.File getParentFile()>();
+
+        $z1 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z1 == 0 goto label7;
+
+        $z5 = virtualinvoke $r1.<java.io.File: boolean isFile()>();
+
+        if $z5 == 0 goto label8;
+
+        $z6 = virtualinvoke $r1.<java.io.File: boolean canWrite()>();
+
+        if $z6 == 0 goto label8;
+
+     label7:
+        if $r2 == null goto label9;
+
+        $z2 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z2 == 0 goto label8;
+
+        $z3 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z3 == 0 goto label9;
+
+        $z4 = virtualinvoke $r2.<java.io.File: boolean canWrite()>();
+
+        if $z4 != 0 goto label9;
+
+     label8:
+        $r11 = new java.awt.print.PrinterException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot write to file:");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.awt.print.PrinterException: void <init>(java.lang.String)>($r15);
+
+        throw $r11;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.SecurityException from label2 to label3 with label5;
+    }
+
+    protected void validatePaper(java.awt.print.Paper, java.awt.print.Paper)
+    {
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9;
+        sun.print.RasterPrinterJob r3;
+        java.awt.print.Paper r0, r1, $r4;
+        int $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, d9, $d10, d11, $d12, d13, $d14, d15, $d16, d17, $d18, d19;
+
+        r3 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.print.Paper;
+
+        r1 := @parameter1: java.awt.print.Paper;
+
+        if r0 == null goto label01;
+
+        if r1 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $d0 = virtualinvoke r0.<java.awt.print.Paper: double getWidth()>();
+
+        $d1 = virtualinvoke r0.<java.awt.print.Paper: double getHeight()>();
+
+        $d2 = virtualinvoke r0.<java.awt.print.Paper: double getImageableX()>();
+
+        $d3 = virtualinvoke r0.<java.awt.print.Paper: double getImageableY()>();
+
+        $d4 = virtualinvoke r0.<java.awt.print.Paper: double getImageableWidth()>();
+
+        $d5 = virtualinvoke r0.<java.awt.print.Paper: double getImageableHeight()>();
+
+        $r4 = new java.awt.print.Paper;
+
+        specialinvoke $r4.<java.awt.print.Paper: void <init>()>();
+
+        $b0 = $d0 cmpl 0.0;
+
+        $i10 = (int) $b0;
+
+        if $i10 <= 0 goto label03;
+
+        $d8 = $d0;
+
+        goto label04;
+
+     label03:
+        $d8 = virtualinvoke $r4.<java.awt.print.Paper: double getWidth()>();
+
+     label04:
+        d9 = $d8;
+
+        $b1 = $d1 cmpl 0.0;
+
+        $i11 = (int) $b1;
+
+        if $i11 <= 0 goto label05;
+
+        $d10 = $d1;
+
+        goto label06;
+
+     label05:
+        $d10 = virtualinvoke $r4.<java.awt.print.Paper: double getHeight()>();
+
+     label06:
+        d11 = $d10;
+
+        $b2 = $d2 cmpl 0.0;
+
+        $i12 = (int) $b2;
+
+        if $i12 <= 0 goto label07;
+
+        $d12 = $d2;
+
+        goto label08;
+
+     label07:
+        $d12 = virtualinvoke $r4.<java.awt.print.Paper: double getImageableX()>();
+
+     label08:
+        d13 = $d12;
+
+        $b3 = $d3 cmpl 0.0;
+
+        $i13 = (int) $b3;
+
+        if $i13 <= 0 goto label09;
+
+        $d14 = $d3;
+
+        goto label10;
+
+     label09:
+        $d14 = virtualinvoke $r4.<java.awt.print.Paper: double getImageableY()>();
+
+     label10:
+        d15 = $d14;
+
+        $b4 = $d4 cmpl 0.0;
+
+        $i14 = (int) $b4;
+
+        if $i14 <= 0 goto label11;
+
+        $d16 = $d4;
+
+        goto label12;
+
+     label11:
+        $d16 = virtualinvoke $r4.<java.awt.print.Paper: double getImageableWidth()>();
+
+     label12:
+        d17 = $d16;
+
+        $b5 = $d5 cmpl 0.0;
+
+        $i15 = (int) $b5;
+
+        if $i15 <= 0 goto label13;
+
+        $d18 = $d5;
+
+        goto label14;
+
+     label13:
+        $d18 = virtualinvoke $r4.<java.awt.print.Paper: double getImageableHeight()>();
+
+     label14:
+        d19 = $d18;
+
+        $b6 = d17 cmpl d9;
+
+        $i16 = (int) $b6;
+
+        if $i16 <= 0 goto label15;
+
+        d17 = d9;
+
+     label15:
+        $b7 = d19 cmpl d11;
+
+        $i17 = (int) $b7;
+
+        if $i17 <= 0 goto label16;
+
+        d19 = d11;
+
+     label16:
+        $d6 = d13 + d17;
+
+        $b8 = $d6 cmpl d9;
+
+        $i18 = (int) $b8;
+
+        if $i18 <= 0 goto label17;
+
+        d13 = d9 - d17;
+
+     label17:
+        $d7 = d15 + d19;
+
+        $b9 = $d7 cmpl d11;
+
+        $i19 = (int) $b9;
+
+        if $i19 <= 0 goto label18;
+
+        d15 = d11 - d19;
+
+     label18:
+        virtualinvoke r1.<java.awt.print.Paper: void setSize(double,double)>(d9, d11);
+
+        virtualinvoke r1.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(d13, d15, d17, d19);
+
+        return;
+    }
+
+    public java.awt.print.PageFormat defaultPage(java.awt.print.PageFormat)
+    {
+        javax.print.attribute.standard.Media r13;
+        sun.print.RasterPrinterJob r4;
+        java.util.Locale $r6, $r8, $r14, $r16, $r17;
+        java.awt.print.PageFormat r0, r2;
+        boolean $z0, $z1, $z2, $z3;
+        javax.print.attribute.standard.MediaSize $r12;
+        float $f0, $f1;
+        javax.print.attribute.standard.MediaSizeName $r11;
+        java.awt.print.Paper $r3;
+        java.lang.String $r7, $r9, $r15;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, d8, d9;
+        javax.print.PrintService $r5;
+        java.lang.Object $r1, $r10;
+
+        r4 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.print.PageFormat;
+
+        $r1 = virtualinvoke r0.<java.awt.print.PageFormat: java.lang.Object clone()>();
+
+        r2 = (java.awt.print.PageFormat) $r1;
+
+        virtualinvoke r2.<java.awt.print.PageFormat: void setOrientation(int)>(1);
+
+        $r3 = new java.awt.print.Paper;
+
+        specialinvoke $r3.<java.awt.print.Paper: void <init>()>();
+
+        $r5 = virtualinvoke r4.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r5 == null goto label1;
+
+        $r10 = interfaceinvoke $r5.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        r13 = (javax.print.attribute.standard.Media) $r10;
+
+        $z2 = r13 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z2 == 0 goto label1;
+
+        $r11 = (javax.print.attribute.standard.MediaSizeName) r13;
+
+        $r12 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r11);
+
+        if $r12 == null goto label1;
+
+        $f0 = virtualinvoke $r12.<javax.print.attribute.standard.MediaSize: float getX(int)>(25400);
+
+        $d4 = (double) $f0;
+
+        d8 = $d4 * 72.0;
+
+        $f1 = virtualinvoke $r12.<javax.print.attribute.standard.MediaSize: float getY(int)>(25400);
+
+        $d5 = (double) $f1;
+
+        d9 = $d5 * 72.0;
+
+        virtualinvoke $r3.<java.awt.print.Paper: void setSize(double,double)>(d8, d9);
+
+        $d7 = d8 - 144.0;
+
+        $d6 = d9 - 144.0;
+
+        virtualinvoke $r3.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(72.0, 72.0, $d7, $d6);
+
+        virtualinvoke r2.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r3);
+
+        return r2;
+
+     label1:
+        $r14 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r15 = virtualinvoke $r14.<java.util.Locale: java.lang.String getCountry()>();
+
+        $r16 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r17 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $z3 = virtualinvoke $r16.<java.util.Locale: boolean equals(java.lang.Object)>($r17);
+
+        if $z3 != 0 goto label2;
+
+        if $r15 == null goto label2;
+
+        $r6 = <java.util.Locale: java.util.Locale US>;
+
+        $r7 = virtualinvoke $r6.<java.util.Locale: java.lang.String getCountry()>();
+
+        $z0 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 != 0 goto label2;
+
+        $r8 = <java.util.Locale: java.util.Locale CANADA>;
+
+        $r9 = virtualinvoke $r8.<java.util.Locale: java.lang.String getCountry()>();
+
+        $z1 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z1 != 0 goto label2;
+
+        $d0 = staticinvoke <java.lang.Math: double rint(double)>(595.2755905511812);
+
+        $d1 = staticinvoke <java.lang.Math: double rint(double)>(841.8897637795276);
+
+        virtualinvoke $r3.<java.awt.print.Paper: void setSize(double,double)>($d0, $d1);
+
+        $d3 = $d0 - 144.0;
+
+        $d2 = $d1 - 144.0;
+
+        virtualinvoke $r3.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(72.0, 72.0, $d3, $d2);
+
+     label2:
+        virtualinvoke r2.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r3);
+
+        return r2;
+    }
+
+    public java.awt.print.PageFormat validatePage(java.awt.print.PageFormat)
+    {
+        sun.print.RasterPrinterJob r4;
+        java.lang.Object $r1;
+        java.awt.print.Paper $r3, $r5;
+        java.awt.print.PageFormat r0, r2;
+
+        r4 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.print.PageFormat;
+
+        $r1 = virtualinvoke r0.<java.awt.print.PageFormat: java.lang.Object clone()>();
+
+        r2 = (java.awt.print.PageFormat) $r1;
+
+        $r3 = new java.awt.print.Paper;
+
+        specialinvoke $r3.<java.awt.print.Paper: void <init>()>();
+
+        $r5 = virtualinvoke r2.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        virtualinvoke r4.<sun.print.RasterPrinterJob: void validatePaper(java.awt.print.Paper,java.awt.print.Paper)>($r5, $r3);
+
+        virtualinvoke r2.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r3);
+
+        return r2;
+    }
+
+    public void setCopies(int)
+    {
+        int i0;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.print.RasterPrinterJob: int mNumCopies> = i0;
+
+        return;
+    }
+
+    public int getCopies()
+    {
+        int $i0;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $i0 = r0.<sun.print.RasterPrinterJob: int mNumCopies>;
+
+        return $i0;
+    }
+
+    protected int getCopiesInt()
+    {
+        int $i0, $i1;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $i0 = r0.<sun.print.RasterPrinterJob: int copiesAttr>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<sun.print.RasterPrinterJob: int copiesAttr>;
+
+        goto label2;
+
+     label1:
+        $i1 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getCopies()>();
+
+     label2:
+        return $i1;
+    }
+
+    public java.lang.String getUserName()
+    {
+        java.lang.String $r0;
+        sun.print.RasterPrinterJob r1;
+
+        r1 := @this: sun.print.RasterPrinterJob;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.name");
+
+        return $r0;
+    }
+
+    protected java.lang.String getUserNameInt()
+    {
+        sun.print.RasterPrinterJob r0;
+        java.lang.SecurityException $r4;
+        java.lang.String $r1, $r2, $r3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.print.RasterPrinterJob: java.lang.String userNameAttr>;
+
+        return $r3;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.lang.String getUserName()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return "";
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public void setJobName(java.lang.String)
+    {
+        java.lang.String r0;
+        java.lang.NullPointerException $r1;
+        sun.print.RasterPrinterJob r2;
+
+        r2 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        r2.<sun.print.RasterPrinterJob: java.lang.String mDocName> = r0;
+
+        goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getJobName()
+    {
+        java.lang.String $r1;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: java.lang.String mDocName>;
+
+        return $r1;
+    }
+
+    protected java.lang.String getJobNameInt()
+    {
+        java.lang.String $r1, $r2;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: java.lang.String jobNameAttr>;
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.lang.String getJobName()>();
+
+     label2:
+        return $r2;
+    }
+
+    protected void setPageRange(int, int)
+    {
+        sun.print.RasterPrinterJob r0;
+        int i0, i1, $i2, $i3, $i4, $i6, $i8;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 < 0 goto label1;
+
+        if i1 < 0 goto label1;
+
+        r0.<sun.print.RasterPrinterJob: int mFirstPage> = i0;
+
+        r0.<sun.print.RasterPrinterJob: int mLastPage> = i1;
+
+        $i3 = r0.<sun.print.RasterPrinterJob: int mLastPage>;
+
+        $i2 = r0.<sun.print.RasterPrinterJob: int mFirstPage>;
+
+        if $i3 >= $i2 goto label2;
+
+        $i4 = r0.<sun.print.RasterPrinterJob: int mFirstPage>;
+
+        r0.<sun.print.RasterPrinterJob: int mLastPage> = $i4;
+
+        goto label2;
+
+     label1:
+        $i6 = (int) -1;
+
+        r0.<sun.print.RasterPrinterJob: int mFirstPage> = $i6;
+
+        $i8 = (int) -1;
+
+        r0.<sun.print.RasterPrinterJob: int mLastPage> = $i8;
+
+     label2:
+        return;
+    }
+
+    protected int getFirstPage()
+    {
+        sun.print.RasterPrinterJob r0;
+        int $i0, $i1, $i3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $i0 = r0.<sun.print.RasterPrinterJob: int mFirstPage>;
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        $i1 = 0;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<sun.print.RasterPrinterJob: int mFirstPage>;
+
+     label2:
+        return $i1;
+    }
+
+    protected int getLastPage()
+    {
+        int $i0;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $i0 = r0.<sun.print.RasterPrinterJob: int mLastPage>;
+
+        return $i0;
+    }
+
+    protected void setCollated(boolean)
+    {
+        sun.print.RasterPrinterJob r0;
+        boolean z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.print.RasterPrinterJob: boolean mCollate> = z0;
+
+        r0.<sun.print.RasterPrinterJob: boolean collateAttReq> = 1;
+
+        return;
+    }
+
+    protected boolean isCollated()
+    {
+        sun.print.RasterPrinterJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $z0 = r0.<sun.print.RasterPrinterJob: boolean mCollate>;
+
+        return $z0;
+    }
+
+    protected final int getSelectAttrib()
+    {
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r2;
+        sun.print.SunPageSelection r4, $r5, $r6, $r7;
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.Attribute $r3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r3 = interfaceinvoke $r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunPageSelection;");
+
+        r4 = (sun.print.SunPageSelection) $r3;
+
+        $r5 = <sun.print.SunPageSelection: sun.print.SunPageSelection RANGE>;
+
+        if r4 != $r5 goto label1;
+
+        return 2;
+
+     label1:
+        $r6 = <sun.print.SunPageSelection: sun.print.SunPageSelection SELECTION>;
+
+        if r4 != $r6 goto label2;
+
+        return 1;
+
+     label2:
+        $r7 = <sun.print.SunPageSelection: sun.print.SunPageSelection ALL>;
+
+        if r4 != $r7 goto label3;
+
+        return 0;
+
+     label3:
+        return 4;
+    }
+
+    protected final int getFromPageAttrib()
+    {
+        int[][] $r5;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r2;
+        javax.print.attribute.standard.PageRanges r4;
+        int[] $r6;
+        sun.print.RasterPrinterJob r0;
+        int $i0, $i1;
+        javax.print.attribute.Attribute $r3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r3 = interfaceinvoke $r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/PageRanges;");
+
+        r4 = (javax.print.attribute.standard.PageRanges) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = virtualinvoke r4.<javax.print.attribute.standard.PageRanges: int[][] getMembers()>();
+
+        $r6 = $r5[0];
+
+        $i1 = $r6[0];
+
+        return $i1;
+
+     label1:
+        $i0 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getMinPageAttrib()>();
+
+        return $i0;
+    }
+
+    protected final int getToPageAttrib()
+    {
+        int[][] $r5;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r2;
+        javax.print.attribute.standard.PageRanges r4;
+        int[] $r6;
+        sun.print.RasterPrinterJob r0;
+        int $i0, $i1, $i2, $i3;
+        javax.print.attribute.Attribute $r3;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r3 = interfaceinvoke $r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/PageRanges;");
+
+        r4 = (javax.print.attribute.standard.PageRanges) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = virtualinvoke r4.<javax.print.attribute.standard.PageRanges: int[][] getMembers()>();
+
+        $i1 = lengthof $r5;
+
+        $i2 = $i1 - 1;
+
+        $r6 = $r5[$i2];
+
+        $i3 = $r6[1];
+
+        return $i3;
+
+     label1:
+        $i0 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getMaxPageAttrib()>();
+
+        return $i0;
+    }
+
+    protected final int getMinPageAttrib()
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r2;
+        int $i0;
+        javax.print.attribute.Attribute $r3;
+        sun.print.SunMinMaxPage r4;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r3 = interfaceinvoke $r2.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunMinMaxPage;");
+
+        r4 = (sun.print.SunMinMaxPage) $r3;
+
+        if r4 == null goto label1;
+
+        $i0 = virtualinvoke r4.<sun.print.SunMinMaxPage: int getMin()>();
+
+        return $i0;
+
+     label1:
+        return 1;
+    }
+
+    protected final int getMaxPageAttrib()
+    {
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r3;
+        sun.print.RasterPrinterJob r0;
+        int $i0, $i1, i2, $i3, $i5;
+        javax.print.attribute.Attribute $r4;
+        sun.print.SunMinMaxPage r5;
+        java.awt.print.Pageable $r2;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.print.RasterPrinterJob: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r4 = interfaceinvoke $r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunMinMaxPage;");
+
+        r5 = (sun.print.SunMinMaxPage) $r4;
+
+        if r5 == null goto label1;
+
+        $i1 = virtualinvoke r5.<sun.print.SunMinMaxPage: int getMax()>();
+
+        return $i1;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable getPageable()>();
+
+        if $r2 == null goto label5;
+
+        $i0 = interfaceinvoke $r2.<java.awt.print.Pageable: int getNumberOfPages()>();
+
+        i2 = $i0;
+
+        $i5 = (int) -1;
+
+        if $i0 > $i5 goto label2;
+
+        i2 = 9999;
+
+     label2:
+        if i2 != 0 goto label3;
+
+        $i3 = 1;
+
+        goto label4;
+
+     label3:
+        $i3 = i2;
+
+     label4:
+        return $i3;
+
+     label5:
+        return 2147483647;
+    }
+
+    protected abstract void startDoc() throws java.awt.print.PrinterException;
+
+    protected abstract void endDoc() throws java.awt.print.PrinterException;
+
+    protected abstract void abortDoc();
+
+    protected void cancelDoc() throws java.awt.print.PrinterAbortException
+    {
+        java.lang.Throwable $r2;
+        sun.print.RasterPrinterJob r0;
+        java.awt.print.PrinterAbortException $r1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        virtualinvoke r0.<sun.print.RasterPrinterJob: void abortDoc()>();
+
+        entermonitor r0;
+
+     label1:
+        r0.<sun.print.RasterPrinterJob: boolean userCancelled> = 0;
+
+        r0.<sun.print.RasterPrinterJob: boolean performingPrinting> = 0;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+     label5:
+        $r1 = new java.awt.print.PrinterAbortException;
+
+        specialinvoke $r1.<java.awt.print.PrinterAbortException: void <init>()>();
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected int getCollatedCopies()
+    {
+        int $i0;
+        sun.print.RasterPrinterJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $z0 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isCollated()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getCopiesInt()>();
+
+        goto label2;
+
+     label1:
+        $i0 = 1;
+
+     label2:
+        return $i0;
+    }
+
+    protected int getNoncollatedCopies()
+    {
+        int $i0;
+        sun.print.RasterPrinterJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $z0 = virtualinvoke r0.<sun.print.RasterPrinterJob: boolean isCollated()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = 1;
+
+        goto label2;
+
+     label1:
+        $i0 = virtualinvoke r0.<sun.print.RasterPrinterJob: int getCopiesInt()>();
+
+     label2:
+        return $i0;
+    }
+
+    synchronized void setGraphicsConfigInfo(java.awt.geom.AffineTransform, double, double)
+    {
+        java.awt.geom.Point2D$Double $r0;
+        sun.print.RasterPrinterJob r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        double d0, d1, $d2, $d3, $d4, $d5;
+        boolean $z0;
+        java.awt.geom.AffineTransform r1, $r4, $r5;
+        sun.print.PrinterGraphicsConfig $r3;
+
+        r2 := @this: sun.print.RasterPrinterJob;
+
+        r1 := @parameter0: java.awt.geom.AffineTransform;
+
+        d0 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        $r0 = new java.awt.geom.Point2D$Double;
+
+        specialinvoke $r0.<java.awt.geom.Point2D$Double: void <init>(double,double)>(d0, d1);
+
+        virtualinvoke r1.<java.awt.geom.AffineTransform: java.awt.geom.Point2D transform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r0, $r0);
+
+        $r3 = r2.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig>;
+
+        if $r3 == null goto label1;
+
+        $r4 = r2.<sun.print.RasterPrinterJob: java.awt.geom.AffineTransform defaultDeviceTransform>;
+
+        if $r4 == null goto label1;
+
+        $r5 = r2.<sun.print.RasterPrinterJob: java.awt.geom.AffineTransform defaultDeviceTransform>;
+
+        $z0 = virtualinvoke r1.<java.awt.geom.AffineTransform: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = r2.<sun.print.RasterPrinterJob: int deviceWidth>;
+
+        $d2 = virtualinvoke $r0.<java.awt.geom.Point2D$Double: double getX()>();
+
+        $i1 = (int) $d2;
+
+        if $i0 != $i1 goto label1;
+
+        $i2 = r2.<sun.print.RasterPrinterJob: int deviceHeight>;
+
+        $d3 = virtualinvoke $r0.<java.awt.geom.Point2D$Double: double getY()>();
+
+        $i3 = (int) $d3;
+
+        if $i2 == $i3 goto label2;
+
+     label1:
+        $d4 = virtualinvoke $r0.<java.awt.geom.Point2D$Double: double getX()>();
+
+        $i4 = (int) $d4;
+
+        r2.<sun.print.RasterPrinterJob: int deviceWidth> = $i4;
+
+        $d5 = virtualinvoke $r0.<java.awt.geom.Point2D$Double: double getY()>();
+
+        $i5 = (int) $d5;
+
+        r2.<sun.print.RasterPrinterJob: int deviceHeight> = $i5;
+
+        r2.<sun.print.RasterPrinterJob: java.awt.geom.AffineTransform defaultDeviceTransform> = r1;
+
+        r2.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig> = null;
+
+     label2:
+        return;
+    }
+
+    synchronized sun.print.PrinterGraphicsConfig getPrinterGraphicsConfig()
+    {
+        javax.print.PrintService $r2;
+        java.awt.geom.AffineTransform $r4;
+        sun.print.PrinterGraphicsConfig $r1, $r3, $r5, $r6;
+        sun.print.RasterPrinterJob r0;
+        int $i0, $i1;
+        java.lang.String r7;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig>;
+
+        return $r6;
+
+     label1:
+        r7 = "Printer Device";
+
+        $r2 = virtualinvoke r0.<sun.print.RasterPrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r2 == null goto label2;
+
+        r7 = virtualinvoke $r2.<java.lang.Object: java.lang.String toString()>();
+
+     label2:
+        $r3 = new sun.print.PrinterGraphicsConfig;
+
+        $r4 = r0.<sun.print.RasterPrinterJob: java.awt.geom.AffineTransform defaultDeviceTransform>;
+
+        $i1 = r0.<sun.print.RasterPrinterJob: int deviceWidth>;
+
+        $i0 = r0.<sun.print.RasterPrinterJob: int deviceHeight>;
+
+        specialinvoke $r3.<sun.print.PrinterGraphicsConfig: void <init>(java.lang.String,java.awt.geom.AffineTransform,int,int)>(r7, $r4, $i1, $i0);
+
+        r0.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig> = $r3;
+
+        $r5 = r0.<sun.print.RasterPrinterJob: sun.print.PrinterGraphicsConfig pgConfig>;
+
+        return $r5;
+    }
+
+    protected int printPage(java.awt.print.Pageable, int) throws java.awt.print.PrinterException
+    {
+        java.awt.Color $r70;
+        byte[] $r73;
+        byte $b16, $b17;
+        java.awt.print.Printable $r4;
+        java.lang.StringBuilder $r15, $r16, $r17, $r19, $r20, $r21, $r27, $r28, $r29, $r55, $r56, $r57, $r58;
+        sun.print.PeekGraphics $r10;
+        java.awt.print.Pageable r0;
+        sun.print.RasterPrinterJob r6;
+        java.awt.geom.Rectangle2D$Double $r11, $r60, $r67;
+        java.awt.print.PrinterException $r51, $r52, $r54;
+        sun.print.RasterPrinterJob$GraphicsState r63;
+        java.awt.print.Paper $r5, $r23, $r24, $r49, $r50;
+        java.awt.Graphics2D $r9, $r25, $r37, $r66, $r69;
+        int i0, $i1, i2, $i3, i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i18, $i19, $i20, $i21, i22, $i23, i24, $i25, $i26, i27, i28, i29;
+        java.lang.Object $r2, $r44;
+        java.awt.image.WritableRaster $r71;
+        java.awt.geom.Rectangle2D $r47;
+        java.awt.geom.AffineTransform $r7, $r12, $r14, $r31, $r38, $r41, $r45, $r61, $r62;
+        java.lang.Exception $r53;
+        double[] $r13, $r32, $r39;
+        java.util.ArrayList $r40, $r42, $r43;
+        java.lang.String $r18, $r22, $r30, $r59;
+        java.awt.print.PageFormat $r1, r3;
+        boolean $z0, $z1, $z2;
+        java.awt.Shape $r34, $r46;
+        java.awt.image.BufferedImage $r8, $r26, r64, $r65;
+        sun.print.PathGraphics $r48;
+        sun.awt.image.ByteInterleavedRaster $r72;
+        java.awt.Graphics $r36;
+        java.awt.Rectangle $r33, $r35;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49, $d50, $d51, $d52, $d53, $d54, $d55, $d56, $d57, $d58, $d59, $d60, $d61, $d62, $d63, $d64, $d65;
+        sun.print.ProxyGraphics2D $r68;
+
+        r6 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.print.Pageable;
+
+        i0 := @parameter1: int;
+
+     label01:
+        $r1 = interfaceinvoke r0.<java.awt.print.Pageable: java.awt.print.PageFormat getPageFormat(int)>(i0);
+
+        $r2 = virtualinvoke $r1.<java.awt.print.PageFormat: java.lang.Object clone()>();
+
+        r3 = (java.awt.print.PageFormat) $r2;
+
+        $r4 = interfaceinvoke r0.<java.awt.print.Pageable: java.awt.print.Printable getPrintable(int)>(i0);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r53 := @caughtexception;
+
+        $r54 = new java.awt.print.PrinterException;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error getting page or printable.[ ");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r53);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ]");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r54.<java.awt.print.PrinterException: void <init>(java.lang.String)>($r59);
+
+        virtualinvoke $r54.<java.awt.print.PrinterException: java.lang.Throwable initCause(java.lang.Throwable)>($r53);
+
+        throw $r54;
+
+     label04:
+        $r5 = virtualinvoke r3.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $i1 = virtualinvoke r3.<java.awt.print.PageFormat: int getOrientation()>();
+
+        if $i1 == 1 goto label06;
+
+        $z1 = r6.<sun.print.RasterPrinterJob: boolean landscapeRotates270>;
+
+        if $z1 == 0 goto label06;
+
+        $d39 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableX()>();
+
+        $d40 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableY()>();
+
+        $d41 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableWidth()>();
+
+        $d42 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableHeight()>();
+
+        $d43 = virtualinvoke $r5.<java.awt.print.Paper: double getWidth()>();
+
+        $d44 = $d43 - $d39;
+
+        $d45 = $d44 - $d41;
+
+        $d46 = virtualinvoke $r5.<java.awt.print.Paper: double getHeight()>();
+
+        $d47 = $d46 - $d40;
+
+        $d48 = $d47 - $d42;
+
+        virtualinvoke $r5.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>($d45, $d48, $d41, $d42);
+
+        virtualinvoke r3.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r5);
+
+        $i20 = virtualinvoke r3.<java.awt.print.PageFormat: int getOrientation()>();
+
+        if $i20 != 0 goto label05;
+
+        virtualinvoke r3.<java.awt.print.PageFormat: void setOrientation(int)>(2);
+
+        goto label06;
+
+     label05:
+        virtualinvoke r3.<java.awt.print.PageFormat: void setOrientation(int)>(0);
+
+     label06:
+        $d49 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getXRes()>();
+
+        $d50 = $d49 / 72.0;
+
+        $d51 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getYRes()>();
+
+        $d52 = $d51 / 72.0;
+
+        $r60 = new java.awt.geom.Rectangle2D$Double;
+
+        $d53 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableX()>();
+
+        $d54 = $d53 * $d50;
+
+        $d55 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableY()>();
+
+        $d56 = $d55 * $d52;
+
+        $d57 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableWidth()>();
+
+        $d58 = $d57 * $d50;
+
+        $d59 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableHeight()>();
+
+        $d60 = $d59 * $d52;
+
+        specialinvoke $r60.<java.awt.geom.Rectangle2D$Double: void <init>(double,double,double,double)>($d54, $d56, $d58, $d60);
+
+        $r61 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r61.<java.awt.geom.AffineTransform: void <init>()>();
+
+        $r62 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r62.<java.awt.geom.AffineTransform: void <init>()>();
+
+        virtualinvoke $r62.<java.awt.geom.AffineTransform: void scale(double,double)>($d50, $d52);
+
+        $d61 = virtualinvoke $r60.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $i21 = (int) $d61;
+
+        i22 = $i21;
+
+        $i23 = $i21 % 4;
+
+        if $i23 == 0 goto label07;
+
+        $i18 = $i21 % 4;
+
+        $i19 = 4 - $i18;
+
+        i22 = $i21 + $i19;
+
+     label07:
+        if i22 > 0 goto label08;
+
+        $r52 = new java.awt.print.PrinterException;
+
+        specialinvoke $r52.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Paper\'s imageable width is too small.");
+
+        throw $r52;
+
+     label08:
+        $d0 = virtualinvoke $r60.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        i2 = (int) $d0;
+
+        if i2 > 0 goto label09;
+
+        $r51 = new java.awt.print.PrinterException;
+
+        specialinvoke $r51.<java.awt.print.PrinterException: void <init>(java.lang.String)>("Paper\'s imageable height is too small.");
+
+        throw $r51;
+
+     label09:
+        $i3 = 4194304 / i22;
+
+        i4 = $i3 / 3;
+
+        $d1 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableX()>();
+
+        $d2 = $d1 * $d50;
+
+        $d3 = staticinvoke <java.lang.Math: double rint(double)>($d2);
+
+        i5 = (int) $d3;
+
+        $d4 = virtualinvoke $r5.<java.awt.print.Paper: double getImageableY()>();
+
+        $d5 = $d4 * $d52;
+
+        $d6 = staticinvoke <java.lang.Math: double rint(double)>($d5);
+
+        i6 = (int) $d6;
+
+        $r7 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r7.<java.awt.geom.AffineTransform: void <init>()>();
+
+        $i7 = neg i5;
+
+        $d8 = (double) $i7;
+
+        $d7 = (double) i6;
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void translate(double,double)>($d8, $d7);
+
+        $d9 = (double) i4;
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void translate(double,double)>(0.0, $d9);
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void scale(double,double)>(1.0, -1.0);
+
+        $r8 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r8.<java.awt.image.BufferedImage: void <init>(int,int,int)>(1, 1, 5);
+
+        $r9 = virtualinvoke $r8.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+        $r10 = virtualinvoke r6.<sun.print.RasterPrinterJob: sun.print.PeekGraphics createPeekGraphics(java.awt.Graphics2D,java.awt.print.PrinterJob)>($r9, r6);
+
+        $r11 = new java.awt.geom.Rectangle2D$Double;
+
+        $d10 = virtualinvoke r3.<java.awt.print.PageFormat: double getImageableX()>();
+
+        $d11 = virtualinvoke r3.<java.awt.print.PageFormat: double getImageableY()>();
+
+        $d12 = virtualinvoke r3.<java.awt.print.PageFormat: double getImageableWidth()>();
+
+        $d13 = virtualinvoke r3.<java.awt.print.PageFormat: double getImageableHeight()>();
+
+        specialinvoke $r11.<java.awt.geom.Rectangle2D$Double: void <init>(double,double,double,double)>($d10, $d11, $d12, $d13);
+
+        virtualinvoke $r10.<sun.print.PeekGraphics: void transform(java.awt.geom.AffineTransform)>($r62);
+
+        $d14 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableX(java.awt.print.Paper)>($r5);
+
+        $d15 = neg $d14;
+
+        $d16 = $d15 / $d50;
+
+        $d17 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableY(java.awt.print.Paper)>($r5);
+
+        $d18 = neg $d17;
+
+        $d19 = $d18 / $d52;
+
+        virtualinvoke $r10.<sun.print.PeekGraphics: void translate(double,double)>($d16, $d19);
+
+        $r12 = new java.awt.geom.AffineTransform;
+
+        $r13 = virtualinvoke r3.<java.awt.print.PageFormat: double[] getMatrix()>();
+
+        specialinvoke $r12.<java.awt.geom.AffineTransform: void <init>(double[])>($r13);
+
+        virtualinvoke $r10.<sun.print.PeekGraphics: void transform(java.awt.geom.AffineTransform)>($r12);
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void initPrinterGraphics(java.awt.Graphics2D,java.awt.geom.Rectangle2D)>($r10, $r11);
+
+        $r14 = virtualinvoke $r10.<sun.print.PeekGraphics: java.awt.geom.AffineTransform getTransform()>();
+
+        $d20 = virtualinvoke $r5.<java.awt.print.Paper: double getWidth()>();
+
+        $d21 = virtualinvoke $r5.<java.awt.print.Paper: double getHeight()>();
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void setGraphicsConfigInfo(java.awt.geom.AffineTransform,double,double)>($r62, $d20, $d21);
+
+        $i8 = interfaceinvoke $r4.<java.awt.print.Printable: int print(java.awt.Graphics,java.awt.print.PageFormat,int)>($r10, $r1, i0);
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pageResult ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r18);
+
+        if $i8 != 0 goto label25;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("startPage ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r22);
+
+        $r23 = virtualinvoke r3.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        $r24 = r6.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper>;
+
+        if $r24 == null goto label10;
+
+        $d35 = virtualinvoke $r23.<java.awt.print.Paper: double getWidth()>();
+
+        $r49 = r6.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper>;
+
+        $d36 = virtualinvoke $r49.<java.awt.print.Paper: double getWidth()>();
+
+        $b16 = $d35 cmpl $d36;
+
+        if $b16 != 0 goto label10;
+
+        $d37 = virtualinvoke $r23.<java.awt.print.Paper: double getHeight()>();
+
+        $r50 = r6.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper>;
+
+        $d38 = virtualinvoke $r50.<java.awt.print.Paper: double getHeight()>();
+
+        $b17 = $d37 cmpl $d38;
+
+        if $b17 == 0 goto label11;
+
+     label10:
+        $z2 = 1;
+
+        goto label12;
+
+     label11:
+        $z2 = 0;
+
+     label12:
+        r6.<sun.print.RasterPrinterJob: java.awt.print.Paper previousPaper> = $r23;
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void startPage(java.awt.print.PageFormat,java.awt.print.Printable,int,boolean)>(r3, $r4, i0, $z2);
+
+        $r25 = virtualinvoke r6.<sun.print.RasterPrinterJob: java.awt.Graphics2D createPathGraphics(sun.print.PeekGraphics,java.awt.print.PrinterJob,java.awt.print.Printable,java.awt.print.PageFormat,int)>($r10, r6, $r4, r3, i0);
+
+        if $r25 == null goto label15;
+
+        virtualinvoke $r25.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r62);
+
+        $d27 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableX(java.awt.print.Paper)>($r5);
+
+        $d28 = neg $d27;
+
+        $d29 = $d28 / $d50;
+
+        $d30 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableY(java.awt.print.Paper)>($r5);
+
+        $d31 = neg $d30;
+
+        $d32 = $d31 / $d52;
+
+        virtualinvoke $r25.<java.awt.Graphics2D: void translate(double,double)>($d29, $d32);
+
+        $r38 = new java.awt.geom.AffineTransform;
+
+        $r39 = virtualinvoke r3.<java.awt.print.PageFormat: double[] getMatrix()>();
+
+        specialinvoke $r38.<java.awt.geom.AffineTransform: void <init>(double[])>($r39);
+
+        virtualinvoke $r25.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r38);
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void initPrinterGraphics(java.awt.Graphics2D,java.awt.geom.Rectangle2D)>($r25, $r11);
+
+        $r40 = r6.<sun.print.RasterPrinterJob: java.util.ArrayList redrawList>;
+
+        virtualinvoke $r40.<java.util.ArrayList: void clear()>();
+
+        $r41 = virtualinvoke $r25.<java.awt.Graphics2D: java.awt.geom.AffineTransform getTransform()>();
+
+        interfaceinvoke $r4.<java.awt.print.Printable: int print(java.awt.Graphics,java.awt.print.PageFormat,int)>($r25, $r1, i0);
+
+        i24 = 0;
+
+     label13:
+        $r42 = r6.<sun.print.RasterPrinterJob: java.util.ArrayList redrawList>;
+
+        $i15 = virtualinvoke $r42.<java.util.ArrayList: int size()>();
+
+        if i24 >= $i15 goto label14;
+
+        $r43 = r6.<sun.print.RasterPrinterJob: java.util.ArrayList redrawList>;
+
+        $r44 = virtualinvoke $r43.<java.util.ArrayList: java.lang.Object get(int)>(i24);
+
+        r63 = (sun.print.RasterPrinterJob$GraphicsState) $r44;
+
+        virtualinvoke $r25.<java.awt.Graphics2D: void setTransform(java.awt.geom.AffineTransform)>($r41);
+
+        $r48 = (sun.print.PathGraphics) $r25;
+
+        $r47 = r63.<sun.print.RasterPrinterJob$GraphicsState: java.awt.geom.Rectangle2D region>;
+
+        $d34 = r63.<sun.print.RasterPrinterJob$GraphicsState: double sx>;
+
+        $d33 = r63.<sun.print.RasterPrinterJob$GraphicsState: double sy>;
+
+        $r46 = r63.<sun.print.RasterPrinterJob$GraphicsState: java.awt.Shape theClip>;
+
+        $r45 = r63.<sun.print.RasterPrinterJob$GraphicsState: java.awt.geom.AffineTransform theTransform>;
+
+        virtualinvoke $r48.<sun.print.PathGraphics: void redrawRegion(java.awt.geom.Rectangle2D,double,double,java.awt.Shape,java.awt.geom.AffineTransform)>($r47, $d34, $d33, $r46, $r45);
+
+        i24 = i24 + 1;
+
+        goto label13;
+
+     label14:
+        goto label24;
+
+     label15:
+        r64 = r6.<sun.print.RasterPrinterJob: java.awt.image.BufferedImage cachedBand>;
+
+        $r26 = r6.<sun.print.RasterPrinterJob: java.awt.image.BufferedImage cachedBand>;
+
+        if $r26 == null goto label16;
+
+        $i13 = r6.<sun.print.RasterPrinterJob: int cachedBandWidth>;
+
+        if i22 != $i13 goto label16;
+
+        $i14 = r6.<sun.print.RasterPrinterJob: int cachedBandHeight>;
+
+        if i4 == $i14 goto label17;
+
+     label16:
+        $r65 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r65.<java.awt.image.BufferedImage: void <init>(int,int,int)>(i22, i4, 5);
+
+        r64 = $r65;
+
+        r6.<sun.print.RasterPrinterJob: java.awt.image.BufferedImage cachedBand> = $r65;
+
+        r6.<sun.print.RasterPrinterJob: int cachedBandWidth> = i22;
+
+        r6.<sun.print.RasterPrinterJob: int cachedBandHeight> = i4;
+
+     label17:
+        $r66 = virtualinvoke r64.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+        $r67 = new java.awt.geom.Rectangle2D$Double;
+
+        $d62 = (double) i22;
+
+        $d63 = (double) i4;
+
+        specialinvoke $r67.<java.awt.geom.Rectangle2D$Double: void <init>(double,double,double,double)>(0.0, 0.0, $d62, $d63);
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void initPrinterGraphics(java.awt.Graphics2D,java.awt.geom.Rectangle2D)>($r66, $r67);
+
+        $r68 = new sun.print.ProxyGraphics2D;
+
+        specialinvoke $r68.<sun.print.ProxyGraphics2D: void <init>(java.awt.Graphics2D,java.awt.print.PrinterJob)>($r66, r6);
+
+        $r69 = virtualinvoke r64.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+        $r70 = <java.awt.Color: java.awt.Color white>;
+
+        virtualinvoke $r69.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r70);
+
+        $r71 = virtualinvoke r64.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r72 = (sun.awt.image.ByteInterleavedRaster) $r71;
+
+        $r73 = virtualinvoke $r72.<sun.awt.image.ByteInterleavedRaster: byte[] getDataStorage()>();
+
+        $d64 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableX(java.awt.print.Paper)>($r5);
+
+        $i25 = (int) $d64;
+
+        $d65 = virtualinvoke r6.<sun.print.RasterPrinterJob: double getPhysicalPrintableY(java.awt.print.Paper)>($r5);
+
+        $i26 = (int) $d65;
+
+        i27 = 0;
+
+     label18:
+        if i27 > i2 goto label23;
+
+        virtualinvoke $r69.<java.awt.Graphics2D: void fillRect(int,int,int,int)>(0, 0, i22, i4);
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void setTransform(java.awt.geom.AffineTransform)>($r61);
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r7);
+
+        $i9 = neg i4;
+
+        $d22 = (double) $i9;
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void translate(double,double)>(0.0, $d22);
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r62);
+
+        $r31 = new java.awt.geom.AffineTransform;
+
+        $r32 = virtualinvoke r3.<java.awt.print.PageFormat: double[] getMatrix()>();
+
+        specialinvoke $r31.<java.awt.geom.AffineTransform: void <init>(double[])>($r32);
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r31);
+
+        $r33 = virtualinvoke $r66.<java.awt.Graphics2D: java.awt.Rectangle getClipBounds()>();
+
+        $r34 = virtualinvoke $r14.<java.awt.geom.AffineTransform: java.awt.Shape createTransformedShape(java.awt.Shape)>($r33);
+
+        $r35 = interfaceinvoke $r34.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+        if $r35 == null goto label19;
+
+        $z0 = virtualinvoke $r10.<sun.print.PeekGraphics: boolean hitsDrawingArea(java.awt.Rectangle)>($r35);
+
+        if $z0 == 0 goto label22;
+
+        if i22 <= 0 goto label22;
+
+        if i4 <= 0 goto label22;
+
+     label19:
+        $i12 = i5 - $i25;
+
+        i28 = $i12;
+
+        if $i12 >= 0 goto label20;
+
+        $d25 = (double) $i12;
+
+        $d26 = $d25 / $d50;
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void translate(double,double)>($d26, 0.0);
+
+        i28 = 0;
+
+     label20:
+        $i10 = i6 + i27;
+
+        $i11 = $i10 - $i26;
+
+        i29 = $i11;
+
+        if $i11 >= 0 goto label21;
+
+        $d23 = (double) $i11;
+
+        $d24 = $d23 / $d52;
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void translate(double,double)>(0.0, $d24);
+
+        i29 = 0;
+
+     label21:
+        $r36 = virtualinvoke $r66.<java.awt.Graphics2D: java.awt.Graphics create()>();
+
+        $r37 = (java.awt.Graphics2D) $r36;
+
+        virtualinvoke $r68.<sun.print.ProxyGraphics2D: void setDelegate(java.awt.Graphics2D)>($r37);
+
+        interfaceinvoke $r4.<java.awt.print.Printable: int print(java.awt.Graphics,java.awt.print.PageFormat,int)>($r68, $r1, i0);
+
+        virtualinvoke $r68.<sun.print.ProxyGraphics2D: void dispose()>();
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void printBand(byte[],int,int,int,int)>($r73, i28, i29, i22, i4);
+
+     label22:
+        i27 = i27 + i4;
+
+        goto label18;
+
+     label23:
+        virtualinvoke $r69.<java.awt.Graphics2D: void dispose()>();
+
+        virtualinvoke $r66.<java.awt.Graphics2D: void dispose()>();
+
+     label24:
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("calling endPage ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void debug_println(java.lang.String)>($r30);
+
+        virtualinvoke r6.<sun.print.RasterPrinterJob: void endPage(java.awt.print.PageFormat,java.awt.print.Printable,int)>(r3, $r4, i0);
+
+     label25:
+        return $i8;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+    }
+
+    public void cancel()
+    {
+        java.lang.Throwable $r1;
+        sun.print.RasterPrinterJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.print.RasterPrinterJob: boolean performingPrinting>;
+
+        if $z0 == 0 goto label2;
+
+        r0.<sun.print.RasterPrinterJob: boolean userCancelled> = 1;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean isCancelled()
+    {
+        java.lang.Throwable $r1;
+        sun.print.RasterPrinterJob r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.print.RasterPrinterJob: boolean performingPrinting>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r0.<sun.print.RasterPrinterJob: boolean userCancelled>;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r1;
+
+     label7:
+        return $z2;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected java.awt.print.Pageable getPageable()
+    {
+        sun.print.RasterPrinterJob r0;
+        java.awt.print.Pageable $r1;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $r1 = r0.<sun.print.RasterPrinterJob: java.awt.print.Pageable mDocument>;
+
+        return $r1;
+    }
+
+    protected java.awt.Graphics2D createPathGraphics(sun.print.PeekGraphics, java.awt.print.PrinterJob, java.awt.print.Printable, java.awt.print.PageFormat, int)
+    {
+        sun.print.PeekGraphics r1;
+        sun.print.RasterPrinterJob r0;
+        int i0;
+        java.awt.print.Printable r3;
+        java.awt.print.PageFormat r4;
+        java.awt.print.PrinterJob r2;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r1 := @parameter0: sun.print.PeekGraphics;
+
+        r2 := @parameter1: java.awt.print.PrinterJob;
+
+        r3 := @parameter2: java.awt.print.Printable;
+
+        r4 := @parameter3: java.awt.print.PageFormat;
+
+        i0 := @parameter4: int;
+
+        return null;
+    }
+
+    protected sun.print.PeekGraphics createPeekGraphics(java.awt.Graphics2D, java.awt.print.PrinterJob)
+    {
+        sun.print.PeekGraphics $r0;
+        java.awt.Graphics2D r1;
+        sun.print.RasterPrinterJob r3;
+        java.awt.print.PrinterJob r2;
+
+        r3 := @this: sun.print.RasterPrinterJob;
+
+        r1 := @parameter0: java.awt.Graphics2D;
+
+        r2 := @parameter1: java.awt.print.PrinterJob;
+
+        $r0 = new sun.print.PeekGraphics;
+
+        specialinvoke $r0.<sun.print.PeekGraphics: void <init>(java.awt.Graphics2D,java.awt.print.PrinterJob)>(r1, r2);
+
+        return $r0;
+    }
+
+    protected void initPrinterGraphics(java.awt.Graphics2D, java.awt.geom.Rectangle2D)
+    {
+        java.awt.Color $r2;
+        java.awt.Graphics2D r0;
+        sun.print.RasterPrinterJob r3;
+        java.awt.geom.Rectangle2D r1;
+
+        r3 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.awt.Graphics2D;
+
+        r1 := @parameter1: java.awt.geom.Rectangle2D;
+
+        virtualinvoke r0.<java.awt.Graphics2D: void setClip(java.awt.Shape)>(r1);
+
+        $r2 = <java.awt.Color: java.awt.Color black>;
+
+        virtualinvoke r0.<java.awt.Graphics2D: void setPaint(java.awt.Paint)>($r2);
+
+        return;
+    }
+
+    public boolean checkAllowedToPrintToFile()
+    {
+        java.lang.SecurityException $r1;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+     label1:
+        specialinvoke r0.<sun.print.RasterPrinterJob: void throwPrintToFile()>();
+
+     label2:
+        return 1;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    private void throwPrintToFile()
+    {
+        sun.print.RasterPrinterJob r1;
+        java.io.FilePermission $r2, $r3, $r4;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: sun.print.RasterPrinterJob;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label2;
+
+        $r2 = r1.<sun.print.RasterPrinterJob: java.io.FilePermission printToFilePermission>;
+
+        if $r2 != null goto label1;
+
+        $r4 = new java.io.FilePermission;
+
+        specialinvoke $r4.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>("<<ALL FILES>>", "read,write");
+
+        r1.<sun.print.RasterPrinterJob: java.io.FilePermission printToFilePermission> = $r4;
+
+     label1:
+        $r3 = r1.<sun.print.RasterPrinterJob: java.io.FilePermission printToFilePermission>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label2:
+        return;
+    }
+
+    protected java.lang.String removeControlChars(java.lang.String)
+    {
+        char c1;
+        sun.print.RasterPrinterJob r4;
+        int i0, i2, i3, $i4, $i5, $i6, $i7, $i8;
+        char[] $r1, r2;
+        java.lang.String r0, $r5;
+
+        r4 := @this: sun.print.RasterPrinterJob;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        i0 = lengthof $r1;
+
+        r2 = newarray (char)[i0];
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label4;
+
+        c1 = $r1[i3];
+
+        $i5 = (int) c1;
+
+        if $i5 > 13 goto label2;
+
+        $i6 = (int) c1;
+
+        if $i6 < 9 goto label2;
+
+        $i7 = (int) c1;
+
+        if $i7 == 11 goto label2;
+
+        $i8 = (int) c1;
+
+        if $i8 != 12 goto label3;
+
+     label2:
+        $i4 = i2;
+
+        i2 = i2 + 1;
+
+        r2[$i4] = c1;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        if i2 != i0 goto label5;
+
+        return r0;
+
+     label5:
+        $r5 = new java.lang.String;
+
+        specialinvoke $r5.<java.lang.String: void <init>(char[],int,int)>(r2, 0, i2);
+
+        return $r5;
+    }
+
+    private long getParentWindowID()
+    {
+        long $l0;
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        $l0 = r0.<sun.print.RasterPrinterJob: long parentWindowID>;
+
+        return $l0;
+    }
+
+    private void clearParentWindowID()
+    {
+        sun.print.RasterPrinterJob r0;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r0.<sun.print.RasterPrinterJob: long parentWindowID> = 0L;
+
+        r0.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop> = null;
+
+        return;
+    }
+
+    private void setParentWindowID(javax.print.attribute.PrintRequestAttributeSet)
+    {
+        sun.print.RasterPrinterJob r0;
+        javax.print.attribute.PrintRequestAttributeSet r1;
+        long $l0;
+        javax.print.attribute.Attribute $r2;
+        sun.print.DialogOnTop $r3, $r4, $r5;
+
+        r0 := @this: sun.print.RasterPrinterJob;
+
+        r1 := @parameter0: javax.print.attribute.PrintRequestAttributeSet;
+
+        r0.<sun.print.RasterPrinterJob: long parentWindowID> = 0L;
+
+        $r2 = interfaceinvoke r1.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/DialogOnTop;");
+
+        $r3 = (sun.print.DialogOnTop) $r2;
+
+        r0.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop> = $r3;
+
+        $r4 = r0.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop>;
+
+        if $r4 == null goto label1;
+
+        $r5 = r0.<sun.print.RasterPrinterJob: sun.print.DialogOnTop onTop>;
+
+        $l0 = virtualinvoke $r5.<sun.print.DialogOnTop: long getID()>();
+
+        r0.<sun.print.RasterPrinterJob: long parentWindowID> = $l0;
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r0, $r3;
+        java.lang.Object $r1, $r4;
+        java.lang.String r2, $r5;
+        boolean $z0, $z1;
+
+        <sun.print.RasterPrinterJob: java.lang.String SHAPE_TEXT_PROP> = "sun.java2d.print.shapetext";
+
+        <sun.print.RasterPrinterJob: java.lang.String FORCE_PDL> = "pdl";
+
+        <sun.print.RasterPrinterJob: java.lang.String FORCE_RASTER> = "raster";
+
+        <sun.print.RasterPrinterJob: java.lang.String FORCE_PIPE_PROP> = "sun.java2d.print.pipeline";
+
+        <sun.print.RasterPrinterJob: float DPI> = 72.0F;
+
+        <sun.print.RasterPrinterJob: int MAX_BAND_SIZE> = 4194304;
+
+        <sun.print.RasterPrinterJob: int PD_NOSELECTION> = 4;
+
+        <sun.print.RasterPrinterJob: int PD_PAGENUMS> = 2;
+
+        <sun.print.RasterPrinterJob: int PD_SELECTION> = 1;
+
+        <sun.print.RasterPrinterJob: int PD_ALLPAGES> = 0;
+
+        <sun.print.RasterPrinterJob: int MAX_UNKNOWN_PAGES> = 9999;
+
+        <sun.print.RasterPrinterJob: int STREAM> = 2;
+
+        <sun.print.RasterPrinterJob: int FILE> = 1;
+
+        <sun.print.RasterPrinterJob: int PRINTER> = 0;
+
+        <sun.print.RasterPrinterJob: boolean forcePDL> = 0;
+
+        <sun.print.RasterPrinterJob: boolean forceRaster> = 0;
+
+        <sun.print.RasterPrinterJob: boolean shapeTextProp> = 0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.java2d.print.pipeline");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label2;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("pdl");
+
+        if $z0 == 0 goto label1;
+
+        <sun.print.RasterPrinterJob: boolean forcePDL> = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("raster");
+
+        if $z1 == 0 goto label2;
+
+        <sun.print.RasterPrinterJob: boolean forceRaster> = 1;
+
+     label2:
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.java2d.print.shapetext");
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r5 = (java.lang.String) $r4;
+
+        if $r5 == null goto label3;
+
+        <sun.print.RasterPrinterJob: boolean shapeTextProp> = 1;
+
+     label3:
+        <sun.print.RasterPrinterJob: boolean debugPrint> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,1040 @@
+public class com.sun.jmx.remote.security.FileLoginModule extends java.lang.Object implements javax.security.auth.spi.LoginModule
+{
+    private static final java.lang.String DEFAULT_PASSWORD_FILE_NAME;
+    private static final java.lang.String USERNAME_KEY;
+    private static final java.lang.String PASSWORD_KEY;
+    private static final com.sun.jmx.remote.util.ClassLogger logger;
+    private boolean useFirstPass;
+    private boolean tryFirstPass;
+    private boolean storePass;
+    private boolean clearPass;
+    private boolean succeeded;
+    private boolean commitSucceeded;
+    private java.lang.String username;
+    private char[] password;
+    private javax.management.remote.JMXPrincipal user;
+    private javax.security.auth.Subject subject;
+    private javax.security.auth.callback.CallbackHandler callbackHandler;
+    private java.util.Map sharedState;
+    private java.util.Map options;
+    private java.lang.String passwordFile;
+    private java.lang.String passwordFileDisplayName;
+    private boolean userSuppliedPasswordFile;
+    private boolean hasJavaHomePermission;
+    private java.util.Properties userCredentials;
+
+    public void <init>()
+    {
+        com.sun.jmx.remote.security.FileLoginModule r0;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean useFirstPass> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean tryFirstPass> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean storePass> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean clearPass> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean commitSucceeded> = 0;
+
+        return;
+    }
+
+    public void initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map)
+    {
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        javax.security.auth.callback.CallbackHandler r2;
+        java.util.Map r3, $r5, r6;
+        java.lang.SecurityException $r25;
+        java.lang.String $r7, $r9, $r10, $r12, $r13, $r15, $r16, $r18, $r20, $r21, $r22, $r23, $r24;
+        boolean $z0, $z1, $z2, $z3;
+        javax.security.auth.Subject r1;
+        java.lang.Object $r4, $r8, $r11, $r14, $r17, $r19;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        r1 := @parameter0: javax.security.auth.Subject;
+
+        r2 := @parameter1: javax.security.auth.callback.CallbackHandler;
+
+        r3 := @parameter2: java.util.Map;
+
+        r6 := @parameter3: java.util.Map;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject> = r1;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.callback.CallbackHandler callbackHandler> = r2;
+
+        $r4 = staticinvoke <com.sun.jmx.mbeanserver.Util: java.lang.Object cast(java.lang.Object)>(r3);
+
+        $r5 = (java.util.Map) $r4;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState> = $r5;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map options> = r6;
+
+        $r7 = "true";
+
+        $r8 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("tryFirstPass");
+
+        $r9 = (java.lang.String) $r8;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r9);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean tryFirstPass> = $z0;
+
+        $r10 = "true";
+
+        $r11 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("useFirstPass");
+
+        $r12 = (java.lang.String) $r11;
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r12);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean useFirstPass> = $z1;
+
+        $r13 = "true";
+
+        $r14 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("storePass");
+
+        $r15 = (java.lang.String) $r14;
+
+        $z2 = virtualinvoke $r13.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r15);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean storePass> = $z2;
+
+        $r16 = "true";
+
+        $r17 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("clearPass");
+
+        $r18 = (java.lang.String) $r17;
+
+        $z3 = virtualinvoke $r16.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r18);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean clearPass> = $z3;
+
+        $r19 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("passwordFile");
+
+        $r20 = (java.lang.String) $r19;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile> = $r20;
+
+        $r21 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile>;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName> = $r21;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean userSuppliedPasswordFile> = 1;
+
+        $r22 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile>;
+
+        if $r22 != null goto label4;
+
+        $r23 = <com.sun.jmx.remote.security.FileLoginModule: java.lang.String DEFAULT_PASSWORD_FILE_NAME>;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile> = $r23;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean userSuppliedPasswordFile> = 0;
+
+     label1:
+        staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean hasJavaHomePermission> = 1;
+
+        $r24 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile>;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName> = $r24;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r25 := @caughtexception;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean hasJavaHomePermission> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName> = "jmxremote.password";
+
+     label4:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public boolean login() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r17, $r18, $r20, $r22, $r25, $r32;
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r11, $r13, $r15, $r26, $r27, $r29;
+        java.lang.Throwable $r31;
+        com.sun.jmx.remote.util.ClassLogger $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r12, $r19, $r21, $r23;
+        java.lang.String $r14, $r16, $r28, $r30;
+        java.util.Properties $r1;
+        java.io.IOException $r24;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+     label01:
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void loadPasswordFile()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r24 := @caughtexception;
+
+        $r25 = new javax.security.auth.login.LoginException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: unable to load the password file: ");
+
+        $r28 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName>;
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r30);
+
+        $r31 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r25, $r24);
+
+        $r32 = (javax.security.auth.login.LoginException) $r31;
+
+        throw $r32;
+
+     label04:
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Properties userCredentials>;
+
+        if $r1 != null goto label05;
+
+        $r17 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r17.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Error: unable to locate the users\' credentials.");
+
+        throw $r17;
+
+     label05:
+        $r2 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r2.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z0 == 0 goto label06;
+
+        $r12 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using password file: ");
+
+        $r14 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", $r16);
+
+     label06:
+        $z1 = r0.<com.sun.jmx.remote.security.FileLoginModule: boolean tryFirstPass>;
+
+        if $z1 == 0 goto label10;
+
+     label07:
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void attemptAuthentication(boolean)>(1);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 1;
+
+        $r9 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z6 = virtualinvoke $r9.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z6 == 0 goto label08;
+
+        $r10 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r10.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication using cached password has succeeded");
+
+     label08:
+        return 1;
+
+     label09:
+        $r22 := @caughtexception;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        $r23 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r23.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication using cached password has failed");
+
+        goto label14;
+
+     label10:
+        $z2 = r0.<com.sun.jmx.remote.security.FileLoginModule: boolean useFirstPass>;
+
+        if $z2 == 0 goto label14;
+
+     label11:
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void attemptAuthentication(boolean)>(1);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 1;
+
+        $r7 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z5 = virtualinvoke $r7.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z5 == 0 goto label12;
+
+        $r8 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r8.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication using cached password has succeeded");
+
+     label12:
+        return 1;
+
+     label13:
+        $r20 := @caughtexception;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        $r21 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r21.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication using cached password has failed");
+
+        throw $r20;
+
+     label14:
+        $r3 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z3 = virtualinvoke $r3.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z3 == 0 goto label15;
+
+        $r6 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Acquiring password");
+
+     label15:
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void attemptAuthentication(boolean)>(0);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 1;
+
+        $r4 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z4 = virtualinvoke $r4.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z4 == 0 goto label16;
+
+        $r5 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r5.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication has succeeded");
+
+     label16:
+        return 1;
+
+     label17:
+        $r18 := @caughtexception;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        $r19 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r19.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Authentication has failed");
+
+        throw $r18;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch javax.security.auth.login.LoginException from label07 to label08 with label09;
+        catch javax.security.auth.login.LoginException from label11 to label12 with label13;
+        catch javax.security.auth.login.LoginException from label15 to label16 with label17;
+    }
+
+    public boolean commit() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r10;
+        java.util.Set $r3, $r8;
+        javax.security.auth.Subject $r1, $r2, $r7;
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        javax.management.remote.JMXPrincipal $r4, $r9;
+        com.sun.jmx.remote.util.ClassLogger $r5, $r6;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        $z0 = r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject>;
+
+        $z1 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        $r10 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r10.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is read-only");
+
+        throw $r10;
+
+     label2:
+        $r2 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r4 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user>;
+
+        $z2 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z2 != 0 goto label3;
+
+        $r7 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject>;
+
+        $r8 = virtualinvoke $r7.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r9 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user>;
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+     label3:
+        $r5 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z3 = virtualinvoke $r5.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z3 == 0 goto label4;
+
+        $r6 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("commit", "Authentication has completed successfully");
+
+     label4:
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean commitSucceeded> = 1;
+
+        return 1;
+    }
+
+    public boolean abort() throws javax.security.auth.login.LoginException
+    {
+        com.sun.jmx.remote.security.FileLoginModule r1;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        $r0 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r2.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("abort", "Authentication has not completed successfully");
+
+     label1:
+        $z1 = r1.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded>;
+
+        if $z1 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z2 = r1.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded>;
+
+        if $z2 != 1 goto label3;
+
+        $z3 = r1.<com.sun.jmx.remote.security.FileLoginModule: boolean commitSucceeded>;
+
+        if $z3 != 0 goto label3;
+
+        r1.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 0;
+
+        specialinvoke r1.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        r1.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user> = null;
+
+        goto label4;
+
+     label3:
+        virtualinvoke r1.<com.sun.jmx.remote.security.FileLoginModule: boolean logout()>();
+
+     label4:
+        return 1;
+    }
+
+    public boolean logout() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r7;
+        java.util.Set $r3;
+        javax.security.auth.Subject $r1, $r2;
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        javax.management.remote.JMXPrincipal $r4;
+        com.sun.jmx.remote.util.ClassLogger $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject>;
+
+        $z0 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        $r7 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r7.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is read-only");
+
+        throw $r7;
+
+     label1:
+        $r2 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r4 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r4);
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void cleanState()>();
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: boolean commitSucceeded> = 0;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user> = null;
+
+        $r5 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z1 = virtualinvoke $r5.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("logout", "Subject is being logged out");
+
+     label2:
+        return 1;
+    }
+
+    private void attemptAuthentication(boolean) throws javax.security.auth.login.LoginException
+    {
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        java.util.Map $r16, $r17, $r19, $r21;
+        javax.security.auth.login.FailedLoginException $r5;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r9, $r11, $r13, $r14;
+        java.lang.String $r1, $r3, $r7, $r12, $r15, $r18, $r23;
+        com.sun.jmx.remote.util.ClassLogger $r4, $r6, $r10, $r24;
+        javax.management.remote.JMXPrincipal $r22;
+        java.util.Properties $r2;
+        char[] $r8, $r20;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<com.sun.jmx.remote.security.FileLoginModule: void getUsernamePassword(boolean)>(z0);
+
+        $r2 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Properties userCredentials>;
+
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>($r1);
+
+        if $r3 == null goto label1;
+
+        $r7 = new java.lang.String;
+
+        $r8 = r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password>;
+
+        specialinvoke $r7.<java.lang.String: void <init>(char[])>($r8);
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 != 0 goto label3;
+
+     label1:
+        $r4 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z1 = virtualinvoke $r4.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", "Invalid username or password");
+
+     label2:
+        $r5 = new javax.security.auth.login.FailedLoginException;
+
+        specialinvoke $r5.<javax.security.auth.login.FailedLoginException: void <init>(java.lang.String)>("Invalid username or password");
+
+        throw $r5;
+
+     label3:
+        $z3 = r0.<com.sun.jmx.remote.security.FileLoginModule: boolean storePass>;
+
+        if $z3 == 0 goto label4;
+
+        $r16 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $z4 = interfaceinvoke $r16.<java.util.Map: boolean containsKey(java.lang.Object)>("javax.security.auth.login.name");
+
+        if $z4 != 0 goto label4;
+
+        $r17 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $z5 = interfaceinvoke $r17.<java.util.Map: boolean containsKey(java.lang.Object)>("javax.security.auth.login.password");
+
+        if $z5 != 0 goto label4;
+
+        $r19 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $r18 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username>;
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("javax.security.auth.login.name", $r18);
+
+        $r21 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $r20 = r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password>;
+
+        interfaceinvoke $r21.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("javax.security.auth.login.password", $r20);
+
+     label4:
+        $r22 = new javax.management.remote.JMXPrincipal;
+
+        $r23 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username>;
+
+        specialinvoke $r22.<javax.management.remote.JMXPrincipal: void <init>(java.lang.String)>($r23);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: javax.management.remote.JMXPrincipal user> = $r22;
+
+        $r24 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z6 = virtualinvoke $r24.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z6 == 0 goto label5;
+
+        $r10 = <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("User \'");
+
+        $r12 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' successfully validated");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("login", $r15);
+
+     label5:
+        return;
+    }
+
+    private void loadPasswordFile() throws java.io.IOException
+    {
+        java.lang.Throwable $r6, $r7;
+        java.io.BufferedInputStream $r3;
+        com.sun.jmx.remote.security.FileLoginModule r1;
+        java.io.FilePermission $r9;
+        java.lang.SecurityException $r8;
+        java.lang.String $r2, $r10, $r14, $r16;
+        boolean $z0, $z1;
+        java.util.Properties $r4, $r5;
+        java.io.FileInputStream $r0;
+        java.lang.StackTraceElement[] $r17;
+        java.security.AccessControlException $r11;
+        java.lang.StringBuilder $r12, $r13, $r15;
+
+        r1 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+     label01:
+        $r0 = new java.io.FileInputStream;
+
+        $r2 = r1.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFile>;
+
+        specialinvoke $r0.<java.io.FileInputStream: void <init>(java.lang.String)>($r2);
+
+     label02:
+        goto label06;
+
+     label03:
+        $r8 := @caughtexception;
+
+        $z0 = r1.<com.sun.jmx.remote.security.FileLoginModule: boolean userSuppliedPasswordFile>;
+
+        if $z0 != 0 goto label04;
+
+        $z1 = r1.<com.sun.jmx.remote.security.FileLoginModule: boolean hasJavaHomePermission>;
+
+        if $z1 == 0 goto label05;
+
+     label04:
+        throw $r8;
+
+     label05:
+        $r9 = new java.io.FilePermission;
+
+        $r10 = r1.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String passwordFileDisplayName>;
+
+        specialinvoke $r9.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>($r10, "read");
+
+        $r11 = new java.security.AccessControlException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("access denied ");
+
+        $r14 = virtualinvoke $r9.<java.io.FilePermission: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.security.AccessControlException: void <init>(java.lang.String)>($r16);
+
+        $r17 = virtualinvoke $r8.<java.lang.SecurityException: java.lang.StackTraceElement[] getStackTrace()>();
+
+        virtualinvoke $r11.<java.security.AccessControlException: void setStackTrace(java.lang.StackTraceElement[])>($r17);
+
+        throw $r11;
+
+     label06:
+        $r3 = new java.io.BufferedInputStream;
+
+        specialinvoke $r3.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r0);
+
+     label07:
+        $r4 = new java.util.Properties;
+
+        specialinvoke $r4.<java.util.Properties: void <init>()>();
+
+        r1.<com.sun.jmx.remote.security.FileLoginModule: java.util.Properties userCredentials> = $r4;
+
+        $r5 = r1.<com.sun.jmx.remote.security.FileLoginModule: java.util.Properties userCredentials>;
+
+        virtualinvoke $r5.<java.util.Properties: void load(java.io.InputStream)>($r3);
+
+     label08:
+        virtualinvoke $r3.<java.io.BufferedInputStream: void close()>();
+
+        goto label11;
+
+     label09:
+        $r7 := @caughtexception;
+
+     label10:
+        virtualinvoke $r3.<java.io.BufferedInputStream: void close()>();
+
+        throw $r7;
+
+     label11:
+        virtualinvoke $r0.<java.io.FileInputStream: void close()>();
+
+        goto label14;
+
+     label12:
+        $r6 := @caughtexception;
+
+     label13:
+        virtualinvoke $r0.<java.io.FileInputStream: void close()>();
+
+        throw $r6;
+
+     label14:
+        return;
+
+        catch java.lang.SecurityException from label01 to label02 with label03;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label06 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    private void getUsernamePassword(boolean) throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r16, $r25, $r34, $r36, $r39;
+        javax.security.auth.callback.UnsupportedCallbackException $r24;
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        javax.security.auth.callback.CallbackHandler $r1, $r5;
+        java.util.Map $r17, $r20;
+        boolean z0;
+        javax.security.auth.callback.PasswordCallback $r4, $r10, $r15;
+        java.lang.StringBuilder $r26, $r27, $r30, $r31;
+        javax.security.auth.callback.Callback $r6, $r9, $r14, $r28;
+        java.lang.Throwable $r33, $r38;
+        javax.security.auth.callback.Callback[] r2;
+        int $i0, $i1;
+        java.lang.String $r8, $r19, $r29, $r32, $r37;
+        java.io.IOException $r35;
+        javax.security.auth.callback.NameCallback $r3, $r7;
+        char[] $r11, $r12, $r13, $r22, $r23;
+        java.lang.Object $r18, $r21;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r17 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $r18 = interfaceinvoke $r17.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.auth.login.name");
+
+        $r19 = (java.lang.String) $r18;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username> = $r19;
+
+        $r20 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        $r21 = interfaceinvoke $r20.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.auth.login.password");
+
+        $r22 = (char[]) $r21;
+
+        $r23 = (char[]) $r22;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password> = $r23;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        if $r1 != null goto label2;
+
+        $r16 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r16.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Error: no CallbackHandler available to garner authentication information from the user");
+
+        throw $r16;
+
+     label2:
+        r2 = newarray (javax.security.auth.callback.Callback)[2];
+
+        $r3 = new javax.security.auth.callback.NameCallback;
+
+        specialinvoke $r3.<javax.security.auth.callback.NameCallback: void <init>(java.lang.String)>("username");
+
+        r2[0] = $r3;
+
+        $r4 = new javax.security.auth.callback.PasswordCallback;
+
+        specialinvoke $r4.<javax.security.auth.callback.PasswordCallback: void <init>(java.lang.String,boolean)>("password", 0);
+
+        r2[1] = $r4;
+
+     label3:
+        $r5 = r0.<com.sun.jmx.remote.security.FileLoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        interfaceinvoke $r5.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>(r2);
+
+        $r6 = r2[0];
+
+        $r7 = (javax.security.auth.callback.NameCallback) $r6;
+
+        $r8 = virtualinvoke $r7.<javax.security.auth.callback.NameCallback: java.lang.String getName()>();
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username> = $r8;
+
+        $r9 = r2[1];
+
+        $r10 = (javax.security.auth.callback.PasswordCallback) $r9;
+
+        $r11 = virtualinvoke $r10.<javax.security.auth.callback.PasswordCallback: char[] getPassword()>();
+
+        $i0 = lengthof $r11;
+
+        $r12 = newarray (char)[$i0];
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password> = $r12;
+
+        $r13 = r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password>;
+
+        $i1 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r11, 0, $r13, 0, $i1);
+
+        $r14 = r2[1];
+
+        $r15 = (javax.security.auth.callback.PasswordCallback) $r14;
+
+        virtualinvoke $r15.<javax.security.auth.callback.PasswordCallback: void clearPassword()>();
+
+     label4:
+        goto label7;
+
+     label5:
+        $r35 := @caughtexception;
+
+        $r36 = new javax.security.auth.login.LoginException;
+
+        $r37 = virtualinvoke $r35.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r36.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r37);
+
+        $r38 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r36, $r35);
+
+        $r39 = (javax.security.auth.login.LoginException) $r38;
+
+        throw $r39;
+
+     label6:
+        $r24 := @caughtexception;
+
+        $r25 = new javax.security.auth.login.LoginException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: ");
+
+        $r28 = virtualinvoke $r24.<javax.security.auth.callback.UnsupportedCallbackException: javax.security.auth.callback.Callback getCallback()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.Object: java.lang.String toString()>();
+
+        $r30 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available to garner authentication information from the user");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r32);
+
+        $r33 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r25, $r24);
+
+        $r34 = (javax.security.auth.login.LoginException) $r33;
+
+        throw $r34;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label3 to label4 with label5;
+        catch javax.security.auth.callback.UnsupportedCallbackException from label3 to label4 with label6;
+    }
+
+    private void cleanState()
+    {
+        com.sun.jmx.remote.security.FileLoginModule r0;
+        java.util.Map $r2, $r3;
+        char[] $r1, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.remote.security.FileLoginModule;
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: java.lang.String username> = null;
+
+        $r1 = r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password>;
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>($r4, 32);
+
+        r0.<com.sun.jmx.remote.security.FileLoginModule: char[] password> = null;
+
+     label1:
+        $z0 = r0.<com.sun.jmx.remote.security.FileLoginModule: boolean clearPass>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>("javax.security.auth.login.name");
+
+        $r3 = r0.<com.sun.jmx.remote.security.FileLoginModule: java.util.Map sharedState>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>("javax.security.auth.login.password");
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String $r3, $r11;
+        com.sun.jmx.remote.util.ClassLogger $r12;
+        char $c0, $c1, $c2;
+        com.sun.jmx.mbeanserver.GetPropertyAction $r1;
+        java.lang.StringBuilder $r0, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        java.lang.Object $r2;
+
+        <com.sun.jmx.remote.security.FileLoginModule: java.lang.String PASSWORD_KEY> = "javax.security.auth.login.password";
+
+        <com.sun.jmx.remote.security.FileLoginModule: java.lang.String USERNAME_KEY> = "javax.security.auth.login.name";
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = new com.sun.jmx.mbeanserver.GetPropertyAction;
+
+        specialinvoke $r1.<com.sun.jmx.mbeanserver.GetPropertyAction: void <init>(java.lang.String)>("java.home");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("management");
+
+        $c2 = <java.io.File: char separatorChar>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("jmxremote.password");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.sun.jmx.remote.security.FileLoginModule: java.lang.String DEFAULT_PASSWORD_FILE_NAME> = $r11;
+
+        $r12 = new com.sun.jmx.remote.util.ClassLogger;
+
+        specialinvoke $r12.<com.sun.jmx.remote.util.ClassLogger: void <init>(java.lang.String,java.lang.String)>("javax.management.remote.misc", "FileLoginModule");
+
+        <com.sun.jmx.remote.security.FileLoginModule: com.sun.jmx.remote.util.ClassLogger logger> = $r12;
+
+        return;
+    }
+}

@@ -1,0 +1,519 @@
+public class sun.java2d.Disposer extends java.lang.Object implements java.lang.Runnable
+{
+    private static final java.lang.ref.ReferenceQueue queue;
+    private static final java.util.Hashtable records;
+    private static sun.java2d.Disposer disposerInstance;
+    public static final int WEAK;
+    public static final int PHANTOM;
+    public static int refType;
+    private static java.util.ArrayList deferredRecords;
+    public static volatile boolean pollingQueue;
+
+    public void <init>()
+    {
+        sun.java2d.Disposer r0;
+
+        r0 := @this: sun.java2d.Disposer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void addRecord(java.lang.Object, long, long)
+    {
+        sun.java2d.DefaultDisposerRecord $r1;
+        sun.java2d.Disposer $r2;
+        java.lang.Object r0;
+        long l0, l1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        l1 := @parameter2: long;
+
+        $r2 = <sun.java2d.Disposer: sun.java2d.Disposer disposerInstance>;
+
+        $r1 = new sun.java2d.DefaultDisposerRecord;
+
+        specialinvoke $r1.<sun.java2d.DefaultDisposerRecord: void <init>(long,long)>(l0, l1);
+
+        virtualinvoke $r2.<sun.java2d.Disposer: void add(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r1);
+
+        return;
+    }
+
+    public static void addRecord(java.lang.Object, sun.java2d.DisposerRecord)
+    {
+        sun.java2d.Disposer $r2;
+        java.lang.Object r0;
+        sun.java2d.DisposerRecord r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: sun.java2d.DisposerRecord;
+
+        $r2 = <sun.java2d.Disposer: sun.java2d.Disposer disposerInstance>;
+
+        virtualinvoke $r2.<sun.java2d.Disposer: void add(java.lang.Object,sun.java2d.DisposerRecord)>(r0, r1);
+
+        return;
+    }
+
+    synchronized void add(java.lang.Object, sun.java2d.DisposerRecord)
+    {
+        java.lang.ref.PhantomReference $r4;
+        sun.java2d.Disposer r7;
+        java.lang.ref.ReferenceQueue $r1, $r5;
+        java.lang.ref.Reference r9;
+        sun.java2d.DisposerRecord r2;
+        int $i0;
+        sun.java2d.DisposerTarget $r6;
+        java.lang.Object r8;
+        java.lang.ref.WeakReference $r0;
+        java.util.Hashtable $r3;
+        boolean $z0;
+
+        r7 := @this: sun.java2d.Disposer;
+
+        r8 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: sun.java2d.DisposerRecord;
+
+        $z0 = r8 instanceof sun.java2d.DisposerTarget;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (sun.java2d.DisposerTarget) r8;
+
+        r8 = interfaceinvoke $r6.<sun.java2d.DisposerTarget: java.lang.Object getDisposerReferent()>();
+
+     label1:
+        $i0 = <sun.java2d.Disposer: int refType>;
+
+        if $i0 != 1 goto label2;
+
+        $r4 = new java.lang.ref.PhantomReference;
+
+        $r5 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        specialinvoke $r4.<java.lang.ref.PhantomReference: void <init>(java.lang.Object,java.lang.ref.ReferenceQueue)>(r8, $r5);
+
+        r9 = $r4;
+
+        goto label3;
+
+     label2:
+        $r0 = new java.lang.ref.WeakReference;
+
+        $r1 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        specialinvoke $r0.<java.lang.ref.WeakReference: void <init>(java.lang.Object,java.lang.ref.ReferenceQueue)>(r8, $r1);
+
+        r9 = $r0;
+
+     label3:
+        $r3 = <sun.java2d.Disposer: java.util.Hashtable records>;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r9, r2);
+
+        return;
+    }
+
+    public void run()
+    {
+        java.io.PrintStream $r1;
+        sun.java2d.Disposer r2;
+        java.lang.Exception $r0;
+        java.lang.ref.ReferenceQueue $r3;
+        java.lang.ref.Reference $r4, $r5;
+        sun.java2d.DisposerRecord $r8;
+        java.lang.Object $r7;
+        java.util.Hashtable $r6;
+
+        r2 := @this: sun.java2d.Disposer;
+
+     label1:
+        $r3 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference remove()>();
+
+        $r5 = (java.lang.ref.Reference) $r4;
+
+        virtualinvoke $r5.<java.lang.ref.Reference: void clear()>();
+
+        $r6 = <sun.java2d.Disposer: java.util.Hashtable records>;
+
+        $r7 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r8 = (sun.java2d.DisposerRecord) $r7;
+
+        interfaceinvoke $r8.<sun.java2d.DisposerRecord: void dispose()>();
+
+        staticinvoke <sun.java2d.Disposer: void clearDeferredRecords()>();
+
+     label2:
+        goto label1;
+
+     label3:
+        $r0 := @caughtexception;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("Exception while removing reference.");
+
+        goto label1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static void clearDeferredRecords()
+    {
+        java.io.PrintStream $r7;
+        java.lang.Exception $r6;
+        java.util.ArrayList $r0, $r1, $r2, $r3, $r4;
+        sun.java2d.DisposerRecord r8;
+        int $i0, i1;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        $r0 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        i1 = 0;
+
+     label3:
+        $r2 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if i1 >= $i0 goto label8;
+
+     label4:
+        $r4 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        r8 = (sun.java2d.DisposerRecord) $r5;
+
+        interfaceinvoke r8.<sun.java2d.DisposerRecord: void dispose()>();
+
+     label5:
+        goto label7;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("Exception while disposing deferred rec.");
+
+     label7:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label8:
+        $r3 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        virtualinvoke $r3.<java.util.ArrayList: void clear()>();
+
+        return;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public static void pollRemove()
+    {
+        java.lang.Throwable $r6;
+        java.lang.ref.ReferenceQueue $r9;
+        java.util.ArrayList $r3, $r4, $r5;
+        sun.java2d.DisposerRecord r11;
+        int i0, i1;
+        java.util.Hashtable $r1;
+        boolean $z0, $z1;
+        java.io.PrintStream $r8;
+        java.lang.Exception $r7;
+        java.lang.ref.Reference $r0, $r10;
+        java.lang.Object $r2;
+
+        $z0 = <sun.java2d.Disposer: boolean pollingQueue>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        <sun.java2d.Disposer: boolean pollingQueue> = 1;
+
+        i0 = 0;
+
+        i1 = 0;
+
+     label02:
+        $r9 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        $r10 = virtualinvoke $r9.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        if $r10 == null goto label07;
+
+        if i0 >= 10000 goto label07;
+
+        if i1 >= 100 goto label07;
+
+        i0 = i0 + 1;
+
+        $r0 = (java.lang.ref.Reference) $r10;
+
+        virtualinvoke $r0.<java.lang.ref.Reference: void clear()>();
+
+        $r1 = <sun.java2d.Disposer: java.util.Hashtable records>;
+
+        $r2 = virtualinvoke $r1.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r10);
+
+        r11 = (sun.java2d.DisposerRecord) $r2;
+
+        $z1 = r11 instanceof sun.java2d.Disposer$PollDisposable;
+
+        if $z1 == 0 goto label03;
+
+        interfaceinvoke r11.<sun.java2d.DisposerRecord: void dispose()>();
+
+        goto label06;
+
+     label03:
+        if r11 != null goto label04;
+
+        goto label02;
+
+     label04:
+        i1 = i1 + 1;
+
+        $r3 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        if $r3 != null goto label05;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>(int)>(5);
+
+        <sun.java2d.Disposer: java.util.ArrayList deferredRecords> = $r5;
+
+     label05:
+        $r4 = <sun.java2d.Disposer: java.util.ArrayList deferredRecords>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>(r11);
+
+     label06:
+        goto label02;
+
+     label07:
+        <sun.java2d.Disposer: boolean pollingQueue> = 0;
+
+        goto label12;
+
+     label08:
+        $r7 := @caughtexception;
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("Exception while removing reference.");
+
+     label09:
+        <sun.java2d.Disposer: boolean pollingQueue> = 0;
+
+        goto label12;
+
+     label10:
+        $r6 := @caughtexception;
+
+     label11:
+        <sun.java2d.Disposer: boolean pollingQueue> = 0;
+
+        throw $r6;
+
+     label12:
+        return;
+
+        catch java.lang.Exception from label02 to label07 with label08;
+        catch java.lang.Throwable from label02 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private static native void initIDs();
+
+    public static void addReference(java.lang.ref.Reference, sun.java2d.DisposerRecord)
+    {
+        java.lang.ref.Reference r0;
+        sun.java2d.DisposerRecord r1;
+        java.util.Hashtable $r2;
+
+        r0 := @parameter0: java.lang.ref.Reference;
+
+        r1 := @parameter1: sun.java2d.DisposerRecord;
+
+        $r2 = <sun.java2d.Disposer: java.util.Hashtable records>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r1);
+
+        return;
+    }
+
+    public static void addObjectRecord(java.lang.Object, sun.java2d.DisposerRecord)
+    {
+        sun.java2d.DisposerRecord r4;
+        java.lang.Object r1;
+        java.lang.ref.WeakReference $r0;
+        java.lang.ref.ReferenceQueue $r2;
+        java.util.Hashtable $r3;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: sun.java2d.DisposerRecord;
+
+        $r3 = <sun.java2d.Disposer: java.util.Hashtable records>;
+
+        $r0 = new java.lang.ref.WeakReference;
+
+        $r2 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        specialinvoke $r0.<java.lang.ref.WeakReference: void <init>(java.lang.Object,java.lang.ref.ReferenceQueue)>(r1, $r2);
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, r4);
+
+        return;
+    }
+
+    public static java.lang.ref.ReferenceQueue getQueue()
+    {
+        java.lang.ref.ReferenceQueue $r0;
+
+        $r0 = <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue>;
+
+        return $r0;
+    }
+
+    public static java.lang.Void lambda$static$0()
+    {
+        sun.java2d.Disposer $r2;
+        java.lang.ThreadGroup $r0;
+        java.lang.Thread $r1;
+
+        $r0 = staticinvoke <sun.misc.ThreadGroupUtils: java.lang.ThreadGroup getRootThreadGroup()>();
+
+        $r1 = new java.lang.Thread;
+
+        $r2 = <sun.java2d.Disposer: sun.java2d.Disposer disposerInstance>;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r0, $r2, "Java2D Disposer");
+
+        virtualinvoke $r1.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>(null);
+
+        virtualinvoke $r1.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r1.<java.lang.Thread: void setPriority(int)>(10);
+
+        virtualinvoke $r1.<java.lang.Thread: void start()>();
+
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        java.io.PrintStream $r6, $r7;
+        sun.java2d.Disposer $r8;
+        java.security.PrivilegedAction $r9;
+        java.lang.ref.ReferenceQueue $r0;
+        sun.security.action.GetPropertyAction $r3;
+        sun.java2d.Disposer$1 $r2;
+        java.lang.Object $r4;
+        java.lang.String r5;
+        java.util.Hashtable $r1;
+        boolean $z0;
+
+        <sun.java2d.Disposer: int PHANTOM> = 1;
+
+        <sun.java2d.Disposer: int WEAK> = 0;
+
+        $r0 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r0.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <sun.java2d.Disposer: java.lang.ref.ReferenceQueue queue> = $r0;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        <sun.java2d.Disposer: java.util.Hashtable records> = $r1;
+
+        <sun.java2d.Disposer: int refType> = 1;
+
+        $r2 = new sun.java2d.Disposer$1;
+
+        specialinvoke $r2.<sun.java2d.Disposer$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        staticinvoke <sun.java2d.Disposer: void initIDs()>();
+
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.java2d.reftype");
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 == null goto label2;
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>("weak");
+
+        if $z0 == 0 goto label1;
+
+        <sun.java2d.Disposer: int refType> = 0;
+
+        $r7 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("Using WEAK refs");
+
+        goto label2;
+
+     label1:
+        <sun.java2d.Disposer: int refType> = 1;
+
+        $r6 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>("Using PHANTOM refs");
+
+     label2:
+        $r8 = new sun.java2d.Disposer;
+
+        specialinvoke $r8.<sun.java2d.Disposer: void <init>()>();
+
+        <sun.java2d.Disposer: sun.java2d.Disposer disposerInstance> = $r8;
+
+        $r9 = staticinvoke <sun.java2d.Disposer$lambda_static_0__471: java.security.PrivilegedAction bootstrap$()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        <sun.java2d.Disposer: java.util.ArrayList deferredRecords> = null;
+
+        <sun.java2d.Disposer: boolean pollingQueue> = 0;
+
+        return;
+    }
+}

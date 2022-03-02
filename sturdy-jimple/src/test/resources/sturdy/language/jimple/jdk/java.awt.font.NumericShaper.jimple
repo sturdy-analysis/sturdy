@@ -1,0 +1,3383 @@
+public final class java.awt.font.NumericShaper extends java.lang.Object implements java.io.Serializable
+{
+    private int key;
+    private int mask;
+    private java.awt.font.NumericShaper$Range shapingRange;
+    private transient java.util.Set rangeSet;
+    private transient java.awt.font.NumericShaper$Range[] rangeArray;
+    private static final int BSEARCH_THRESHOLD;
+    private static final long serialVersionUID;
+    public static final int EUROPEAN;
+    public static final int ARABIC;
+    public static final int EASTERN_ARABIC;
+    public static final int DEVANAGARI;
+    public static final int BENGALI;
+    public static final int GURMUKHI;
+    public static final int GUJARATI;
+    public static final int ORIYA;
+    public static final int TAMIL;
+    public static final int TELUGU;
+    public static final int KANNADA;
+    public static final int MALAYALAM;
+    public static final int THAI;
+    public static final int LAO;
+    public static final int TIBETAN;
+    public static final int MYANMAR;
+    public static final int ETHIOPIC;
+    public static final int KHMER;
+    public static final int MONGOLIAN;
+    public static final int ALL_RANGES;
+    private static final int EUROPEAN_KEY;
+    private static final int ARABIC_KEY;
+    private static final int EASTERN_ARABIC_KEY;
+    private static final int DEVANAGARI_KEY;
+    private static final int BENGALI_KEY;
+    private static final int GURMUKHI_KEY;
+    private static final int GUJARATI_KEY;
+    private static final int ORIYA_KEY;
+    private static final int TAMIL_KEY;
+    private static final int TELUGU_KEY;
+    private static final int KANNADA_KEY;
+    private static final int MALAYALAM_KEY;
+    private static final int THAI_KEY;
+    private static final int LAO_KEY;
+    private static final int TIBETAN_KEY;
+    private static final int MYANMAR_KEY;
+    private static final int ETHIOPIC_KEY;
+    private static final int KHMER_KEY;
+    private static final int MONGOLIAN_KEY;
+    private static final int NUM_KEYS;
+    private static final int CONTEXTUAL_MASK;
+    private static final char[] bases;
+    private static final char[] contexts;
+    private static int ctCache;
+    private static int ctCacheLimit;
+    private transient volatile java.awt.font.NumericShaper$Range currentRange;
+    private static int[] strongTable;
+    private transient volatile int stCache;
+
+    private static int getContextKey(char)
+    {
+        int $i1, $i3, $i4, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i14, $i15, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29;
+        char c0, $c2, $c5, $c11, $c16;
+        char[] $r0, $r1, $r2, $r3;
+
+        c0 := @parameter0: char;
+
+        $r0 = <java.awt.font.NumericShaper: char[] contexts>;
+
+        $i1 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $c2 = $r0[$i1];
+
+        $i22 = (int) c0;
+
+        $i23 = (int) $c2;
+
+        if $i22 >= $i23 goto label2;
+
+     label1:
+        $i14 = <java.awt.font.NumericShaper: int ctCache>;
+
+        if $i14 <= 0 goto label4;
+
+        $r3 = <java.awt.font.NumericShaper: char[] contexts>;
+
+        $i15 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $c16 = $r3[$i15];
+
+        $i24 = (int) c0;
+
+        $i25 = (int) $c16;
+
+        if $i24 >= $i25 goto label4;
+
+        $i17 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i18 = $i17 - 1;
+
+        <java.awt.font.NumericShaper: int ctCache> = $i18;
+
+        goto label1;
+
+     label2:
+        $r1 = <java.awt.font.NumericShaper: char[] contexts>;
+
+        $i3 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i4 = $i3 + 1;
+
+        $c5 = $r1[$i4];
+
+        $i26 = (int) c0;
+
+        $i27 = (int) $c5;
+
+        if $i26 < $i27 goto label4;
+
+     label3:
+        $i8 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i7 = <java.awt.font.NumericShaper: int ctCacheLimit>;
+
+        if $i8 >= $i7 goto label4;
+
+        $r2 = <java.awt.font.NumericShaper: char[] contexts>;
+
+        $i9 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i10 = $i9 + 1;
+
+        $c11 = $r2[$i10];
+
+        $i28 = (int) c0;
+
+        $i29 = (int) $c11;
+
+        if $i28 < $i29 goto label4;
+
+        $i12 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i13 = $i12 + 1;
+
+        <java.awt.font.NumericShaper: int ctCache> = $i13;
+
+        goto label3;
+
+     label4:
+        $i19 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i20 = $i19 & 1;
+
+        if $i20 != 0 goto label5;
+
+        $i6 = <java.awt.font.NumericShaper: int ctCache>;
+
+        $i21 = $i6 / 2;
+
+        goto label6;
+
+     label5:
+        $i21 = 0;
+
+     label6:
+        return $i21;
+    }
+
+    private java.awt.font.NumericShaper$Range rangeForCodePoint(int)
+    {
+        java.awt.font.NumericShaper$Range $r1, $r3, $r4, $r5, r6, $r7;
+        int i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, i8, i9, i10;
+        boolean $z0, $z1;
+        java.awt.font.NumericShaper$Range[] r2;
+        java.awt.font.NumericShaper r0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range currentRange>;
+
+        $z0 = staticinvoke <java.awt.font.NumericShaper$Range: boolean access$100(java.awt.font.NumericShaper$Range,int)>($r1, i0);
+
+        if $z0 == 0 goto label01;
+
+        $r7 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range currentRange>;
+
+        return $r7;
+
+     label01:
+        r2 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range[] rangeArray>;
+
+        $i1 = lengthof r2;
+
+        if $i1 <= 3 goto label07;
+
+        i8 = 0;
+
+        $i3 = lengthof r2;
+
+        i9 = $i3 - 1;
+
+     label02:
+        if i8 > i9 goto label06;
+
+        $i4 = i8 + i9;
+
+        i5 = $i4 / 2;
+
+        r6 = r2[i5];
+
+        $i6 = staticinvoke <java.awt.font.NumericShaper$Range: int access$200(java.awt.font.NumericShaper$Range)>(r6);
+
+        if i0 >= $i6 goto label03;
+
+        i9 = i5 - 1;
+
+        goto label05;
+
+     label03:
+        $i7 = staticinvoke <java.awt.font.NumericShaper$Range: int access$300(java.awt.font.NumericShaper$Range)>(r6);
+
+        if i0 < $i7 goto label04;
+
+        i8 = i5 + 1;
+
+        goto label05;
+
+     label04:
+        r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range currentRange> = r6;
+
+        return r6;
+
+     label05:
+        goto label02;
+
+     label06:
+        goto label10;
+
+     label07:
+        i10 = 0;
+
+     label08:
+        $i2 = lengthof r2;
+
+        if i10 >= $i2 goto label10;
+
+        $r4 = r2[i10];
+
+        $z1 = staticinvoke <java.awt.font.NumericShaper$Range: boolean access$100(java.awt.font.NumericShaper$Range,int)>($r4, i0);
+
+        if $z1 == 0 goto label09;
+
+        $r5 = r2[i10];
+
+        return $r5;
+
+     label09:
+        i10 = i10 + 1;
+
+        goto label08;
+
+     label10:
+        $r3 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EUROPEAN>;
+
+        return $r3;
+    }
+
+    private boolean isStrongDirectional(char)
+    {
+        int[] $r1, $r2, $r3, $r4, $r5;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, $i10, $i11, $i12, $i13;
+        boolean $z0;
+        java.awt.font.NumericShaper r0;
+        char c0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        c0 := @parameter0: char;
+
+        i8 = r0.<java.awt.font.NumericShaper: int stCache>;
+
+        $r1 = <java.awt.font.NumericShaper: int[] strongTable>;
+
+        $i1 = $r1[i8];
+
+        $i10 = (int) c0;
+
+        if $i10 >= $i1 goto label1;
+
+        $r5 = <java.awt.font.NumericShaper: int[] strongTable>;
+
+        $i11 = (int) c0;
+
+        i8 = staticinvoke <java.awt.font.NumericShaper: int search(int,int[],int,int)>($i11, $r5, 0, i8);
+
+        goto label2;
+
+     label1:
+        $r2 = <java.awt.font.NumericShaper: int[] strongTable>;
+
+        $i2 = i8 + 1;
+
+        $i3 = $r2[$i2];
+
+        $i12 = (int) c0;
+
+        if $i12 < $i3 goto label2;
+
+        $r4 = <java.awt.font.NumericShaper: int[] strongTable>;
+
+        $i7 = i8 + 1;
+
+        $r3 = <java.awt.font.NumericShaper: int[] strongTable>;
+
+        $i4 = lengthof $r3;
+
+        $i5 = $i4 - i8;
+
+        $i6 = $i5 - 1;
+
+        $i13 = (int) c0;
+
+        i8 = staticinvoke <java.awt.font.NumericShaper: int search(int,int[],int,int)>($i13, $r4, $i7, $i6);
+
+     label2:
+        $i9 = i8 & 1;
+
+        if $i9 != 1 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        r0.<java.awt.font.NumericShaper: int stCache> = i8;
+
+        return $z0;
+    }
+
+    private static int getKeyFromMask(int)
+    {
+        java.lang.IllegalArgumentException $r7;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i8;
+        java.lang.StringBuilder $r2, $r4, $r6;
+        java.lang.String $r3, $r5;
+
+        i0 := @parameter0: int;
+
+        i6 = 0;
+
+     label1:
+        if i6 >= 19 goto label2;
+
+        $i4 = 1 << i6;
+
+        $i5 = i0 & $i4;
+
+        if $i5 != 0 goto label2;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        if i6 == 19 goto label3;
+
+        $i1 = 1 << i6;
+
+        $i8 = (int) -1;
+
+        $i2 = $i1 ^ $i8;
+
+        $i3 = i0 & $i2;
+
+        if $i3 == 0 goto label4;
+
+     label3:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid shaper: ");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label4:
+        return i6;
+    }
+
+    public static java.awt.font.NumericShaper getShaper(int)
+    {
+        int i0, $i1;
+        java.awt.font.NumericShaper $r0;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <java.awt.font.NumericShaper: int getKeyFromMask(int)>(i0);
+
+        $r0 = new java.awt.font.NumericShaper;
+
+        specialinvoke $r0.<java.awt.font.NumericShaper: void <init>(int,int)>($i1, i0);
+
+        return $r0;
+    }
+
+    public static java.awt.font.NumericShaper getShaper(java.awt.font.NumericShaper$Range)
+    {
+        java.awt.font.NumericShaper$Range r1;
+        java.awt.font.NumericShaper $r0;
+        java.util.EnumSet $r2;
+
+        r1 := @parameter0: java.awt.font.NumericShaper$Range;
+
+        $r0 = new java.awt.font.NumericShaper;
+
+        $r2 = staticinvoke <java.util.EnumSet: java.util.EnumSet of(java.lang.Enum)>(r1);
+
+        specialinvoke $r0.<java.awt.font.NumericShaper: void <init>(java.awt.font.NumericShaper$Range,java.util.Set)>(r1, $r2);
+
+        return $r0;
+    }
+
+    public static java.awt.font.NumericShaper getContextualShaper(int)
+    {
+        int i0, i1;
+        java.awt.font.NumericShaper $r0;
+
+        i0 := @parameter0: int;
+
+        i1 = i0 | -2147483648;
+
+        $r0 = new java.awt.font.NumericShaper;
+
+        specialinvoke $r0.<java.awt.font.NumericShaper: void <init>(int,int)>(0, i1);
+
+        return $r0;
+    }
+
+    public static java.awt.font.NumericShaper getContextualShaper(java.util.Set)
+    {
+        java.util.Set r1;
+        java.awt.font.NumericShaper$Range $r2;
+        java.awt.font.NumericShaper $r0;
+
+        r1 := @parameter0: java.util.Set;
+
+        $r0 = new java.awt.font.NumericShaper;
+
+        $r2 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EUROPEAN>;
+
+        specialinvoke $r0.<java.awt.font.NumericShaper: void <init>(java.awt.font.NumericShaper$Range,java.util.Set)>($r2, r1);
+
+        $r0.<java.awt.font.NumericShaper: int mask> = -2147483648;
+
+        return $r0;
+    }
+
+    public static java.awt.font.NumericShaper getContextualShaper(int, int)
+    {
+        java.awt.font.NumericShaper $r0;
+        int i0, $i1, i2, i3;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $i1 = staticinvoke <java.awt.font.NumericShaper: int getKeyFromMask(int)>(i0);
+
+        i3 = i2 | -2147483648;
+
+        $r0 = new java.awt.font.NumericShaper;
+
+        specialinvoke $r0.<java.awt.font.NumericShaper: void <init>(int,int)>($i1, i3);
+
+        return $r0;
+    }
+
+    public static java.awt.font.NumericShaper getContextualShaper(java.util.Set, java.awt.font.NumericShaper$Range)
+    {
+        java.awt.font.NumericShaper$Range r0;
+        java.awt.font.NumericShaper $r1;
+        java.util.Set r2;
+        java.lang.NullPointerException $r3;
+
+        r2 := @parameter0: java.util.Set;
+
+        r0 := @parameter1: java.awt.font.NumericShaper$Range;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r1 = new java.awt.font.NumericShaper;
+
+        specialinvoke $r1.<java.awt.font.NumericShaper: void <init>(java.awt.font.NumericShaper$Range,java.util.Set)>(r0, r2);
+
+        $r1.<java.awt.font.NumericShaper: int mask> = -2147483648;
+
+        return $r1;
+    }
+
+    private void <init>(int, int)
+    {
+        java.awt.font.NumericShaper$Range $r1;
+        java.awt.font.NumericShaper r0;
+        int i0, i1;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EUROPEAN>;
+
+        r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range currentRange> = $r1;
+
+        r0.<java.awt.font.NumericShaper: int stCache> = 0;
+
+        r0.<java.awt.font.NumericShaper: int key> = i0;
+
+        r0.<java.awt.font.NumericShaper: int mask> = i1;
+
+        return;
+    }
+
+    private void <init>(java.awt.font.NumericShaper$Range, java.util.Set)
+    {
+        java.lang.Object[] $r22;
+        java.awt.font.NumericShaper$Range $r1, r2, $r5, $r9, $r11, $r13, $r15, $r18;
+        int $i0, $i1;
+        java.util.EnumSet $r4;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.font.NumericShaper$Range[] $r8, $r21, $r23, $r24;
+        java.awt.font.NumericShaper r0;
+        java.awt.font.NumericShaper$1 $r7;
+        java.util.Set r3, $r6, $r10, $r12, $r14, $r16, $r17, $r19, $r20;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r2 := @parameter0: java.awt.font.NumericShaper$Range;
+
+        r3 := @parameter1: java.util.Set;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EUROPEAN>;
+
+        r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range currentRange> = $r1;
+
+        r0.<java.awt.font.NumericShaper: int stCache> = 0;
+
+        r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange> = r2;
+
+        $r4 = staticinvoke <java.util.EnumSet: java.util.EnumSet copyOf(java.util.Collection)>(r3);
+
+        r0.<java.awt.font.NumericShaper: java.util.Set rangeSet> = $r4;
+
+        $r6 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r5 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EASTERN_ARABIC>;
+
+        $z0 = interfaceinvoke $r6.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        $r14 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r13 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range ARABIC>;
+
+        $z2 = interfaceinvoke $r14.<java.util.Set: boolean contains(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label1;
+
+        $r16 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r15 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range ARABIC>;
+
+        interfaceinvoke $r16.<java.util.Set: boolean remove(java.lang.Object)>($r15);
+
+     label1:
+        $r17 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r18 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range TAI_THAM_THAM>;
+
+        $z3 = interfaceinvoke $r17.<java.util.Set: boolean contains(java.lang.Object)>($r18);
+
+        if $z3 == 0 goto label2;
+
+        $r10 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r9 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range TAI_THAM_HORA>;
+
+        $z1 = interfaceinvoke $r10.<java.util.Set: boolean contains(java.lang.Object)>($r9);
+
+        if $z1 == 0 goto label2;
+
+        $r12 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r11 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range TAI_THAM_HORA>;
+
+        interfaceinvoke $r12.<java.util.Set: boolean remove(java.lang.Object)>($r11);
+
+     label2:
+        $r19 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r20 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $i0 = interfaceinvoke $r20.<java.util.Set: int size()>();
+
+        $r21 = newarray (java.awt.font.NumericShaper$Range)[$i0];
+
+        $r22 = interfaceinvoke $r19.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r21);
+
+        $r23 = (java.awt.font.NumericShaper$Range[]) $r22;
+
+        r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range[] rangeArray> = $r23;
+
+        $r24 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range[] rangeArray>;
+
+        $i1 = lengthof $r24;
+
+        if $i1 <= 3 goto label3;
+
+        $r8 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range[] rangeArray>;
+
+        $r7 = new java.awt.font.NumericShaper$1;
+
+        specialinvoke $r7.<java.awt.font.NumericShaper$1: void <init>(java.awt.font.NumericShaper)>(r0);
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],java.util.Comparator)>($r8, $r7);
+
+     label3:
+        return;
+    }
+
+    public void shape(char[], int, int)
+    {
+        java.awt.font.NumericShaper r0;
+        java.util.Set $r2;
+        java.awt.font.NumericShaper$Range $r3;
+        int i0, i1, $i2;
+        char[] r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void checkParams(char[],int,int)>(r1, i0, i1);
+
+        $z0 = virtualinvoke r0.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r2 != null goto label1;
+
+        $i2 = r0.<java.awt.font.NumericShaper: int key>;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,int)>(r1, i0, i1, $i2);
+
+        goto label3;
+
+     label1:
+        $r3 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,java.awt.font.NumericShaper$Range)>(r1, i0, i1, $r3);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeNonContextually(char[],int,int)>(r1, i0, i1);
+
+     label3:
+        return;
+    }
+
+    public void shape(char[], int, int, int)
+    {
+        java.awt.font.NumericShaper$Range[] $r3;
+        java.awt.font.NumericShaper r0;
+        java.util.Set $r2;
+        java.awt.font.NumericShaper$Range $r4;
+        int i0, i1, i2, $i3;
+        char[] r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void checkParams(char[],int,int)>(r1, i0, i1);
+
+        $z0 = virtualinvoke r0.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z0 == 0 goto label3;
+
+        $i3 = staticinvoke <java.awt.font.NumericShaper: int getKeyFromMask(int)>(i2);
+
+        $r2 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r2 != null goto label1;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,int)>(r1, i0, i1, $i3);
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range[] values()>();
+
+        $r4 = $r3[$i3];
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,java.awt.font.NumericShaper$Range)>(r1, i0, i1, $r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeNonContextually(char[],int,int)>(r1, i0, i1);
+
+     label4:
+        return;
+    }
+
+    public void shape(char[], int, int, java.awt.font.NumericShaper$Range)
+    {
+        java.awt.font.NumericShaper r0;
+        java.util.Set $r3;
+        java.lang.NullPointerException $r5;
+        java.awt.font.NumericShaper$Range r2, $r4;
+        int i0, i1, $i2;
+        char[] r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: java.awt.font.NumericShaper$Range;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void checkParams(char[],int,int)>(r1, i0, i1);
+
+        if r2 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("context is null");
+
+        throw $r5;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z0 == 0 goto label5;
+
+        $r3 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r3 == null goto label2;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,java.awt.font.NumericShaper$Range)>(r1, i0, i1, r2);
+
+        goto label6;
+
+     label2:
+        $i2 = staticinvoke <java.awt.font.NumericShaper$Range: int access$500(java.awt.font.NumericShaper$Range)>(r2);
+
+        if $i2 < 0 goto label3;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,int)>(r1, i0, i1, $i2);
+
+        goto label4;
+
+     label3:
+        $r4 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeContextually(char[],int,int,java.awt.font.NumericShaper$Range)>(r1, i0, i1, $r4);
+
+     label4:
+        goto label6;
+
+     label5:
+        specialinvoke r0.<java.awt.font.NumericShaper: void shapeNonContextually(char[],int,int)>(r1, i0, i1);
+
+     label6:
+        return;
+    }
+
+    private void checkParams(char[], int, int)
+    {
+        java.lang.IndexOutOfBoundsException $r3;
+        java.awt.font.NumericShaper r2;
+        java.lang.NullPointerException $r1;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6;
+        char[] r0;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String $r7;
+
+        r2 := @this: java.awt.font.NumericShaper;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>(java.lang.String)>("text is null");
+
+        throw $r1;
+
+     label1:
+        if i0 < 0 goto label2;
+
+        $i1 = lengthof r0;
+
+        if i0 > $i1 goto label2;
+
+        $i3 = i0 + i2;
+
+        if $i3 < 0 goto label2;
+
+        $i5 = i0 + i2;
+
+        $i4 = lengthof r0;
+
+        if $i5 <= $i4 goto label3;
+
+     label2:
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad start or count for text of length ");
+
+        $i6 = lengthof r0;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label3:
+        return;
+    }
+
+    public boolean isContextual()
+    {
+        java.awt.font.NumericShaper r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        $i0 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i1 = $i0 & -2147483648;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getRanges()
+    {
+        int $i0, $i1;
+        java.awt.font.NumericShaper r0;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        $i0 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i1 = $i0 & 2147483647;
+
+        return $i1;
+    }
+
+    public java.util.Set getRangeSet()
+    {
+        java.awt.font.NumericShaper r0;
+        int $i0;
+        java.util.Set $r1, $r2, $r3;
+        java.util.EnumSet $r4;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        $r1 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r4 = staticinvoke <java.util.EnumSet: java.util.EnumSet copyOf(java.util.Collection)>($r3);
+
+        return $r4;
+
+     label1:
+        $i0 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $r2 = staticinvoke <java.awt.font.NumericShaper$Range: java.util.Set access$600(int)>($i0);
+
+        return $r2;
+    }
+
+    private void shapeNonContextually(char[], int, int)
+    {
+        java.awt.font.NumericShaper$Range $r1, $r4, $r5;
+        int $i0, $i1, i2, i3, $i5, $i8, i9, i10, i11, $i12, $i13, $i14, $i15, $i16;
+        java.awt.font.NumericShaper r0;
+        char c4, $c6, $c7;
+        char[] $r2, r3;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r3 := @parameter0: char[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        i9 = 48;
+
+        $r1 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        i10 = staticinvoke <java.awt.font.NumericShaper$Range: int access$700(java.awt.font.NumericShaper$Range)>($r4);
+
+        $r5 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        $c7 = virtualinvoke $r5.<java.awt.font.NumericShaper$Range: char getNumericBase()>();
+
+        $i13 = (int) $c7;
+
+        $i8 = 48 + $i13;
+
+        i9 = (char) $i8;
+
+        goto label2;
+
+     label1:
+        $r2 = <java.awt.font.NumericShaper: char[] bases>;
+
+        $i0 = r0.<java.awt.font.NumericShaper: int key>;
+
+        i10 = $r2[$i0];
+
+        $i1 = r0.<java.awt.font.NumericShaper: int key>;
+
+        if $i1 != 16 goto label2;
+
+        i9 = (char) 49;
+
+     label2:
+        i11 = i2;
+
+        $i12 = i2 + i3;
+
+     label3:
+        if i11 >= $i12 goto label5;
+
+        c4 = r3[i11];
+
+        $i14 = (int) c4;
+
+        if $i14 < i9 goto label4;
+
+        $i15 = (int) c4;
+
+        if $i15 > 57 goto label4;
+
+        $i16 = (int) c4;
+
+        $i5 = $i16 + i10;
+
+        $c6 = (char) $i5;
+
+        r3[i11] = $c6;
+
+     label4:
+        i11 = i11 + 1;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private synchronized void shapeContextually(char[], int, int, int)
+    {
+        byte $b20, b21, $b24;
+        boolean $z0;
+        java.lang.Throwable $r3;
+        int $i0, $i1, $i2, i3, i4, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i16, i17, i18, i22, i23, $i25, $i26, $i27, $i28;
+        java.awt.font.NumericShaper r0;
+        char c5, $c15, c19;
+        char[] $r1, r2, $r4;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r2 := @parameter0: char[];
+
+        i3 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i17 := @parameter3: int;
+
+        $i1 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i0 = 1 << i17;
+
+        $i2 = $i1 & $i0;
+
+        if $i2 != 0 goto label01;
+
+        i17 = 0;
+
+     label01:
+        i18 = i17;
+
+        $r1 = <java.awt.font.NumericShaper: char[] bases>;
+
+        c19 = $r1[i17];
+
+        if i17 != 16 goto label02;
+
+        $b20 = 49;
+
+        goto label03;
+
+     label02:
+        $b20 = 48;
+
+     label03:
+        b21 = $b20;
+
+        entermonitor class "Ljava/awt/font/NumericShaper;";
+
+     label04:
+        i22 = i3;
+
+        $i16 = i3 + i4;
+
+     label05:
+        if i22 >= $i16 goto label15;
+
+        c5 = r2[i22];
+
+        $i25 = (int) c5;
+
+        if $i25 < b21 goto label06;
+
+        $i26 = (int) c5;
+
+        if $i26 > 57 goto label06;
+
+        $i27 = (int) c5;
+
+        $i28 = (int) c19;
+
+        $i14 = $i27 + $i28;
+
+        $c15 = (char) $i14;
+
+        r2[i22] = $c15;
+
+     label06:
+        $z0 = specialinvoke r0.<java.awt.font.NumericShaper: boolean isStrongDirectional(char)>(c5);
+
+        if $z0 == 0 goto label14;
+
+        $i6 = staticinvoke <java.awt.font.NumericShaper: int getContextKey(char)>(c5);
+
+        if $i6 == i18 goto label14;
+
+        i18 = $i6;
+
+        i23 = $i6;
+
+        $i7 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i8 = $i7 & 4;
+
+        if $i8 == 0 goto label08;
+
+        if $i6 == 1 goto label07;
+
+        if $i6 != 2 goto label08;
+
+     label07:
+        i23 = 2;
+
+        goto label11;
+
+     label08:
+        $i9 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i10 = $i9 & 2;
+
+        if $i10 == 0 goto label10;
+
+        if $i6 == 1 goto label09;
+
+        if $i6 != 2 goto label10;
+
+     label09:
+        i23 = 1;
+
+        goto label11;
+
+     label10:
+        $i12 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $i11 = 1 << $i6;
+
+        $i13 = $i12 & $i11;
+
+        if $i13 != 0 goto label11;
+
+        i23 = 0;
+
+     label11:
+        $r4 = <java.awt.font.NumericShaper: char[] bases>;
+
+        c19 = $r4[i23];
+
+        if i23 != 16 goto label12;
+
+        $b24 = 49;
+
+        goto label13;
+
+     label12:
+        $b24 = 48;
+
+     label13:
+        b21 = $b24;
+
+     label14:
+        i22 = i22 + 1;
+
+        goto label05;
+
+     label15:
+        exitmonitor class "Ljava/awt/font/NumericShaper;";
+
+     label16:
+        goto label19;
+
+     label17:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/font/NumericShaper;";
+
+     label18:
+        throw $r3;
+
+     label19:
+        return;
+
+        catch java.lang.Throwable from label04 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    private void shapeContextually(char[], int, int, java.awt.font.NumericShaper$Range)
+    {
+        java.awt.font.NumericShaper$Range $r2, r4, r5;
+        int i0, i1, $i4, $i5, i7, $i9, $i11, i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        boolean $z0, $z1;
+        java.awt.font.NumericShaper r1;
+        java.util.Set $r3;
+        char c2, $c3, $c6, $c8, c10;
+        char[] r0;
+
+        r1 := @this: java.awt.font.NumericShaper;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r4 := @parameter3: java.awt.font.NumericShaper$Range;
+
+        if r4 == null goto label1;
+
+        $r3 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $z1 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>(r4);
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        r4 = <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range EUROPEAN>;
+
+     label2:
+        r5 = r4;
+
+        i7 = staticinvoke <java.awt.font.NumericShaper$Range: int access$700(java.awt.font.NumericShaper$Range)>(r4);
+
+        $c8 = virtualinvoke r4.<java.awt.font.NumericShaper$Range: char getNumericBase()>();
+
+        $i13 = (int) $c8;
+
+        $i9 = 48 + $i13;
+
+        c10 = (char) $i9;
+
+        $i11 = i0 + i1;
+
+        i12 = i0;
+
+     label3:
+        if i12 >= $i11 goto label6;
+
+        c2 = r0[i12];
+
+        $i14 = (int) c2;
+
+        $i15 = (int) c10;
+
+        if $i14 < $i15 goto label4;
+
+        $i16 = (int) c2;
+
+        if $i16 > 57 goto label4;
+
+        $i17 = (int) c2;
+
+        $i5 = $i17 + i7;
+
+        $c6 = (char) $i5;
+
+        r0[i12] = $c6;
+
+        goto label5;
+
+     label4:
+        $z0 = specialinvoke r1.<java.awt.font.NumericShaper: boolean isStrongDirectional(char)>(c2);
+
+        if $z0 == 0 goto label5;
+
+        $i18 = (int) c2;
+
+        $r2 = specialinvoke r1.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range rangeForCodePoint(int)>($i18);
+
+        if $r2 == r5 goto label5;
+
+        r5 = $r2;
+
+        i7 = staticinvoke <java.awt.font.NumericShaper$Range: int access$700(java.awt.font.NumericShaper$Range)>($r2);
+
+        $c3 = virtualinvoke $r2.<java.awt.font.NumericShaper$Range: char getNumericBase()>();
+
+        $i19 = (int) $c3;
+
+        $i4 = 48 + $i19;
+
+        c10 = (char) $i4;
+
+     label5:
+        i12 = i12 + 1;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    public int hashCode()
+    {
+        java.awt.font.NumericShaper r0;
+        int $i0, i1, i2;
+        java.util.Set $r1, $r2;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        i1 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $r1 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r1 == null goto label1;
+
+        i2 = i1 & -2147483648;
+
+        $r2 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Set: int hashCode()>();
+
+        i1 = i2 ^ $i0;
+
+     label1:
+        return i1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.awt.font.NumericShaper$Range $r5, $r7, $r11, $r12, $r15, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.util.Set $r2, $r3, $r4, $r6, $r8, $r9, $r10, $r13, $r14;
+        java.lang.ClassCastException $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.awt.font.NumericShaper r1, r18;
+        java.lang.Object r0;
+
+        r1 := @this: java.awt.font.NumericShaper;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label14;
+
+     label01:
+        r18 = (java.awt.font.NumericShaper) r0;
+
+        $r2 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r2 == null goto label07;
+
+        $r8 = r18.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r8 == null goto label04;
+
+        $z6 = virtualinvoke r1.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        $z7 = virtualinvoke r18.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z6 != $z7 goto label02;
+
+        $r14 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $r13 = r18.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $z8 = interfaceinvoke $r14.<java.util.Set: boolean equals(java.lang.Object)>($r13);
+
+        if $z8 == 0 goto label02;
+
+        $r16 = r1.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        $r15 = r18.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        if $r16 != $r15 goto label02;
+
+        $z9 = 1;
+
+        goto label03;
+
+     label02:
+        $z9 = 0;
+
+     label03:
+        return $z9;
+
+     label04:
+        $z3 = virtualinvoke r1.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        $z4 = virtualinvoke r18.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z3 != $z4 goto label05;
+
+        $r9 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $i6 = r18.<java.awt.font.NumericShaper: int mask>;
+
+        $r10 = staticinvoke <java.awt.font.NumericShaper$Range: java.util.Set access$600(int)>($i6);
+
+        $z5 = interfaceinvoke $r9.<java.util.Set: boolean equals(java.lang.Object)>($r10);
+
+        if $z5 == 0 goto label05;
+
+        $r11 = r1.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        $i7 = r18.<java.awt.font.NumericShaper: int key>;
+
+        $r12 = staticinvoke <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range access$800(int)>($i7);
+
+        if $r11 != $r12 goto label05;
+
+        $z10 = 1;
+
+        goto label06;
+
+     label05:
+        $z10 = 0;
+
+     label06:
+        return $z10;
+
+     label07:
+        $r3 = r18.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r3 == null goto label10;
+
+        $i4 = r1.<java.awt.font.NumericShaper: int mask>;
+
+        $r4 = staticinvoke <java.awt.font.NumericShaper$Range: java.util.Set access$600(int)>($i4);
+
+        $i5 = r1.<java.awt.font.NumericShaper: int key>;
+
+        $r5 = staticinvoke <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range access$800(int)>($i5);
+
+        $z0 = virtualinvoke r1.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        $z1 = virtualinvoke r18.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z0 != $z1 goto label08;
+
+        $r6 = r18.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $z2 = interfaceinvoke $r4.<java.util.Set: boolean equals(java.lang.Object)>($r6);
+
+        if $z2 == 0 goto label08;
+
+        $r7 = r18.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        if $r5 != $r7 goto label08;
+
+        $z11 = 1;
+
+        goto label09;
+
+     label08:
+        $z11 = 0;
+
+     label09:
+        return $z11;
+
+     label10:
+        $i1 = r18.<java.awt.font.NumericShaper: int mask>;
+
+        $i0 = r1.<java.awt.font.NumericShaper: int mask>;
+
+        if $i1 != $i0 goto label11;
+
+        $i3 = r18.<java.awt.font.NumericShaper: int key>;
+
+        $i2 = r1.<java.awt.font.NumericShaper: int key>;
+
+        if $i3 != $i2 goto label11;
+
+        $z12 = 1;
+
+        goto label12;
+
+     label11:
+        $z12 = 0;
+
+     label12:
+        return $z12;
+
+     label13:
+        $r17 := @caughtexception;
+
+     label14:
+        return 0;
+
+        catch java.lang.ClassCastException from label01 to label03 with label13;
+        catch java.lang.ClassCastException from label04 to label06 with label13;
+        catch java.lang.ClassCastException from label07 to label09 with label13;
+        catch java.lang.ClassCastException from label10 to label12 with label13;
+    }
+
+    public java.lang.String toString()
+    {
+        java.awt.font.NumericShaper$Range $r8, $r9, $r11;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r2, $r6;
+        boolean $z0, $z1, z2;
+        java.awt.font.NumericShaper$Range[] $r7, $r10;
+        java.awt.font.NumericShaper r1;
+        java.util.Set $r5, $r12;
+        java.lang.StringBuilder $r0, $r3, $r4;
+
+        r1 := @this: java.awt.font.NumericShaper;
+
+        $r0 = new java.lang.StringBuilder;
+
+        $r2 = specialinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[contextual:");
+
+        $z0 = virtualinvoke r1.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $z1 = virtualinvoke r1.<java.awt.font.NumericShaper: boolean isContextual()>();
+
+        if $z1 == 0 goto label03;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", context:");
+
+        $r9 = r1.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        if $r9 != null goto label01;
+
+        $r10 = staticinvoke <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range[] values()>();
+
+        $i3 = r1.<java.awt.font.NumericShaper: int key>;
+
+        $r11 = $r10[$i3];
+
+        goto label02;
+
+     label01:
+        $r11 = r1.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+     label02:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+     label03:
+        $r12 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r12 != null goto label09;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", range(s): ");
+
+        z2 = 1;
+
+        i4 = 0;
+
+     label04:
+        if i4 >= 19 goto label08;
+
+        $i1 = r1.<java.awt.font.NumericShaper: int mask>;
+
+        $i0 = 1 << i4;
+
+        $i2 = $i1 & $i0;
+
+        if $i2 == 0 goto label07;
+
+        if z2 == 0 goto label05;
+
+        z2 = 0;
+
+        goto label06;
+
+     label05:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label06:
+        $r7 = staticinvoke <java.awt.font.NumericShaper$Range: java.awt.font.NumericShaper$Range[] values()>();
+
+        $r8 = $r7[i4];
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", range set: ");
+
+        $r5 = r1.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+     label10:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        $r6 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    private static int getHighBit(int)
+    {
+        int i0, i1, $i3;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $i3 = (int) -32;
+
+        return $i3;
+
+     label1:
+        i1 = 0;
+
+        if i0 < 65536 goto label2;
+
+        i0 = i0 >> 16;
+
+        i1 = 16;
+
+     label2:
+        if i0 < 256 goto label3;
+
+        i0 = i0 >> 8;
+
+        i1 = i1 + 8;
+
+     label3:
+        if i0 < 16 goto label4;
+
+        i0 = i0 >> 4;
+
+        i1 = i1 + 4;
+
+     label4:
+        if i0 < 4 goto label5;
+
+        i0 = i0 >> 2;
+
+        i1 = i1 + 2;
+
+     label5:
+        if i0 < 2 goto label6;
+
+        i1 = i1 + 1;
+
+     label6:
+        return i1;
+    }
+
+    private static int search(int, int[], int, int)
+    {
+        int[] r0;
+        int i0, $i1, i2, i3, i4, i5, $i6, $i7, $i8, $i9, i10, i11;
+
+        i5 := @parameter0: int;
+
+        r0 := @parameter1: int[];
+
+        i4 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $i1 = staticinvoke <java.awt.font.NumericShaper: int getHighBit(int)>(i0);
+
+        i2 = 1 << $i1;
+
+        i3 = i0 - i2;
+
+        i10 = i2;
+
+        i11 = i4;
+
+        $i6 = i4 + i3;
+
+        $i7 = r0[$i6];
+
+        if i5 < $i7 goto label1;
+
+        i11 = i4 + i3;
+
+     label1:
+        if i10 <= 1 goto label2;
+
+        i10 = i10 >> 1;
+
+        $i8 = i11 + i10;
+
+        $i9 = r0[$i8];
+
+        if i5 < $i9 goto label1;
+
+        i11 = i11 + i10;
+
+        goto label1;
+
+     label2:
+        return i11;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.awt.font.NumericShaper r0;
+        java.util.Set $r3, $r5;
+        java.awt.font.NumericShaper$Range $r1, $r4;
+        int $i0, $i1, $i2, $i3;
+        java.io.ObjectOutputStream r2;
+
+        r0 := @this: java.awt.font.NumericShaper;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<java.awt.font.NumericShaper: java.awt.font.NumericShaper$Range shapingRange>;
+
+        $i3 = staticinvoke <java.awt.font.NumericShaper$Range: int access$500(java.awt.font.NumericShaper$Range)>($r4);
+
+        if $i3 < 0 goto label1;
+
+        r0.<java.awt.font.NumericShaper: int key> = $i3;
+
+     label1:
+        $r5 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        if $r5 == null goto label2;
+
+        $i0 = r0.<java.awt.font.NumericShaper: int mask>;
+
+        $r3 = r0.<java.awt.font.NumericShaper: java.util.Set rangeSet>;
+
+        $i1 = staticinvoke <java.awt.font.NumericShaper$Range: int access$900(java.util.Set)>($r3);
+
+        $i2 = $i0 | $i1;
+
+        r0.<java.awt.font.NumericShaper: int mask> = $i2;
+
+     label2:
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r0, $r1, $r2;
+        int[] $r3;
+        int $i0, $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i19, $i21, $i23, $i25, $i27, $i29, $i31, $i33, $i35, $i37, $i39, $i41, $i43, $i45, $i47, $i49, $i51, $i53, $i55, $i57, $i59, $i61, $i63, $i65, $i67, $i69, $i71, $i73, $i75, $i77, $i79, $i81, $i83, $i85, $i87, $i89, $i91, $i93, $i95, $i97, $i99, $i101, $i103, $i105, $i107, $i109, $i111, $i113, $i115, $i117, $i119, $i121, $i123, $i125, $i127, $i129, $i131, $i133, $i135, $i137, $i139, $i141, $i143, $i145, $i147, $i149, $i151, $i153, $i155, $i157, $i159, $i161, $i163, $i165, $i167, $i169, $i171, $i173, $i175, $i177, $i179;
+
+        <java.awt.font.NumericShaper: int CONTEXTUAL_MASK> = -2147483648;
+
+        <java.awt.font.NumericShaper: int NUM_KEYS> = 19;
+
+        <java.awt.font.NumericShaper: int MONGOLIAN_KEY> = 18;
+
+        <java.awt.font.NumericShaper: int KHMER_KEY> = 17;
+
+        <java.awt.font.NumericShaper: int ETHIOPIC_KEY> = 16;
+
+        <java.awt.font.NumericShaper: int MYANMAR_KEY> = 15;
+
+        <java.awt.font.NumericShaper: int TIBETAN_KEY> = 14;
+
+        <java.awt.font.NumericShaper: int LAO_KEY> = 13;
+
+        <java.awt.font.NumericShaper: int THAI_KEY> = 12;
+
+        <java.awt.font.NumericShaper: int MALAYALAM_KEY> = 11;
+
+        <java.awt.font.NumericShaper: int KANNADA_KEY> = 10;
+
+        <java.awt.font.NumericShaper: int TELUGU_KEY> = 9;
+
+        <java.awt.font.NumericShaper: int TAMIL_KEY> = 8;
+
+        <java.awt.font.NumericShaper: int ORIYA_KEY> = 7;
+
+        <java.awt.font.NumericShaper: int GUJARATI_KEY> = 6;
+
+        <java.awt.font.NumericShaper: int GURMUKHI_KEY> = 5;
+
+        <java.awt.font.NumericShaper: int BENGALI_KEY> = 4;
+
+        <java.awt.font.NumericShaper: int DEVANAGARI_KEY> = 3;
+
+        <java.awt.font.NumericShaper: int EASTERN_ARABIC_KEY> = 2;
+
+        <java.awt.font.NumericShaper: int ARABIC_KEY> = 1;
+
+        <java.awt.font.NumericShaper: int EUROPEAN_KEY> = 0;
+
+        <java.awt.font.NumericShaper: int ALL_RANGES> = 524287;
+
+        <java.awt.font.NumericShaper: int MONGOLIAN> = 262144;
+
+        <java.awt.font.NumericShaper: int KHMER> = 131072;
+
+        <java.awt.font.NumericShaper: int ETHIOPIC> = 65536;
+
+        <java.awt.font.NumericShaper: int MYANMAR> = 32768;
+
+        <java.awt.font.NumericShaper: int TIBETAN> = 16384;
+
+        <java.awt.font.NumericShaper: int LAO> = 8192;
+
+        <java.awt.font.NumericShaper: int THAI> = 4096;
+
+        <java.awt.font.NumericShaper: int MALAYALAM> = 2048;
+
+        <java.awt.font.NumericShaper: int KANNADA> = 1024;
+
+        <java.awt.font.NumericShaper: int TELUGU> = 512;
+
+        <java.awt.font.NumericShaper: int TAMIL> = 256;
+
+        <java.awt.font.NumericShaper: int ORIYA> = 128;
+
+        <java.awt.font.NumericShaper: int GUJARATI> = 64;
+
+        <java.awt.font.NumericShaper: int GURMUKHI> = 32;
+
+        <java.awt.font.NumericShaper: int BENGALI> = 16;
+
+        <java.awt.font.NumericShaper: int DEVANAGARI> = 8;
+
+        <java.awt.font.NumericShaper: int EASTERN_ARABIC> = 4;
+
+        <java.awt.font.NumericShaper: int ARABIC> = 2;
+
+        <java.awt.font.NumericShaper: int EUROPEAN> = 1;
+
+        <java.awt.font.NumericShaper: long serialVersionUID> = -8022764705923730308L;
+
+        <java.awt.font.NumericShaper: int BSEARCH_THRESHOLD> = 3;
+
+        $r0 = newarray (char)[19];
+
+        $r0[0] = 0;
+
+        $r0[1] = 1584;
+
+        $r0[2] = 1728;
+
+        $r0[3] = 2358;
+
+        $r0[4] = 2486;
+
+        $r0[5] = 2614;
+
+        $r0[6] = 2742;
+
+        $r0[7] = 2870;
+
+        $r0[8] = 2998;
+
+        $r0[9] = 3126;
+
+        $r0[10] = 3254;
+
+        $r0[11] = 3382;
+
+        $r0[12] = 3616;
+
+        $r0[13] = 3744;
+
+        $r0[14] = 3824;
+
+        $r0[15] = 4112;
+
+        $r0[16] = 4920;
+
+        $r0[17] = 6064;
+
+        $r0[18] = 6112;
+
+        <java.awt.font.NumericShaper: char[] bases> = $r0;
+
+        $r1 = newarray (char)[39];
+
+        $r1[0] = 0;
+
+        $r1[1] = 768;
+
+        $r1[2] = 1536;
+
+        $r1[3] = 1920;
+
+        $r1[4] = 1536;
+
+        $r1[5] = 1920;
+
+        $r1[6] = 2304;
+
+        $r1[7] = 2432;
+
+        $r1[8] = 2432;
+
+        $r1[9] = 2560;
+
+        $r1[10] = 2560;
+
+        $r1[11] = 2688;
+
+        $r1[12] = 2688;
+
+        $r1[13] = 2816;
+
+        $r1[14] = 2816;
+
+        $r1[15] = 2944;
+
+        $r1[16] = 2944;
+
+        $r1[17] = 3072;
+
+        $r1[18] = 3072;
+
+        $r1[19] = 3200;
+
+        $r1[20] = 3200;
+
+        $r1[21] = 3328;
+
+        $r1[22] = 3328;
+
+        $r1[23] = 3456;
+
+        $r1[24] = 3584;
+
+        $r1[25] = 3712;
+
+        $r1[26] = 3712;
+
+        $r1[27] = 3840;
+
+        $r1[28] = 3840;
+
+        $r1[29] = 4096;
+
+        $r1[30] = 4096;
+
+        $r1[31] = 4224;
+
+        $r1[32] = 4608;
+
+        $r1[33] = 4992;
+
+        $r1[34] = 6016;
+
+        $r1[35] = 6144;
+
+        $r1[36] = 6144;
+
+        $r1[37] = 6400;
+
+        $r1[38] = 65535;
+
+        <java.awt.font.NumericShaper: char[] contexts> = $r1;
+
+        <java.awt.font.NumericShaper: int ctCache> = 0;
+
+        $r2 = <java.awt.font.NumericShaper: char[] contexts>;
+
+        $i0 = lengthof $r2;
+
+        $i1 = $i0 - 2;
+
+        <java.awt.font.NumericShaper: int ctCacheLimit> = $i1;
+
+        $r3 = newarray (int)[600];
+
+        $r3[0] = 0;
+
+        $r3[1] = 65;
+
+        $r3[2] = 91;
+
+        $r3[3] = 97;
+
+        $r3[4] = 123;
+
+        $r3[5] = 170;
+
+        $r3[6] = 171;
+
+        $r3[7] = 181;
+
+        $r3[8] = 182;
+
+        $r3[9] = 186;
+
+        $r3[10] = 187;
+
+        $r3[11] = 192;
+
+        $r3[12] = 215;
+
+        $r3[13] = 216;
+
+        $r3[14] = 247;
+
+        $r3[15] = 248;
+
+        $r3[16] = 697;
+
+        $r3[17] = 699;
+
+        $r3[18] = 706;
+
+        $r3[19] = 720;
+
+        $r3[20] = 722;
+
+        $r3[21] = 736;
+
+        $r3[22] = 741;
+
+        $r3[23] = 750;
+
+        $r3[24] = 751;
+
+        $r3[25] = 880;
+
+        $r3[26] = 884;
+
+        $r3[27] = 886;
+
+        $r3[28] = 894;
+
+        $r3[29] = 902;
+
+        $r3[30] = 903;
+
+        $r3[31] = 904;
+
+        $r3[32] = 1014;
+
+        $r3[33] = 1015;
+
+        $r3[34] = 1155;
+
+        $r3[35] = 1162;
+
+        $r3[36] = 1418;
+
+        $r3[37] = 1470;
+
+        $r3[38] = 1471;
+
+        $r3[39] = 1472;
+
+        $r3[40] = 1473;
+
+        $r3[41] = 1475;
+
+        $r3[42] = 1476;
+
+        $r3[43] = 1478;
+
+        $r3[44] = 1479;
+
+        $r3[45] = 1488;
+
+        $r3[46] = 1536;
+
+        $r3[47] = 1544;
+
+        $r3[48] = 1545;
+
+        $r3[49] = 1547;
+
+        $r3[50] = 1548;
+
+        $r3[51] = 1549;
+
+        $r3[52] = 1550;
+
+        $r3[53] = 1563;
+
+        $r3[54] = 1611;
+
+        $r3[55] = 1645;
+
+        $r3[56] = 1648;
+
+        $r3[57] = 1649;
+
+        $r3[58] = 1750;
+
+        $r3[59] = 1765;
+
+        $r3[60] = 1767;
+
+        $r3[61] = 1774;
+
+        $r3[62] = 1776;
+
+        $r3[63] = 1786;
+
+        $r3[64] = 1809;
+
+        $r3[65] = 1810;
+
+        $r3[66] = 1840;
+
+        $r3[67] = 1869;
+
+        $r3[68] = 1958;
+
+        $r3[69] = 1969;
+
+        $r3[70] = 2027;
+
+        $r3[71] = 2036;
+
+        $r3[72] = 2038;
+
+        $r3[73] = 2042;
+
+        $r3[74] = 2070;
+
+        $r3[75] = 2074;
+
+        $r3[76] = 2075;
+
+        $r3[77] = 2084;
+
+        $r3[78] = 2085;
+
+        $r3[79] = 2088;
+
+        $r3[80] = 2089;
+
+        $r3[81] = 2096;
+
+        $r3[82] = 2137;
+
+        $r3[83] = 2142;
+
+        $r3[84] = 2276;
+
+        $r3[85] = 2307;
+
+        $r3[86] = 2362;
+
+        $r3[87] = 2363;
+
+        $r3[88] = 2364;
+
+        $r3[89] = 2365;
+
+        $r3[90] = 2369;
+
+        $r3[91] = 2377;
+
+        $r3[92] = 2381;
+
+        $r3[93] = 2382;
+
+        $r3[94] = 2385;
+
+        $r3[95] = 2392;
+
+        $r3[96] = 2402;
+
+        $r3[97] = 2404;
+
+        $r3[98] = 2433;
+
+        $r3[99] = 2434;
+
+        $r3[100] = 2492;
+
+        $r3[101] = 2493;
+
+        $r3[102] = 2497;
+
+        $r3[103] = 2503;
+
+        $r3[104] = 2509;
+
+        $r3[105] = 2510;
+
+        $r3[106] = 2530;
+
+        $r3[107] = 2534;
+
+        $r3[108] = 2546;
+
+        $r3[109] = 2548;
+
+        $r3[110] = 2555;
+
+        $r3[111] = 2563;
+
+        $r3[112] = 2620;
+
+        $r3[113] = 2622;
+
+        $r3[114] = 2625;
+
+        $r3[115] = 2649;
+
+        $r3[116] = 2672;
+
+        $r3[117] = 2674;
+
+        $r3[118] = 2677;
+
+        $r3[119] = 2691;
+
+        $r3[120] = 2748;
+
+        $r3[121] = 2749;
+
+        $r3[122] = 2753;
+
+        $r3[123] = 2761;
+
+        $r3[124] = 2765;
+
+        $r3[125] = 2768;
+
+        $r3[126] = 2786;
+
+        $r3[127] = 2790;
+
+        $r3[128] = 2801;
+
+        $r3[129] = 2818;
+
+        $r3[130] = 2876;
+
+        $r3[131] = 2877;
+
+        $r3[132] = 2879;
+
+        $r3[133] = 2880;
+
+        $r3[134] = 2881;
+
+        $r3[135] = 2887;
+
+        $r3[136] = 2893;
+
+        $r3[137] = 2903;
+
+        $r3[138] = 2914;
+
+        $r3[139] = 2918;
+
+        $r3[140] = 2946;
+
+        $r3[141] = 2947;
+
+        $r3[142] = 3008;
+
+        $r3[143] = 3009;
+
+        $r3[144] = 3021;
+
+        $r3[145] = 3024;
+
+        $r3[146] = 3059;
+
+        $r3[147] = 3073;
+
+        $r3[148] = 3134;
+
+        $r3[149] = 3137;
+
+        $r3[150] = 3142;
+
+        $r3[151] = 3160;
+
+        $r3[152] = 3170;
+
+        $r3[153] = 3174;
+
+        $r3[154] = 3192;
+
+        $r3[155] = 3199;
+
+        $r3[156] = 3260;
+
+        $r3[157] = 3261;
+
+        $r3[158] = 3276;
+
+        $r3[159] = 3285;
+
+        $r3[160] = 3298;
+
+        $r3[161] = 3302;
+
+        $r3[162] = 3393;
+
+        $r3[163] = 3398;
+
+        $r3[164] = 3405;
+
+        $r3[165] = 3406;
+
+        $r3[166] = 3426;
+
+        $r3[167] = 3430;
+
+        $r3[168] = 3530;
+
+        $r3[169] = 3535;
+
+        $r3[170] = 3538;
+
+        $r3[171] = 3544;
+
+        $r3[172] = 3633;
+
+        $r3[173] = 3634;
+
+        $r3[174] = 3636;
+
+        $r3[175] = 3648;
+
+        $r3[176] = 3655;
+
+        $r3[177] = 3663;
+
+        $r3[178] = 3761;
+
+        $r3[179] = 3762;
+
+        $r3[180] = 3764;
+
+        $r3[181] = 3773;
+
+        $r3[182] = 3784;
+
+        $r3[183] = 3792;
+
+        $r3[184] = 3864;
+
+        $r3[185] = 3866;
+
+        $r3[186] = 3893;
+
+        $r3[187] = 3894;
+
+        $r3[188] = 3895;
+
+        $r3[189] = 3896;
+
+        $r3[190] = 3897;
+
+        $r3[191] = 3902;
+
+        $r3[192] = 3953;
+
+        $r3[193] = 3967;
+
+        $r3[194] = 3968;
+
+        $r3[195] = 3973;
+
+        $r3[196] = 3974;
+
+        $r3[197] = 3976;
+
+        $r3[198] = 3981;
+
+        $r3[199] = 4030;
+
+        $r3[200] = 4038;
+
+        $r3[201] = 4039;
+
+        $r3[202] = 4141;
+
+        $r3[203] = 4145;
+
+        $r3[204] = 4146;
+
+        $r3[205] = 4152;
+
+        $r3[206] = 4153;
+
+        $r3[207] = 4155;
+
+        $r3[208] = 4157;
+
+        $r3[209] = 4159;
+
+        $r3[210] = 4184;
+
+        $r3[211] = 4186;
+
+        $r3[212] = 4190;
+
+        $r3[213] = 4193;
+
+        $r3[214] = 4209;
+
+        $r3[215] = 4213;
+
+        $r3[216] = 4226;
+
+        $r3[217] = 4227;
+
+        $r3[218] = 4229;
+
+        $r3[219] = 4231;
+
+        $r3[220] = 4237;
+
+        $r3[221] = 4238;
+
+        $r3[222] = 4253;
+
+        $r3[223] = 4254;
+
+        $r3[224] = 4957;
+
+        $r3[225] = 4960;
+
+        $r3[226] = 5008;
+
+        $r3[227] = 5024;
+
+        $r3[228] = 5120;
+
+        $r3[229] = 5121;
+
+        $r3[230] = 5760;
+
+        $r3[231] = 5761;
+
+        $r3[232] = 5787;
+
+        $r3[233] = 5792;
+
+        $r3[234] = 5906;
+
+        $r3[235] = 5920;
+
+        $r3[236] = 5938;
+
+        $r3[237] = 5941;
+
+        $r3[238] = 5970;
+
+        $r3[239] = 5984;
+
+        $r3[240] = 6002;
+
+        $r3[241] = 6016;
+
+        $r3[242] = 6068;
+
+        $r3[243] = 6070;
+
+        $r3[244] = 6071;
+
+        $r3[245] = 6078;
+
+        $r3[246] = 6086;
+
+        $r3[247] = 6087;
+
+        $r3[248] = 6089;
+
+        $r3[249] = 6100;
+
+        $r3[250] = 6107;
+
+        $r3[251] = 6108;
+
+        $r3[252] = 6109;
+
+        $r3[253] = 6112;
+
+        $r3[254] = 6128;
+
+        $r3[255] = 6160;
+
+        $r3[256] = 6313;
+
+        $r3[257] = 6314;
+
+        $r3[258] = 6432;
+
+        $r3[259] = 6435;
+
+        $r3[260] = 6439;
+
+        $r3[261] = 6441;
+
+        $r3[262] = 6450;
+
+        $r3[263] = 6451;
+
+        $r3[264] = 6457;
+
+        $r3[265] = 6470;
+
+        $r3[266] = 6622;
+
+        $r3[267] = 6656;
+
+        $r3[268] = 6679;
+
+        $r3[269] = 6681;
+
+        $r3[270] = 6742;
+
+        $r3[271] = 6743;
+
+        $r3[272] = 6744;
+
+        $r3[273] = 6753;
+
+        $r3[274] = 6754;
+
+        $r3[275] = 6755;
+
+        $r3[276] = 6757;
+
+        $r3[277] = 6765;
+
+        $r3[278] = 6771;
+
+        $r3[279] = 6784;
+
+        $r3[280] = 6912;
+
+        $r3[281] = 6916;
+
+        $r3[282] = 6964;
+
+        $r3[283] = 6965;
+
+        $r3[284] = 6966;
+
+        $r3[285] = 6971;
+
+        $r3[286] = 6972;
+
+        $r3[287] = 6973;
+
+        $r3[288] = 6978;
+
+        $r3[289] = 6979;
+
+        $r3[290] = 7019;
+
+        $r3[291] = 7028;
+
+        $r3[292] = 7040;
+
+        $r3[293] = 7042;
+
+        $r3[294] = 7074;
+
+        $r3[295] = 7078;
+
+        $r3[296] = 7080;
+
+        $r3[297] = 7082;
+
+        $r3[298] = 7083;
+
+        $r3[299] = 7084;
+
+        $r3[300] = 7142;
+
+        $r3[301] = 7143;
+
+        $r3[302] = 7144;
+
+        $r3[303] = 7146;
+
+        $r3[304] = 7149;
+
+        $r3[305] = 7150;
+
+        $r3[306] = 7151;
+
+        $r3[307] = 7154;
+
+        $r3[308] = 7212;
+
+        $r3[309] = 7220;
+
+        $r3[310] = 7222;
+
+        $r3[311] = 7227;
+
+        $r3[312] = 7376;
+
+        $r3[313] = 7379;
+
+        $r3[314] = 7380;
+
+        $r3[315] = 7393;
+
+        $r3[316] = 7394;
+
+        $r3[317] = 7401;
+
+        $r3[318] = 7405;
+
+        $r3[319] = 7406;
+
+        $r3[320] = 7412;
+
+        $r3[321] = 7413;
+
+        $r3[322] = 7616;
+
+        $r3[323] = 7680;
+
+        $r3[324] = 8125;
+
+        $r3[325] = 8126;
+
+        $r3[326] = 8127;
+
+        $r3[327] = 8130;
+
+        $r3[328] = 8141;
+
+        $r3[329] = 8144;
+
+        $r3[330] = 8157;
+
+        $r3[331] = 8160;
+
+        $r3[332] = 8173;
+
+        $r3[333] = 8178;
+
+        $r3[334] = 8189;
+
+        $r3[335] = 8206;
+
+        $r3[336] = 8208;
+
+        $r3[337] = 8305;
+
+        $r3[338] = 8308;
+
+        $r3[339] = 8319;
+
+        $r3[340] = 8320;
+
+        $r3[341] = 8336;
+
+        $r3[342] = 8352;
+
+        $r3[343] = 8450;
+
+        $r3[344] = 8451;
+
+        $r3[345] = 8455;
+
+        $r3[346] = 8456;
+
+        $r3[347] = 8458;
+
+        $r3[348] = 8468;
+
+        $r3[349] = 8469;
+
+        $r3[350] = 8470;
+
+        $r3[351] = 8473;
+
+        $r3[352] = 8478;
+
+        $r3[353] = 8484;
+
+        $r3[354] = 8485;
+
+        $r3[355] = 8486;
+
+        $r3[356] = 8487;
+
+        $r3[357] = 8488;
+
+        $r3[358] = 8489;
+
+        $r3[359] = 8490;
+
+        $r3[360] = 8494;
+
+        $r3[361] = 8495;
+
+        $r3[362] = 8506;
+
+        $r3[363] = 8508;
+
+        $r3[364] = 8512;
+
+        $r3[365] = 8517;
+
+        $r3[366] = 8522;
+
+        $r3[367] = 8526;
+
+        $r3[368] = 8528;
+
+        $r3[369] = 8544;
+
+        $r3[370] = 8585;
+
+        $r3[371] = 9014;
+
+        $r3[372] = 9083;
+
+        $r3[373] = 9109;
+
+        $r3[374] = 9110;
+
+        $r3[375] = 9372;
+
+        $r3[376] = 9450;
+
+        $r3[377] = 9900;
+
+        $r3[378] = 9901;
+
+        $r3[379] = 10240;
+
+        $r3[380] = 10496;
+
+        $r3[381] = 11264;
+
+        $r3[382] = 11493;
+
+        $r3[383] = 11499;
+
+        $r3[384] = 11503;
+
+        $r3[385] = 11506;
+
+        $r3[386] = 11513;
+
+        $r3[387] = 11520;
+
+        $r3[388] = 11647;
+
+        $r3[389] = 11648;
+
+        $r3[390] = 11744;
+
+        $r3[391] = 12293;
+
+        $r3[392] = 12296;
+
+        $r3[393] = 12321;
+
+        $r3[394] = 12330;
+
+        $r3[395] = 12337;
+
+        $r3[396] = 12342;
+
+        $r3[397] = 12344;
+
+        $r3[398] = 12349;
+
+        $r3[399] = 12353;
+
+        $r3[400] = 12441;
+
+        $r3[401] = 12445;
+
+        $r3[402] = 12448;
+
+        $r3[403] = 12449;
+
+        $r3[404] = 12539;
+
+        $r3[405] = 12540;
+
+        $r3[406] = 12736;
+
+        $r3[407] = 12784;
+
+        $r3[408] = 12829;
+
+        $r3[409] = 12832;
+
+        $r3[410] = 12880;
+
+        $r3[411] = 12896;
+
+        $r3[412] = 12924;
+
+        $r3[413] = 12927;
+
+        $r3[414] = 12977;
+
+        $r3[415] = 12992;
+
+        $r3[416] = 13004;
+
+        $r3[417] = 13008;
+
+        $r3[418] = 13175;
+
+        $r3[419] = 13179;
+
+        $r3[420] = 13278;
+
+        $r3[421] = 13280;
+
+        $r3[422] = 13311;
+
+        $r3[423] = 13312;
+
+        $r3[424] = 19904;
+
+        $r3[425] = 19968;
+
+        $i3 = (int) 42128;
+
+        $r3[426] = $i3;
+
+        $i5 = (int) 42192;
+
+        $r3[427] = $i5;
+
+        $i7 = (int) 42509;
+
+        $r3[428] = $i7;
+
+        $i9 = (int) 42512;
+
+        $r3[429] = $i9;
+
+        $i11 = (int) 42607;
+
+        $r3[430] = $i11;
+
+        $i13 = (int) 42624;
+
+        $r3[431] = $i13;
+
+        $i15 = (int) 42655;
+
+        $r3[432] = $i15;
+
+        $i17 = (int) 42656;
+
+        $r3[433] = $i17;
+
+        $i19 = (int) 42736;
+
+        $r3[434] = $i19;
+
+        $i21 = (int) 42738;
+
+        $r3[435] = $i21;
+
+        $i23 = (int) 42752;
+
+        $r3[436] = $i23;
+
+        $i25 = (int) 42786;
+
+        $r3[437] = $i25;
+
+        $i27 = (int) 42888;
+
+        $r3[438] = $i27;
+
+        $i29 = (int) 42889;
+
+        $r3[439] = $i29;
+
+        $i31 = (int) 43010;
+
+        $r3[440] = $i31;
+
+        $i33 = (int) 43011;
+
+        $r3[441] = $i33;
+
+        $i35 = (int) 43014;
+
+        $r3[442] = $i35;
+
+        $i37 = (int) 43015;
+
+        $r3[443] = $i37;
+
+        $i39 = (int) 43019;
+
+        $r3[444] = $i39;
+
+        $i41 = (int) 43020;
+
+        $r3[445] = $i41;
+
+        $i43 = (int) 43045;
+
+        $r3[446] = $i43;
+
+        $i45 = (int) 43047;
+
+        $r3[447] = $i45;
+
+        $i47 = (int) 43048;
+
+        $r3[448] = $i47;
+
+        $i49 = (int) 43056;
+
+        $r3[449] = $i49;
+
+        $i51 = (int) 43064;
+
+        $r3[450] = $i51;
+
+        $i53 = (int) 43072;
+
+        $r3[451] = $i53;
+
+        $i55 = (int) 43124;
+
+        $r3[452] = $i55;
+
+        $i57 = (int) 43136;
+
+        $r3[453] = $i57;
+
+        $i59 = (int) 43204;
+
+        $r3[454] = $i59;
+
+        $i61 = (int) 43214;
+
+        $r3[455] = $i61;
+
+        $i63 = (int) 43232;
+
+        $r3[456] = $i63;
+
+        $i65 = (int) 43250;
+
+        $r3[457] = $i65;
+
+        $i67 = (int) 43302;
+
+        $r3[458] = $i67;
+
+        $i69 = (int) 43310;
+
+        $r3[459] = $i69;
+
+        $i71 = (int) 43335;
+
+        $r3[460] = $i71;
+
+        $i73 = (int) 43346;
+
+        $r3[461] = $i73;
+
+        $i75 = (int) 43392;
+
+        $r3[462] = $i75;
+
+        $i77 = (int) 43395;
+
+        $r3[463] = $i77;
+
+        $i79 = (int) 43443;
+
+        $r3[464] = $i79;
+
+        $i81 = (int) 43444;
+
+        $r3[465] = $i81;
+
+        $i83 = (int) 43446;
+
+        $r3[466] = $i83;
+
+        $i85 = (int) 43450;
+
+        $r3[467] = $i85;
+
+        $i87 = (int) 43452;
+
+        $r3[468] = $i87;
+
+        $i89 = (int) 43453;
+
+        $r3[469] = $i89;
+
+        $i91 = (int) 43561;
+
+        $r3[470] = $i91;
+
+        $i93 = (int) 43567;
+
+        $r3[471] = $i93;
+
+        $i95 = (int) 43569;
+
+        $r3[472] = $i95;
+
+        $i97 = (int) 43571;
+
+        $r3[473] = $i97;
+
+        $i99 = (int) 43573;
+
+        $r3[474] = $i99;
+
+        $i101 = (int) 43584;
+
+        $r3[475] = $i101;
+
+        $i103 = (int) 43587;
+
+        $r3[476] = $i103;
+
+        $i105 = (int) 43588;
+
+        $r3[477] = $i105;
+
+        $i107 = (int) 43596;
+
+        $r3[478] = $i107;
+
+        $i109 = (int) 43597;
+
+        $r3[479] = $i109;
+
+        $i111 = (int) 43696;
+
+        $r3[480] = $i111;
+
+        $i113 = (int) 43697;
+
+        $r3[481] = $i113;
+
+        $i115 = (int) 43698;
+
+        $r3[482] = $i115;
+
+        $i117 = (int) 43701;
+
+        $r3[483] = $i117;
+
+        $i119 = (int) 43703;
+
+        $r3[484] = $i119;
+
+        $i121 = (int) 43705;
+
+        $r3[485] = $i121;
+
+        $i123 = (int) 43710;
+
+        $r3[486] = $i123;
+
+        $i125 = (int) 43712;
+
+        $r3[487] = $i125;
+
+        $i127 = (int) 43713;
+
+        $r3[488] = $i127;
+
+        $i129 = (int) 43714;
+
+        $r3[489] = $i129;
+
+        $i131 = (int) 43756;
+
+        $r3[490] = $i131;
+
+        $i133 = (int) 43758;
+
+        $r3[491] = $i133;
+
+        $i135 = (int) 43766;
+
+        $r3[492] = $i135;
+
+        $i137 = (int) 43777;
+
+        $r3[493] = $i137;
+
+        $i139 = (int) 44005;
+
+        $r3[494] = $i139;
+
+        $i141 = (int) 44006;
+
+        $r3[495] = $i141;
+
+        $i143 = (int) 44008;
+
+        $r3[496] = $i143;
+
+        $i145 = (int) 44009;
+
+        $r3[497] = $i145;
+
+        $i147 = (int) 44013;
+
+        $r3[498] = $i147;
+
+        $i149 = (int) 44016;
+
+        $r3[499] = $i149;
+
+        $i151 = (int) 64286;
+
+        $r3[500] = $i151;
+
+        $i153 = (int) 64287;
+
+        $r3[501] = $i153;
+
+        $i155 = (int) 64297;
+
+        $r3[502] = $i155;
+
+        $i157 = (int) 64298;
+
+        $r3[503] = $i157;
+
+        $i159 = (int) 64830;
+
+        $r3[504] = $i159;
+
+        $i161 = (int) 64848;
+
+        $r3[505] = $i161;
+
+        $i163 = (int) 65021;
+
+        $r3[506] = $i163;
+
+        $i165 = (int) 65136;
+
+        $r3[507] = $i165;
+
+        $i167 = (int) 65279;
+
+        $r3[508] = $i167;
+
+        $i169 = (int) 65313;
+
+        $r3[509] = $i169;
+
+        $i171 = (int) 65339;
+
+        $r3[510] = $i171;
+
+        $i173 = (int) 65345;
+
+        $r3[511] = $i173;
+
+        $i175 = (int) 65371;
+
+        $r3[512] = $i175;
+
+        $i177 = (int) 65382;
+
+        $r3[513] = $i177;
+
+        $i179 = (int) 65504;
+
+        $r3[514] = $i179;
+
+        $r3[515] = 65536;
+
+        $r3[516] = 65793;
+
+        $r3[517] = 65794;
+
+        $r3[518] = 65856;
+
+        $r3[519] = 66000;
+
+        $r3[520] = 66045;
+
+        $r3[521] = 66176;
+
+        $r3[522] = 67871;
+
+        $r3[523] = 67872;
+
+        $r3[524] = 68097;
+
+        $r3[525] = 68112;
+
+        $r3[526] = 68152;
+
+        $r3[527] = 68160;
+
+        $r3[528] = 68409;
+
+        $r3[529] = 68416;
+
+        $r3[530] = 69216;
+
+        $r3[531] = 69632;
+
+        $r3[532] = 69633;
+
+        $r3[533] = 69634;
+
+        $r3[534] = 69688;
+
+        $r3[535] = 69703;
+
+        $r3[536] = 69714;
+
+        $r3[537] = 69734;
+
+        $r3[538] = 69760;
+
+        $r3[539] = 69762;
+
+        $r3[540] = 69811;
+
+        $r3[541] = 69815;
+
+        $r3[542] = 69817;
+
+        $r3[543] = 69819;
+
+        $r3[544] = 69888;
+
+        $r3[545] = 69891;
+
+        $r3[546] = 69927;
+
+        $r3[547] = 69932;
+
+        $r3[548] = 69933;
+
+        $r3[549] = 69942;
+
+        $r3[550] = 70016;
+
+        $r3[551] = 70018;
+
+        $r3[552] = 70070;
+
+        $r3[553] = 70079;
+
+        $r3[554] = 71339;
+
+        $r3[555] = 71340;
+
+        $r3[556] = 71341;
+
+        $r3[557] = 71342;
+
+        $r3[558] = 71344;
+
+        $r3[559] = 71350;
+
+        $r3[560] = 71351;
+
+        $r3[561] = 71360;
+
+        $r3[562] = 94095;
+
+        $r3[563] = 94099;
+
+        $r3[564] = 119143;
+
+        $r3[565] = 119146;
+
+        $r3[566] = 119155;
+
+        $r3[567] = 119171;
+
+        $r3[568] = 119173;
+
+        $r3[569] = 119180;
+
+        $r3[570] = 119210;
+
+        $r3[571] = 119214;
+
+        $r3[572] = 119296;
+
+        $r3[573] = 119648;
+
+        $r3[574] = 120539;
+
+        $r3[575] = 120540;
+
+        $r3[576] = 120597;
+
+        $r3[577] = 120598;
+
+        $r3[578] = 120655;
+
+        $r3[579] = 120656;
+
+        $r3[580] = 120713;
+
+        $r3[581] = 120714;
+
+        $r3[582] = 120771;
+
+        $r3[583] = 120772;
+
+        $r3[584] = 120782;
+
+        $r3[585] = 126464;
+
+        $r3[586] = 126704;
+
+        $r3[587] = 127248;
+
+        $r3[588] = 127338;
+
+        $r3[589] = 127344;
+
+        $r3[590] = 127744;
+
+        $r3[591] = 128140;
+
+        $r3[592] = 128141;
+
+        $r3[593] = 128292;
+
+        $r3[594] = 128293;
+
+        $r3[595] = 131072;
+
+        $r3[596] = 917505;
+
+        $r3[597] = 983040;
+
+        $r3[598] = 1114110;
+
+        $r3[599] = 1114111;
+
+        <java.awt.font.NumericShaper: int[] strongTable> = $r3;
+
+        return;
+    }
+}

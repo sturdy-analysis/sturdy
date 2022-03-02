@@ -1,0 +1,3682 @@
+public class sun.print.PrintJob2D extends java.awt.PrintJob implements java.awt.print.Printable, java.lang.Runnable
+{
+    private static final java.awt.PageAttributes$MediaType[] SIZES;
+    private static final javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES;
+    private static final int[] WIDTHS;
+    private static final int[] LENGTHS;
+    private java.awt.Frame frame;
+    private java.lang.String docTitle;
+    private java.awt.JobAttributes jobAttributes;
+    private java.awt.PageAttributes pageAttributes;
+    private javax.print.attribute.PrintRequestAttributeSet attributes;
+    private java.awt.print.PrinterJob printerJob;
+    private java.awt.print.PageFormat pageFormat;
+    private sun.print.PrintJob2D$MessageQ graphicsToBeDrawn;
+    private sun.print.PrintJob2D$MessageQ graphicsDrawn;
+    private java.awt.Graphics2D currentGraphics;
+    private int pageIndex;
+    private static final java.lang.String DEST_PROP;
+    private static final java.lang.String PRINTER;
+    private static final java.lang.String FILE;
+    private static final java.lang.String PRINTER_PROP;
+    private static final java.lang.String FILENAME_PROP;
+    private static final java.lang.String NUMCOPIES_PROP;
+    private static final java.lang.String OPTIONS_PROP;
+    private static final java.lang.String ORIENT_PROP;
+    private static final java.lang.String PORTRAIT;
+    private static final java.lang.String LANDSCAPE;
+    private static final java.lang.String PAPERSIZE_PROP;
+    private static final java.lang.String LETTER;
+    private static final java.lang.String LEGAL;
+    private static final java.lang.String EXECUTIVE;
+    private static final java.lang.String A4;
+    private java.util.Properties props;
+    private java.lang.String options;
+    private java.lang.Thread printerJobThread;
+
+    public void <init>(java.awt.Frame, java.lang.String, java.util.Properties)
+    {
+        java.util.Properties r3;
+        java.awt.Frame r6;
+        java.awt.JobAttributes $r9, $r12;
+        sun.print.PrintJob2D r0;
+        java.awt.PageAttributes $r8, $r13;
+        int $i1;
+        java.lang.String r7;
+        sun.print.PrintJob2D$MessageQ $r10, $r11;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        r6 := @parameter0: java.awt.Frame;
+
+        r7 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.util.Properties;
+
+        specialinvoke r0.<java.awt.PrintJob: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: java.lang.String docTitle> = "";
+
+        $r10 = new sun.print.PrintJob2D$MessageQ;
+
+        specialinvoke $r10.<sun.print.PrintJob2D$MessageQ: void <init>(sun.print.PrintJob2D,java.lang.String)>(r0, "tobedrawn");
+
+        r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn> = $r10;
+
+        $r11 = new sun.print.PrintJob2D$MessageQ;
+
+        specialinvoke $r11.<sun.print.PrintJob2D$MessageQ: void <init>(sun.print.PrintJob2D,java.lang.String)>(r0, "drawn");
+
+        r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn> = $r11;
+
+        $i1 = (int) -1;
+
+        r0.<sun.print.PrintJob2D: int pageIndex> = $i1;
+
+        r0.<sun.print.PrintJob2D: java.lang.String options> = "";
+
+        r0.<sun.print.PrintJob2D: java.util.Properties props> = r3;
+
+        $r12 = new java.awt.JobAttributes;
+
+        specialinvoke $r12.<java.awt.JobAttributes: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes> = $r12;
+
+        $r13 = new java.awt.PageAttributes;
+
+        specialinvoke $r13.<java.awt.PageAttributes: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes> = $r13;
+
+        specialinvoke r0.<sun.print.PrintJob2D: void translateInputProps()>();
+
+        $r9 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r8 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        specialinvoke r0.<sun.print.PrintJob2D: void initPrintJob2D(java.awt.Frame,java.lang.String,java.awt.JobAttributes,java.awt.PageAttributes)>(r6, r7, $r9, $r8);
+
+        return;
+    }
+
+    public void <init>(java.awt.Frame, java.lang.String, java.awt.JobAttributes, java.awt.PageAttributes)
+    {
+        java.awt.Frame r3;
+        java.awt.JobAttributes r5;
+        sun.print.PrintJob2D r0;
+        java.awt.PageAttributes r6;
+        int $i1;
+        java.lang.String r4;
+        sun.print.PrintJob2D$MessageQ $r7, $r8;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        r3 := @parameter0: java.awt.Frame;
+
+        r4 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.awt.JobAttributes;
+
+        r6 := @parameter3: java.awt.PageAttributes;
+
+        specialinvoke r0.<java.awt.PrintJob: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: java.lang.String docTitle> = "";
+
+        $r7 = new sun.print.PrintJob2D$MessageQ;
+
+        specialinvoke $r7.<sun.print.PrintJob2D$MessageQ: void <init>(sun.print.PrintJob2D,java.lang.String)>(r0, "tobedrawn");
+
+        r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn> = $r7;
+
+        $r8 = new sun.print.PrintJob2D$MessageQ;
+
+        specialinvoke $r8.<sun.print.PrintJob2D$MessageQ: void <init>(sun.print.PrintJob2D,java.lang.String)>(r0, "drawn");
+
+        r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn> = $r8;
+
+        $i1 = (int) -1;
+
+        r0.<sun.print.PrintJob2D: int pageIndex> = $i1;
+
+        r0.<sun.print.PrintJob2D: java.lang.String options> = "";
+
+        specialinvoke r0.<sun.print.PrintJob2D: void initPrintJob2D(java.awt.Frame,java.lang.String,java.awt.JobAttributes,java.awt.PageAttributes)>(r3, r4, r5, r6);
+
+        return;
+    }
+
+    private void initPrintJob2D(java.awt.Frame, java.lang.String, java.awt.JobAttributes, java.awt.PageAttributes)
+    {
+        int[][] $r7, $r10;
+        java.awt.JobAttributes r4, $r6, $r12, $r13, $r14, $r17, $r37;
+        java.lang.NullPointerException $r26;
+        sun.print.PrintJob2D r2;
+        int[] $r8, $r9, $r11, $r16;
+        java.lang.SecurityException $r29;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.awt.Frame r1;
+        java.awt.JobAttributes$DialogType $r21, $r22, $r27, $r28;
+        java.awt.PageAttributes r5, $r15, $r38;
+        java.awt.JobAttributes$DestinationType $r18, $r19;
+        java.lang.StringBuilder $r32, $r33, $r34, $r40, $r41, $r42;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String r3, $r20, $r35, $r36, $r43;
+        java.io.IOException $r30;
+        java.lang.IllegalArgumentException $r25, $r31, $r39;
+        java.lang.SecurityManager $r0;
+        java.io.File $r23, $r24;
+
+        r2 := @this: sun.print.PrintJob2D;
+
+        r1 := @parameter0: java.awt.Frame;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.awt.JobAttributes;
+
+        r5 := @parameter3: java.awt.PageAttributes;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPrintJobAccess()>();
+
+     label01:
+        if r1 != null goto label03;
+
+        if r4 == null goto label02;
+
+        $r27 = virtualinvoke r4.<java.awt.JobAttributes: java.awt.JobAttributes$DialogType getDialog()>();
+
+        $r28 = <java.awt.JobAttributes$DialogType: java.awt.JobAttributes$DialogType NATIVE>;
+
+        if $r27 != $r28 goto label03;
+
+     label02:
+        $r26 = new java.lang.NullPointerException;
+
+        specialinvoke $r26.<java.lang.NullPointerException: void <init>(java.lang.String)>("Frame must not be null");
+
+        throw $r26;
+
+     label03:
+        r2.<sun.print.PrintJob2D: java.awt.Frame frame> = r1;
+
+        if r3 != null goto label04;
+
+        $r36 = "";
+
+        goto label05;
+
+     label04:
+        $r36 = r3;
+
+     label05:
+        r2.<sun.print.PrintJob2D: java.lang.String docTitle> = $r36;
+
+        if r4 == null goto label06;
+
+        $r37 = r4;
+
+        goto label07;
+
+     label06:
+        $r37 = new java.awt.JobAttributes;
+
+        specialinvoke $r37.<java.awt.JobAttributes: void <init>()>();
+
+     label07:
+        r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes> = $r37;
+
+        if r5 == null goto label08;
+
+        $r38 = r5;
+
+        goto label09;
+
+     label08:
+        $r38 = new java.awt.PageAttributes;
+
+        specialinvoke $r38.<java.awt.PageAttributes: void <init>()>();
+
+     label09:
+        r2.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes> = $r38;
+
+        $r6 = r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r7 = virtualinvoke $r6.<java.awt.JobAttributes: int[][] getPageRanges()>();
+
+        $r8 = $r7[0];
+
+        $i4 = $r8[0];
+
+        $i0 = lengthof $r7;
+
+        $i1 = $i0 - 1;
+
+        $r9 = $r7[$i1];
+
+        $i5 = $r9[1];
+
+        $r12 = r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r10 = newarray (int[])[1];
+
+        $r11 = newarray (int)[2];
+
+        $r11[0] = $i4;
+
+        $r11[1] = $i5;
+
+        $r10[0] = $r11;
+
+        virtualinvoke $r12.<java.awt.JobAttributes: void setPageRanges(int[][])>($r10);
+
+        $r13 = r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        virtualinvoke $r13.<java.awt.JobAttributes: void setToPage(int)>($i5);
+
+        $r14 = r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        virtualinvoke $r14.<java.awt.JobAttributes: void setFromPage(int)>($i4);
+
+        $r15 = r2.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r16 = virtualinvoke $r15.<java.awt.PageAttributes: int[] getPrinterResolution()>();
+
+        $i3 = $r16[0];
+
+        $i2 = $r16[1];
+
+        if $i3 == $i2 goto label10;
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Differing cross feed and feed resolutions not supported.");
+
+        throw $r25;
+
+     label10:
+        $r17 = r2.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r18 = virtualinvoke $r17.<java.awt.JobAttributes: java.awt.JobAttributes$DestinationType getDestination()>();
+
+        $r19 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType FILE>;
+
+        if $r18 != $r19 goto label18;
+
+        specialinvoke r2.<sun.print.PrintJob2D: void throwPrintToFile()>();
+
+        $r20 = virtualinvoke r4.<java.awt.JobAttributes: java.lang.String getFileName()>();
+
+        if $r20 == null goto label18;
+
+        $r21 = virtualinvoke r4.<java.awt.JobAttributes: java.awt.JobAttributes$DialogType getDialog()>();
+
+        $r22 = <java.awt.JobAttributes$DialogType: java.awt.JobAttributes$DialogType NONE>;
+
+        if $r21 != $r22 goto label18;
+
+        $r23 = new java.io.File;
+
+        specialinvoke $r23.<java.io.File: void <init>(java.lang.String)>($r20);
+
+     label11:
+        $z0 = virtualinvoke $r23.<java.io.File: boolean createNewFile()>();
+
+        if $z0 == 0 goto label12;
+
+        virtualinvoke $r23.<java.io.File: boolean delete()>();
+
+     label12:
+        goto label15;
+
+     label13:
+        $r30 := @caughtexception;
+
+        $r31 = new java.lang.IllegalArgumentException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot write to file:");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r35);
+
+        throw $r31;
+
+     label14:
+        $r29 := @caughtexception;
+
+     label15:
+        $r24 = virtualinvoke $r23.<java.io.File: java.io.File getParentFile()>();
+
+        $z1 = virtualinvoke $r23.<java.io.File: boolean exists()>();
+
+        if $z1 == 0 goto label16;
+
+        $z5 = virtualinvoke $r23.<java.io.File: boolean isFile()>();
+
+        if $z5 == 0 goto label17;
+
+        $z6 = virtualinvoke $r23.<java.io.File: boolean canWrite()>();
+
+        if $z6 == 0 goto label17;
+
+     label16:
+        if $r24 == null goto label18;
+
+        $z2 = virtualinvoke $r24.<java.io.File: boolean exists()>();
+
+        if $z2 == 0 goto label17;
+
+        $z3 = virtualinvoke $r24.<java.io.File: boolean exists()>();
+
+        if $z3 == 0 goto label18;
+
+        $z4 = virtualinvoke $r24.<java.io.File: boolean canWrite()>();
+
+        if $z4 != 0 goto label18;
+
+     label17:
+        $r39 = new java.lang.IllegalArgumentException;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot write to file:");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r39.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r43);
+
+        throw $r39;
+
+     label18:
+        return;
+
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.lang.SecurityException from label11 to label12 with label14;
+    }
+
+    public boolean printDialog()
+    {
+        java.awt.print.PrinterJob $r1, $r2, $r5, $r18, $r38, $r41, $r57;
+        javax.print.attribute.standard.Media $r40;
+        java.awt.Frame $r46, $r53;
+        javax.print.attribute.PrintRequestAttributeSet $r12, $r16, $r17, $r19, $r23, $r29, $r44, $r47, $r49, $r51;
+        java.awt.PageAttributes$OriginType $r26, $r27;
+        java.lang.String $r39;
+        javax.print.attribute.standard.OrientationRequested $r31, $r34, $r36;
+        java.awt.JobAttributes $r3, $r7;
+        sun.print.PrintJob2D r0;
+        sun.print.SunPageSelection $r11, $r48, $r50;
+        java.awt.print.PageFormat $r22, $r28, $r32, $r33, $r35, $r55, $r58;
+        boolean $z0, $z1, z2;
+        sun.print.DialogOwner $r45;
+        java.awt.JobAttributes$DialogType $r4, $r13, $r14, $r52;
+        javax.print.attribute.standard.MediaSize r54;
+        java.awt.PageAttributes $r25;
+        java.awt.JobAttributes$DefaultSelectionType $r8, $r9, $r10;
+        javax.print.attribute.standard.JobName r21;
+        float $f0, $f1;
+        javax.print.attribute.standard.MediaSizeName $r37;
+        java.awt.print.Paper $r56;
+        javax.print.attribute.standard.DialogTypeSelection $r15, $r43;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9;
+        javax.print.PrintService $r6, $r42;
+        javax.print.attribute.Attribute $r20, $r24, $r30;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = staticinvoke <java.awt.print.PrinterJob: java.awt.print.PrinterJob getPrinterJob()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob> = $r1;
+
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        if $r2 != null goto label01;
+
+        return 0;
+
+     label01:
+        $r3 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r4 = virtualinvoke $r3.<java.awt.JobAttributes: java.awt.JobAttributes$DialogType getDialog()>();
+
+        $r5 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r6 = virtualinvoke $r5.<java.awt.print.PrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r6 != null goto label02;
+
+        $r52 = <java.awt.JobAttributes$DialogType: java.awt.JobAttributes$DialogType NONE>;
+
+        if $r4 != $r52 goto label02;
+
+        return 0;
+
+     label02:
+        specialinvoke r0.<sun.print.PrintJob2D: void copyAttributes(javax.print.PrintService)>($r6);
+
+        $r7 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r8 = virtualinvoke $r7.<java.awt.JobAttributes: java.awt.JobAttributes$DefaultSelectionType getDefaultSelection()>();
+
+        $r9 = <java.awt.JobAttributes$DefaultSelectionType: java.awt.JobAttributes$DefaultSelectionType RANGE>;
+
+        if $r8 != $r9 goto label03;
+
+        $r51 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r50 = <sun.print.SunPageSelection: sun.print.SunPageSelection RANGE>;
+
+        interfaceinvoke $r51.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r50);
+
+        goto label05;
+
+     label03:
+        $r10 = <java.awt.JobAttributes$DefaultSelectionType: java.awt.JobAttributes$DefaultSelectionType SELECTION>;
+
+        if $r8 != $r10 goto label04;
+
+        $r49 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r48 = <sun.print.SunPageSelection: sun.print.SunPageSelection SELECTION>;
+
+        interfaceinvoke $r49.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r48);
+
+        goto label05;
+
+     label04:
+        $r12 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r11 = <sun.print.SunPageSelection: sun.print.SunPageSelection ALL>;
+
+        interfaceinvoke $r12.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r11);
+
+     label05:
+        $r53 = r0.<sun.print.PrintJob2D: java.awt.Frame frame>;
+
+        if $r53 == null goto label06;
+
+        $r47 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r45 = new sun.print.DialogOwner;
+
+        $r46 = r0.<sun.print.PrintJob2D: java.awt.Frame frame>;
+
+        specialinvoke $r45.<sun.print.DialogOwner: void <init>(java.awt.Frame)>($r46);
+
+        interfaceinvoke $r47.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r45);
+
+     label06:
+        $r13 = <java.awt.JobAttributes$DialogType: java.awt.JobAttributes$DialogType NONE>;
+
+        if $r4 != $r13 goto label07;
+
+        z2 = 1;
+
+        goto label11;
+
+     label07:
+        $r14 = <java.awt.JobAttributes$DialogType: java.awt.JobAttributes$DialogType NATIVE>;
+
+        if $r4 != $r14 goto label08;
+
+        $r44 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r43 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection NATIVE>;
+
+        interfaceinvoke $r44.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r43);
+
+        goto label09;
+
+     label08:
+        $r16 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r15 = <javax.print.attribute.standard.DialogTypeSelection: javax.print.attribute.standard.DialogTypeSelection COMMON>;
+
+        interfaceinvoke $r16.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r15);
+
+     label09:
+        $r18 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r17 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $z0 = virtualinvoke $r18.<java.awt.print.PrinterJob: boolean printDialog(javax.print.attribute.PrintRequestAttributeSet)>($r17);
+
+        z2 = $z0;
+
+        if $z0 == 0 goto label11;
+
+        if $r6 != null goto label10;
+
+        $r41 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r42 = virtualinvoke $r41.<java.awt.print.PrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r42 != null goto label10;
+
+        return 0;
+
+     label10:
+        specialinvoke r0.<sun.print.PrintJob2D: void updateAttributes()>();
+
+        specialinvoke r0.<sun.print.PrintJob2D: void translateOutputProps()>();
+
+     label11:
+        if z2 == 0 goto label20;
+
+        $r19 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r20 = interfaceinvoke $r19.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/JobName;");
+
+        r21 = (javax.print.attribute.standard.JobName) $r20;
+
+        if r21 == null goto label12;
+
+        $r38 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r39 = virtualinvoke r21.<javax.print.attribute.standard.JobName: java.lang.String toString()>();
+
+        virtualinvoke $r38.<java.awt.print.PrinterJob: void setJobName(java.lang.String)>($r39);
+
+     label12:
+        $r22 = new java.awt.print.PageFormat;
+
+        specialinvoke $r22.<java.awt.print.PageFormat: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat> = $r22;
+
+        $r23 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r24 = interfaceinvoke $r23.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r40 = (javax.print.attribute.standard.Media) $r24;
+
+        r54 = null;
+
+        if $r40 == null goto label13;
+
+        $z1 = $r40 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z1 == 0 goto label13;
+
+        $r37 = (javax.print.attribute.standard.MediaSizeName) $r40;
+
+        r54 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r37);
+
+     label13:
+        $r55 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        $r56 = virtualinvoke $r55.<java.awt.print.PageFormat: java.awt.print.Paper getPaper()>();
+
+        if r54 == null goto label14;
+
+        $f0 = virtualinvoke r54.<javax.print.attribute.standard.MediaSize: float getX(int)>(25400);
+
+        $d6 = (double) $f0;
+
+        $d7 = $d6 * 72.0;
+
+        $f1 = virtualinvoke r54.<javax.print.attribute.standard.MediaSize: float getY(int)>(25400);
+
+        $d8 = (double) $f1;
+
+        $d9 = $d8 * 72.0;
+
+        virtualinvoke $r56.<java.awt.print.Paper: void setSize(double,double)>($d7, $d9);
+
+     label14:
+        $r25 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r26 = virtualinvoke $r25.<java.awt.PageAttributes: java.awt.PageAttributes$OriginType getOrigin()>();
+
+        $r27 = <java.awt.PageAttributes$OriginType: java.awt.PageAttributes$OriginType PRINTABLE>;
+
+        if $r26 != $r27 goto label15;
+
+        $d2 = virtualinvoke $r56.<java.awt.print.Paper: double getWidth()>();
+
+        $d3 = $d2 - 36.0;
+
+        $d4 = virtualinvoke $r56.<java.awt.print.Paper: double getHeight()>();
+
+        $d5 = $d4 - 36.0;
+
+        virtualinvoke $r56.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(18.0, 18.0, $d3, $d5);
+
+        goto label16;
+
+     label15:
+        $d0 = virtualinvoke $r56.<java.awt.print.Paper: double getWidth()>();
+
+        $d1 = virtualinvoke $r56.<java.awt.print.Paper: double getHeight()>();
+
+        virtualinvoke $r56.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(0.0, 0.0, $d0, $d1);
+
+     label16:
+        $r28 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r28.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r56);
+
+        $r29 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r30 = interfaceinvoke $r29.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        $r36 = (javax.print.attribute.standard.OrientationRequested) $r30;
+
+        if $r36 == null goto label17;
+
+        $r34 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        if $r36 != $r34 goto label17;
+
+        $r35 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r35.<java.awt.print.PageFormat: void setOrientation(int)>(2);
+
+        goto label19;
+
+     label17:
+        $r31 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        if $r36 != $r31 goto label18;
+
+        $r33 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r33.<java.awt.print.PageFormat: void setOrientation(int)>(0);
+
+        goto label19;
+
+     label18:
+        $r32 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r32.<java.awt.print.PageFormat: void setOrientation(int)>(1);
+
+     label19:
+        $r57 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r58 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r57.<java.awt.print.PrinterJob: void setPrintable(java.awt.print.Printable,java.awt.print.PageFormat)>(r0, $r58);
+
+     label20:
+        return z2;
+    }
+
+    private void updateAttributes()
+    {
+        javax.print.attribute.standard.Chromaticity $r82, $r83;
+        java.awt.JobAttributes$MultipleDocumentHandlingType $r23, $r61;
+        java.awt.print.PrinterJob $r14;
+        javax.print.attribute.standard.Media $r86;
+        javax.print.attribute.standard.PrintQuality $r40, $r41, $r53;
+        javax.print.attribute.standard.Destination $r79;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r5, $r16, $r20, $r25, $r33, $r38, $r77, $r80, $r84;
+        javax.print.attribute.standard.SheetCollate $r22, $r67;
+        java.awt.JobAttributes$DestinationType $r12, $r68;
+        java.awt.PageAttributes$OrientationRequestedType $r36, $r51;
+        javax.print.attribute.standard.Copies r3;
+        java.lang.String $r65, $r72;
+        javax.print.attribute.standard.OrientationRequested $r35, $r56;
+        java.awt.PageAttributes$MediaType $r45;
+        int[][] $r18;
+        java.awt.JobAttributes $r4, $r11, $r13, $r19, $r24, $r30, $r58, $r60, $r62, $r64, $r69, $r70, $r74, $r76;
+        sun.print.PrintJob2D r0;
+        sun.print.SunPageSelection r7, $r8, $r9;
+        java.net.URI $r71;
+        boolean $z0;
+        java.awt.PageAttributes $r32, $r37, $r43, $r46, $r48, $r50, $r52, $r55;
+        java.awt.JobAttributes$DefaultSelectionType $r10, $r73, $r75;
+        javax.print.attribute.standard.MediaSizeName $r44;
+        java.awt.PageAttributes$PrintQualityType $r42, $r47, $r49;
+        javax.print.attribute.standard.PageRanges $r66;
+        javax.print.attribute.standard.Sides $r27, $r28, $r63;
+        int $i0;
+        java.awt.JobAttributes$SidesType $r29, $r57, $r59;
+        javax.print.PrintService $r15;
+        java.awt.PageAttributes$ColorType $r31, $r54;
+        javax.print.attribute.Attribute $r2, $r6, $r17, $r21, $r26, $r34, $r39, $r78, $r81, $r85;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r2 = interfaceinvoke $r1.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Copies;");
+
+        r3 = (javax.print.attribute.standard.Copies) $r2;
+
+        $r4 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i0 = virtualinvoke r3.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        virtualinvoke $r4.<java.awt.JobAttributes: void setCopies(int)>($i0);
+
+        $r5 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r6 = interfaceinvoke $r5.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Lsun/print/SunPageSelection;");
+
+        r7 = (sun.print.SunPageSelection) $r6;
+
+        $r8 = <sun.print.SunPageSelection: sun.print.SunPageSelection RANGE>;
+
+        if r7 != $r8 goto label01;
+
+        $r76 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r75 = <java.awt.JobAttributes$DefaultSelectionType: java.awt.JobAttributes$DefaultSelectionType RANGE>;
+
+        virtualinvoke $r76.<java.awt.JobAttributes: void setDefaultSelection(java.awt.JobAttributes$DefaultSelectionType)>($r75);
+
+        goto label03;
+
+     label01:
+        $r9 = <sun.print.SunPageSelection: sun.print.SunPageSelection SELECTION>;
+
+        if r7 != $r9 goto label02;
+
+        $r74 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r73 = <java.awt.JobAttributes$DefaultSelectionType: java.awt.JobAttributes$DefaultSelectionType SELECTION>;
+
+        virtualinvoke $r74.<java.awt.JobAttributes: void setDefaultSelection(java.awt.JobAttributes$DefaultSelectionType)>($r73);
+
+        goto label03;
+
+     label02:
+        $r11 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r10 = <java.awt.JobAttributes$DefaultSelectionType: java.awt.JobAttributes$DefaultSelectionType ALL>;
+
+        virtualinvoke $r11.<java.awt.JobAttributes: void setDefaultSelection(java.awt.JobAttributes$DefaultSelectionType)>($r10);
+
+     label03:
+        $r77 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r78 = interfaceinvoke $r77.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        $r79 = (javax.print.attribute.standard.Destination) $r78;
+
+        if $r79 == null goto label04;
+
+        $r69 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r68 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType FILE>;
+
+        virtualinvoke $r69.<java.awt.JobAttributes: void setDestination(java.awt.JobAttributes$DestinationType)>($r68);
+
+        $r70 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r71 = virtualinvoke $r79.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        $r72 = virtualinvoke $r71.<java.net.URI: java.lang.String getPath()>();
+
+        virtualinvoke $r70.<java.awt.JobAttributes: void setFileName(java.lang.String)>($r72);
+
+        goto label05;
+
+     label04:
+        $r13 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r12 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType PRINTER>;
+
+        virtualinvoke $r13.<java.awt.JobAttributes: void setDestination(java.awt.JobAttributes$DestinationType)>($r12);
+
+     label05:
+        $r14 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r15 = virtualinvoke $r14.<java.awt.print.PrinterJob: javax.print.PrintService getPrintService()>();
+
+        if $r15 == null goto label06;
+
+        $r64 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r65 = interfaceinvoke $r15.<javax.print.PrintService: java.lang.String getName()>();
+
+        virtualinvoke $r64.<java.awt.JobAttributes: void setPrinter(java.lang.String)>($r65);
+
+     label06:
+        $r16 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r17 = interfaceinvoke $r16.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/PageRanges;");
+
+        $r66 = (javax.print.attribute.standard.PageRanges) $r17;
+
+        $r18 = virtualinvoke $r66.<javax.print.attribute.standard.PageRanges: int[][] getMembers()>();
+
+        $r19 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        virtualinvoke $r19.<java.awt.JobAttributes: void setPageRanges(int[][])>($r18);
+
+        $r20 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r21 = interfaceinvoke $r20.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/SheetCollate;");
+
+        $r67 = (javax.print.attribute.standard.SheetCollate) $r21;
+
+        $r22 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate COLLATED>;
+
+        if $r67 != $r22 goto label07;
+
+        $r62 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r61 = <java.awt.JobAttributes$MultipleDocumentHandlingType: java.awt.JobAttributes$MultipleDocumentHandlingType SEPARATE_DOCUMENTS_COLLATED_COPIES>;
+
+        virtualinvoke $r62.<java.awt.JobAttributes: void setMultipleDocumentHandling(java.awt.JobAttributes$MultipleDocumentHandlingType)>($r61);
+
+        goto label08;
+
+     label07:
+        $r24 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r23 = <java.awt.JobAttributes$MultipleDocumentHandlingType: java.awt.JobAttributes$MultipleDocumentHandlingType SEPARATE_DOCUMENTS_UNCOLLATED_COPIES>;
+
+        virtualinvoke $r24.<java.awt.JobAttributes: void setMultipleDocumentHandling(java.awt.JobAttributes$MultipleDocumentHandlingType)>($r23);
+
+     label08:
+        $r25 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r26 = interfaceinvoke $r25.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Sides;");
+
+        $r63 = (javax.print.attribute.standard.Sides) $r26;
+
+        $r27 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_LONG_EDGE>;
+
+        if $r63 != $r27 goto label09;
+
+        $r60 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r59 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType TWO_SIDED_LONG_EDGE>;
+
+        virtualinvoke $r60.<java.awt.JobAttributes: void setSides(java.awt.JobAttributes$SidesType)>($r59);
+
+        goto label11;
+
+     label09:
+        $r28 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_SHORT_EDGE>;
+
+        if $r63 != $r28 goto label10;
+
+        $r58 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r57 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType TWO_SIDED_SHORT_EDGE>;
+
+        virtualinvoke $r58.<java.awt.JobAttributes: void setSides(java.awt.JobAttributes$SidesType)>($r57);
+
+        goto label11;
+
+     label10:
+        $r30 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r29 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType ONE_SIDED>;
+
+        virtualinvoke $r30.<java.awt.JobAttributes: void setSides(java.awt.JobAttributes$SidesType)>($r29);
+
+     label11:
+        $r80 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r81 = interfaceinvoke $r80.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Chromaticity;");
+
+        $r82 = (javax.print.attribute.standard.Chromaticity) $r81;
+
+        $r83 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity COLOR>;
+
+        if $r82 != $r83 goto label12;
+
+        $r55 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r54 = <java.awt.PageAttributes$ColorType: java.awt.PageAttributes$ColorType COLOR>;
+
+        virtualinvoke $r55.<java.awt.PageAttributes: void setColor(java.awt.PageAttributes$ColorType)>($r54);
+
+        goto label13;
+
+     label12:
+        $r32 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r31 = <java.awt.PageAttributes$ColorType: java.awt.PageAttributes$ColorType MONOCHROME>;
+
+        virtualinvoke $r32.<java.awt.PageAttributes: void setColor(java.awt.PageAttributes$ColorType)>($r31);
+
+     label13:
+        $r33 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r34 = interfaceinvoke $r33.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        $r56 = (javax.print.attribute.standard.OrientationRequested) $r34;
+
+        $r35 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        if $r56 != $r35 goto label14;
+
+        $r52 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r51 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType LANDSCAPE>;
+
+        virtualinvoke $r52.<java.awt.PageAttributes: void setOrientationRequested(java.awt.PageAttributes$OrientationRequestedType)>($r51);
+
+        goto label15;
+
+     label14:
+        $r37 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r36 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType PORTRAIT>;
+
+        virtualinvoke $r37.<java.awt.PageAttributes: void setOrientationRequested(java.awt.PageAttributes$OrientationRequestedType)>($r36);
+
+     label15:
+        $r38 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r39 = interfaceinvoke $r38.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrintQuality;");
+
+        $r53 = (javax.print.attribute.standard.PrintQuality) $r39;
+
+        $r40 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality DRAFT>;
+
+        if $r53 != $r40 goto label16;
+
+        $r50 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r49 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType DRAFT>;
+
+        virtualinvoke $r50.<java.awt.PageAttributes: void setPrintQuality(java.awt.PageAttributes$PrintQualityType)>($r49);
+
+        goto label18;
+
+     label16:
+        $r41 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality HIGH>;
+
+        if $r53 != $r41 goto label17;
+
+        $r48 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r47 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType HIGH>;
+
+        virtualinvoke $r48.<java.awt.PageAttributes: void setPrintQuality(java.awt.PageAttributes$PrintQualityType)>($r47);
+
+        goto label18;
+
+     label17:
+        $r43 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r42 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType NORMAL>;
+
+        virtualinvoke $r43.<java.awt.PageAttributes: void setPrintQuality(java.awt.PageAttributes$PrintQualityType)>($r42);
+
+     label18:
+        $r84 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r85 = interfaceinvoke $r84.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r86 = (javax.print.attribute.standard.Media) $r85;
+
+        if $r86 == null goto label19;
+
+        $z0 = $r86 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z0 == 0 goto label19;
+
+        $r44 = (javax.print.attribute.standard.MediaSizeName) $r86;
+
+        $r45 = staticinvoke <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType unMapMedia(javax.print.attribute.standard.MediaSizeName)>($r44);
+
+        if $r45 == null goto label19;
+
+        $r46 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        virtualinvoke $r46.<java.awt.PageAttributes: void setMedia(java.awt.PageAttributes$MediaType)>($r45);
+
+     label19:
+        specialinvoke r0.<sun.print.PrintJob2D: void debugPrintAttributes(boolean,boolean)>(0, 0);
+
+        return;
+    }
+
+    private void debugPrintAttributes(boolean, boolean)
+    {
+        java.awt.JobAttributes$MultipleDocumentHandlingType $r45;
+        java.awt.JobAttributes $r23, $r26, $r30, $r34, $r38, $r41, $r44, $r48, $r52;
+        sun.print.PrintJob2D r3;
+        boolean z0, z1;
+        java.awt.PageAttributes $r4, $r8, $r12, $r16;
+        java.awt.JobAttributes$DestinationType $r31;
+        java.awt.JobAttributes$DefaultSelectionType $r27;
+        java.lang.StringBuilder $r0, $r2, $r6, $r7, $r10, $r11, $r14, $r15, $r18, $r20, $r22, $r24, $r25, $r28, $r29, $r32, $r33, $r36, $r37, $r39, $r40, $r42, $r43, $r46, $r47, $r50, $r51, $r54;
+        java.awt.PageAttributes$OrientationRequestedType $r9;
+        java.awt.PageAttributes$PrintQualityType $r13;
+        int $i0, $i1, $i2;
+        java.awt.JobAttributes$SidesType $r53;
+        java.lang.String $r19, $r35, $r49, $r55;
+        java.io.PrintStream $r1, $r21;
+        java.awt.PageAttributes$MediaType $r17;
+        java.awt.PageAttributes$ColorType $r5;
+
+        r3 := @this: sun.print.PrintJob2D;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r21 = <java.lang.System: java.io.PrintStream out>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new Attributes\ncopies = ");
+
+        $r23 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i0 = virtualinvoke $r23.<java.awt.JobAttributes: int getCopies()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nselection = ");
+
+        $r26 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r27 = virtualinvoke $r26.<java.awt.JobAttributes: java.awt.JobAttributes$DefaultSelectionType getDefaultSelection()>();
+
+        $r28 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\ndest ");
+
+        $r30 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r31 = virtualinvoke $r30.<java.awt.JobAttributes: java.awt.JobAttributes$DestinationType getDestination()>();
+
+        $r32 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nfile ");
+
+        $r34 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r35 = virtualinvoke $r34.<java.awt.JobAttributes: java.lang.String getFileName()>();
+
+        $r36 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nfromPage ");
+
+        $r38 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i1 = virtualinvoke $r38.<java.awt.JobAttributes: int getFromPage()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\ntoPage ");
+
+        $r41 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i2 = virtualinvoke $r41.<java.awt.JobAttributes: int getToPage()>();
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\ncollation ");
+
+        $r44 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r45 = virtualinvoke $r44.<java.awt.JobAttributes: java.awt.JobAttributes$MultipleDocumentHandlingType getMultipleDocumentHandling()>();
+
+        $r46 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r45);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nPrinter ");
+
+        $r48 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r49 = virtualinvoke $r48.<java.awt.JobAttributes: java.lang.String getPrinter()>();
+
+        $r50 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nSides2 ");
+
+        $r52 = r3.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r53 = virtualinvoke $r52.<java.awt.JobAttributes: java.awt.JobAttributes$SidesType getSides()>();
+
+        $r54 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r53);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<java.io.PrintStream: void println(java.lang.String)>($r55);
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new Attributes\ncolor = ");
+
+        $r4 = r3.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r5 = virtualinvoke $r4.<java.awt.PageAttributes: java.awt.PageAttributes$ColorType getColor()>();
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\norientation = ");
+
+        $r8 = r3.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r9 = virtualinvoke $r8.<java.awt.PageAttributes: java.awt.PageAttributes$OrientationRequestedType getOrientationRequested()>();
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nquality ");
+
+        $r12 = r3.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r13 = virtualinvoke $r12.<java.awt.PageAttributes: java.awt.PageAttributes$PrintQualityType getPrintQuality()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nMedia2 ");
+
+        $r16 = r3.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r17 = virtualinvoke $r16.<java.awt.PageAttributes: java.awt.PageAttributes$MediaType getMedia()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r19);
+
+     label2:
+        return;
+    }
+
+    private void copyAttributes(javax.print.PrintService)
+    {
+        javax.print.attribute.standard.Chromaticity $r22, $r50;
+        java.awt.JobAttributes$MultipleDocumentHandlingType $r97, $r98;
+        javax.print.attribute.HashPrintRequestAttributeSet $r1;
+        java.awt.print.PrinterJob $r24, $r72;
+        javax.print.PrintService[] $r68;
+        javax.print.attribute.standard.PrintQuality $r40, $r42, $r44;
+        javax.print.attribute.standard.Destination $r62, $r65;
+        javax.print.attribute.PrintRequestAttributeSet $r4, $r11, $r14, $r17, $r23, $r31, $r41, $r43, $r45, $r46, $r49, $r51, $r53, $r55, $r57, $r59, $r63, $r66, $r89;
+        javax.print.attribute.standard.SheetCollate $r10, $r52;
+        java.awt.JobAttributes$DestinationType $r84, $r85;
+        java.awt.PageAttributes$OrientationRequestedType $r27, $r28;
+        java.lang.StringBuilder $r77, $r78, $r79;
+        sun.print.SunMinMaxPage $r90;
+        javax.print.attribute.standard.Copies $r12;
+        java.lang.String $r3, $r7, $r61, $r67, $r70, $r75, $r80, r86;
+        javax.print.attribute.standard.OrientationRequested $r30, $r48;
+        java.awt.PageAttributes$MediaType $r33;
+        java.io.File $r88;
+        java.net.URISyntaxException $r73;
+        java.awt.JobAttributes $r6, $r13, $r16, $r18, $r60, $r83, $r91, $r92, $r93, $r96;
+        sun.print.PrintJob2D r0;
+        java.lang.SecurityException $r74;
+        java.awt.print.PageFormat $r25, $r29, $r47;
+        java.net.URI $r76, r87;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.PageAttributes $r19, $r26, $r32, $r35;
+        java.awt.print.PrinterException $r81;
+        javax.print.attribute.standard.JobName $r2;
+        javax.print.attribute.standard.MediaSizeName $r34;
+        java.awt.PageAttributes$PrintQualityType $r36, $r37, $r38, $r39;
+        javax.print.attribute.standard.PageRanges $r15;
+        javax.print.attribute.standard.Sides $r54, $r56, $r58;
+        java.awt.JobAttributes$SidesType $r8, $r9, $r94, $r95;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6;
+        javax.print.PrintService r5, $r69, $r71, r82;
+        java.awt.PageAttributes$ColorType $r20, $r21;
+        java.lang.Object $r64;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        r5 := @parameter0: javax.print.PrintService;
+
+        $r1 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        specialinvoke $r1.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes> = $r1;
+
+        $r4 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r2 = new javax.print.attribute.standard.JobName;
+
+        $r3 = r0.<sun.print.PrintJob2D: java.lang.String docTitle>;
+
+        specialinvoke $r2.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>($r3, null);
+
+        interfaceinvoke $r4.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r2);
+
+        r82 = r5;
+
+        $r6 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r7 = virtualinvoke $r6.<java.awt.JobAttributes: java.lang.String getPrinter()>();
+
+        if $r7 == null goto label06;
+
+        if $r7 == "" goto label06;
+
+        $r67 = interfaceinvoke r5.<javax.print.PrintService: java.lang.String getName()>();
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r67);
+
+        if $z2 != 0 goto label06;
+
+        $r68 = staticinvoke <java.awt.print.PrinterJob: javax.print.PrintService[] lookupPrintServices()>();
+
+     label01:
+        i4 = 0;
+
+     label02:
+        $i3 = lengthof $r68;
+
+        if i4 >= $i3 goto label04;
+
+        $r69 = $r68[i4];
+
+        $r70 = interfaceinvoke $r69.<javax.print.PrintService: java.lang.String getName()>();
+
+        $z3 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r70);
+
+        if $z3 == 0 goto label03;
+
+        $r72 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r71 = $r68[i4];
+
+        virtualinvoke $r72.<java.awt.print.PrinterJob: void setPrintService(javax.print.PrintService)>($r71);
+
+        r82 = $r68[i4];
+
+        goto label04;
+
+     label03:
+        i4 = i4 + 1;
+
+        goto label02;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r81 := @caughtexception;
+
+     label06:
+        $r83 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r84 = virtualinvoke $r83.<java.awt.JobAttributes: java.awt.JobAttributes$DestinationType getDestination()>();
+
+        $r85 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType FILE>;
+
+        if $r84 != $r85 goto label17;
+
+        $z0 = interfaceinvoke r82.<javax.print.PrintService: boolean isAttributeCategorySupported(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        if $z0 == 0 goto label17;
+
+        $r60 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r61 = virtualinvoke $r60.<java.awt.JobAttributes: java.lang.String getFileName()>();
+
+        r86 = $r61;
+
+        if $r61 != null goto label07;
+
+        $r64 = interfaceinvoke r82.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Destination;");
+
+        $r65 = (javax.print.attribute.standard.Destination) $r64;
+
+        if $r65 == null goto label07;
+
+        $r66 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        interfaceinvoke $r66.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r65);
+
+        goto label17;
+
+     label07:
+        r87 = null;
+
+     label08:
+        if $r61 == null goto label09;
+
+        $z1 = virtualinvoke $r61.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 == 0 goto label10;
+
+        r86 = ".";
+
+        goto label10;
+
+     label09:
+        r86 = "out.prn";
+
+     label10:
+        $r88 = new java.io.File;
+
+        specialinvoke $r88.<java.io.File: void <init>(java.lang.String)>(r86);
+
+        r87 = virtualinvoke $r88.<java.io.File: java.net.URI toURI()>();
+
+     label11:
+        goto label16;
+
+     label12:
+        $r74 := @caughtexception;
+
+     label13:
+        $r75 = virtualinvoke r86.<java.lang.String: java.lang.String replace(char,char)>(92, 47);
+
+        $r76 = new java.net.URI;
+
+        $r77 = new java.lang.StringBuilder;
+
+        specialinvoke $r77.<java.lang.StringBuilder: void <init>()>();
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file:");
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r75);
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r76.<java.net.URI: void <init>(java.lang.String)>($r80);
+
+        r87 = $r76;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r73 := @caughtexception;
+
+     label16:
+        if r87 == null goto label17;
+
+        $r63 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r62 = new javax.print.attribute.standard.Destination;
+
+        specialinvoke $r62.<javax.print.attribute.standard.Destination: void <init>(java.net.URI)>(r87);
+
+        interfaceinvoke $r63.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r62);
+
+     label17:
+        $r89 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r90 = new sun.print.SunMinMaxPage;
+
+        $r91 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i5 = virtualinvoke $r91.<java.awt.JobAttributes: int getMinPage()>();
+
+        $r92 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i6 = virtualinvoke $r92.<java.awt.JobAttributes: int getMaxPage()>();
+
+        specialinvoke $r90.<sun.print.SunMinMaxPage: void <init>(int,int)>($i5, $i6);
+
+        interfaceinvoke $r89.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r90);
+
+        $r93 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r94 = virtualinvoke $r93.<java.awt.JobAttributes: java.awt.JobAttributes$SidesType getSides()>();
+
+        $r95 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType TWO_SIDED_LONG_EDGE>;
+
+        if $r94 != $r95 goto label18;
+
+        $r59 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r58 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_LONG_EDGE>;
+
+        interfaceinvoke $r59.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r58);
+
+        goto label20;
+
+     label18:
+        $r8 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType TWO_SIDED_SHORT_EDGE>;
+
+        if $r94 != $r8 goto label19;
+
+        $r57 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r56 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_SHORT_EDGE>;
+
+        interfaceinvoke $r57.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r56);
+
+        goto label20;
+
+     label19:
+        $r9 = <java.awt.JobAttributes$SidesType: java.awt.JobAttributes$SidesType ONE_SIDED>;
+
+        if $r94 != $r9 goto label20;
+
+        $r55 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r54 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides ONE_SIDED>;
+
+        interfaceinvoke $r55.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r54);
+
+     label20:
+        $r96 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r97 = virtualinvoke $r96.<java.awt.JobAttributes: java.awt.JobAttributes$MultipleDocumentHandlingType getMultipleDocumentHandling()>();
+
+        $r98 = <java.awt.JobAttributes$MultipleDocumentHandlingType: java.awt.JobAttributes$MultipleDocumentHandlingType SEPARATE_DOCUMENTS_COLLATED_COPIES>;
+
+        if $r97 != $r98 goto label21;
+
+        $r53 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r52 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate COLLATED>;
+
+        interfaceinvoke $r53.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r52);
+
+        goto label22;
+
+     label21:
+        $r11 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r10 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate UNCOLLATED>;
+
+        interfaceinvoke $r11.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r10);
+
+     label22:
+        $r14 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r12 = new javax.print.attribute.standard.Copies;
+
+        $r13 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i0 = virtualinvoke $r13.<java.awt.JobAttributes: int getCopies()>();
+
+        specialinvoke $r12.<javax.print.attribute.standard.Copies: void <init>(int)>($i0);
+
+        interfaceinvoke $r14.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r12);
+
+        $r17 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r15 = new javax.print.attribute.standard.PageRanges;
+
+        $r16 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i1 = virtualinvoke $r16.<java.awt.JobAttributes: int getFromPage()>();
+
+        $r18 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i2 = virtualinvoke $r18.<java.awt.JobAttributes: int getToPage()>();
+
+        specialinvoke $r15.<javax.print.attribute.standard.PageRanges: void <init>(int,int)>($i1, $i2);
+
+        interfaceinvoke $r17.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r15);
+
+        $r19 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r20 = virtualinvoke $r19.<java.awt.PageAttributes: java.awt.PageAttributes$ColorType getColor()>();
+
+        $r21 = <java.awt.PageAttributes$ColorType: java.awt.PageAttributes$ColorType COLOR>;
+
+        if $r20 != $r21 goto label23;
+
+        $r51 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r50 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity COLOR>;
+
+        interfaceinvoke $r51.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r50);
+
+        goto label24;
+
+     label23:
+        $r23 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r22 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity MONOCHROME>;
+
+        interfaceinvoke $r23.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r22);
+
+     label24:
+        $r24 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r25 = virtualinvoke $r24.<java.awt.print.PrinterJob: java.awt.print.PageFormat defaultPage()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat> = $r25;
+
+        $r26 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r27 = virtualinvoke $r26.<java.awt.PageAttributes: java.awt.PageAttributes$OrientationRequestedType getOrientationRequested()>();
+
+        $r28 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType LANDSCAPE>;
+
+        if $r27 != $r28 goto label25;
+
+        $r47 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r47.<java.awt.print.PageFormat: void setOrientation(int)>(0);
+
+        $r49 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r48 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        interfaceinvoke $r49.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r48);
+
+        goto label26;
+
+     label25:
+        $r29 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        virtualinvoke $r29.<java.awt.print.PageFormat: void setOrientation(int)>(1);
+
+        $r31 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r30 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested PORTRAIT>;
+
+        interfaceinvoke $r31.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r30);
+
+     label26:
+        $r32 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r33 = virtualinvoke $r32.<java.awt.PageAttributes: java.awt.PageAttributes$MediaType getMedia()>();
+
+        $r34 = staticinvoke <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName mapMedia(java.awt.PageAttributes$MediaType)>($r33);
+
+        if $r34 == null goto label27;
+
+        $r46 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        interfaceinvoke $r46.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r34);
+
+     label27:
+        $r35 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r36 = virtualinvoke $r35.<java.awt.PageAttributes: java.awt.PageAttributes$PrintQualityType getPrintQuality()>();
+
+        $r37 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType DRAFT>;
+
+        if $r36 != $r37 goto label28;
+
+        $r45 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r44 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality DRAFT>;
+
+        interfaceinvoke $r45.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r44);
+
+        goto label30;
+
+     label28:
+        $r38 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType NORMAL>;
+
+        if $r36 != $r38 goto label29;
+
+        $r43 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r42 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality NORMAL>;
+
+        interfaceinvoke $r43.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r42);
+
+        goto label30;
+
+     label29:
+        $r39 = <java.awt.PageAttributes$PrintQualityType: java.awt.PageAttributes$PrintQualityType HIGH>;
+
+        if $r36 != $r39 goto label30;
+
+        $r41 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        $r40 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality HIGH>;
+
+        interfaceinvoke $r41.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r40);
+
+     label30:
+        return;
+
+        catch java.awt.print.PrinterException from label01 to label04 with label05;
+        catch java.lang.SecurityException from label08 to label11 with label12;
+        catch java.net.URISyntaxException from label13 to label14 with label15;
+    }
+
+    public java.awt.Graphics getGraphics()
+    {
+        sun.print.PrintJob2D r0;
+        java.awt.print.PageFormat $r6, $r8;
+        boolean $z0, $z1;
+        java.awt.Graphics $r12;
+        java.lang.Throwable $r22;
+        sun.print.PeekGraphics $r14;
+        sun.print.ProxyPrintGraphics $r10, r23;
+        java.awt.Graphics2D $r1, $r3, $r4, $r5, $r7, $r9, $r11, $r13, $r15, $r18, $r19;
+        int $i0, $i1, $i2;
+        sun.print.PrintJob2D$MessageQ $r2, $r16, $r17, $r20, $r21;
+        double $d0, $d1, $d2, d3;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        r23 = null;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<sun.print.PrintJob2D: int pageIndex>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.print.PrintJob2D: int pageIndex> = $i1;
+
+        $i2 = r0.<sun.print.PrintJob2D: int pageIndex>;
+
+        if $i2 != 0 goto label2;
+
+        $r21 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        $z1 = virtualinvoke $r21.<sun.print.PrintJob2D$MessageQ: boolean isClosed()>();
+
+        if $z1 != 0 goto label2;
+
+        specialinvoke r0.<sun.print.PrintJob2D: void startPrinterJobThread()>();
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r22 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r22;
+
+     label6:
+        $r1 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        if $r1 == null goto label7;
+
+        $r20 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        $r19 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        virtualinvoke $r20.<sun.print.PrintJob2D$MessageQ: boolean append(java.awt.Graphics2D)>($r19);
+
+        r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics> = null;
+
+     label7:
+        $r2 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        $r3 = virtualinvoke $r2.<sun.print.PrintJob2D$MessageQ: java.awt.Graphics2D pop()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics> = $r3;
+
+        $r4 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        $z0 = $r4 instanceof sun.print.PeekGraphics;
+
+        if $z0 == 0 goto label8;
+
+        $r13 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        $r14 = (sun.print.PeekGraphics) $r13;
+
+        virtualinvoke $r14.<sun.print.PeekGraphics: void setAWTDrawingOnly()>();
+
+        $r16 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        $r15 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        virtualinvoke $r16.<sun.print.PrintJob2D$MessageQ: boolean append(java.awt.Graphics2D)>($r15);
+
+        $r17 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        $r18 = virtualinvoke $r17.<sun.print.PrintJob2D$MessageQ: java.awt.Graphics2D pop()>();
+
+        r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics> = $r18;
+
+     label8:
+        $r5 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        if $r5 == null goto label9;
+
+        $r7 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        $r6 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        $d0 = virtualinvoke $r6.<java.awt.print.PageFormat: double getImageableX()>();
+
+        $r8 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        $d1 = virtualinvoke $r8.<java.awt.print.PageFormat: double getImageableY()>();
+
+        virtualinvoke $r7.<java.awt.Graphics2D: void translate(double,double)>($d0, $d1);
+
+        $d2 = specialinvoke r0.<sun.print.PrintJob2D: double getPageResolutionInternal()>();
+
+        d3 = 72.0 / $d2;
+
+        $r9 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        virtualinvoke $r9.<java.awt.Graphics2D: void scale(double,double)>(d3, d3);
+
+        $r10 = new sun.print.ProxyPrintGraphics;
+
+        $r11 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        $r12 = virtualinvoke $r11.<java.awt.Graphics2D: java.awt.Graphics create()>();
+
+        specialinvoke $r10.<sun.print.ProxyPrintGraphics: void <init>(java.awt.Graphics,java.awt.PrintJob)>($r12, r0);
+
+        r23 = $r10;
+
+     label9:
+        return r23;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.awt.Dimension getPageDimension()
+    {
+        sun.print.PrintJob2D r0;
+        int $i0, $i1;
+        java.awt.print.PageFormat $r2, $r3, $r7, $r8;
+        double d0, d1, $d2, $d3, $d4, $d5;
+        java.awt.PageAttributes$OriginType $r5, $r6;
+        java.awt.PageAttributes $r1, $r4;
+        java.awt.Dimension $r9;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r5 = virtualinvoke $r4.<java.awt.PageAttributes: java.awt.PageAttributes$OriginType getOrigin()>();
+
+        $r6 = <java.awt.PageAttributes$OriginType: java.awt.PageAttributes$OriginType PRINTABLE>;
+
+        if $r5 != $r6 goto label1;
+
+        $r7 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        d0 = virtualinvoke $r7.<java.awt.print.PageFormat: double getImageableWidth()>();
+
+        $r8 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        d1 = virtualinvoke $r8.<java.awt.print.PageFormat: double getImageableHeight()>();
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        d0 = virtualinvoke $r2.<java.awt.print.PageFormat: double getWidth()>();
+
+        $r3 = r0.<sun.print.PrintJob2D: java.awt.print.PageFormat pageFormat>;
+
+        d1 = virtualinvoke $r3.<java.awt.print.PageFormat: double getHeight()>();
+
+     label2:
+        $d2 = specialinvoke r0.<sun.print.PrintJob2D: double getPageResolutionInternal()>();
+
+        $d3 = $d2 / 72.0;
+
+        $r9 = new java.awt.Dimension;
+
+        $d4 = d0 * $d3;
+
+        $i0 = (int) $d4;
+
+        $d5 = d1 * $d3;
+
+        $i1 = (int) $d5;
+
+        specialinvoke $r9.<java.awt.Dimension: void <init>(int,int)>($i0, $i1);
+
+        return $r9;
+    }
+
+    private double getPageResolutionInternal()
+    {
+        sun.print.PrintJob2D r0;
+        java.awt.PageAttributes $r1, $r2;
+        int[] $r3;
+        int $i0, $i1, $i2;
+        double $d0, $d1, $d2;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r3 = virtualinvoke $r2.<java.awt.PageAttributes: int[] getPrinterResolution()>();
+
+        $i0 = $r3[2];
+
+        if $i0 != 3 goto label1;
+
+        $i2 = $r3[0];
+
+        $d2 = (double) $i2;
+
+        return $d2;
+
+     label1:
+        $i1 = $r3[0];
+
+        $d0 = (double) $i1;
+
+        $d1 = $d0 * 2.54;
+
+        return $d1;
+
+     label2:
+        return 72.0;
+    }
+
+    public int getPageResolution()
+    {
+        int $i0;
+        sun.print.PrintJob2D r0;
+        double $d0;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $d0 = specialinvoke r0.<sun.print.PrintJob2D: double getPageResolutionInternal()>();
+
+        $i0 = (int) $d0;
+
+        return $i0;
+    }
+
+    public boolean lastPageFirst()
+    {
+        sun.print.PrintJob2D r0;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        return 0;
+    }
+
+    public synchronized void end()
+    {
+        sun.print.PrintJob2D r0;
+        java.awt.Graphics2D $r2, $r7;
+        java.lang.InterruptedException $r9;
+        java.lang.Thread $r4, $r5, $r6;
+        sun.print.PrintJob2D$MessageQ $r1, $r3, $r8;
+        boolean $z0;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        virtualinvoke $r1.<sun.print.PrintJob2D$MessageQ: void close()>();
+
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        if $r2 == null goto label1;
+
+        $r8 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        $r7 = r0.<sun.print.PrintJob2D: java.awt.Graphics2D currentGraphics>;
+
+        virtualinvoke $r8.<sun.print.PrintJob2D$MessageQ: boolean append(java.awt.Graphics2D)>($r7);
+
+     label1:
+        $r3 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        virtualinvoke $r3.<sun.print.PrintJob2D$MessageQ: void closeWhenEmpty()>();
+
+        $r4 = r0.<sun.print.PrintJob2D: java.lang.Thread printerJobThread>;
+
+        if $r4 == null goto label5;
+
+        $r5 = r0.<sun.print.PrintJob2D: java.lang.Thread printerJobThread>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label5;
+
+     label2:
+        $r6 = r0.<sun.print.PrintJob2D: java.lang.Thread printerJobThread>;
+
+        virtualinvoke $r6.<java.lang.Thread: void join()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    public void finalize()
+    {
+        sun.print.PrintJob2D r0;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        virtualinvoke r0.<sun.print.PrintJob2D: void end()>();
+
+        return;
+    }
+
+    public int print(java.awt.Graphics, java.awt.print.PageFormat, int) throws java.awt.print.PrinterException
+    {
+        sun.print.PrintJob2D r0;
+        byte b1;
+        java.awt.Graphics2D $r2, $r5;
+        java.awt.Graphics r1;
+        int i0;
+        java.awt.print.PageFormat r6;
+        sun.print.PrintJob2D$MessageQ $r3, $r4;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        r6 := @parameter1: java.awt.print.PageFormat;
+
+        i0 := @parameter2: int;
+
+        $r3 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        $r2 = (java.awt.Graphics2D) r1;
+
+        virtualinvoke $r3.<sun.print.PrintJob2D$MessageQ: boolean append(java.awt.Graphics2D)>($r2);
+
+        $r4 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        $r5 = virtualinvoke $r4.<sun.print.PrintJob2D$MessageQ: java.awt.Graphics2D pop()>();
+
+        if $r5 == null goto label1;
+
+        b1 = 0;
+
+        goto label2;
+
+     label1:
+        b1 = 1;
+
+     label2:
+        return b1;
+    }
+
+    private void startPrinterJobThread()
+    {
+        sun.print.PrintJob2D r0;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = new java.lang.Thread;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>(r0, "printerJobThread");
+
+        r0.<sun.print.PrintJob2D: java.lang.Thread printerJobThread> = $r1;
+
+        $r2 = r0.<sun.print.PrintJob2D: java.lang.Thread printerJobThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public void run()
+    {
+        sun.print.PrintJob2D r0;
+        java.awt.print.PrinterException $r5;
+        javax.print.attribute.PrintRequestAttributeSet $r1;
+        sun.print.PrintJob2D$MessageQ $r3, $r4;
+        java.awt.print.PrinterJob $r2;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+     label1:
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.print.PrinterJob printerJob>;
+
+        $r1 = r0.<sun.print.PrintJob2D: javax.print.attribute.PrintRequestAttributeSet attributes>;
+
+        virtualinvoke $r2.<java.awt.print.PrinterJob: void print(javax.print.attribute.PrintRequestAttributeSet)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r3 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsToBeDrawn>;
+
+        virtualinvoke $r3.<sun.print.PrintJob2D$MessageQ: void closeWhenEmpty()>();
+
+        $r4 = r0.<sun.print.PrintJob2D: sun.print.PrintJob2D$MessageQ graphicsDrawn>;
+
+        virtualinvoke $r4.<sun.print.PrintJob2D$MessageQ: void close()>();
+
+        return;
+
+        catch java.awt.print.PrinterException from label1 to label2 with label3;
+    }
+
+    private static int[] getSize(java.awt.PageAttributes$MediaType)
+    {
+        java.awt.PageAttributes$MediaType[] $r1, $r2;
+        java.awt.PageAttributes$MediaType r3, $r4;
+        int[] r0, $r5, $r6;
+        int $i0, $i1, $i2, i3;
+
+        r3 := @parameter0: java.awt.PageAttributes$MediaType;
+
+        r0 = newarray (int)[2];
+
+        r0[0] = 612;
+
+        r0[1] = 792;
+
+        i3 = 0;
+
+     label1:
+        $r1 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r4 = $r2[i3];
+
+        if $r4 != r3 goto label2;
+
+        $r5 = <sun.print.PrintJob2D: int[] WIDTHS>;
+
+        $i1 = $r5[i3];
+
+        r0[0] = $i1;
+
+        $r6 = <sun.print.PrintJob2D: int[] LENGTHS>;
+
+        $i2 = $r6[i3];
+
+        r0[1] = $i2;
+
+        goto label3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return r0;
+    }
+
+    public static javax.print.attribute.standard.MediaSizeName mapMedia(java.awt.PageAttributes$MediaType)
+    {
+        byte $b5, $b6;
+        int[] $r11, $r12;
+        javax.print.attribute.standard.MediaSize $r16, $r20;
+        float $f0, $f1;
+        javax.print.attribute.standard.MediaSizeName $r6, $r15, r18;
+        java.awt.PageAttributes$MediaType[] $r0, $r2, $r8;
+        int $i0, $i1, $i2, $i3, $i4, i7, $i8, $i9;
+        java.lang.String $r10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        java.awt.PageAttributes$MediaType r3, $r4, $r9;
+        sun.print.CustomMediaSizeName $r19;
+        javax.print.attribute.standard.MediaSizeName[] $r1, $r5, $r14, $r17;
+
+        r3 := @parameter0: java.awt.PageAttributes$MediaType;
+
+        r18 = null;
+
+        $r0 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $i1 = lengthof $r0;
+
+        $r1 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        $i0 = lengthof $r1;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i0);
+
+        i7 = 0;
+
+     label1:
+        if i7 >= $i2 goto label4;
+
+        $r2 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r4 = $r2[i7];
+
+        if $r4 != r3 goto label3;
+
+        $r5 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        $r6 = $r5[i7];
+
+        if $r6 == null goto label2;
+
+        $r14 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        $r15 = $r14[i7];
+
+        $r16 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r15);
+
+        if $r16 == null goto label2;
+
+        $r17 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        r18 = $r17[i7];
+
+        goto label4;
+
+     label2:
+        $r19 = new sun.print.CustomMediaSizeName;
+
+        $r8 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r9 = $r8[i7];
+
+        $r10 = virtualinvoke $r9.<java.awt.PageAttributes$MediaType: java.lang.String toString()>();
+
+        specialinvoke $r19.<sun.print.CustomMediaSizeName: void <init>(java.lang.String)>($r10);
+
+        r18 = $r19;
+
+        $r11 = <sun.print.PrintJob2D: int[] WIDTHS>;
+
+        $i3 = $r11[i7];
+
+        $d0 = (double) $i3;
+
+        $d1 = $d0 / 72.0;
+
+        $d2 = staticinvoke <java.lang.Math: double rint(double)>($d1);
+
+        $f0 = (float) $d2;
+
+        $r12 = <sun.print.PrintJob2D: int[] LENGTHS>;
+
+        $i4 = $r12[i7];
+
+        $d3 = (double) $i4;
+
+        $d4 = $d3 / 72.0;
+
+        $d5 = staticinvoke <java.lang.Math: double rint(double)>($d4);
+
+        $f1 = (float) $d5;
+
+        $d6 = (double) $f0;
+
+        $b5 = $d6 cmpl 0.0;
+
+        $i8 = (int) $b5;
+
+        if $i8 <= 0 goto label4;
+
+        $d7 = (double) $f1;
+
+        $b6 = $d7 cmpl 0.0;
+
+        $i9 = (int) $b6;
+
+        if $i9 <= 0 goto label4;
+
+        $r20 = new javax.print.attribute.standard.MediaSize;
+
+        specialinvoke $r20.<javax.print.attribute.standard.MediaSize: void <init>(float,float,int,javax.print.attribute.standard.MediaSizeName)>($f0, $f1, 25400, $r19);
+
+        goto label4;
+
+     label3:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label4:
+        return r18;
+    }
+
+    public static java.awt.PageAttributes$MediaType unMapMedia(javax.print.attribute.standard.MediaSizeName)
+    {
+        javax.print.attribute.standard.MediaSizeName r3, $r4;
+        java.awt.PageAttributes$MediaType[] $r0, $r5, $r7;
+        java.awt.PageAttributes$MediaType $r6, r8;
+        int $i0, $i1, $i2, i3;
+        javax.print.attribute.standard.MediaSizeName[] $r1, $r2;
+
+        r3 := @parameter0: javax.print.attribute.standard.MediaSizeName;
+
+        r8 = null;
+
+        $r0 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $i1 = lengthof $r0;
+
+        $r1 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        $i0 = lengthof $r1;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i0);
+
+        i3 = 0;
+
+     label1:
+        if i3 >= $i2 goto label3;
+
+        $r2 = <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES>;
+
+        $r4 = $r2[i3];
+
+        if $r4 != r3 goto label2;
+
+        $r5 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r6 = $r5[i3];
+
+        if $r6 == null goto label2;
+
+        $r7 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        r8 = $r7[i3];
+
+        goto label3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return r8;
+    }
+
+    private void translateInputProps()
+    {
+        java.awt.JobAttributes $r32, $r33, $r34, $r36, $r38;
+        sun.print.PrintJob2D r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.awt.PageAttributes $r13, $r17, $r21, $r25, $r29, $r31;
+        java.awt.JobAttributes$DestinationType $r35, $r37;
+        java.awt.PageAttributes$OrientationRequestedType $r28, $r30;
+        java.awt.PageAttributes$MediaType[] $r14, $r18, $r22, $r26;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r3, $r5, $r7, $r9, $r11, $r40, $r42;
+        java.util.Properties $r1, $r2, $r4, $r6, $r8, $r10, $r39, $r41;
+        java.awt.PageAttributes$MediaType $r12, $r15, $r16, $r19, $r20, $r23, $r24, $r27;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r2 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.destination");
+
+        if $r3 == null goto label03;
+
+        $z6 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("printer");
+
+        if $z6 == 0 goto label02;
+
+        $r38 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r37 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType PRINTER>;
+
+        virtualinvoke $r38.<java.awt.JobAttributes: void setDestination(java.awt.JobAttributes$DestinationType)>($r37);
+
+        goto label03;
+
+     label02:
+        $z7 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("file");
+
+        if $z7 == 0 goto label03;
+
+        $r36 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r35 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType FILE>;
+
+        virtualinvoke $r36.<java.awt.JobAttributes: void setDestination(java.awt.JobAttributes$DestinationType)>($r35);
+
+     label03:
+        $r39 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r40 = virtualinvoke $r39.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.printer");
+
+        if $r40 == null goto label04;
+
+        $r34 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        virtualinvoke $r34.<java.awt.JobAttributes: void setPrinter(java.lang.String)>($r40);
+
+     label04:
+        $r4 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r5 = virtualinvoke $r4.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.fileName");
+
+        if $r5 == null goto label05;
+
+        $r33 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        virtualinvoke $r33.<java.awt.JobAttributes: void setFileName(java.lang.String)>($r5);
+
+     label05:
+        $r6 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r7 = virtualinvoke $r6.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.numCopies");
+
+        if $r7 == null goto label06;
+
+        $r32 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r7);
+
+        virtualinvoke $r32.<java.awt.JobAttributes: void setCopies(int)>($i4);
+
+     label06:
+        $r8 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r9 = virtualinvoke $r8.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("awt.print.options", "");
+
+        r0.<sun.print.PrintJob2D: java.lang.String options> = $r9;
+
+        $r10 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r11 = virtualinvoke $r10.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.orientation");
+
+        if $r11 == null goto label08;
+
+        $z4 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("portrait");
+
+        if $z4 == 0 goto label07;
+
+        $r31 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r30 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType PORTRAIT>;
+
+        virtualinvoke $r31.<java.awt.PageAttributes: void setOrientationRequested(java.awt.PageAttributes$OrientationRequestedType)>($r30);
+
+        goto label08;
+
+     label07:
+        $z5 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("landscape");
+
+        if $z5 == 0 goto label08;
+
+        $r29 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r28 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType LANDSCAPE>;
+
+        virtualinvoke $r29.<java.awt.PageAttributes: void setOrientationRequested(java.awt.PageAttributes$OrientationRequestedType)>($r28);
+
+     label08:
+        $r41 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r42 = virtualinvoke $r41.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("awt.print.paperSize");
+
+        if $r42 == null goto label12;
+
+        $z0 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>("letter");
+
+        if $z0 == 0 goto label09;
+
+        $r25 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r26 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r24 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType LETTER>;
+
+        $i3 = virtualinvoke $r24.<java.awt.PageAttributes$MediaType: int hashCode()>();
+
+        $r27 = $r26[$i3];
+
+        virtualinvoke $r25.<java.awt.PageAttributes: void setMedia(java.awt.PageAttributes$MediaType)>($r27);
+
+        goto label12;
+
+     label09:
+        $z1 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>("legal");
+
+        if $z1 == 0 goto label10;
+
+        $r21 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r22 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r20 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType LEGAL>;
+
+        $i2 = virtualinvoke $r20.<java.awt.PageAttributes$MediaType: int hashCode()>();
+
+        $r23 = $r22[$i2];
+
+        virtualinvoke $r21.<java.awt.PageAttributes: void setMedia(java.awt.PageAttributes$MediaType)>($r23);
+
+        goto label12;
+
+     label10:
+        $z2 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>("executive");
+
+        if $z2 == 0 goto label11;
+
+        $r17 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r18 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r16 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType EXECUTIVE>;
+
+        $i1 = virtualinvoke $r16.<java.awt.PageAttributes$MediaType: int hashCode()>();
+
+        $r19 = $r18[$i1];
+
+        virtualinvoke $r17.<java.awt.PageAttributes: void setMedia(java.awt.PageAttributes$MediaType)>($r19);
+
+        goto label12;
+
+     label11:
+        $z3 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>("a4");
+
+        if $z3 == 0 goto label12;
+
+        $r13 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r14 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r12 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType A4>;
+
+        $i0 = virtualinvoke $r12.<java.awt.PageAttributes$MediaType: int hashCode()>();
+
+        $r15 = $r14[$i0];
+
+        virtualinvoke $r13.<java.awt.PageAttributes: void setMedia(java.awt.PageAttributes$MediaType)>($r15);
+
+     label12:
+        return;
+    }
+
+    private void translateOutputProps()
+    {
+        java.awt.JobAttributes $r2, $r6, $r27, $r29;
+        sun.print.PrintJob2D r0;
+        boolean $z0, $z1, $z2;
+        java.awt.PageAttributes $r9, $r30;
+        java.awt.JobAttributes$DestinationType $r4, $r5;
+        java.lang.StringBuilder $r18, $r20, $r21;
+        java.awt.PageAttributes$OrientationRequestedType $r31, $r32;
+        java.awt.PageAttributes$MediaType[] $r10;
+        int $i0, $i1;
+        java.lang.String $r7, $r22, $r23, $r26, $r28, $r33, r34;
+        java.util.Properties $r1, $r3, $r8, $r17, $r19, $r24, $r25, $r35;
+        java.awt.PageAttributes$MediaType $r11, $r12, $r13, $r14, $r15, $r16;
+
+        r0 := @this: sun.print.PrintJob2D;
+
+        $r1 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r3 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r2 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r4 = virtualinvoke $r2.<java.awt.JobAttributes: java.awt.JobAttributes$DestinationType getDestination()>();
+
+        $r5 = <java.awt.JobAttributes$DestinationType: java.awt.JobAttributes$DestinationType PRINTER>;
+
+        if $r4 != $r5 goto label02;
+
+        $r26 = "printer";
+
+        goto label03;
+
+     label02:
+        $r26 = "file";
+
+     label03:
+        virtualinvoke $r3.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.destination", $r26);
+
+        $r6 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r7 = virtualinvoke $r6.<java.awt.JobAttributes: java.lang.String getPrinter()>();
+
+        if $r7 == null goto label04;
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label04;
+
+        $r25 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        virtualinvoke $r25.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.printer", $r7);
+
+     label04:
+        $r27 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $r28 = virtualinvoke $r27.<java.awt.JobAttributes: java.lang.String getFileName()>();
+
+        if $r28 == null goto label05;
+
+        $z1 = virtualinvoke $r28.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label05;
+
+        $r24 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        virtualinvoke $r24.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.fileName", $r28);
+
+     label05:
+        $r29 = r0.<sun.print.PrintJob2D: java.awt.JobAttributes jobAttributes>;
+
+        $i1 = virtualinvoke $r29.<java.awt.JobAttributes: int getCopies()>();
+
+        if $i1 <= 0 goto label06;
+
+        $r19 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.numCopies", $r22);
+
+     label06:
+        $r23 = r0.<sun.print.PrintJob2D: java.lang.String options>;
+
+        if $r23 == null goto label07;
+
+        $z0 = virtualinvoke $r23.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label07;
+
+        $r17 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        virtualinvoke $r17.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.options", $r23);
+
+     label07:
+        $r8 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        $r30 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r31 = virtualinvoke $r30.<java.awt.PageAttributes: java.awt.PageAttributes$OrientationRequestedType getOrientationRequested()>();
+
+        $r32 = <java.awt.PageAttributes$OrientationRequestedType: java.awt.PageAttributes$OrientationRequestedType PORTRAIT>;
+
+        if $r31 != $r32 goto label08;
+
+        $r33 = "portrait";
+
+        goto label09;
+
+     label08:
+        $r33 = "landscape";
+
+     label09:
+        virtualinvoke $r8.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.orientation", $r33);
+
+        $r10 = <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES>;
+
+        $r9 = r0.<sun.print.PrintJob2D: java.awt.PageAttributes pageAttributes>;
+
+        $r11 = virtualinvoke $r9.<java.awt.PageAttributes: java.awt.PageAttributes$MediaType getMedia()>();
+
+        $i0 = virtualinvoke $r11.<java.awt.PageAttributes$MediaType: int hashCode()>();
+
+        $r16 = $r10[$i0];
+
+        $r12 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType LETTER>;
+
+        if $r16 != $r12 goto label10;
+
+        r34 = "letter";
+
+        goto label14;
+
+     label10:
+        $r13 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType LEGAL>;
+
+        if $r16 != $r13 goto label11;
+
+        r34 = "legal";
+
+        goto label14;
+
+     label11:
+        $r14 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType EXECUTIVE>;
+
+        if $r16 != $r14 goto label12;
+
+        r34 = "executive";
+
+        goto label14;
+
+     label12:
+        $r15 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType A4>;
+
+        if $r16 != $r15 goto label13;
+
+        r34 = "a4";
+
+        goto label14;
+
+     label13:
+        r34 = virtualinvoke $r16.<java.awt.PageAttributes$MediaType: java.lang.String toString()>();
+
+     label14:
+        $r35 = r0.<sun.print.PrintJob2D: java.util.Properties props>;
+
+        virtualinvoke $r35.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>("awt.print.paperSize", r34);
+
+        return;
+    }
+
+    private void throwPrintToFile()
+    {
+        sun.print.PrintJob2D r2;
+        java.io.FilePermission $r1, r3;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: sun.print.PrintJob2D;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        r3 = null;
+
+        if $r0 == null goto label1;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>("<<ALL FILES>>", "read,write");
+
+        r3 = $r1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>(r3);
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        javax.print.attribute.standard.MediaSizeName[] $r76;
+        int[] $r145, $r146;
+        javax.print.attribute.standard.MediaSizeName $r77, $r78, $r79, $r80, $r81, $r82, $r83, $r84, $r85, $r86, $r87, $r88, $r89, $r90, $r91, $r92, $r93, $r94, $r95, $r96, $r97, $r98, $r99, $r100, $r101, $r102, $r103, $r104, $r105, $r106, $r107, $r108, $r109, $r110, $r111, $r112, $r113, $r114, $r115, $r116, $r117, $r118, $r119, $r120, $r121, $r122, $r123, $r124, $r125, $r126, $r127, $r128, $r129, $r130, $r131, $r132, $r133, $r134, $r135, $r136, $r137, $r138, $r139, $r140, $r141, $r142, $r143, $r144;
+        java.awt.PageAttributes$MediaType[] $r0;
+        java.awt.PageAttributes$MediaType $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r60, $r61, $r62, $r63, $r64, $r65, $r66, $r67, $r68, $r69, $r70, $r71, $r72, $r73, $r74, $r75;
+
+        <sun.print.PrintJob2D: java.lang.String A4> = "a4";
+
+        <sun.print.PrintJob2D: java.lang.String EXECUTIVE> = "executive";
+
+        <sun.print.PrintJob2D: java.lang.String LEGAL> = "legal";
+
+        <sun.print.PrintJob2D: java.lang.String LETTER> = "letter";
+
+        <sun.print.PrintJob2D: java.lang.String PAPERSIZE_PROP> = "awt.print.paperSize";
+
+        <sun.print.PrintJob2D: java.lang.String LANDSCAPE> = "landscape";
+
+        <sun.print.PrintJob2D: java.lang.String PORTRAIT> = "portrait";
+
+        <sun.print.PrintJob2D: java.lang.String ORIENT_PROP> = "awt.print.orientation";
+
+        <sun.print.PrintJob2D: java.lang.String OPTIONS_PROP> = "awt.print.options";
+
+        <sun.print.PrintJob2D: java.lang.String NUMCOPIES_PROP> = "awt.print.numCopies";
+
+        <sun.print.PrintJob2D: java.lang.String FILENAME_PROP> = "awt.print.fileName";
+
+        <sun.print.PrintJob2D: java.lang.String PRINTER_PROP> = "awt.print.printer";
+
+        <sun.print.PrintJob2D: java.lang.String FILE> = "file";
+
+        <sun.print.PrintJob2D: java.lang.String PRINTER> = "printer";
+
+        <sun.print.PrintJob2D: java.lang.String DEST_PROP> = "awt.print.destination";
+
+        $r0 = newarray (java.awt.PageAttributes$MediaType)[75];
+
+        $r1 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_4A0>;
+
+        $r0[0] = $r1;
+
+        $r2 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_2A0>;
+
+        $r0[1] = $r2;
+
+        $r3 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A0>;
+
+        $r0[2] = $r3;
+
+        $r4 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A1>;
+
+        $r0[3] = $r4;
+
+        $r5 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A2>;
+
+        $r0[4] = $r5;
+
+        $r6 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A3>;
+
+        $r0[5] = $r6;
+
+        $r7 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A4>;
+
+        $r0[6] = $r7;
+
+        $r8 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A5>;
+
+        $r0[7] = $r8;
+
+        $r9 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A6>;
+
+        $r0[8] = $r9;
+
+        $r10 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A7>;
+
+        $r0[9] = $r10;
+
+        $r11 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A8>;
+
+        $r0[10] = $r11;
+
+        $r12 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A9>;
+
+        $r0[11] = $r12;
+
+        $r13 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_A10>;
+
+        $r0[12] = $r13;
+
+        $r14 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B0>;
+
+        $r0[13] = $r14;
+
+        $r15 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B1>;
+
+        $r0[14] = $r15;
+
+        $r16 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B2>;
+
+        $r0[15] = $r16;
+
+        $r17 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B3>;
+
+        $r0[16] = $r17;
+
+        $r18 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B4>;
+
+        $r0[17] = $r18;
+
+        $r19 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B5>;
+
+        $r0[18] = $r19;
+
+        $r20 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B6>;
+
+        $r0[19] = $r20;
+
+        $r21 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B7>;
+
+        $r0[20] = $r21;
+
+        $r22 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B8>;
+
+        $r0[21] = $r22;
+
+        $r23 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B9>;
+
+        $r0[22] = $r23;
+
+        $r24 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_B10>;
+
+        $r0[23] = $r24;
+
+        $r25 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B0>;
+
+        $r0[24] = $r25;
+
+        $r26 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B1>;
+
+        $r0[25] = $r26;
+
+        $r27 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B2>;
+
+        $r0[26] = $r27;
+
+        $r28 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B3>;
+
+        $r0[27] = $r28;
+
+        $r29 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B4>;
+
+        $r0[28] = $r29;
+
+        $r30 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B5>;
+
+        $r0[29] = $r30;
+
+        $r31 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B6>;
+
+        $r0[30] = $r31;
+
+        $r32 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B7>;
+
+        $r0[31] = $r32;
+
+        $r33 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B8>;
+
+        $r0[32] = $r33;
+
+        $r34 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B9>;
+
+        $r0[33] = $r34;
+
+        $r35 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType JIS_B10>;
+
+        $r0[34] = $r35;
+
+        $r36 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C0>;
+
+        $r0[35] = $r36;
+
+        $r37 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C1>;
+
+        $r0[36] = $r37;
+
+        $r38 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C2>;
+
+        $r0[37] = $r38;
+
+        $r39 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C3>;
+
+        $r0[38] = $r39;
+
+        $r40 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C4>;
+
+        $r0[39] = $r40;
+
+        $r41 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C5>;
+
+        $r0[40] = $r41;
+
+        $r42 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C6>;
+
+        $r0[41] = $r42;
+
+        $r43 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C7>;
+
+        $r0[42] = $r43;
+
+        $r44 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C8>;
+
+        $r0[43] = $r44;
+
+        $r45 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C9>;
+
+        $r0[44] = $r45;
+
+        $r46 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_C10>;
+
+        $r0[45] = $r46;
+
+        $r47 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ISO_DESIGNATED_LONG>;
+
+        $r0[46] = $r47;
+
+        $r48 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType EXECUTIVE>;
+
+        $r0[47] = $r48;
+
+        $r49 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType FOLIO>;
+
+        $r0[48] = $r49;
+
+        $r50 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType INVOICE>;
+
+        $r0[49] = $r50;
+
+        $r51 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType LEDGER>;
+
+        $r0[50] = $r51;
+
+        $r52 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_LETTER>;
+
+        $r0[51] = $r52;
+
+        $r53 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_LEGAL>;
+
+        $r0[52] = $r53;
+
+        $r54 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType QUARTO>;
+
+        $r0[53] = $r54;
+
+        $r55 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType A>;
+
+        $r0[54] = $r55;
+
+        $r56 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType B>;
+
+        $r0[55] = $r56;
+
+        $r57 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType C>;
+
+        $r0[56] = $r57;
+
+        $r58 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType D>;
+
+        $r0[57] = $r58;
+
+        $r59 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType E>;
+
+        $r0[58] = $r59;
+
+        $r60 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_10X15_ENVELOPE>;
+
+        $r0[59] = $r60;
+
+        $r61 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_10X14_ENVELOPE>;
+
+        $r0[60] = $r61;
+
+        $r62 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_10X13_ENVELOPE>;
+
+        $r0[61] = $r62;
+
+        $r63 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_9X12_ENVELOPE>;
+
+        $r0[62] = $r63;
+
+        $r64 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_9X11_ENVELOPE>;
+
+        $r0[63] = $r64;
+
+        $r65 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_7X9_ENVELOPE>;
+
+        $r0[64] = $r65;
+
+        $r66 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_6X9_ENVELOPE>;
+
+        $r0[65] = $r66;
+
+        $r67 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_NUMBER_9_ENVELOPE>;
+
+        $r0[66] = $r67;
+
+        $r68 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_NUMBER_10_ENVELOPE>;
+
+        $r0[67] = $r68;
+
+        $r69 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_NUMBER_11_ENVELOPE>;
+
+        $r0[68] = $r69;
+
+        $r70 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_NUMBER_12_ENVELOPE>;
+
+        $r0[69] = $r70;
+
+        $r71 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType NA_NUMBER_14_ENVELOPE>;
+
+        $r0[70] = $r71;
+
+        $r72 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType INVITE_ENVELOPE>;
+
+        $r0[71] = $r72;
+
+        $r73 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType ITALY_ENVELOPE>;
+
+        $r0[72] = $r73;
+
+        $r74 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType MONARCH_ENVELOPE>;
+
+        $r0[73] = $r74;
+
+        $r75 = <java.awt.PageAttributes$MediaType: java.awt.PageAttributes$MediaType PERSONAL_ENVELOPE>;
+
+        $r0[74] = $r75;
+
+        <sun.print.PrintJob2D: java.awt.PageAttributes$MediaType[] SIZES> = $r0;
+
+        $r76 = newarray (javax.print.attribute.standard.MediaSizeName)[75];
+
+        $r76[0] = null;
+
+        $r76[1] = null;
+
+        $r77 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A0>;
+
+        $r76[2] = $r77;
+
+        $r78 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A1>;
+
+        $r76[3] = $r78;
+
+        $r79 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A2>;
+
+        $r76[4] = $r79;
+
+        $r80 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A3>;
+
+        $r76[5] = $r80;
+
+        $r81 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A4>;
+
+        $r76[6] = $r81;
+
+        $r82 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A5>;
+
+        $r76[7] = $r82;
+
+        $r83 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A6>;
+
+        $r76[8] = $r83;
+
+        $r84 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A7>;
+
+        $r76[9] = $r84;
+
+        $r85 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A8>;
+
+        $r76[10] = $r85;
+
+        $r86 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A9>;
+
+        $r76[11] = $r86;
+
+        $r87 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A10>;
+
+        $r76[12] = $r87;
+
+        $r88 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B0>;
+
+        $r76[13] = $r88;
+
+        $r89 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B1>;
+
+        $r76[14] = $r89;
+
+        $r90 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B2>;
+
+        $r76[15] = $r90;
+
+        $r91 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B3>;
+
+        $r76[16] = $r91;
+
+        $r92 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B4>;
+
+        $r76[17] = $r92;
+
+        $r93 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B5>;
+
+        $r76[18] = $r93;
+
+        $r94 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B6>;
+
+        $r76[19] = $r94;
+
+        $r95 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B7>;
+
+        $r76[20] = $r95;
+
+        $r96 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B8>;
+
+        $r76[21] = $r96;
+
+        $r97 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B9>;
+
+        $r76[22] = $r97;
+
+        $r98 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B10>;
+
+        $r76[23] = $r98;
+
+        $r99 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B0>;
+
+        $r76[24] = $r99;
+
+        $r100 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B1>;
+
+        $r76[25] = $r100;
+
+        $r101 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B2>;
+
+        $r76[26] = $r101;
+
+        $r102 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B3>;
+
+        $r76[27] = $r102;
+
+        $r103 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B4>;
+
+        $r76[28] = $r103;
+
+        $r104 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B5>;
+
+        $r76[29] = $r104;
+
+        $r105 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B6>;
+
+        $r76[30] = $r105;
+
+        $r106 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B7>;
+
+        $r76[31] = $r106;
+
+        $r107 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B8>;
+
+        $r76[32] = $r107;
+
+        $r108 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B9>;
+
+        $r76[33] = $r108;
+
+        $r109 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B10>;
+
+        $r76[34] = $r109;
+
+        $r110 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C0>;
+
+        $r76[35] = $r110;
+
+        $r111 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C1>;
+
+        $r76[36] = $r111;
+
+        $r112 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C2>;
+
+        $r76[37] = $r112;
+
+        $r113 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C3>;
+
+        $r76[38] = $r113;
+
+        $r114 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C4>;
+
+        $r76[39] = $r114;
+
+        $r115 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C5>;
+
+        $r76[40] = $r115;
+
+        $r116 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C6>;
+
+        $r76[41] = $r116;
+
+        $r76[42] = null;
+
+        $r76[43] = null;
+
+        $r76[44] = null;
+
+        $r76[45] = null;
+
+        $r117 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_DESIGNATED_LONG>;
+
+        $r76[46] = $r117;
+
+        $r118 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName EXECUTIVE>;
+
+        $r76[47] = $r118;
+
+        $r119 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName FOLIO>;
+
+        $r76[48] = $r119;
+
+        $r120 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName INVOICE>;
+
+        $r76[49] = $r120;
+
+        $r121 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName LEDGER>;
+
+        $r76[50] = $r121;
+
+        $r122 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LETTER>;
+
+        $r76[51] = $r122;
+
+        $r123 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LEGAL>;
+
+        $r76[52] = $r123;
+
+        $r124 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName QUARTO>;
+
+        $r76[53] = $r124;
+
+        $r125 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName A>;
+
+        $r76[54] = $r125;
+
+        $r126 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName B>;
+
+        $r76[55] = $r126;
+
+        $r127 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName C>;
+
+        $r76[56] = $r127;
+
+        $r128 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName D>;
+
+        $r76[57] = $r128;
+
+        $r129 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName E>;
+
+        $r76[58] = $r129;
+
+        $r130 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_10X15_ENVELOPE>;
+
+        $r76[59] = $r130;
+
+        $r131 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_10X14_ENVELOPE>;
+
+        $r76[60] = $r131;
+
+        $r132 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_10X13_ENVELOPE>;
+
+        $r76[61] = $r132;
+
+        $r133 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_9X12_ENVELOPE>;
+
+        $r76[62] = $r133;
+
+        $r134 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_9X11_ENVELOPE>;
+
+        $r76[63] = $r134;
+
+        $r135 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_7X9_ENVELOPE>;
+
+        $r76[64] = $r135;
+
+        $r136 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_6X9_ENVELOPE>;
+
+        $r76[65] = $r136;
+
+        $r137 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_9_ENVELOPE>;
+
+        $r76[66] = $r137;
+
+        $r138 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_10_ENVELOPE>;
+
+        $r76[67] = $r138;
+
+        $r139 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_11_ENVELOPE>;
+
+        $r76[68] = $r139;
+
+        $r140 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_12_ENVELOPE>;
+
+        $r76[69] = $r140;
+
+        $r141 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_14_ENVELOPE>;
+
+        $r76[70] = $r141;
+
+        $r76[71] = null;
+
+        $r142 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ITALY_ENVELOPE>;
+
+        $r76[72] = $r142;
+
+        $r143 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName MONARCH_ENVELOPE>;
+
+        $r76[73] = $r143;
+
+        $r144 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName PERSONAL_ENVELOPE>;
+
+        $r76[74] = $r144;
+
+        <sun.print.PrintJob2D: javax.print.attribute.standard.MediaSizeName[] JAVAXSIZES> = $r76;
+
+        $r145 = newarray (int)[75];
+
+        $r145[0] = 4768;
+
+        $r145[1] = 3370;
+
+        $r145[2] = 2384;
+
+        $r145[3] = 1684;
+
+        $r145[4] = 1191;
+
+        $r145[5] = 842;
+
+        $r145[6] = 595;
+
+        $r145[7] = 420;
+
+        $r145[8] = 298;
+
+        $r145[9] = 210;
+
+        $r145[10] = 147;
+
+        $r145[11] = 105;
+
+        $r145[12] = 74;
+
+        $r145[13] = 2835;
+
+        $r145[14] = 2004;
+
+        $r145[15] = 1417;
+
+        $r145[16] = 1001;
+
+        $r145[17] = 709;
+
+        $r145[18] = 499;
+
+        $r145[19] = 354;
+
+        $r145[20] = 249;
+
+        $r145[21] = 176;
+
+        $r145[22] = 125;
+
+        $r145[23] = 88;
+
+        $r145[24] = 2920;
+
+        $r145[25] = 2064;
+
+        $r145[26] = 1460;
+
+        $r145[27] = 1032;
+
+        $r145[28] = 729;
+
+        $r145[29] = 516;
+
+        $r145[30] = 363;
+
+        $r145[31] = 258;
+
+        $r145[32] = 181;
+
+        $r145[33] = 128;
+
+        $r145[34] = 91;
+
+        $r145[35] = 2599;
+
+        $r145[36] = 1837;
+
+        $r145[37] = 1298;
+
+        $r145[38] = 918;
+
+        $r145[39] = 649;
+
+        $r145[40] = 459;
+
+        $r145[41] = 323;
+
+        $r145[42] = 230;
+
+        $r145[43] = 162;
+
+        $r145[44] = 113;
+
+        $r145[45] = 79;
+
+        $r145[46] = 312;
+
+        $r145[47] = 522;
+
+        $r145[48] = 612;
+
+        $r145[49] = 396;
+
+        $r145[50] = 792;
+
+        $r145[51] = 612;
+
+        $r145[52] = 612;
+
+        $r145[53] = 609;
+
+        $r145[54] = 612;
+
+        $r145[55] = 792;
+
+        $r145[56] = 1224;
+
+        $r145[57] = 1584;
+
+        $r145[58] = 2448;
+
+        $r145[59] = 720;
+
+        $r145[60] = 720;
+
+        $r145[61] = 720;
+
+        $r145[62] = 648;
+
+        $r145[63] = 648;
+
+        $r145[64] = 504;
+
+        $r145[65] = 432;
+
+        $r145[66] = 279;
+
+        $r145[67] = 297;
+
+        $r145[68] = 324;
+
+        $r145[69] = 342;
+
+        $r145[70] = 360;
+
+        $r145[71] = 624;
+
+        $r145[72] = 312;
+
+        $r145[73] = 279;
+
+        $r145[74] = 261;
+
+        <sun.print.PrintJob2D: int[] WIDTHS> = $r145;
+
+        $r146 = newarray (int)[75];
+
+        $r146[0] = 6741;
+
+        $r146[1] = 4768;
+
+        $r146[2] = 3370;
+
+        $r146[3] = 2384;
+
+        $r146[4] = 1684;
+
+        $r146[5] = 1191;
+
+        $r146[6] = 842;
+
+        $r146[7] = 595;
+
+        $r146[8] = 420;
+
+        $r146[9] = 298;
+
+        $r146[10] = 210;
+
+        $r146[11] = 147;
+
+        $r146[12] = 105;
+
+        $r146[13] = 4008;
+
+        $r146[14] = 2835;
+
+        $r146[15] = 2004;
+
+        $r146[16] = 1417;
+
+        $r146[17] = 1001;
+
+        $r146[18] = 729;
+
+        $r146[19] = 499;
+
+        $r146[20] = 354;
+
+        $r146[21] = 249;
+
+        $r146[22] = 176;
+
+        $r146[23] = 125;
+
+        $r146[24] = 4127;
+
+        $r146[25] = 2920;
+
+        $r146[26] = 2064;
+
+        $r146[27] = 1460;
+
+        $r146[28] = 1032;
+
+        $r146[29] = 729;
+
+        $r146[30] = 516;
+
+        $r146[31] = 363;
+
+        $r146[32] = 258;
+
+        $r146[33] = 181;
+
+        $r146[34] = 128;
+
+        $r146[35] = 3677;
+
+        $r146[36] = 2599;
+
+        $r146[37] = 1837;
+
+        $r146[38] = 1298;
+
+        $r146[39] = 918;
+
+        $r146[40] = 649;
+
+        $r146[41] = 459;
+
+        $r146[42] = 323;
+
+        $r146[43] = 230;
+
+        $r146[44] = 162;
+
+        $r146[45] = 113;
+
+        $r146[46] = 624;
+
+        $r146[47] = 756;
+
+        $r146[48] = 936;
+
+        $r146[49] = 612;
+
+        $r146[50] = 1224;
+
+        $r146[51] = 792;
+
+        $r146[52] = 1008;
+
+        $r146[53] = 780;
+
+        $r146[54] = 792;
+
+        $r146[55] = 1224;
+
+        $r146[56] = 1584;
+
+        $r146[57] = 2448;
+
+        $r146[58] = 3168;
+
+        $r146[59] = 1080;
+
+        $r146[60] = 1008;
+
+        $r146[61] = 936;
+
+        $r146[62] = 864;
+
+        $r146[63] = 792;
+
+        $r146[64] = 648;
+
+        $r146[65] = 648;
+
+        $r146[66] = 639;
+
+        $r146[67] = 684;
+
+        $r146[68] = 747;
+
+        $r146[69] = 792;
+
+        $r146[70] = 828;
+
+        $r146[71] = 624;
+
+        $r146[72] = 652;
+
+        $r146[73] = 540;
+
+        $r146[74] = 468;
+
+        <sun.print.PrintJob2D: int[] LENGTHS> = $r146;
+
+        return;
+    }
+}

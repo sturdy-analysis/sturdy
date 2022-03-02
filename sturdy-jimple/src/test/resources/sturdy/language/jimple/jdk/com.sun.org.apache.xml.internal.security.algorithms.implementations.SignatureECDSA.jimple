@@ -1,0 +1,533 @@
+public abstract class com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA extends com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithmSpi
+{
+    private static final com.sun.org.slf4j.internal.Logger LOG;
+    private final java.security.Signature signatureAlgorithm;
+    private int signIntLen;
+
+    public abstract java.lang.String engineGetURI();
+
+    public static byte[] convertASN1toXMLDSIG(byte[], int) throws java.io.IOException
+    {
+        int i0;
+        byte[] r0, $r1;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $r1 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.ECDSAUtils: byte[] convertASN1toXMLDSIG(byte[],int)>(r0, i0);
+
+        return $r1;
+    }
+
+    public static byte[] convertXMLDSIGtoASN1(byte[]) throws java.io.IOException
+    {
+        byte[] r0, $r1;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.ECDSAUtils: byte[] convertXMLDSIGtoASN1(byte[])>(r0);
+
+        return $r1;
+    }
+
+    public void <init>() throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: void <init>(java.security.Provider)>(null);
+
+        return;
+    }
+
+    public void <init>(java.security.Provider) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.lang.Object[] $r3, $r11;
+        java.security.Signature $r6, $r8, $r9;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r14;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+        java.security.Provider r5;
+        java.security.GeneralSecurityException $r10;
+        int $i1;
+        com.sun.org.slf4j.internal.Logger $r4;
+        java.lang.String $r1, $r2, $r7, $r12;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r5 := @parameter0: java.security.Provider;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithmSpi: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: int signIntLen> = $i1;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.lang.String engineGetURI()>();
+
+        $r2 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.JCEMapper: java.lang.String translateURItoJCEID(java.lang.String)>($r1);
+
+        $r4 = <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = $r2;
+
+        virtualinvoke $r4.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Object[])>("Created SignatureECDSA using {}", $r3);
+
+     label1:
+        if r5 != null goto label4;
+
+        $r7 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.JCEMapper: java.lang.String getProviderId()>();
+
+        if $r7 != null goto label2;
+
+        $r9 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r2);
+
+        r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm> = $r9;
+
+        goto label3;
+
+     label2:
+        $r8 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.lang.String)>($r2, $r7);
+
+        r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm> = $r8;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.security.Provider)>($r2, r5);
+
+        r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm> = $r6;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r11[0] = $r2;
+
+        $r12 = virtualinvoke $r10.<java.security.GeneralSecurityException: java.lang.String getLocalizedMessage()>();
+
+        $r11[1] = $r12;
+
+        $r14 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r14.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.String,java.lang.Object[])>("algorithms.NoSuchAlgorithm", $r11);
+
+        throw $r14;
+
+     label7:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label5 with label6;
+        catch java.security.NoSuchProviderException from label1 to label5 with label6;
+    }
+
+    protected void engineSetParameter(java.security.spec.AlgorithmParameterSpec) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.security.Signature $r2;
+        java.security.spec.AlgorithmParameterSpec r1;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r4;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+        java.security.InvalidAlgorithmParameterException $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r1 := @parameter0: java.security.spec.AlgorithmParameterSpec;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        virtualinvoke $r2.<java.security.Signature: void setParameter(java.security.spec.AlgorithmParameterSpec)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.security.InvalidAlgorithmParameterException from label1 to label2 with label3;
+    }
+
+    protected boolean engineVerify(byte[]) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        byte[] r0, $r1;
+        java.security.Signature $r4;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r12;
+        java.lang.Exception $r11;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r3;
+        com.sun.org.slf4j.internal.Logger $r2, $r6;
+        java.lang.StringBuilder $r5, $r7, $r9;
+        java.lang.String $r8, $r10;
+        boolean $z0, $z1;
+
+        r3 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r0 := @parameter0: byte[];
+
+     label1:
+        $r1 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: byte[] convertXMLDSIGtoASN1(byte[])>(r0);
+
+        $r2 = <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $z0 = virtualinvoke $r2.<com.sun.org.slf4j.internal.Logger: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Called ECDSA.verify() on ");
+
+        $r8 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: java.lang.String encodeToString(byte[])>(r0);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>($r10);
+
+     label2:
+        $r4 = r3.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        $z1 = virtualinvoke $r4.<java.security.Signature: boolean verify(byte[])>($r1);
+
+     label3:
+        return $z1;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r12.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r11);
+
+        throw $r12;
+
+        catch java.security.SignatureException from label1 to label3 with label4;
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    protected void engineInitVerify(java.security.Key) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.security.Key r0;
+        java.security.Signature $r2;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r0 := @parameter0: java.security.Key;
+
+        $r2 = r1.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: void engineInitVerify(java.security.Key,java.security.Signature)>(r0, $r2);
+
+        return;
+    }
+
+    protected byte[] engineSign() throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        byte[] $r2, $r3;
+        java.security.Signature $r1;
+        int $i0;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r5;
+        java.lang.Exception $r4;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        $r2 = virtualinvoke $r1.<java.security.Signature: byte[] sign()>();
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: int signIntLen>;
+
+        $r3 = staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: byte[] convertASN1toXMLDSIG(byte[],int)>($r2, $i0);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r5.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+        catch java.security.SignatureException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected void engineInitSign(java.security.Key, java.security.SecureRandom) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.security.spec.ECField $r7;
+        java.security.Signature $r3;
+        java.security.spec.EllipticCurve $r6;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r2;
+        java.security.spec.ECParameterSpec $r5;
+        java.security.Key r0;
+        java.security.SecureRandom r1;
+        int $i0, $i1, $i2;
+        java.security.interfaces.ECPrivateKey r4;
+        boolean $z0;
+
+        r2 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r0 := @parameter0: java.security.Key;
+
+        r1 := @parameter1: java.security.SecureRandom;
+
+        $z0 = r0 instanceof java.security.interfaces.ECPrivateKey;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.security.interfaces.ECPrivateKey) r0;
+
+        $r5 = interfaceinvoke r4.<java.security.interfaces.ECPrivateKey: java.security.spec.ECParameterSpec getParams()>();
+
+        $r6 = virtualinvoke $r5.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $r7 = virtualinvoke $r6.<java.security.spec.EllipticCurve: java.security.spec.ECField getField()>();
+
+        $i0 = interfaceinvoke $r7.<java.security.spec.ECField: int getFieldSize()>();
+
+        $i1 = $i0 + 7;
+
+        $i2 = $i1 / 8;
+
+        r2.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: int signIntLen> = $i2;
+
+     label1:
+        $r3 = r2.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        staticinvoke <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: void engineInitSign(java.security.Key,java.security.SecureRandom,java.security.Signature)>(r0, r1, $r3);
+
+        return;
+    }
+
+    protected void engineInitSign(java.security.Key) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.security.Key r1;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r1 := @parameter0: java.security.Key;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: void engineInitSign(java.security.Key,java.security.SecureRandom)>(r1, null);
+
+        return;
+    }
+
+    protected void engineUpdate(byte[]) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        byte[] r1;
+        java.security.SignatureException $r3;
+        java.security.Signature $r2;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r4;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        virtualinvoke $r2.<java.security.Signature: void update(byte[])>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.security.SignatureException from label1 to label2 with label3;
+    }
+
+    protected void engineUpdate(byte) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        byte b0;
+        java.security.SignatureException $r2;
+        java.security.Signature $r1;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r3;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        b0 := @parameter0: byte;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        virtualinvoke $r1.<java.security.Signature: void update(byte)>(b0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.security.SignatureException from label1 to label2 with label3;
+    }
+
+    protected void engineUpdate(byte[], int, int) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        byte[] r1;
+        java.security.SignatureException $r3;
+        int i0, i1;
+        java.security.Signature $r2;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r4;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        virtualinvoke $r2.<java.security.Signature: void update(byte[],int,int)>(r1, i0, i1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.security.SignatureException from label1 to label2 with label3;
+    }
+
+    protected java.lang.String engineGetJCEAlgorithmString()
+    {
+        java.security.Signature $r1;
+        java.lang.String $r2;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        $r2 = virtualinvoke $r1.<java.security.Signature: java.lang.String getAlgorithm()>();
+
+        return $r2;
+    }
+
+    protected java.lang.String engineGetJCEProviderName()
+    {
+        java.security.Signature $r1;
+        java.lang.String $r3;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r0;
+        java.security.Provider $r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: java.security.Signature signatureAlgorithm>;
+
+        $r2 = virtualinvoke $r1.<java.security.Signature: java.security.Provider getProvider()>();
+
+        $r3 = virtualinvoke $r2.<java.security.Provider: java.lang.String getName()>();
+
+        return $r3;
+    }
+
+    protected void engineSetHMACOutputLength(int) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        int i0;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r0;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        i0 := @parameter0: int;
+
+        $r0 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.String)>("algorithms.HMACOutputLengthOnlyForHMAC");
+
+        throw $r0;
+    }
+
+    protected void engineInitSign(java.security.Key, java.security.spec.AlgorithmParameterSpec) throws com.sun.org.apache.xml.internal.security.signature.XMLSignatureException
+    {
+        java.security.Key r2;
+        java.security.spec.AlgorithmParameterSpec r3;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureException $r0;
+        com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA r1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
+
+        r2 := @parameter0: java.security.Key;
+
+        r3 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r0 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureException: void <init>(java.lang.String)>("algorithms.CannotUseAlgorithmParameterSpecOnRSA");
+
+        throw $r0;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.slf4j.internal.Logger $r0;
+
+        $r0 = staticinvoke <com.sun.org.slf4j.internal.LoggerFactory: com.sun.org.slf4j.internal.Logger getLogger(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/algorithms/implementations/SignatureECDSA;");
+
+        <com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA: com.sun.org.slf4j.internal.Logger LOG> = $r0;
+
+        return;
+    }
+}

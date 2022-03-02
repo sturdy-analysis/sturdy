@@ -1,0 +1,341 @@
+class java.util.zip.ZipUtils extends java.lang.Object
+{
+    private static final long WINDOWS_EPOCH_IN_MICROSECONDS;
+
+    void <init>()
+    {
+        java.util.zip.ZipUtils r0;
+
+        r0 := @this: java.util.zip.ZipUtils;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static final java.nio.file.attribute.FileTime winTimeToFileTime(long)
+    {
+        java.util.concurrent.TimeUnit $r0;
+        java.nio.file.attribute.FileTime $r1;
+        long l0, $l1, $l2;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 / 10L;
+
+        $l2 = $l1 + -11644473600000000L;
+
+        $r0 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MICROSECONDS>;
+
+        $r1 = staticinvoke <java.nio.file.attribute.FileTime: java.nio.file.attribute.FileTime 'from'(long,java.util.concurrent.TimeUnit)>($l2, $r0);
+
+        return $r1;
+    }
+
+    public static final long fileTimeToWinTime(java.nio.file.attribute.FileTime)
+    {
+        java.util.concurrent.TimeUnit $r1;
+        java.nio.file.attribute.FileTime r0;
+        long $l0, $l1, $l2;
+
+        r0 := @parameter0: java.nio.file.attribute.FileTime;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MICROSECONDS>;
+
+        $l0 = virtualinvoke r0.<java.nio.file.attribute.FileTime: long 'to'(java.util.concurrent.TimeUnit)>($r1);
+
+        $l1 = $l0 - -11644473600000000L;
+
+        $l2 = $l1 * 10L;
+
+        return $l2;
+    }
+
+    public static final java.nio.file.attribute.FileTime unixTimeToFileTime(long)
+    {
+        java.util.concurrent.TimeUnit $r0;
+        java.nio.file.attribute.FileTime $r1;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $r0 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r1 = staticinvoke <java.nio.file.attribute.FileTime: java.nio.file.attribute.FileTime 'from'(long,java.util.concurrent.TimeUnit)>(l0, $r0);
+
+        return $r1;
+    }
+
+    public static final long fileTimeToUnixTime(java.nio.file.attribute.FileTime)
+    {
+        java.util.concurrent.TimeUnit $r1;
+        java.nio.file.attribute.FileTime r0;
+        long $l0;
+
+        r0 := @parameter0: java.nio.file.attribute.FileTime;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $l0 = virtualinvoke r0.<java.nio.file.attribute.FileTime: long 'to'(java.util.concurrent.TimeUnit)>($r1);
+
+        return $l0;
+    }
+
+    private static long dosToJavaTime(long)
+    {
+        java.util.Date $r0;
+        long l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l21;
+        int $i15, $i16, $i17, $i18, $i19, $i20;
+
+        l0 := @parameter0: long;
+
+        $r0 = new java.util.Date;
+
+        $l1 = l0 >> 25;
+
+        $l2 = $l1 & 127L;
+
+        $l3 = $l2 + 80L;
+
+        $i20 = (int) $l3;
+
+        $l4 = l0 >> 21;
+
+        $l5 = $l4 & 15L;
+
+        $l6 = $l5 - 1L;
+
+        $i19 = (int) $l6;
+
+        $l7 = l0 >> 16;
+
+        $l8 = $l7 & 31L;
+
+        $i18 = (int) $l8;
+
+        $l9 = l0 >> 11;
+
+        $l10 = $l9 & 31L;
+
+        $i17 = (int) $l10;
+
+        $l11 = l0 >> 5;
+
+        $l12 = $l11 & 63L;
+
+        $i16 = (int) $l12;
+
+        $l13 = l0 << 1;
+
+        $l14 = $l13 & 62L;
+
+        $i15 = (int) $l14;
+
+        specialinvoke $r0.<java.util.Date: void <init>(int,int,int,int,int,int)>($i20, $i19, $i18, $i17, $i16, $i15);
+
+        $l21 = virtualinvoke $r0.<java.util.Date: long getTime()>();
+
+        return $l21;
+    }
+
+    public static long extendedDosToJavaTime(long)
+    {
+        long l0, $l1, $l2, $l3;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <java.util.zip.ZipUtils: long dosToJavaTime(long)>(l0);
+
+        $l2 = l0 >> 32;
+
+        $l3 = $l1 + $l2;
+
+        return $l3;
+    }
+
+    private static long javaToDosTime(long)
+    {
+        java.util.Date $r0;
+        long l0, $l21;
+        int $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20;
+
+        l0 := @parameter0: long;
+
+        $r0 = new java.util.Date;
+
+        specialinvoke $r0.<java.util.Date: void <init>(long)>(l0);
+
+        $i1 = virtualinvoke $r0.<java.util.Date: int getYear()>();
+
+        i2 = $i1 + 1900;
+
+        if i2 >= 1980 goto label1;
+
+        return 2162688L;
+
+     label1:
+        $i3 = i2 - 1980;
+
+        $i4 = $i3 << 25;
+
+        $i5 = virtualinvoke $r0.<java.util.Date: int getMonth()>();
+
+        $i6 = $i5 + 1;
+
+        $i7 = $i6 << 21;
+
+        $i8 = $i4 | $i7;
+
+        $i9 = virtualinvoke $r0.<java.util.Date: int getDate()>();
+
+        $i10 = $i9 << 16;
+
+        $i11 = $i8 | $i10;
+
+        $i12 = virtualinvoke $r0.<java.util.Date: int getHours()>();
+
+        $i13 = $i12 << 11;
+
+        $i14 = $i11 | $i13;
+
+        $i15 = virtualinvoke $r0.<java.util.Date: int getMinutes()>();
+
+        $i16 = $i15 << 5;
+
+        $i17 = $i14 | $i16;
+
+        $i18 = virtualinvoke $r0.<java.util.Date: int getSeconds()>();
+
+        $i19 = $i18 >> 1;
+
+        $i20 = $i17 | $i19;
+
+        $l21 = (long) $i20;
+
+        return $l21;
+    }
+
+    public static long javaToExtendedDosTime(long)
+    {
+        long l0, $l2, $l4, $l5, $l6;
+        byte $b1, $b3;
+        int $i7;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i7 = (int) $b1;
+
+        if $i7 >= 0 goto label1;
+
+        return 2162688L;
+
+     label1:
+        $l2 = staticinvoke <java.util.zip.ZipUtils: long javaToDosTime(long)>(l0);
+
+        $b3 = $l2 cmp 2162688L;
+
+        if $b3 == 0 goto label2;
+
+        $l4 = l0 % 2000L;
+
+        $l5 = $l4 << 32;
+
+        $l6 = $l2 + $l5;
+
+        goto label3;
+
+     label2:
+        $l6 = 2162688L;
+
+     label3:
+        return $l6;
+    }
+
+    public static final int get16(byte[], int)
+    {
+        byte[] r0;
+        byte $b1, $b4;
+        int i0, $i2, $i3, $i5, $i6, $i7;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $b1 = r0[i0];
+
+        $i2 = staticinvoke <java.lang.Byte: int toUnsignedInt(byte)>($b1);
+
+        $i3 = i0 + 1;
+
+        $b4 = r0[$i3];
+
+        $i5 = staticinvoke <java.lang.Byte: int toUnsignedInt(byte)>($b4);
+
+        $i6 = $i5 << 8;
+
+        $i7 = $i2 | $i6;
+
+        return $i7;
+    }
+
+    public static final long get32(byte[], int)
+    {
+        byte[] r0;
+        long $l3, $l5, $l6, $l7, $l8;
+        int i0, $i1, $i2, $i4;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $i1 = staticinvoke <java.util.zip.ZipUtils: int get16(byte[],int)>(r0, i0);
+
+        $l3 = (long) $i1;
+
+        $i2 = i0 + 2;
+
+        $i4 = staticinvoke <java.util.zip.ZipUtils: int get16(byte[],int)>(r0, $i2);
+
+        $l5 = (long) $i4;
+
+        $l6 = $l5 << 16;
+
+        $l7 = $l3 | $l6;
+
+        $l8 = $l7 & 4294967295L;
+
+        return $l8;
+    }
+
+    public static final long get64(byte[], int)
+    {
+        byte[] r0;
+        int i0, $i2;
+        long $l1, $l3, $l4, $l5;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $l1 = staticinvoke <java.util.zip.ZipUtils: long get32(byte[],int)>(r0, i0);
+
+        $i2 = i0 + 4;
+
+        $l3 = staticinvoke <java.util.zip.ZipUtils: long get32(byte[],int)>(r0, $i2);
+
+        $l4 = $l3 << 32;
+
+        $l5 = $l1 | $l4;
+
+        return $l5;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.zip.ZipUtils: long WINDOWS_EPOCH_IN_MICROSECONDS> = -11644473600000000L;
+
+        return;
+    }
+}

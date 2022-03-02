@@ -1,0 +1,1262 @@
+public final class sun.awt.AppContext extends java.lang.Object
+{
+    private static final sun.util.logging.PlatformLogger log;
+    public static final java.lang.Object EVENT_QUEUE_KEY;
+    public static final java.lang.Object EVENT_QUEUE_LOCK_KEY;
+    public static final java.lang.Object EVENT_QUEUE_COND_KEY;
+    private static final java.util.Map threadGroup2appContext;
+    private static volatile sun.awt.AppContext mainAppContext;
+    private static final java.lang.Object getAppContextLock;
+    private final java.util.Map table;
+    private final java.lang.ThreadGroup threadGroup;
+    private java.beans.PropertyChangeSupport changeSupport;
+    public static final java.lang.String DISPOSED_PROPERTY_NAME;
+    public static final java.lang.String GUI_DISPOSED;
+    private volatile sun.awt.AppContext$State state;
+    private static final java.util.concurrent.atomic.AtomicInteger numAppContexts;
+    private final java.lang.ClassLoader contextClassLoader;
+    private static final java.lang.ThreadLocal threadAppContext;
+    private long DISPOSAL_TIMEOUT;
+    private long THREAD_INTERRUPT_TIMEOUT;
+    private sun.awt.MostRecentKeyValue mostRecentKeyValue;
+    private sun.awt.MostRecentKeyValue shadowMostRecentKeyValue;
+
+    public static java.util.Set getAppContexts()
+    {
+        java.util.HashSet $r1;
+        java.lang.Throwable $r4;
+        java.util.Map $r0, $r2;
+        java.util.Collection $r3;
+
+        $r0 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new java.util.HashSet;
+
+        $r2 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r1.<java.util.HashSet: void <init>(java.util.Collection)>($r3);
+
+        exitmonitor $r0;
+
+     label2:
+        return $r1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean isDisposed()
+    {
+        sun.awt.AppContext r0;
+        sun.awt.AppContext$State $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.AppContext;
+
+        $r2 = r0.<sun.awt.AppContext: sun.awt.AppContext$State state>;
+
+        $r1 = <sun.awt.AppContext$State: sun.awt.AppContext$State DISPOSED>;
+
+        if $r2 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    void <init>(java.lang.ThreadGroup)
+    {
+        java.util.concurrent.locks.ReentrantLock $r9;
+        java.util.HashMap $r1;
+        java.lang.ThreadGroup r4;
+        java.util.concurrent.locks.Condition $r11;
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        sun.awt.AppContext r0;
+        sun.awt.AppContext$State $r2;
+        java.util.Map $r5;
+        java.lang.Object $r7, $r10, $r12;
+        java.lang.ClassLoader $r8;
+        sun.awt.AppContext$1 $r6;
+
+        r0 := @this: sun.awt.AppContext;
+
+        r4 := @parameter0: java.lang.ThreadGroup;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.awt.AppContext: java.util.Map table> = $r1;
+
+        r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport> = null;
+
+        $r2 = <sun.awt.AppContext$State: sun.awt.AppContext$State VALID>;
+
+        r0.<sun.awt.AppContext: sun.awt.AppContext$State state> = $r2;
+
+        r0.<sun.awt.AppContext: long DISPOSAL_TIMEOUT> = 5000L;
+
+        r0.<sun.awt.AppContext: long THREAD_INTERRUPT_TIMEOUT> = 1000L;
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue> = null;
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue shadowMostRecentKeyValue> = null;
+
+        $r3 = <sun.awt.AppContext: java.util.concurrent.atomic.AtomicInteger numAppContexts>;
+
+        virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup> = r4;
+
+        $r5 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r4, r0);
+
+        $r6 = new sun.awt.AppContext$1;
+
+        specialinvoke $r6.<sun.awt.AppContext$1: void <init>(sun.awt.AppContext)>(r0);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        $r8 = (java.lang.ClassLoader) $r7;
+
+        r0.<sun.awt.AppContext: java.lang.ClassLoader contextClassLoader> = $r8;
+
+        $r9 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r9.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        $r10 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_LOCK_KEY>;
+
+        virtualinvoke r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r9);
+
+        $r11 = interfaceinvoke $r9.<java.util.concurrent.locks.Lock: java.util.concurrent.locks.Condition newCondition()>();
+
+        $r12 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_COND_KEY>;
+
+        virtualinvoke r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, $r11);
+
+        return;
+    }
+
+    private static final void initMainAppContext()
+    {
+        sun.awt.AppContext$2 $r0;
+
+        $r0 = new sun.awt.AppContext$2;
+
+        specialinvoke $r0.<sun.awt.AppContext$2: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    public static final sun.awt.AppContext getAppContext()
+    {
+        java.lang.ThreadLocal $r1;
+        java.util.concurrent.atomic.AtomicInteger $r0;
+        sun.awt.AppContext $r5, $r6, $r7, r8;
+        int $i0;
+        java.lang.Object $r2, $r4;
+        sun.awt.AppContext$3 $r3;
+
+        $r0 = <sun.awt.AppContext: java.util.concurrent.atomic.AtomicInteger numAppContexts>;
+
+        $i0 = virtualinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i0 != 1 goto label1;
+
+        $r5 = <sun.awt.AppContext: sun.awt.AppContext mainAppContext>;
+
+        if $r5 == null goto label1;
+
+        $r7 = <sun.awt.AppContext: sun.awt.AppContext mainAppContext>;
+
+        return $r7;
+
+     label1:
+        $r1 = <sun.awt.AppContext: java.lang.ThreadLocal threadAppContext>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r6 = (sun.awt.AppContext) $r2;
+
+        r8 = $r6;
+
+        if null != $r6 goto label2;
+
+        $r3 = new sun.awt.AppContext$3;
+
+        specialinvoke $r3.<sun.awt.AppContext$3: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r8 = (sun.awt.AppContext) $r4;
+
+     label2:
+        return r8;
+    }
+
+    public static final boolean isMainContext(sun.awt.AppContext)
+    {
+        sun.awt.AppContext r0, $r1;
+        boolean $z0;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        if r0 == null goto label1;
+
+        $r1 = <sun.awt.AppContext: sun.awt.AppContext mainAppContext>;
+
+        if r0 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static final sun.awt.AppContext getExecutionAppContext()
+    {
+        sun.awt.AppContext $r2;
+        sun.awt.AWTSecurityManager r1;
+        java.lang.SecurityManager $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $z0 = $r0 instanceof sun.awt.AWTSecurityManager;
+
+        if $z0 == 0 goto label1;
+
+        r1 = (sun.awt.AWTSecurityManager) $r0;
+
+        $r2 = virtualinvoke r1.<sun.awt.AWTSecurityManager: sun.awt.AppContext getAppContext()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public void dispose() throws java.lang.IllegalThreadStateException
+    {
+        java.lang.ThreadGroup $r1, $r3, $r15, $r16, $r17, $r18, $r21, $r25, $r26, $r40, $r41;
+        byte $b9, $b11;
+        java.util.concurrent.atomic.AtomicInteger $r24;
+        sun.awt.AppContext r0;
+        java.lang.Thread $r2;
+        java.util.Map $r19, $r22, $r23, $r27;
+        boolean $z0;
+        java.lang.ThreadLocal $r20;
+        java.awt.Toolkit $r10, $r13;
+        java.lang.Throwable $r29, $r33, $r34, $r36, $r38;
+        sun.awt.AppContext$4 $r45;
+        sun.awt.AppContext$5 $r47;
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l8, $l10, $l12, l13;
+        java.awt.event.InvocationEvent $r46, $r48;
+        int $i6, $i7, $i14, $i15, i16, $i17, $i18;
+        java.lang.IllegalThreadStateException $r30, $r43;
+        java.lang.InterruptedException $r31, $r32, $r35, $r37;
+        sun.awt.AppContext$State $r4, $r5, $r6, $r14;
+        java.beans.PropertyChangeSupport r39;
+        java.lang.ThreadGroup[] r42;
+        java.lang.Object $r44;
+
+        r0 := @this: sun.awt.AppContext;
+
+        $r1 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.ThreadGroup: boolean parentOf(java.lang.ThreadGroup)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        $r43 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r43.<java.lang.IllegalThreadStateException: void <init>(java.lang.String)>("Current Thread is contained within AppContext to be disposed.");
+
+        throw $r43;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r5 = r0.<sun.awt.AppContext: sun.awt.AppContext$State state>;
+
+        $r4 = <sun.awt.AppContext$State: sun.awt.AppContext$State VALID>;
+
+        if $r5 == $r4 goto label04;
+
+        exitmonitor r0;
+
+     label03:
+        return;
+
+     label04:
+        $r6 = <sun.awt.AppContext$State: sun.awt.AppContext$State BEING_DISPOSED>;
+
+        r0.<sun.awt.AppContext: sun.awt.AppContext$State state> = $r6;
+
+        exitmonitor r0;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r38 := @caughtexception;
+
+        exitmonitor r0;
+
+     label07:
+        throw $r38;
+
+     label08:
+        r39 = r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        if r39 == null goto label09;
+
+        virtualinvoke r39.<java.beans.PropertyChangeSupport: void firePropertyChange(java.lang.String,boolean,boolean)>("disposed", 0, 1);
+
+     label09:
+        $r44 = new java.lang.Object;
+
+        specialinvoke $r44.<java.lang.Object: void <init>()>();
+
+        $r45 = new sun.awt.AppContext$4;
+
+        specialinvoke $r45.<sun.awt.AppContext$4: void <init>(sun.awt.AppContext,java.beans.PropertyChangeSupport,java.lang.Object)>(r0, r39, $r44);
+
+        entermonitor $r44;
+
+     label10:
+        $r46 = new java.awt.event.InvocationEvent;
+
+        $r10 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        specialinvoke $r46.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r10, $r45);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>(r0, $r46);
+
+     label11:
+        $l0 = r0.<sun.awt.AppContext: long DISPOSAL_TIMEOUT>;
+
+        virtualinvoke $r44.<java.lang.Object: void wait(long)>($l0);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r37 := @caughtexception;
+
+     label14:
+        exitmonitor $r44;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r36 := @caughtexception;
+
+        exitmonitor $r44;
+
+     label17:
+        throw $r36;
+
+     label18:
+        $r47 = new sun.awt.AppContext$5;
+
+        specialinvoke $r47.<sun.awt.AppContext$5: void <init>(sun.awt.AppContext,java.lang.Object)>(r0, $r44);
+
+        entermonitor $r44;
+
+     label19:
+        $r48 = new java.awt.event.InvocationEvent;
+
+        $r13 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        specialinvoke $r48.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r13, $r47);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>(r0, $r48);
+
+     label20:
+        $l1 = r0.<sun.awt.AppContext: long DISPOSAL_TIMEOUT>;
+
+        virtualinvoke $r44.<java.lang.Object: void wait(long)>($l1);
+
+     label21:
+        goto label23;
+
+     label22:
+        $r35 := @caughtexception;
+
+     label23:
+        exitmonitor $r44;
+
+     label24:
+        goto label27;
+
+     label25:
+        $r34 := @caughtexception;
+
+        exitmonitor $r44;
+
+     label26:
+        throw $r34;
+
+     label27:
+        entermonitor r0;
+
+     label28:
+        $r14 = <sun.awt.AppContext$State: sun.awt.AppContext$State DISPOSED>;
+
+        r0.<sun.awt.AppContext: sun.awt.AppContext$State state> = $r14;
+
+        exitmonitor r0;
+
+     label29:
+        goto label32;
+
+     label30:
+        $r33 := @caughtexception;
+
+        exitmonitor r0;
+
+     label31:
+        throw $r33;
+
+     label32:
+        $r15 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r15.<java.lang.ThreadGroup: void interrupt()>();
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = r0.<sun.awt.AppContext: long THREAD_INTERRUPT_TIMEOUT>;
+
+        l13 = $l2 + $l3;
+
+     label33:
+        $r40 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $i14 = virtualinvoke $r40.<java.lang.ThreadGroup: int activeCount()>();
+
+        if $i14 <= 0 goto label37;
+
+        $l10 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b11 = $l10 cmp l13;
+
+        $i17 = (int) $b11;
+
+        if $i17 >= 0 goto label37;
+
+     label34:
+        staticinvoke <java.lang.Thread: void sleep(long)>(10L);
+
+     label35:
+        goto label33;
+
+     label36:
+        $r32 := @caughtexception;
+
+        goto label33;
+
+     label37:
+        $r16 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r16.<java.lang.ThreadGroup: void stop()>();
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l5 = r0.<sun.awt.AppContext: long THREAD_INTERRUPT_TIMEOUT>;
+
+        $l12 = $l4 + $l5;
+
+     label38:
+        $r41 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $i15 = virtualinvoke $r41.<java.lang.ThreadGroup: int activeCount()>();
+
+        if $i15 <= 0 goto label42;
+
+        $l8 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b9 = $l8 cmp $l12;
+
+        $i18 = (int) $b9;
+
+        if $i18 >= 0 goto label42;
+
+     label39:
+        staticinvoke <java.lang.Thread: void sleep(long)>(10L);
+
+     label40:
+        goto label38;
+
+     label41:
+        $r31 := @caughtexception;
+
+        goto label38;
+
+     label42:
+        $r17 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $i6 = virtualinvoke $r17.<java.lang.ThreadGroup: int activeGroupCount()>();
+
+        if $i6 <= 0 goto label44;
+
+        r42 = newarray (java.lang.ThreadGroup)[$i6];
+
+        $r25 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $i7 = virtualinvoke $r25.<java.lang.ThreadGroup: int enumerate(java.lang.ThreadGroup[])>(r42);
+
+        i16 = 0;
+
+     label43:
+        if i16 >= $i7 goto label44;
+
+        $r27 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        $r26 = r42[i16];
+
+        interfaceinvoke $r27.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r26);
+
+        i16 = i16 + 1;
+
+        goto label43;
+
+     label44:
+        $r19 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        $r18 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = <sun.awt.AppContext: java.lang.ThreadLocal threadAppContext>;
+
+        virtualinvoke $r20.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+     label45:
+        $r21 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r21.<java.lang.ThreadGroup: void destroy()>();
+
+     label46:
+        goto label48;
+
+     label47:
+        $r30 := @caughtexception;
+
+     label48:
+        $r22 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        entermonitor $r22;
+
+     label49:
+        $r23 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        interfaceinvoke $r23.<java.util.Map: void clear()>();
+
+        exitmonitor $r22;
+
+     label50:
+        goto label53;
+
+     label51:
+        $r29 := @caughtexception;
+
+        exitmonitor $r22;
+
+     label52:
+        throw $r29;
+
+     label53:
+        $r24 = <sun.awt.AppContext: java.util.concurrent.atomic.AtomicInteger numAppContexts>;
+
+        virtualinvoke $r24.<java.util.concurrent.atomic.AtomicInteger: int decrementAndGet()>();
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue> = null;
+
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.InterruptedException from label11 to label12 with label13;
+        catch java.lang.Throwable from label10 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.InterruptedException from label20 to label21 with label22;
+        catch java.lang.Throwable from label19 to label24 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+        catch java.lang.Throwable from label28 to label29 with label30;
+        catch java.lang.Throwable from label30 to label31 with label30;
+        catch java.lang.InterruptedException from label34 to label35 with label36;
+        catch java.lang.InterruptedException from label39 to label40 with label41;
+        catch java.lang.IllegalThreadStateException from label45 to label46 with label47;
+        catch java.lang.Throwable from label49 to label50 with label51;
+        catch java.lang.Throwable from label51 to label52 with label51;
+    }
+
+    static void stopEventDispatchThreads()
+    {
+        sun.awt.AppContext$PostShutdownEventRunnable $r4;
+        java.util.Iterator $r1;
+        java.util.Set $r0;
+        sun.awt.AppContext$CreateThreadAction $r6;
+        sun.awt.AppContext r3, $r5;
+        java.lang.Thread r8;
+        java.lang.Object $r2, $r7;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <sun.awt.AppContext: java.util.Set getAppContexts()>();
+
+        $r1 = interfaceinvoke $r0.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.awt.AppContext) $r2;
+
+        $z0 = virtualinvoke r3.<sun.awt.AppContext: boolean isDisposed()>();
+
+        if $z0 == 0 goto label2;
+
+        goto label1;
+
+     label2:
+        $r4 = new sun.awt.AppContext$PostShutdownEventRunnable;
+
+        specialinvoke $r4.<sun.awt.AppContext$PostShutdownEventRunnable: void <init>(sun.awt.AppContext)>(r3);
+
+        $r5 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if r3 == $r5 goto label3;
+
+        $r6 = new sun.awt.AppContext$CreateThreadAction;
+
+        specialinvoke $r6.<sun.awt.AppContext$CreateThreadAction: void <init>(sun.awt.AppContext,java.lang.Runnable)>(r3, $r4);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        r8 = (java.lang.Thread) $r7;
+
+        virtualinvoke r8.<java.lang.Thread: void start()>();
+
+        goto label4;
+
+     label3:
+        interfaceinvoke $r4.<java.lang.Runnable: void run()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        java.lang.Throwable $r14;
+        sun.awt.MostRecentKeyValue r2, $r6, r7, $r8, $r9, $r10, $r11;
+        sun.awt.AppContext r0;
+        java.util.Map $r1, $r4;
+        java.lang.Object r3, $r5, $r12, $r13;
+
+        r0 := @this: sun.awt.AppContext;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        entermonitor $r1;
+
+     label1:
+        r2 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue>;
+
+        if r2 == null goto label3;
+
+        $r12 = r2.<sun.awt.MostRecentKeyValue: java.lang.Object key>;
+
+        if $r12 != r3 goto label3;
+
+        $r13 = r2.<sun.awt.MostRecentKeyValue: java.lang.Object value>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r13;
+
+     label3:
+        $r4 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r3);
+
+        $r6 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue>;
+
+        if $r6 != null goto label4;
+
+        $r10 = new sun.awt.MostRecentKeyValue;
+
+        specialinvoke $r10.<sun.awt.MostRecentKeyValue: void <init>(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue> = $r10;
+
+        $r11 = new sun.awt.MostRecentKeyValue;
+
+        specialinvoke $r11.<sun.awt.MostRecentKeyValue: void <init>(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue shadowMostRecentKeyValue> = $r11;
+
+        goto label5;
+
+     label4:
+        r7 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue>;
+
+        $r8 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue shadowMostRecentKeyValue>;
+
+        virtualinvoke $r8.<sun.awt.MostRecentKeyValue: void setPair(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        $r9 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue shadowMostRecentKeyValue>;
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue> = $r9;
+
+        r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue shadowMostRecentKeyValue> = r7;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        return $r5;
+
+     label7:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r14;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Throwable $r6;
+        sun.awt.MostRecentKeyValue r2;
+        sun.awt.AppContext r0;
+        java.util.Map $r1, $r7;
+        java.lang.Object r3, r4, $r5, $r8;
+
+        r0 := @this: sun.awt.AppContext;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        entermonitor $r1;
+
+     label1:
+        r2 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue>;
+
+        if r2 == null goto label2;
+
+        $r5 = r2.<sun.awt.MostRecentKeyValue: java.lang.Object key>;
+
+        if $r5 != r3 goto label2;
+
+        r2.<sun.awt.MostRecentKeyValue: java.lang.Object value> = r4;
+
+     label2:
+        $r7 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, r4);
+
+        exitmonitor $r1;
+
+     label3:
+        return $r8;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object remove(java.lang.Object)
+    {
+        java.lang.Throwable $r5;
+        sun.awt.MostRecentKeyValue r2;
+        sun.awt.AppContext r0;
+        java.util.Map $r1, $r6;
+        java.lang.Object r3, $r4, $r7;
+
+        r0 := @this: sun.awt.AppContext;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        entermonitor $r1;
+
+     label1:
+        r2 = r0.<sun.awt.AppContext: sun.awt.MostRecentKeyValue mostRecentKeyValue>;
+
+        if r2 == null goto label2;
+
+        $r4 = r2.<sun.awt.MostRecentKeyValue: java.lang.Object key>;
+
+        if $r4 != r3 goto label2;
+
+        r2.<sun.awt.MostRecentKeyValue: java.lang.Object value> = null;
+
+     label2:
+        $r6 = r0.<sun.awt.AppContext: java.util.Map table>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r3);
+
+        exitmonitor $r1;
+
+     label3:
+        return $r7;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.ThreadGroup getThreadGroup()
+    {
+        java.lang.ThreadGroup $r1;
+        sun.awt.AppContext r0;
+
+        r0 := @this: sun.awt.AppContext;
+
+        $r1 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        return $r1;
+    }
+
+    public java.lang.ClassLoader getContextClassLoader()
+    {
+        java.lang.ClassLoader $r1;
+        sun.awt.AppContext r0;
+
+        r0 := @this: sun.awt.AppContext;
+
+        $r1 = r0.<sun.awt.AppContext: java.lang.ClassLoader contextClassLoader>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.ThreadGroup $r6;
+        sun.awt.AppContext r1;
+        java.lang.StringBuilder $r0, $r4, $r5, $r8, $r9;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r7, $r10;
+
+        r1 := @this: sun.awt.AppContext;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[threadGroup=");
+
+        $r6 = r1.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        $r7 = virtualinvoke $r6.<java.lang.ThreadGroup: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    public synchronized java.beans.PropertyChangeListener[] getPropertyChangeListeners()
+    {
+        java.beans.PropertyChangeListener[] $r3, $r4;
+        sun.awt.AppContext r0;
+        java.beans.PropertyChangeSupport $r1, $r2;
+
+        r0 := @this: sun.awt.AppContext;
+
+        $r1 = r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r1 != null goto label1;
+
+        $r4 = newarray (java.beans.PropertyChangeListener)[0];
+
+        return $r4;
+
+     label1:
+        $r2 = r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        $r3 = virtualinvoke $r2.<java.beans.PropertyChangeSupport: java.beans.PropertyChangeListener[] getPropertyChangeListeners()>();
+
+        return $r3;
+    }
+
+    public synchronized void addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.beans.PropertyChangeListener r0;
+        sun.awt.AppContext r1;
+        java.beans.PropertyChangeSupport $r2, $r4, $r5;
+        java.lang.String r3;
+
+        r1 := @this: sun.awt.AppContext;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.PropertyChangeListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.beans.PropertyChangeSupport;
+
+        specialinvoke $r5.<java.beans.PropertyChangeSupport: void <init>(java.lang.Object)>(r1);
+
+        r1.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport> = $r5;
+
+     label2:
+        $r4 = r1.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r4.<java.beans.PropertyChangeSupport: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r3, r0);
+
+        return;
+    }
+
+    public synchronized void removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.beans.PropertyChangeListener r0;
+        sun.awt.AppContext r1;
+        java.beans.PropertyChangeSupport $r2, $r4;
+        java.lang.String r3;
+
+        r1 := @this: sun.awt.AppContext;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.PropertyChangeListener;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 != null goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r4 = r1.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r4.<java.beans.PropertyChangeSupport: void removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r3, r0);
+
+        return;
+    }
+
+    public synchronized java.beans.PropertyChangeListener[] getPropertyChangeListeners(java.lang.String)
+    {
+        java.beans.PropertyChangeListener[] $r4, $r5;
+        sun.awt.AppContext r0;
+        java.beans.PropertyChangeSupport $r1, $r3;
+        java.lang.String r2;
+
+        r0 := @this: sun.awt.AppContext;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r1 != null goto label1;
+
+        $r5 = newarray (java.beans.PropertyChangeListener)[0];
+
+        return $r5;
+
+     label1:
+        $r3 = r0.<sun.awt.AppContext: java.beans.PropertyChangeSupport changeSupport>;
+
+        $r4 = virtualinvoke $r3.<java.beans.PropertyChangeSupport: java.beans.PropertyChangeListener[] getPropertyChangeListeners(java.lang.String)>(r2);
+
+        return $r4;
+    }
+
+    public static java.lang.Object getSoftReferenceValue(java.lang.Object, java.util.function.Supplier)
+    {
+        java.util.function.Supplier r3;
+        sun.awt.AppContext $r0;
+        java.lang.Object r1, $r2, $r4, $r6;
+        java.lang.ref.SoftReference $r5, r7;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.util.function.Supplier;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(r1);
+
+        r7 = (java.lang.ref.SoftReference) $r2;
+
+        if r7 == null goto label1;
+
+        $r6 = virtualinvoke r7.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        if $r6 == null goto label1;
+
+        return $r6;
+
+     label1:
+        $r4 = interfaceinvoke r3.<java.util.function.Supplier: java.lang.Object get()>();
+
+        $r5 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r5.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r4);
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r5);
+
+        return $r4;
+    }
+
+    static sun.awt.AppContext access$102(sun.awt.AppContext)
+    {
+        sun.awt.AppContext r0;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        <sun.awt.AppContext: sun.awt.AppContext mainAppContext> = r0;
+
+        return r0;
+    }
+
+    static java.lang.Object access$200()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.awt.AppContext: java.lang.Object getAppContextLock>;
+
+        return $r0;
+    }
+
+    static java.util.concurrent.atomic.AtomicInteger access$300()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = <sun.awt.AppContext: java.util.concurrent.atomic.AtomicInteger numAppContexts>;
+
+        return $r0;
+    }
+
+    static void access$400()
+    {
+        staticinvoke <sun.awt.AppContext: void initMainAppContext()>();
+
+        return;
+    }
+
+    static java.util.Map access$500()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.AppContext: java.util.Map threadGroup2appContext>;
+
+        return $r0;
+    }
+
+    static java.lang.ThreadLocal access$600()
+    {
+        java.lang.ThreadLocal $r0;
+
+        $r0 = <sun.awt.AppContext: java.lang.ThreadLocal threadAppContext>;
+
+        return $r0;
+    }
+
+    static sun.util.logging.PlatformLogger access$700()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <sun.awt.AppContext: sun.util.logging.PlatformLogger log>;
+
+        return $r0;
+    }
+
+    static java.lang.ThreadGroup access$800(sun.awt.AppContext)
+    {
+        java.lang.ThreadGroup $r1;
+        sun.awt.AppContext r0;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        $r1 = r0.<sun.awt.AppContext: java.lang.ThreadGroup threadGroup>;
+
+        return $r1;
+    }
+
+    static sun.awt.AppContext access$900()
+    {
+        sun.awt.AppContext $r0;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getExecutionAppContext()>();
+
+        return $r0;
+    }
+
+    static sun.awt.AppContext access$100()
+    {
+        sun.awt.AppContext $r0;
+
+        $r0 = <sun.awt.AppContext: sun.awt.AppContext mainAppContext>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.awt.AppContext$6 $r9;
+        java.lang.ThreadLocal $r8;
+        sun.util.logging.PlatformLogger $r0;
+        java.util.IdentityHashMap $r4;
+        java.util.concurrent.atomic.AtomicInteger $r7;
+        java.lang.StringBuffer $r1;
+        java.util.Map $r5;
+        java.lang.StringBuilder $r2, $r3;
+        sun.awt.AppContext$GetAppContextLock $r6;
+
+        <sun.awt.AppContext: java.lang.String GUI_DISPOSED> = "guidisposed";
+
+        <sun.awt.AppContext: java.lang.String DISPOSED_PROPERTY_NAME> = "disposed";
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.AppContext");
+
+        <sun.awt.AppContext: sun.util.logging.PlatformLogger log> = $r0;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(java.lang.String)>("EventQueue");
+
+        <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY> = $r1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(java.lang.String)>("EventQueue.Lock");
+
+        <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_LOCK_KEY> = $r2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>(java.lang.String)>("EventQueue.Condition");
+
+        <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_COND_KEY> = $r3;
+
+        $r4 = new java.util.IdentityHashMap;
+
+        specialinvoke $r4.<java.util.IdentityHashMap: void <init>()>();
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r4);
+
+        <sun.awt.AppContext: java.util.Map threadGroup2appContext> = $r5;
+
+        <sun.awt.AppContext: sun.awt.AppContext mainAppContext> = null;
+
+        $r6 = new sun.awt.AppContext$GetAppContextLock;
+
+        specialinvoke $r6.<sun.awt.AppContext$GetAppContextLock: void <init>(sun.awt.AppContext$1)>(null);
+
+        <sun.awt.AppContext: java.lang.Object getAppContextLock> = $r6;
+
+        $r7 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r7.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(0);
+
+        <sun.awt.AppContext: java.util.concurrent.atomic.AtomicInteger numAppContexts> = $r7;
+
+        $r8 = new java.lang.ThreadLocal;
+
+        specialinvoke $r8.<java.lang.ThreadLocal: void <init>()>();
+
+        <sun.awt.AppContext: java.lang.ThreadLocal threadAppContext> = $r8;
+
+        $r9 = new sun.awt.AppContext$6;
+
+        specialinvoke $r9.<sun.awt.AppContext$6: void <init>()>();
+
+        staticinvoke <sun.misc.SharedSecrets: void setJavaAWTAccess(sun.misc.JavaAWTAccess)>($r9);
+
+        return;
+    }
+}

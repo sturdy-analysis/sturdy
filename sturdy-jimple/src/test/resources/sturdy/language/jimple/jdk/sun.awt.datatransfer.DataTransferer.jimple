@@ -1,0 +1,5564 @@
+public abstract class sun.awt.datatransfer.DataTransferer extends java.lang.Object
+{
+    public static final java.awt.datatransfer.DataFlavor plainTextStringFlavor;
+    public static final java.awt.datatransfer.DataFlavor javaTextEncodingFlavor;
+    private static final java.util.Map textMIMESubtypeCharsetSupport;
+    private static java.lang.String defaultEncoding;
+    private static final java.util.Set textNatives;
+    private static final java.util.Map nativeCharsets;
+    private static final java.util.Map nativeEOLNs;
+    private static final java.util.Map nativeTerminators;
+    private static final java.lang.String DATA_CONVERTER_KEY;
+    private static sun.awt.datatransfer.DataTransferer transferer;
+    private static final sun.util.logging.PlatformLogger dtLog;
+    private static final java.lang.String[] DEPLOYMENT_CACHE_PROPERTIES;
+    private static final java.util.ArrayList deploymentCacheDirectoryList;
+
+    public void <init>()
+    {
+        sun.awt.datatransfer.DataTransferer r0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized sun.awt.datatransfer.DataTransferer getInstance()
+    {
+        sun.awt.datatransfer.DataTransferer $r2;
+        sun.awt.ComponentFactory $r1;
+        java.awt.Toolkit $r0;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = (sun.awt.ComponentFactory) $r0;
+
+        $r2 = interfaceinvoke $r1.<sun.awt.ComponentFactory: sun.awt.datatransfer.DataTransferer getDataTransferer()>();
+
+        return $r2;
+    }
+
+    public static java.lang.String canonicalName(java.lang.String)
+    {
+        java.nio.charset.Charset $r1;
+        java.nio.charset.IllegalCharsetNameException $r4;
+        java.lang.String r0, $r2;
+        java.nio.charset.UnsupportedCharsetException $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke $r1.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return r0;
+
+     label4:
+        $r3 := @caughtexception;
+
+        return r0;
+
+        catch java.nio.charset.IllegalCharsetNameException from label1 to label2 with label3;
+        catch java.nio.charset.UnsupportedCharsetException from label1 to label2 with label4;
+    }
+
+    public static java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)
+    {
+        java.awt.datatransfer.DataFlavor r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        $z0 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.String getParameter(java.lang.String)>("charset");
+
+        if $r1 == null goto label2;
+
+        $r2 = $r1;
+
+        goto label3;
+
+     label2:
+        $r2 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getDefaultTextCharset()>();
+
+     label3:
+        return $r2;
+    }
+
+    public static java.lang.String getDefaultTextCharset()
+    {
+        java.nio.charset.Charset $r1;
+        java.lang.String $r0, $r2, $r3;
+
+        $r0 = <sun.awt.datatransfer.DataTransferer: java.lang.String defaultEncoding>;
+
+        if $r0 == null goto label1;
+
+        $r3 = <sun.awt.datatransfer.DataTransferer: java.lang.String defaultEncoding>;
+
+        return $r3;
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset()>();
+
+        $r2 = virtualinvoke $r1.<java.nio.charset.Charset: java.lang.String name()>();
+
+        <sun.awt.datatransfer.DataTransferer: java.lang.String defaultEncoding> = $r2;
+
+        return $r2;
+    }
+
+    public static boolean doesSubtypeSupportCharset(java.awt.datatransfer.DataFlavor)
+    {
+        java.awt.datatransfer.DataFlavor r2;
+        java.util.Map $r3, $r6;
+        java.lang.Boolean $r7, $r12;
+        java.lang.String $r5, $r8, $r9, $r11;
+        boolean $z0, z1, $z2, $z3, $z5, $z6;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r10;
+        java.lang.Object $r4;
+
+        r2 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        $r1 = <sun.awt.datatransfer.DataTransferer: sun.util.logging.PlatformLogger dtLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = "text";
+
+        $r9 = virtualinvoke r2.<java.awt.datatransfer.DataFlavor: java.lang.String getPrimaryType()>();
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z2 != 0 goto label1;
+
+        $r10 = <sun.awt.datatransfer.DataTransferer: sun.util.logging.PlatformLogger dtLog>;
+
+        virtualinvoke $r10.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Assertion (\"text\".equals(flavor.getPrimaryType())) failed");
+
+     label1:
+        $r11 = virtualinvoke r2.<java.awt.datatransfer.DataFlavor: java.lang.String getSubType()>();
+
+        if $r11 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = <sun.awt.datatransfer.DataTransferer: java.util.Map textMIMESubtypeCharsetSupport>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        if $r4 == null goto label5;
+
+        $r7 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r4 != $r7 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+
+     label5:
+        $r5 = virtualinvoke r2.<java.awt.datatransfer.DataFlavor: java.lang.String getParameter(java.lang.String)>("charset");
+
+        if $r5 == null goto label6;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label7;
+
+     label6:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label7:
+        z1 = $z5;
+
+        $r6 = <sun.awt.datatransfer.DataTransferer: java.util.Map textMIMESubtypeCharsetSupport>;
+
+        if $z6 == 0 goto label8;
+
+        $r12 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        goto label9;
+
+     label8:
+        $r12 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+     label9:
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r12);
+
+        return z1;
+    }
+
+    public static boolean doesSubtypeSupportCharset(java.lang.String, java.lang.String)
+    {
+        java.util.Map $r1, $r4;
+        java.lang.Boolean $r5, $r6;
+        java.lang.Object $r2;
+        java.lang.String r0, r3;
+        boolean z0, $z1, $z3, $z4;
+
+        r0 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = <sun.awt.datatransfer.DataTransferer: java.util.Map textMIMESubtypeCharsetSupport>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r2 == null goto label3;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r2 != $r5 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+
+     label3:
+        if r3 == null goto label4;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label5:
+        z0 = $z4;
+
+        $r4 = <sun.awt.datatransfer.DataTransferer: java.util.Map textMIMESubtypeCharsetSupport>;
+
+        if $z3 == 0 goto label6;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        goto label7;
+
+     label6:
+        $r6 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+     label7:
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r6);
+
+        return z0;
+    }
+
+    public static boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)
+    {
+        java.awt.datatransfer.DataFlavor r0, $r1;
+        java.lang.String $r2, $r3, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.lang.Class $r4, $r5, $r6, $r7;
+
+        r0 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        $r1 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor stringFlavor>;
+
+        $z0 = virtualinvoke $r1.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = "text";
+
+        $r3 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.String getPrimaryType()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean doesSubtypeSupportCharset(java.awt.datatransfer.DataFlavor)>(r0);
+
+        if $z2 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r4 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z3 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassReader()>();
+
+        if $z3 != 0 goto label4;
+
+        $r5 = class "Ljava/lang/String;";
+
+        $z4 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z4 != 0 goto label4;
+
+        $z5 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassCharBuffer()>();
+
+        if $z5 != 0 goto label4;
+
+        $r6 = class "[C";
+
+        $z6 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z6 == 0 goto label5;
+
+     label4:
+        return 1;
+
+     label5:
+        $z7 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z7 != 0 goto label6;
+
+        $z8 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassByteBuffer()>();
+
+        if $z8 != 0 goto label6;
+
+        $r7 = class "[B";
+
+        $z9 = virtualinvoke $r7.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z9 != 0 goto label6;
+
+        return 0;
+
+     label6:
+        $r8 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.String getParameter(java.lang.String)>("charset");
+
+        if $r8 == null goto label7;
+
+        $z10 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isEncodingSupported(java.lang.String)>($r8);
+
+        goto label8;
+
+     label7:
+        $z10 = 1;
+
+     label8:
+        return $z10;
+    }
+
+    public static boolean isFlavorNoncharsetTextType(java.awt.datatransfer.DataFlavor)
+    {
+        java.awt.datatransfer.DataFlavor r0;
+        java.lang.Class $r3, $r4;
+        java.lang.String $r1, $r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        $r1 = "text";
+
+        $r2 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.String getPrimaryType()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean doesSubtypeSupportCharset(java.awt.datatransfer.DataFlavor)>(r0);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z2 != 0 goto label3;
+
+        $z3 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassByteBuffer()>();
+
+        if $z3 != 0 goto label3;
+
+        $r3 = class "[B";
+
+        $r4 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z4 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z4 == 0 goto label4;
+
+     label3:
+        $z5 = 1;
+
+        goto label5;
+
+     label4:
+        $z5 = 0;
+
+     label5:
+        return $z5;
+    }
+
+    public static boolean isEncodingSupported(java.lang.String)
+    {
+        java.nio.charset.IllegalCharsetNameException $r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = staticinvoke <java.nio.charset.Charset: boolean isSupported(java.lang.String)>(r0);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return 0;
+
+        catch java.nio.charset.IllegalCharsetNameException from label1 to label2 with label3;
+    }
+
+    public static boolean isRemote(java.lang.Class)
+    {
+        java.lang.Class r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $z0 = staticinvoke <sun.awt.datatransfer.DataTransferer$RMI: boolean isRemote(java.lang.Class)>(r0);
+
+        return $z0;
+    }
+
+    public static java.util.Set standardEncodings()
+    {
+        java.util.SortedSet $r0;
+
+        $r0 = staticinvoke <sun.awt.datatransfer.DataTransferer$StandardEncodingsHolder: java.util.SortedSet access$000()>();
+
+        return $r0;
+    }
+
+    public static java.awt.datatransfer.FlavorTable adaptFlavorMap(java.awt.datatransfer.FlavorMap)
+    {
+        java.awt.datatransfer.FlavorTable $r2;
+        java.awt.datatransfer.FlavorMap r0;
+        sun.awt.datatransfer.DataTransferer$1 $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.datatransfer.FlavorMap;
+
+        $z0 = r0 instanceof java.awt.datatransfer.FlavorTable;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.awt.datatransfer.FlavorTable) r0;
+
+        return $r2;
+
+     label1:
+        $r1 = new sun.awt.datatransfer.DataTransferer$1;
+
+        specialinvoke $r1.<sun.awt.datatransfer.DataTransferer$1: void <init>(java.awt.datatransfer.FlavorMap)>(r0);
+
+        return $r1;
+    }
+
+    public abstract java.lang.String getDefaultUnicodeEncoding();
+
+    public void registerTextFlavorProperties(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        sun.awt.datatransfer.DataTransferer r0;
+        java.lang.Integer $r7;
+        java.lang.Long $r2;
+        java.util.Map $r8, $r9, $r10;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r1, r4, r5, r6, $r11;
+        boolean $z0;
+        java.util.Set $r3;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String;
+
+        $r2 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Long getFormatForNativeAsLong(java.lang.String)>(r1);
+
+        $r3 = <sun.awt.datatransfer.DataTransferer: java.util.Set textNatives>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+        $r10 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeCharsets>;
+
+        if r4 == null goto label1;
+
+        $i3 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        if $i3 == 0 goto label1;
+
+        $r11 = r4;
+
+        goto label2;
+
+     label1:
+        $r11 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getDefaultTextCharset()>();
+
+     label2:
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r11);
+
+        if r5 == null goto label3;
+
+        $i2 = virtualinvoke r5.<java.lang.String: int length()>();
+
+        if $i2 == 0 goto label3;
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>("\n");
+
+        if $z0 != 0 goto label3;
+
+        $r9 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeEOLNs>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r5);
+
+     label3:
+        if r6 == null goto label4;
+
+        $i0 = virtualinvoke r6.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label4;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(java.lang.String)>(r6);
+
+        $i1 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        if $i1 <= 0 goto label4;
+
+        $r8 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeTerminators>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+     label4:
+        return;
+    }
+
+    protected boolean isTextFormat(long)
+    {
+        java.lang.Long $r1;
+        java.util.Set $r0;
+        sun.awt.datatransfer.DataTransferer r2;
+        long l0;
+        boolean $z0;
+
+        r2 := @this: sun.awt.datatransfer.DataTransferer;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.awt.datatransfer.DataTransferer: java.util.Set textNatives>;
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $z0 = interfaceinvoke $r0.<java.util.Set: boolean contains(java.lang.Object)>($r1);
+
+        return $z0;
+    }
+
+    protected java.lang.String getCharsetForTextFormat(java.lang.Long)
+    {
+        java.lang.Long r0;
+        java.util.Map $r1;
+        sun.awt.datatransfer.DataTransferer r4;
+        java.lang.Object $r2;
+        java.lang.String $r3;
+
+        r4 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r0 := @parameter0: java.lang.Long;
+
+        $r1 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeCharsets>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r3 = (java.lang.String) $r2;
+
+        return $r3;
+    }
+
+    public abstract boolean isLocaleDependentTextFormat(long);
+
+    public abstract boolean isFileFormat(long);
+
+    public abstract boolean isImageFormat(long);
+
+    protected boolean isURIListFormat(long)
+    {
+        sun.awt.datatransfer.DataTransferer r0;
+        long l0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        l0 := @parameter0: long;
+
+        return 0;
+    }
+
+    public java.util.SortedMap getFormatsForTransferable(java.awt.datatransfer.Transferable, java.awt.datatransfer.FlavorTable)
+    {
+        java.util.TreeMap $r5;
+        java.awt.datatransfer.FlavorTable r3;
+        java.awt.datatransfer.Transferable r0;
+        java.awt.datatransfer.DataFlavor[] $r1;
+        sun.awt.datatransfer.DataTransferer r2;
+        java.util.SortedMap $r4;
+
+        r2 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r0 := @parameter0: java.awt.datatransfer.Transferable;
+
+        r3 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r1 = interfaceinvoke r0.<java.awt.datatransfer.Transferable: java.awt.datatransfer.DataFlavor[] getTransferDataFlavors()>();
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.util.TreeMap;
+
+        specialinvoke $r5.<java.util.TreeMap: void <init>()>();
+
+        return $r5;
+
+     label1:
+        $r4 = virtualinvoke r2.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[],java.awt.datatransfer.FlavorTable)>($r1, r3);
+
+        return $r4;
+    }
+
+    public java.util.SortedMap getFormatsForFlavor(java.awt.datatransfer.DataFlavor, java.awt.datatransfer.FlavorTable)
+    {
+        java.awt.datatransfer.DataFlavor r2;
+        java.awt.datatransfer.FlavorTable r3;
+        java.awt.datatransfer.DataFlavor[] $r1;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.util.SortedMap $r4;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        r3 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r1 = newarray (java.awt.datatransfer.DataFlavor)[1];
+
+        $r1[0] = r2;
+
+        $r4 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[],java.awt.datatransfer.FlavorTable)>($r1, r3);
+
+        return $r4;
+    }
+
+    public java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[], java.awt.datatransfer.FlavorTable)
+    {
+        sun.awt.datatransfer.DataTransferer r8;
+        java.lang.Integer $r12;
+        java.lang.Long $r11;
+        sun.awt.datatransfer.DataTransferer$IndexOrderComparator $r26;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.awt.datatransfer.DataFlavor[] r1;
+        java.util.List $r20;
+        java.awt.datatransfer.DataFlavor $r15, $r18, r19;
+        java.util.HashMap $r22, $r23, $r24, $r25;
+        java.awt.datatransfer.FlavorTable r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i9, i10, $i12, $i14;
+        java.lang.String $r10, $r13, $r14, $r16, $r17;
+        java.util.Iterator $r21;
+        java.util.TreeMap $r27;
+        java.lang.Object $r9;
+
+        r8 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.DataFlavor[];
+
+        r7 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r22 = new java.util.HashMap;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r22.<java.util.HashMap: void <init>(int)>($i0);
+
+        $r23 = new java.util.HashMap;
+
+        $i1 = lengthof r1;
+
+        specialinvoke $r23.<java.util.HashMap: void <init>(int)>($i1);
+
+        $r24 = new java.util.HashMap;
+
+        $i2 = lengthof r1;
+
+        specialinvoke $r24.<java.util.HashMap: void <init>(int)>($i2);
+
+        $r25 = new java.util.HashMap;
+
+        $i3 = lengthof r1;
+
+        specialinvoke $r25.<java.util.HashMap: void <init>(int)>($i3);
+
+        i7 = 0;
+
+        $i4 = lengthof r1;
+
+        i8 = $i4 - 1;
+
+     label01:
+        if i8 < 0 goto label10;
+
+        r19 = r1[i8];
+
+        if r19 != null goto label02;
+
+        goto label09;
+
+     label02:
+        $z0 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean isFlavorTextType()>();
+
+        if $z0 != 0 goto label03;
+
+        $z4 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean isFlavorJavaFileListType()>();
+
+        if $z4 != 0 goto label03;
+
+        $r18 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z5 = virtualinvoke $r18.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r19);
+
+        if $z5 != 0 goto label03;
+
+        $z6 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z6 != 0 goto label03;
+
+        $z7 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z7 != 0 goto label03;
+
+        $z8 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z8 == 0 goto label09;
+
+     label03:
+        $r20 = interfaceinvoke r7.<java.awt.datatransfer.FlavorTable: java.util.List getNativesForFlavor(java.awt.datatransfer.DataFlavor)>(r19);
+
+        $i9 = interfaceinvoke $r20.<java.util.List: int size()>();
+
+        i10 = i7 + $i9;
+
+        $r21 = interfaceinvoke $r20.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z9 = interfaceinvoke $r21.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label08;
+
+        $r9 = interfaceinvoke $r21.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (java.lang.String) $r9;
+
+        $r11 = virtualinvoke r8.<sun.awt.datatransfer.DataTransferer: java.lang.Long getFormatForNativeAsLong(java.lang.String)>($r10);
+
+        $i6 = i10;
+
+        $i12 = (int) -1;
+
+        i10 = i10 + $i12;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i6);
+
+        interfaceinvoke $r22.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, r19);
+
+        interfaceinvoke $r24.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r12);
+
+        $r13 = "text";
+
+        $r14 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: java.lang.String getPrimaryType()>();
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r14);
+
+        if $z1 == 0 goto label05;
+
+        $r16 = "plain";
+
+        $r17 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: java.lang.String getSubType()>();
+
+        $z3 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r17);
+
+        if $z3 != 0 goto label06;
+
+     label05:
+        $r15 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor stringFlavor>;
+
+        $z2 = virtualinvoke r19.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>($r15);
+
+        if $z2 == 0 goto label07;
+
+     label06:
+        interfaceinvoke $r23.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, r19);
+
+        interfaceinvoke $r25.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r12);
+
+     label07:
+        goto label04;
+
+     label08:
+        $i5 = interfaceinvoke $r20.<java.util.List: int size()>();
+
+        i7 = i10 + $i5;
+
+     label09:
+        $i14 = (int) -1;
+
+        i8 = i8 + $i14;
+
+        goto label01;
+
+     label10:
+        interfaceinvoke $r22.<java.util.Map: void putAll(java.util.Map)>($r23);
+
+        interfaceinvoke $r24.<java.util.Map: void putAll(java.util.Map)>($r25);
+
+        $r26 = new sun.awt.datatransfer.DataTransferer$IndexOrderComparator;
+
+        specialinvoke $r26.<sun.awt.datatransfer.DataTransferer$IndexOrderComparator: void <init>(java.util.Map,boolean)>($r24, 0);
+
+        $r27 = new java.util.TreeMap;
+
+        specialinvoke $r27.<java.util.TreeMap: void <init>(java.util.Comparator)>($r26);
+
+        interfaceinvoke $r27.<java.util.SortedMap: void putAll(java.util.Map)>($r22);
+
+        return $r27;
+    }
+
+    public long[] getFormatsForTransferableAsArray(java.awt.datatransfer.Transferable, java.awt.datatransfer.FlavorTable)
+    {
+        long[] $r4;
+        java.awt.datatransfer.FlavorTable r2;
+        java.awt.datatransfer.Transferable r1;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.util.SortedMap $r3;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.Transferable;
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.FlavorTable)>(r1, r2);
+
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: long[] keysToLongArray(java.util.SortedMap)>($r3);
+
+        return $r4;
+    }
+
+    public long[] getFormatsForFlavorAsArray(java.awt.datatransfer.DataFlavor, java.awt.datatransfer.FlavorTable)
+    {
+        long[] $r4;
+        java.awt.datatransfer.DataFlavor r1;
+        java.awt.datatransfer.FlavorTable r2;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.util.SortedMap $r3;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForFlavor(java.awt.datatransfer.DataFlavor,java.awt.datatransfer.FlavorTable)>(r1, r2);
+
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: long[] keysToLongArray(java.util.SortedMap)>($r3);
+
+        return $r4;
+    }
+
+    public long[] getFormatsForFlavorsAsArray(java.awt.datatransfer.DataFlavor[], java.awt.datatransfer.FlavorTable)
+    {
+        long[] $r4;
+        java.awt.datatransfer.FlavorTable r2;
+        java.awt.datatransfer.DataFlavor[] r1;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.util.SortedMap $r3;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.DataFlavor[];
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[],java.awt.datatransfer.FlavorTable)>(r1, r2);
+
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: long[] keysToLongArray(java.util.SortedMap)>($r3);
+
+        return $r4;
+    }
+
+    public java.util.Map getFlavorsForFormat(long, java.awt.datatransfer.FlavorTable)
+    {
+        long[] $r1;
+        java.awt.datatransfer.FlavorTable r2;
+        java.util.Map $r3;
+        sun.awt.datatransfer.DataTransferer r0;
+        long l0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        l0 := @parameter0: long;
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r1 = newarray (long)[1];
+
+        $r1[0] = l0;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.Map getFlavorsForFormats(long[],java.awt.datatransfer.FlavorTable)>($r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.Map getFlavorsForFormats(long[], java.awt.datatransfer.FlavorTable)
+    {
+        sun.awt.datatransfer.DataTransferer r9;
+        java.lang.Long $r12, $r20;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.util.List $r7, $r15;
+        java.awt.datatransfer.DataFlavor r18, $r19, r22;
+        java.util.HashMap $r0;
+        long l5;
+        java.util.HashSet $r2, $r3;
+        long[] r1;
+        java.awt.datatransfer.FlavorTable r6;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r11, $r14;
+        java.util.Iterator $r4, $r8, $r16;
+        java.lang.Object $r5, $r10, $r13, $r17, $r21;
+
+        r9 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: long[];
+
+        r6 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r0 = new java.util.HashMap;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>(int)>($i0);
+
+        $r2 = new java.util.HashSet;
+
+        $i1 = lengthof r1;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>(int)>($i1);
+
+        $r3 = new java.util.HashSet;
+
+        $i2 = lengthof r1;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>(int)>($i2);
+
+        i4 = 0;
+
+     label01:
+        $i3 = lengthof r1;
+
+        if i4 >= $i3 goto label06;
+
+        l5 = r1[i4];
+
+        $r14 = virtualinvoke r9.<sun.awt.datatransfer.DataTransferer: java.lang.String getNativeForFormat(long)>(l5);
+
+        $r15 = interfaceinvoke r6.<java.awt.datatransfer.FlavorTable: java.util.List getFlavorsForNative(java.lang.String)>($r14);
+
+        $r16 = interfaceinvoke $r15.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z3 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label05;
+
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (java.awt.datatransfer.DataFlavor) $r17;
+
+        $z4 = virtualinvoke r18.<java.awt.datatransfer.DataFlavor: boolean isFlavorTextType()>();
+
+        if $z4 != 0 goto label03;
+
+        $z5 = virtualinvoke r18.<java.awt.datatransfer.DataFlavor: boolean isFlavorJavaFileListType()>();
+
+        if $z5 != 0 goto label03;
+
+        $r19 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z6 = virtualinvoke $r19.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r18);
+
+        if $z6 != 0 goto label03;
+
+        $z7 = virtualinvoke r18.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z7 != 0 goto label03;
+
+        $z8 = virtualinvoke r18.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z8 != 0 goto label03;
+
+        $z9 = virtualinvoke r18.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z9 == 0 goto label04;
+
+     label03:
+        $r20 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l5);
+
+        $r21 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.Object createMapping(java.lang.Object,java.lang.Object)>($r20, r18);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r18, $r20);
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r21);
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>(r18);
+
+     label04:
+        goto label02;
+
+     label05:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label06:
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label11;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.awt.datatransfer.DataFlavor) $r5;
+
+        $r7 = interfaceinvoke r6.<java.awt.datatransfer.FlavorTable: java.util.List getNativesForFlavor(java.awt.datatransfer.DataFlavor)>(r22);
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r10 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (java.lang.String) $r10;
+
+        $r12 = virtualinvoke r9.<sun.awt.datatransfer.DataTransferer: java.lang.Long getFormatForNativeAsLong(java.lang.String)>($r11);
+
+        $r13 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.Object createMapping(java.lang.Object,java.lang.Object)>($r12, r22);
+
+        $z2 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label09;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r22, $r12);
+
+        goto label10;
+
+     label09:
+        goto label08;
+
+     label10:
+        goto label07;
+
+     label11:
+        return $r0;
+    }
+
+    public java.util.Set getFlavorsForFormatsAsSet(long[], java.awt.datatransfer.FlavorTable)
+    {
+        java.awt.datatransfer.DataFlavor r8, $r9;
+        sun.awt.datatransfer.DataTransferer r2;
+        long $l2;
+        java.util.HashSet $r0;
+        long[] r1;
+        java.awt.datatransfer.FlavorTable r4;
+        int $i0, $i1, i3;
+        java.lang.String $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.Iterator $r6;
+        java.util.List $r5;
+        java.lang.Object $r7;
+
+        r2 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: long[];
+
+        r4 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r0 = new java.util.HashSet;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>(int)>($i0);
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label6;
+
+        $l2 = r1[i3];
+
+        $r3 = virtualinvoke r2.<sun.awt.datatransfer.DataTransferer: java.lang.String getNativeForFormat(long)>($l2);
+
+        $r5 = interfaceinvoke r4.<java.awt.datatransfer.FlavorTable: java.util.List getFlavorsForNative(java.lang.String)>($r3);
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.awt.datatransfer.DataFlavor) $r7;
+
+        $z1 = virtualinvoke r8.<java.awt.datatransfer.DataFlavor: boolean isFlavorTextType()>();
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke r8.<java.awt.datatransfer.DataFlavor: boolean isFlavorJavaFileListType()>();
+
+        if $z2 != 0 goto label3;
+
+        $r9 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z3 = virtualinvoke $r9.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r8);
+
+        if $z3 != 0 goto label3;
+
+        $z4 = virtualinvoke r8.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z4 != 0 goto label3;
+
+        $z5 = virtualinvoke r8.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z5 != 0 goto label3;
+
+        $z6 = virtualinvoke r8.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z6 == 0 goto label4;
+
+     label3:
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>(r8);
+
+     label4:
+        goto label2;
+
+     label5:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label6:
+        return $r0;
+    }
+
+    public java.awt.datatransfer.DataFlavor[] getFlavorsForFormatAsArray(long, java.awt.datatransfer.FlavorTable)
+    {
+        long[] $r1;
+        java.awt.datatransfer.FlavorTable r2;
+        java.awt.datatransfer.DataFlavor[] $r3;
+        sun.awt.datatransfer.DataTransferer r0;
+        long l0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        l0 := @parameter0: long;
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r1 = newarray (long)[1];
+
+        $r1[0] = l0;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor[] getFlavorsForFormatsAsArray(long[],java.awt.datatransfer.FlavorTable)>($r1, r2);
+
+        return $r3;
+    }
+
+    public java.awt.datatransfer.DataFlavor[] getFlavorsForFormatsAsArray(long[], java.awt.datatransfer.FlavorTable)
+    {
+        long[] r1;
+        java.awt.datatransfer.FlavorTable r2;
+        java.awt.datatransfer.DataFlavor[] $r4;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.util.Set $r3;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter0: long[];
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r3 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.Set getFlavorsForFormatsAsSet(long[],java.awt.datatransfer.FlavorTable)>(r1, r2);
+
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor[] setToSortedDataFlavorArray(java.util.Set)>($r3);
+
+        return $r4;
+    }
+
+    private static java.lang.Object createMapping(java.lang.Object, java.lang.Object)
+    {
+        java.util.List $r3;
+        java.lang.Object[] $r0;
+        java.lang.Object r1, r2;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r0 = newarray (java.lang.Object)[2];
+
+        $r0[0] = r1;
+
+        $r0[1] = r2;
+
+        $r3 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r0);
+
+        return $r3;
+    }
+
+    protected abstract java.lang.Long getFormatForNativeAsLong(java.lang.String);
+
+    protected abstract java.lang.String getNativeForFormat(long);
+
+    private java.lang.String getBestCharsetForTextFormat(java.lang.Long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] $r7, $r8;
+        java.awt.datatransfer.UnsupportedFlavorException $r9;
+        java.awt.datatransfer.DataFlavor $r3, $r5;
+        java.awt.datatransfer.Transferable r0;
+        sun.awt.datatransfer.DataTransferer r1;
+        long $l0;
+        java.lang.Long r2;
+        java.lang.Object $r6;
+        java.lang.String $r4, r10;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.lang.Long;
+
+        r0 := @parameter1: java.awt.datatransfer.Transferable;
+
+        r10 = null;
+
+        if r0 == null goto label4;
+
+        $l0 = virtualinvoke r2.<java.lang.Long: long longValue()>();
+
+        $z0 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: boolean isLocaleDependentTextFormat(long)>($l0);
+
+        if $z0 == 0 goto label4;
+
+        $r3 = <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $z1 = interfaceinvoke r0.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>($r3);
+
+        if $z1 == 0 goto label4;
+
+     label1:
+        $r4 = new java.lang.String;
+
+        $r5 = <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $r6 = interfaceinvoke r0.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>($r5);
+
+        $r7 = (byte[]) $r6;
+
+        $r8 = (byte[]) $r7;
+
+        specialinvoke $r4.<java.lang.String: void <init>(byte[],java.lang.String)>($r8, "UTF-8");
+
+        r10 = $r4;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r9 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        r10 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: java.lang.String getCharsetForTextFormat(java.lang.Long)>(r2);
+
+     label5:
+        if r10 != null goto label6;
+
+        r10 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getDefaultTextCharset()>();
+
+     label6:
+        return r10;
+
+        catch java.awt.datatransfer.UnsupportedFlavorException from label1 to label2 with label3;
+    }
+
+    private byte[] translateTransferableString(java.lang.String, long) throws java.io.IOException
+    {
+        byte[] $r6, r12, r13;
+        sun.awt.datatransfer.DataTransferer r1;
+        long l0;
+        java.lang.Integer $r10;
+        java.lang.Long $r0;
+        java.lang.StringBuffer $r14;
+        java.util.Map $r3, $r7;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, i11, i12, $i13;
+        java.lang.String $r2, r5, r11;
+        boolean $z0;
+        char $c8;
+        java.lang.Object $r4, $r8;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r11 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        $r0 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r2 = specialinvoke r1.<sun.awt.datatransfer.DataTransferer: java.lang.String getBestCharsetForTextFormat(java.lang.Long,java.awt.datatransfer.Transferable)>($r0, null);
+
+        $r3 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeEOLNs>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 == null goto label6;
+
+        $i6 = virtualinvoke r11.<java.lang.String: int length()>();
+
+        $r14 = new java.lang.StringBuffer;
+
+        $i7 = $i6 * 2;
+
+        specialinvoke $r14.<java.lang.StringBuffer: void <init>(int)>($i7);
+
+        i11 = 0;
+
+     label1:
+        if i11 >= $i6 goto label5;
+
+        $z0 = virtualinvoke r11.<java.lang.String: boolean startsWith(java.lang.String,int)>(r5, i11);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r5);
+
+        $i9 = virtualinvoke r5.<java.lang.String: int length()>();
+
+        $i10 = $i9 - 1;
+
+        i11 = i11 + $i10;
+
+        goto label4;
+
+     label2:
+        $c8 = virtualinvoke r11.<java.lang.String: char charAt(int)>(i11);
+
+        $i13 = (int) $c8;
+
+        if $i13 != 10 goto label3;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r5);
+
+        goto label4;
+
+     label3:
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+     label4:
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label5:
+        r11 = virtualinvoke $r14.<java.lang.StringBuffer: java.lang.String toString()>();
+
+     label6:
+        $r6 = virtualinvoke r11.<java.lang.String: byte[] getBytes(java.lang.String)>($r2);
+
+        r12 = $r6;
+
+        $r7 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeTerminators>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r10 = (java.lang.Integer) $r8;
+
+        if $r10 == null goto label9;
+
+        $i1 = virtualinvoke $r10.<java.lang.Integer: int intValue()>();
+
+        $i2 = lengthof $r6;
+
+        $i3 = $i2 + $i1;
+
+        r13 = newarray (byte)[$i3];
+
+        $i4 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r13, 0, $i4);
+
+        i12 = lengthof $r6;
+
+     label7:
+        $i5 = lengthof r13;
+
+        if i12 >= $i5 goto label8;
+
+        r13[i12] = 0;
+
+        i12 = i12 + 1;
+
+        goto label7;
+
+     label8:
+        r12 = r13;
+
+     label9:
+        return r12;
+    }
+
+    private java.lang.String translateBytesToString(byte[], long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] r10;
+        sun.awt.datatransfer.DataTransferer r1;
+        java.lang.Integer r9;
+        byte $b20;
+        java.lang.Long $r0;
+        java.util.Map $r4, $r7;
+        boolean z0;
+        java.awt.datatransfer.Transferable r2;
+        long l0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i12, $i13, $i15, $i16, $i17, $i18, $i19, i21, i22, i23, i24, $i25, i26, i27, $i28, $i29;
+        java.lang.String $r3, r6, r15, $r16, $r17;
+        char $c7, $c10, $c11, $c14;
+        char[] $r12, $r13;
+        java.lang.Object $r5, $r8;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r10 := @parameter0: byte[];
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.awt.datatransfer.Transferable;
+
+        $r0 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r3 = specialinvoke r1.<sun.awt.datatransfer.DataTransferer: java.lang.String getBestCharsetForTextFormat(java.lang.Long,java.awt.datatransfer.Transferable)>($r0, r2);
+
+        $r4 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeEOLNs>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r6 = (java.lang.String) $r5;
+
+        $r7 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeTerminators>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r9 = (java.lang.Integer) $r8;
+
+        if r9 == null goto label07;
+
+        $i15 = virtualinvoke r9.<java.lang.Integer: int intValue()>();
+
+        i21 = 0;
+
+     label01:
+        $i16 = lengthof r10;
+
+        $i17 = $i16 - $i15;
+
+        $i18 = $i17 + 1;
+
+        if i21 >= $i18 goto label06;
+
+        i22 = i21;
+
+     label02:
+        $i19 = i21 + $i15;
+
+        if i22 >= $i19 goto label04;
+
+        $b20 = r10[i22];
+
+        if $b20 == 0 goto label03;
+
+        goto label05;
+
+     label03:
+        i22 = i22 + 1;
+
+        goto label02;
+
+     label04:
+        goto label06;
+
+     label05:
+        i21 = i21 + $i15;
+
+        goto label01;
+
+     label06:
+        goto label08;
+
+     label07:
+        i21 = lengthof r10;
+
+     label08:
+        $r16 = new java.lang.String;
+
+        specialinvoke $r16.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>(r10, 0, i21, $r3);
+
+        r15 = $r16;
+
+        if r6 == null goto label16;
+
+        $r12 = virtualinvoke $r16.<java.lang.String: char[] toCharArray()>();
+
+        $r13 = virtualinvoke r6.<java.lang.String: char[] toCharArray()>();
+
+        i23 = 0;
+
+        i24 = 0;
+
+     label09:
+        $i25 = lengthof $r12;
+
+        if i24 >= $i25 goto label15;
+
+        $i1 = lengthof $r13;
+
+        $i3 = i24 + $i1;
+
+        $i2 = lengthof $r12;
+
+        if $i3 <= $i2 goto label10;
+
+        $i12 = i23;
+
+        i23 = i23 + 1;
+
+        $i13 = i24;
+
+        i24 = i24 + 1;
+
+        $c14 = $r12[$i13];
+
+        $r12[$i12] = $c14;
+
+        goto label09;
+
+     label10:
+        z0 = 1;
+
+        i26 = 0;
+
+        i27 = i24;
+
+     label11:
+        $i4 = lengthof $r13;
+
+        if i26 >= $i4 goto label13;
+
+        $c11 = $r13[i26];
+
+        $c10 = $r12[i27];
+
+        $i28 = (int) $c11;
+
+        $i29 = (int) $c10;
+
+        if $i28 == $i29 goto label12;
+
+        z0 = 0;
+
+        goto label13;
+
+     label12:
+        i26 = i26 + 1;
+
+        i27 = i27 + 1;
+
+        goto label11;
+
+     label13:
+        if z0 == 0 goto label14;
+
+        $i8 = i23;
+
+        i23 = i23 + 1;
+
+        $r12[$i8] = 10;
+
+        $i9 = lengthof $r13;
+
+        i24 = i24 + $i9;
+
+        goto label09;
+
+     label14:
+        $i5 = i23;
+
+        i23 = i23 + 1;
+
+        $i6 = i24;
+
+        i24 = i24 + 1;
+
+        $c7 = $r12[$i6];
+
+        $r12[$i5] = $c7;
+
+        goto label09;
+
+     label15:
+        $r17 = new java.lang.String;
+
+        specialinvoke $r17.<java.lang.String: void <init>(char[],int,int)>($r12, 0, i23);
+
+        r15 = $r17;
+
+     label16:
+        return r15;
+    }
+
+    public byte[] translateTransferable(java.awt.datatransfer.Transferable, java.awt.datatransfer.DataFlavor, long) throws java.io.IOException
+    {
+        byte[] $r7, $r18, $r21, $r22, $r23, $r31, $r35, $r52, $r55, $r58, $r61, $r66, $r69, $r106, r110, r111, r115;
+        sun.awt.datatransfer.DataTransferer r4;
+        java.io.ByteArrayOutputStream $r50, $r141, $r142;
+        long l0;
+        java.lang.StringBuffer $r124;
+        java.io.IOException $r122, $r123, $r125, $r127, $r131, $r132, $r133, $r134, $r136, $r140, $r144;
+        java.security.ProtectionDomain $r26, $r48;
+        java.net.URISyntaxException $r87;
+        java.awt.Image r112;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i10, $i11, $i12, $i13, $i14, $i15;
+        java.lang.Object $r2, $r16, $r33, $r36, $r73, r102;
+        java.lang.Class $r8, $r9, $r10, $r11, $r12, $r13;
+        java.io.Reader r103;
+        java.lang.Throwable $r74, $r75, $r76, $r79, $r80, $r81, $r83, $r84, $r85, $r91, $r92, $r93, $r95, $r96, $r97, r104, r114, r118, r119, r121;
+        java.util.ArrayList $r27, $r49, $r137;
+        java.lang.String $r5, $r6, $r19, $r25, $r30, $r34, $r40, $r41, $r42, $r43, $r56, $r59, $r101, $r105, r116, r117, $r126, $r128, $r129, $r130, $r143;
+        java.io.File $r138;
+        char[] $r64, $r65, r108;
+        java.lang.ClassNotFoundException $r89;
+        java.nio.ByteBuffer r109;
+        java.net.URI $r38, $r139;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, z30, $z31, $z32, z33, $z34, $z35, $z36;
+        java.awt.datatransfer.UnsupportedFlavorException $r99;
+        java.nio.CharBuffer r107;
+        java.util.List $r44, r113;
+        java.awt.datatransfer.DataFlavor r1, $r3, $r14, $r24, $r47, $r72, $r135;
+        java.awt.datatransfer.Transferable r0;
+        java.util.Iterator $r29;
+        char $c9;
+        java.io.InputStream r120;
+
+        r4 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r0 := @parameter0: java.awt.datatransfer.Transferable;
+
+        r1 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+     label001:
+        $r2 = interfaceinvoke r0.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>(r1);
+
+        r102 = $r2;
+
+        if $r2 != null goto label003;
+
+     label002:
+        return null;
+
+     label003:
+        $r3 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor plainTextFlavor>;
+
+        $z0 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>($r3);
+
+        if $z0 == 0 goto label006;
+
+        $z29 = $r2 instanceof java.io.InputStream;
+
+        if $z29 != 0 goto label006;
+
+        $r72 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor stringFlavor>;
+
+        $r73 = interfaceinvoke r0.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>($r72);
+
+        r102 = $r73;
+
+        if $r73 != null goto label005;
+
+     label004:
+        return null;
+
+     label005:
+        z30 = 1;
+
+        goto label007;
+
+     label006:
+        z30 = 0;
+
+     label007:
+        goto label009;
+
+     label008:
+        $r99 := @caughtexception;
+
+        $r122 = new java.io.IOException;
+
+        $r101 = virtualinvoke $r99.<java.awt.datatransfer.UnsupportedFlavorException: java.lang.String getMessage()>();
+
+        specialinvoke $r122.<java.io.IOException: void <init>(java.lang.String)>($r101);
+
+        throw $r122;
+
+     label009:
+        if z30 != 0 goto label010;
+
+        $r8 = class "Ljava/lang/String;";
+
+        $r9 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z1 = virtualinvoke $r8.<java.lang.Object: boolean equals(java.lang.Object)>($r9);
+
+        if $z1 == 0 goto label011;
+
+        $z27 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z27 == 0 goto label011;
+
+        $z28 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z28 == 0 goto label011;
+
+     label010:
+        $r5 = (java.lang.String) r102;
+
+        $r6 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: java.lang.String removeSuspectedData(java.awt.datatransfer.DataFlavor,java.awt.datatransfer.Transferable,java.lang.String)>(r1, r0, $r5);
+
+        $r7 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r6, l0);
+
+        return $r7;
+
+     label011:
+        $z31 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassReader()>();
+
+        if $z31 == 0 goto label026;
+
+        $z25 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z25 == 0 goto label012;
+
+        $z26 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z26 != 0 goto label013;
+
+     label012:
+        $r123 = new java.io.IOException;
+
+        specialinvoke $r123.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as Reader");
+
+        throw $r123;
+
+     label013:
+        $r124 = new java.lang.StringBuffer;
+
+        specialinvoke $r124.<java.lang.StringBuffer: void <init>()>();
+
+        r103 = (java.io.Reader) r102;
+
+        r104 = null;
+
+     label014:
+        $i8 = virtualinvoke r103.<java.io.Reader: int read()>();
+
+        $i14 = (int) -1;
+
+        if $i8 == $i14 goto label015;
+
+        $c9 = (char) $i8;
+
+        virtualinvoke $r124.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c9);
+
+        goto label014;
+
+     label015:
+        if r103 == null goto label025;
+
+        goto label016;
+
+     label016:
+        virtualinvoke r103.<java.io.Reader: void close()>();
+
+        goto label025;
+
+     label017:
+        $r97 := @caughtexception;
+
+        r104 = $r97;
+
+        throw $r97;
+
+     label018:
+        $r96 := @caughtexception;
+
+     label019:
+        if r103 == null goto label024;
+
+        if r104 == null goto label023;
+
+     label020:
+        virtualinvoke r103.<java.io.Reader: void close()>();
+
+     label021:
+        goto label024;
+
+     label022:
+        $r95 := @caughtexception;
+
+        virtualinvoke r104.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r95);
+
+        goto label024;
+
+     label023:
+        virtualinvoke r103.<java.io.Reader: void close()>();
+
+     label024:
+        throw $r96;
+
+     label025:
+        $r105 = virtualinvoke $r124.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r106 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r105, l0);
+
+        return $r106;
+
+     label026:
+        $z2 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassCharBuffer()>();
+
+        if $z2 == 0 goto label029;
+
+        $z23 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z23 == 0 goto label027;
+
+        $z24 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z24 != 0 goto label028;
+
+     label027:
+        $r125 = new java.io.IOException;
+
+        specialinvoke $r125.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as CharBuffer");
+
+        throw $r125;
+
+     label028:
+        r107 = (java.nio.CharBuffer) r102;
+
+        $i7 = virtualinvoke r107.<java.nio.CharBuffer: int remaining()>();
+
+        r108 = newarray (char)[$i7];
+
+        virtualinvoke r107.<java.nio.CharBuffer: java.nio.CharBuffer get(char[],int,int)>(r108, 0, $i7);
+
+        $r126 = new java.lang.String;
+
+        specialinvoke $r126.<java.lang.String: void <init>(char[])>(r108);
+
+        $r69 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r126, l0);
+
+        return $r69;
+
+     label029:
+        $r10 = class "[C";
+
+        $r11 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z3 = virtualinvoke $r10.<java.lang.Object: boolean equals(java.lang.Object)>($r11);
+
+        if $z3 == 0 goto label032;
+
+        $z21 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z21 == 0 goto label030;
+
+        $z22 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z22 != 0 goto label031;
+
+     label030:
+        $r127 = new java.io.IOException;
+
+        specialinvoke $r127.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as char array");
+
+        throw $r127;
+
+     label031:
+        $r128 = new java.lang.String;
+
+        $r64 = (char[]) r102;
+
+        $r65 = (char[]) $r64;
+
+        specialinvoke $r128.<java.lang.String: void <init>(char[])>($r65);
+
+        $r66 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r128, l0);
+
+        return $r66;
+
+     label032:
+        $z4 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassByteBuffer()>();
+
+        if $z4 == 0 goto label034;
+
+        r109 = (java.nio.ByteBuffer) r102;
+
+        $i6 = virtualinvoke r109.<java.nio.ByteBuffer: int remaining()>();
+
+        r110 = newarray (byte)[$i6];
+
+        virtualinvoke r109.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r110, 0, $i6);
+
+        $z19 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z19 == 0 goto label033;
+
+        $z20 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z20 == 0 goto label033;
+
+        $r59 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        $r129 = new java.lang.String;
+
+        specialinvoke $r129.<java.lang.String: void <init>(byte[],java.lang.String)>(r110, $r59);
+
+        $r61 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r129, l0);
+
+        return $r61;
+
+     label033:
+        return r110;
+
+     label034:
+        $r12 = class "[B";
+
+        $r13 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z5 = virtualinvoke $r12.<java.lang.Object: boolean equals(java.lang.Object)>($r13);
+
+        if $z5 == 0 goto label036;
+
+        $r55 = (byte[]) r102;
+
+        r111 = (byte[]) $r55;
+
+        $z17 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z17 == 0 goto label035;
+
+        $z18 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z18 == 0 goto label035;
+
+        $r56 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        $r130 = new java.lang.String;
+
+        specialinvoke $r130.<java.lang.String: void <init>(byte[],java.lang.String)>(r111, $r56);
+
+        $r58 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r130, l0);
+
+        return $r58;
+
+     label035:
+        return r111;
+
+     label036:
+        $r14 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z6 = virtualinvoke $r14.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z6 == 0 goto label039;
+
+        $z16 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isImageFormat(long)>(l0);
+
+        if $z16 != 0 goto label037;
+
+        $r131 = new java.io.IOException;
+
+        specialinvoke $r131.<java.io.IOException: void <init>(java.lang.String)>("Data translation failed: not an image format");
+
+        throw $r131;
+
+     label037:
+        r112 = (java.awt.Image) r102;
+
+        $r52 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] imageToPlatformBytes(java.awt.Image,long)>(r112, l0);
+
+        if $r52 != null goto label038;
+
+        $r132 = new java.io.IOException;
+
+        specialinvoke $r132.<java.io.IOException: void <init>(java.lang.String)>("Data translation failed: cannot convert java image to native format");
+
+        throw $r132;
+
+     label038:
+        return $r52;
+
+     label039:
+        $z7 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isFileFormat(long)>(l0);
+
+        if $z7 == 0 goto label053;
+
+        $r47 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z15 = virtualinvoke $r47.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z15 != 0 goto label040;
+
+        $r133 = new java.io.IOException;
+
+        specialinvoke $r133.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r133;
+
+     label040:
+        r113 = (java.util.List) r102;
+
+        $r48 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.security.ProtectionDomain getUserProtectionDomain(java.awt.datatransfer.Transferable)>(r0);
+
+        $r49 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: java.util.ArrayList castToFiles(java.util.List,java.security.ProtectionDomain)>(r113, $r48);
+
+        $r50 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: java.io.ByteArrayOutputStream convertFileListToBytes(java.util.ArrayList)>($r49);
+
+        r114 = null;
+
+     label041:
+        r115 = virtualinvoke $r50.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label042:
+        if $r50 == null goto label052;
+
+        goto label043;
+
+     label043:
+        virtualinvoke $r50.<java.io.ByteArrayOutputStream: void close()>();
+
+        goto label052;
+
+     label044:
+        $r93 := @caughtexception;
+
+        r114 = $r93;
+
+        throw $r93;
+
+     label045:
+        $r92 := @caughtexception;
+
+     label046:
+        if $r50 == null goto label051;
+
+        if r114 == null goto label050;
+
+     label047:
+        virtualinvoke $r50.<java.io.ByteArrayOutputStream: void close()>();
+
+     label048:
+        goto label051;
+
+     label049:
+        $r91 := @caughtexception;
+
+        virtualinvoke r114.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r91);
+
+        goto label051;
+
+     label050:
+        virtualinvoke $r50.<java.io.ByteArrayOutputStream: void close()>();
+
+     label051:
+        throw $r92;
+
+     label052:
+        goto label119;
+
+     label053:
+        $z8 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isURIListFormat(long)>(l0);
+
+        if $z8 == 0 goto label080;
+
+        $r24 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z14 = virtualinvoke $r24.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z14 != 0 goto label054;
+
+        $r134 = new java.io.IOException;
+
+        specialinvoke $r134.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r134;
+
+     label054:
+        $r25 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: java.lang.String getNativeForFormat(long)>(l0);
+
+        r116 = null;
+
+        if $r25 == null goto label058;
+
+     label055:
+        $r135 = new java.awt.datatransfer.DataFlavor;
+
+        specialinvoke $r135.<java.awt.datatransfer.DataFlavor: void <init>(java.lang.String)>($r25);
+
+        r116 = virtualinvoke $r135.<java.awt.datatransfer.DataFlavor: java.lang.String getParameter(java.lang.String)>("charset");
+
+     label056:
+        goto label058;
+
+     label057:
+        $r89 := @caughtexception;
+
+        $r136 = new java.io.IOException;
+
+        specialinvoke $r136.<java.io.IOException: void <init>(java.lang.Throwable)>($r89);
+
+        throw $r136;
+
+     label058:
+        if r116 != null goto label059;
+
+        r116 = "UTF-8";
+
+     label059:
+        $r44 = (java.util.List) r102;
+
+        $r26 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.security.ProtectionDomain getUserProtectionDomain(java.awt.datatransfer.Transferable)>(r0);
+
+        $r27 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: java.util.ArrayList castToFiles(java.util.List,java.security.ProtectionDomain)>($r44, $r26);
+
+        $r137 = new java.util.ArrayList;
+
+        $i2 = virtualinvoke $r27.<java.util.ArrayList: int size()>();
+
+        specialinvoke $r137.<java.util.ArrayList: void <init>(int)>($i2);
+
+        $r29 = virtualinvoke $r27.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label060:
+        $z32 = interfaceinvoke $r29.<java.util.Iterator: boolean hasNext()>();
+
+        if $z32 == 0 goto label065;
+
+        $r36 = interfaceinvoke $r29.<java.util.Iterator: java.lang.Object next()>();
+
+        r117 = (java.lang.String) $r36;
+
+        $r138 = new java.io.File;
+
+        specialinvoke $r138.<java.io.File: void <init>(java.lang.String)>(r117);
+
+        $r38 = virtualinvoke $r138.<java.io.File: java.net.URI toURI()>();
+
+     label061:
+        $r139 = new java.net.URI;
+
+        $r40 = virtualinvoke $r38.<java.net.URI: java.lang.String getScheme()>();
+
+        $r41 = virtualinvoke $r38.<java.net.URI: java.lang.String getPath()>();
+
+        $r42 = virtualinvoke $r38.<java.net.URI: java.lang.String getFragment()>();
+
+        specialinvoke $r139.<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r40, "", $r41, $r42);
+
+        $r43 = virtualinvoke $r139.<java.net.URI: java.lang.String toString()>();
+
+        virtualinvoke $r137.<java.util.ArrayList: boolean add(java.lang.Object)>($r43);
+
+     label062:
+        goto label064;
+
+     label063:
+        $r87 := @caughtexception;
+
+        $r140 = new java.io.IOException;
+
+        specialinvoke $r140.<java.io.IOException: void <init>(java.lang.Throwable)>($r87);
+
+        throw $r140;
+
+     label064:
+        goto label060;
+
+     label065:
+        $r30 = "\r\n";
+
+        $r31 = virtualinvoke $r30.<java.lang.String: byte[] getBytes(java.lang.String)>(r116);
+
+        $r141 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r141.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r118 = null;
+
+     label066:
+        i10 = 0;
+
+     label067:
+        $i3 = virtualinvoke $r137.<java.util.ArrayList: int size()>();
+
+        if i10 >= $i3 goto label068;
+
+        $r33 = virtualinvoke $r137.<java.util.ArrayList: java.lang.Object get(int)>(i10);
+
+        $r34 = (java.lang.String) $r33;
+
+        $r35 = virtualinvoke $r34.<java.lang.String: byte[] getBytes(java.lang.String)>(r116);
+
+        $i4 = lengthof $r35;
+
+        virtualinvoke $r141.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r35, 0, $i4);
+
+        $i5 = lengthof $r31;
+
+        virtualinvoke $r141.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r31, 0, $i5);
+
+        i10 = i10 + 1;
+
+        goto label067;
+
+     label068:
+        r115 = virtualinvoke $r141.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label069:
+        if $r141 == null goto label079;
+
+        goto label070;
+
+     label070:
+        virtualinvoke $r141.<java.io.ByteArrayOutputStream: void close()>();
+
+        goto label079;
+
+     label071:
+        $r85 := @caughtexception;
+
+        r118 = $r85;
+
+        throw $r85;
+
+     label072:
+        $r84 := @caughtexception;
+
+     label073:
+        if $r141 == null goto label078;
+
+        if r118 == null goto label077;
+
+     label074:
+        virtualinvoke $r141.<java.io.ByteArrayOutputStream: void close()>();
+
+     label075:
+        goto label078;
+
+     label076:
+        $r83 := @caughtexception;
+
+        virtualinvoke r118.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r83);
+
+        goto label078;
+
+     label077:
+        virtualinvoke $r141.<java.io.ByteArrayOutputStream: void close()>();
+
+     label078:
+        throw $r84;
+
+     label079:
+        goto label119;
+
+     label080:
+        $z9 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z9 == 0 goto label116;
+
+        $z12 = r102 instanceof java.io.InputStream;
+
+        if $z12 != 0 goto label081;
+
+        $r23 = newarray (byte)[0];
+
+        return $r23;
+
+     label081:
+        $r142 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r142.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r119 = null;
+
+     label082:
+        r120 = (java.io.InputStream) r102;
+
+        r121 = null;
+
+     label083:
+        $i1 = virtualinvoke r120.<java.io.InputStream: int available()>();
+
+        if $i1 <= 8192 goto label084;
+
+        $i11 = $i1;
+
+        goto label085;
+
+     label084:
+        $i11 = 8192;
+
+     label085:
+        $r22 = newarray (byte)[$i11];
+
+     label086:
+        $i12 = lengthof $r22;
+
+        $i13 = virtualinvoke r120.<java.io.InputStream: int read(byte[],int,int)>($r22, 0, $i12);
+
+        $i15 = (int) -1;
+
+        if $i13 != $i15 goto label087;
+
+        $z36 = 1;
+
+        $z35 = 1;
+
+        goto label088;
+
+     label087:
+        $z36 = 0;
+
+        $z35 = 0;
+
+     label088:
+        z33 = $z36;
+
+        if $z35 != 0 goto label089;
+
+        virtualinvoke $r142.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r22, 0, $i13);
+
+     label089:
+        if z33 == 0 goto label086;
+
+     label090:
+        if r120 == null goto label100;
+
+        goto label091;
+
+     label091:
+        virtualinvoke r120.<java.io.InputStream: void close()>();
+
+        goto label100;
+
+     label092:
+        $r81 := @caughtexception;
+
+        r121 = $r81;
+
+        throw $r81;
+
+     label093:
+        $r80 := @caughtexception;
+
+     label094:
+        if r120 == null goto label099;
+
+        if r121 == null goto label098;
+
+     label095:
+        virtualinvoke r120.<java.io.InputStream: void close()>();
+
+     label096:
+        goto label099;
+
+     label097:
+        $r79 := @caughtexception;
+
+        virtualinvoke r121.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r79);
+
+        goto label099;
+
+     label098:
+        virtualinvoke r120.<java.io.InputStream: void close()>();
+
+     label099:
+        throw $r80;
+
+     label100:
+        $z34 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z34 == 0 goto label104;
+
+        $z13 = virtualinvoke r4.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z13 == 0 goto label104;
+
+        $r18 = virtualinvoke $r142.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r19 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        $r143 = new java.lang.String;
+
+        specialinvoke $r143.<java.lang.String: void <init>(byte[],java.lang.String)>($r18, $r19);
+
+        $r21 = specialinvoke r4.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferableString(java.lang.String,long)>($r143, l0);
+
+     label101:
+        if $r142 == null goto label103;
+
+        goto label102;
+
+     label102:
+        virtualinvoke $r142.<java.io.ByteArrayOutputStream: void close()>();
+
+     label103:
+        return $r21;
+
+     label104:
+        r115 = virtualinvoke $r142.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label105:
+        if $r142 == null goto label115;
+
+        goto label106;
+
+     label106:
+        virtualinvoke $r142.<java.io.ByteArrayOutputStream: void close()>();
+
+        goto label115;
+
+     label107:
+        $r76 := @caughtexception;
+
+        r119 = $r76;
+
+        throw $r76;
+
+     label108:
+        $r75 := @caughtexception;
+
+     label109:
+        if $r142 == null goto label114;
+
+        if r119 == null goto label113;
+
+     label110:
+        virtualinvoke $r142.<java.io.ByteArrayOutputStream: void close()>();
+
+     label111:
+        goto label114;
+
+     label112:
+        $r74 := @caughtexception;
+
+        virtualinvoke r119.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r74);
+
+        goto label114;
+
+     label113:
+        virtualinvoke $r142.<java.io.ByteArrayOutputStream: void close()>();
+
+     label114:
+        throw $r75;
+
+     label115:
+        goto label119;
+
+     label116:
+        $z10 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z10 == 0 goto label117;
+
+        $r16 = staticinvoke <sun.awt.datatransfer.DataTransferer$RMI: java.lang.Object newMarshalledObject(java.lang.Object)>(r102);
+
+        r115 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] convertObjectToBytes(java.lang.Object)>($r16);
+
+        goto label119;
+
+     label117:
+        $z11 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z11 == 0 goto label118;
+
+        r115 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] convertObjectToBytes(java.lang.Object)>(r102);
+
+        goto label119;
+
+     label118:
+        $r144 = new java.io.IOException;
+
+        specialinvoke $r144.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r144;
+
+     label119:
+        return r115;
+
+        catch java.awt.datatransfer.UnsupportedFlavorException from label001 to label002 with label008;
+        catch java.awt.datatransfer.UnsupportedFlavorException from label003 to label004 with label008;
+        catch java.awt.datatransfer.UnsupportedFlavorException from label005 to label007 with label008;
+        catch java.lang.Throwable from label014 to label015 with label017;
+        catch java.lang.Throwable from label020 to label021 with label022;
+        catch java.lang.Throwable from label017 to label019 with label018;
+        catch java.lang.Throwable from label041 to label042 with label044;
+        catch java.lang.Throwable from label047 to label048 with label049;
+        catch java.lang.Throwable from label044 to label046 with label045;
+        catch java.lang.ClassNotFoundException from label055 to label056 with label057;
+        catch java.net.URISyntaxException from label061 to label062 with label063;
+        catch java.lang.Throwable from label066 to label069 with label071;
+        catch java.lang.Throwable from label074 to label075 with label076;
+        catch java.lang.Throwable from label071 to label073 with label072;
+        catch java.lang.Throwable from label083 to label090 with label092;
+        catch java.lang.Throwable from label095 to label096 with label097;
+        catch java.lang.Throwable from label092 to label094 with label093;
+        catch java.lang.Throwable from label082 to label101 with label107;
+        catch java.lang.Throwable from label104 to label105 with label107;
+        catch java.lang.Throwable from label110 to label111 with label112;
+        catch java.lang.Throwable from label107 to label109 with label108;
+    }
+
+    private static byte[] convertObjectToBytes(java.lang.Object) throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5, $r6, $r7, $r8, $r9, r12, r13;
+        byte[] $r3;
+        java.io.ByteArrayOutputStream $r0;
+        java.io.ObjectOutputStream $r1;
+        java.lang.Object r2;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r12 = null;
+
+     label01:
+        $r1 = new java.io.ObjectOutputStream;
+
+        specialinvoke $r1.<java.io.ObjectOutputStream: void <init>(java.io.OutputStream)>($r0);
+
+        r13 = null;
+
+     label02:
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(r2);
+
+        $r3 = virtualinvoke $r0.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label03:
+        if $r1 == null goto label05;
+
+        goto label04;
+
+     label04:
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void close()>();
+
+     label05:
+        if $r0 == null goto label07;
+
+        goto label06;
+
+     label06:
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void close()>();
+
+     label07:
+        return $r3;
+
+     label08:
+        $r9 := @caughtexception;
+
+        r13 = $r9;
+
+        throw $r9;
+
+     label09:
+        $r8 := @caughtexception;
+
+     label10:
+        if $r1 == null goto label15;
+
+        if r13 == null goto label14;
+
+     label11:
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void close()>();
+
+     label12:
+        goto label15;
+
+     label13:
+        $r7 := @caughtexception;
+
+        virtualinvoke r13.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r7);
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void close()>();
+
+     label15:
+        throw $r8;
+
+     label16:
+        $r6 := @caughtexception;
+
+        r12 = $r6;
+
+        throw $r6;
+
+     label17:
+        $r5 := @caughtexception;
+
+     label18:
+        if $r0 == null goto label23;
+
+        if r12 == null goto label22;
+
+     label19:
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void close()>();
+
+     label20:
+        goto label23;
+
+     label21:
+        $r4 := @caughtexception;
+
+        virtualinvoke r12.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r4);
+
+        goto label23;
+
+     label22:
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void close()>();
+
+     label23:
+        throw $r5;
+
+        catch java.lang.Throwable from label02 to label03 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label01 to label05 with label16;
+        catch java.lang.Throwable from label08 to label16 with label16;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label08 to label18 with label17;
+    }
+
+    protected abstract java.io.ByteArrayOutputStream convertFileListToBytes(java.util.ArrayList) throws java.io.IOException;
+
+    private java.lang.String removeSuspectedData(java.awt.datatransfer.DataFlavor, java.awt.datatransfer.Transferable, java.lang.String) throws java.io.IOException
+    {
+        java.security.PrivilegedActionException $r8;
+        java.awt.datatransfer.DataFlavor r2;
+        java.awt.datatransfer.Transferable r3;
+        sun.awt.datatransfer.DataTransferer$2 $r5;
+        sun.awt.datatransfer.DataTransferer r6;
+        java.io.IOException $r9;
+        java.lang.SecurityManager $r0;
+        java.security.ProtectionDomain $r4;
+        java.lang.Object $r7;
+        java.lang.String r1, $r10, r11;
+        boolean $z0;
+
+        r6 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        r3 := @parameter1: java.awt.datatransfer.Transferable;
+
+        r1 := @parameter2: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if null == $r0 goto label1;
+
+        $z0 = virtualinvoke r2.<java.awt.datatransfer.DataFlavor: boolean isMimeTypeEqual(java.lang.String)>("text/uri-list");
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return r1;
+
+     label2:
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.security.ProtectionDomain getUserProtectionDomain(java.awt.datatransfer.Transferable)>(r3);
+
+     label3:
+        $r5 = new sun.awt.datatransfer.DataTransferer$2;
+
+        specialinvoke $r5.<sun.awt.datatransfer.DataTransferer$2: void <init>(sun.awt.datatransfer.DataTransferer,java.lang.String,java.security.ProtectionDomain)>(r6, r1, $r4);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r5);
+
+        r11 = (java.lang.String) $r7;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = virtualinvoke $r8.<java.security.PrivilegedActionException: java.lang.String getMessage()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>($r10, $r8);
+
+        throw $r9;
+
+     label6:
+        return r11;
+
+        catch java.security.PrivilegedActionException from label3 to label4 with label5;
+    }
+
+    private static java.security.ProtectionDomain getUserProtectionDomain(java.awt.datatransfer.Transferable)
+    {
+        java.awt.datatransfer.Transferable r0;
+        java.lang.Class $r1;
+        java.security.ProtectionDomain $r2;
+
+        r0 := @parameter0: java.awt.datatransfer.Transferable;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.security.ProtectionDomain getProtectionDomain()>();
+
+        return $r2;
+    }
+
+    private boolean isForbiddenToRead(java.io.File, java.security.ProtectionDomain)
+    {
+        java.io.FilePermission $r1;
+        java.security.ProtectionDomain r0;
+        sun.awt.datatransfer.DataTransferer r5;
+        java.io.IOException $r4;
+        java.lang.String $r3;
+        java.io.File r2;
+        boolean $z0;
+
+        r5 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.io.File;
+
+        r0 := @parameter1: java.security.ProtectionDomain;
+
+        if null != r0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = new java.io.FilePermission;
+
+        $r3 = virtualinvoke r2.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>($r3, "read, delete");
+
+        $z0 = virtualinvoke r0.<java.security.ProtectionDomain: boolean implies(java.security.Permission)>($r1);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return 1;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    private java.util.ArrayList castToFiles(java.util.List, java.security.ProtectionDomain) throws java.io.IOException
+    {
+        java.security.PrivilegedActionException $r5;
+        sun.awt.datatransfer.DataTransferer$3 $r1;
+        sun.awt.datatransfer.DataTransferer r2;
+        java.io.IOException $r6;
+        java.util.ArrayList $r0;
+        java.util.List r3;
+        java.security.ProtectionDomain r4;
+        java.lang.String $r7;
+
+        r2 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r3 := @parameter0: java.util.List;
+
+        r4 := @parameter1: java.security.ProtectionDomain;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r1 = new sun.awt.datatransfer.DataTransferer$3;
+
+        specialinvoke $r1.<sun.awt.datatransfer.DataTransferer$3: void <init>(sun.awt.datatransfer.DataTransferer,java.util.List,java.security.ProtectionDomain,java.util.ArrayList)>(r2, r3, r4, $r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        $r7 = virtualinvoke $r5.<java.security.PrivilegedActionException: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+     label4:
+        return $r0;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private java.io.File castToFile(java.lang.Object) throws java.io.IOException
+    {
+        sun.awt.datatransfer.DataTransferer r3;
+        java.lang.Object r0;
+        java.lang.String r4;
+        java.io.File $r1, $r2;
+        boolean $z0, $z1;
+
+        r3 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.io.File;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.io.File) r0;
+
+        r4 = virtualinvoke $r2.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        goto label3;
+
+     label1:
+        $z1 = r0 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        r4 = (java.lang.String) r0;
+
+        goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>(r4);
+
+        return $r1;
+    }
+
+    private static boolean isFileInWebstartedCache(java.io.File)
+    {
+        java.lang.String[] r11;
+        java.util.ArrayList $r0, $r1, $r9;
+        int i0, i1;
+        java.lang.String r5, $r6;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r2;
+        java.io.IOException $r10;
+        java.io.File r4, $r7, $r8, r12, r13;
+        java.lang.Object $r3;
+
+        r4 := @parameter0: java.io.File;
+
+        $r0 = <sun.awt.datatransfer.DataTransferer: java.util.ArrayList deploymentCacheDirectoryList>;
+
+        $z0 = virtualinvoke $r0.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label06;
+
+        r11 = <sun.awt.datatransfer.DataTransferer: java.lang.String[] DEPLOYMENT_CACHE_PROPERTIES>;
+
+        i0 = lengthof r11;
+
+        i1 = 0;
+
+     label01:
+        if i1 >= i0 goto label06;
+
+        r5 = r11[i1];
+
+        $r6 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>(r5);
+
+        if $r6 == null goto label05;
+
+     label02:
+        $r7 = new java.io.File;
+
+        specialinvoke $r7.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.io.File: java.io.File getCanonicalFile()>();
+
+        if $r8 == null goto label03;
+
+        $r9 = <sun.awt.datatransfer.DataTransferer: java.util.ArrayList deploymentCacheDirectoryList>;
+
+        virtualinvoke $r9.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r10 := @caughtexception;
+
+     label05:
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label06:
+        $r1 = <sun.awt.datatransfer.DataTransferer: java.util.ArrayList deploymentCacheDirectoryList>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label07:
+        $z2 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label11;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.io.File) $r3;
+
+        r13 = r4;
+
+     label08:
+        if r13 == null goto label10;
+
+        $z1 = virtualinvoke r13.<java.io.File: boolean equals(java.lang.Object)>(r12);
+
+        if $z1 == 0 goto label09;
+
+        return 1;
+
+     label09:
+        r13 = virtualinvoke r13.<java.io.File: java.io.File getParentFile()>();
+
+        goto label08;
+
+     label10:
+        goto label07;
+
+     label11:
+        return 0;
+
+        catch java.io.IOException from label02 to label03 with label04;
+    }
+
+    public java.lang.Object translateBytes(byte[], java.awt.datatransfer.DataFlavor, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] r67;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.lang.Exception $r42;
+        java.lang.Throwable $r38, $r39, $r40, $r45, $r46, $r47, $r49, $r50, $r51, $r53, $r54, $r55, $r57, $r58, $r59, $r61, $r62, $r63, r70, r71, r73, r74, r75, r76;
+        long l0;
+        java.util.ArrayList $r30;
+        java.lang.String $r17, $r18, $r19, $r20, $r22, $r24, $r36, $r44;
+        java.io.IOException $r9, $r10, $r21, $r23, $r37, $r43;
+        java.io.File $r32, $r35;
+        java.io.ObjectInputStream $r14;
+        java.nio.ByteBuffer $r72;
+        java.net.URI[] $r29;
+        java.io.ByteArrayInputStream $r11, $r13, $r16, $r26, $r28;
+        java.net.URI r31;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24;
+        java.nio.CharBuffer $r25;
+        java.awt.datatransfer.DataFlavor r1, $r8, $r27, $r33;
+        java.awt.datatransfer.Transferable r12;
+        java.lang.String[] $r34;
+        int i1, $i2, $i3, i4, i5;
+        java.lang.IllegalArgumentException $r65;
+        java.lang.Class $r2, $r3, $r4, $r5, $r6, $r7;
+        java.lang.Object $r15, r68;
+        java.io.File[] r69;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r67 := @parameter0: byte[];
+
+        r1 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        r12 := @parameter3: java.awt.datatransfer.Transferable;
+
+        r68 = null;
+
+        $z0 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isFileFormat(long)>(l0);
+
+        if $z0 == 0 goto label005;
+
+        $r33 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z23 = virtualinvoke $r33.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z23 != 0 goto label001;
+
+        $r37 = new java.io.IOException;
+
+        specialinvoke $r37.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r37;
+
+     label001:
+        $r34 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String[] dragQueryFile(byte[])>(r67);
+
+        if $r34 != null goto label002;
+
+        return null;
+
+     label002:
+        $i2 = lengthof $r34;
+
+        r69 = newarray (java.io.File)[$i2];
+
+        i4 = 0;
+
+     label003:
+        $i3 = lengthof $r34;
+
+        if i4 >= $i3 goto label004;
+
+        $r35 = new java.io.File;
+
+        $r36 = $r34[i4];
+
+        specialinvoke $r35.<java.io.File: void <init>(java.lang.String)>($r36);
+
+        r69[i4] = $r35;
+
+        i4 = i4 + 1;
+
+        goto label003;
+
+     label004:
+        r68 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r69);
+
+        goto label106;
+
+     label005:
+        $z1 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isURIListFormat(long)>(l0);
+
+        if $z1 == 0 goto label028;
+
+        $r27 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z22 = virtualinvoke $r27.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z22 == 0 goto label028;
+
+        $r28 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r28.<java.io.ByteArrayInputStream: void <init>(byte[])>(r67);
+
+        r70 = null;
+
+     label006:
+        $r29 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.net.URI[] dragQueryURIs(java.io.InputStream,long,java.awt.datatransfer.Transferable)>($r28, l0, r12);
+
+        if $r29 != null goto label010;
+
+     label007:
+        if $r28 == null goto label009;
+
+        goto label008;
+
+     label008:
+        virtualinvoke $r28.<java.io.ByteArrayInputStream: void close()>();
+
+     label009:
+        return null;
+
+     label010:
+        $r30 = new java.util.ArrayList;
+
+        specialinvoke $r30.<java.util.ArrayList: void <init>()>();
+
+        i1 = lengthof $r29;
+
+        i5 = 0;
+
+     label011:
+        if i5 >= i1 goto label016;
+
+        r31 = $r29[i5];
+
+     label012:
+        $r32 = new java.io.File;
+
+        specialinvoke $r32.<java.io.File: void <init>(java.net.URI)>(r31);
+
+        interfaceinvoke $r30.<java.util.List: boolean add(java.lang.Object)>($r32);
+
+     label013:
+        goto label015;
+
+     label014:
+        $r65 := @caughtexception;
+
+     label015:
+        i5 = i5 + 1;
+
+        goto label011;
+
+     label016:
+        r68 = $r30;
+
+     label017:
+        if $r28 == null goto label027;
+
+        goto label018;
+
+     label018:
+        virtualinvoke $r28.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label027;
+
+     label019:
+        $r63 := @caughtexception;
+
+        r70 = $r63;
+
+        throw $r63;
+
+     label020:
+        $r62 := @caughtexception;
+
+     label021:
+        if $r28 == null goto label026;
+
+        if r70 == null goto label025;
+
+     label022:
+        virtualinvoke $r28.<java.io.ByteArrayInputStream: void close()>();
+
+     label023:
+        goto label026;
+
+     label024:
+        $r61 := @caughtexception;
+
+        virtualinvoke r70.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r61);
+
+        goto label026;
+
+     label025:
+        virtualinvoke $r28.<java.io.ByteArrayInputStream: void close()>();
+
+     label026:
+        throw $r62;
+
+     label027:
+        goto label106;
+
+     label028:
+        $r2 = class "Ljava/lang/String;";
+
+        $r3 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z2 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label029;
+
+        $z20 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z20 == 0 goto label029;
+
+        $z21 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z21 == 0 goto label029;
+
+        r68 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>(r67, l0, r12);
+
+        goto label106;
+
+     label029:
+        $z24 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassReader()>();
+
+        if $z24 == 0 goto label042;
+
+        $r26 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r26.<java.io.ByteArrayInputStream: void <init>(byte[])>(r67);
+
+        r71 = null;
+
+     label030:
+        r68 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>($r26, r1, l0, r12);
+
+     label031:
+        if $r26 == null goto label041;
+
+        goto label032;
+
+     label032:
+        virtualinvoke $r26.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label041;
+
+     label033:
+        $r59 := @caughtexception;
+
+        r71 = $r59;
+
+        throw $r59;
+
+     label034:
+        $r58 := @caughtexception;
+
+     label035:
+        if $r26 == null goto label040;
+
+        if r71 == null goto label039;
+
+     label036:
+        virtualinvoke $r26.<java.io.ByteArrayInputStream: void close()>();
+
+     label037:
+        goto label040;
+
+     label038:
+        $r57 := @caughtexception;
+
+        virtualinvoke r71.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r57);
+
+        goto label040;
+
+     label039:
+        virtualinvoke $r26.<java.io.ByteArrayInputStream: void close()>();
+
+     label040:
+        throw $r58;
+
+     label041:
+        goto label106;
+
+     label042:
+        $z3 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassCharBuffer()>();
+
+        if $z3 == 0 goto label045;
+
+        $z18 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z18 == 0 goto label043;
+
+        $z19 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z19 != 0 goto label044;
+
+     label043:
+        $r23 = new java.io.IOException;
+
+        specialinvoke $r23.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as CharBuffer");
+
+        throw $r23;
+
+     label044:
+        $r24 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>(r67, l0, r12);
+
+        $r25 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(java.lang.CharSequence)>($r24);
+
+        r68 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object constructFlavoredObject(java.lang.Object,java.awt.datatransfer.DataFlavor,java.lang.Class)>($r25, r1, class "Ljava/nio/CharBuffer;");
+
+        goto label106;
+
+     label045:
+        $r4 = class "[C";
+
+        $r5 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z4 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z4 == 0 goto label048;
+
+        $z16 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z16 == 0 goto label046;
+
+        $z17 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z17 != 0 goto label047;
+
+     label046:
+        $r21 = new java.io.IOException;
+
+        specialinvoke $r21.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as char array");
+
+        throw $r21;
+
+     label047:
+        $r22 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>(r67, l0, r12);
+
+        r68 = virtualinvoke $r22.<java.lang.String: char[] toCharArray()>();
+
+        goto label106;
+
+     label048:
+        $z5 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassByteBuffer()>();
+
+        if $z5 == 0 goto label050;
+
+        $z14 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z14 == 0 goto label049;
+
+        $z15 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z15 == 0 goto label049;
+
+        $r19 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>(r67, l0, r12);
+
+        $r20 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        r67 = virtualinvoke $r19.<java.lang.String: byte[] getBytes(java.lang.String)>($r20);
+
+     label049:
+        $r72 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r67);
+
+        r68 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object constructFlavoredObject(java.lang.Object,java.awt.datatransfer.DataFlavor,java.lang.Class)>($r72, r1, class "Ljava/nio/ByteBuffer;");
+
+        goto label106;
+
+     label050:
+        $r6 = class "[B";
+
+        $r7 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z6 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z6 == 0 goto label052;
+
+        $z12 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z12 == 0 goto label051;
+
+        $z13 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z13 == 0 goto label051;
+
+        $r17 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>(r67, l0, r12);
+
+        $r18 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        r68 = virtualinvoke $r17.<java.lang.String: byte[] getBytes(java.lang.String)>($r18);
+
+        goto label106;
+
+     label051:
+        r68 = r67;
+
+        goto label106;
+
+     label052:
+        $z7 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z7 == 0 goto label065;
+
+        $r16 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r16.<java.io.ByteArrayInputStream: void <init>(byte[])>(r67);
+
+        r73 = null;
+
+     label053:
+        r68 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>($r16, r1, l0, r12);
+
+     label054:
+        if $r16 == null goto label064;
+
+        goto label055;
+
+     label055:
+        virtualinvoke $r16.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label064;
+
+     label056:
+        $r55 := @caughtexception;
+
+        r73 = $r55;
+
+        throw $r55;
+
+     label057:
+        $r54 := @caughtexception;
+
+     label058:
+        if $r16 == null goto label063;
+
+        if r73 == null goto label062;
+
+     label059:
+        virtualinvoke $r16.<java.io.ByteArrayInputStream: void close()>();
+
+     label060:
+        goto label063;
+
+     label061:
+        $r53 := @caughtexception;
+
+        virtualinvoke r73.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r53);
+
+        goto label063;
+
+     label062:
+        virtualinvoke $r16.<java.io.ByteArrayInputStream: void close()>();
+
+     label063:
+        throw $r54;
+
+     label064:
+        goto label106;
+
+     label065:
+        $z8 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z8 == 0 goto label091;
+
+     label066:
+        $r13 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r13.<java.io.ByteArrayInputStream: void <init>(byte[])>(r67);
+
+        r74 = null;
+
+     label067:
+        $r14 = new java.io.ObjectInputStream;
+
+        specialinvoke $r14.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>($r13);
+
+        r75 = null;
+
+     label068:
+        $r15 = virtualinvoke $r14.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        r68 = staticinvoke <sun.awt.datatransfer.DataTransferer$RMI: java.lang.Object getMarshalledObject(java.lang.Object)>($r15);
+
+     label069:
+        if $r14 == null goto label079;
+
+        goto label070;
+
+     label070:
+        virtualinvoke $r14.<java.io.ObjectInputStream: void close()>();
+
+        goto label079;
+
+     label071:
+        $r51 := @caughtexception;
+
+        r75 = $r51;
+
+        throw $r51;
+
+     label072:
+        $r50 := @caughtexception;
+
+     label073:
+        if $r14 == null goto label078;
+
+        if r75 == null goto label077;
+
+     label074:
+        virtualinvoke $r14.<java.io.ObjectInputStream: void close()>();
+
+     label075:
+        goto label078;
+
+     label076:
+        $r49 := @caughtexception;
+
+        virtualinvoke r75.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r49);
+
+        goto label078;
+
+     label077:
+        virtualinvoke $r14.<java.io.ObjectInputStream: void close()>();
+
+     label078:
+        throw $r50;
+
+     label079:
+        if $r13 == null goto label089;
+
+        goto label080;
+
+     label080:
+        virtualinvoke $r13.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label089;
+
+     label081:
+        $r47 := @caughtexception;
+
+        r74 = $r47;
+
+        throw $r47;
+
+     label082:
+        $r46 := @caughtexception;
+
+     label083:
+        if $r13 == null goto label088;
+
+        if r74 == null goto label087;
+
+     label084:
+        virtualinvoke $r13.<java.io.ByteArrayInputStream: void close()>();
+
+     label085:
+        goto label088;
+
+     label086:
+        $r45 := @caughtexception;
+
+        virtualinvoke r74.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r45);
+
+        goto label088;
+
+     label087:
+        virtualinvoke $r13.<java.io.ByteArrayInputStream: void close()>();
+
+     label088:
+        throw $r46;
+
+     label089:
+        goto label106;
+
+     label090:
+        $r42 := @caughtexception;
+
+        $r43 = new java.io.IOException;
+
+        $r44 = virtualinvoke $r42.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r43.<java.io.IOException: void <init>(java.lang.String)>($r44);
+
+        throw $r43;
+
+     label091:
+        $z9 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z9 == 0 goto label104;
+
+        $r11 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r11.<java.io.ByteArrayInputStream: void <init>(byte[])>(r67);
+
+        r76 = null;
+
+     label092:
+        r68 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>($r11, r1, l0, r12);
+
+     label093:
+        if $r11 == null goto label103;
+
+        goto label094;
+
+     label094:
+        virtualinvoke $r11.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label103;
+
+     label095:
+        $r40 := @caughtexception;
+
+        r76 = $r40;
+
+        throw $r40;
+
+     label096:
+        $r39 := @caughtexception;
+
+     label097:
+        if $r11 == null goto label102;
+
+        if r76 == null goto label101;
+
+     label098:
+        virtualinvoke $r11.<java.io.ByteArrayInputStream: void close()>();
+
+     label099:
+        goto label102;
+
+     label100:
+        $r38 := @caughtexception;
+
+        virtualinvoke r76.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r38);
+
+        goto label102;
+
+     label101:
+        virtualinvoke $r11.<java.io.ByteArrayInputStream: void close()>();
+
+     label102:
+        throw $r39;
+
+     label103:
+        goto label106;
+
+     label104:
+        $r8 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z10 = virtualinvoke $r8.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z10 == 0 goto label106;
+
+        $z11 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isImageFormat(long)>(l0);
+
+        if $z11 != 0 goto label105;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r10;
+
+     label105:
+        r68 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.awt.Image platformImageBytesToImage(byte[],long)>(r67, l0);
+
+     label106:
+        if r68 != null goto label107;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r9;
+
+     label107:
+        return r68;
+
+        catch java.lang.IllegalArgumentException from label012 to label013 with label014;
+        catch java.lang.Throwable from label006 to label007 with label019;
+        catch java.lang.Throwable from label010 to label017 with label019;
+        catch java.lang.Throwable from label022 to label023 with label024;
+        catch java.lang.Throwable from label019 to label021 with label020;
+        catch java.lang.Throwable from label030 to label031 with label033;
+        catch java.lang.Throwable from label036 to label037 with label038;
+        catch java.lang.Throwable from label033 to label035 with label034;
+        catch java.lang.Throwable from label053 to label054 with label056;
+        catch java.lang.Throwable from label059 to label060 with label061;
+        catch java.lang.Throwable from label056 to label058 with label057;
+        catch java.lang.Throwable from label068 to label069 with label071;
+        catch java.lang.Throwable from label074 to label075 with label076;
+        catch java.lang.Throwable from label071 to label073 with label072;
+        catch java.lang.Throwable from label067 to label079 with label081;
+        catch java.lang.Throwable from label084 to label085 with label086;
+        catch java.lang.Throwable from label081 to label083 with label082;
+        catch java.lang.Exception from label066 to label089 with label090;
+        catch java.lang.Throwable from label092 to label093 with label095;
+        catch java.lang.Throwable from label098 to label099 with label100;
+        catch java.lang.Throwable from label095 to label097 with label096;
+    }
+
+    public java.lang.Object translateStream(java.io.InputStream, java.awt.datatransfer.DataFlavor, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] $r9, $r14, $r25, $r27;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.lang.Exception $r34, $r41;
+        java.lang.Throwable $r37, $r38, $r39, $r44, $r45, $r46, r52, r53;
+        long l0;
+        java.util.ArrayList $r31;
+        java.lang.String $r16, $r17, $r22, $r26, $r28, $r36, $r43;
+        java.io.IOException $r7, $r10, $r18, $r35, $r42;
+        java.io.InputStreamReader $r23;
+        java.io.File $r33;
+        java.io.StringReader $r24;
+        java.io.ObjectInputStream $r11, $r12;
+        java.net.URI[] $r30;
+        java.net.URI r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16;
+        java.awt.datatransfer.DataFlavor r1, $r6, $r19, $r21, $r29, $r50;
+        java.awt.datatransfer.Transferable r15;
+        int i1, i2;
+        java.lang.IllegalArgumentException $r48;
+        java.lang.Class $r2, $r3, $r4, $r5;
+        java.lang.Object $r13, $r20, r49;
+        java.io.InputStream r8, r51;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r8 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        r15 := @parameter3: java.awt.datatransfer.Transferable;
+
+        r49 = null;
+
+        $z0 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isURIListFormat(long)>(l0);
+
+        if $z0 == 0 goto label08;
+
+        $r29 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z15 = virtualinvoke $r29.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z15 == 0 goto label08;
+
+        $r30 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.net.URI[] dragQueryURIs(java.io.InputStream,long,java.awt.datatransfer.Transferable)>(r8, l0, r15);
+
+        if $r30 != null goto label01;
+
+        return null;
+
+     label01:
+        $r31 = new java.util.ArrayList;
+
+        specialinvoke $r31.<java.util.ArrayList: void <init>()>();
+
+        i1 = lengthof $r30;
+
+        i2 = 0;
+
+     label02:
+        if i2 >= i1 goto label07;
+
+        r32 = $r30[i2];
+
+     label03:
+        $r33 = new java.io.File;
+
+        specialinvoke $r33.<java.io.File: void <init>(java.net.URI)>(r32);
+
+        virtualinvoke $r31.<java.util.ArrayList: boolean add(java.lang.Object)>($r33);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r48 := @caughtexception;
+
+     label06:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label07:
+        r49 = $r31;
+
+        goto label48;
+
+     label08:
+        $r2 = class "Ljava/lang/String;";
+
+        $r3 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label09;
+
+        $z13 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z13 == 0 goto label09;
+
+        $z14 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z14 == 0 goto label09;
+
+        $r27 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] inputStreamToByteArray(java.io.InputStream)>(r8);
+
+        $r28 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>($r27, l0, r15);
+
+        return $r28;
+
+     label09:
+        $r50 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor plainTextFlavor>;
+
+        $z16 = virtualinvoke $r50.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z16 == 0 goto label10;
+
+        $r24 = new java.io.StringReader;
+
+        $r25 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] inputStreamToByteArray(java.io.InputStream)>(r8);
+
+        $r26 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>($r25, l0, r15);
+
+        specialinvoke $r24.<java.io.StringReader: void <init>(java.lang.String)>($r26);
+
+        r49 = $r24;
+
+        goto label48;
+
+     label10:
+        $z2 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassInputStream()>();
+
+        if $z2 == 0 goto label11;
+
+        r49 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStreamToInputStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>(r8, r1, l0, r15);
+
+        goto label48;
+
+     label11:
+        $z3 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassReader()>();
+
+        if $z3 == 0 goto label14;
+
+        $z11 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z11 == 0 goto label12;
+
+        $z12 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z12 != 0 goto label13;
+
+     label12:
+        $r18 = new java.io.IOException;
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>("cannot transfer non-text data as Reader");
+
+        throw $r18;
+
+     label13:
+        $r19 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor plainTextFlavor>;
+
+        $r20 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStreamToInputStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>(r8, $r19, l0, r15);
+
+        r51 = (java.io.InputStream) $r20;
+
+        $r21 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor plainTextFlavor>;
+
+        $r22 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>($r21);
+
+        $r23 = new java.io.InputStreamReader;
+
+        specialinvoke $r23.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>(r51, $r22);
+
+        r49 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object constructFlavoredObject(java.lang.Object,java.awt.datatransfer.DataFlavor,java.lang.Class)>($r23, r1, class "Ljava/io/Reader;");
+
+        goto label48;
+
+     label14:
+        $r4 = class "[B";
+
+        $r5 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z4 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z4 == 0 goto label16;
+
+        $z9 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z9 == 0 goto label15;
+
+        $z10 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z10 == 0 goto label15;
+
+        $r14 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] inputStreamToByteArray(java.io.InputStream)>(r8);
+
+        $r16 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.String translateBytesToString(byte[],long,java.awt.datatransfer.Transferable)>($r14, l0, r15);
+
+        $r17 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r1);
+
+        r49 = virtualinvoke $r16.<java.lang.String: byte[] getBytes(java.lang.String)>($r17);
+
+        goto label48;
+
+     label15:
+        r49 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] inputStreamToByteArray(java.io.InputStream)>(r8);
+
+        goto label48;
+
+     label16:
+        $z5 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassRemote()>();
+
+        if $z5 == 0 goto label31;
+
+     label17:
+        $r12 = new java.io.ObjectInputStream;
+
+        specialinvoke $r12.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>(r8);
+
+        r52 = null;
+
+     label18:
+        $r13 = virtualinvoke $r12.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        r49 = staticinvoke <sun.awt.datatransfer.DataTransferer$RMI: java.lang.Object getMarshalledObject(java.lang.Object)>($r13);
+
+     label19:
+        if $r12 == null goto label29;
+
+        goto label20;
+
+     label20:
+        virtualinvoke $r12.<java.io.ObjectInputStream: void close()>();
+
+        goto label29;
+
+     label21:
+        $r46 := @caughtexception;
+
+        r52 = $r46;
+
+        throw $r46;
+
+     label22:
+        $r45 := @caughtexception;
+
+     label23:
+        if $r12 == null goto label28;
+
+        if r52 == null goto label27;
+
+     label24:
+        virtualinvoke $r12.<java.io.ObjectInputStream: void close()>();
+
+     label25:
+        goto label28;
+
+     label26:
+        $r44 := @caughtexception;
+
+        virtualinvoke r52.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r44);
+
+        goto label28;
+
+     label27:
+        virtualinvoke $r12.<java.io.ObjectInputStream: void close()>();
+
+     label28:
+        throw $r45;
+
+     label29:
+        goto label48;
+
+     label30:
+        $r41 := @caughtexception;
+
+        $r42 = new java.io.IOException;
+
+        $r43 = virtualinvoke $r41.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r42.<java.io.IOException: void <init>(java.lang.String)>($r43);
+
+        throw $r42;
+
+     label31:
+        $z6 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isRepresentationClassSerializable()>();
+
+        if $z6 == 0 goto label46;
+
+     label32:
+        $r11 = new java.io.ObjectInputStream;
+
+        specialinvoke $r11.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>(r8);
+
+        r53 = null;
+
+     label33:
+        r49 = virtualinvoke $r11.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label34:
+        if $r11 == null goto label44;
+
+        goto label35;
+
+     label35:
+        virtualinvoke $r11.<java.io.ObjectInputStream: void close()>();
+
+        goto label44;
+
+     label36:
+        $r39 := @caughtexception;
+
+        r53 = $r39;
+
+        throw $r39;
+
+     label37:
+        $r38 := @caughtexception;
+
+     label38:
+        if $r11 == null goto label43;
+
+        if r53 == null goto label42;
+
+     label39:
+        virtualinvoke $r11.<java.io.ObjectInputStream: void close()>();
+
+     label40:
+        goto label43;
+
+     label41:
+        $r37 := @caughtexception;
+
+        virtualinvoke r53.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r37);
+
+        goto label43;
+
+     label42:
+        virtualinvoke $r11.<java.io.ObjectInputStream: void close()>();
+
+     label43:
+        throw $r38;
+
+     label44:
+        goto label48;
+
+     label45:
+        $r34 := @caughtexception;
+
+        $r35 = new java.io.IOException;
+
+        $r36 = virtualinvoke $r34.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r35.<java.io.IOException: void <init>(java.lang.String)>($r36);
+
+        throw $r35;
+
+     label46:
+        $r6 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor imageFlavor>;
+
+        $z7 = virtualinvoke $r6.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r1);
+
+        if $z7 == 0 goto label48;
+
+        $z8 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isImageFormat(long)>(l0);
+
+        if $z8 != 0 goto label47;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r10;
+
+     label47:
+        $r9 = staticinvoke <sun.awt.datatransfer.DataTransferer: byte[] inputStreamToByteArray(java.io.InputStream)>(r8);
+
+        r49 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer: java.awt.Image platformImageBytesToImage(byte[],long)>($r9, l0);
+
+     label48:
+        if r49 != null goto label49;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r7;
+
+     label49:
+        return r49;
+
+        catch java.lang.IllegalArgumentException from label03 to label04 with label05;
+        catch java.lang.Throwable from label18 to label19 with label21;
+        catch java.lang.Throwable from label24 to label25 with label26;
+        catch java.lang.Throwable from label21 to label23 with label22;
+        catch java.lang.Exception from label17 to label29 with label30;
+        catch java.lang.Throwable from label33 to label34 with label36;
+        catch java.lang.Throwable from label39 to label40 with label41;
+        catch java.lang.Throwable from label36 to label38 with label37;
+        catch java.lang.Exception from label32 to label44 with label45;
+    }
+
+    private java.lang.Object translateStreamToInputStream(java.io.InputStream, java.awt.datatransfer.DataFlavor, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        java.awt.datatransfer.DataFlavor r0;
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream $r2;
+        java.awt.datatransfer.Transferable r4;
+        sun.awt.datatransfer.DataTransferer r1;
+        long l0;
+        java.lang.Object $r6;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        java.io.InputStream r5;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        r0 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        r4 := @parameter3: java.awt.datatransfer.Transferable;
+
+        $z0 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFlavorCharsetTextType(java.awt.datatransfer.DataFlavor)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: boolean isTextFormat(long)>(l0);
+
+        if $z1 == 0 goto label1;
+
+        $r2 = new sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        $r3 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getTextCharset(java.awt.datatransfer.DataFlavor)>(r0);
+
+        specialinvoke $r2.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: void <init>(sun.awt.datatransfer.DataTransferer,java.io.InputStream,long,java.lang.String,java.awt.datatransfer.Transferable)>(r1, r5, l0, $r3, r4);
+
+        r5 = $r2;
+
+     label1:
+        $r6 = specialinvoke r1.<sun.awt.datatransfer.DataTransferer: java.lang.Object constructFlavoredObject(java.lang.Object,java.awt.datatransfer.DataFlavor,java.lang.Class)>(r5, r0, class "Ljava/io/InputStream;");
+
+        return $r6;
+    }
+
+    private java.lang.Object constructFlavoredObject(java.lang.Object, java.awt.datatransfer.DataFlavor, java.lang.Class) throws java.io.IOException
+    {
+        sun.awt.datatransfer.DataTransferer r4;
+        java.lang.SecurityException $r25;
+        boolean $z0, $z1, $z2;
+        java.lang.Exception $r22;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r16;
+        java.lang.Object[] $r7;
+        java.awt.datatransfer.DataFlavor r0;
+        java.lang.reflect.Constructor $r18, $r19, r29;
+        java.lang.reflect.Constructor[] $r6, r28;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r15, $r17, $r24, $r27;
+        sun.awt.datatransfer.DataTransferer$4 $r3;
+        java.lang.Class[] $r20;
+        java.io.IOException $r10, $r23, $r26;
+        java.lang.Class $r1, r2, $r21;
+        java.lang.Object $r5, r8, $r9;
+
+        r4 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r8 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        r2 := @parameter2: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z0 = virtualinvoke r2.<java.lang.Object: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        return r8;
+
+     label01:
+        $r3 = new sun.awt.datatransfer.DataTransferer$4;
+
+        specialinvoke $r3.<sun.awt.datatransfer.DataTransferer$4: void <init>(sun.awt.datatransfer.DataTransferer,java.lang.Class)>(r4, $r1);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r6 = (java.lang.reflect.Constructor[]) $r5;
+
+        r28 = (java.lang.reflect.Constructor[]) $r6;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r25 := @caughtexception;
+
+        $r26 = new java.io.IOException;
+
+        $r27 = virtualinvoke $r25.<java.lang.SecurityException: java.lang.String getMessage()>();
+
+        specialinvoke $r26.<java.io.IOException: void <init>(java.lang.String)>($r27);
+
+        throw $r26;
+
+     label04:
+        r29 = null;
+
+        i3 = 0;
+
+     label05:
+        $i0 = lengthof r28;
+
+        if i3 >= $i0 goto label08;
+
+        $r18 = r28[i3];
+
+        $i1 = virtualinvoke $r18.<java.lang.reflect.Constructor: int getModifiers()>();
+
+        $z1 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i1);
+
+        if $z1 != 0 goto label06;
+
+        goto label07;
+
+     label06:
+        $r19 = r28[i3];
+
+        $r20 = virtualinvoke $r19.<java.lang.reflect.Constructor: java.lang.Class[] getParameterTypes()>();
+
+        if $r20 == null goto label07;
+
+        $i2 = lengthof $r20;
+
+        if $i2 != 1 goto label07;
+
+        $r21 = $r20[0];
+
+        $z2 = virtualinvoke r2.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        if $z2 == 0 goto label07;
+
+        r29 = r28[i3];
+
+        goto label08;
+
+     label07:
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label08:
+        if r29 != null goto label09;
+
+        $r10 = new java.io.IOException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("can\'t find <init>(L");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";)V for class: ");
+
+        $r15 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>($r17);
+
+        throw $r10;
+
+     label09:
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = r8;
+
+        $r9 = virtualinvoke r29.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r7);
+
+     label10:
+        return $r9;
+
+     label11:
+        $r22 := @caughtexception;
+
+        $r23 = new java.io.IOException;
+
+        $r24 = virtualinvoke $r22.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r23.<java.io.IOException: void <init>(java.lang.String)>($r24);
+
+        throw $r23;
+
+        catch java.lang.SecurityException from label01 to label02 with label03;
+        catch java.lang.Exception from label09 to label10 with label11;
+    }
+
+    protected abstract java.lang.String[] dragQueryFile(byte[]);
+
+    protected java.net.URI[] dragQueryURIs(java.io.InputStream, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r1;
+        java.awt.datatransfer.Transferable r4;
+        sun.awt.datatransfer.DataTransferer r2;
+        java.io.IOException $r0;
+        long l0;
+        java.io.InputStream r3;
+
+        r2 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        l0 := @parameter1: long;
+
+        r4 := @parameter2: java.awt.datatransfer.Transferable;
+
+        $r0 = new java.io.IOException;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("not implemented on this platform");
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.Throwable)>($r1);
+
+        throw $r0;
+    }
+
+    protected abstract java.awt.Image platformImageBytesToImage(byte[], long) throws java.io.IOException;
+
+    protected java.awt.Image standardImageBytesToImage(byte[], java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r20, $r21, $r22, $r24, r28;
+        byte[] r10;
+        sun.awt.datatransfer.DataTransferer r26;
+        java.io.ByteArrayInputStream $r9;
+        int $i0;
+        java.lang.String r0, $r6, $r18;
+        boolean $z0, $z1;
+        javax.imageio.ImageReader r8;
+        java.util.Iterator $r1;
+        java.awt.image.BufferedImage $r13;
+        java.io.IOException $r2, $r14, $r19, r27;
+        javax.imageio.stream.ImageInputStream $r11;
+        javax.imageio.ImageReadParam $r12;
+        java.lang.StringBuilder $r3, $r4, $r5, $r15, $r16, $r17;
+        java.lang.Object $r7;
+
+        r26 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r10 := @parameter0: byte[];
+
+        r0 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageReadersByMIMEType(java.lang.String)>(r0);
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label01;
+
+        $r14 = new java.io.IOException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No registered service provider can decode  an image from ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>($r18);
+
+        throw $r14;
+
+     label01:
+        r27 = null;
+
+     label02:
+        $z1 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label26;
+
+        $r7 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (javax.imageio.ImageReader) $r7;
+
+     label03:
+        $r9 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r9.<java.io.ByteArrayInputStream: void <init>(byte[])>(r10);
+
+        r28 = null;
+
+     label04:
+        $r11 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageInputStream createImageInputStream(java.lang.Object)>($r9);
+
+     label05:
+        $r12 = virtualinvoke r8.<javax.imageio.ImageReader: javax.imageio.ImageReadParam getDefaultReadParam()>();
+
+        virtualinvoke r8.<javax.imageio.ImageReader: void setInput(java.lang.Object,boolean,boolean)>($r11, 1, 1);
+
+        $i0 = virtualinvoke r8.<javax.imageio.ImageReader: int getMinIndex()>();
+
+        $r13 = virtualinvoke r8.<javax.imageio.ImageReader: java.awt.image.BufferedImage read(int,javax.imageio.ImageReadParam)>($i0, $r12);
+
+        if $r13 == null goto label10;
+
+     label06:
+        interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: void close()>();
+
+        virtualinvoke r8.<javax.imageio.ImageReader: void dispose()>();
+
+     label07:
+        if $r9 == null goto label09;
+
+        goto label08;
+
+     label08:
+        virtualinvoke $r9.<java.io.ByteArrayInputStream: void close()>();
+
+     label09:
+        return $r13;
+
+     label10:
+        interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: void close()>();
+
+        virtualinvoke r8.<javax.imageio.ImageReader: void dispose()>();
+
+        goto label13;
+
+     label11:
+        $r24 := @caughtexception;
+
+     label12:
+        interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: void close()>();
+
+        virtualinvoke r8.<javax.imageio.ImageReader: void dispose()>();
+
+        throw $r24;
+
+     label13:
+        if $r9 == null goto label23;
+
+        goto label14;
+
+     label14:
+        virtualinvoke $r9.<java.io.ByteArrayInputStream: void close()>();
+
+        goto label23;
+
+     label15:
+        $r22 := @caughtexception;
+
+        r28 = $r22;
+
+        throw $r22;
+
+     label16:
+        $r21 := @caughtexception;
+
+     label17:
+        if $r9 == null goto label22;
+
+        if r28 == null goto label21;
+
+     label18:
+        virtualinvoke $r9.<java.io.ByteArrayInputStream: void close()>();
+
+     label19:
+        goto label22;
+
+     label20:
+        $r20 := @caughtexception;
+
+        virtualinvoke r28.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r20);
+
+        goto label22;
+
+     label21:
+        virtualinvoke $r9.<java.io.ByteArrayInputStream: void close()>();
+
+     label22:
+        throw $r21;
+
+     label23:
+        goto label25;
+
+     label24:
+        $r19 := @caughtexception;
+
+        r27 = $r19;
+
+        goto label02;
+
+     label25:
+        goto label02;
+
+     label26:
+        if r27 != null goto label27;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Registered service providers failed to decode an image from ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        r27 = $r2;
+
+     label27:
+        throw r27;
+
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label04 to label07 with label15;
+        catch java.lang.Throwable from label10 to label13 with label15;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label15 to label17 with label16;
+        catch java.io.IOException from label03 to label09 with label24;
+        catch java.io.IOException from label10 to label23 with label24;
+    }
+
+    protected abstract byte[] imageToPlatformBytes(java.awt.Image, long) throws java.io.IOException;
+
+    protected byte[] imageToStandardBytes(java.awt.Image, java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r19;
+        byte[] $r8, $r12;
+        sun.awt.image.ToolkitImage $r9;
+        sun.awt.datatransfer.DataTransferer r7;
+        sun.awt.image.ImageRepresentation $r10;
+        int i0, i1;
+        java.lang.String r0, $r17;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r1;
+        java.awt.Image r2;
+        java.awt.image.BufferedImage $r5;
+        java.awt.image.RenderedImage $r11;
+        java.io.IOException $r13, $r18, $r20, r21;
+        java.awt.image.ColorModel $r3;
+        java.awt.Graphics $r6;
+        java.awt.image.WritableRaster $r4;
+        java.lang.StringBuilder $r14, $r15, $r16;
+
+        r7 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.awt.Image;
+
+        r0 := @parameter1: java.lang.String;
+
+        r21 = null;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageWritersByMIMEType(java.lang.String)>(r0);
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label01;
+
+        $r13 = new java.io.IOException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No registered service provider can encode  an image to ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>($r17);
+
+        throw $r13;
+
+     label01:
+        $z1 = r2 instanceof java.awt.image.RenderedImage;
+
+        if $z1 == 0 goto label05;
+
+     label02:
+        $r11 = (java.awt.image.RenderedImage) r2;
+
+        $r12 = virtualinvoke r7.<sun.awt.datatransfer.DataTransferer: byte[] imageToStandardBytesImpl(java.awt.image.RenderedImage,java.lang.String)>($r11, r0);
+
+     label03:
+        return $r12;
+
+     label04:
+        $r20 := @caughtexception;
+
+        r21 = $r20;
+
+     label05:
+        $z2 = r2 instanceof sun.awt.image.ToolkitImage;
+
+        if $z2 == 0 goto label06;
+
+        $r9 = (sun.awt.image.ToolkitImage) r2;
+
+        $r10 = virtualinvoke $r9.<sun.awt.image.ToolkitImage: sun.awt.image.ImageRepresentation getImageRep()>();
+
+        virtualinvoke $r10.<sun.awt.image.ImageRepresentation: void reconstruct(int)>(32);
+
+        i0 = virtualinvoke $r10.<sun.awt.image.ImageRepresentation: int getWidth()>();
+
+        i1 = virtualinvoke $r10.<sun.awt.image.ImageRepresentation: int getHeight()>();
+
+        goto label07;
+
+     label06:
+        i0 = virtualinvoke r2.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>(null);
+
+        i1 = virtualinvoke r2.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>(null);
+
+     label07:
+        $r3 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>(i0, i1);
+
+        $r5 = new java.awt.image.BufferedImage;
+
+        $z3 = virtualinvoke $r3.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        specialinvoke $r5.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r3, $r4, $z3, null);
+
+        $r6 = virtualinvoke $r5.<java.awt.image.BufferedImage: java.awt.Graphics getGraphics()>();
+
+     label08:
+        virtualinvoke $r6.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,int,int,java.awt.image.ImageObserver)>(r2, 0, 0, i0, i1, null);
+
+     label09:
+        virtualinvoke $r6.<java.awt.Graphics: void dispose()>();
+
+        goto label12;
+
+     label10:
+        $r19 := @caughtexception;
+
+     label11:
+        virtualinvoke $r6.<java.awt.Graphics: void dispose()>();
+
+        throw $r19;
+
+     label12:
+        $r8 = virtualinvoke r7.<sun.awt.datatransfer.DataTransferer: byte[] imageToStandardBytesImpl(java.awt.image.RenderedImage,java.lang.String)>($r5, r0);
+
+     label13:
+        return $r8;
+
+     label14:
+        $r18 := @caughtexception;
+
+        if r21 == null goto label15;
+
+        throw r21;
+
+     label15:
+        throw $r18;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.io.IOException from label12 to label13 with label14;
+    }
+
+    protected byte[] imageToStandardBytesImpl(java.awt.image.RenderedImage, java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r18;
+        byte[] $r16;
+        java.io.ByteArrayOutputStream $r4;
+        javax.imageio.ImageTypeSpecifier $r2;
+        sun.awt.datatransfer.DataTransferer r19;
+        javax.imageio.spi.ImageWriterSpi $r14;
+        java.lang.String r0, $r11;
+        boolean $z0, $z1;
+        java.util.Iterator $r1;
+        java.awt.image.RenderedImage r3;
+        java.io.IOException $r5, $r17, r20;
+        javax.imageio.stream.ImageOutputStream $r15;
+        javax.imageio.ImageWriter r13;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10;
+        java.lang.Object $r12;
+
+        r19 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r3 := @parameter0: java.awt.image.RenderedImage;
+
+        r0 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageWritersByMIMEType(java.lang.String)>(r0);
+
+        $r2 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r2.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.RenderedImage)>(r3);
+
+        $r4 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r4.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r20 = null;
+
+     label01:
+        $z1 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r12 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (javax.imageio.ImageWriter) $r12;
+
+        $r14 = virtualinvoke r13.<javax.imageio.ImageWriter: javax.imageio.spi.ImageWriterSpi getOriginatingProvider()>();
+
+        $z0 = virtualinvoke $r14.<javax.imageio.spi.ImageWriterSpi: boolean canEncodeImage(javax.imageio.ImageTypeSpecifier)>($r2);
+
+        if $z0 != 0 goto label02;
+
+        goto label01;
+
+     label02:
+        $r15 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageOutputStream createImageOutputStream(java.lang.Object)>($r4);
+
+     label03:
+        virtualinvoke r13.<javax.imageio.ImageWriter: void setOutput(java.lang.Object)>($r15);
+
+        virtualinvoke r13.<javax.imageio.ImageWriter: void write(java.awt.image.RenderedImage)>(r3);
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void flush()>();
+
+     label04:
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        goto label07;
+
+     label05:
+        $r18 := @caughtexception;
+
+     label06:
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        throw $r18;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r17 := @caughtexception;
+
+        virtualinvoke r13.<javax.imageio.ImageWriter: void dispose()>();
+
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void reset()>();
+
+        r20 = $r17;
+
+        goto label01;
+
+     label09:
+        virtualinvoke r13.<javax.imageio.ImageWriter: void dispose()>();
+
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void close()>();
+
+        $r16 = virtualinvoke $r4.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r16;
+
+     label10:
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void close()>();
+
+        if r20 != null goto label11;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Registered service providers failed to encode ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r11);
+
+        r20 = $r5;
+
+     label11:
+        throw r20;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.io.IOException from label02 to label07 with label08;
+    }
+
+    private java.lang.Object concatData(java.lang.Object, java.lang.Object)
+    {
+        byte[] $r3, $r4, $r5, r6, $r8, r9, r10;
+        sun.awt.datatransfer.DataTransferer r11;
+        java.io.ByteArrayInputStream $r2, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1, $z2;
+        java.io.SequenceInputStream $r14;
+        java.lang.Object r0, r1;
+        java.io.InputStream r12, r13;
+
+        r11 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof byte[];
+
+        if $z0 == 0 goto label2;
+
+        $r5 = (byte[]) r0;
+
+        r6 = (byte[]) $r5;
+
+        $z2 = r1 instanceof byte[];
+
+        if $z2 == 0 goto label1;
+
+        $r8 = (byte[]) r1;
+
+        r9 = (byte[]) $r8;
+
+        $i1 = lengthof r6;
+
+        $i0 = lengthof r9;
+
+        $i2 = $i1 + $i0;
+
+        r10 = newarray (byte)[$i2];
+
+        $i3 = lengthof r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r6, 0, r10, 0, $i3);
+
+        $i5 = lengthof r6;
+
+        $i4 = lengthof r9;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r9, 0, r10, $i5, $i4);
+
+        return r10;
+
+     label1:
+        $r7 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r7.<java.io.ByteArrayInputStream: void <init>(byte[])>(r6);
+
+        r12 = $r7;
+
+        r13 = (java.io.InputStream) r1;
+
+        goto label4;
+
+     label2:
+        r12 = (java.io.InputStream) r0;
+
+        $z1 = r1 instanceof byte[];
+
+        if $z1 == 0 goto label3;
+
+        $r2 = new java.io.ByteArrayInputStream;
+
+        $r3 = (byte[]) r1;
+
+        $r4 = (byte[]) $r3;
+
+        specialinvoke $r2.<java.io.ByteArrayInputStream: void <init>(byte[])>($r4);
+
+        r13 = $r2;
+
+        goto label4;
+
+     label3:
+        r13 = (java.io.InputStream) r1;
+
+     label4:
+        $r14 = new java.io.SequenceInputStream;
+
+        specialinvoke $r14.<java.io.SequenceInputStream: void <init>(java.io.InputStream,java.io.InputStream)>(r12, r13);
+
+        return $r14;
+    }
+
+    public byte[] convertData(java.lang.Object, java.awt.datatransfer.Transferable, long, java.util.Map, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r14;
+        byte[] $r11, r16;
+        sun.awt.datatransfer.ToolkitThreadBlockedHandler $r9, $r12, $r13, $r15;
+        java.awt.datatransfer.DataFlavor r17;
+        java.awt.datatransfer.Transferable r4;
+        sun.awt.datatransfer.DataTransferer r3;
+        long l0;
+        java.util.Stack $r5;
+        java.lang.Long $r1;
+        java.util.Map r0;
+        sun.awt.AppContext $r8;
+        boolean z0, $z1;
+        sun.awt.datatransfer.DataTransferer$5 $r6;
+        java.lang.Object $r2, r7, $r10;
+
+        r3 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.awt.datatransfer.Transferable;
+
+        l0 := @parameter2: long;
+
+        r0 := @parameter3: java.util.Map;
+
+        z0 := @parameter4: boolean;
+
+        r16 = null;
+
+        if z0 == 0 goto label10;
+
+     label01:
+        $r5 = new java.util.Stack;
+
+        specialinvoke $r5.<java.util.Stack: void <init>()>();
+
+        $r6 = new sun.awt.datatransfer.DataTransferer$5;
+
+        specialinvoke $r6.<sun.awt.datatransfer.DataTransferer$5: void <init>(sun.awt.datatransfer.DataTransferer,java.util.Map,long,java.awt.datatransfer.Transferable,java.util.Stack)>(r3, r0, l0, r4, $r5);
+
+        $r8 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r7);
+
+        $r9 = virtualinvoke r3.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r9.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void lock()>();
+
+        if $r8 == null goto label02;
+
+        virtualinvoke $r8.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>("DATA_CONVERTER_KEY", $r6);
+
+     label02:
+        staticinvoke <sun.awt.SunToolkit: void executeOnEventHandlerThread(java.lang.Object,java.lang.Runnable)>(r7, $r6);
+
+     label03:
+        $z1 = virtualinvoke $r5.<java.util.Stack: boolean empty()>();
+
+        if $z1 == 0 goto label04;
+
+        $r13 = virtualinvoke r3.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r13.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void enter()>();
+
+        goto label03;
+
+     label04:
+        if $r8 == null goto label05;
+
+        virtualinvoke $r8.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>("DATA_CONVERTER_KEY");
+
+     label05:
+        $r10 = virtualinvoke $r5.<java.util.Stack: java.lang.Object pop()>();
+
+        $r11 = (byte[]) $r10;
+
+        r16 = (byte[]) $r11;
+
+     label06:
+        $r12 = virtualinvoke r3.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r12.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void unlock()>();
+
+        goto label09;
+
+     label07:
+        $r14 := @caughtexception;
+
+     label08:
+        $r15 = virtualinvoke r3.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r15.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void unlock()>();
+
+        throw $r14;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r1 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        r17 = (java.awt.datatransfer.DataFlavor) $r2;
+
+        if r17 == null goto label11;
+
+        r16 = virtualinvoke r3.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r4, r17, l0);
+
+     label11:
+        return r16;
+
+        catch java.lang.Throwable from label01 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public void processDataConversionRequests()
+    {
+        java.lang.Throwable $r6;
+        sun.awt.datatransfer.ToolkitThreadBlockedHandler $r2, $r5, $r7;
+        sun.awt.datatransfer.DataTransferer r1;
+        java.lang.Runnable r4;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        $z0 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z0 == 0 goto label4;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r2.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void lock()>();
+
+     label1:
+        $r3 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>("DATA_CONVERTER_KEY");
+
+        r4 = (java.lang.Runnable) $r3;
+
+        if r4 == null goto label2;
+
+        interfaceinvoke r4.<java.lang.Runnable: void run()>();
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>("DATA_CONVERTER_KEY");
+
+     label2:
+        $r5 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r5.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()>();
+
+        interfaceinvoke $r7.<sun.awt.datatransfer.ToolkitThreadBlockedHandler: void unlock()>();
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public abstract sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler();
+
+    public static long[] keysToLongArray(java.util.SortedMap)
+    {
+        java.util.Iterator $r3;
+        java.util.Set $r1;
+        long $l1;
+        long[] r2;
+        java.lang.Long $r5;
+        int $i0, i2;
+        java.lang.Object $r4;
+        java.util.SortedMap r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.SortedMap;
+
+        $r1 = interfaceinvoke r0.<java.util.SortedMap: java.util.Set keySet()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.Set: int size()>();
+
+        r2 = newarray (long)[$i0];
+
+        i2 = 0;
+
+        $r3 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.Long) $r4;
+
+        $l1 = virtualinvoke $r5.<java.lang.Long: long longValue()>();
+
+        r2[i2] = $l1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    public static java.awt.datatransfer.DataFlavor[] setToSortedDataFlavorArray(java.util.Set)
+    {
+        int $i0;
+        java.awt.datatransfer.DataFlavor[] r1;
+        sun.awt.datatransfer.DataTransferer$DataFlavorComparator $r2;
+        java.util.Set r0;
+
+        r0 := @parameter0: java.util.Set;
+
+        $i0 = interfaceinvoke r0.<java.util.Set: int size()>();
+
+        r1 = newarray (java.awt.datatransfer.DataFlavor)[$i0];
+
+        interfaceinvoke r0.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>(r1);
+
+        $r2 = new sun.awt.datatransfer.DataTransferer$DataFlavorComparator;
+
+        specialinvoke $r2.<sun.awt.datatransfer.DataTransferer$DataFlavorComparator: void <init>(boolean)>(0);
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],java.util.Comparator)>(r1, $r2);
+
+        return r1;
+    }
+
+    protected static byte[] inputStreamToByteArray(java.io.InputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5, $r6, r8;
+        byte[] r1, $r3;
+        java.io.ByteArrayOutputStream $r9;
+        int $i0, $i2;
+        java.io.InputStream r2;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r9 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r9.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r8 = null;
+
+     label01:
+        r1 = newarray (byte)[8192];
+
+     label02:
+        $i0 = virtualinvoke r2.<java.io.InputStream: int read(byte[])>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label03;
+
+        virtualinvoke $r9.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r1, 0, $i0);
+
+        goto label02;
+
+     label03:
+        $r3 = virtualinvoke $r9.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label04:
+        if $r9 == null goto label06;
+
+        goto label05;
+
+     label05:
+        virtualinvoke $r9.<java.io.ByteArrayOutputStream: void close()>();
+
+     label06:
+        return $r3;
+
+     label07:
+        $r6 := @caughtexception;
+
+        r8 = $r6;
+
+        throw $r6;
+
+     label08:
+        $r5 := @caughtexception;
+
+     label09:
+        if $r9 == null goto label14;
+
+        if r8 == null goto label13;
+
+     label10:
+        virtualinvoke $r9.<java.io.ByteArrayOutputStream: void close()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r4 := @caughtexception;
+
+        virtualinvoke r8.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r4);
+
+        goto label14;
+
+     label13:
+        virtualinvoke $r9.<java.io.ByteArrayOutputStream: void close()>();
+
+     label14:
+        throw $r5;
+
+        catch java.lang.Throwable from label01 to label04 with label07;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+    }
+
+    public java.util.LinkedHashSet getPlatformMappingsForNative(java.lang.String)
+    {
+        sun.awt.datatransfer.DataTransferer r1;
+        java.lang.String r2;
+        java.util.LinkedHashSet $r0;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.LinkedHashSet;
+
+        specialinvoke $r0.<java.util.LinkedHashSet: void <init>()>();
+
+        return $r0;
+    }
+
+    public java.util.LinkedHashSet getPlatformMappingsForFlavor(java.awt.datatransfer.DataFlavor)
+    {
+        sun.awt.datatransfer.DataTransferer r1;
+        java.awt.datatransfer.DataFlavor r2;
+        java.util.LinkedHashSet $r0;
+
+        r1 := @this: sun.awt.datatransfer.DataTransferer;
+
+        r2 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        $r0 = new java.util.LinkedHashSet;
+
+        specialinvoke $r0.<java.util.LinkedHashSet: void <init>()>();
+
+        return $r0;
+    }
+
+    static boolean access$100(java.io.File)
+    {
+        java.io.File r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = staticinvoke <sun.awt.datatransfer.DataTransferer: boolean isFileInWebstartedCache(java.io.File)>(r0);
+
+        return $z0;
+    }
+
+    static boolean access$200(sun.awt.datatransfer.DataTransferer, java.io.File, java.security.ProtectionDomain)
+    {
+        java.security.ProtectionDomain r2;
+        sun.awt.datatransfer.DataTransferer r0;
+        java.io.File r1;
+        boolean $z0;
+
+        r0 := @parameter0: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter1: java.io.File;
+
+        r2 := @parameter2: java.security.ProtectionDomain;
+
+        $z0 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: boolean isForbiddenToRead(java.io.File,java.security.ProtectionDomain)>(r1, r2);
+
+        return $z0;
+    }
+
+    static java.io.File access$300(sun.awt.datatransfer.DataTransferer, java.lang.Object) throws java.io.IOException
+    {
+        sun.awt.datatransfer.DataTransferer r0;
+        java.lang.Object r1;
+        java.io.File $r2;
+
+        r0 := @parameter0: sun.awt.datatransfer.DataTransferer;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $r2 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.io.File castToFile(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    static java.util.Map access$400()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeEOLNs>;
+
+        return $r0;
+    }
+
+    static java.util.Map access$500()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.datatransfer.DataTransferer: java.util.Map nativeTerminators>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Map $r3, $r5, $r7, $r27;
+        java.util.Set $r1;
+        java.awt.datatransfer.DataFlavor $r9, $r10, r32, r33;
+        java.util.HashMap $r2, $r4, $r6, $r11;
+        java.lang.String[] $r28;
+        java.util.ArrayList $r29;
+        java.util.HashSet $r0;
+        java.lang.Boolean $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26;
+        sun.util.logging.PlatformLogger $r8;
+        java.lang.ClassNotFoundException $r30, $r31;
+
+        <sun.awt.datatransfer.DataTransferer: java.lang.String DATA_CONVERTER_KEY> = "DATA_CONVERTER_KEY";
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r0);
+
+        <sun.awt.datatransfer.DataTransferer: java.util.Set textNatives> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r2);
+
+        <sun.awt.datatransfer.DataTransferer: java.util.Map nativeCharsets> = $r3;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r4);
+
+        <sun.awt.datatransfer.DataTransferer: java.util.Map nativeEOLNs> = $r5;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        $r7 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r6);
+
+        <sun.awt.datatransfer.DataTransferer: java.util.Map nativeTerminators> = $r7;
+
+        $r8 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.datatransfer.DataTransfer");
+
+        <sun.awt.datatransfer.DataTransferer: sun.util.logging.PlatformLogger dtLog> = $r8;
+
+        r32 = null;
+
+     label1:
+        $r9 = new java.awt.datatransfer.DataFlavor;
+
+        specialinvoke $r9.<java.awt.datatransfer.DataFlavor: void <init>(java.lang.String)>("text/plain;charset=Unicode;class=java.lang.String");
+
+        r32 = $r9;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r31 := @caughtexception;
+
+     label4:
+        <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor plainTextStringFlavor> = r32;
+
+        r33 = null;
+
+     label5:
+        $r10 = new java.awt.datatransfer.DataFlavor;
+
+        specialinvoke $r10.<java.awt.datatransfer.DataFlavor: void <init>(java.lang.String)>("application/x-java-text-encoding;class=\"[B\"");
+
+        r33 = $r10;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r30 := @caughtexception;
+
+     label8:
+        <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor> = r33;
+
+        $r11 = new java.util.HashMap;
+
+        specialinvoke $r11.<java.util.HashMap: void <init>(int)>(17);
+
+        $r12 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("sgml", $r12);
+
+        $r13 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("xml", $r13);
+
+        $r14 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("html", $r14);
+
+        $r15 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("enriched", $r15);
+
+        $r16 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("richtext", $r16);
+
+        $r17 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("uri-list", $r17);
+
+        $r18 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("directory", $r18);
+
+        $r19 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("css", $r19);
+
+        $r20 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("calendar", $r20);
+
+        $r21 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("plain", $r21);
+
+        $r22 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("rtf", $r22);
+
+        $r23 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("tab-separated-values", $r23);
+
+        $r24 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("t140", $r24);
+
+        $r25 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("rfc822-headers", $r25);
+
+        $r26 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("parityfec", $r26);
+
+        $r27 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r11);
+
+        <sun.awt.datatransfer.DataTransferer: java.util.Map textMIMESubtypeCharsetSupport> = $r27;
+
+        $r28 = newarray (java.lang.String)[4];
+
+        $r28[0] = "deployment.system.cachedir";
+
+        $r28[1] = "deployment.user.cachedir";
+
+        $r28[2] = "deployment.javaws.cachedir";
+
+        $r28[3] = "deployment.javapi.cachedir";
+
+        <sun.awt.datatransfer.DataTransferer: java.lang.String[] DEPLOYMENT_CACHE_PROPERTIES> = $r28;
+
+        $r29 = new java.util.ArrayList;
+
+        specialinvoke $r29.<java.util.ArrayList: void <init>()>();
+
+        <sun.awt.datatransfer.DataTransferer: java.util.ArrayList deploymentCacheDirectoryList> = $r29;
+
+        return;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.ClassNotFoundException from label5 to label6 with label7;
+    }
+}

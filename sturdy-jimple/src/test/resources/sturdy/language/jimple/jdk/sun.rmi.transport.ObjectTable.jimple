@@ -1,0 +1,728 @@
+public final class sun.rmi.transport.ObjectTable extends java.lang.Object
+{
+    private static final long gcInterval;
+    private static final java.lang.Object tableLock;
+    private static final java.util.Map objTable;
+    private static final java.util.Map implTable;
+    private static final java.lang.Object keepAliveLock;
+    private static int keepAliveCount;
+    private static java.lang.Thread reaper;
+    static final java.lang.ref.ReferenceQueue reapQueue;
+    private static sun.misc.GC$LatencyRequest gcLatencyRequest;
+
+    private void <init>()
+    {
+        sun.rmi.transport.ObjectTable r0;
+
+        r0 := @this: sun.rmi.transport.ObjectTable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static sun.rmi.transport.Target getTarget(sun.rmi.transport.ObjectEndpoint)
+    {
+        java.lang.Throwable $r5;
+        sun.rmi.transport.ObjectEndpoint r1;
+        java.util.Map $r2;
+        java.lang.Object $r0, $r3;
+        sun.rmi.transport.Target $r4;
+
+        r1 := @parameter0: sun.rmi.transport.ObjectEndpoint;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (sun.rmi.transport.Target) $r3;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static sun.rmi.transport.Target getTarget(java.rmi.Remote)
+    {
+        java.lang.Throwable $r6;
+        sun.rmi.transport.WeakRef $r1;
+        java.rmi.Remote r2;
+        java.util.Map $r3;
+        java.lang.Object $r0, $r4;
+        sun.rmi.transport.Target $r5;
+
+        r2 := @parameter0: java.rmi.Remote;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = <sun.rmi.transport.ObjectTable: java.util.Map implTable>;
+
+        $r1 = new sun.rmi.transport.WeakRef;
+
+        specialinvoke $r1.<sun.rmi.transport.WeakRef: void <init>(java.lang.Object)>(r2);
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (sun.rmi.transport.Target) $r4;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static java.rmi.Remote getStub(java.rmi.Remote) throws java.rmi.NoSuchObjectException
+    {
+        java.rmi.Remote r0, $r2;
+        java.rmi.NoSuchObjectException $r3;
+        sun.rmi.transport.Target $r1;
+
+        r0 := @parameter0: java.rmi.Remote;
+
+        $r1 = staticinvoke <sun.rmi.transport.ObjectTable: sun.rmi.transport.Target getTarget(java.rmi.Remote)>(r0);
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.rmi.NoSuchObjectException;
+
+        specialinvoke $r3.<java.rmi.NoSuchObjectException: void <init>(java.lang.String)>("object not exported");
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke $r1.<sun.rmi.transport.Target: java.rmi.Remote getStub()>();
+
+        return $r2;
+    }
+
+    public static boolean unexportObject(java.rmi.Remote, boolean) throws java.rmi.NoSuchObjectException
+    {
+        java.lang.Throwable $r4;
+        java.rmi.Remote r1;
+        java.rmi.NoSuchObjectException $r3;
+        java.lang.Object $r0;
+        sun.rmi.transport.Target $r2;
+        boolean z0, $z1;
+
+        r1 := @parameter0: java.rmi.Remote;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = staticinvoke <sun.rmi.transport.ObjectTable: sun.rmi.transport.Target getTarget(java.rmi.Remote)>(r1);
+
+        if $r2 != null goto label2;
+
+        $r3 = new java.rmi.NoSuchObjectException;
+
+        specialinvoke $r3.<java.rmi.NoSuchObjectException: void <init>(java.lang.String)>("object not exported");
+
+        throw $r3;
+
+     label2:
+        $z1 = virtualinvoke $r2.<sun.rmi.transport.Target: boolean unexport(boolean)>(z0);
+
+        if $z1 == 0 goto label4;
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void removeTarget(sun.rmi.transport.Target)>($r2);
+
+        exitmonitor $r0;
+
+     label3:
+        return 1;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        return 0;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    static void putTarget(sun.rmi.transport.Target) throws java.rmi.server.ExportException
+    {
+        java.lang.Throwable $r19;
+        java.rmi.server.ExportException $r11, $r12;
+        java.util.logging.Level $r3, $r15;
+        sun.rmi.transport.WeakRef $r2;
+        java.util.Map $r7, $r8, $r9, $r10;
+        java.lang.String $r18;
+        boolean $z0, $z1, $z2, $z3;
+        java.rmi.Remote $r6;
+        sun.rmi.runtime.Log $r4, $r14;
+        sun.rmi.transport.ObjectEndpoint $r1;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r13, $r16, $r17;
+        sun.rmi.transport.Target r0;
+
+        r0 := @parameter0: sun.rmi.transport.Target;
+
+        $r1 = virtualinvoke r0.<sun.rmi.transport.Target: sun.rmi.transport.ObjectEndpoint getObjectEndpoint()>();
+
+        $r2 = virtualinvoke r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef getWeakImpl()>();
+
+        $r4 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r3 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r4.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r14 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r15 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("add object ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r15, $r18);
+
+     label1:
+        $r5 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r5;
+
+     label2:
+        $r6 = virtualinvoke r0.<sun.rmi.transport.Target: java.rmi.Remote getImpl()>();
+
+        if $r6 == null goto label5;
+
+        $r7 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        $z1 = interfaceinvoke $r7.<java.util.Map: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z1 == 0 goto label3;
+
+        $r12 = new java.rmi.server.ExportException;
+
+        specialinvoke $r12.<java.rmi.server.ExportException: void <init>(java.lang.String)>("internal error: ObjID already in use");
+
+        throw $r12;
+
+     label3:
+        $r8 = <sun.rmi.transport.ObjectTable: java.util.Map implTable>;
+
+        $z2 = interfaceinvoke $r8.<java.util.Map: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z2 == 0 goto label4;
+
+        $r11 = new java.rmi.server.ExportException;
+
+        specialinvoke $r11.<java.rmi.server.ExportException: void <init>(java.lang.String)>("object already exported");
+
+        throw $r11;
+
+     label4:
+        $r9 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r0);
+
+        $r10 = <sun.rmi.transport.ObjectTable: java.util.Map implTable>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r0);
+
+        $z3 = virtualinvoke r0.<sun.rmi.transport.Target: boolean isPermanent()>();
+
+        if $z3 != 0 goto label5;
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void incrementKeepAliveCount()>();
+
+     label5:
+        exitmonitor $r5;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r19 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label8:
+        throw $r19;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private static void removeTarget(sun.rmi.transport.Target)
+    {
+        java.util.logging.Level $r3, $r9;
+        sun.rmi.runtime.Log $r4, $r8;
+        sun.rmi.transport.WeakRef $r2;
+        sun.rmi.transport.ObjectEndpoint $r1;
+        java.util.Map $r5, $r6;
+        java.lang.StringBuilder $r7, $r10, $r11;
+        java.lang.String $r12;
+        sun.rmi.transport.Target r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.rmi.transport.Target;
+
+        $r1 = virtualinvoke r0.<sun.rmi.transport.Target: sun.rmi.transport.ObjectEndpoint getObjectEndpoint()>();
+
+        $r2 = virtualinvoke r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef getWeakImpl()>();
+
+        $r4 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r3 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r4.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r9 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("remove object ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r9, $r12);
+
+     label1:
+        $r5 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        $r6 = <sun.rmi.transport.ObjectTable: java.util.Map implTable>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        virtualinvoke r0.<sun.rmi.transport.Target: void markRemoved()>();
+
+        return;
+    }
+
+    static void referenced(java.rmi.server.ObjID, long, java.rmi.dgc.VMID)
+    {
+        java.lang.Throwable $r8;
+        sun.rmi.transport.Transport $r3;
+        long l0;
+        sun.rmi.transport.ObjectEndpoint $r1;
+        java.util.Map $r4;
+        java.lang.Object $r0, $r5;
+        sun.rmi.transport.Target r6;
+        java.rmi.dgc.VMID r7;
+        java.rmi.server.ObjID r2;
+
+        r2 := @parameter0: java.rmi.server.ObjID;
+
+        l0 := @parameter1: long;
+
+        r7 := @parameter2: java.rmi.dgc.VMID;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new sun.rmi.transport.ObjectEndpoint;
+
+        $r3 = staticinvoke <sun.rmi.transport.Transport: sun.rmi.transport.Transport currentTransport()>();
+
+        specialinvoke $r1.<sun.rmi.transport.ObjectEndpoint: void <init>(java.rmi.server.ObjID,sun.rmi.transport.Transport)>(r2, $r3);
+
+        $r4 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        r6 = (sun.rmi.transport.Target) $r5;
+
+        if r6 == null goto label2;
+
+        virtualinvoke r6.<sun.rmi.transport.Target: void referenced(long,java.rmi.dgc.VMID)>(l0, r7);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r8;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void unreferenced(java.rmi.server.ObjID, long, java.rmi.dgc.VMID, boolean)
+    {
+        java.lang.Throwable $r8;
+        sun.rmi.transport.Transport $r3;
+        long l0;
+        sun.rmi.transport.ObjectEndpoint $r1;
+        java.util.Map $r4;
+        java.lang.Object $r0, $r5;
+        sun.rmi.transport.Target r6;
+        java.rmi.dgc.VMID r7;
+        java.rmi.server.ObjID r2;
+        boolean z0;
+
+        r2 := @parameter0: java.rmi.server.ObjID;
+
+        l0 := @parameter1: long;
+
+        r7 := @parameter2: java.rmi.dgc.VMID;
+
+        z0 := @parameter3: boolean;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new sun.rmi.transport.ObjectEndpoint;
+
+        $r3 = staticinvoke <sun.rmi.transport.Transport: sun.rmi.transport.Transport currentTransport()>();
+
+        specialinvoke $r1.<sun.rmi.transport.ObjectEndpoint: void <init>(java.rmi.server.ObjID,sun.rmi.transport.Transport)>(r2, $r3);
+
+        $r4 = <sun.rmi.transport.ObjectTable: java.util.Map objTable>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        r6 = (sun.rmi.transport.Target) $r5;
+
+        if r6 == null goto label2;
+
+        virtualinvoke r6.<sun.rmi.transport.Target: void unreferenced(long,java.rmi.dgc.VMID,boolean)>(l0, r7, z0);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r8;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void incrementKeepAliveCount()
+    {
+        sun.misc.GC$LatencyRequest $r2, $r3;
+        java.lang.Throwable $r9;
+        long $l2;
+        sun.rmi.transport.ObjectTable$Reaper $r5;
+        java.lang.Thread $r1, $r7, $r8;
+        int $i0, $i1;
+        java.lang.Object $r0, $r6;
+        sun.rmi.runtime.NewThreadAction $r4;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object keepAliveLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = <sun.rmi.transport.ObjectTable: int keepAliveCount>;
+
+        $i1 = $i0 + 1;
+
+        <sun.rmi.transport.ObjectTable: int keepAliveCount> = $i1;
+
+        $r1 = <sun.rmi.transport.ObjectTable: java.lang.Thread reaper>;
+
+        if $r1 != null goto label2;
+
+        $r4 = new sun.rmi.runtime.NewThreadAction;
+
+        $r5 = new sun.rmi.transport.ObjectTable$Reaper;
+
+        specialinvoke $r5.<sun.rmi.transport.ObjectTable$Reaper: void <init>(sun.rmi.transport.ObjectTable$1)>(null);
+
+        specialinvoke $r4.<sun.rmi.runtime.NewThreadAction: void <init>(java.lang.Runnable,java.lang.String,boolean)>($r5, "Reaper", 0);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r7 = (java.lang.Thread) $r6;
+
+        <sun.rmi.transport.ObjectTable: java.lang.Thread reaper> = $r7;
+
+        $r8 = <sun.rmi.transport.ObjectTable: java.lang.Thread reaper>;
+
+        virtualinvoke $r8.<java.lang.Thread: void start()>();
+
+     label2:
+        $r2 = <sun.rmi.transport.ObjectTable: sun.misc.GC$LatencyRequest gcLatencyRequest>;
+
+        if $r2 != null goto label3;
+
+        $l2 = <sun.rmi.transport.ObjectTable: long gcInterval>;
+
+        $r3 = staticinvoke <sun.misc.GC: sun.misc.GC$LatencyRequest requestLatency(long)>($l2);
+
+        <sun.rmi.transport.ObjectTable: sun.misc.GC$LatencyRequest gcLatencyRequest> = $r3;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r9;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static void decrementKeepAliveCount()
+    {
+        sun.misc.GC$LatencyRequest $r3;
+        java.lang.Throwable $r5;
+        java.lang.AssertionError $r4;
+        java.lang.Thread $r1;
+        sun.rmi.transport.ObjectTable$1 $r2;
+        int $i0, $i1, $i2;
+        java.lang.Object $r0;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object keepAliveLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = <sun.rmi.transport.ObjectTable: int keepAliveCount>;
+
+        $i1 = $i0 - 1;
+
+        <sun.rmi.transport.ObjectTable: int keepAliveCount> = $i1;
+
+        $i2 = <sun.rmi.transport.ObjectTable: int keepAliveCount>;
+
+        if $i2 != 0 goto label3;
+
+        $r1 = <sun.rmi.transport.ObjectTable: java.lang.Thread reaper>;
+
+        if $r1 != null goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r2 = new sun.rmi.transport.ObjectTable$1;
+
+        specialinvoke $r2.<sun.rmi.transport.ObjectTable$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        <sun.rmi.transport.ObjectTable: java.lang.Thread reaper> = null;
+
+        $r3 = <sun.rmi.transport.ObjectTable: sun.misc.GC$LatencyRequest gcLatencyRequest>;
+
+        virtualinvoke $r3.<sun.misc.GC$LatencyRequest: void cancel()>();
+
+        <sun.rmi.transport.ObjectTable: sun.misc.GC$LatencyRequest gcLatencyRequest> = null;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r5;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static java.lang.Thread access$100()
+    {
+        java.lang.Thread $r0;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Thread reaper>;
+
+        return $r0;
+    }
+
+    static java.lang.Object access$200()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.lang.Object tableLock>;
+
+        return $r0;
+    }
+
+    static java.util.Map access$300()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.rmi.transport.ObjectTable: java.util.Map implTable>;
+
+        return $r0;
+    }
+
+    static void access$400(sun.rmi.transport.Target)
+    {
+        sun.rmi.transport.Target r0;
+
+        r0 := @parameter0: sun.rmi.transport.Target;
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void removeTarget(sun.rmi.transport.Target)>(r0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetLongAction $r0;
+        long $l0;
+        java.util.HashMap $r4, $r5;
+        java.lang.ref.ReferenceQueue $r7;
+        java.lang.Long $r2;
+        java.lang.Object $r1, $r3, $r6;
+
+        $r0 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r0.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.dgc.server.gcInterval", 3600000L);
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Long) $r1;
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.ObjectTable: long gcInterval> = $l0;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        <sun.rmi.transport.ObjectTable: java.lang.Object tableLock> = $r3;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        <sun.rmi.transport.ObjectTable: java.util.Map objTable> = $r4;
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        <sun.rmi.transport.ObjectTable: java.util.Map implTable> = $r5;
+
+        $r6 = new java.lang.Object;
+
+        specialinvoke $r6.<java.lang.Object: void <init>()>();
+
+        <sun.rmi.transport.ObjectTable: java.lang.Object keepAliveLock> = $r6;
+
+        <sun.rmi.transport.ObjectTable: int keepAliveCount> = 0;
+
+        <sun.rmi.transport.ObjectTable: java.lang.Thread reaper> = null;
+
+        $r7 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r7.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <sun.rmi.transport.ObjectTable: java.lang.ref.ReferenceQueue reapQueue> = $r7;
+
+        <sun.rmi.transport.ObjectTable: sun.misc.GC$LatencyRequest gcLatencyRequest> = null;
+
+        return;
+    }
+}

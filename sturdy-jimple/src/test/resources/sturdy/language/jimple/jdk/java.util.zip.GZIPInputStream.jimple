@@ -1,0 +1,602 @@
+public class java.util.zip.GZIPInputStream extends java.util.zip.InflaterInputStream
+{
+    protected java.util.zip.CRC32 crc;
+    protected boolean eos;
+    private boolean closed;
+    public static final int GZIP_MAGIC;
+    private static final int FTEXT;
+    private static final int FHCRC;
+    private static final int FEXTRA;
+    private static final int FNAME;
+    private static final int FCOMMENT;
+    private byte[] tmpbuf;
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r0;
+        java.io.IOException $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        $z0 = r0.<java.util.zip.GZIPInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public void <init>(java.io.InputStream, int) throws java.io.IOException
+    {
+        byte[] $r4;
+        java.util.zip.GZIPInputStream r0;
+        java.util.zip.Inflater $r2;
+        int i0;
+        java.util.zip.CRC32 $r3;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        $r2 = new java.util.zip.Inflater;
+
+        specialinvoke $r2.<java.util.zip.Inflater: void <init>(boolean)>(1);
+
+        specialinvoke r0.<java.util.zip.InflaterInputStream: void <init>(java.io.InputStream,java.util.zip.Inflater,int)>(r1, $r2, i0);
+
+        $r3 = new java.util.zip.CRC32;
+
+        specialinvoke $r3.<java.util.zip.CRC32: void <init>()>();
+
+        r0.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc> = $r3;
+
+        r0.<java.util.zip.GZIPInputStream: boolean closed> = 0;
+
+        $r4 = newarray (byte)[128];
+
+        r0.<java.util.zip.GZIPInputStream: byte[] tmpbuf> = $r4;
+
+        r0.<java.util.zip.GZIPInputStream: boolean usesDefaultInflater> = 1;
+
+        specialinvoke r0.<java.util.zip.GZIPInputStream: int readHeader(java.io.InputStream)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.util.zip.GZIPInputStream: void <init>(java.io.InputStream,int)>(r1, 512);
+
+        return;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.util.zip.GZIPInputStream r0;
+        int i0, i1, $i2, $i3, $i5, $i7;
+        java.util.zip.CRC32 $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.util.zip.GZIPInputStream: void ensureOpen()>();
+
+        $z0 = r0.<java.util.zip.GZIPInputStream: boolean eos>;
+
+        if $z0 == 0 goto label1;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+     label1:
+        $i2 = specialinvoke r0.<java.util.zip.InflaterInputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        $i7 = (int) -1;
+
+        if $i2 != $i7 goto label3;
+
+        $z1 = specialinvoke r0.<java.util.zip.GZIPInputStream: boolean readTrailer()>();
+
+        if $z1 == 0 goto label2;
+
+        r0.<java.util.zip.GZIPInputStream: boolean eos> = 1;
+
+        goto label4;
+
+     label2:
+        $i3 = virtualinvoke r0.<java.util.zip.GZIPInputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        return $i3;
+
+     label3:
+        $r2 = r0.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r2.<java.util.zip.CRC32: void update(byte[],int,int)>(r1, i0, $i2);
+
+     label4:
+        return $i2;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r0;
+        boolean $z0;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        $z0 = r0.<java.util.zip.GZIPInputStream: boolean closed>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<java.util.zip.InflaterInputStream: void close()>();
+
+        r0.<java.util.zip.GZIPInputStream: boolean eos> = 1;
+
+        r0.<java.util.zip.GZIPInputStream: boolean closed> = 1;
+
+     label1:
+        return;
+    }
+
+    private int readHeader(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r2;
+        java.util.zip.CheckedInputStream $r10;
+        long $l7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15, $i17, $i19;
+        java.util.zip.ZipException $r11, $r12, $r13;
+        java.util.zip.CRC32 $r3, $r4, $r5, $r6;
+        java.io.InputStream r1;
+
+        r2 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $r10 = new java.util.zip.CheckedInputStream;
+
+        $r3 = r2.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        specialinvoke $r10.<java.util.zip.CheckedInputStream: void <init>(java.io.InputStream,java.util.zip.Checksum)>(r1, $r3);
+
+        $r4 = r2.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r4.<java.util.zip.CRC32: void reset()>();
+
+        $i0 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUShort(java.io.InputStream)>($r10);
+
+        $i17 = (int) 35615;
+
+        if $i0 == $i17 goto label1;
+
+        $r11 = new java.util.zip.ZipException;
+
+        specialinvoke $r11.<java.util.zip.ZipException: void <init>(java.lang.String)>("Not in GZIP format");
+
+        throw $r11;
+
+     label1:
+        $i1 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>($r10);
+
+        if $i1 == 8 goto label2;
+
+        $r12 = new java.util.zip.ZipException;
+
+        specialinvoke $r12.<java.util.zip.ZipException: void <init>(java.lang.String)>("Unsupported compression method");
+
+        throw $r12;
+
+     label2:
+        $i2 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>($r10);
+
+        specialinvoke r2.<java.util.zip.GZIPInputStream: void skipBytes(java.io.InputStream,int)>($r10, 6);
+
+        i14 = 10;
+
+        $i3 = $i2 & 4;
+
+        if $i3 != 4 goto label3;
+
+        $i12 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUShort(java.io.InputStream)>($r10);
+
+        specialinvoke r2.<java.util.zip.GZIPInputStream: void skipBytes(java.io.InputStream,int)>($r10, $i12);
+
+        $i13 = $i12 + 2;
+
+        i14 = 10 + $i13;
+
+     label3:
+        $i4 = $i2 & 8;
+
+        if $i4 != 8 goto label5;
+
+     label4:
+        i14 = i14 + 1;
+
+        $i11 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>($r10);
+
+        if $i11 != 0 goto label4;
+
+     label5:
+        $i5 = $i2 & 16;
+
+        if $i5 != 16 goto label7;
+
+     label6:
+        i14 = i14 + 1;
+
+        $i10 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>($r10);
+
+        if $i10 != 0 goto label6;
+
+     label7:
+        $i6 = $i2 & 2;
+
+        if $i6 != 2 goto label9;
+
+        $r6 = r2.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        $l7 = virtualinvoke $r6.<java.util.zip.CRC32: long getValue()>();
+
+        $i8 = (int) $l7;
+
+        $i19 = (int) 65535;
+
+        i15 = $i8 & $i19;
+
+        $i9 = specialinvoke r2.<java.util.zip.GZIPInputStream: int readUShort(java.io.InputStream)>($r10);
+
+        if $i9 == i15 goto label8;
+
+        $r13 = new java.util.zip.ZipException;
+
+        specialinvoke $r13.<java.util.zip.ZipException: void <init>(java.lang.String)>("Corrupt GZIP header");
+
+        throw $r13;
+
+     label8:
+        i14 = i14 + 2;
+
+     label9:
+        $r5 = r2.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r5.<java.util.zip.CRC32: void reset()>();
+
+        return i14;
+    }
+
+    private boolean readTrailer() throws java.io.IOException
+    {
+        byte[] $r7, $r11;
+        java.util.zip.GZIPInputStream r0;
+        java.util.zip.Inflater $r1, $r4, $r6, $r8;
+        byte $b3, $b7;
+        java.io.ByteArrayInputStream $r10;
+        java.util.zip.ZipException $r3;
+        long $l1, $l2, $l4, $l5, $l6;
+        int $i0, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16;
+        java.io.SequenceInputStream $r9;
+        java.io.IOException $r13;
+        java.util.zip.CRC32 $r2;
+        java.util.zip.GZIPInputStream$1 $r12;
+        java.io.InputStream $r5, r14;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r14 = r0.<java.util.zip.GZIPInputStream: java.io.InputStream in>;
+
+        $r1 = r0.<java.util.zip.GZIPInputStream: java.util.zip.Inflater inf>;
+
+        $i0 = virtualinvoke $r1.<java.util.zip.Inflater: int getRemaining()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r9 = new java.io.SequenceInputStream;
+
+        $r10 = new java.io.ByteArrayInputStream;
+
+        $r11 = r0.<java.util.zip.GZIPInputStream: byte[] buf>;
+
+        $i15 = r0.<java.util.zip.GZIPInputStream: int len>;
+
+        $i16 = $i15 - $i0;
+
+        specialinvoke $r10.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r11, $i16, $i0);
+
+        $r12 = new java.util.zip.GZIPInputStream$1;
+
+        specialinvoke $r12.<java.util.zip.GZIPInputStream$1: void <init>(java.util.zip.GZIPInputStream,java.io.InputStream)>(r0, r14);
+
+        specialinvoke $r9.<java.io.SequenceInputStream: void <init>(java.io.InputStream,java.io.InputStream)>($r10, $r12);
+
+        r14 = $r9;
+
+     label1:
+        $l1 = specialinvoke r0.<java.util.zip.GZIPInputStream: long readUInt(java.io.InputStream)>(r14);
+
+        $r2 = r0.<java.util.zip.GZIPInputStream: java.util.zip.CRC32 crc>;
+
+        $l2 = virtualinvoke $r2.<java.util.zip.CRC32: long getValue()>();
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 != 0 goto label2;
+
+        $l4 = specialinvoke r0.<java.util.zip.GZIPInputStream: long readUInt(java.io.InputStream)>(r14);
+
+        $r4 = r0.<java.util.zip.GZIPInputStream: java.util.zip.Inflater inf>;
+
+        $l5 = virtualinvoke $r4.<java.util.zip.Inflater: long getBytesWritten()>();
+
+        $l6 = $l5 & 4294967295L;
+
+        $b7 = $l4 cmp $l6;
+
+        if $b7 == 0 goto label3;
+
+     label2:
+        $r3 = new java.util.zip.ZipException;
+
+        specialinvoke $r3.<java.util.zip.ZipException: void <init>(java.lang.String)>("Corrupt GZIP trailer");
+
+        throw $r3;
+
+     label3:
+        $r5 = r0.<java.util.zip.GZIPInputStream: java.io.InputStream in>;
+
+        $i8 = virtualinvoke $r5.<java.io.InputStream: int available()>();
+
+        if $i8 > 0 goto label4;
+
+        if $i0 <= 26 goto label9;
+
+     label4:
+        $i9 = specialinvoke r0.<java.util.zip.GZIPInputStream: int readHeader(java.io.InputStream)>(r14);
+
+        $i14 = 8 + $i9;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r13 := @caughtexception;
+
+        return 1;
+
+     label7:
+        $r6 = r0.<java.util.zip.GZIPInputStream: java.util.zip.Inflater inf>;
+
+        virtualinvoke $r6.<java.util.zip.Inflater: void reset()>();
+
+        if $i0 <= $i14 goto label8;
+
+        $r8 = r0.<java.util.zip.GZIPInputStream: java.util.zip.Inflater inf>;
+
+        $r7 = r0.<java.util.zip.GZIPInputStream: byte[] buf>;
+
+        $i10 = r0.<java.util.zip.GZIPInputStream: int len>;
+
+        $i11 = $i10 - $i0;
+
+        $i13 = $i11 + $i14;
+
+        $i12 = $i0 - $i14;
+
+        virtualinvoke $r8.<java.util.zip.Inflater: void setInput(byte[],int,int)>($r7, $i13, $i12);
+
+     label8:
+        return 0;
+
+     label9:
+        return 1;
+
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    private long readUInt(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r0;
+        long l1, $l3, $l4, $l5;
+        int $i0, $i2;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $i0 = specialinvoke r0.<java.util.zip.GZIPInputStream: int readUShort(java.io.InputStream)>(r1);
+
+        l1 = (long) $i0;
+
+        $i2 = specialinvoke r0.<java.util.zip.GZIPInputStream: int readUShort(java.io.InputStream)>(r1);
+
+        $l3 = (long) $i2;
+
+        $l4 = $l3 << 16;
+
+        $l5 = $l4 | l1;
+
+        return $l5;
+    }
+
+    private int readUShort(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r0;
+        int $i0, $i1, $i2, $i3;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.zip.GZIPInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $i0 = specialinvoke r0.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>(r1);
+
+        $i1 = specialinvoke r0.<java.util.zip.GZIPInputStream: int readUByte(java.io.InputStream)>(r1);
+
+        $i2 = $i1 << 8;
+
+        $i3 = $i2 | $i0;
+
+        return $i3;
+    }
+
+    private int readUByte(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.zip.GZIPInputStream r3;
+        java.io.IOException $r14;
+        java.io.EOFException $r12;
+        int $i0, $i2, $i4;
+        java.lang.Class $r5;
+        java.lang.StringBuilder $r7, $r8, $r9, $r13;
+        java.lang.String $r6, $r10;
+        java.io.InputStream r0, $r4;
+
+        r3 := @this: java.util.zip.GZIPInputStream;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        $i0 = virtualinvoke r0.<java.io.InputStream: int read()>();
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label1;
+
+        $r12 = new java.io.EOFException;
+
+        specialinvoke $r12.<java.io.EOFException: void <init>()>();
+
+        throw $r12;
+
+     label1:
+        $i4 = (int) -1;
+
+        if $i0 < $i4 goto label2;
+
+        if $i0 <= 255 goto label3;
+
+     label2:
+        $r14 = new java.io.IOException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r3.<java.util.zip.GZIPInputStream: java.io.InputStream in>;
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".read() returned value out of range -1..255: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>($r10);
+
+        throw $r14;
+
+     label3:
+        return $i0;
+    }
+
+    private void skipBytes(java.io.InputStream, int) throws java.io.IOException
+    {
+        byte[] $r2, $r3, $r4;
+        java.util.zip.GZIPInputStream r1;
+        java.io.EOFException $r6;
+        int $i0, $i1, i2, $i3, $i5;
+        java.io.InputStream r0;
+
+        r1 := @this: java.util.zip.GZIPInputStream;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        i2 := @parameter1: int;
+
+     label1:
+        if i2 <= 0 goto label5;
+
+        $r4 = r1.<java.util.zip.GZIPInputStream: byte[] tmpbuf>;
+
+        $r2 = r1.<java.util.zip.GZIPInputStream: byte[] tmpbuf>;
+
+        $i0 = lengthof $r2;
+
+        if i2 >= $i0 goto label2;
+
+        $i3 = i2;
+
+        goto label3;
+
+     label2:
+        $r3 = r1.<java.util.zip.GZIPInputStream: byte[] tmpbuf>;
+
+        $i3 = lengthof $r3;
+
+     label3:
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[],int,int)>($r4, 0, $i3);
+
+        $i5 = (int) -1;
+
+        if $i1 != $i5 goto label4;
+
+        $r6 = new java.io.EOFException;
+
+        specialinvoke $r6.<java.io.EOFException: void <init>()>();
+
+        throw $r6;
+
+     label4:
+        i2 = i2 - $i1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.zip.GZIPInputStream: int FCOMMENT> = 16;
+
+        <java.util.zip.GZIPInputStream: int FNAME> = 8;
+
+        <java.util.zip.GZIPInputStream: int FEXTRA> = 4;
+
+        <java.util.zip.GZIPInputStream: int FHCRC> = 2;
+
+        <java.util.zip.GZIPInputStream: int FTEXT> = 1;
+
+        <java.util.zip.GZIPInputStream: int GZIP_MAGIC> = 35615;
+
+        return;
+    }
+}

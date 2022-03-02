@@ -1,0 +1,660 @@
+public final class com.sun.media.sound.MidiUtils extends java.lang.Object
+{
+    public static final int DEFAULT_TEMPO_MPQ;
+    public static final int META_END_OF_TRACK_TYPE;
+    public static final int META_TEMPO_TYPE;
+
+    private void <init>()
+    {
+        com.sun.media.sound.MidiUtils r0;
+
+        r0 := @this: com.sun.media.sound.MidiUtils;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static boolean isMetaEndOfTrack(javax.sound.midi.MidiMessage)
+    {
+        byte[] $r1;
+        javax.sound.midi.MidiMessage r0;
+        short $s3, $s5;
+        byte $b2, $b4;
+        int $i0, $i1, $i6;
+        boolean $z0;
+
+        r0 := @parameter0: javax.sound.midi.MidiMessage;
+
+        $i0 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getLength()>();
+
+        if $i0 != 3 goto label1;
+
+        $i1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getStatus()>();
+
+        if $i1 == 255 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: byte[] getMessage()>();
+
+        $b2 = $r1[1];
+
+        $s5 = (short) $b2;
+
+        $s3 = $s5 & 255;
+
+        $i6 = (int) $s3;
+
+        if $i6 != 47 goto label3;
+
+        $b4 = $r1[2];
+
+        if $b4 != 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    public static boolean isMetaTempo(javax.sound.midi.MidiMessage)
+    {
+        byte[] $r1;
+        javax.sound.midi.MidiMessage r0;
+        short $s3, $s5;
+        byte $b2, $b4;
+        int $i0, $i1, $i6, $i7;
+        boolean $z0;
+
+        r0 := @parameter0: javax.sound.midi.MidiMessage;
+
+        $i0 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getLength()>();
+
+        if $i0 != 6 goto label1;
+
+        $i1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getStatus()>();
+
+        if $i1 == 255 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: byte[] getMessage()>();
+
+        $b2 = $r1[1];
+
+        $s5 = (short) $b2;
+
+        $s3 = $s5 & 255;
+
+        $i6 = (int) $s3;
+
+        if $i6 != 81 goto label3;
+
+        $b4 = $r1[2];
+
+        $i7 = (int) $b4;
+
+        if $i7 != 3 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    public static int getTempoMPQ(javax.sound.midi.MidiMessage)
+    {
+        byte[] $r1;
+        javax.sound.midi.MidiMessage r0;
+        short $s3, $s7, $s9, $s11, $s17, $s22, $s23, $s26;
+        byte $b2, $b4, $b5, $b6, $b10;
+        int $i0, $i1, $i8, $i12, $i13, i14, $i16, $i18, $i19, $i21, $i24, $i25, $i27;
+
+        r0 := @parameter0: javax.sound.midi.MidiMessage;
+
+        $i0 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getLength()>();
+
+        if $i0 != 6 goto label1;
+
+        $i1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: int getStatus()>();
+
+        if $i1 == 255 goto label2;
+
+     label1:
+        $i16 = (int) -1;
+
+        return $i16;
+
+     label2:
+        $r1 = virtualinvoke r0.<javax.sound.midi.MidiMessage: byte[] getMessage()>();
+
+        $b2 = $r1[1];
+
+        $s17 = (short) $b2;
+
+        $s3 = $s17 & 255;
+
+        $i18 = (int) $s3;
+
+        if $i18 != 81 goto label3;
+
+        $b4 = $r1[2];
+
+        $i19 = (int) $b4;
+
+        if $i19 == 3 goto label4;
+
+     label3:
+        $i21 = (int) -1;
+
+        return $i21;
+
+     label4:
+        $b5 = $r1[5];
+
+        $s22 = (short) $b5;
+
+        $s9 = $s22 & 255;
+
+        $b6 = $r1[4];
+
+        $s23 = (short) $b6;
+
+        $s7 = $s23 & 255;
+
+        $i24 = (int) $s7;
+
+        $i8 = $i24 << 8;
+
+        $i25 = (int) $s9;
+
+        $i13 = $i25 | $i8;
+
+        $b10 = $r1[3];
+
+        $s26 = (short) $b10;
+
+        $s11 = $s26 & 255;
+
+        $i27 = (int) $s11;
+
+        $i12 = $i27 << 16;
+
+        i14 = $i13 | $i12;
+
+        return i14;
+    }
+
+    public static double convertTempo(double)
+    {
+        byte $b0;
+        int $i1;
+        double $d0, d1;
+
+        d1 := @parameter0: double;
+
+        $b0 = d1 cmpg 0.0;
+
+        $i1 = (int) $b0;
+
+        if $i1 > 0 goto label1;
+
+        d1 = 1.0;
+
+     label1:
+        $d0 = 6.0E7 / d1;
+
+        return $d0;
+    }
+
+    public static long ticks2microsec(long, double, int)
+    {
+        long l0, $l2;
+        int i1;
+        double d0, $d1, $d2, $d3, $d4;
+
+        l0 := @parameter0: long;
+
+        d0 := @parameter1: double;
+
+        i1 := @parameter2: int;
+
+        $d1 = (double) l0;
+
+        $d3 = $d1 * d0;
+
+        $d2 = (double) i1;
+
+        $d4 = $d3 / $d2;
+
+        $l2 = (long) $d4;
+
+        return $l2;
+    }
+
+    public static long microsec2ticks(long, double, int)
+    {
+        long l0, $l2;
+        int i1;
+        double $d0, $d1, d2, $d3, $d4;
+
+        l0 := @parameter0: long;
+
+        d2 := @parameter1: double;
+
+        i1 := @parameter2: int;
+
+        $d1 = (double) l0;
+
+        $d0 = (double) i1;
+
+        $d3 = $d1 * $d0;
+
+        $d4 = $d3 / d2;
+
+        $l2 = (long) $d4;
+
+        return $l2;
+    }
+
+    public static long tick2microsecond(javax.sound.midi.Sequence, long, com.sun.media.sound.MidiUtils$TempoCache)
+    {
+        byte $b0, $b9, $b20;
+        int[] $r3;
+        float $f0, $f1, $f2, $f3;
+        long l2, $l3, $l5, $l6, $l7, $l8, $l11, $l12, $l15, $l16, $l17, $l18, $l19, $l24, l27;
+        javax.sound.midi.Sequence r0;
+        long[] $r2;
+        com.sun.media.sound.MidiUtils$TempoCache r4, $r5;
+        int $i1, $i4, $i10, $i13, $i14, $i21, $i22, $i23, i25, i26, i28, $i29, $i30;
+        double $d0, $d1, $d2, $d3, $d4, d5;
+
+        r0 := @parameter0: javax.sound.midi.Sequence;
+
+        l2 := @parameter1: long;
+
+        r4 := @parameter2: com.sun.media.sound.MidiUtils$TempoCache;
+
+        $f0 = virtualinvoke r0.<javax.sound.midi.Sequence: float getDivisionType()>();
+
+        $b0 = $f0 cmpl 0.0F;
+
+        if $b0 == 0 goto label1;
+
+        $d2 = (double) l2;
+
+        $f1 = virtualinvoke r0.<javax.sound.midi.Sequence: float getDivisionType()>();
+
+        $i23 = virtualinvoke r0.<javax.sound.midi.Sequence: int getResolution()>();
+
+        $f2 = (float) $i23;
+
+        $f3 = $f1 * $f2;
+
+        $d3 = (double) $f3;
+
+        d5 = $d2 / $d3;
+
+        $d4 = 1000000.0 * d5;
+
+        $l24 = (long) $d4;
+
+        return $l24;
+
+     label1:
+        if r4 != null goto label2;
+
+        $r5 = new com.sun.media.sound.MidiUtils$TempoCache;
+
+        specialinvoke $r5.<com.sun.media.sound.MidiUtils$TempoCache: void <init>(javax.sound.midi.Sequence)>(r0);
+
+        r4 = $r5;
+
+     label2:
+        $i1 = virtualinvoke r0.<javax.sound.midi.Sequence: int getResolution()>();
+
+        $r2 = r4.<com.sun.media.sound.MidiUtils$TempoCache: long[] ticks>;
+
+        $r3 = r4.<com.sun.media.sound.MidiUtils$TempoCache: int[] tempos>;
+
+        $i21 = lengthof $r3;
+
+        $i22 = r4.<com.sun.media.sound.MidiUtils$TempoCache: int snapshotIndex>;
+
+        i25 = $i22;
+
+        i26 = r4.<com.sun.media.sound.MidiUtils$TempoCache: int snapshotMicro>;
+
+        l27 = 0L;
+
+        if $i22 <= 0 goto label3;
+
+        if $i22 >= $i21 goto label3;
+
+        $l19 = $r2[$i22];
+
+        $b20 = $l19 cmp l2;
+
+        $i29 = (int) $b20;
+
+        if $i29 <= 0 goto label4;
+
+     label3:
+        i26 = 0;
+
+        i25 = 0;
+
+     label4:
+        if $i21 <= 0 goto label7;
+
+        i28 = i25 + 1;
+
+     label5:
+        if i28 >= $i21 goto label6;
+
+        $l8 = $r2[i28];
+
+        $b9 = $l8 cmp l2;
+
+        $i30 = (int) $b9;
+
+        if $i30 > 0 goto label6;
+
+        $l16 = (long) i26;
+
+        $l12 = $r2[i28];
+
+        $i10 = i28 - 1;
+
+        $l11 = $r2[$i10];
+
+        $l15 = $l12 - $l11;
+
+        $i13 = i28 - 1;
+
+        $i14 = $r3[$i13];
+
+        $d1 = (double) $i14;
+
+        $l17 = staticinvoke <com.sun.media.sound.MidiUtils: long ticks2microsec(long,double,int)>($l15, $d1, $i1);
+
+        $l18 = $l16 + $l17;
+
+        i26 = (int) $l18;
+
+        i25 = i28;
+
+        i28 = i28 + 1;
+
+        goto label5;
+
+     label6:
+        $l6 = (long) i26;
+
+        $l3 = $r2[i25];
+
+        $l5 = l2 - $l3;
+
+        $i4 = $r3[i25];
+
+        $d0 = (double) $i4;
+
+        $l7 = staticinvoke <com.sun.media.sound.MidiUtils: long ticks2microsec(long,double,int)>($l5, $d0, $i1);
+
+        l27 = $l6 + $l7;
+
+     label7:
+        r4.<com.sun.media.sound.MidiUtils$TempoCache: int snapshotIndex> = i25;
+
+        r4.<com.sun.media.sound.MidiUtils$TempoCache: int snapshotMicro> = i26;
+
+        return l27;
+    }
+
+    public static long microsecond2tick(javax.sound.midi.Sequence, long, com.sun.media.sound.MidiUtils$TempoCache)
+    {
+        byte $b0, $b3, $b18;
+        int[] $r3;
+        float $f0, $f1, $f2;
+        long l2, $l7, $l8, $l9, $l11, $l12, $l15, $l16, l17, l22, l23, l24;
+        javax.sound.midi.Sequence r0;
+        long[] $r2;
+        com.sun.media.sound.MidiUtils$TempoCache r4, $r5;
+        int $i1, $i4, $i5, $i6, $i10, $i13, $i14, $i19, $i20, $i21, i25, $i26, $i27, $i28, $i29;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, d7;
+
+        r0 := @parameter0: javax.sound.midi.Sequence;
+
+        l2 := @parameter1: long;
+
+        r4 := @parameter2: com.sun.media.sound.MidiUtils$TempoCache;
+
+        $f0 = virtualinvoke r0.<javax.sound.midi.Sequence: float getDivisionType()>();
+
+        $b0 = $f0 cmpl 0.0F;
+
+        if $b0 == 0 goto label2;
+
+        $d2 = (double) l2;
+
+        $f1 = virtualinvoke r0.<javax.sound.midi.Sequence: float getDivisionType()>();
+
+        $d3 = (double) $f1;
+
+        $d4 = $d2 * $d3;
+
+        $i20 = virtualinvoke r0.<javax.sound.midi.Sequence: int getResolution()>();
+
+        $d5 = (double) $i20;
+
+        $d6 = $d4 * $d5;
+
+        d7 = $d6 / 1000000.0;
+
+        l22 = (long) d7;
+
+        if r4 == null goto label1;
+
+        $f2 = virtualinvoke r4.<com.sun.media.sound.MidiUtils$TempoCache: float getTempoMPQAt(long)>(l22);
+
+        $i21 = (int) $f2;
+
+        r4.<com.sun.media.sound.MidiUtils$TempoCache: int currTempo> = $i21;
+
+     label1:
+        return l22;
+
+     label2:
+        if r4 != null goto label3;
+
+        $r5 = new com.sun.media.sound.MidiUtils$TempoCache;
+
+        specialinvoke $r5.<com.sun.media.sound.MidiUtils$TempoCache: void <init>(javax.sound.midi.Sequence)>(r0);
+
+        r4 = $r5;
+
+     label3:
+        $r2 = r4.<com.sun.media.sound.MidiUtils$TempoCache: long[] ticks>;
+
+        $r3 = r4.<com.sun.media.sound.MidiUtils$TempoCache: int[] tempos>;
+
+        $i19 = lengthof $r3;
+
+        $i1 = virtualinvoke r0.<javax.sound.midi.Sequence: int getResolution()>();
+
+        l23 = 0L;
+
+        l24 = 0L;
+
+        i25 = 1;
+
+        $b3 = l2 cmp 0L;
+
+        $i28 = (int) $b3;
+
+        if $i28 <= 0 goto label7;
+
+        if $i19 <= 0 goto label7;
+
+     label4:
+        if i25 >= $i19 goto label6;
+
+        $l12 = $r2[i25];
+
+        $i10 = i25 - 1;
+
+        $l11 = $r2[$i10];
+
+        $l15 = $l12 - $l11;
+
+        $i13 = i25 - 1;
+
+        $i14 = $r3[$i13];
+
+        $d1 = (double) $i14;
+
+        $l16 = staticinvoke <com.sun.media.sound.MidiUtils: long ticks2microsec(long,double,int)>($l15, $d1, $i1);
+
+        l17 = l23 + $l16;
+
+        $b18 = l17 cmp l2;
+
+        $i29 = (int) $b18;
+
+        if $i29 <= 0 goto label5;
+
+        goto label6;
+
+     label5:
+        l23 = l17;
+
+        i25 = i25 + 1;
+
+        goto label4;
+
+     label6:
+        $i4 = i25 - 1;
+
+        $l8 = $r2[$i4];
+
+        $l7 = l2 - l23;
+
+        $i5 = i25 - 1;
+
+        $i6 = $r3[$i5];
+
+        $d0 = (double) $i6;
+
+        $l9 = staticinvoke <com.sun.media.sound.MidiUtils: long microsec2ticks(long,double,int)>($l7, $d0, $i1);
+
+        l24 = $l8 + $l9;
+
+     label7:
+        $i26 = i25 - 1;
+
+        $i27 = $r3[$i26];
+
+        r4.<com.sun.media.sound.MidiUtils$TempoCache: int currTempo> = $i27;
+
+        return l24;
+    }
+
+    public static int tick2index(javax.sound.midi.Track, long)
+    {
+        long l0, $l4;
+        byte $b1, $b5, $b6;
+        javax.sound.midi.Track r0;
+        int $i2, $i3, $i7, i8, i9, i10, $i11, $i12;
+        javax.sound.midi.MidiEvent $r1;
+
+        r0 := @parameter0: javax.sound.midi.Track;
+
+        l0 := @parameter1: long;
+
+        i8 = 0;
+
+        $b1 = l0 cmp 0L;
+
+        $i11 = (int) $b1;
+
+        if $i11 <= 0 goto label6;
+
+        i9 = 0;
+
+        $i2 = virtualinvoke r0.<javax.sound.midi.Track: int size()>();
+
+        i10 = $i2 - 1;
+
+     label1:
+        if i9 >= i10 goto label6;
+
+        $i3 = i9 + i10;
+
+        i8 = $i3 >> 1;
+
+        $r1 = virtualinvoke r0.<javax.sound.midi.Track: javax.sound.midi.MidiEvent get(int)>(i8);
+
+        $l4 = virtualinvoke $r1.<javax.sound.midi.MidiEvent: long getTick()>();
+
+        $b5 = $l4 cmp l0;
+
+        if $b5 != 0 goto label2;
+
+        goto label6;
+
+     label2:
+        $b6 = $l4 cmp l0;
+
+        $i12 = (int) $b6;
+
+        if $i12 >= 0 goto label4;
+
+        $i7 = i10 - 1;
+
+        if i9 != $i7 goto label3;
+
+        i8 = i8 + 1;
+
+        goto label6;
+
+     label3:
+        i9 = i8;
+
+        goto label5;
+
+     label4:
+        i10 = i8;
+
+     label5:
+        goto label1;
+
+     label6:
+        return i8;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.MidiUtils: int META_TEMPO_TYPE> = 81;
+
+        <com.sun.media.sound.MidiUtils: int META_END_OF_TRACK_TYPE> = 47;
+
+        <com.sun.media.sound.MidiUtils: int DEFAULT_TEMPO_MPQ> = 500000;
+
+        return;
+    }
+}

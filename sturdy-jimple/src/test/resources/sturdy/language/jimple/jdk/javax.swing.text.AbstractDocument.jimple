@@ -1,0 +1,2583 @@
+public abstract class javax.swing.text.AbstractDocument extends java.lang.Object implements javax.swing.text.Document, java.io.Serializable
+{
+    private transient int numReaders;
+    private transient java.lang.Thread currWriter;
+    private transient int numWriters;
+    private transient boolean notifyingListeners;
+    private static java.lang.Boolean defaultI18NProperty;
+    private java.util.Dictionary documentProperties;
+    protected javax.swing.event.EventListenerList listenerList;
+    private javax.swing.text.AbstractDocument$Content data;
+    private javax.swing.text.AbstractDocument$AttributeContext context;
+    private transient javax.swing.text.AbstractDocument$BranchElement bidiRoot;
+    private javax.swing.text.DocumentFilter documentFilter;
+    private transient javax.swing.text.DocumentFilter$FilterBypass filterBypass;
+    private static final java.lang.String BAD_LOCK_STATE;
+    protected static final java.lang.String BAD_LOCATION;
+    public static final java.lang.String ParagraphElementName;
+    public static final java.lang.String ContentElementName;
+    public static final java.lang.String SectionElementName;
+    public static final java.lang.String BidiElementName;
+    public static final java.lang.String ElementNameAttribute;
+    static final java.lang.String I18NProperty;
+    static final java.lang.Object MultiByteProperty;
+    static final java.lang.String AsyncLoadPriority;
+
+    protected void <init>(javax.swing.text.AbstractDocument$Content)
+    {
+        javax.swing.text.StyleContext $r2;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.AbstractDocument$Content r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.text.AbstractDocument$Content;
+
+        $r2 = staticinvoke <javax.swing.text.StyleContext: javax.swing.text.StyleContext getDefaultStyleContext()>();
+
+        specialinvoke r0.<javax.swing.text.AbstractDocument: void <init>(javax.swing.text.AbstractDocument$Content,javax.swing.text.AbstractDocument$AttributeContext)>(r1, $r2);
+
+        return;
+    }
+
+    protected void <init>(javax.swing.text.AbstractDocument$Content, javax.swing.text.AbstractDocument$AttributeContext)
+    {
+        java.lang.Throwable $r10;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.AbstractDocument$1 $r6;
+        javax.swing.event.EventListenerList $r1;
+        java.lang.Boolean $r5, $r8, $r9, $r12;
+        java.lang.String r11;
+        javax.swing.text.AbstractDocument$BidiElement $r14;
+        javax.swing.text.Element[] $r13;
+        javax.swing.text.AbstractDocument$Content r2;
+        javax.swing.text.AbstractDocument$AttributeContext r3;
+        javax.swing.text.AbstractDocument$BranchElement $r15, $r16;
+        java.lang.Object $r7;
+        javax.swing.text.AbstractDocument$BidiRootElement $r4;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r2 := @parameter0: javax.swing.text.AbstractDocument$Content;
+
+        r3 := @parameter1: javax.swing.text.AbstractDocument$AttributeContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.text.AbstractDocument: java.util.Dictionary documentProperties> = null;
+
+        $r1 = new javax.swing.event.EventListenerList;
+
+        specialinvoke $r1.<javax.swing.event.EventListenerList: void <init>()>();
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList> = $r1;
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data> = r2;
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$AttributeContext context> = r3;
+
+        $r4 = new javax.swing.text.AbstractDocument$BidiRootElement;
+
+        specialinvoke $r4.<javax.swing.text.AbstractDocument$BidiRootElement: void <init>(javax.swing.text.AbstractDocument)>(r0);
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot> = $r4;
+
+        $r5 = <javax.swing.text.AbstractDocument: java.lang.Boolean defaultI18NProperty>;
+
+        if $r5 != null goto label2;
+
+        $r6 = new javax.swing.text.AbstractDocument$1;
+
+        specialinvoke $r6.<javax.swing.text.AbstractDocument$1: void <init>(javax.swing.text.AbstractDocument)>(r0);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        r11 = (java.lang.String) $r7;
+
+        if r11 == null goto label1;
+
+        $r9 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>(r11);
+
+        <javax.swing.text.AbstractDocument: java.lang.Boolean defaultI18NProperty> = $r9;
+
+        goto label2;
+
+     label1:
+        $r8 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        <javax.swing.text.AbstractDocument: java.lang.Boolean defaultI18NProperty> = $r8;
+
+     label2:
+        $r12 = <javax.swing.text.AbstractDocument: java.lang.Boolean defaultI18NProperty>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void putProperty(java.lang.Object,java.lang.Object)>("i18n", $r12);
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label3:
+        $r13 = newarray (javax.swing.text.Element)[1];
+
+        $r14 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r15 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        specialinvoke $r14.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r0, $r15, 0, 1, 0);
+
+        $r13[0] = $r14;
+
+        $r16 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        virtualinvoke $r16.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, $r13);
+
+     label4:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label7;
+
+     label5:
+        $r10 := @caughtexception;
+
+     label6:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r10;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.util.Dictionary getDocumentProperties()
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.util.Dictionary $r1, $r2;
+        java.util.Hashtable $r3;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: java.util.Dictionary documentProperties>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>(int)>(2);
+
+        r0.<javax.swing.text.AbstractDocument: java.util.Dictionary documentProperties> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AbstractDocument: java.util.Dictionary documentProperties>;
+
+        return $r2;
+    }
+
+    public void setDocumentProperties(java.util.Dictionary)
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.util.Dictionary r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: java.util.Dictionary;
+
+        r0.<javax.swing.text.AbstractDocument: java.util.Dictionary documentProperties> = r1;
+
+        return;
+    }
+
+    protected void fireInsertUpdate(javax.swing.event.DocumentEvent)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r2;
+        javax.swing.event.DocumentListener $r6;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.DocumentEvent r5;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r5 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 1;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label2:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/DocumentListener;" goto label3;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.DocumentListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.DocumentListener: void insertUpdate(javax.swing.event.DocumentEvent)>(r5);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label2;
+
+     label4:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected void fireChangedUpdate(javax.swing.event.DocumentEvent)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r2;
+        javax.swing.event.DocumentListener $r6;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.DocumentEvent r5;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r5 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 1;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label2:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/DocumentListener;" goto label3;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.DocumentListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.DocumentListener: void changedUpdate(javax.swing.event.DocumentEvent)>(r5);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label2;
+
+     label4:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected void fireRemoveUpdate(javax.swing.event.DocumentEvent)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r2;
+        javax.swing.event.DocumentListener $r6;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.DocumentEvent r5;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r5 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 1;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label2:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/DocumentListener;" goto label3;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.DocumentListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.DocumentListener: void removeUpdate(javax.swing.event.DocumentEvent)>(r5);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label2;
+
+     label4:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners> = 0;
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected void fireUndoableEditUpdate(javax.swing.event.UndoableEditEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.event.UndoableEditListener $r6;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.UndoableEditEvent r5;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r5 := @parameter0: javax.swing.event.UndoableEditEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/UndoableEditListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.UndoableEditListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.UndoableEditListener: void undoableEditHappened(javax.swing.event.UndoableEditEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener[] $r3;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r2;
+        java.lang.Class r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(r1);
+
+        return $r3;
+    }
+
+    public int getAsynchronousLoadPriority()
+    {
+        javax.swing.text.AbstractDocument r0;
+        int $i0, $i2;
+        java.lang.Object $r1;
+        java.lang.Integer r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>("load priority");
+
+        r2 = (java.lang.Integer) $r1;
+
+        if r2 == null goto label1;
+
+        $i0 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+
+     label1:
+        $i2 = (int) -1;
+
+        return $i2;
+    }
+
+    public void setAsynchronousLoadPriority(int)
+    {
+        int i0;
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Integer $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        goto label2;
+
+     label1:
+        $r1 = null;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void putProperty(java.lang.Object,java.lang.Object)>("load priority", $r1);
+
+        return;
+    }
+
+    public void setDocumentFilter(javax.swing.text.DocumentFilter)
+    {
+        javax.swing.text.DocumentFilter r1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.text.DocumentFilter;
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter documentFilter> = r1;
+
+        return;
+    }
+
+    public javax.swing.text.DocumentFilter getDocumentFilter()
+    {
+        javax.swing.text.DocumentFilter $r1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter documentFilter>;
+
+        return $r1;
+    }
+
+    public void render(java.lang.Runnable)
+    {
+        java.lang.Throwable $r2;
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Runnable r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        interfaceinvoke r1.<java.lang.Runnable: void run()>();
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getLength()
+    {
+        javax.swing.text.AbstractDocument r0;
+        int $i0, $i1;
+        javax.swing.text.AbstractDocument$Content $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.AbstractDocument$Content: int length()>();
+
+        $i1 = $i0 - 1;
+
+        return $i1;
+    }
+
+    public void addDocumentListener(javax.swing.event.DocumentListener)
+    {
+        javax.swing.event.DocumentListener r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.event.DocumentListener;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/DocumentListener;", r1);
+
+        return;
+    }
+
+    public void removeDocumentListener(javax.swing.event.DocumentListener)
+    {
+        javax.swing.event.DocumentListener r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.event.DocumentListener;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/DocumentListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.DocumentListener[] getDocumentListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.event.DocumentListener[] $r3;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/DocumentListener;");
+
+        $r3 = (javax.swing.event.DocumentListener[]) $r2;
+
+        return $r3;
+    }
+
+    public void addUndoableEditListener(javax.swing.event.UndoableEditListener)
+    {
+        javax.swing.event.UndoableEditListener r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.event.UndoableEditListener;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/UndoableEditListener;", r1);
+
+        return;
+    }
+
+    public void removeUndoableEditListener(javax.swing.event.UndoableEditListener)
+    {
+        javax.swing.event.UndoableEditListener r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.event.UndoableEditListener;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/UndoableEditListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.UndoableEditListener[] getUndoableEditListeners()
+    {
+        javax.swing.event.UndoableEditListener[] $r3;
+        java.util.EventListener[] $r2;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.event.EventListenerList $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/UndoableEditListener;");
+
+        $r3 = (javax.swing.event.UndoableEditListener[]) $r2;
+
+        return $r3;
+    }
+
+    public final java.lang.Object getProperty(java.lang.Object)
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Object r2, $r3;
+        java.util.Dictionary $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: java.util.Dictionary getDocumentProperties()>();
+
+        $r3 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r2);
+
+        return $r3;
+    }
+
+    public final void putProperty(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Throwable $r10;
+        javax.swing.text.AbstractDocument r1;
+        java.awt.font.TextAttribute $r4;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent $r7;
+        javax.swing.event.DocumentEvent$EventType $r8;
+        int $i0;
+        java.lang.Boolean $r5;
+        java.lang.Object r0, r3, $r6;
+        java.util.Dictionary $r2, $r9;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        $r9 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.util.Dictionary getDocumentProperties()>();
+
+        virtualinvoke $r9.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, r0);
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.util.Dictionary getDocumentProperties()>();
+
+        virtualinvoke $r2.<java.util.Dictionary: java.lang.Object remove(java.lang.Object)>(r3);
+
+     label2:
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        if r3 != $r4 goto label7;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $z0 = virtualinvoke $r5.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label7;
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label3:
+        $r7 = new javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $i0 = virtualinvoke r1.<javax.swing.text.AbstractDocument: int getLength()>();
+
+        $r8 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        specialinvoke $r7.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void <init>(javax.swing.text.AbstractDocument,int,int,javax.swing.event.DocumentEvent$EventType)>(r1, 0, $i0, $r8);
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void updateBidi(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>($r7);
+
+     label4:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label7;
+
+     label5:
+        $r10 := @caughtexception;
+
+     label6:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r10;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void remove(int, int) throws javax.swing.text.BadLocationException
+    {
+        java.lang.Throwable $r3;
+        javax.swing.text.DocumentFilter $r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.DocumentFilter$FilterBypass $r2;
+        int i0, i1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter getDocumentFilter()>();
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label1:
+        if $r1 == null goto label2;
+
+        $r2 = specialinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass getFilterBypass()>();
+
+        virtualinvoke $r1.<javax.swing.text.DocumentFilter: void remove(javax.swing.text.DocumentFilter$FilterBypass,int,int)>($r2, i0, i1);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void handleRemove(int,int)>(i0, i1);
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void handleRemove(int, int) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r1;
+        javax.swing.undo.UndoableEdit $r5;
+        javax.swing.text.BadLocationException $r0;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent $r2;
+        javax.swing.text.AbstractDocument$Content $r4;
+        javax.swing.event.DocumentEvent$EventType $r3;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        javax.swing.event.UndoableEditEvent $r6;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 <= 0 goto label4;
+
+        if i1 < 0 goto label1;
+
+        $i4 = i1 + i0;
+
+        $i5 = virtualinvoke r1.<javax.swing.text.AbstractDocument: int getLength()>();
+
+        if $i4 <= $i5 goto label2;
+
+     label1:
+        $r0 = new javax.swing.text.BadLocationException;
+
+        $i2 = virtualinvoke r1.<javax.swing.text.AbstractDocument: int getLength()>();
+
+        $i3 = $i2 + 1;
+
+        specialinvoke $r0.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid remove", $i3);
+
+        throw $r0;
+
+     label2:
+        $r2 = new javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r3 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        specialinvoke $r2.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void <init>(javax.swing.text.AbstractDocument,int,int,javax.swing.event.DocumentEvent$EventType)>(r1, i1, i0, $r3);
+
+        $z0 = staticinvoke <javax.swing.text.Utilities: boolean isComposedTextElement(javax.swing.text.Document,int)>(r1, i1);
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void removeUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>($r2);
+
+        $r4 = r1.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.AbstractDocument$Content: javax.swing.undo.UndoableEdit remove(int,int)>(i1, i0);
+
+        if $r5 == null goto label3;
+
+        virtualinvoke $r2.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r5);
+
+     label3:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void postRemoveUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>($r2);
+
+        virtualinvoke $r2.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void end()>();
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void fireRemoveUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+        if $r5 == null goto label4;
+
+        if $z0 != 0 goto label4;
+
+        $r6 = new javax.swing.event.UndoableEditEvent;
+
+        specialinvoke $r6.<javax.swing.event.UndoableEditEvent: void <init>(java.lang.Object,javax.swing.undo.UndoableEdit)>(r1, $r2);
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void fireUndoableEditUpdate(javax.swing.event.UndoableEditEvent)>($r6);
+
+     label4:
+        return;
+    }
+
+    public void replace(int, int, java.lang.String, javax.swing.text.AttributeSet) throws javax.swing.text.BadLocationException
+    {
+        java.lang.Throwable $r5;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.DocumentFilter$FilterBypass $r4;
+        javax.swing.text.DocumentFilter $r1;
+        int i0, $i1, i2, $i3;
+        java.lang.String r2;
+        javax.swing.text.AttributeSet r3;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: javax.swing.text.AttributeSet;
+
+        if i0 != 0 goto label2;
+
+        if r2 == null goto label1;
+
+        $i3 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        if $i3 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter getDocumentFilter()>();
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label3:
+        if $r1 == null goto label4;
+
+        $r4 = specialinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass getFilterBypass()>();
+
+        virtualinvoke $r1.<javax.swing.text.DocumentFilter: void replace(javax.swing.text.DocumentFilter$FilterBypass,int,int,java.lang.String,javax.swing.text.AttributeSet)>($r4, i2, i0, r2, r3);
+
+        goto label6;
+
+     label4:
+        if i0 <= 0 goto label5;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void remove(int,int)>(i2, i0);
+
+     label5:
+        if r2 == null goto label6;
+
+        $i1 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label6;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>(i2, r2, r3);
+
+     label6:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label9;
+
+     label7:
+        $r5 := @caughtexception;
+
+     label8:
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r5;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void insertString(int, java.lang.String, javax.swing.text.AttributeSet) throws javax.swing.text.BadLocationException
+    {
+        java.lang.Throwable $r5;
+        javax.swing.text.AbstractDocument r1;
+        javax.swing.text.DocumentFilter$FilterBypass $r4;
+        javax.swing.text.DocumentFilter $r2;
+        int $i0, i1;
+        java.lang.String r0;
+        javax.swing.text.AttributeSet r3;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: javax.swing.text.AttributeSet;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = virtualinvoke r1.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter getDocumentFilter()>();
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label3:
+        if $r2 == null goto label4;
+
+        $r4 = specialinvoke r1.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass getFilterBypass()>();
+
+        virtualinvoke $r2.<javax.swing.text.DocumentFilter: void insertString(javax.swing.text.DocumentFilter$FilterBypass,int,java.lang.String,javax.swing.text.AttributeSet)>($r4, i1, r0, r3);
+
+        goto label5;
+
+     label4:
+        specialinvoke r1.<javax.swing.text.AbstractDocument: void handleInsertString(int,java.lang.String,javax.swing.text.AttributeSet)>(i1, r0, r3);
+
+     label5:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label8;
+
+     label6:
+        $r5 := @caughtexception;
+
+     label7:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r5;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private void handleInsertString(int, java.lang.String, javax.swing.text.AttributeSet) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r1;
+        java.awt.font.TextAttribute $r11;
+        int $i0, i1, $i2, $i3;
+        java.lang.Boolean $r7, $r14, $r15, $r16;
+        java.lang.String r0;
+        javax.swing.text.AttributeSet r8;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.undo.UndoableEdit $r3;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent $r4;
+        javax.swing.text.AbstractDocument$Content $r2;
+        javax.swing.event.DocumentEvent$EventType $r5;
+        char[] $r13;
+        java.lang.Object $r6, $r10, $r12;
+        javax.swing.event.UndoableEditEvent $r9;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: javax.swing.text.AttributeSet;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = r1.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.AbstractDocument$Content: javax.swing.undo.UndoableEdit insertString(int,java.lang.String)>(i1, r0);
+
+        $r4 = new javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r5 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        specialinvoke $r4.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void <init>(javax.swing.text.AbstractDocument,int,int,javax.swing.event.DocumentEvent$EventType)>(r1, i1, $i2, $r5);
+
+        if $r3 == null goto label3;
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r3);
+
+     label3:
+        $r6 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $r7 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $z0 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 == 0 goto label5;
+
+        $r11 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r12 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>($r11);
+
+        if $r12 == null goto label4;
+
+        $r15 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_RTL>;
+
+        $z3 = virtualinvoke $r12.<java.lang.Object: boolean equals(java.lang.Object)>($r15);
+
+        if $z3 == 0 goto label4;
+
+        $r16 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void putProperty(java.lang.Object,java.lang.Object)>("i18n", $r16);
+
+        goto label5;
+
+     label4:
+        $r13 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i3 = lengthof $r13;
+
+        $z2 = staticinvoke <sun.swing.SwingUtilities2: boolean isComplexLayout(char[],int,int)>($r13, 0, $i3);
+
+        if $z2 == 0 goto label5;
+
+        $r14 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void putProperty(java.lang.Object,java.lang.Object)>("i18n", $r14);
+
+     label5:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void insertUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent,javax.swing.text.AttributeSet)>($r4, r8);
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void end()>();
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void fireInsertUpdate(javax.swing.event.DocumentEvent)>($r4);
+
+        if $r3 == null goto label7;
+
+        if r8 == null goto label6;
+
+        $r10 = <javax.swing.text.StyleConstants: java.lang.Object ComposedTextAttribute>;
+
+        $z1 = interfaceinvoke r8.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>($r10);
+
+        if $z1 != 0 goto label7;
+
+     label6:
+        $r9 = new javax.swing.event.UndoableEditEvent;
+
+        specialinvoke $r9.<javax.swing.event.UndoableEditEvent: void <init>(java.lang.Object,javax.swing.undo.UndoableEdit)>(r1, $r4);
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void fireUndoableEditUpdate(javax.swing.event.UndoableEditEvent)>($r9);
+
+     label7:
+        return;
+    }
+
+    public java.lang.String getText(int, int) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r0;
+        int i0, i1;
+        java.lang.String $r2;
+        javax.swing.text.BadLocationException $r3;
+        javax.swing.text.AbstractDocument$Content $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new javax.swing.text.BadLocationException;
+
+        specialinvoke $r3.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Length must be positive", i0);
+
+        throw $r3;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.AbstractDocument$Content: java.lang.String getString(int,int)>(i1, i0);
+
+        return $r2;
+    }
+
+    public void getText(int, int, javax.swing.text.Segment) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r0;
+        int i0, i1;
+        javax.swing.text.Segment r1;
+        javax.swing.text.BadLocationException $r3;
+        javax.swing.text.AbstractDocument$Content $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.text.Segment;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new javax.swing.text.BadLocationException;
+
+        specialinvoke $r3.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Length must be positive", i0);
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        interfaceinvoke $r2.<javax.swing.text.AbstractDocument$Content: void getChars(int,int,javax.swing.text.Segment)>(i1, i0, r1);
+
+        return;
+    }
+
+    public synchronized javax.swing.text.Position createPosition(int) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.Position $r2;
+        int i0;
+        javax.swing.text.AbstractDocument$Content $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.AbstractDocument$Content: javax.swing.text.Position createPosition(int)>(i0);
+
+        return $r2;
+    }
+
+    public final javax.swing.text.Position getStartPosition()
+    {
+        javax.swing.text.BadLocationException $r1;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.Position r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+     label1:
+        r2 = virtualinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.Position createPosition(int)>(0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        r2 = null;
+
+     label4:
+        return r2;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public final javax.swing.text.Position getEndPosition()
+    {
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.Position r3;
+        int $i0;
+        javax.swing.text.BadLocationException $r2;
+        javax.swing.text.AbstractDocument$Content $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.AbstractDocument$Content: int length()>();
+
+        r3 = virtualinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.Position createPosition(int)>($i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r3 = null;
+
+     label4:
+        return r3;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public javax.swing.text.Element[] getRootElements()
+    {
+        javax.swing.text.AbstractDocument r1;
+        javax.swing.text.Element[] r0;
+        javax.swing.text.Element $r2, $r3;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        r0 = newarray (javax.swing.text.Element)[2];
+
+        $r2 = virtualinvoke r1.<javax.swing.text.AbstractDocument: javax.swing.text.Element getDefaultRootElement()>();
+
+        r0[0] = $r2;
+
+        $r3 = virtualinvoke r1.<javax.swing.text.AbstractDocument: javax.swing.text.Element getBidiRootElement()>();
+
+        r0[1] = $r3;
+
+        return r0;
+    }
+
+    public abstract javax.swing.text.Element getDefaultRootElement();
+
+    private javax.swing.text.DocumentFilter$FilterBypass getFilterBypass()
+    {
+        javax.swing.text.AbstractDocument$DefaultFilterBypass $r3;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.DocumentFilter$FilterBypass $r1, $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass filterBypass>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.text.AbstractDocument$DefaultFilterBypass;
+
+        specialinvoke $r3.<javax.swing.text.AbstractDocument$DefaultFilterBypass: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.AbstractDocument$1)>(r0, null);
+
+        r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass filterBypass> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.DocumentFilter$FilterBypass filterBypass>;
+
+        return $r2;
+    }
+
+    public javax.swing.text.Element getBidiRootElement()
+    {
+        javax.swing.text.AbstractDocument$BranchElement $r1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        return $r1;
+    }
+
+    static boolean isLeftToRight(javax.swing.text.Document, int, int)
+    {
+        javax.swing.text.AbstractDocument r3;
+        int i0, $i1, $i2, i3, $i4, $i5;
+        java.lang.Boolean $r1;
+        javax.swing.text.AttributeSet $r6;
+        boolean $z0, $z1, $z2;
+        java.lang.Object $r2;
+        javax.swing.text.Document r0;
+        javax.swing.text.Element $r4, $r5;
+
+        r0 := @parameter0: javax.swing.text.Document;
+
+        i0 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r0 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label3;
+
+        r3 = (javax.swing.text.AbstractDocument) r0;
+
+        $r4 = virtualinvoke r3.<javax.swing.text.AbstractDocument: javax.swing.text.Element getBidiRootElement()>();
+
+        $i1 = interfaceinvoke $r4.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $i2 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i2 < i3 goto label3;
+
+        $r6 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i4 = staticinvoke <javax.swing.text.StyleConstants: int getBidiLevel(javax.swing.text.AttributeSet)>($r6);
+
+        $i5 = $i4 % 2;
+
+        if $i5 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+
+     label3:
+        return 1;
+    }
+
+    public abstract javax.swing.text.Element getParagraphElement(int);
+
+    protected final javax.swing.text.AbstractDocument$AttributeContext getAttributeContext()
+    {
+        javax.swing.text.AbstractDocument$AttributeContext $r1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$AttributeContext context>;
+
+        return $r1;
+    }
+
+    protected void insertUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent, javax.swing.text.AttributeSet)
+    {
+        javax.swing.text.AbstractDocument r0;
+        int $i0, $i1, $i2, $i5, $i6, $i8;
+        java.lang.Boolean $r2, $r7, $r10;
+        javax.swing.text.AttributeSet r13;
+        boolean $z0, $z1;
+        char $c3, $c4;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r3;
+        javax.swing.text.BadLocationException $r12;
+        javax.swing.event.DocumentEvent$EventType $r4, $r5;
+        java.lang.Object $r1, $r6, $r8, $r11;
+        javax.swing.text.Segment $r9;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r3 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        r13 := @parameter1: javax.swing.text.AttributeSet;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void updateBidi(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r3);
+
+     label1:
+        $r4 = staticinvoke <javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType access$100(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r3);
+
+        $r5 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r4 != $r5 goto label8;
+
+        $i0 = virtualinvoke r3.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getLength()>();
+
+        if $i0 <= 0 goto label8;
+
+        $r7 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = <javax.swing.text.AbstractDocument: java.lang.Object MultiByteProperty>;
+
+        $r8 = virtualinvoke r0.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>($r6);
+
+        $z1 = virtualinvoke $r7.<java.lang.Boolean: boolean equals(java.lang.Object)>($r8);
+
+        if $z1 != 0 goto label8;
+
+        $r9 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+     label2:
+        $i1 = virtualinvoke r3.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getOffset()>();
+
+        $i2 = virtualinvoke r3.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getLength()>();
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void getText(int,int,javax.swing.text.Segment)>($i1, $i2, $r9);
+
+        virtualinvoke $r9.<javax.swing.text.Segment: char first()>();
+
+     label3:
+        $c3 = virtualinvoke $r9.<javax.swing.text.Segment: char current()>();
+
+        $i5 = (int) $c3;
+
+        if $i5 <= 255 goto label4;
+
+        $r11 = <javax.swing.text.AbstractDocument: java.lang.Object MultiByteProperty>;
+
+        $r10 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void putProperty(java.lang.Object,java.lang.Object)>($r11, $r10);
+
+        goto label5;
+
+     label4:
+        $c4 = virtualinvoke $r9.<javax.swing.text.Segment: char next()>();
+
+        $i6 = (int) $c4;
+
+        $i8 = (int) 65535;
+
+        if $i6 != $i8 goto label3;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r12 := @caughtexception;
+
+     label7:
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r9);
+
+     label8:
+        return;
+
+        catch javax.swing.text.BadLocationException from label2 to label5 with label6;
+    }
+
+    protected void removeUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r1 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        return;
+    }
+
+    protected void postRemoveUpdate(javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Boolean $r2;
+        java.lang.Object $r1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r3 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument: void updateBidi(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r3);
+
+     label1:
+        return;
+    }
+
+    void updateBidi(javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        byte[] $r6;
+        java.util.Vector $r45;
+        byte $b4, $b8, $b16, $b19, $b20, $b23, $b24, $b25, $b29, $b30, $b35, $b38, $b39, $b43;
+        javax.swing.text.AttributeSet $r27, $r33;
+        javax.swing.text.AbstractDocument$BranchElement $r8, $r10, $r12, $r13, $r15, $r16, $r17, $r21, $r23, $r24, $r25, $r29, $r30, $r31, $r35;
+        java.lang.Error $r44;
+        javax.swing.text.AbstractDocument$BidiElement r42, $r46, $r47, $r48, $r49, $r50, $r51;
+        javax.swing.text.Element[] $r19, r43;
+        javax.swing.text.AbstractDocument$ElementEdit $r52;
+        javax.swing.text.AbstractDocument r3;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i17, $i18, $i21, $i22, $i26, $i27, $i28, $i31, $i32, $i33, $i34, $i36, $i37, $i40, $i41, $i42, $i44, $i45, $i46, $i47, i48, i49, i50, i51, i52, $i53, i54, i55, i56, i57, i58, i59, i60, $i61, $i62, $i63, $i64, $i66, $i67, $i68, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78;
+        javax.swing.event.DocumentEvent$EventType $r1, $r2, $r36, $r37, $r38, $r39;
+        javax.swing.text.Element $r4, $r5, $r18, $r26, $r32, $r41;
+
+        r3 := @this: javax.swing.text.AbstractDocument;
+
+        r0 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = staticinvoke <javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType access$100(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r0);
+
+        $r2 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r1 == $r2 goto label01;
+
+        $r36 = staticinvoke <javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType access$100(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r0);
+
+        $r37 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType CHANGE>;
+
+        if $r36 != $r37 goto label02;
+
+     label01:
+        $i0 = virtualinvoke r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getOffset()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getLength()>();
+
+        $i47 = $i0 + $i1;
+
+        $r4 = virtualinvoke r3.<javax.swing.text.AbstractDocument: javax.swing.text.Element getParagraphElement(int)>($i0);
+
+        i48 = interfaceinvoke $r4.<javax.swing.text.Element: int getStartOffset()>();
+
+        $r5 = virtualinvoke r3.<javax.swing.text.AbstractDocument: javax.swing.text.Element getParagraphElement(int)>($i47);
+
+        i49 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        goto label04;
+
+     label02:
+        $r38 = staticinvoke <javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType access$100(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r0);
+
+        $r39 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        if $r38 != $r39 goto label03;
+
+        $i46 = virtualinvoke r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int getOffset()>();
+
+        $r41 = virtualinvoke r3.<javax.swing.text.AbstractDocument: javax.swing.text.Element getParagraphElement(int)>($i46);
+
+        i48 = interfaceinvoke $r41.<javax.swing.text.Element: int getStartOffset()>();
+
+        i49 = interfaceinvoke $r41.<javax.swing.text.Element: int getEndOffset()>();
+
+        goto label04;
+
+     label03:
+        $r44 = new java.lang.Error;
+
+        specialinvoke $r44.<java.lang.Error: void <init>(java.lang.String)>("Internal error: unknown event type.");
+
+        throw $r44;
+
+     label04:
+        $r6 = specialinvoke r3.<javax.swing.text.AbstractDocument: byte[] calculateBidiLevels(int,int)>(i48, i49);
+
+        $r45 = new java.util.Vector;
+
+        specialinvoke $r45.<java.util.Vector: void <init>()>();
+
+        i50 = i48;
+
+        i51 = 0;
+
+        if i48 <= 0 goto label07;
+
+        $r30 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i40 = i48 - 1;
+
+        $i41 = virtualinvoke $r30.<javax.swing.text.AbstractDocument$BranchElement: int getElementIndex(int)>($i40);
+
+        i51 = $i41;
+
+        $r31 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $r32 = virtualinvoke $r31.<javax.swing.text.AbstractDocument$BranchElement: javax.swing.text.Element getElement(int)>($i41);
+
+        $r33 = interfaceinvoke $r32.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i42 = staticinvoke <javax.swing.text.StyleConstants: int getBidiLevel(javax.swing.text.AttributeSet)>($r33);
+
+        $b43 = $r6[0];
+
+        $i61 = (int) $b43;
+
+        if $i42 != $i61 goto label05;
+
+        i50 = interfaceinvoke $r32.<javax.swing.text.Element: int getStartOffset()>();
+
+        goto label07;
+
+     label05:
+        $i44 = interfaceinvoke $r32.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i44 <= i48 goto label06;
+
+        $r46 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r35 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i45 = interfaceinvoke $r32.<javax.swing.text.Element: int getStartOffset()>();
+
+        specialinvoke $r46.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r35, $i45, i48, $i42);
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>($r46);
+
+        goto label07;
+
+     label06:
+        i51 = $i41 + 1;
+
+     label07:
+        i52 = 0;
+
+     label08:
+        $i53 = lengthof $r6;
+
+        if i52 >= $i53 goto label09;
+
+        $b39 = $r6[i52];
+
+        $b38 = $r6[0];
+
+        $i62 = (int) $b39;
+
+        $i63 = (int) $b38;
+
+        if $i62 != $i63 goto label09;
+
+        i52 = i52 + 1;
+
+        goto label08;
+
+     label09:
+        i54 = i49;
+
+        r42 = null;
+
+        $r8 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i2 = virtualinvoke $r8.<javax.swing.text.AbstractDocument$BranchElement: int getElementCount()>();
+
+        i55 = $i2 - 1;
+
+        $i3 = virtualinvoke r3.<javax.swing.text.AbstractDocument: int getLength()>();
+
+        if i49 > $i3 goto label12;
+
+        $r24 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i31 = virtualinvoke $r24.<javax.swing.text.AbstractDocument$BranchElement: int getElementIndex(int)>(i49);
+
+        i55 = $i31;
+
+        $r25 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $r26 = virtualinvoke $r25.<javax.swing.text.AbstractDocument$BranchElement: javax.swing.text.Element getElement(int)>($i31);
+
+        $r27 = interfaceinvoke $r26.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i32 = staticinvoke <javax.swing.text.StyleConstants: int getBidiLevel(javax.swing.text.AttributeSet)>($r27);
+
+        $i33 = lengthof $r6;
+
+        $i34 = $i33 - 1;
+
+        $b35 = $r6[$i34];
+
+        $i64 = (int) $b35;
+
+        if $i32 != $i64 goto label10;
+
+        i54 = interfaceinvoke $r26.<javax.swing.text.Element: int getEndOffset()>();
+
+        goto label12;
+
+     label10:
+        $i36 = interfaceinvoke $r26.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i36 >= i49 goto label11;
+
+        $r47 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r29 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i37 = interfaceinvoke $r26.<javax.swing.text.Element: int getEndOffset()>();
+
+        specialinvoke $r47.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r29, i49, $i37, $i32);
+
+        r42 = $r47;
+
+        goto label12;
+
+     label11:
+        $i66 = (int) -1;
+
+        i55 = $i31 + $i66;
+
+     label12:
+        i56 = lengthof $r6;
+
+     label13:
+        if i56 <= i52 goto label14;
+
+        $i26 = i56 - 1;
+
+        $b30 = $r6[$i26];
+
+        $i27 = lengthof $r6;
+
+        $i28 = $i27 - 1;
+
+        $b29 = $r6[$i28];
+
+        $i67 = (int) $b30;
+
+        $i68 = (int) $b29;
+
+        if $i67 != $i68 goto label14;
+
+        $i70 = (int) -1;
+
+        i56 = i56 + $i70;
+
+        goto label13;
+
+     label14:
+        if i52 != i56 goto label15;
+
+        $b24 = $r6[0];
+
+        $i21 = lengthof $r6;
+
+        $i22 = $i21 - 1;
+
+        $b23 = $r6[$i22];
+
+        $i71 = (int) $b24;
+
+        $i72 = (int) $b23;
+
+        if $i71 != $i72 goto label15;
+
+        $r48 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r23 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $b25 = $r6[0];
+
+        $i73 = (int) $b25;
+
+        specialinvoke $r48.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r23, i50, i54, $i73);
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>($r48);
+
+        goto label20;
+
+     label15:
+        $r49 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r10 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i5 = i52 + i48;
+
+        $b4 = $r6[0];
+
+        $i74 = (int) $b4;
+
+        specialinvoke $r49.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r10, i50, $i5, $i74);
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>($r49);
+
+        i57 = i52;
+
+     label16:
+        if i57 >= i56 goto label19;
+
+        i58 = i57;
+
+     label17:
+        $i15 = lengthof $r6;
+
+        if i58 >= $i15 goto label18;
+
+        $b20 = $r6[i58];
+
+        $b19 = $r6[i57];
+
+        $i75 = (int) $b20;
+
+        $i76 = (int) $b19;
+
+        if $i75 != $i76 goto label18;
+
+        i58 = i58 + 1;
+
+        goto label17;
+
+     label18:
+        $r50 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r21 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i18 = i48 + i57;
+
+        $i17 = i48 + i58;
+
+        $b16 = $r6[i57];
+
+        $i77 = (int) $b16;
+
+        specialinvoke $r50.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r21, $i18, $i17, $i77);
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>($r50);
+
+        i57 = i58;
+
+        goto label16;
+
+     label19:
+        $r51 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r12 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i9 = i56 + i48;
+
+        $i6 = lengthof $r6;
+
+        $i7 = $i6 - 1;
+
+        $b8 = $r6[$i7];
+
+        $i78 = (int) $b8;
+
+        specialinvoke $r51.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r3, $r12, $i9, i54, $i78);
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>($r51);
+
+     label20:
+        if r42 == null goto label21;
+
+        virtualinvoke $r45.<java.util.Vector: void addElement(java.lang.Object)>(r42);
+
+     label21:
+        i59 = 0;
+
+        $r13 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i10 = virtualinvoke $r13.<javax.swing.text.AbstractDocument$BranchElement: int getElementCount()>();
+
+        if $i10 <= 0 goto label22;
+
+        $i14 = i55 - i51;
+
+        i59 = $i14 + 1;
+
+     label22:
+        $r19 = newarray (javax.swing.text.Element)[i59];
+
+        i60 = 0;
+
+     label23:
+        if i60 >= i59 goto label24;
+
+        $r17 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i13 = i51 + i60;
+
+        $r18 = virtualinvoke $r17.<javax.swing.text.AbstractDocument$BranchElement: javax.swing.text.Element getElement(int)>($i13);
+
+        $r19[i60] = $r18;
+
+        i60 = i60 + 1;
+
+        goto label23;
+
+     label24:
+        $i11 = virtualinvoke $r45.<java.util.Vector: int size()>();
+
+        r43 = newarray (javax.swing.text.Element)[$i11];
+
+        virtualinvoke $r45.<java.util.Vector: void copyInto(java.lang.Object[])>(r43);
+
+        $r52 = new javax.swing.text.AbstractDocument$ElementEdit;
+
+        $r15 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        specialinvoke $r52.<javax.swing.text.AbstractDocument$ElementEdit: void <init>(javax.swing.text.Element,int,javax.swing.text.Element[],javax.swing.text.Element[])>($r15, i51, $r19, r43);
+
+        virtualinvoke r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r52);
+
+        $r16 = r3.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        $i12 = lengthof $r19;
+
+        virtualinvoke $r16.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(i51, $i12, r43);
+
+        return;
+    }
+
+    private byte[] calculateBidiLevels(int, int)
+    {
+        byte[] r0;
+        javax.swing.text.AbstractDocument r1;
+        byte b9;
+        java.text.Bidi $r20;
+        javax.swing.text.AttributeSet $r6;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.BadLocationException $r11;
+        java.lang.StringBuilder $r13, $r14, $r16;
+        java.awt.font.TextAttribute $r2, $r7;
+        java.lang.Error $r4, $r12;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i10, $i11, $i12;
+        java.lang.Boolean $r10, r18, r19;
+        java.lang.String $r15, $r17;
+        char[] $r21;
+        java.lang.Object $r3, $r8;
+        javax.swing.text.Segment $r9;
+        javax.swing.text.Element $r5;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $i2 = i0 - i1;
+
+        r0 = newarray (byte)[$i2];
+
+        i7 = 0;
+
+        r18 = null;
+
+        $r2 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r3 = virtualinvoke r1.<javax.swing.text.AbstractDocument: java.lang.Object getProperty(java.lang.Object)>($r2);
+
+        $z0 = $r3 instanceof java.lang.Boolean;
+
+        if $z0 == 0 goto label01;
+
+        r18 = (java.lang.Boolean) $r3;
+
+     label01:
+        i8 = i1;
+
+     label02:
+        if i8 >= i0 goto label10;
+
+        $r5 = virtualinvoke r1.<javax.swing.text.AbstractDocument: javax.swing.text.Element getParagraphElement(int)>(i8);
+
+        $i4 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i5 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        r19 = r18;
+
+        $r6 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r7 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r8 = interfaceinvoke $r6.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r7);
+
+        $z1 = $r8 instanceof java.lang.Boolean;
+
+        if $z1 == 0 goto label03;
+
+        r19 = (java.lang.Boolean) $r8;
+
+     label03:
+        $r9 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+     label04:
+        $i6 = $i5 - $i4;
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void getText(int,int,javax.swing.text.Segment)>($i4, $i6, $r9);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.Error;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Internal error: ");
+
+        $r15 = virtualinvoke $r11.<javax.swing.text.BadLocationException: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.Error: void <init>(java.lang.String)>($r17);
+
+        throw $r12;
+
+     label07:
+        b9 = -2;
+
+        if r19 == null goto label09;
+
+        $r10 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_LTR>;
+
+        $z2 = virtualinvoke $r10.<java.lang.Boolean: boolean equals(java.lang.Object)>(r19);
+
+        if $z2 == 0 goto label08;
+
+        b9 = 0;
+
+        goto label09;
+
+     label08:
+        b9 = 1;
+
+     label09:
+        $r20 = new java.text.Bidi;
+
+        $r21 = $r9.<javax.swing.text.Segment: char[] array>;
+
+        $i10 = $r9.<javax.swing.text.Segment: int offset>;
+
+        $i11 = $r9.<javax.swing.text.Segment: int count>;
+
+        specialinvoke $r20.<java.text.Bidi: void <init>(char[],int,byte[],int,int,int)>($r21, $i10, null, 0, $i11, b9);
+
+        staticinvoke <sun.font.BidiUtils: void getLevels(java.text.Bidi,byte[],int)>($r20, r0, i7);
+
+        $i12 = virtualinvoke $r20.<java.text.Bidi: int getLength()>();
+
+        i7 = i7 + $i12;
+
+        i8 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r9);
+
+        goto label02;
+
+     label10:
+        $i3 = lengthof r0;
+
+        if i7 == $i3 goto label11;
+
+        $r4 = new java.lang.Error;
+
+        specialinvoke $r4.<java.lang.Error: void <init>(java.lang.String)>("levelsEnd assertion failed.");
+
+        throw $r4;
+
+     label11:
+        return r0;
+
+        catch javax.swing.text.BadLocationException from label04 to label05 with label06;
+    }
+
+    public void dump(java.io.PrintStream)
+    {
+        java.io.PrintStream r2;
+        javax.swing.text.AbstractDocument$AbstractElement $r4;
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.AbstractDocument$BranchElement $r3;
+        javax.swing.text.Element $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        r2 := @parameter0: java.io.PrintStream;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument: javax.swing.text.Element getDefaultRootElement()>();
+
+        $z0 = $r1 instanceof javax.swing.text.AbstractDocument$AbstractElement;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (javax.swing.text.AbstractDocument$AbstractElement) $r1;
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument$AbstractElement: void dump(java.io.PrintStream,int)>(r2, 0);
+
+     label1:
+        $r3 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        virtualinvoke $r3.<javax.swing.text.AbstractDocument$BranchElement: void dump(java.io.PrintStream,int)>(r2, 0);
+
+        return;
+    }
+
+    protected final javax.swing.text.AbstractDocument$Content getContent()
+    {
+        javax.swing.text.AbstractDocument r0;
+        javax.swing.text.AbstractDocument$Content $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$Content data>;
+
+        return $r1;
+    }
+
+    protected javax.swing.text.Element createLeafElement(javax.swing.text.Element, javax.swing.text.AttributeSet, int, int)
+    {
+        javax.swing.text.AbstractDocument r1;
+        int i0, i1;
+        javax.swing.text.AbstractDocument$LeafElement $r0;
+        javax.swing.text.Element r2;
+        javax.swing.text.AttributeSet r3;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r3 := @parameter1: javax.swing.text.AttributeSet;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = new javax.swing.text.AbstractDocument$LeafElement;
+
+        specialinvoke $r0.<javax.swing.text.AbstractDocument$LeafElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r1, r2, r3, i0, i1);
+
+        return $r0;
+    }
+
+    protected javax.swing.text.Element createBranchElement(javax.swing.text.Element, javax.swing.text.AttributeSet)
+    {
+        javax.swing.text.AbstractDocument r1;
+        javax.swing.text.AbstractDocument$BranchElement $r0;
+        javax.swing.text.Element r2;
+        javax.swing.text.AttributeSet r3;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r3 := @parameter1: javax.swing.text.AttributeSet;
+
+        $r0 = new javax.swing.text.AbstractDocument$BranchElement;
+
+        specialinvoke $r0.<javax.swing.text.AbstractDocument$BranchElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,javax.swing.text.AttributeSet)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    protected final synchronized java.lang.Thread getCurrentWriter()
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Thread $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        return $r1;
+    }
+
+    protected final synchronized void writeLock()
+    {
+        java.lang.IllegalStateException $r3;
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Error $r7;
+        java.lang.InterruptedException $r6;
+        java.lang.Thread $r1, $r2, $r4, $r5;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+     label1:
+        $i0 = r0.<javax.swing.text.AbstractDocument: int numReaders>;
+
+        if $i0 > 0 goto label2;
+
+        $r4 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        if $r4 == null goto label6;
+
+     label2:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        if $r1 != $r2 goto label5;
+
+        $z0 = r0.<javax.swing.text.AbstractDocument: boolean notifyingListeners>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Attempt to mutate in notification");
+
+        throw $r3;
+
+     label3:
+        $i1 = r0.<javax.swing.text.AbstractDocument: int numWriters>;
+
+        $i2 = $i1 + 1;
+
+        r0.<javax.swing.text.AbstractDocument: int numWriters> = $i2;
+
+     label4:
+        return;
+
+     label5:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label1;
+
+     label6:
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter> = $r5;
+
+        r0.<javax.swing.text.AbstractDocument: int numWriters> = 1;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.Error;
+
+        specialinvoke $r7.<java.lang.Error: void <init>(java.lang.String)>("Interrupted attempt to acquire write lock");
+
+        throw $r7;
+
+     label9:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label4 with label8;
+        catch java.lang.InterruptedException from label5 to label7 with label8;
+    }
+
+    protected final synchronized void writeUnlock()
+    {
+        int $i0, $i1;
+        javax.swing.text.AbstractDocument r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $i0 = r0.<javax.swing.text.AbstractDocument: int numWriters>;
+
+        $i1 = $i0 - 1;
+
+        r0.<javax.swing.text.AbstractDocument: int numWriters> = $i1;
+
+        if $i1 > 0 goto label1;
+
+        r0.<javax.swing.text.AbstractDocument: int numWriters> = 0;
+
+        r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter> = null;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label1:
+        return;
+    }
+
+    public final synchronized void readLock()
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Error $r5;
+        java.lang.InterruptedException $r4;
+        java.lang.Thread $r1, $r2, $r3;
+        int $i0, $i1;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r2 != $r3 goto label3;
+
+     label2:
+        return;
+
+     label3:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label1;
+
+     label4:
+        $i0 = r0.<javax.swing.text.AbstractDocument: int numReaders>;
+
+        $i1 = $i0 + 1;
+
+        r0.<javax.swing.text.AbstractDocument: int numReaders> = $i1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.Error;
+
+        specialinvoke $r5.<java.lang.Error: void <init>(java.lang.String)>("Interrupted attempt to acquire read lock");
+
+        throw $r5;
+
+     label7:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label6;
+        catch java.lang.InterruptedException from label3 to label5 with label6;
+    }
+
+    public final synchronized void readUnlock()
+    {
+        javax.swing.text.AbstractDocument r0;
+        java.lang.Thread $r1, $r2;
+        int $i0, $i1, $i2;
+        javax.swing.text.StateInvariantError $r3;
+
+        r0 := @this: javax.swing.text.AbstractDocument;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument: java.lang.Thread currWriter>;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r1 != $r2 goto label1;
+
+        return;
+
+     label1:
+        $i0 = r0.<javax.swing.text.AbstractDocument: int numReaders>;
+
+        if $i0 > 0 goto label2;
+
+        $r3 = new javax.swing.text.StateInvariantError;
+
+        specialinvoke $r3.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>("document lock failure");
+
+        throw $r3;
+
+     label2:
+        $i1 = r0.<javax.swing.text.AbstractDocument: int numReaders>;
+
+        $i2 = $i1 - 1;
+
+        r0.<javax.swing.text.AbstractDocument: int numReaders> = $i2;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        javax.swing.text.AbstractDocument r1;
+        javax.swing.text.AbstractDocument$BidiElement $r5;
+        java.io.ObjectInputStream r0;
+        javax.swing.text.Element[] r4;
+        javax.swing.text.AbstractDocument$2 $r8;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.text.AbstractDocument$BranchElement $r6, $r7;
+        javax.swing.text.AbstractDocument$BidiRootElement $r3;
+
+        r1 := @this: javax.swing.text.AbstractDocument;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = new javax.swing.event.EventListenerList;
+
+        specialinvoke $r2.<javax.swing.event.EventListenerList: void <init>()>();
+
+        r1.<javax.swing.text.AbstractDocument: javax.swing.event.EventListenerList listenerList> = $r2;
+
+        $r3 = new javax.swing.text.AbstractDocument$BidiRootElement;
+
+        specialinvoke $r3.<javax.swing.text.AbstractDocument$BidiRootElement: void <init>(javax.swing.text.AbstractDocument)>(r1);
+
+        r1.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot> = $r3;
+
+     label1:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+        r4 = newarray (javax.swing.text.Element)[1];
+
+        $r5 = new javax.swing.text.AbstractDocument$BidiElement;
+
+        $r6 = r1.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        specialinvoke $r5.<javax.swing.text.AbstractDocument$BidiElement: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.Element,int,int,int)>(r1, $r6, 0, 1, 0);
+
+        r4[0] = $r5;
+
+        $r7 = r1.<javax.swing.text.AbstractDocument: javax.swing.text.AbstractDocument$BranchElement bidiRoot>;
+
+        virtualinvoke $r7.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r4);
+
+     label2:
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        virtualinvoke r1.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r9;
+
+     label4:
+        $r8 = new javax.swing.text.AbstractDocument$2;
+
+        specialinvoke $r8.<javax.swing.text.AbstractDocument$2: void <init>(javax.swing.text.AbstractDocument)>(r1);
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void registerValidation(java.io.ObjectInputValidation,int)>($r8, 0);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    static void access$200(javax.swing.text.AbstractDocument, int, java.lang.String, javax.swing.text.AttributeSet) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractDocument r0;
+        int i0;
+        java.lang.String r1;
+        javax.swing.text.AttributeSet r2;
+
+        r0 := @parameter0: javax.swing.text.AbstractDocument;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: javax.swing.text.AttributeSet;
+
+        specialinvoke r0.<javax.swing.text.AbstractDocument: void handleInsertString(int,java.lang.String,javax.swing.text.AttributeSet)>(i0, r1, r2);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.text.AbstractDocument: java.lang.String AsyncLoadPriority> = "load priority";
+
+        <javax.swing.text.AbstractDocument: java.lang.String I18NProperty> = "i18n";
+
+        <javax.swing.text.AbstractDocument: java.lang.String ElementNameAttribute> = "$ename";
+
+        <javax.swing.text.AbstractDocument: java.lang.String BidiElementName> = "bidi level";
+
+        <javax.swing.text.AbstractDocument: java.lang.String SectionElementName> = "section";
+
+        <javax.swing.text.AbstractDocument: java.lang.String ContentElementName> = "content";
+
+        <javax.swing.text.AbstractDocument: java.lang.String ParagraphElementName> = "paragraph";
+
+        <javax.swing.text.AbstractDocument: java.lang.String BAD_LOCATION> = "document location failure";
+
+        <javax.swing.text.AbstractDocument: java.lang.String BAD_LOCK_STATE> = "document lock failure";
+
+        <javax.swing.text.AbstractDocument: java.lang.Object MultiByteProperty> = "multiByte";
+
+        return;
+    }
+}

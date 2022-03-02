@@ -1,0 +1,722 @@
+public class java.io.BufferedInputStream extends java.io.FilterInputStream
+{
+    private static int DEFAULT_BUFFER_SIZE;
+    private static int MAX_BUFFER_SIZE;
+    protected volatile byte[] buf;
+    private static final java.util.concurrent.atomic.AtomicReferenceFieldUpdater bufUpdater;
+    protected int count;
+    protected int pos;
+    protected int markpos;
+    protected int marklimit;
+
+    private java.io.InputStream getInIfOpen() throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        java.io.BufferedInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r1 = r0.<java.io.BufferedInputStream: java.io.InputStream in>;
+
+        if r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label1:
+        return r1;
+    }
+
+    private byte[] getBufIfOpen() throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.IOException $r2;
+        java.io.BufferedInputStream r0;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r1 = r0.<java.io.BufferedInputStream: byte[] buf>;
+
+        if r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label1:
+        return r1;
+    }
+
+    public void <init>(java.io.InputStream)
+    {
+        int $i0;
+        java.io.BufferedInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $i0 = <java.io.BufferedInputStream: int DEFAULT_BUFFER_SIZE>;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r1, $i0);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, int)
+    {
+        byte[] $r2;
+        java.io.BufferedInputStream r0;
+        int i0, $i2;
+        java.lang.IllegalArgumentException $r4;
+        java.io.InputStream r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        $i2 = (int) -1;
+
+        r0.<java.io.BufferedInputStream: int markpos> = $i2;
+
+        if i0 > 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Buffer size <= 0");
+
+        throw $r4;
+
+     label1:
+        $r2 = newarray (byte)[i0];
+
+        r0.<java.io.BufferedInputStream: byte[] buf> = $r2;
+
+        return;
+    }
+
+    private void fill() throws java.io.IOException
+    {
+        byte[] $r1, $r4, r6;
+        java.io.BufferedInputStream r0;
+        boolean $z0;
+        java.util.concurrent.atomic.AtomicReferenceFieldUpdater $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, i20, $i21, i22, $i23, $i24, $i25, $i26, $i27, $i28, $i30;
+        java.io.IOException $r9;
+        java.lang.OutOfMemoryError $r8;
+        java.io.InputStream $r7;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        $r1 = specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        r6 = $r1;
+
+        $i0 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        if $i0 >= 0 goto label01;
+
+        r0.<java.io.BufferedInputStream: int pos> = 0;
+
+        goto label09;
+
+     label01:
+        $i2 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i1 = lengthof $r1;
+
+        if $i2 < $i1 goto label09;
+
+        $i5 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        if $i5 <= 0 goto label02;
+
+        $i18 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i17 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        i20 = $i18 - $i17;
+
+        $i19 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i19, $r1, 0, i20);
+
+        r0.<java.io.BufferedInputStream: int pos> = i20;
+
+        r0.<java.io.BufferedInputStream: int markpos> = 0;
+
+        goto label09;
+
+     label02:
+        $i7 = lengthof $r1;
+
+        $i6 = r0.<java.io.BufferedInputStream: int marklimit>;
+
+        if $i7 < $i6 goto label03;
+
+        $i30 = (int) -1;
+
+        r0.<java.io.BufferedInputStream: int markpos> = $i30;
+
+        r0.<java.io.BufferedInputStream: int pos> = 0;
+
+        goto label09;
+
+     label03:
+        $i9 = lengthof $r1;
+
+        $i8 = <java.io.BufferedInputStream: int MAX_BUFFER_SIZE>;
+
+        if $i9 < $i8 goto label04;
+
+        $r8 = new java.lang.OutOfMemoryError;
+
+        specialinvoke $r8.<java.lang.OutOfMemoryError: void <init>(java.lang.String)>("Required array size too large");
+
+        throw $r8;
+
+     label04:
+        $i13 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i11 = <java.io.BufferedInputStream: int MAX_BUFFER_SIZE>;
+
+        $i10 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i12 = $i11 - $i10;
+
+        if $i13 > $i12 goto label05;
+
+        $i16 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i21 = $i16 * 2;
+
+        goto label06;
+
+     label05:
+        $i21 = <java.io.BufferedInputStream: int MAX_BUFFER_SIZE>;
+
+     label06:
+        i22 = $i21;
+
+        $i14 = r0.<java.io.BufferedInputStream: int marklimit>;
+
+        if $i21 <= $i14 goto label07;
+
+        i22 = r0.<java.io.BufferedInputStream: int marklimit>;
+
+     label07:
+        $r4 = newarray (byte)[i22];
+
+        $i15 = r0.<java.io.BufferedInputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r4, 0, $i15);
+
+        $r2 = <java.io.BufferedInputStream: java.util.concurrent.atomic.AtomicReferenceFieldUpdater bufUpdater>;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicReferenceFieldUpdater: boolean compareAndSet(java.lang.Object,java.lang.Object,java.lang.Object)>(r0, $r1, $r4);
+
+        if $z0 != 0 goto label08;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r9;
+
+     label08:
+        r6 = $r4;
+
+     label09:
+        $i23 = r0.<java.io.BufferedInputStream: int pos>;
+
+        r0.<java.io.BufferedInputStream: int count> = $i23;
+
+        $r7 = specialinvoke r0.<java.io.BufferedInputStream: java.io.InputStream getInIfOpen()>();
+
+        $i24 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i25 = lengthof r6;
+
+        $i26 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i27 = $i25 - $i26;
+
+        $i28 = virtualinvoke $r7.<java.io.InputStream: int read(byte[],int,int)>(r6, $i24, $i27);
+
+        if $i28 <= 0 goto label10;
+
+        $i3 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i4 = $i28 + $i3;
+
+        r0.<java.io.BufferedInputStream: int count> = $i4;
+
+     label10:
+        return;
+    }
+
+    public synchronized int read() throws java.io.IOException
+    {
+        byte[] $r1;
+        java.io.BufferedInputStream r0;
+        short $s5, $s10;
+        byte $b4;
+        int $i0, $i1, $i2, $i3, $i6, $i7, $i9, $i11;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        $i1 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i0 = r0.<java.io.BufferedInputStream: int count>;
+
+        if $i1 < $i0 goto label1;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void fill()>();
+
+        $i7 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i6 = r0.<java.io.BufferedInputStream: int count>;
+
+        if $i7 < $i6 goto label1;
+
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label1:
+        $r1 = specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $i2 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.io.BufferedInputStream: int pos> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s10 = (short) $b4;
+
+        $s5 = $s10 & 255;
+
+        $i11 = (int) $s5;
+
+        return $i11;
+    }
+
+    private int read1(byte[], int, int) throws java.io.IOException
+    {
+        byte[] $r1, r2, $r3;
+        java.io.BufferedInputStream r0;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, $i14, $i16;
+        java.io.InputStream $r4;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r2 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i1 = r0.<java.io.BufferedInputStream: int count>;
+
+        $i0 = r0.<java.io.BufferedInputStream: int pos>;
+
+        i13 = $i1 - $i0;
+
+        if i13 > 0 goto label2;
+
+        $r3 = specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $i7 = lengthof $r3;
+
+        if i2 < $i7 goto label1;
+
+        $i10 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        if $i10 >= 0 goto label1;
+
+        $r4 = specialinvoke r0.<java.io.BufferedInputStream: java.io.InputStream getInIfOpen()>();
+
+        $i12 = virtualinvoke $r4.<java.io.InputStream: int read(byte[],int,int)>(r2, i3, i2);
+
+        return $i12;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedInputStream: void fill()>();
+
+        $i9 = r0.<java.io.BufferedInputStream: int count>;
+
+        $i8 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i11 = $i9 - $i8;
+
+        i13 = $i11;
+
+        if $i11 > 0 goto label2;
+
+        $i16 = (int) -1;
+
+        return $i16;
+
+     label2:
+        if i13 >= i2 goto label3;
+
+        $i14 = i13;
+
+        goto label4;
+
+     label3:
+        $i14 = i2;
+
+     label4:
+        $r1 = specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $i4 = r0.<java.io.BufferedInputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i4, r2, i3, $i14);
+
+        $i5 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i6 = $i5 + $i14;
+
+        r0.<java.io.BufferedInputStream: int pos> = $i6;
+
+        return $i14;
+    }
+
+    public synchronized int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.lang.IndexOutOfBoundsException $r3;
+        java.io.BufferedInputStream r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, $i14;
+        java.io.InputStream r2;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $i3 = i0 | i1;
+
+        $i2 = i0 + i1;
+
+        $i7 = $i3 | $i2;
+
+        $i5 = lengthof r1;
+
+        $i4 = i0 + i1;
+
+        $i6 = $i5 - $i4;
+
+        $i8 = $i7 | $i6;
+
+        if $i8 >= 0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        if i1 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        i13 = 0;
+
+     label3:
+        $i10 = i0 + i13;
+
+        $i9 = i1 - i13;
+
+        $i11 = specialinvoke r0.<java.io.BufferedInputStream: int read1(byte[],int,int)>(r1, $i10, $i9);
+
+        if $i11 > 0 goto label6;
+
+        if i13 != 0 goto label4;
+
+        $i14 = $i11;
+
+        goto label5;
+
+     label4:
+        $i14 = i13;
+
+     label5:
+        return $i14;
+
+     label6:
+        i13 = i13 + $i11;
+
+        if i13 < i1 goto label7;
+
+        return i13;
+
+     label7:
+        r2 = r0.<java.io.BufferedInputStream: java.io.InputStream in>;
+
+        if r2 == null goto label8;
+
+        $i12 = virtualinvoke r2.<java.io.InputStream: int available()>();
+
+        if $i12 > 0 goto label8;
+
+        return i13;
+
+     label8:
+        goto label3;
+    }
+
+    public synchronized long skip(long) throws java.io.IOException
+    {
+        java.io.BufferedInputStream r0;
+        long l0, $l8, $l9, $l16, l17, $l18;
+        byte $b1, $b5, $b6, $b15;
+        int $i2, $i3, $i4, $i7, $i10, $i11, $i12, $i13, $i14, $i19, $i20, $i21, $i22;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $b1 = l0 cmp 0L;
+
+        $i19 = (int) $b1;
+
+        if $i19 > 0 goto label1;
+
+        return 0L;
+
+     label1:
+        $i3 = r0.<java.io.BufferedInputStream: int count>;
+
+        $i2 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i4 = $i3 - $i2;
+
+        l17 = (long) $i4;
+
+        $b5 = l17 cmp 0L;
+
+        $i20 = (int) $b5;
+
+        if $i20 > 0 goto label3;
+
+        $i11 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        if $i11 >= 0 goto label2;
+
+        $r1 = specialinvoke r0.<java.io.BufferedInputStream: java.io.InputStream getInIfOpen()>();
+
+        $l16 = virtualinvoke $r1.<java.io.InputStream: long skip(long)>(l0);
+
+        return $l16;
+
+     label2:
+        specialinvoke r0.<java.io.BufferedInputStream: void fill()>();
+
+        $i13 = r0.<java.io.BufferedInputStream: int count>;
+
+        $i12 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $i14 = $i13 - $i12;
+
+        l17 = (long) $i14;
+
+        $b15 = l17 cmp 0L;
+
+        $i21 = (int) $b15;
+
+        if $i21 > 0 goto label3;
+
+        return 0L;
+
+     label3:
+        $b6 = l17 cmp l0;
+
+        $i22 = (int) $b6;
+
+        if $i22 >= 0 goto label4;
+
+        $l18 = l17;
+
+        goto label5;
+
+     label4:
+        $l18 = l0;
+
+     label5:
+        $i7 = r0.<java.io.BufferedInputStream: int pos>;
+
+        $l8 = (long) $i7;
+
+        $l9 = $l8 + $l18;
+
+        $i10 = (int) $l9;
+
+        r0.<java.io.BufferedInputStream: int pos> = $i10;
+
+        return $l18;
+    }
+
+    public synchronized int available() throws java.io.IOException
+    {
+        java.io.BufferedInputStream r0;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        $i1 = r0.<java.io.BufferedInputStream: int count>;
+
+        $i0 = r0.<java.io.BufferedInputStream: int pos>;
+
+        i2 = $i1 - $i0;
+
+        $r1 = specialinvoke r0.<java.io.BufferedInputStream: java.io.InputStream getInIfOpen()>();
+
+        $i3 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        $i4 = 2147483647 - $i3;
+
+        if i2 <= $i4 goto label1;
+
+        $i5 = 2147483647;
+
+        goto label2;
+
+     label1:
+        $i5 = i2 + $i3;
+
+     label2:
+        return $i5;
+    }
+
+    public synchronized void mark(int)
+    {
+        int i0, $i1;
+        java.io.BufferedInputStream r0;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        i0 := @parameter0: int;
+
+        r0.<java.io.BufferedInputStream: int marklimit> = i0;
+
+        $i1 = r0.<java.io.BufferedInputStream: int pos>;
+
+        r0.<java.io.BufferedInputStream: int markpos> = $i1;
+
+        return;
+    }
+
+    public synchronized void reset() throws java.io.IOException
+    {
+        java.io.BufferedInputStream r0;
+        int $i0, $i1;
+        java.io.IOException $r1;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        specialinvoke r0.<java.io.BufferedInputStream: byte[] getBufIfOpen()>();
+
+        $i0 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        if $i0 >= 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Resetting to invalid mark");
+
+        throw $r1;
+
+     label1:
+        $i1 = r0.<java.io.BufferedInputStream: int markpos>;
+
+        r0.<java.io.BufferedInputStream: int pos> = $i1;
+
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        java.io.BufferedInputStream r0;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+        return 1;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        byte[] $r1;
+        java.io.BufferedInputStream r0;
+        java.util.concurrent.atomic.AtomicReferenceFieldUpdater $r2;
+        boolean $z0;
+        java.io.InputStream r3;
+
+        r0 := @this: java.io.BufferedInputStream;
+
+     label1:
+        $r1 = r0.<java.io.BufferedInputStream: byte[] buf>;
+
+        if $r1 == null goto label3;
+
+        $r2 = <java.io.BufferedInputStream: java.util.concurrent.atomic.AtomicReferenceFieldUpdater bufUpdater>;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicReferenceFieldUpdater: boolean compareAndSet(java.lang.Object,java.lang.Object,java.lang.Object)>(r0, $r1, null);
+
+        if $z0 == 0 goto label1;
+
+        r3 = r0.<java.io.BufferedInputStream: java.io.InputStream in>;
+
+        r0.<java.io.BufferedInputStream: java.io.InputStream in> = null;
+
+        if r3 == null goto label2;
+
+        virtualinvoke r3.<java.io.InputStream: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicReferenceFieldUpdater $r0;
+
+        <java.io.BufferedInputStream: int DEFAULT_BUFFER_SIZE> = 8192;
+
+        <java.io.BufferedInputStream: int MAX_BUFFER_SIZE> = 2147483639;
+
+        $r0 = staticinvoke <java.util.concurrent.atomic.AtomicReferenceFieldUpdater: java.util.concurrent.atomic.AtomicReferenceFieldUpdater newUpdater(java.lang.Class,java.lang.Class,java.lang.String)>(class "Ljava/io/BufferedInputStream;", class "[B", "buf");
+
+        <java.io.BufferedInputStream: java.util.concurrent.atomic.AtomicReferenceFieldUpdater bufUpdater> = $r0;
+
+        return;
+    }
+}

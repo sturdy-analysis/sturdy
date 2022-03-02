@@ -1,0 +1,160 @@
+public final class com.sun.media.sound.SoftMixingMixerProvider extends javax.sound.sampled.spi.MixerProvider
+{
+    static com.sun.media.sound.SoftMixingMixer globalmixer;
+    static java.lang.Thread lockthread;
+    static final java.lang.Object mutex;
+
+    public void <init>()
+    {
+        com.sun.media.sound.SoftMixingMixerProvider r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMixerProvider;
+
+        specialinvoke r0.<javax.sound.sampled.spi.MixerProvider: void <init>()>();
+
+        return;
+    }
+
+    public javax.sound.sampled.Mixer getMixer(javax.sound.sampled.Mixer$Info)
+    {
+        javax.sound.sampled.Mixer$Info r0, $r15;
+        java.lang.Throwable $r23;
+        com.sun.media.sound.SoftMixingMixer $r3, $r4, $r5;
+        java.lang.Thread $r2, $r6, $r7;
+        java.lang.String $r11, $r14, $r19, $r22;
+        com.sun.media.sound.SoftMixingMixerProvider r24;
+        java.lang.IllegalArgumentException $r8, $r16;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r9, $r10, $r12, $r13, $r17, $r18, $r20, $r21;
+
+        r24 := @this: com.sun.media.sound.SoftMixingMixerProvider;
+
+        r0 := @parameter0: javax.sound.sampled.Mixer$Info;
+
+        if r0 == null goto label1;
+
+        $r15 = <com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.Mixer$Info info>;
+
+        if r0 == $r15 goto label1;
+
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Mixer ");
+
+        $r19 = virtualinvoke r0.<javax.sound.sampled.Mixer$Info: java.lang.String toString()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported by this provider.");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r22);
+
+        throw $r16;
+
+     label1:
+        $r1 = <com.sun.media.sound.SoftMixingMixerProvider: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label2:
+        $r2 = <com.sun.media.sound.SoftMixingMixerProvider: java.lang.Thread lockthread>;
+
+        if $r2 == null goto label3;
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r7 = <com.sun.media.sound.SoftMixingMixerProvider: java.lang.Thread lockthread>;
+
+        if $r6 != $r7 goto label3;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Mixer ");
+
+        $r11 = virtualinvoke r0.<javax.sound.sampled.Mixer$Info: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported by this provider.");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r14);
+
+        throw $r8;
+
+     label3:
+        $r3 = <com.sun.media.sound.SoftMixingMixerProvider: com.sun.media.sound.SoftMixingMixer globalmixer>;
+
+        if $r3 != null goto label4;
+
+        $r5 = new com.sun.media.sound.SoftMixingMixer;
+
+        specialinvoke $r5.<com.sun.media.sound.SoftMixingMixer: void <init>()>();
+
+        <com.sun.media.sound.SoftMixingMixerProvider: com.sun.media.sound.SoftMixingMixer globalmixer> = $r5;
+
+     label4:
+        $r4 = <com.sun.media.sound.SoftMixingMixerProvider: com.sun.media.sound.SoftMixingMixer globalmixer>;
+
+        exitmonitor $r1;
+
+     label5:
+        return $r4;
+
+     label6:
+        $r23 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r23;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public javax.sound.sampled.Mixer$Info[] getMixerInfo()
+    {
+        javax.sound.sampled.Mixer$Info $r1;
+        com.sun.media.sound.SoftMixingMixerProvider r2;
+        javax.sound.sampled.Mixer$Info[] $r0;
+
+        r2 := @this: com.sun.media.sound.SoftMixingMixerProvider;
+
+        $r0 = newarray (javax.sound.sampled.Mixer$Info)[1];
+
+        $r1 = <com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.Mixer$Info info>;
+
+        $r0[0] = $r1;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        <com.sun.media.sound.SoftMixingMixerProvider: com.sun.media.sound.SoftMixingMixer globalmixer> = null;
+
+        <com.sun.media.sound.SoftMixingMixerProvider: java.lang.Thread lockthread> = null;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <com.sun.media.sound.SoftMixingMixerProvider: java.lang.Object mutex> = $r0;
+
+        return;
+    }
+}

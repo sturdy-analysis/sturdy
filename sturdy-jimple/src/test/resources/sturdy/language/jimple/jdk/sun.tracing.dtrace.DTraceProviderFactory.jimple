@@ -1,0 +1,151 @@
+public final class sun.tracing.dtrace.DTraceProviderFactory extends com.sun.tracing.ProviderFactory
+{
+
+    public void <init>()
+    {
+        sun.tracing.dtrace.DTraceProviderFactory r0;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProviderFactory;
+
+        specialinvoke r0.<com.sun.tracing.ProviderFactory: void <init>()>();
+
+        return;
+    }
+
+    public com.sun.tracing.Provider createProvider(java.lang.Class)
+    {
+        sun.tracing.dtrace.DTraceProviderFactory r6;
+        sun.tracing.dtrace.Activation $r3;
+        com.sun.tracing.Provider $r2;
+        sun.tracing.dtrace.DTraceProvider $r0;
+        java.lang.Class r1;
+        java.lang.String $r4;
+        sun.tracing.dtrace.DTraceProvider[] $r5;
+
+        r6 := @this: sun.tracing.dtrace.DTraceProviderFactory;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new sun.tracing.dtrace.DTraceProvider;
+
+        specialinvoke $r0.<sun.tracing.dtrace.DTraceProvider: void <init>(java.lang.Class)>(r1);
+
+        $r2 = virtualinvoke $r0.<sun.tracing.dtrace.DTraceProvider: com.sun.tracing.Provider newProxyInstance()>();
+
+        virtualinvoke $r0.<sun.tracing.dtrace.DTraceProvider: void setProxy(java.lang.Object)>($r2);
+
+        virtualinvoke $r0.<sun.tracing.dtrace.DTraceProvider: void init()>();
+
+        $r3 = new sun.tracing.dtrace.Activation;
+
+        $r4 = virtualinvoke $r0.<sun.tracing.dtrace.DTraceProvider: java.lang.String getModuleName()>();
+
+        $r5 = newarray (sun.tracing.dtrace.DTraceProvider)[1];
+
+        $r5[0] = $r0;
+
+        specialinvoke $r3.<sun.tracing.dtrace.Activation: void <init>(java.lang.String,sun.tracing.dtrace.DTraceProvider[])>($r4, $r5);
+
+        return $r2;
+    }
+
+    public java.util.Map createProviders(java.util.Set, java.lang.String)
+    {
+        sun.tracing.dtrace.Activation $r4;
+        java.lang.Object[] $r7;
+        java.util.Iterator $r3;
+        com.sun.tracing.Provider $r12;
+        java.util.Set r2;
+        java.util.HashMap $r0;
+        sun.tracing.dtrace.DTraceProvider $r11;
+        java.util.HashSet $r1;
+        sun.tracing.dtrace.DTraceProviderFactory r13;
+        java.lang.Object $r9;
+        java.lang.Class r10;
+        java.lang.String r5;
+        sun.tracing.dtrace.DTraceProvider[] $r6, $r8;
+        boolean $z0;
+
+        r13 := @this: sun.tracing.dtrace.DTraceProviderFactory;
+
+        r2 := @parameter0: java.util.Set;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r3 = interfaceinvoke r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r9 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.lang.Class) $r9;
+
+        $r11 = new sun.tracing.dtrace.DTraceProvider;
+
+        specialinvoke $r11.<sun.tracing.dtrace.DTraceProvider: void <init>(java.lang.Class)>(r10);
+
+        virtualinvoke $r1.<java.util.HashSet: boolean add(java.lang.Object)>($r11);
+
+        $r12 = virtualinvoke $r11.<sun.tracing.dtrace.DTraceProvider: com.sun.tracing.Provider newProxyInstance()>();
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r10, $r12);
+
+        goto label1;
+
+     label2:
+        $r4 = new sun.tracing.dtrace.Activation;
+
+        $r6 = newarray (sun.tracing.dtrace.DTraceProvider)[0];
+
+        $r7 = virtualinvoke $r1.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (sun.tracing.dtrace.DTraceProvider[]) $r7;
+
+        specialinvoke $r4.<sun.tracing.dtrace.Activation: void <init>(java.lang.String,sun.tracing.dtrace.DTraceProvider[])>(r5, $r8);
+
+        return $r0;
+    }
+
+    public static boolean isSupported()
+    {
+        java.lang.RuntimePermission $r1;
+        java.lang.SecurityException $r2;
+        java.lang.SecurityManager $r0;
+        boolean $z0;
+
+     label1:
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label2;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>("com.sun.tracing.dtrace.createProvider");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label2:
+        $z0 = staticinvoke <sun.tracing.dtrace.JVM: boolean isSupported()>();
+
+     label3:
+        return $z0;
+
+     label4:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.SecurityException from label1 to label3 with label4;
+    }
+}

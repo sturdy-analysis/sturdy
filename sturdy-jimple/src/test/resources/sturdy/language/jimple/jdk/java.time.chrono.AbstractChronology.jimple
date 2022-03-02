@@ -1,0 +1,2296 @@
+public abstract class java.time.chrono.AbstractChronology extends java.lang.Object implements java.time.chrono.Chronology
+{
+    static final java.util.Comparator DATE_ORDER;
+    static final java.util.Comparator DATE_TIME_ORDER;
+    static final java.util.Comparator INSTANT_ORDER;
+    private static final java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID;
+    private static final java.util.concurrent.ConcurrentHashMap CHRONOS_BY_TYPE;
+
+    static java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)
+    {
+        java.time.chrono.Chronology r0, $r2;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.time.chrono.Chronology;
+
+        $r1 = interfaceinvoke r0.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $r2 = staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology,java.lang.String)>(r0, $r1);
+
+        return $r2;
+    }
+
+    static java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology, java.lang.String)
+    {
+        java.time.chrono.Chronology r1, r4;
+        java.util.concurrent.ConcurrentHashMap $r2, $r6;
+        java.lang.Object $r3;
+        java.lang.String r0, $r5;
+
+        r1 := @parameter0: java.time.chrono.Chronology;
+
+        r0 := @parameter1: java.lang.String;
+
+        $r2 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r0, r1);
+
+        r4 = (java.time.chrono.Chronology) $r3;
+
+        if r4 != null goto label1;
+
+        $r5 = interfaceinvoke r1.<java.time.chrono.Chronology: java.lang.String getCalendarType()>();
+
+        if $r5 == null goto label1;
+
+        $r6 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_TYPE>;
+
+        virtualinvoke $r6.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r5, r1);
+
+     label1:
+        return r4;
+    }
+
+    private static boolean initCache()
+    {
+        java.time.chrono.HijrahChronology $r2;
+        java.time.chrono.ThaiBuddhistChronology $r5;
+        java.time.chrono.IsoChronology $r8;
+        java.lang.String $r11, $r16;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger $r12;
+        java.util.Iterator $r7;
+        java.util.concurrent.ConcurrentHashMap $r0;
+        java.util.ServiceLoader $r6;
+        java.time.chrono.Chronology $r17;
+        java.time.chrono.MinguoChronology $r4;
+        java.time.chrono.JapaneseChronology $r3;
+        java.lang.Object $r1, $r9;
+        java.time.chrono.AbstractChronology r10;
+        java.lang.StringBuilder $r13, $r14, $r15;
+
+        $r0 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID>;
+
+        $r1 = virtualinvoke $r0.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>("ISO");
+
+        if $r1 != null goto label5;
+
+        $r2 = <java.time.chrono.HijrahChronology: java.time.chrono.HijrahChronology INSTANCE>;
+
+        staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>($r2);
+
+        $r3 = <java.time.chrono.JapaneseChronology: java.time.chrono.JapaneseChronology INSTANCE>;
+
+        staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>($r3);
+
+        $r4 = <java.time.chrono.MinguoChronology: java.time.chrono.MinguoChronology INSTANCE>;
+
+        staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>($r4);
+
+        $r5 = <java.time.chrono.ThaiBuddhistChronology: java.time.chrono.ThaiBuddhistChronology INSTANCE>;
+
+        staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>($r5);
+
+        $r6 = staticinvoke <java.util.ServiceLoader: java.util.ServiceLoader load(java.lang.Class,java.lang.ClassLoader)>(class "Ljava/time/chrono/AbstractChronology;", null);
+
+        $r7 = virtualinvoke $r6.<java.util.ServiceLoader: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r9 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.time.chrono.AbstractChronology) $r9;
+
+        $r11 = virtualinvoke r10.<java.time.chrono.AbstractChronology: java.lang.String getId()>();
+
+        $z1 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("ISO");
+
+        if $z1 != 0 goto label2;
+
+        $r17 = staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>(r10);
+
+        if $r17 == null goto label3;
+
+     label2:
+        $r12 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.time.chrono");
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring duplicate Chronology, from ServiceLoader configuration ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r16);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r8 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology registerChrono(java.time.chrono.Chronology)>($r8);
+
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    static java.time.chrono.Chronology ofLocale(java.util.Locale)
+    {
+        java.time.chrono.IsoChronology $r17;
+        java.util.Locale r0;
+        java.lang.String $r1, $r2, $r3, $r13, $r16;
+        java.time.DateTimeException $r9;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r8;
+        java.util.concurrent.ConcurrentHashMap $r4;
+        java.util.ServiceLoader $r7;
+        java.time.chrono.Chronology $r6, r15;
+        java.lang.Object $r5, $r14;
+        java.lang.StringBuilder $r10, $r11, $r12;
+
+        r0 := @parameter0: java.util.Locale;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "locale");
+
+        $r1 = virtualinvoke r0.<java.util.Locale: java.lang.String getUnicodeLocaleType(java.lang.String)>("ca");
+
+        if $r1 == null goto label1;
+
+        $r2 = "iso";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = "iso8601";
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r17 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        return $r17;
+
+     label2:
+        $r4 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_TYPE>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r6 = (java.time.chrono.Chronology) $r5;
+
+        if $r6 == null goto label3;
+
+        return $r6;
+
+     label3:
+        $z2 = staticinvoke <java.time.chrono.AbstractChronology: boolean initCache()>();
+
+        if $z2 != 0 goto label2;
+
+        $r7 = staticinvoke <java.util.ServiceLoader: java.util.ServiceLoader load(java.lang.Class)>(class "Ljava/time/chrono/Chronology;");
+
+        $r8 = virtualinvoke $r7.<java.util.ServiceLoader: java.util.Iterator iterator()>();
+
+     label4:
+        $z3 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label6;
+
+        $r14 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.time.chrono.Chronology) $r14;
+
+        $r16 = interfaceinvoke r15.<java.time.chrono.Chronology: java.lang.String getCalendarType()>();
+
+        $z4 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r16);
+
+        if $z4 == 0 goto label5;
+
+        return r15;
+
+     label5:
+        goto label4;
+
+     label6:
+        $r9 = new java.time.DateTimeException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown calendar system: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.time.DateTimeException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+    }
+
+    static java.time.chrono.Chronology of(java.lang.String)
+    {
+        java.lang.String r0, $r8, $r11, $r12;
+        java.time.DateTimeException $r4;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r3;
+        java.util.ServiceLoader $r2;
+        java.time.chrono.Chronology $r1, r10;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.Object $r9;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "id");
+
+     label1:
+        $r1 = staticinvoke <java.time.chrono.AbstractChronology: java.time.chrono.Chronology of0(java.lang.String)>(r0);
+
+        if $r1 == null goto label2;
+
+        return $r1;
+
+     label2:
+        $z0 = staticinvoke <java.time.chrono.AbstractChronology: boolean initCache()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.util.ServiceLoader: java.util.ServiceLoader load(java.lang.Class)>(class "Ljava/time/chrono/Chronology;");
+
+        $r3 = virtualinvoke $r2.<java.util.ServiceLoader: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label6;
+
+        $r9 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.time.chrono.Chronology) $r9;
+
+        $r11 = interfaceinvoke r10.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r11);
+
+        if $z2 != 0 goto label4;
+
+        $r12 = interfaceinvoke r10.<java.time.chrono.Chronology: java.lang.String getCalendarType()>();
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z3 == 0 goto label5;
+
+     label4:
+        return r10;
+
+     label5:
+        goto label3;
+
+     label6:
+        $r4 = new java.time.DateTimeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown chronology: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.DateTimeException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+    }
+
+    private static java.time.chrono.Chronology of0(java.lang.String)
+    {
+        java.time.chrono.Chronology r5;
+        java.util.concurrent.ConcurrentHashMap $r1, $r3;
+        java.lang.Object $r2, $r4;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        r5 = (java.time.chrono.Chronology) $r2;
+
+        if r5 != null goto label1;
+
+        $r3 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_TYPE>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        r5 = (java.time.chrono.Chronology) $r4;
+
+     label1:
+        return r5;
+    }
+
+    static java.util.Set getAvailableChronologies()
+    {
+        java.util.Iterator $r4;
+        java.util.Collection $r2;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.util.ServiceLoader $r3;
+        java.util.HashSet $r0;
+        java.time.chrono.Chronology r6;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        staticinvoke <java.time.chrono.AbstractChronology: boolean initCache()>();
+
+        $r0 = new java.util.HashSet;
+
+        $r1 = <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.util.Collection values()>();
+
+        specialinvoke $r0.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        $r3 = staticinvoke <java.util.ServiceLoader: java.util.ServiceLoader load(java.lang.Class)>(class "Ljava/time/chrono/Chronology;");
+
+        $r4 = virtualinvoke $r3.<java.util.ServiceLoader: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.time.chrono.Chronology) $r5;
+
+        virtualinvoke $r0.<java.util.HashSet: boolean add(java.lang.Object)>(r6);
+
+        goto label1;
+
+     label2:
+        return $r0;
+    }
+
+    protected void <init>()
+    {
+        java.time.chrono.AbstractChronology r0;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.time.chrono.ChronoLocalDate resolveDate(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.lang.Long $r22;
+        java.util.Map r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.time.format.ResolverStyle r3;
+        java.time.temporal.ChronoField $r1, $r5, $r6, $r7, $r8, $r9, $r13, $r14, $r15, $r16, $r20, $r24;
+        long $l0;
+        java.time.chrono.ChronoLocalDate $r4, $r10, $r11, $r12, $r17, $r18, $r19, $r23;
+        java.time.chrono.AbstractChronology r2;
+        java.lang.Object $r21;
+
+        r2 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.util.Map;
+
+        r3 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField EPOCH_DAY>;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r20 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField EPOCH_DAY>;
+
+        $r21 = interfaceinvoke r0.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r20);
+
+        $r22 = (java.lang.Long) $r21;
+
+        $l0 = virtualinvoke $r22.<java.lang.Long: long longValue()>();
+
+        $r23 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateEpochDay(long)>($l0);
+
+        return $r23;
+
+     label1:
+        virtualinvoke r2.<java.time.chrono.AbstractChronology: void resolveProlepticMonth(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        $r4 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYearOfEra(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        if $r4 == null goto label2;
+
+        return $r4;
+
+     label2:
+        $r5 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $z1 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label8;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $z2 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r6);
+
+        if $z2 == 0 goto label5;
+
+        $r13 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $z6 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r13);
+
+        if $z6 == 0 goto label3;
+
+        $r19 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYMD(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r19;
+
+     label3:
+        $r14 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $z7 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r14);
+
+        if $z7 == 0 goto label5;
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $z8 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r15);
+
+        if $z8 == 0 goto label4;
+
+        $r18 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYMAA(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r18;
+
+     label4:
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $z9 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r16);
+
+        if $z9 == 0 goto label5;
+
+        $r17 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYMAD(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r17;
+
+     label5:
+        $r24 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $z10 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r24);
+
+        if $z10 == 0 goto label6;
+
+        $r12 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYD(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r12;
+
+     label6:
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $z3 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r7);
+
+        if $z3 == 0 goto label8;
+
+        $r8 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $z4 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r8);
+
+        if $z4 == 0 goto label7;
+
+        $r11 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYAA(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r11;
+
+     label7:
+        $r9 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $z5 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r9);
+
+        if $z5 == 0 goto label8;
+
+        $r10 = virtualinvoke r2.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveYAD(java.util.Map,java.time.format.ResolverStyle)>(r0, r3);
+
+        return $r10;
+
+     label8:
+        return null;
+    }
+
+    void resolveProlepticMonth(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.format.ResolverStyle r4, $r5;
+        java.time.temporal.ChronoField $r1, $r8, $r10, $r12, $r13, $r14, $r15, $r16;
+        long $l0, $l2, $l4, $l5;
+        java.lang.Long r3;
+        java.util.Map r0;
+        int $i1, $i3;
+        java.time.chrono.ChronoLocalDate $r7, $r9, $r11;
+        java.lang.Object $r2;
+        java.time.chrono.AbstractChronology r6;
+
+        r6 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.util.Map;
+
+        r4 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        r3 = (java.lang.Long) $r2;
+
+        if r3 == null goto label2;
+
+        $r5 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r4 == $r5 goto label1;
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        $l5 = virtualinvoke r3.<java.lang.Long: long longValue()>();
+
+        virtualinvoke $r16.<java.time.temporal.ChronoField: long checkValidValue(long)>($l5);
+
+     label1:
+        $r7 = virtualinvoke r6.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateNow()>();
+
+        $r8 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $r9 = interfaceinvoke $r7.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalField,long)>($r8, 1L);
+
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        $l0 = virtualinvoke r3.<java.lang.Long: long longValue()>();
+
+        $r11 = interfaceinvoke $r9.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalField,long)>($r10, $l0);
+
+        $r13 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i1 = interfaceinvoke $r11.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r12);
+
+        $l2 = (long) $i1;
+
+        virtualinvoke r6.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r13, $l2);
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r14 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i3 = interfaceinvoke $r11.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r14);
+
+        $l4 = (long) $i3;
+
+        virtualinvoke r6.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r15, $l4);
+
+     label2:
+        return;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYearOfEra(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r7, $r25, $r34, $r39;
+        java.lang.Long r3, $r10, r14, $r28;
+        java.util.Map r0;
+        boolean $z0, $z1, $z2;
+        java.time.chrono.Era $r32, $r36, r41;
+        java.util.List $r19;
+        java.time.format.ResolverStyle r15, $r16, $r18;
+        java.time.temporal.ChronoField $r1, $r4, $r6, $r8, $r11, $r12, $r17, $r21, $r22, $r23, $r24, $r26, $r29, $r31, $r33, $r35, $r37, $r38, $r40;
+        long $l0, $l1, $l5, $l6, $l7, $l10, $l11, $l14, $l15;
+        int $i2, $i3, $i4, $i8, $i9, $i12, $i13, i16;
+        java.time.chrono.ChronoLocalDate $r30;
+        java.lang.Object $r2, $r9, $r13, $r20, $r27;
+        java.time.chrono.AbstractChronology r5;
+
+        r5 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.util.Map;
+
+        r15 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        r3 = (java.lang.Long) $r2;
+
+        if r3 == null goto label8;
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r13 = interfaceinvoke r0.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        r14 = (java.lang.Long) $r13;
+
+        $r16 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r15 == $r16 goto label1;
+
+        $r38 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        $r39 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r38);
+
+        $l15 = virtualinvoke r3.<java.lang.Long: long longValue()>();
+
+        $r40 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        i16 = virtualinvoke $r39.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l15, $r40);
+
+        goto label2;
+
+     label1:
+        $l1 = virtualinvoke r3.<java.lang.Long: long longValue()>();
+
+        i16 = staticinvoke <java.lang.Math: int toIntExact(long)>($l1);
+
+     label2:
+        if r14 == null goto label3;
+
+        $r33 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r34 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r33);
+
+        $l11 = virtualinvoke r14.<java.lang.Long: long longValue()>();
+
+        $r35 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $i12 = virtualinvoke $r34.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l11, $r35);
+
+        $r36 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.chrono.Era eraOf(int)>($i12);
+
+        $r37 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i13 = virtualinvoke r5.<java.time.chrono.AbstractChronology: int prolepticYear(java.time.chrono.Era,int)>($r36, i16);
+
+        $l14 = (long) $i13;
+
+        virtualinvoke r5.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r37, $l14);
+
+        goto label7;
+
+     label3:
+        $r17 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $z1 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r17);
+
+        if $z1 == 0 goto label4;
+
+        $r24 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r25 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r24);
+
+        $r26 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r27 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r26);
+
+        $r28 = (java.lang.Long) $r27;
+
+        $l7 = virtualinvoke $r28.<java.lang.Long: long longValue()>();
+
+        $r29 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i8 = virtualinvoke $r25.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l7, $r29);
+
+        $r30 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i8, 1);
+
+        $r31 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r32 = interfaceinvoke $r30.<java.time.chrono.ChronoLocalDate: java.time.chrono.Era getEra()>();
+
+        $i9 = virtualinvoke r5.<java.time.chrono.AbstractChronology: int prolepticYear(java.time.chrono.Era,int)>($r32, i16);
+
+        $l10 = (long) $i9;
+
+        virtualinvoke r5.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r31, $l10);
+
+        goto label7;
+
+     label4:
+        $r18 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle STRICT>;
+
+        if r15 != $r18 goto label5;
+
+        $r23 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        interfaceinvoke r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r23, r3);
+
+        goto label7;
+
+     label5:
+        $r19 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.util.List eras()>();
+
+        $z2 = interfaceinvoke $r19.<java.util.List: boolean isEmpty()>();
+
+        if $z2 == 0 goto label6;
+
+        $r22 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l6 = (long) i16;
+
+        virtualinvoke r5.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r22, $l6);
+
+        goto label7;
+
+     label6:
+        $i2 = interfaceinvoke $r19.<java.util.List: int size()>();
+
+        $i3 = $i2 - 1;
+
+        $r20 = interfaceinvoke $r19.<java.util.List: java.lang.Object get(int)>($i3);
+
+        r41 = (java.time.chrono.Era) $r20;
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i4 = virtualinvoke r5.<java.time.chrono.AbstractChronology: int prolepticYear(java.time.chrono.Era,int)>(r41, i16);
+
+        $l5 = (long) $i4;
+
+        virtualinvoke r5.<java.time.chrono.AbstractChronology: void addFieldValue(java.util.Map,java.time.temporal.ChronoField,long)>(r0, $r21, $l5);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label9;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r7 = virtualinvoke r5.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r6);
+
+        $r8 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r9 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r10 = (java.lang.Long) $r9;
+
+        $l0 = virtualinvoke $r10.<java.lang.Long: long longValue()>();
+
+        $r11 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        virtualinvoke $r7.<java.time.temporal.ValueRange: long checkValidValue(long,java.time.temporal.TemporalField)>($l0, $r11);
+
+     label9:
+        return null;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYMD(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r2, $r11, $r17;
+        java.lang.Long $r6, $r14, $r20, $r27, $r30;
+        java.util.Map r3;
+        java.time.DateTimeException $r36;
+        java.time.format.ResolverStyle r8, $r9, $r22;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r16, $r18, $r21, $r25, $r28;
+        long $l0, $l2, $l4, $l6, $l7, $l8, $l9;
+        int $i1, $i3, $i5;
+        java.time.chrono.ChronoLocalDate $r23, $r24, $r31, $r33, $r35, $r37, $r39;
+        java.time.temporal.ChronoUnit $r32, $r34;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Object $r5, $r13, $r19, $r26, $r29;
+        java.time.temporal.TemporalAdjuster $r38;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r25 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r26 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r25);
+
+        $r27 = (java.lang.Long) $r26;
+
+        $l6 = virtualinvoke $r27.<java.lang.Long: long longValue()>();
+
+        $l7 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l6, 1L);
+
+        $r28 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $r29 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r28);
+
+        $r30 = (java.lang.Long) $r29;
+
+        $l8 = virtualinvoke $r30.<java.lang.Long: long longValue()>();
+
+        $l9 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l8, 1L);
+
+        $r31 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, 1, 1);
+
+        $r32 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        $r33 = interfaceinvoke $r31.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l7, $r32);
+
+        $r34 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r35 = interfaceinvoke $r33.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l9, $r34);
+
+        return $r35;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $r17 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r16);
+
+        $r18 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $r19 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = (java.lang.Long) $r19;
+
+        $l4 = virtualinvoke $r20.<java.lang.Long: long longValue()>();
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $i5 = virtualinvoke $r17.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l4, $r21);
+
+        $r22 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle SMART>;
+
+        if r8 != $r22 goto label5;
+
+     label2:
+        $r24 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, $i3, $i5);
+
+     label3:
+        return $r24;
+
+     label4:
+        $r36 := @caughtexception;
+
+        $r37 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, $i3, 1);
+
+        $r38 = staticinvoke <java.time.temporal.TemporalAdjusters: java.time.temporal.TemporalAdjuster lastDayOfMonth()>();
+
+        $r39 = interfaceinvoke $r37.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalAdjuster)>($r38);
+
+        return $r39;
+
+     label5:
+        $r23 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, $i3, $i5);
+
+        return $r23;
+
+        catch java.time.DateTimeException from label2 to label3 with label4;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYD(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.format.ResolverStyle r8, $r9;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r17;
+        long $l0, $l2, $l4, $l5;
+        java.time.temporal.ValueRange $r2, $r11;
+        java.lang.Long $r6, $r14, $r19;
+        java.util.Map r3;
+        int $i1, $i3;
+        java.time.chrono.ChronoLocalDate $r16, $r20, $r22;
+        java.time.temporal.ChronoUnit $r21;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Object $r5, $r13, $r18;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r17 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $r18 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r17);
+
+        $r19 = (java.lang.Long) $r18;
+
+        $l4 = virtualinvoke $r19.<java.lang.Long: long longValue()>();
+
+        $l5 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l4, 1L);
+
+        $r20 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, 1);
+
+        $r21 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r22 = interfaceinvoke $r20.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l5, $r21);
+
+        return $r22;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, $i3);
+
+        return $r16;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYMAA(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r2, $r11, $r17, $r23;
+        java.lang.Long $r6, $r14, $r20, $r26, $r36, $r39, $r42;
+        java.util.Map r3;
+        java.time.format.ResolverStyle r8, $r9, $r31;
+        long $l0, $l2, $l4, $l6, $l12, $l14, $l15, $l16, $l17, $l18, $l19;
+        java.time.temporal.ChronoUnit $r29, $r44, $r46, $r48;
+        java.time.chrono.AbstractChronology r0;
+        java.time.DateTimeException $r33;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r16, $r18, $r21, $r22, $r24, $r27, $r32, $r34, $r37, $r40;
+        int $i1, $i3, $i5, $i7, $i8, $i9, $i10, $i11, $i13;
+        java.time.chrono.ChronoLocalDate $r28, $r30, $r43, $r45, $r47, $r49;
+        java.lang.Object $r5, $r13, $r19, $r25, $r35, $r38, $r41;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r34 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r35 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r34);
+
+        $r36 = (java.lang.Long) $r35;
+
+        $l14 = virtualinvoke $r36.<java.lang.Long: long longValue()>();
+
+        $l15 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l14, 1L);
+
+        $r37 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r38 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r37);
+
+        $r39 = (java.lang.Long) $r38;
+
+        $l16 = virtualinvoke $r39.<java.lang.Long: long longValue()>();
+
+        $l17 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l16, 1L);
+
+        $r40 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $r41 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r40);
+
+        $r42 = (java.lang.Long) $r41;
+
+        $l18 = virtualinvoke $r42.<java.lang.Long: long longValue()>();
+
+        $l19 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l18, 1L);
+
+        $r43 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, 1, 1);
+
+        $r44 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        $r45 = interfaceinvoke $r43.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l15, $r44);
+
+        $r46 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit WEEKS>;
+
+        $r47 = interfaceinvoke $r45.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l17, $r46);
+
+        $r48 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r49 = interfaceinvoke $r47.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l19, $r48);
+
+        return $r49;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r17 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r16);
+
+        $r18 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r19 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = (java.lang.Long) $r19;
+
+        $l4 = virtualinvoke $r20.<java.lang.Long: long longValue()>();
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $i5 = virtualinvoke $r17.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l4, $r21);
+
+        $r22 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $r23 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r22);
+
+        $r24 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $r25 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r24);
+
+        $r26 = (java.lang.Long) $r25;
+
+        $l6 = virtualinvoke $r26.<java.lang.Long: long longValue()>();
+
+        $r27 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $i7 = virtualinvoke $r23.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l6, $r27);
+
+        $r28 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, $i3, 1);
+
+        $i8 = $i5 - 1;
+
+        $i10 = $i8 * 7;
+
+        $i9 = $i7 - 1;
+
+        $i11 = $i10 + $i9;
+
+        $l12 = (long) $i11;
+
+        $r29 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r30 = interfaceinvoke $r28.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l12, $r29);
+
+        $r31 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle STRICT>;
+
+        if r8 != $r31 goto label2;
+
+        $r32 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i13 = interfaceinvoke $r30.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r32);
+
+        if $i13 == $i3 goto label2;
+
+        $r33 = new java.time.DateTimeException;
+
+        specialinvoke $r33.<java.time.DateTimeException: void <init>(java.lang.String)>("Strict mode rejected resolved date as it is in a different month");
+
+        throw $r33;
+
+     label2:
+        return $r30;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYMAD(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r2, $r11, $r17, $r23;
+        java.lang.Long $r6, $r14, $r20, $r26, $r39, $r42, $r45;
+        java.util.Map r3;
+        java.time.format.ResolverStyle r8, $r9, $r34;
+        long $l0, $l2, $l4, $l6, $l10, $l12, $l13, $l14, $l15, $l16, $l17;
+        java.time.temporal.ChronoUnit $r29;
+        java.time.DayOfWeek $r31;
+        java.time.chrono.AbstractChronology r0;
+        java.time.temporal.TemporalAdjuster $r32;
+        java.time.DateTimeException $r36;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r16, $r18, $r21, $r22, $r24, $r27, $r35, $r37, $r40, $r43;
+        int $i1, $i3, $i5, $i7, $i8, $i9, $i11;
+        java.time.chrono.ChronoLocalDate $r28, $r30, $r33, $r46, $r47;
+        java.lang.Object $r5, $r13, $r19, $r25, $r38, $r41, $r44;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r37 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r38 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r37);
+
+        $r39 = (java.lang.Long) $r38;
+
+        $l12 = virtualinvoke $r39.<java.lang.Long: long longValue()>();
+
+        $l13 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l12, 1L);
+
+        $r40 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r41 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r40);
+
+        $r42 = (java.lang.Long) $r41;
+
+        $l14 = virtualinvoke $r42.<java.lang.Long: long longValue()>();
+
+        $l15 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l14, 1L);
+
+        $r43 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r44 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r43);
+
+        $r45 = (java.lang.Long) $r44;
+
+        $l16 = virtualinvoke $r45.<java.lang.Long: long longValue()>();
+
+        $l17 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l16, 1L);
+
+        $r46 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, 1, 1);
+
+        $r47 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveAligned(java.time.chrono.ChronoLocalDate,long,long,long)>($r46, $l13, $l15, $l17);
+
+        return $r47;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r17 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r16);
+
+        $r18 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $r19 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = (java.lang.Long) $r19;
+
+        $l4 = virtualinvoke $r20.<java.lang.Long: long longValue()>();
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $i5 = virtualinvoke $r17.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l4, $r21);
+
+        $r22 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r23 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r22);
+
+        $r24 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r25 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r24);
+
+        $r26 = (java.lang.Long) $r25;
+
+        $l6 = virtualinvoke $r26.<java.lang.Long: long longValue()>();
+
+        $r27 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $i7 = virtualinvoke $r23.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l6, $r27);
+
+        $r28 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate date(int,int,int)>($i1, $i3, 1);
+
+        $i8 = $i5 - 1;
+
+        $i9 = $i8 * 7;
+
+        $l10 = (long) $i9;
+
+        $r29 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r30 = interfaceinvoke $r28.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l10, $r29);
+
+        $r31 = staticinvoke <java.time.DayOfWeek: java.time.DayOfWeek of(int)>($i7);
+
+        $r32 = staticinvoke <java.time.temporal.TemporalAdjusters: java.time.temporal.TemporalAdjuster nextOrSame(java.time.DayOfWeek)>($r31);
+
+        $r33 = interfaceinvoke $r30.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalAdjuster)>($r32);
+
+        $r34 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle STRICT>;
+
+        if r8 != $r34 goto label2;
+
+        $r35 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i11 = interfaceinvoke $r33.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r35);
+
+        if $i11 == $i3 goto label2;
+
+        $r36 = new java.time.DateTimeException;
+
+        specialinvoke $r36.<java.time.DateTimeException: void <init>(java.lang.String)>("Strict mode rejected resolved date as it is in a different month");
+
+        throw $r36;
+
+     label2:
+        return $r33;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYAA(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r2, $r11, $r17;
+        java.lang.Long $r6, $r14, $r20, $r30, $r33;
+        java.util.Map r3;
+        java.time.DateTimeException $r27;
+        java.time.format.ResolverStyle r8, $r9, $r25;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r16, $r18, $r21, $r26, $r28, $r31;
+        long $l0, $l2, $l4, $l10, $l12, $l13, $l14, $l15;
+        int $i1, $i3, $i5, $i6, $i7, $i8, $i9, $i11;
+        java.time.chrono.ChronoLocalDate $r22, $r24, $r34, $r36, $r38;
+        java.time.temporal.ChronoUnit $r23, $r35, $r37;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Object $r5, $r13, $r19, $r29, $r32;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r28 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r29 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r28);
+
+        $r30 = (java.lang.Long) $r29;
+
+        $l12 = virtualinvoke $r30.<java.lang.Long: long longValue()>();
+
+        $l13 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l12, 1L);
+
+        $r31 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $r32 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r31);
+
+        $r33 = (java.lang.Long) $r32;
+
+        $l14 = virtualinvoke $r33.<java.lang.Long: long longValue()>();
+
+        $l15 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l14, 1L);
+
+        $r34 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, 1);
+
+        $r35 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit WEEKS>;
+
+        $r36 = interfaceinvoke $r34.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l13, $r35);
+
+        $r37 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r38 = interfaceinvoke $r36.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l15, $r37);
+
+        return $r38;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $r17 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r16);
+
+        $r18 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $r19 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = (java.lang.Long) $r19;
+
+        $l4 = virtualinvoke $r20.<java.lang.Long: long longValue()>();
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $i5 = virtualinvoke $r17.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l4, $r21);
+
+        $r22 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, 1);
+
+        $i6 = $i3 - 1;
+
+        $i8 = $i6 * 7;
+
+        $i7 = $i5 - 1;
+
+        $i9 = $i8 + $i7;
+
+        $l10 = (long) $i9;
+
+        $r23 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r24 = interfaceinvoke $r22.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l10, $r23);
+
+        $r25 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle STRICT>;
+
+        if r8 != $r25 goto label2;
+
+        $r26 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i11 = interfaceinvoke $r24.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r26);
+
+        if $i11 == $i1 goto label2;
+
+        $r27 = new java.time.DateTimeException;
+
+        specialinvoke $r27.<java.time.DateTimeException: void <init>(java.lang.String)>("Strict mode rejected resolved date as it is in a different year");
+
+        throw $r27;
+
+     label2:
+        return $r24;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveYAD(java.util.Map, java.time.format.ResolverStyle)
+    {
+        java.time.temporal.ValueRange $r2, $r11, $r17;
+        java.lang.Long $r6, $r14, $r20, $r33, $r36;
+        java.util.Map r3;
+        java.time.DateTimeException $r30;
+        java.time.format.ResolverStyle r8, $r9, $r28;
+        java.time.temporal.ChronoField $r1, $r4, $r7, $r10, $r12, $r15, $r16, $r18, $r21, $r29, $r31, $r34;
+        long $l0, $l2, $l4, $l8, $l10, $l11, $l12, $l13;
+        int $i1, $i3, $i5, $i6, $i7, $i9;
+        java.time.chrono.ChronoLocalDate $r22, $r24, $r27, $r37, $r38;
+        java.time.temporal.ChronoUnit $r23;
+        java.time.DayOfWeek $r25;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Object $r5, $r13, $r19, $r32, $r35;
+        java.time.temporal.TemporalAdjuster $r26;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r3 := @parameter0: java.util.Map;
+
+        r8 := @parameter1: java.time.format.ResolverStyle;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r1);
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, $r7);
+
+        $r9 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle LENIENT>;
+
+        if r8 != $r9 goto label1;
+
+        $r31 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r32 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r31);
+
+        $r33 = (java.lang.Long) $r32;
+
+        $l10 = virtualinvoke $r33.<java.lang.Long: long longValue()>();
+
+        $l11 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l10, 1L);
+
+        $r34 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r35 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r34);
+
+        $r36 = (java.lang.Long) $r35;
+
+        $l12 = virtualinvoke $r36.<java.lang.Long: long longValue()>();
+
+        $l13 = staticinvoke <java.lang.Math: long subtractExact(long,long)>($l12, 1L);
+
+        $r37 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, 1);
+
+        $r38 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate resolveAligned(java.time.chrono.ChronoLocalDate,long,long,long)>($r37, 0L, $l11, $l13);
+
+        return $r38;
+
+     label1:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r11 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r10);
+
+        $r12 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $r13 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        $r14 = (java.lang.Long) $r13;
+
+        $l2 = virtualinvoke $r14.<java.lang.Long: long longValue()>();
+
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $i3 = virtualinvoke $r11.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l2, $r15);
+
+        $r16 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r17 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.temporal.ValueRange range(java.time.temporal.ChronoField)>($r16);
+
+        $r18 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $r19 = interfaceinvoke r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r18);
+
+        $r20 = (java.lang.Long) $r19;
+
+        $l4 = virtualinvoke $r20.<java.lang.Long: long longValue()>();
+
+        $r21 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_WEEK>;
+
+        $i5 = virtualinvoke $r17.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l4, $r21);
+
+        $r22 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.time.chrono.ChronoLocalDate dateYearDay(int,int)>($i1, 1);
+
+        $i6 = $i3 - 1;
+
+        $i7 = $i6 * 7;
+
+        $l8 = (long) $i7;
+
+        $r23 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r24 = interfaceinvoke $r22.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l8, $r23);
+
+        $r25 = staticinvoke <java.time.DayOfWeek: java.time.DayOfWeek of(int)>($i5);
+
+        $r26 = staticinvoke <java.time.temporal.TemporalAdjusters: java.time.temporal.TemporalAdjuster nextOrSame(java.time.DayOfWeek)>($r25);
+
+        $r27 = interfaceinvoke $r24.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalAdjuster)>($r26);
+
+        $r28 = <java.time.format.ResolverStyle: java.time.format.ResolverStyle STRICT>;
+
+        if r8 != $r28 goto label2;
+
+        $r29 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i9 = interfaceinvoke $r27.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>($r29);
+
+        if $i9 == $i1 goto label2;
+
+        $r30 = new java.time.DateTimeException;
+
+        specialinvoke $r30.<java.time.DateTimeException: void <init>(java.lang.String)>("Strict mode rejected resolved date as it is in a different year");
+
+        throw $r30;
+
+     label2:
+        return $r27;
+    }
+
+    java.time.chrono.ChronoLocalDate resolveAligned(java.time.chrono.ChronoLocalDate, long, long, long)
+    {
+        long l0, l1, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, l12;
+        byte $b2, $b3;
+        int $i13, $i14, $i15;
+        java.time.chrono.ChronoLocalDate r0, $r2, $r4, r8, $r11;
+        java.time.temporal.ChronoUnit $r1, $r3, $r5, $r6;
+        java.time.DayOfWeek $r9;
+        java.time.chrono.AbstractChronology r7;
+        java.time.temporal.TemporalAdjuster $r10;
+
+        r7 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        l0 := @parameter1: long;
+
+        l1 := @parameter2: long;
+
+        l12 := @parameter3: long;
+
+        $r1 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        $r2 = interfaceinvoke r0.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>(l0, $r1);
+
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit WEEKS>;
+
+        $r4 = interfaceinvoke $r2.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>(l1, $r3);
+
+        r8 = $r4;
+
+        $b2 = l12 cmp 7L;
+
+        $i14 = (int) $b2;
+
+        if $i14 <= 0 goto label1;
+
+        $l8 = l12 - 1L;
+
+        $l9 = $l8 / 7L;
+
+        $r6 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit WEEKS>;
+
+        r8 = interfaceinvoke $r4.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l9, $r6);
+
+        $l10 = l12 - 1L;
+
+        $l11 = $l10 % 7L;
+
+        l12 = $l11 + 1L;
+
+        goto label2;
+
+     label1:
+        $b3 = l12 cmp 1L;
+
+        $i15 = (int) $b3;
+
+        if $i15 >= 0 goto label2;
+
+        $l4 = staticinvoke <java.lang.Math: long subtractExact(long,long)>(l12, 7L);
+
+        $l5 = $l4 / 7L;
+
+        $r5 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit WEEKS>;
+
+        r8 = interfaceinvoke $r4.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate plus(long,java.time.temporal.TemporalUnit)>($l5, $r5);
+
+        $l6 = l12 + 6L;
+
+        $l7 = $l6 % 7L;
+
+        l12 = $l7 + 1L;
+
+     label2:
+        $i13 = (int) l12;
+
+        $r9 = staticinvoke <java.time.DayOfWeek: java.time.DayOfWeek of(int)>($i13);
+
+        $r10 = staticinvoke <java.time.temporal.TemporalAdjusters: java.time.temporal.TemporalAdjuster nextOrSame(java.time.DayOfWeek)>($r9);
+
+        $r11 = interfaceinvoke r8.<java.time.chrono.ChronoLocalDate: java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalAdjuster)>($r10);
+
+        return $r11;
+    }
+
+    void addFieldValue(java.util.Map, java.time.temporal.ChronoField, long)
+    {
+        java.time.temporal.ChronoField r1;
+        long l0, $l1;
+        byte $b2;
+        java.lang.Long r3, $r4;
+        java.util.Map r0;
+        java.lang.String $r15;
+        java.time.DateTimeException $r5;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+        java.time.chrono.AbstractChronology r16;
+
+        r16 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.util.Map;
+
+        r1 := @parameter1: java.time.temporal.ChronoField;
+
+        l0 := @parameter2: long;
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r3 = (java.lang.Long) $r2;
+
+        if r3 == null goto label1;
+
+        $l1 = virtualinvoke r3.<java.lang.Long: long longValue()>();
+
+        $b2 = $l1 cmp l0;
+
+        if $b2 == 0 goto label1;
+
+        $r5 = new java.time.DateTimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Conflict found: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" differs from ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.time.DateTimeException: void <init>(java.lang.String)>($r15);
+
+        throw $r5;
+
+     label1:
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        interfaceinvoke r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+        return;
+    }
+
+    public int compareTo(java.time.chrono.Chronology)
+    {
+        java.time.chrono.Chronology r2;
+        int $i0;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.String $r1, $r3;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r2 := @parameter0: java.time.chrono.Chronology;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.lang.String getId()>();
+
+        $r3 = interfaceinvoke r2.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int compareTo(java.lang.String)>($r3);
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        int $i0;
+        java.time.chrono.AbstractChronology r0, $r2;
+        java.lang.Object r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.chrono.AbstractChronology;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (java.time.chrono.AbstractChronology) r1;
+
+        $i0 = virtualinvoke r0.<java.time.chrono.AbstractChronology: int compareTo(java.time.chrono.Chronology)>($r2);
+
+        if $i0 != 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        int $i0, $i1, $i2;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        $r2 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.lang.String getId()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        $i2 = $i0 ^ $i1;
+
+        return $i2;
+    }
+
+    public java.lang.String toString()
+    {
+        java.time.chrono.AbstractChronology r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.AbstractChronology: java.lang.String getId()>();
+
+        return $r1;
+    }
+
+    java.lang.Object writeReplace()
+    {
+        java.time.chrono.Ser $r0;
+        java.time.chrono.AbstractChronology r1;
+
+        r1 := @this: java.time.chrono.AbstractChronology;
+
+        $r0 = new java.time.chrono.Ser;
+
+        specialinvoke $r0.<java.time.chrono.Ser: void <init>(byte,java.lang.Object)>(1, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.ObjectStreamException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.time.chrono.AbstractChronology r1;
+
+        r1 := @this: java.time.chrono.AbstractChronology;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r0;
+        java.time.chrono.AbstractChronology r1;
+        java.lang.String $r2;
+
+        r1 := @this: java.time.chrono.AbstractChronology;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $r2 = virtualinvoke r1.<java.time.chrono.AbstractChronology: java.lang.String getId()>();
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeUTF(java.lang.String)>($r2);
+
+        return;
+    }
+
+    static java.time.chrono.Chronology readExternal(java.io.DataInput) throws java.io.IOException
+    {
+        java.io.DataInput r0;
+        java.time.chrono.Chronology $r2;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $r1 = interfaceinvoke r0.<java.io.DataInput: java.lang.String readUTF()>();
+
+        $r2 = staticinvoke <java.time.chrono.Chronology: java.time.chrono.Chronology of(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        java.time.chrono.Chronology $r2;
+        int $i0;
+        java.time.chrono.AbstractChronology r0;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.chrono.AbstractChronology;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.time.chrono.Chronology) r1;
+
+        $i0 = virtualinvoke r0.<java.time.chrono.AbstractChronology: int compareTo(java.time.chrono.Chronology)>($r2);
+
+        return $i0;
+    }
+
+    private static java.lang.Object $deserializeLambda$(java.lang.invoke.SerializedLambda)
+    {
+        byte b4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        java.lang.invoke.SerializedLambda r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r6, $r8, $r9, $r10, $r11, $r12, $r14, $r15, $r16, $r17, $r18;
+        java.lang.IllegalArgumentException $r20;
+        java.util.Comparator $r7, $r13, $r19;
+
+        r0 := @parameter0: java.lang.invoke.SerializedLambda;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplMethodName()>();
+
+        b4 = -1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1169580303: goto label1;
+            case 113408742: goto label2;
+            case 988104628: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $z17 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("lambda$static$2241c452$1");
+
+        if $z17 == 0 goto label4;
+
+        b4 = 0;
+
+        goto label4;
+
+     label2:
+        $z16 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("lambda$static$7f2d2d5b$1");
+
+        if $z16 == 0 goto label4;
+
+        b4 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("lambda$static$b5a61975$1");
+
+        if $z0 == 0 goto label4;
+
+        b4 = 2;
+
+     label4:
+        tableswitch(b4)
+        {
+            case 0: goto label5;
+            case 1: goto label6;
+            case 2: goto label7;
+            default: goto label8;
+        };
+
+     label5:
+        $i3 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: int getImplMethodKind()>();
+
+        if $i3 != 6 goto label8;
+
+        $r14 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceClass()>();
+
+        $z11 = virtualinvoke $r14.<java.lang.Object: boolean equals(java.lang.Object)>("java/util/Comparator");
+
+        if $z11 == 0 goto label8;
+
+        $r15 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodName()>();
+
+        $z12 = virtualinvoke $r15.<java.lang.Object: boolean equals(java.lang.Object)>("compare");
+
+        if $z12 == 0 goto label8;
+
+        $r16 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodSignature()>();
+
+        $z13 = virtualinvoke $r16.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/lang/Object;Ljava/lang/Object;)I");
+
+        if $z13 == 0 goto label8;
+
+        $r17 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplClass()>();
+
+        $z14 = virtualinvoke $r17.<java.lang.Object: boolean equals(java.lang.Object)>("java/time/chrono/AbstractChronology");
+
+        if $z14 == 0 goto label8;
+
+        $r18 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplMethodSignature()>();
+
+        $z15 = virtualinvoke $r18.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/time/chrono/ChronoZonedDateTime;Ljava/time/chrono/ChronoZonedDateTime;)I");
+
+        if $z15 == 0 goto label8;
+
+        $r19 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_2241c452_1__53: java.util.Comparator bootstrap$()>();
+
+        return $r19;
+
+     label6:
+        $i2 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: int getImplMethodKind()>();
+
+        if $i2 != 6 goto label8;
+
+        $r8 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceClass()>();
+
+        $z6 = virtualinvoke $r8.<java.lang.Object: boolean equals(java.lang.Object)>("java/util/Comparator");
+
+        if $z6 == 0 goto label8;
+
+        $r9 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodName()>();
+
+        $z7 = virtualinvoke $r9.<java.lang.Object: boolean equals(java.lang.Object)>("compare");
+
+        if $z7 == 0 goto label8;
+
+        $r10 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodSignature()>();
+
+        $z8 = virtualinvoke $r10.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/lang/Object;Ljava/lang/Object;)I");
+
+        if $z8 == 0 goto label8;
+
+        $r11 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplClass()>();
+
+        $z9 = virtualinvoke $r11.<java.lang.Object: boolean equals(java.lang.Object)>("java/time/chrono/AbstractChronology");
+
+        if $z9 == 0 goto label8;
+
+        $r12 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplMethodSignature()>();
+
+        $z10 = virtualinvoke $r12.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/time/chrono/ChronoLocalDate;Ljava/time/chrono/ChronoLocalDate;)I");
+
+        if $z10 == 0 goto label8;
+
+        $r13 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_7f2d2d5b_1__51: java.util.Comparator bootstrap$()>();
+
+        return $r13;
+
+     label7:
+        $i1 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: int getImplMethodKind()>();
+
+        if $i1 != 6 goto label8;
+
+        $r2 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceClass()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>("java/util/Comparator");
+
+        if $z1 == 0 goto label8;
+
+        $r3 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodName()>();
+
+        $z2 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>("compare");
+
+        if $z2 == 0 goto label8;
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getFunctionalInterfaceMethodSignature()>();
+
+        $z3 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/lang/Object;Ljava/lang/Object;)I");
+
+        if $z3 == 0 goto label8;
+
+        $r5 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplClass()>();
+
+        $z4 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>("java/time/chrono/AbstractChronology");
+
+        if $z4 == 0 goto label8;
+
+        $r6 = virtualinvoke r0.<java.lang.invoke.SerializedLambda: java.lang.String getImplMethodSignature()>();
+
+        $z5 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>("(Ljava/time/chrono/ChronoLocalDateTime;Ljava/time/chrono/ChronoLocalDateTime;)I");
+
+        if $z5 == 0 goto label8;
+
+        $r7 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_b5a61975_1__47: java.util.Comparator bootstrap$()>();
+
+        return $r7;
+
+     label8:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid lambda deserialization");
+
+        throw $r20;
+    }
+
+    public static int lambda$static$2241c452$1(java.time.chrono.ChronoZonedDateTime, java.time.chrono.ChronoZonedDateTime)
+    {
+        long $l0, $l1, $l4, $l6;
+        java.time.chrono.ChronoZonedDateTime r0, r1;
+        int $i2, $i3, $i5, i7;
+        java.time.LocalTime $r2, $r3;
+
+        r0 := @parameter0: java.time.chrono.ChronoZonedDateTime;
+
+        r1 := @parameter1: java.time.chrono.ChronoZonedDateTime;
+
+        $l0 = interfaceinvoke r0.<java.time.chrono.ChronoZonedDateTime: long toEpochSecond()>();
+
+        $l1 = interfaceinvoke r1.<java.time.chrono.ChronoZonedDateTime: long toEpochSecond()>();
+
+        $i2 = staticinvoke <java.lang.Long: int compare(long,long)>($l0, $l1);
+
+        i7 = $i2;
+
+        if $i2 != 0 goto label1;
+
+        $r2 = interfaceinvoke r0.<java.time.chrono.ChronoZonedDateTime: java.time.LocalTime toLocalTime()>();
+
+        $i3 = virtualinvoke $r2.<java.time.LocalTime: int getNano()>();
+
+        $l4 = (long) $i3;
+
+        $r3 = interfaceinvoke r1.<java.time.chrono.ChronoZonedDateTime: java.time.LocalTime toLocalTime()>();
+
+        $i5 = virtualinvoke $r3.<java.time.LocalTime: int getNano()>();
+
+        $l6 = (long) $i5;
+
+        i7 = staticinvoke <java.lang.Long: int compare(long,long)>($l4, $l6);
+
+     label1:
+        return i7;
+    }
+
+    public static int lambda$static$b5a61975$1(java.time.chrono.ChronoLocalDateTime, java.time.chrono.ChronoLocalDateTime)
+    {
+        java.time.chrono.ChronoLocalDate $r1, $r3;
+        java.time.chrono.ChronoLocalDateTime r0, r2;
+        long $l0, $l1, $l3, $l4;
+        int $i2, i5;
+        java.time.LocalTime $r4, $r5;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDateTime;
+
+        r2 := @parameter1: java.time.chrono.ChronoLocalDateTime;
+
+        $r1 = interfaceinvoke r0.<java.time.chrono.ChronoLocalDateTime: java.time.chrono.ChronoLocalDate toLocalDate()>();
+
+        $l0 = interfaceinvoke $r1.<java.time.chrono.ChronoLocalDate: long toEpochDay()>();
+
+        $r3 = interfaceinvoke r2.<java.time.chrono.ChronoLocalDateTime: java.time.chrono.ChronoLocalDate toLocalDate()>();
+
+        $l1 = interfaceinvoke $r3.<java.time.chrono.ChronoLocalDate: long toEpochDay()>();
+
+        $i2 = staticinvoke <java.lang.Long: int compare(long,long)>($l0, $l1);
+
+        i5 = $i2;
+
+        if $i2 != 0 goto label1;
+
+        $r4 = interfaceinvoke r0.<java.time.chrono.ChronoLocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        $l3 = virtualinvoke $r4.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $r5 = interfaceinvoke r2.<java.time.chrono.ChronoLocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        $l4 = virtualinvoke $r5.<java.time.LocalTime: long toNanoOfDay()>();
+
+        i5 = staticinvoke <java.lang.Long: int compare(long,long)>($l3, $l4);
+
+     label1:
+        return i5;
+    }
+
+    public static int lambda$static$7f2d2d5b$1(java.time.chrono.ChronoLocalDate, java.time.chrono.ChronoLocalDate)
+    {
+        java.time.chrono.ChronoLocalDate r0, r1;
+        int $i2;
+        long $l0, $l1;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        r1 := @parameter1: java.time.chrono.ChronoLocalDate;
+
+        $l0 = interfaceinvoke r0.<java.time.chrono.ChronoLocalDate: long toEpochDay()>();
+
+        $l1 = interfaceinvoke r1.<java.time.chrono.ChronoLocalDate: long toEpochDay()>();
+
+        $i2 = staticinvoke <java.lang.Long: int compare(long,long)>($l0, $l1);
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r9, $r10;
+        java.io.Serializable $r1, $r4, $r7;
+        java.util.Comparator $r0, $r2, $r3, $r5, $r6, $r8;
+
+        $r0 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_7f2d2d5b_1__48: java.util.Comparator bootstrap$()>();
+
+        $r1 = (java.io.Serializable) $r0;
+
+        $r2 = (java.util.Comparator) $r1;
+
+        <java.time.chrono.AbstractChronology: java.util.Comparator DATE_ORDER> = $r2;
+
+        $r3 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_b5a61975_1__49: java.util.Comparator bootstrap$()>();
+
+        $r4 = (java.io.Serializable) $r3;
+
+        $r5 = (java.util.Comparator) $r4;
+
+        <java.time.chrono.AbstractChronology: java.util.Comparator DATE_TIME_ORDER> = $r5;
+
+        $r6 = staticinvoke <java.time.chrono.AbstractChronology$lambda_static_2241c452_1__50: java.util.Comparator bootstrap$()>();
+
+        $r7 = (java.io.Serializable) $r6;
+
+        $r8 = (java.util.Comparator) $r7;
+
+        <java.time.chrono.AbstractChronology: java.util.Comparator INSTANT_ORDER> = $r8;
+
+        $r9 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r9.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_ID> = $r9;
+
+        $r10 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r10.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <java.time.chrono.AbstractChronology: java.util.concurrent.ConcurrentHashMap CHRONOS_BY_TYPE> = $r10;
+
+        return;
+    }
+}

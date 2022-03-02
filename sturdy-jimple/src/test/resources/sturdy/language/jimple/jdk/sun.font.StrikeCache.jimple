@@ -1,0 +1,849 @@
+public final class sun.font.StrikeCache extends java.lang.Object
+{
+    static final sun.misc.Unsafe unsafe;
+    static java.lang.ref.ReferenceQueue refQueue;
+    static java.util.ArrayList disposeListeners;
+    static int MINSTRIKES;
+    static int recentStrikeIndex;
+    static sun.font.FontStrike[] recentStrikes;
+    static boolean cacheRefTypeWeak;
+    static int nativeAddressSize;
+    static int glyphInfoSize;
+    static int xAdvanceOffset;
+    static int yAdvanceOffset;
+    static int boundsOffset;
+    static int widthOffset;
+    static int heightOffset;
+    static int rowBytesOffset;
+    static int topLeftXOffset;
+    static int topLeftYOffset;
+    static int pixelDataOffset;
+    static int cacheCellOffset;
+    static int managedOffset;
+    static long invisibleGlyphPtr;
+
+    public void <init>()
+    {
+        sun.font.StrikeCache r0;
+
+        r0 := @this: sun.font.StrikeCache;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static native void getGlyphCacheDescription(long[]);
+
+    static void refStrike(sun.font.FontStrike)
+    {
+        int $i0, i1, i2;
+        sun.font.FontStrike r0;
+        sun.font.FontStrike[] $r1;
+
+        r0 := @parameter0: sun.font.FontStrike;
+
+        i1 = <sun.font.StrikeCache: int recentStrikeIndex>;
+
+        $r1 = <sun.font.StrikeCache: sun.font.FontStrike[] recentStrikes>;
+
+        $r1[i1] = r0;
+
+        i2 = i1 + 1;
+
+        $i0 = <sun.font.StrikeCache: int MINSTRIKES>;
+
+        if i2 != $i0 goto label1;
+
+        i2 = 0;
+
+     label1:
+        <sun.font.StrikeCache: int recentStrikeIndex> = i2;
+
+        return;
+    }
+
+    private static final void doDispose(sun.font.FontStrikeDisposer)
+    {
+        int[][] $r3, $r14, $r16, $r18, $r20;
+        byte $b1, $b6, $b11;
+        int[] $r1, $r5, $r15, $r17, $r19, $r22;
+        boolean $z0;
+        sun.font.FontStrikeDisposer r0;
+        long $l0, $l2, $l3, $l5, $l7, $l8, $l10, $l12, $l13, $l14, $l15;
+        long[] $r2, $r6, $r8, $r10, $r12, $r21;
+        int $i4, $i9, i16, i17;
+        long[][] $r4, $r7, $r9, $r11, $r13;
+
+        r0 := @parameter0: sun.font.FontStrikeDisposer;
+
+        $r1 = r0.<sun.font.FontStrikeDisposer: int[] intGlyphImages>;
+
+        if $r1 == null goto label01;
+
+        $r22 = r0.<sun.font.FontStrikeDisposer: int[] intGlyphImages>;
+
+        $l15 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedIntMemory(int[],long)>($r22, $l15);
+
+        goto label12;
+
+     label01:
+        $r2 = r0.<sun.font.FontStrikeDisposer: long[] longGlyphImages>;
+
+        if $r2 == null goto label02;
+
+        $r21 = r0.<sun.font.FontStrikeDisposer: long[] longGlyphImages>;
+
+        $l14 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedLongMemory(long[],long)>($r21, $l14);
+
+        goto label12;
+
+     label02:
+        $r3 = r0.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages>;
+
+        if $r3 == null goto label06;
+
+        i16 = 0;
+
+     label03:
+        $r14 = r0.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages>;
+
+        $i9 = lengthof $r14;
+
+        if i16 >= $i9 goto label05;
+
+        $r16 = r0.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages>;
+
+        $r17 = $r16[i16];
+
+        if $r17 == null goto label04;
+
+        $r18 = r0.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages>;
+
+        $r19 = $r18[i16];
+
+        $l13 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedIntMemory(int[],long)>($r19, $l13);
+
+        r0.<sun.font.FontStrikeDisposer: long pScalerContext> = 0L;
+
+        $r20 = r0.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages>;
+
+        $r20[i16] = null;
+
+     label04:
+        i16 = i16 + 1;
+
+        goto label03;
+
+     label05:
+        $l10 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        $b11 = $l10 cmp 0L;
+
+        if $b11 == 0 goto label12;
+
+        $r15 = newarray (int)[0];
+
+        $l12 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedIntMemory(int[],long)>($r15, $l12);
+
+        goto label12;
+
+     label06:
+        $r4 = r0.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages>;
+
+        if $r4 == null goto label10;
+
+        i17 = 0;
+
+     label07:
+        $r7 = r0.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages>;
+
+        $i4 = lengthof $r7;
+
+        if i17 >= $i4 goto label09;
+
+        $r9 = r0.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages>;
+
+        $r10 = $r9[i17];
+
+        if $r10 == null goto label08;
+
+        $r11 = r0.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages>;
+
+        $r12 = $r11[i17];
+
+        $l8 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedLongMemory(long[],long)>($r12, $l8);
+
+        r0.<sun.font.FontStrikeDisposer: long pScalerContext> = 0L;
+
+        $r13 = r0.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages>;
+
+        $r13[i17] = null;
+
+     label08:
+        i17 = i17 + 1;
+
+        goto label07;
+
+     label09:
+        $l5 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 == 0 goto label12;
+
+        $r8 = newarray (long)[0];
+
+        $l7 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedLongMemory(long[],long)>($r8, $l7);
+
+        goto label12;
+
+     label10:
+        $l0 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label12;
+
+        $z0 = staticinvoke <sun.font.StrikeCache: boolean longAddresses()>();
+
+        if $z0 == 0 goto label11;
+
+        $r6 = newarray (long)[0];
+
+        $l3 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedLongMemory(long[],long)>($r6, $l3);
+
+        goto label12;
+
+     label11:
+        $r5 = newarray (int)[0];
+
+        $l2 = r0.<sun.font.FontStrikeDisposer: long pScalerContext>;
+
+        staticinvoke <sun.font.StrikeCache: void freeCachedIntMemory(int[],long)>($r5, $l2);
+
+     label12:
+        return;
+    }
+
+    private static boolean longAddresses()
+    {
+        int $i0;
+        boolean $z0;
+
+        $i0 = <sun.font.StrikeCache: int nativeAddressSize>;
+
+        if $i0 != 8 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static void disposeStrike(sun.font.FontStrikeDisposer)
+    {
+        java.lang.Throwable $r7;
+        sun.java2d.pipe.BufferedContext $r6;
+        java.awt.GraphicsConfiguration $r4;
+        sun.font.FontStrikeDisposer r1;
+        java.awt.GraphicsDevice $r3;
+        sun.font.StrikeCache$2 $r2;
+        java.awt.GraphicsEnvironment $r0;
+        sun.java2d.pipe.hw.AccelGraphicsConfig r5;
+        sun.java2d.pipe.RenderQueue r8;
+        boolean $z0, $z1, $z2;
+
+        r1 := @parameter0: sun.font.FontStrikeDisposer;
+
+        $z0 = <sun.java2d.Disposer: boolean pollingQueue>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <sun.font.StrikeCache: void doDispose(sun.font.FontStrikeDisposer)>(r1);
+
+        return;
+
+     label1:
+        r8 = null;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $z1 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = virtualinvoke $r0.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $z2 = $r4 instanceof sun.java2d.pipe.hw.AccelGraphicsConfig;
+
+        if $z2 == 0 goto label2;
+
+        r5 = (sun.java2d.pipe.hw.AccelGraphicsConfig) $r4;
+
+        $r6 = interfaceinvoke r5.<sun.java2d.pipe.hw.AccelGraphicsConfig: sun.java2d.pipe.BufferedContext getContext()>();
+
+        if $r6 == null goto label2;
+
+        r8 = virtualinvoke $r6.<sun.java2d.pipe.BufferedContext: sun.java2d.pipe.RenderQueue getRenderQueue()>();
+
+     label2:
+        if r8 == null goto label8;
+
+        virtualinvoke r8.<sun.java2d.pipe.RenderQueue: void lock()>();
+
+     label3:
+        $r2 = new sun.font.StrikeCache$2;
+
+        specialinvoke $r2.<sun.font.StrikeCache$2: void <init>(sun.font.FontStrikeDisposer)>(r1);
+
+        virtualinvoke r8.<sun.java2d.pipe.RenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r2);
+
+     label4:
+        virtualinvoke r8.<sun.java2d.pipe.RenderQueue: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        virtualinvoke r8.<sun.java2d.pipe.RenderQueue: void unlock()>();
+
+        throw $r7;
+
+     label7:
+        goto label9;
+
+     label8:
+        staticinvoke <sun.font.StrikeCache: void doDispose(sun.font.FontStrikeDisposer)>(r1);
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static native void freeIntPointer(int);
+
+    static native void freeLongPointer(long);
+
+    private static native void freeIntMemory(int[], long);
+
+    private static native void freeLongMemory(long[], long);
+
+    private static void freeCachedIntMemory(int[], long)
+    {
+        sun.misc.Unsafe $r3;
+        java.lang.Throwable $r6;
+        long l1, $l7, $l10;
+        java.util.ArrayList $r0, $r1, $r5, r7;
+        byte $b8;
+        int[] r2;
+        java.lang.Long $r4;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i9, i11;
+
+        r2 := @parameter0: int[];
+
+        l1 := @parameter1: long;
+
+        $r0 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label06;
+
+        r7 = null;
+
+        i11 = 0;
+
+     label02:
+        $i2 = lengthof r2;
+
+        if i11 >= $i2 goto label05;
+
+        $i3 = r2[i11];
+
+        if $i3 == 0 goto label04;
+
+        $r3 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i5 = r2[i11];
+
+        $i4 = <sun.font.StrikeCache: int managedOffset>;
+
+        $i6 = $i5 + $i4;
+
+        $l7 = (long) $i6;
+
+        $b8 = virtualinvoke $r3.<sun.misc.Unsafe: byte getByte(long)>($l7);
+
+        if $b8 != 0 goto label04;
+
+        if r7 != null goto label03;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r7 = $r5;
+
+     label03:
+        $i9 = r2[i11];
+
+        $l10 = (long) $i9;
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l10);
+
+        virtualinvoke r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+     label04:
+        i11 = i11 + 1;
+
+        goto label02;
+
+     label05:
+        if r7 == null goto label06;
+
+        staticinvoke <sun.font.StrikeCache: void notifyDisposeListeners(java.util.ArrayList)>(r7);
+
+     label06:
+        exitmonitor $r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label09:
+        throw $r6;
+
+     label10:
+        staticinvoke <sun.font.StrikeCache: void freeIntMemory(int[],long)>(r2, l1);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private static void freeCachedLongMemory(long[], long)
+    {
+        sun.misc.Unsafe $r3;
+        java.lang.Throwable $r6;
+        long l1, $l3, $l6, $l7, $l8, $l10;
+        java.util.ArrayList $r0, $r1, $r5, r7;
+        long[] r2;
+        byte $b4, $b9;
+        java.lang.Long $r4;
+        int $i0, $i2, $i5, i11;
+
+        r2 := @parameter0: long[];
+
+        l1 := @parameter1: long;
+
+        $r0 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label06;
+
+        r7 = null;
+
+        i11 = 0;
+
+     label02:
+        $i2 = lengthof r2;
+
+        if i11 >= $i2 goto label05;
+
+        $l3 = r2[i11];
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label04;
+
+        $r3 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $l7 = r2[i11];
+
+        $i5 = <sun.font.StrikeCache: int managedOffset>;
+
+        $l6 = (long) $i5;
+
+        $l8 = $l7 + $l6;
+
+        $b9 = virtualinvoke $r3.<sun.misc.Unsafe: byte getByte(long)>($l8);
+
+        if $b9 != 0 goto label04;
+
+        if r7 != null goto label03;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r7 = $r5;
+
+     label03:
+        $l10 = r2[i11];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l10);
+
+        virtualinvoke r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+     label04:
+        i11 = i11 + 1;
+
+        goto label02;
+
+     label05:
+        if r7 == null goto label06;
+
+        staticinvoke <sun.font.StrikeCache: void notifyDisposeListeners(java.util.ArrayList)>(r7);
+
+     label06:
+        exitmonitor $r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label09:
+        throw $r6;
+
+     label10:
+        staticinvoke <sun.font.StrikeCache: void freeLongMemory(long[],long)>(r2, l1);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public static void addGlyphDisposedListener(sun.font.GlyphDisposedListener)
+    {
+        java.lang.Throwable $r3;
+        sun.font.GlyphDisposedListener r1;
+        java.util.ArrayList $r0, $r2;
+
+        r1 := @parameter0: sun.font.GlyphDisposedListener;
+
+        $r0 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>(r1);
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static void notifyDisposeListeners(java.util.ArrayList)
+    {
+        java.util.Iterator $r1;
+        sun.font.GlyphDisposedListener r3;
+        java.lang.Object $r2;
+        java.util.ArrayList $r0, r4;
+        boolean $z0;
+
+        r4 := @parameter0: java.util.ArrayList;
+
+        $r0 = <sun.font.StrikeCache: java.util.ArrayList disposeListeners>;
+
+        $r1 = virtualinvoke $r0.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.font.GlyphDisposedListener) $r2;
+
+        interfaceinvoke r3.<sun.font.GlyphDisposedListener: void glyphDisposed(java.util.ArrayList)>(r4);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public static java.lang.ref.Reference getStrikeRef(sun.font.FontStrike)
+    {
+        java.lang.ref.Reference $r1;
+        sun.font.FontStrike r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.font.FontStrike;
+
+        $z0 = <sun.font.StrikeCache: boolean cacheRefTypeWeak>;
+
+        $r1 = staticinvoke <sun.font.StrikeCache: java.lang.ref.Reference getStrikeRef(sun.font.FontStrike,boolean)>(r0, $z0);
+
+        return $r1;
+    }
+
+    public static java.lang.ref.Reference getStrikeRef(sun.font.FontStrike, boolean)
+    {
+        sun.font.FontStrikeDisposer $r1;
+        sun.font.StrikeCache$SoftDisposerRef $r2;
+        java.lang.ref.SoftReference $r4;
+        java.lang.ref.WeakReference $r5;
+        sun.font.FontStrike r0;
+        sun.font.StrikeCache$WeakDisposerRef $r3;
+        boolean z0;
+
+        r0 := @parameter0: sun.font.FontStrike;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.font.FontStrike: sun.font.FontStrikeDisposer disposer>;
+
+        if $r1 != null goto label2;
+
+        if z0 == 0 goto label1;
+
+        $r5 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r5.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        return $r5;
+
+     label1:
+        $r4 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r4.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(r0);
+
+        return $r4;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $r3 = new sun.font.StrikeCache$WeakDisposerRef;
+
+        specialinvoke $r3.<sun.font.StrikeCache$WeakDisposerRef: void <init>(sun.font.FontStrike)>(r0);
+
+        return $r3;
+
+     label3:
+        $r2 = new sun.font.StrikeCache$SoftDisposerRef;
+
+        specialinvoke $r2.<sun.font.StrikeCache$SoftDisposerRef: void <init>(sun.font.FontStrike)>(r0);
+
+        return $r2;
+    }
+
+    static void access$000(sun.font.FontStrikeDisposer)
+    {
+        sun.font.FontStrikeDisposer r0;
+
+        r0 := @parameter0: sun.font.FontStrikeDisposer;
+
+        staticinvoke <sun.font.StrikeCache: void doDispose(sun.font.FontStrikeDisposer)>(r0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.InternalError $r5;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        sun.misc.Unsafe $r0;
+        long $l0, $l2, $l4, $l6, $l8, $l10, $l12, $l14, $l16, $l18, $l20, $l21, $l23;
+        sun.font.StrikeCache$1 $r4;
+        java.lang.ref.ReferenceQueue $r1;
+        java.util.ArrayList $r2;
+        long[] r3;
+        int $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i19, $i22, $i24, $i25, $i26;
+        java.lang.String $r9;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.font.StrikeCache: sun.misc.Unsafe unsafe> = $r0;
+
+        $r1 = staticinvoke <sun.java2d.Disposer: java.lang.ref.ReferenceQueue getQueue()>();
+
+        <sun.font.StrikeCache: java.lang.ref.ReferenceQueue refQueue> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>(1);
+
+        <sun.font.StrikeCache: java.util.ArrayList disposeListeners> = $r2;
+
+        <sun.font.StrikeCache: int MINSTRIKES> = 8;
+
+        <sun.font.StrikeCache: int recentStrikeIndex> = 0;
+
+        r3 = newarray (long)[13];
+
+        staticinvoke <sun.font.StrikeCache: void getGlyphCacheDescription(long[])>(r3);
+
+        $l0 = r3[0];
+
+        $i1 = (int) $l0;
+
+        <sun.font.StrikeCache: int nativeAddressSize> = $i1;
+
+        $l2 = r3[1];
+
+        $i3 = (int) $l2;
+
+        <sun.font.StrikeCache: int glyphInfoSize> = $i3;
+
+        $l4 = r3[2];
+
+        $i5 = (int) $l4;
+
+        <sun.font.StrikeCache: int xAdvanceOffset> = $i5;
+
+        $l6 = r3[3];
+
+        $i7 = (int) $l6;
+
+        <sun.font.StrikeCache: int yAdvanceOffset> = $i7;
+
+        $l8 = r3[4];
+
+        $i9 = (int) $l8;
+
+        <sun.font.StrikeCache: int widthOffset> = $i9;
+
+        $l10 = r3[5];
+
+        $i11 = (int) $l10;
+
+        <sun.font.StrikeCache: int heightOffset> = $i11;
+
+        $l12 = r3[6];
+
+        $i13 = (int) $l12;
+
+        <sun.font.StrikeCache: int rowBytesOffset> = $i13;
+
+        $l14 = r3[7];
+
+        $i15 = (int) $l14;
+
+        <sun.font.StrikeCache: int topLeftXOffset> = $i15;
+
+        $l16 = r3[8];
+
+        $i17 = (int) $l16;
+
+        <sun.font.StrikeCache: int topLeftYOffset> = $i17;
+
+        $l18 = r3[9];
+
+        $i19 = (int) $l18;
+
+        <sun.font.StrikeCache: int pixelDataOffset> = $i19;
+
+        $l20 = r3[10];
+
+        <sun.font.StrikeCache: long invisibleGlyphPtr> = $l20;
+
+        $l21 = r3[11];
+
+        $i22 = (int) $l21;
+
+        <sun.font.StrikeCache: int cacheCellOffset> = $i22;
+
+        $l23 = r3[12];
+
+        $i24 = (int) $l23;
+
+        <sun.font.StrikeCache: int managedOffset> = $i24;
+
+        $i25 = <sun.font.StrikeCache: int nativeAddressSize>;
+
+        if $i25 >= 4 goto label1;
+
+        $r5 = new java.lang.InternalError;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected address size for font data: ");
+
+        $i26 = <sun.font.StrikeCache: int nativeAddressSize>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i26);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.InternalError: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        $r4 = new sun.font.StrikeCache$1;
+
+        specialinvoke $r4.<sun.font.StrikeCache$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        return;
+    }
+}

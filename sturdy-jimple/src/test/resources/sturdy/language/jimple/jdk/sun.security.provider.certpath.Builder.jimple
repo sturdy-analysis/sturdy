@@ -1,0 +1,719 @@
+public abstract class sun.security.provider.certpath.Builder extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+    private java.util.Set matchingPolicies;
+    final sun.security.provider.certpath.PKIX$BuilderParams buildParams;
+    final java.security.cert.X509CertSelector targetCertConstraints;
+    static final boolean USE_AIA;
+
+    void <init>(sun.security.provider.certpath.PKIX$BuilderParams)
+    {
+        java.security.cert.X509CertSelector $r3;
+        sun.security.provider.certpath.Builder r0;
+        sun.security.provider.certpath.PKIX$BuilderParams r1;
+        java.security.cert.CertSelector $r2;
+
+        r0 := @this: sun.security.provider.certpath.Builder;
+
+        r1 := @parameter0: sun.security.provider.certpath.PKIX$BuilderParams;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.provider.certpath.Builder: sun.security.provider.certpath.PKIX$BuilderParams buildParams> = r1;
+
+        $r2 = virtualinvoke r1.<sun.security.provider.certpath.PKIX$BuilderParams: java.security.cert.CertSelector targetCertConstraints()>();
+
+        $r3 = (java.security.cert.X509CertSelector) $r2;
+
+        r0.<sun.security.provider.certpath.Builder: java.security.cert.X509CertSelector targetCertConstraints> = $r3;
+
+        return;
+    }
+
+    abstract java.util.Collection getMatchingCerts(sun.security.provider.certpath.State, java.util.List) throws java.security.cert.CertStoreException, java.security.cert.CertificateException, java.io.IOException;
+
+    abstract void verifyCert(java.security.cert.X509Certificate, sun.security.provider.certpath.State, java.util.List) throws java.security.GeneralSecurityException;
+
+    abstract boolean isPathCompleted(java.security.cert.X509Certificate);
+
+    abstract void addCertToPath(java.security.cert.X509Certificate, java.util.LinkedList);
+
+    abstract void removeFinalCertFromPath(java.util.LinkedList);
+
+    static int distance(sun.security.x509.GeneralNameInterface, sun.security.x509.GeneralNameInterface, int)
+    {
+        sun.security.util.Debug $r2, $r3, $r4, $r5;
+        sun.security.x509.GeneralNameInterface r0, r1;
+        int $i0, i1, $i2, $i3, $i4;
+
+        r0 := @parameter0: sun.security.x509.GeneralNameInterface;
+
+        r1 := @parameter1: sun.security.x509.GeneralNameInterface;
+
+        i1 := @parameter2: int;
+
+        $i0 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int constrains(sun.security.x509.GeneralNameInterface)>(r1);
+
+        tableswitch($i0)
+        {
+            case -1: goto label1;
+            case 0: goto label5;
+            case 1: goto label7;
+            case 2: goto label6;
+            case 3: goto label3;
+            default: goto label8;
+        };
+
+     label1:
+        $r4 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label2;
+
+        $r5 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>("Builder.distance(): Names are different types");
+
+     label2:
+        return i1;
+
+     label3:
+        $r2 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label4;
+
+        $r3 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        virtualinvoke $r3.<sun.security.util.Debug: void println(java.lang.String)>("Builder.distance(): Names are same type but in different subtrees");
+
+     label4:
+        return i1;
+
+     label5:
+        return 0;
+
+     label6:
+        goto label9;
+
+     label7:
+        goto label9;
+
+     label8:
+        return i1;
+
+     label9:
+        $i2 = interfaceinvoke r1.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i3 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i4 = $i2 - $i3;
+
+        return $i4;
+    }
+
+    static int hops(sun.security.x509.GeneralNameInterface, sun.security.x509.GeneralNameInterface, int)
+    {
+        sun.security.x509.X500Name r2, r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        sun.security.util.Debug $r5, $r6, $r7, $r8, $r9, $r10;
+        sun.security.x509.GeneralNameInterface r0, r1;
+
+        r0 := @parameter0: sun.security.x509.GeneralNameInterface;
+
+        r1 := @parameter1: sun.security.x509.GeneralNameInterface;
+
+        i8 := @parameter2: int;
+
+        $i0 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int constrains(sun.security.x509.GeneralNameInterface)>(r1);
+
+        tableswitch($i0)
+        {
+            case -1: goto label01;
+            case 0: goto label04;
+            case 1: goto label06;
+            case 2: goto label05;
+            case 3: goto label03;
+            default: goto label07;
+        };
+
+     label01:
+        $r9 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label02;
+
+        $r10 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>("Builder.hops(): Names are different types");
+
+     label02:
+        return i8;
+
+     label03:
+        goto label08;
+
+     label04:
+        return 0;
+
+     label05:
+        $i9 = interfaceinvoke r1.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i10 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i11 = $i9 - $i10;
+
+        return $i11;
+
+     label06:
+        $i12 = interfaceinvoke r1.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i13 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int subtreeDepth()>();
+
+        $i14 = $i12 - $i13;
+
+        return $i14;
+
+     label07:
+        return i8;
+
+     label08:
+        $i1 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int getType()>();
+
+        if $i1 == 4 goto label10;
+
+        $r7 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label09;
+
+        $r8 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>("Builder.hops(): hopDistance not implemented for this name type");
+
+     label09:
+        return i8;
+
+     label10:
+        r2 = (sun.security.x509.X500Name) r0;
+
+        r3 = (sun.security.x509.X500Name) r1;
+
+        $r4 = virtualinvoke r2.<sun.security.x509.X500Name: sun.security.x509.X500Name commonAncestor(sun.security.x509.X500Name)>(r3);
+
+        if $r4 != null goto label12;
+
+        $r5 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r5 == null goto label11;
+
+        $r6 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>("Builder.hops(): Names are in different namespaces");
+
+     label11:
+        return i8;
+
+     label12:
+        $i2 = virtualinvoke $r4.<sun.security.x509.X500Name: int subtreeDepth()>();
+
+        $i3 = virtualinvoke r2.<sun.security.x509.X500Name: int subtreeDepth()>();
+
+        $i4 = virtualinvoke r3.<sun.security.x509.X500Name: int subtreeDepth()>();
+
+        $i6 = $i3 + $i4;
+
+        $i5 = 2 * $i2;
+
+        $i7 = $i6 - $i5;
+
+        return $i7;
+    }
+
+    static int targetDistance(sun.security.x509.NameConstraintsExtension, java.security.cert.X509Certificate, sun.security.x509.GeneralNameInterface) throws java.io.IOException
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.x509.GeneralName $r12, $r27;
+        sun.security.x509.X500Name $r3;
+        sun.security.x509.GeneralSubtrees $r8, $r9;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.x509.X509CertImpl $r1;
+        sun.security.util.Debug $r7, $r10, $r16, $r21;
+        sun.security.x509.GeneralSubtree $r11;
+        sun.security.x509.GeneralNameInterface r4, $r13, $r28;
+        java.lang.StringBuilder $r17, $r18, $r22, $r24, $r36, $r37;
+        javax.security.auth.x500.X500Principal $r2;
+        sun.security.x509.NameConstraintsExtension r32, $r33;
+        sun.security.x509.SubjectAlternativeNameExtension $r5;
+        int $i0, $i1, $i2, $i3, i4, i5, $i7, $i9, $i11, $i13;
+        java.lang.String $r19, $r23, $r25;
+        java.io.IOException $r34, $r35, $r38;
+        java.security.cert.CertificateException $r30;
+        java.lang.Object $r6;
+        sun.security.x509.GeneralNames $r26;
+
+        r32 := @parameter0: sun.security.x509.NameConstraintsExtension;
+
+        r0 := @parameter1: java.security.cert.X509Certificate;
+
+        r4 := @parameter2: sun.security.x509.GeneralNameInterface;
+
+        if r32 == null goto label01;
+
+        $z3 = virtualinvoke r32.<sun.security.x509.NameConstraintsExtension: boolean verify(java.security.cert.X509Certificate)>(r0);
+
+        if $z3 != 0 goto label01;
+
+        $r34 = new java.io.IOException;
+
+        specialinvoke $r34.<java.io.IOException: void <init>(java.lang.String)>("certificate does not satisfy existing name constraints");
+
+        throw $r34;
+
+     label01:
+        $r1 = staticinvoke <sun.security.x509.X509CertImpl: sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate)>(r0);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r30 := @caughtexception;
+
+        $r35 = new java.io.IOException;
+
+        specialinvoke $r35.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid certificate", $r30);
+
+        throw $r35;
+
+     label04:
+        $r2 = virtualinvoke $r1.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r3 = staticinvoke <sun.security.x509.X500Name: sun.security.x509.X500Name asX500Name(javax.security.auth.x500.X500Principal)>($r2);
+
+        $z0 = virtualinvoke $r3.<sun.security.x509.X500Name: boolean equals(java.lang.Object)>(r4);
+
+        if $z0 == 0 goto label05;
+
+        return 0;
+
+     label05:
+        $r5 = virtualinvoke $r1.<sun.security.x509.X509CertImpl: sun.security.x509.SubjectAlternativeNameExtension getSubjectAlternativeNameExtension()>();
+
+        if $r5 == null goto label08;
+
+        $r26 = virtualinvoke $r5.<sun.security.x509.SubjectAlternativeNameExtension: sun.security.x509.GeneralNames get(java.lang.String)>("subject_name");
+
+        if $r26 == null goto label08;
+
+        i4 = 0;
+
+        $i3 = virtualinvoke $r26.<sun.security.x509.GeneralNames: int size()>();
+
+     label06:
+        if i4 >= $i3 goto label08;
+
+        $r27 = virtualinvoke $r26.<sun.security.x509.GeneralNames: sun.security.x509.GeneralName get(int)>(i4);
+
+        $r28 = virtualinvoke $r27.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $z2 = virtualinvoke $r28.<java.lang.Object: boolean equals(java.lang.Object)>(r4);
+
+        if $z2 == 0 goto label07;
+
+        return 0;
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        $r33 = virtualinvoke $r1.<sun.security.x509.X509CertImpl: sun.security.x509.NameConstraintsExtension getNameConstraintsExtension()>();
+
+        if $r33 != null goto label09;
+
+        $i7 = (int) -1;
+
+        return $i7;
+
+     label09:
+        if r32 == null goto label10;
+
+        virtualinvoke r32.<sun.security.x509.NameConstraintsExtension: void merge(sun.security.x509.NameConstraintsExtension)>($r33);
+
+        goto label11;
+
+     label10:
+        $r6 = virtualinvoke $r33.<sun.security.x509.NameConstraintsExtension: java.lang.Object clone()>();
+
+        r32 = (sun.security.x509.NameConstraintsExtension) $r6;
+
+     label11:
+        $r7 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label12;
+
+        $r21 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Builder.targetDistance() merged constraints: ");
+
+        $r23 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r32);
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r25);
+
+     label12:
+        $r8 = virtualinvoke r32.<sun.security.x509.NameConstraintsExtension: sun.security.x509.GeneralSubtrees get(java.lang.String)>("permitted_subtrees");
+
+        $r9 = virtualinvoke r32.<sun.security.x509.NameConstraintsExtension: sun.security.x509.GeneralSubtrees get(java.lang.String)>("excluded_subtrees");
+
+        if $r8 == null goto label13;
+
+        virtualinvoke $r8.<sun.security.x509.GeneralSubtrees: void reduce(sun.security.x509.GeneralSubtrees)>($r9);
+
+     label13:
+        $r10 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label14;
+
+        $r16 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Builder.targetDistance() reduced constraints: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label14:
+        $z1 = virtualinvoke r32.<sun.security.x509.NameConstraintsExtension: boolean verify(sun.security.x509.GeneralNameInterface)>(r4);
+
+        if $z1 != 0 goto label15;
+
+        $r38 = new java.io.IOException;
+
+        specialinvoke $r38.<java.io.IOException: void <init>(java.lang.String)>("New certificate not allowed to sign certificate for target");
+
+        throw $r38;
+
+     label15:
+        if $r8 != null goto label16;
+
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label16:
+        i5 = 0;
+
+        $i0 = virtualinvoke $r8.<sun.security.x509.GeneralSubtrees: int size()>();
+
+     label17:
+        if i5 >= $i0 goto label19;
+
+        $r11 = virtualinvoke $r8.<sun.security.x509.GeneralSubtrees: sun.security.x509.GeneralSubtree get(int)>(i5);
+
+        $r12 = virtualinvoke $r11.<sun.security.x509.GeneralSubtree: sun.security.x509.GeneralName getName()>();
+
+        $r13 = virtualinvoke $r12.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $i11 = (int) -1;
+
+        $i1 = staticinvoke <sun.security.provider.certpath.Builder: int distance(sun.security.x509.GeneralNameInterface,sun.security.x509.GeneralNameInterface,int)>($r13, r4, $i11);
+
+        if $i1 < 0 goto label18;
+
+        $i2 = $i1 + 1;
+
+        return $i2;
+
+     label18:
+        i5 = i5 + 1;
+
+        goto label17;
+
+     label19:
+        $i13 = (int) -1;
+
+        return $i13;
+
+        catch java.security.cert.CertificateException from label01 to label02 with label03;
+    }
+
+    java.util.Set getMatchingPolicies()
+    {
+        java.util.Set $r1, $r3, $r6, $r7, $r8;
+        java.util.HashSet $r5;
+        sun.security.provider.certpath.Builder r0;
+        sun.security.provider.certpath.PKIX$BuilderParams $r2, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.provider.certpath.Builder;
+
+        $r1 = r0.<sun.security.provider.certpath.Builder: java.util.Set matchingPolicies>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.security.provider.certpath.Builder: sun.security.provider.certpath.PKIX$BuilderParams buildParams>;
+
+        $r3 = virtualinvoke $r2.<sun.security.provider.certpath.PKIX$BuilderParams: java.util.Set initialPolicies()>();
+
+        $z0 = interfaceinvoke $r3.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>("2.5.29.32.0");
+
+        if $z1 != 0 goto label1;
+
+        $r4 = r0.<sun.security.provider.certpath.Builder: sun.security.provider.certpath.PKIX$BuilderParams buildParams>;
+
+        $z2 = virtualinvoke $r4.<sun.security.provider.certpath.PKIX$BuilderParams: boolean policyMappingInhibited()>();
+
+        if $z2 == 0 goto label1;
+
+        $r5 = new java.util.HashSet;
+
+        specialinvoke $r5.<java.util.HashSet: void <init>(java.util.Collection)>($r3);
+
+        r0.<sun.security.provider.certpath.Builder: java.util.Set matchingPolicies> = $r5;
+
+        $r6 = r0.<sun.security.provider.certpath.Builder: java.util.Set matchingPolicies>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean add(java.lang.Object)>("2.5.29.32.0");
+
+        goto label2;
+
+     label1:
+        $r7 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.provider.certpath.Builder: java.util.Set matchingPolicies> = $r7;
+
+     label2:
+        $r8 = r0.<sun.security.provider.certpath.Builder: java.util.Set matchingPolicies>;
+
+        return $r8;
+    }
+
+    boolean addMatchingCerts(java.security.cert.X509CertSelector, java.util.Collection, java.util.Collection, boolean)
+    {
+        java.security.cert.X509Certificate $r1, $r12, $r15;
+        java.math.BigInteger $r22;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, z8, z9, z10;
+        java.security.cert.X509CertSelector r0;
+        java.util.Collection r2, $r6, r14;
+        sun.security.util.Debug $r18, $r20, $r33, $r35;
+        java.security.cert.CertStoreException $r32;
+        java.security.cert.Certificate r9;
+        java.lang.StringBuilder $r19, $r21, $r24, $r25, $r27, $r28, $r30, $r34, $r36, $r37;
+        javax.security.auth.x500.X500Principal $r26, $r29;
+        sun.security.provider.certpath.Builder r10;
+        sun.security.provider.certpath.PKIX$BuilderParams $r11, $r16;
+        java.lang.String $r13, $r17, $r23, $r31, $r38;
+        java.util.Iterator $r3, $r7;
+        java.security.cert.CertStore r5;
+        java.lang.Object $r4, $r8;
+
+        r10 := @this: sun.security.provider.certpath.Builder;
+
+        r0 := @parameter0: java.security.cert.X509CertSelector;
+
+        r2 := @parameter1: java.util.Collection;
+
+        r14 := @parameter2: java.util.Collection;
+
+        z2 := @parameter3: boolean;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509CertSelector: java.security.cert.X509Certificate getCertificate()>();
+
+        if $r1 == null goto label03;
+
+        $z5 = virtualinvoke r0.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>($r1);
+
+        if $z5 == 0 goto label02;
+
+        $r16 = r10.<sun.security.provider.certpath.Builder: sun.security.provider.certpath.PKIX$BuilderParams buildParams>;
+
+        $r17 = virtualinvoke $r16.<sun.security.provider.certpath.PKIX$BuilderParams: java.lang.String sigProvider()>();
+
+        $z6 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfSigned(java.security.cert.X509Certificate,java.lang.String)>($r1, $r17);
+
+        if $z6 != 0 goto label02;
+
+        $r18 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r18 == null goto label01;
+
+        $r20 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Builder.addMatchingCerts: adding target cert\n  SN: ");
+
+        $r22 = virtualinvoke $r1.<java.security.cert.X509Certificate: java.math.BigInteger getSerialNumber()>();
+
+        $r23 = staticinvoke <sun.security.util.Debug: java.lang.String toHexString(java.math.BigInteger)>($r22);
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  Subject: ");
+
+        $r26 = virtualinvoke $r1.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  Issuer: ");
+
+        $r29 = virtualinvoke $r1.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<sun.security.util.Debug: void println(java.lang.String)>($r31);
+
+     label01:
+        $z7 = interfaceinvoke r14.<java.util.Collection: boolean add(java.lang.Object)>($r1);
+
+        return $z7;
+
+     label02:
+        return 0;
+
+     label03:
+        z8 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label13;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.security.cert.CertStore) $r4;
+
+     label05:
+        $r6 = virtualinvoke r5.<java.security.cert.CertStore: java.util.Collection getCertificates(java.security.cert.CertSelector)>(r0);
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label08;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.security.cert.Certificate) $r8;
+
+        $r12 = (java.security.cert.X509Certificate) r9;
+
+        $r11 = r10.<sun.security.provider.certpath.Builder: sun.security.provider.certpath.PKIX$BuilderParams buildParams>;
+
+        $r13 = virtualinvoke $r11.<sun.security.provider.certpath.PKIX$BuilderParams: java.lang.String sigProvider()>();
+
+        $z3 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfSigned(java.security.cert.X509Certificate,java.lang.String)>($r12, $r13);
+
+        if $z3 != 0 goto label07;
+
+        $r15 = (java.security.cert.X509Certificate) r9;
+
+        $z4 = interfaceinvoke r14.<java.util.Collection: boolean add(java.lang.Object)>($r15);
+
+        if $z4 == 0 goto label07;
+
+        z8 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+     label07:
+        goto label06;
+
+     label08:
+        if z2 != 0 goto label10;
+
+        if z9 == 0 goto label10;
+
+     label09:
+        return 1;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r32 := @caughtexception;
+
+        $r33 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        if $r33 == null goto label12;
+
+        $r35 = <sun.security.provider.certpath.Builder: sun.security.util.Debug debug>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Builder.addMatchingCerts, non-fatal exception retrieving certs: ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r32);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<sun.security.util.Debug: void println(java.lang.String)>($r38);
+
+        virtualinvoke $r32.<java.security.cert.CertStoreException: void printStackTrace()>();
+
+     label12:
+        goto label04;
+
+     label13:
+        return z10;
+
+        catch java.security.cert.CertStoreException from label05 to label09 with label11;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetBooleanAction $r1;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        sun.security.util.Debug $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.Builder: sun.security.util.Debug debug> = $r0;
+
+        $r1 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r1.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("com.sun.security.enableAIAcaIssuers");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.security.provider.certpath.Builder: boolean USE_AIA> = $z0;
+
+        return;
+    }
+}

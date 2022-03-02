@@ -1,0 +1,2548 @@
+public class sun.security.provider.PolicyParser extends java.lang.Object
+{
+    private static final java.lang.String EXTDIRS_PROPERTY;
+    private static final java.lang.String OLD_EXTDIRS_EXPANSION;
+    static final java.lang.String EXTDIRS_EXPANSION;
+    private java.util.Vector grantEntries;
+    private java.util.Map domainEntries;
+    private static final sun.security.util.Debug debug;
+    private java.io.StreamTokenizer st;
+    private int lookahead;
+    private boolean expandProp;
+    private java.lang.String keyStoreUrlString;
+    private java.lang.String keyStoreType;
+    private java.lang.String keyStoreProvider;
+    private java.lang.String storePassURL;
+
+    private java.lang.String expand(java.lang.String) throws sun.security.util.PropertyExpander$ExpandException
+    {
+        java.lang.String r1, $r2;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    private java.lang.String expand(java.lang.String, boolean) throws sun.security.util.PropertyExpander$ExpandException
+    {
+        java.lang.String r1, $r2;
+        sun.security.provider.PolicyParser r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = r0.<sun.security.provider.PolicyParser: boolean expandProp>;
+
+        if $z0 != 0 goto label1;
+
+        return r1;
+
+     label1:
+        $r2 = staticinvoke <sun.security.util.PropertyExpander: java.lang.String expand(java.lang.String,boolean)>(r1, z1);
+
+        return $r2;
+    }
+
+    public void <init>()
+    {
+        java.util.Vector $r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.provider.PolicyParser: boolean expandProp> = 0;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString> = null;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreType> = null;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider> = null;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL> = null;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries> = $r1;
+
+        return;
+    }
+
+    public void <init>(boolean)
+    {
+        sun.security.provider.PolicyParser r0;
+        boolean z0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: void <init>()>();
+
+        r0.<sun.security.provider.PolicyParser: boolean expandProp> = z0;
+
+        return;
+    }
+
+    public void read(java.io.Reader) throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        java.util.Map $r25, $r28, $r34;
+        java.io.StreamTokenizer $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r43;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.provider.PolicyParser$ParsingException $r46, $r47;
+        java.io.Reader r40;
+        java.lang.Object[] $r31;
+        sun.security.provider.PolicyParser$DomainEntry $r26;
+        java.text.MessageFormat $r45;
+        int $i0, $i1, $i3;
+        java.lang.String $r19, $r20, $r22, $r23, $r24, $r27, $r30, $r33, $r36, $r37;
+        sun.security.provider.PolicyParser r0;
+        sun.security.provider.PolicyParser$GrantEntry $r38, r41;
+        java.util.TreeMap $r44;
+        java.io.BufferedReader $r42;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r40 := @parameter0: java.io.Reader;
+
+        $z0 = r40 instanceof java.io.BufferedReader;
+
+        if $z0 != 0 goto label01;
+
+        $r42 = new java.io.BufferedReader;
+
+        specialinvoke $r42.<java.io.BufferedReader: void <init>(java.io.Reader)>(r40);
+
+        r40 = $r42;
+
+     label01:
+        $r43 = new java.io.StreamTokenizer;
+
+        specialinvoke $r43.<java.io.StreamTokenizer: void <init>(java.io.Reader)>(r40);
+
+        r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st> = $r43;
+
+        $r2 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r2.<java.io.StreamTokenizer: void resetSyntax()>();
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r3.<java.io.StreamTokenizer: void wordChars(int,int)>(97, 122);
+
+        $r4 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r4.<java.io.StreamTokenizer: void wordChars(int,int)>(65, 90);
+
+        $r5 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r5.<java.io.StreamTokenizer: void wordChars(int,int)>(46, 46);
+
+        $r6 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r6.<java.io.StreamTokenizer: void wordChars(int,int)>(48, 57);
+
+        $r7 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r7.<java.io.StreamTokenizer: void wordChars(int,int)>(95, 95);
+
+        $r8 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r8.<java.io.StreamTokenizer: void wordChars(int,int)>(36, 36);
+
+        $r9 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r9.<java.io.StreamTokenizer: void wordChars(int,int)>(160, 255);
+
+        $r10 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r10.<java.io.StreamTokenizer: void whitespaceChars(int,int)>(0, 32);
+
+        $r11 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r11.<java.io.StreamTokenizer: void commentChar(int)>(47);
+
+        $r12 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r12.<java.io.StreamTokenizer: void quoteChar(int)>(39);
+
+        $r13 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r13.<java.io.StreamTokenizer: void quoteChar(int)>(34);
+
+        $r14 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r14.<java.io.StreamTokenizer: void lowerCaseMode(boolean)>(0);
+
+        $r15 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r15.<java.io.StreamTokenizer: void ordinaryChar(int)>(47);
+
+        $r16 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r16.<java.io.StreamTokenizer: void slashSlashComments(boolean)>(1);
+
+        $r17 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r17.<java.io.StreamTokenizer: void slashStarComments(boolean)>(1);
+
+        $r18 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i0 = virtualinvoke $r18.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i0;
+
+        r41 = null;
+
+     label02:
+        $i1 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label09;
+
+        $z1 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("grant");
+
+        if $z1 == 0 goto label03;
+
+        $r38 = specialinvoke r0.<sun.security.provider.PolicyParser: sun.security.provider.PolicyParser$GrantEntry parseGrantEntry()>();
+
+        r41 = $r38;
+
+        if $r38 == null goto label08;
+
+        virtualinvoke r0.<sun.security.provider.PolicyParser: void add(sun.security.provider.PolicyParser$GrantEntry)>($r38);
+
+        goto label08;
+
+     label03:
+        $z2 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("keystore");
+
+        if $z2 == 0 goto label04;
+
+        $r37 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        if $r37 != null goto label04;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: void parseKeyStoreEntry()>();
+
+        goto label08;
+
+     label04:
+        $z3 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("keystorePasswordURL");
+
+        if $z3 == 0 goto label05;
+
+        $r36 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        if $r36 != null goto label05;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: void parseStorePassURL()>();
+
+        goto label08;
+
+     label05:
+        if r41 != null goto label08;
+
+        $r23 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        if $r23 != null goto label08;
+
+        $r24 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        if $r24 != null goto label08;
+
+        $z4 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("domain");
+
+        if $z4 == 0 goto label08;
+
+        $r25 = r0.<sun.security.provider.PolicyParser: java.util.Map domainEntries>;
+
+        if $r25 != null goto label06;
+
+        $r44 = new java.util.TreeMap;
+
+        specialinvoke $r44.<java.util.TreeMap: void <init>()>();
+
+        r0.<sun.security.provider.PolicyParser: java.util.Map domainEntries> = $r44;
+
+     label06:
+        $r26 = specialinvoke r0.<sun.security.provider.PolicyParser: sun.security.provider.PolicyParser$DomainEntry parseDomainEntry()>();
+
+        if $r26 == null goto label08;
+
+        $r27 = virtualinvoke $r26.<sun.security.provider.PolicyParser$DomainEntry: java.lang.String getName()>();
+
+        $r28 = r0.<sun.security.provider.PolicyParser: java.util.Map domainEntries>;
+
+        $z5 = interfaceinvoke $r28.<java.util.Map: boolean containsKey(java.lang.Object)>($r27);
+
+        if $z5 != 0 goto label07;
+
+        $r34 = r0.<sun.security.provider.PolicyParser: java.util.Map domainEntries>;
+
+        interfaceinvoke $r34.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r27, $r26);
+
+        goto label08;
+
+     label07:
+        $r45 = new java.text.MessageFormat;
+
+        $r30 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("duplicate.keystore.domain.name");
+
+        specialinvoke $r45.<java.text.MessageFormat: void <init>(java.lang.String)>($r30);
+
+        $r31 = newarray (java.lang.Object)[1];
+
+        $r31[0] = $r27;
+
+        $r46 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r33 = virtualinvoke $r45.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r31);
+
+        specialinvoke $r46.<sun.security.provider.PolicyParser$ParsingException: void <init>(java.lang.String)>($r33);
+
+        throw $r46;
+
+     label08:
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(";");
+
+        goto label02;
+
+     label09:
+        $r19 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        if $r19 != null goto label10;
+
+        $r20 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        if $r20 == null goto label10;
+
+        $r47 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r22 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("keystorePasswordURL.can.not.be.specified.without.also.specifying.keystore");
+
+        specialinvoke $r47.<sun.security.provider.PolicyParser$ParsingException: void <init>(java.lang.String)>($r22);
+
+        throw $r47;
+
+     label10:
+        return;
+    }
+
+    public void add(sun.security.provider.PolicyParser$GrantEntry)
+    {
+        sun.security.provider.PolicyParser$GrantEntry r1;
+        java.util.Vector $r2;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: sun.security.provider.PolicyParser$GrantEntry;
+
+        $r2 = r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public void replace(sun.security.provider.PolicyParser$GrantEntry, sun.security.provider.PolicyParser$GrantEntry)
+    {
+        java.util.Vector $r3, $r4;
+        sun.security.provider.PolicyParser$GrantEntry r1, r2;
+        int $i0;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r2 := @parameter0: sun.security.provider.PolicyParser$GrantEntry;
+
+        r1 := @parameter1: sun.security.provider.PolicyParser$GrantEntry;
+
+        $r4 = r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries>;
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int indexOf(java.lang.Object)>(r2);
+
+        virtualinvoke $r4.<java.util.Vector: void setElementAt(java.lang.Object,int)>(r1, $i0);
+
+        return;
+    }
+
+    public boolean remove(sun.security.provider.PolicyParser$GrantEntry)
+    {
+        java.util.Vector $r2;
+        sun.security.provider.PolicyParser$GrantEntry r1;
+        sun.security.provider.PolicyParser r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: sun.security.provider.PolicyParser$GrantEntry;
+
+        $r2 = r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries>;
+
+        $z0 = virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        return $z0;
+    }
+
+    public java.lang.String getKeyStoreUrl()
+    {
+        char $c1;
+        sun.security.util.Debug $r7, $r8;
+        int $i0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r9;
+        sun.security.provider.PolicyParser r0;
+        sun.security.util.PropertyExpander$ExpandException $r6;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+     label1:
+        $r1 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        $r4 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String,boolean)>($r3, 1);
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String replace(char,char)>($c1, 47);
+
+     label2:
+        return $r5;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label5;
+
+        $r8 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r9 = virtualinvoke $r6.<sun.security.util.PropertyExpander$ExpandException: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label5:
+        return null;
+
+     label6:
+        return null;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label1 to label2 with label4;
+    }
+
+    public void setKeyStoreUrl(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString> = r1;
+
+        return;
+    }
+
+    public java.lang.String getKeyStoreType()
+    {
+        java.lang.String $r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        $r1 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreType>;
+
+        return $r1;
+    }
+
+    public void setKeyStoreType(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreType> = r1;
+
+        return;
+    }
+
+    public java.lang.String getKeyStoreProvider()
+    {
+        java.lang.String $r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        $r1 = r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider>;
+
+        return $r1;
+    }
+
+    public void setKeyStoreProvider(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider> = r1;
+
+        return;
+    }
+
+    public java.lang.String getStorePassURL()
+    {
+        char $c1;
+        sun.security.util.Debug $r7, $r8;
+        int $i0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r9;
+        sun.security.provider.PolicyParser r0;
+        sun.security.util.PropertyExpander$ExpandException $r6;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+     label1:
+        $r1 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        $r4 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String,boolean)>($r3, 1);
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String replace(char,char)>($c1, 47);
+
+     label2:
+        return $r5;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label5;
+
+        $r8 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r9 = virtualinvoke $r6.<sun.security.util.PropertyExpander$ExpandException: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label5:
+        return null;
+
+     label6:
+        return null;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label1 to label2 with label4;
+    }
+
+    public void setStorePassURL(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL> = r1;
+
+        return;
+    }
+
+    public java.util.Enumeration grantElements()
+    {
+        java.util.Vector $r1;
+        java.util.Enumeration $r2;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        $r1 = r0.<sun.security.provider.PolicyParser: java.util.Vector grantEntries>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        return $r2;
+    }
+
+    public java.util.Collection getDomainEntries()
+    {
+        sun.security.provider.PolicyParser r0;
+        java.util.Map $r1;
+        java.util.Collection $r2;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        $r1 = r0.<sun.security.provider.PolicyParser: java.util.Map domainEntries>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        return $r2;
+    }
+
+    public void write(java.io.Writer)
+    {
+        java.util.Enumeration $r4;
+        java.util.Date $r7;
+        java.lang.String $r10, $r11, $r12;
+        sun.security.provider.PolicyParser r3;
+        boolean $z0;
+        java.io.PrintWriter $r0;
+        java.io.BufferedWriter $r1;
+        sun.security.provider.PolicyParser$GrantEntry r14;
+        java.io.Writer r2;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9;
+        java.lang.Object $r13;
+
+        r3 := @this: sun.security.provider.PolicyParser;
+
+        r2 := @parameter0: java.io.Writer;
+
+        $r0 = new java.io.PrintWriter;
+
+        $r1 = new java.io.BufferedWriter;
+
+        specialinvoke $r1.<java.io.BufferedWriter: void <init>(java.io.Writer)>(r2);
+
+        specialinvoke $r0.<java.io.PrintWriter: void <init>(java.io.Writer)>($r1);
+
+        $r4 = virtualinvoke r3.<sun.security.provider.PolicyParser: java.util.Enumeration grantElements()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/* AUTOMATICALLY GENERATED ON ");
+
+        $r7 = new java.util.Date;
+
+        specialinvoke $r7.<java.util.Date: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*/");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.io.PrintWriter: void println(java.lang.String)>($r10);
+
+        virtualinvoke $r0.<java.io.PrintWriter: void println(java.lang.String)>("/* DO NOT EDIT */");
+
+        virtualinvoke $r0.<java.io.PrintWriter: void println()>();
+
+        $r11 = r3.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        if $r11 == null goto label1;
+
+        specialinvoke r3.<sun.security.provider.PolicyParser: void writeKeyStoreEntry(java.io.PrintWriter)>($r0);
+
+     label1:
+        $r12 = r3.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        if $r12 == null goto label2;
+
+        specialinvoke r3.<sun.security.provider.PolicyParser: void writeStorePassURL(java.io.PrintWriter)>($r0);
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r13 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r14 = (sun.security.provider.PolicyParser$GrantEntry) $r13;
+
+        virtualinvoke r14.<sun.security.provider.PolicyParser$GrantEntry: void write(java.io.PrintWriter)>($r0);
+
+        virtualinvoke $r0.<java.io.PrintWriter: void println()>();
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r0.<java.io.PrintWriter: void flush()>();
+
+        return;
+    }
+
+    private void parseKeyStoreEntry() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        int $i0, $i1;
+        java.io.StreamTokenizer $r3, $r7;
+        java.lang.String $r1, $r4, $r5, $r8, $r9;
+        sun.security.provider.PolicyParser r0;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.provider.PolicyParser$ParsingException $r2, $r6;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("keystore");
+
+        $r1 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString> = $r1;
+
+        $z0 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(",");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(",");
+
+        $z1 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("\"");
+
+        if $z1 == 0 goto label2;
+
+        $r5 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreType> = $r5;
+
+        goto label3;
+
+     label2:
+        $r2 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i0 = virtualinvoke $r3.<java.io.StreamTokenizer: int lineno()>();
+
+        $r4 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.keystore.type");
+
+        specialinvoke $r2.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i0, $r4);
+
+        throw $r2;
+
+     label3:
+        $z2 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(",");
+
+        if $z2 != 0 goto label4;
+
+        return;
+
+     label4:
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(",");
+
+        $z3 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("\"");
+
+        if $z3 == 0 goto label5;
+
+        $r9 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider> = $r9;
+
+        goto label6;
+
+     label5:
+        $r6 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r7 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i1 = virtualinvoke $r7.<java.io.StreamTokenizer: int lineno()>();
+
+        $r8 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.keystore.provider");
+
+        specialinvoke $r6.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i1, $r8);
+
+        throw $r6;
+
+     label6:
+        return;
+    }
+
+    private void parseStorePassURL() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        java.lang.String $r1;
+        sun.security.provider.PolicyParser r0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("keyStorePasswordURL");
+
+        $r1 = specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        r0.<sun.security.provider.PolicyParser: java.lang.String storePassURL> = $r1;
+
+        return;
+    }
+
+    private void writeKeyStoreEntry(java.io.PrintWriter)
+    {
+        java.lang.String $r2, $r3, $r4, $r7, $r10, $r11, $r14, $r17, $r18;
+        sun.security.provider.PolicyParser r1;
+        boolean $z0, $z1;
+        java.io.PrintWriter r0;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9, $r12, $r13, $r15, $r16;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        r0 := @parameter0: java.io.PrintWriter;
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>("keystore \"");
+
+        $r2 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreUrlString>;
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>($r2);
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(char)>(34);
+
+        $r3 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreType>;
+
+        if $r3 == null goto label1;
+
+        $r11 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreType>;
+
+        $z1 = virtualinvoke $r11.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label1;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", \"");
+
+        $r14 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreType>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>($r17);
+
+     label1:
+        $r18 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider>;
+
+        if $r18 == null goto label2;
+
+        $r4 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", \"");
+
+        $r7 = r1.<sun.security.provider.PolicyParser: java.lang.String keyStoreProvider>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>($r10);
+
+     label2:
+        virtualinvoke r0.<java.io.PrintWriter: void println(java.lang.String)>(";");
+
+        virtualinvoke r0.<java.io.PrintWriter: void println()>();
+
+        return;
+    }
+
+    private void writeStorePassURL(java.io.PrintWriter)
+    {
+        java.io.PrintWriter r0;
+        java.lang.String $r2;
+        sun.security.provider.PolicyParser r1;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        r0 := @parameter0: java.io.PrintWriter;
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>("keystorePasswordURL \"");
+
+        $r2 = r1.<sun.security.provider.PolicyParser: java.lang.String storePassURL>;
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(java.lang.String)>($r2);
+
+        virtualinvoke r0.<java.io.PrintWriter: void print(char)>(34);
+
+        virtualinvoke r0.<java.io.PrintWriter: void println(java.lang.String)>(";");
+
+        virtualinvoke r0.<java.io.PrintWriter: void println()>();
+
+        return;
+    }
+
+    private sun.security.provider.PolicyParser$GrantEntry parseGrantEntry() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        sun.security.util.Debug $r10, $r12, $r32, $r36, $r56, $r57, $r60, $r61, $r64, $r66;
+        java.lang.StringBuilder $r11, $r13, $r15, $r65, $r67, $r68;
+        java.util.StringTokenizer $r40;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r9, $r14, $r16, $r17, $r18, $r19, $r20, $r21, $r24, $r28, $r31, $r35, $r38, $r39, $r41, $r44, $r45, $r46, $r49, $r50, $r51, $r54, $r58, $r62, $r69, r71, r72, $r73;
+        sun.security.provider.PolicyParser$GrantEntry $r0, r75, $r76;
+        sun.security.util.PropertyExpander$ExpandException $r55, $r59, $r63;
+        java.io.StreamTokenizer $r23, $r27, $r34, $r43, $r48, $r53;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, z14, $z15, $z16, $z17;
+        sun.security.provider.PolicyParser$PermissionEntry $r25;
+        sun.security.provider.PolicyParser$ParsingException $r22, $r26, $r33, $r42, $r47, $r52;
+        javax.security.auth.x500.X500Principal $r29, $r30;
+        java.lang.String[] $r7;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12;
+        java.util.LinkedList $r37, r70;
+        sun.security.provider.PolicyParser r1;
+        sun.security.provider.PolicyParser$PrincipalEntry $r74;
+        char $c3;
+        java.lang.Object $r8;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        $r0 = new sun.security.provider.PolicyParser$GrantEntry;
+
+        specialinvoke $r0.<sun.security.provider.PolicyParser$GrantEntry: void <init>()>();
+
+        r70 = null;
+
+        z14 = 0;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("grant");
+
+     label01:
+        $z15 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("{");
+
+        if $z15 != 0 goto label25;
+
+        $z2 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>("Codebase");
+
+        if $z2 == 0 goto label03;
+
+        $r50 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        if $r50 == null goto label02;
+
+        $r52 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r53 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i9 = virtualinvoke $r53.<java.io.StreamTokenizer: int lineno()>();
+
+        $r54 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("multiple.Codebase.expressions");
+
+        specialinvoke $r52.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i9, $r54);
+
+        throw $r52;
+
+     label02:
+        $r51 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase> = $r51;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>(",");
+
+        goto label01;
+
+     label03:
+        $z3 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>("SignedBy");
+
+        if $z3 == 0 goto label10;
+
+        $r38 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        if $r38 == null goto label04;
+
+        $r47 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r48 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i8 = virtualinvoke $r48.<java.io.StreamTokenizer: int lineno()>();
+
+        $r49 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("multiple.SignedBy.expressions");
+
+        specialinvoke $r47.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i8, $r49);
+
+        throw $r47;
+
+     label04:
+        $r39 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy> = $r39;
+
+        $r40 = new java.util.StringTokenizer;
+
+        $r41 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        specialinvoke $r40.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>($r41, ",", 1);
+
+        i10 = 0;
+
+        i11 = 0;
+
+     label05:
+        $z11 = virtualinvoke $r40.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z11 == 0 goto label08;
+
+        $r45 = virtualinvoke $r40.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.String: java.lang.String trim()>();
+
+        $z12 = virtualinvoke $r46.<java.lang.String: boolean equals(java.lang.Object)>(",");
+
+        if $z12 == 0 goto label06;
+
+        i11 = i11 + 1;
+
+        goto label07;
+
+     label06:
+        $z13 = virtualinvoke $r46.<java.lang.String: boolean isEmpty()>();
+
+        if $z13 != 0 goto label07;
+
+        i10 = i10 + 1;
+
+     label07:
+        goto label05;
+
+     label08:
+        if i10 > i11 goto label09;
+
+        $r42 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r43 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i7 = virtualinvoke $r43.<java.io.StreamTokenizer: int lineno()>();
+
+        $r44 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("SignedBy.has.empty.alias");
+
+        specialinvoke $r42.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i7, $r44);
+
+        throw $r42;
+
+     label09:
+        specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>(",");
+
+        goto label01;
+
+     label10:
+        $z4 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>("Principal");
+
+        if $z4 == 0 goto label24;
+
+        if r70 != null goto label11;
+
+        $r37 = new java.util.LinkedList;
+
+        specialinvoke $r37.<java.util.LinkedList: void <init>()>();
+
+        r70 = $r37;
+
+     label11:
+        $z5 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("\"");
+
+        if $z5 == 0 goto label12;
+
+        r71 = "PolicyParser.REPLACE_NAME";
+
+        r72 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("principal type");
+
+        goto label18;
+
+     label12:
+        $z6 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("*");
+
+        if $z6 == 0 goto label13;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("*");
+
+        r71 = "WILDCARD_PRINCIPAL_CLASS";
+
+        goto label14;
+
+     label13:
+        r71 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("principal type");
+
+     label14:
+        $z7 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("*");
+
+        if $z7 == 0 goto label15;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("*");
+
+        r72 = "WILDCARD_PRINCIPAL_NAME";
+
+        goto label16;
+
+     label15:
+        r72 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+     label16:
+        $z8 = virtualinvoke r71.<java.lang.String: boolean equals(java.lang.Object)>("WILDCARD_PRINCIPAL_CLASS");
+
+        if $z8 == 0 goto label18;
+
+        $z10 = virtualinvoke r72.<java.lang.String: boolean equals(java.lang.Object)>("WILDCARD_PRINCIPAL_NAME");
+
+        if $z10 != 0 goto label18;
+
+        $r32 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r32 == null goto label17;
+
+        $r36 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        virtualinvoke $r36.<sun.security.util.Debug: void println(java.lang.String)>("disallowing principal that has WILDCARD class but no WILDCARD name");
+
+     label17:
+        $r33 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r34 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i6 = virtualinvoke $r34.<java.io.StreamTokenizer: int lineno()>();
+
+        $r35 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("can.not.specify.Principal.with.a.wildcard.class.without.a.wildcard.name");
+
+        specialinvoke $r33.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i6, $r35);
+
+        throw $r33;
+
+     label18:
+        $r73 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>(r72);
+
+        r72 = $r73;
+
+        $z16 = virtualinvoke r71.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.auth.x500.X500Principal");
+
+        if $z16 == 0 goto label19;
+
+        $z9 = virtualinvoke $r73.<java.lang.String: boolean equals(java.lang.Object)>("WILDCARD_PRINCIPAL_NAME");
+
+        if $z9 != 0 goto label19;
+
+        $r29 = new javax.security.auth.x500.X500Principal;
+
+        $r30 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r30.<javax.security.auth.x500.X500Principal: void <init>(java.lang.String)>($r73);
+
+        $r31 = virtualinvoke $r30.<javax.security.auth.x500.X500Principal: java.lang.String toString()>();
+
+        specialinvoke $r29.<javax.security.auth.x500.X500Principal: void <init>(java.lang.String)>($r31);
+
+        r72 = virtualinvoke $r29.<javax.security.auth.x500.X500Principal: java.lang.String getName()>();
+
+     label19:
+        $r74 = new sun.security.provider.PolicyParser$PrincipalEntry;
+
+        specialinvoke $r74.<sun.security.provider.PolicyParser$PrincipalEntry: void <init>(java.lang.String,java.lang.String)>(r71, r72);
+
+        virtualinvoke r70.<java.util.LinkedList: boolean add(java.lang.Object)>($r74);
+
+     label20:
+        goto label23;
+
+     label21:
+        $r63 := @caughtexception;
+
+        $r64 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r64 == null goto label22;
+
+        $r66 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r67 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("principal name expansion failed: ");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r72);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r66.<sun.security.util.Debug: void println(java.lang.String)>($r69);
+
+     label22:
+        z14 = 1;
+
+     label23:
+        specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>(",");
+
+        goto label01;
+
+     label24:
+        $r26 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r27 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i5 = virtualinvoke $r27.<java.io.StreamTokenizer: int lineno()>();
+
+        $r28 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.codeBase.or.SignedBy.or.Principal");
+
+        specialinvoke $r26.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i5, $r28);
+
+        throw $r26;
+
+     label25:
+        if r70 == null goto label26;
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.util.LinkedList principals> = r70;
+
+     label26:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("{");
+
+     label27:
+        $z17 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("}");
+
+        if $z17 != 0 goto label34;
+
+        $z1 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("Permission");
+
+        if $z1 == 0 goto label33;
+
+     label28:
+        $r25 = specialinvoke r1.<sun.security.provider.PolicyParser: sun.security.provider.PolicyParser$PermissionEntry parsePermissionEntry()>();
+
+        virtualinvoke $r0.<sun.security.provider.PolicyParser$GrantEntry: void add(sun.security.provider.PolicyParser$PermissionEntry)>($r25);
+
+     label29:
+        goto label32;
+
+     label30:
+        $r59 := @caughtexception;
+
+        $r60 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r60 == null goto label31;
+
+        $r61 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r62 = virtualinvoke $r59.<sun.security.util.PropertyExpander$ExpandException: java.lang.String toString()>();
+
+        virtualinvoke $r61.<sun.security.util.Debug: void println(java.lang.String)>($r62);
+
+     label31:
+        specialinvoke r1.<sun.security.provider.PolicyParser: void skipEntry()>();
+
+     label32:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(";");
+
+        goto label27;
+
+     label33:
+        $r22 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r23 = r1.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i4 = virtualinvoke $r23.<java.io.StreamTokenizer: int lineno()>();
+
+        $r24 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.permission.entry");
+
+        specialinvoke $r22.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String)>($i4, $r24);
+
+        throw $r22;
+
+     label34:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("}");
+
+     label35:
+        $r2 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        if $r2 == null goto label36;
+
+        $r20 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        $r21 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>($r20);
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy> = $r21;
+
+     label36:
+        $r3 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        if $r3 == null goto label42;
+
+        $r4 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("${java.ext.dirs}");
+
+        if $z0 == 0 goto label37;
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase> = "${{java.ext.dirs}}";
+
+     label37:
+        $r5 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int indexOf(java.lang.String)>("${{java.ext.dirs}}");
+
+        if $i0 >= 0 goto label38;
+
+        $r17 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        $r18 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String,boolean)>($r17, 1);
+
+        $c3 = <java.io.File: char separatorChar>;
+
+        $r19 = virtualinvoke $r18.<java.lang.String: java.lang.String replace(char,char)>($c3, 47);
+
+        $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase> = $r19;
+
+        goto label42;
+
+     label38:
+        $r6 = $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        $r7 = staticinvoke <sun.security.provider.PolicyParser: java.lang.String[] parseExtDirs(java.lang.String,int)>($r6, $i0);
+
+        if $r7 == null goto label41;
+
+        $i1 = lengthof $r7;
+
+        if $i1 <= 0 goto label41;
+
+        i12 = 0;
+
+     label39:
+        $i2 = lengthof $r7;
+
+        if i12 >= $i2 goto label41;
+
+        $r8 = virtualinvoke $r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.Object clone()>();
+
+        r75 = (sun.security.provider.PolicyParser$GrantEntry) $r8;
+
+        $r9 = $r7[i12];
+
+        r75.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase> = $r9;
+
+        virtualinvoke r1.<sun.security.provider.PolicyParser: void add(sun.security.provider.PolicyParser$GrantEntry)>(r75);
+
+        $r10 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label40;
+
+        $r12 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("creating policy entry for expanded java.ext.dirs path:\n\t\t");
+
+        $r14 = $r7[i12];
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>($r16);
+
+     label40:
+        i12 = i12 + 1;
+
+        goto label39;
+
+     label41:
+        z14 = 1;
+
+     label42:
+        goto label45;
+
+     label43:
+        $r55 := @caughtexception;
+
+        $r56 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        if $r56 == null goto label44;
+
+        $r57 = <sun.security.provider.PolicyParser: sun.security.util.Debug debug>;
+
+        $r58 = virtualinvoke $r55.<sun.security.util.PropertyExpander$ExpandException: java.lang.String toString()>();
+
+        virtualinvoke $r57.<sun.security.util.Debug: void println(java.lang.String)>($r58);
+
+     label44:
+        return null;
+
+     label45:
+        if z14 != 1 goto label46;
+
+        $r76 = null;
+
+        goto label47;
+
+     label46:
+        $r76 = $r0;
+
+     label47:
+        return $r76;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label18 to label20 with label21;
+        catch sun.security.util.PropertyExpander$ExpandException from label28 to label29 with label30;
+        catch sun.security.util.PropertyExpander$ExpandException from label35 to label42 with label43;
+    }
+
+    private sun.security.provider.PolicyParser$PermissionEntry parsePermissionEntry() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException, sun.security.util.PropertyExpander$ExpandException
+    {
+        sun.security.provider.PolicyParser$PermissionEntry $r0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        sun.security.provider.PolicyParser r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        $r0 = new sun.security.provider.PolicyParser$PermissionEntry;
+
+        specialinvoke $r0.<sun.security.provider.PolicyParser$PermissionEntry: void <init>()>();
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("Permission");
+
+        $r2 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("permission type");
+
+        $r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission> = $r2;
+
+        $z0 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("\"");
+
+        if $z0 == 0 goto label1;
+
+        $r7 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r8 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>($r7);
+
+        $r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name> = $r8;
+
+     label1:
+        $z1 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(",");
+
+        if $z1 != 0 goto label2;
+
+        return $r0;
+
+     label2:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(",");
+
+        $z2 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("\"");
+
+        if $z2 == 0 goto label4;
+
+        $r5 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r6 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>($r5);
+
+        $r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String action> = $r6;
+
+        $z4 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(",");
+
+        if $z4 != 0 goto label3;
+
+        return $r0;
+
+     label3:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(",");
+
+     label4:
+        $z3 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peekAndMatch(java.lang.String)>("SignedBy");
+
+        if $z3 == 0 goto label5;
+
+        $r3 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r4 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>($r3);
+
+        $r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy> = $r4;
+
+     label5:
+        return $r0;
+    }
+
+    private sun.security.provider.PolicyParser$DomainEntry parseDomainEntry() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        sun.security.provider.PolicyParser$KeyStoreEntry $r5;
+        java.util.HashMap $r0;
+        sun.security.provider.PolicyParser$DomainEntry $r3, $r7;
+        java.util.Map r6;
+        java.lang.String $r2, $r4;
+        sun.security.provider.PolicyParser r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        r6 = $r0;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("domain");
+
+        $r2 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("domain name");
+
+     label1:
+        $z0 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("{");
+
+        if $z0 != 0 goto label2;
+
+        r6 = specialinvoke r1.<sun.security.provider.PolicyParser: java.util.Map parseProperties(java.lang.String)>("{");
+
+        goto label1;
+
+     label2:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("{");
+
+        $r3 = new sun.security.provider.PolicyParser$DomainEntry;
+
+        specialinvoke $r3.<sun.security.provider.PolicyParser$DomainEntry: void <init>(java.lang.String,java.util.Map)>($r2, r6);
+
+     label3:
+        $z1 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("}");
+
+        if $z1 != 0 goto label5;
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("keystore");
+
+        $r4 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("keystore name");
+
+        $z2 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>("}");
+
+        if $z2 != 0 goto label4;
+
+        r6 = specialinvoke r1.<sun.security.provider.PolicyParser: java.util.Map parseProperties(java.lang.String)>(";");
+
+     label4:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(";");
+
+        $r5 = new sun.security.provider.PolicyParser$KeyStoreEntry;
+
+        specialinvoke $r5.<sun.security.provider.PolicyParser$KeyStoreEntry: void <init>(java.lang.String,java.util.Map)>($r4, r6);
+
+        virtualinvoke $r3.<sun.security.provider.PolicyParser$DomainEntry: void add(sun.security.provider.PolicyParser$KeyStoreEntry)>($r5);
+
+        goto label3;
+
+     label5:
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("}");
+
+        goto label6;
+
+     label6:
+        $r7 = $r3;
+
+        return $r7;
+    }
+
+    private java.util.Map parseProperties(java.lang.String) throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        java.util.HashMap $r0;
+        java.io.IOException $r9;
+        java.util.Locale $r6;
+        java.lang.String r2, $r3, $r4, $r5, $r7, $r10;
+        sun.security.provider.PolicyParser r1;
+        boolean $z0;
+        sun.security.util.PropertyExpander$ExpandException $r8;
+
+        r1 := @this: sun.security.provider.PolicyParser;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+     label1:
+        $z0 = specialinvoke r1.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(r2);
+
+        if $z0 != 0 goto label6;
+
+        $r3 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("property name");
+
+        specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("=");
+
+     label2:
+        $r4 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>("quoted string");
+
+        $r5 = specialinvoke r1.<sun.security.provider.PolicyParser: java.lang.String expand(java.lang.String)>($r4);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = virtualinvoke $r8.<sun.security.util.PropertyExpander$ExpandException: java.lang.String getLocalizedMessage()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>($r10);
+
+        throw $r9;
+
+     label5:
+        $r6 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r6);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, $r5);
+
+        goto label1;
+
+     label6:
+        return $r0;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label2 to label3 with label4;
+    }
+
+    static java.lang.String[] parseExtDirs(java.lang.String, int)
+    {
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r13, $r14, $r16, $r22, $r23, $r25, $r26;
+        java.lang.String[] r20;
+        java.util.StringTokenizer $r5;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r0, r1, $r2, r3, r4, $r6, $r8, $r9, $r10, $r11, $r12, $r15, $r17, $r18, $r19, $r21, $r24, $r27;
+        java.io.File $r7;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.ext.dirs");
+
+        if i0 <= 0 goto label01;
+
+        $r18 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int,int)>(0, i0);
+
+        goto label02;
+
+     label01:
+        $r18 = "file:";
+
+     label02:
+        r1 = $r18;
+
+        $r2 = "${{java.ext.dirs}}";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i4 = i0 + $i1;
+
+        $i2 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        if $i4 >= $i2 goto label03;
+
+        $r19 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>($i4);
+
+        goto label04;
+
+     label03:
+        $r19 = (java.lang.String) null;
+
+     label04:
+        r4 = $r19;
+
+        r20 = null;
+
+        if $r0 == null goto label10;
+
+        $r5 = new java.util.StringTokenizer;
+
+        $r6 = <java.io.File: java.lang.String pathSeparator>;
+
+        specialinvoke $r5.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r0, $r6);
+
+        $i3 = virtualinvoke $r5.<java.util.StringTokenizer: int countTokens()>();
+
+        r20 = newarray (java.lang.String)[$i3];
+
+        i5 = 0;
+
+     label05:
+        if i5 >= $i3 goto label10;
+
+        $r7 = new java.io.File;
+
+        $r8 = virtualinvoke $r5.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        specialinvoke $r7.<java.io.File: void <init>(java.lang.String)>($r8);
+
+        $r9 = virtualinvoke $r7.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r10 = staticinvoke <sun.net.www.ParseUtil: java.lang.String encodePath(java.lang.String)>($r9);
+
+        r20[i5] = $r10;
+
+        $r11 = r20[i5];
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label06;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r15 = r20[i5];
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r20[i5] = $r17;
+
+     label06:
+        if r4 != null goto label08;
+
+        $r12 = r20[i5];
+
+        $z1 = virtualinvoke $r12.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z1 == 0 goto label07;
+
+        $r21 = "*";
+
+        goto label09;
+
+     label07:
+        $r21 = "/*";
+
+        goto label09;
+
+     label08:
+        $r21 = r4;
+
+     label09:
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r24 = r20[i5];
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r20[i5] = $r27;
+
+        i5 = i5 + 1;
+
+        goto label05;
+
+     label10:
+        return r20;
+    }
+
+    private boolean peekAndMatch(java.lang.String) throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        java.lang.String r1;
+        sun.security.provider.PolicyParser r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<sun.security.provider.PolicyParser: boolean peek(java.lang.String)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.security.provider.PolicyParser: java.lang.String match(java.lang.String)>(r1);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean peek(java.lang.String)
+    {
+        int $i0;
+        java.io.StreamTokenizer $r2;
+        java.lang.String r1, $r3;
+        sun.security.provider.PolicyParser r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        z7 = 0;
+
+        $i0 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        lookupswitch($i0)
+        {
+            case -3: goto label1;
+            case 34: goto label5;
+            case 42: goto label6;
+            case 44: goto label2;
+            case 59: goto label7;
+            case 123: goto label3;
+            case 125: goto label4;
+            default: goto label8;
+        };
+
+     label1:
+        $r2 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $r3 = $r2.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        if $z6 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label2:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(",");
+
+        if $z3 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label3:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("{");
+
+        if $z1 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label4:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("}");
+
+        if $z0 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label5:
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("\"");
+
+        if $z5 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label6:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("*");
+
+        if $z4 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label7:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(";");
+
+        if $z2 == 0 goto label8;
+
+        z7 = 1;
+
+        goto label8;
+
+     label8:
+        return z7;
+    }
+
+    private java.lang.String match(java.lang.String) throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        java.lang.StringBuilder $r37, $r39, $r42;
+        java.lang.Object[] $r32;
+        java.lang.String r1, $r23, $r31, $r34, $r38, $r41, $r43, $r45, $r49, $r57, r59;
+        char[] $r58;
+        java.io.StreamTokenizer $r3, $r4, $r6, $r7, $r9, $r10, $r12, $r13, $r15, $r16, $r18, $r19, $r21, $r22, $r24, $r25, $r26, $r27, $r28, $r29, $r36, $r40, $r44, $r47, $r48, $r50, $r51, $r52, $r53, $r54, $r56, $r60, $r61;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        sun.security.provider.PolicyParser$ParsingException $r2, $r5, $r8, $r11, $r14, $r17, $r20, $r33, $r35, $r46, $r55;
+        java.text.MessageFormat $r30;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i25;
+        sun.security.provider.PolicyParser r0;
+        double $d0;
+        char $c24;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r59 = null;
+
+        $i0 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        lookupswitch($i0)
+        {
+            case -3: goto label03;
+            case -2: goto label01;
+            case -1: goto label02;
+            case 34: goto label09;
+            case 42: goto label21;
+            case 44: goto label13;
+            case 59: goto label19;
+            case 61: goto label23;
+            case 123: goto label15;
+            case 125: goto label17;
+            default: goto label25;
+        };
+
+     label01:
+        $r35 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r36 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i17 = virtualinvoke $r36.<java.io.StreamTokenizer: int lineno()>();
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("number.");
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $d0 = $r40.<java.io.StreamTokenizer: double nval>;
+
+        $r41 = staticinvoke <java.lang.String: java.lang.String valueOf(double)>($d0);
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r35.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i17, r1, $r43);
+
+        throw $r35;
+
+     label02:
+        $r30 = new java.text.MessageFormat;
+
+        $r31 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.expect.read.end.of.file.");
+
+        specialinvoke $r30.<java.text.MessageFormat: void <init>(java.lang.String)>($r31);
+
+        $r32 = newarray (java.lang.Object)[1];
+
+        $r32[0] = r1;
+
+        $r33 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r34 = virtualinvoke $r30.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r32);
+
+        specialinvoke $r33.<sun.security.provider.PolicyParser$ParsingException: void <init>(java.lang.String)>($r34);
+
+        throw $r33;
+
+     label03:
+        $r44 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $r45 = $r44.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $z9 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r45);
+
+        if $z9 == 0 goto label04;
+
+        $r54 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i21 = virtualinvoke $r54.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i21;
+
+        goto label26;
+
+     label04:
+        $z10 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("permission type");
+
+        if $z10 == 0 goto label05;
+
+        $r52 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r52.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r53 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i20 = virtualinvoke $r53.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i20;
+
+        goto label26;
+
+     label05:
+        $z11 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("principal type");
+
+        if $z11 == 0 goto label06;
+
+        $r50 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r50.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r51 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i19 = virtualinvoke $r51.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i19;
+
+        goto label26;
+
+     label06:
+        $z12 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("domain name");
+
+        if $z12 != 0 goto label07;
+
+        $z13 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("keystore name");
+
+        if $z13 != 0 goto label07;
+
+        $z14 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("property name");
+
+        if $z14 == 0 goto label08;
+
+     label07:
+        $r60 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r60.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r61 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i25 = virtualinvoke $r61.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i25;
+
+        goto label26;
+
+     label08:
+        $r46 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r47 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i18 = virtualinvoke $r47.<java.io.StreamTokenizer: int lineno()>();
+
+        $r48 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $r49 = $r48.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        specialinvoke $r46.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i18, r1, $r49);
+
+        throw $r46;
+
+     label09:
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("quoted string");
+
+        if $z6 == 0 goto label10;
+
+        $r28 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r28.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r29 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i16 = virtualinvoke $r29.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i16;
+
+        goto label26;
+
+     label10:
+        $z7 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("permission type");
+
+        if $z7 == 0 goto label11;
+
+        $r26 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r26.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r27 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i15 = virtualinvoke $r27.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i15;
+
+        goto label26;
+
+     label11:
+        $z8 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("principal type");
+
+        if $z8 == 0 goto label12;
+
+        $r24 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        r59 = $r24.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r25 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i14 = virtualinvoke $r25.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i14;
+
+        goto label26;
+
+     label12:
+        $r20 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r21 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i13 = virtualinvoke $r21.<java.io.StreamTokenizer: int lineno()>();
+
+        $r22 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $r23 = $r22.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        specialinvoke $r20.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i13, r1, $r23);
+
+        throw $r20;
+
+     label13:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(",");
+
+        if $z4 == 0 goto label14;
+
+        $r16 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i10 = virtualinvoke $r16.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i10;
+
+        goto label26;
+
+     label14:
+        $r14 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r15 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i9 = virtualinvoke $r15.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r14.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i9, r1, ",");
+
+        throw $r14;
+
+     label15:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("{");
+
+        if $z1 == 0 goto label16;
+
+        $r7 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i4 = virtualinvoke $r7.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i4;
+
+        goto label26;
+
+     label16:
+        $r5 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r6 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i3 = virtualinvoke $r6.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r5.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i3, r1, "{");
+
+        throw $r5;
+
+     label17:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("}");
+
+        if $z0 == 0 goto label18;
+
+        $r4 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i2 = virtualinvoke $r4.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i2;
+
+        goto label26;
+
+     label18:
+        $r2 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r3 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i1 = virtualinvoke $r3.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r2.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i1, r1, "}");
+
+        throw $r2;
+
+     label19:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(";");
+
+        if $z3 == 0 goto label20;
+
+        $r13 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i8 = virtualinvoke $r13.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i8;
+
+        goto label26;
+
+     label20:
+        $r11 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r12 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i7 = virtualinvoke $r12.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r11.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i7, r1, ";");
+
+        throw $r11;
+
+     label21:
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("*");
+
+        if $z5 == 0 goto label22;
+
+        $r19 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i12 = virtualinvoke $r19.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i12;
+
+        goto label26;
+
+     label22:
+        $r17 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r18 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i11 = virtualinvoke $r18.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r17.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i11, r1, "*");
+
+        throw $r17;
+
+     label23:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("=");
+
+        if $z2 == 0 goto label24;
+
+        $r10 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i6 = virtualinvoke $r10.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i6;
+
+        goto label26;
+
+     label24:
+        $r8 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r9 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i5 = virtualinvoke $r9.<java.io.StreamTokenizer: int lineno()>();
+
+        specialinvoke $r8.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i5, r1, "=");
+
+        throw $r8;
+
+     label25:
+        $r55 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r56 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i22 = virtualinvoke $r56.<java.io.StreamTokenizer: int lineno()>();
+
+        $r57 = new java.lang.String;
+
+        $r58 = newarray (char)[1];
+
+        $i23 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        $c24 = (char) $i23;
+
+        $r58[0] = $c24;
+
+        specialinvoke $r57.<java.lang.String: void <init>(char[])>($r58);
+
+        specialinvoke $r55.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i22, r1, $r57);
+
+        throw $r55;
+
+     label26:
+        return r59;
+    }
+
+    private void skipEntry() throws sun.security.provider.PolicyParser$ParsingException, java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3;
+        java.io.StreamTokenizer $r4, $r8, $r12;
+        java.lang.String $r2, $r6, $r9, $r11;
+        sun.security.provider.PolicyParser r0;
+        double $d0;
+        sun.security.provider.PolicyParser$ParsingException $r1, $r3;
+        java.lang.StringBuilder $r5, $r7, $r10;
+
+        r0 := @this: sun.security.provider.PolicyParser;
+
+     label1:
+        $i0 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        if $i0 == 59 goto label5;
+
+        $i1 = r0.<sun.security.provider.PolicyParser: int lookahead>;
+
+        lookupswitch($i1)
+        {
+            case -2: goto label2;
+            case -1: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        $r3 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r4 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i2 = virtualinvoke $r4.<java.io.StreamTokenizer: int lineno()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("number.");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $d0 = $r8.<java.io.StreamTokenizer: double nval>;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String valueOf(double)>($d0);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<sun.security.provider.PolicyParser$ParsingException: void <init>(int,java.lang.String,java.lang.String)>($i2, ";", $r11);
+
+        throw $r3;
+
+     label3:
+        $r1 = new sun.security.provider.PolicyParser$ParsingException;
+
+        $r2 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("expected.read.end.of.file.");
+
+        specialinvoke $r1.<sun.security.provider.PolicyParser$ParsingException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label4:
+        $r12 = r0.<sun.security.provider.PolicyParser: java.io.StreamTokenizer st>;
+
+        $i3 = virtualinvoke $r12.<java.io.StreamTokenizer: int nextToken()>();
+
+        r0.<sun.security.provider.PolicyParser: int lookahead> = $i3;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public static void main(java.lang.String[]) throws java.lang.Exception
+    {
+        java.lang.Throwable $r6, $r7, $r8, $r10, $r11, $r12, r14, r15;
+        java.io.FileWriter $r3;
+        java.lang.String[] r1;
+        java.io.FileReader $r0;
+        java.lang.String $r2, $r4;
+        sun.security.provider.PolicyParser $r5;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r0 = new java.io.FileReader;
+
+        $r2 = r1[0];
+
+        specialinvoke $r0.<java.io.FileReader: void <init>(java.lang.String)>($r2);
+
+        r14 = null;
+
+     label01:
+        $r3 = new java.io.FileWriter;
+
+        $r4 = r1[1];
+
+        specialinvoke $r3.<java.io.FileWriter: void <init>(java.lang.String)>($r4);
+
+        r15 = null;
+
+     label02:
+        $r5 = new sun.security.provider.PolicyParser;
+
+        specialinvoke $r5.<sun.security.provider.PolicyParser: void <init>(boolean)>(1);
+
+        virtualinvoke $r5.<sun.security.provider.PolicyParser: void read(java.io.Reader)>($r0);
+
+        virtualinvoke $r5.<sun.security.provider.PolicyParser: void write(java.io.Writer)>($r3);
+
+     label03:
+        if $r3 == null goto label13;
+
+        goto label04;
+
+     label04:
+        virtualinvoke $r3.<java.io.FileWriter: void close()>();
+
+        goto label13;
+
+     label05:
+        $r12 := @caughtexception;
+
+        r15 = $r12;
+
+        throw $r12;
+
+     label06:
+        $r11 := @caughtexception;
+
+     label07:
+        if $r3 == null goto label12;
+
+        if r15 == null goto label11;
+
+     label08:
+        virtualinvoke $r3.<java.io.FileWriter: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r10 := @caughtexception;
+
+        virtualinvoke r15.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r10);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r3.<java.io.FileWriter: void close()>();
+
+     label12:
+        throw $r11;
+
+     label13:
+        if $r0 == null goto label23;
+
+        goto label14;
+
+     label14:
+        virtualinvoke $r0.<java.io.FileReader: void close()>();
+
+        goto label23;
+
+     label15:
+        $r8 := @caughtexception;
+
+        r14 = $r8;
+
+        throw $r8;
+
+     label16:
+        $r7 := @caughtexception;
+
+     label17:
+        if $r0 == null goto label22;
+
+        if r14 == null goto label21;
+
+     label18:
+        virtualinvoke $r0.<java.io.FileReader: void close()>();
+
+     label19:
+        goto label22;
+
+     label20:
+        $r6 := @caughtexception;
+
+        virtualinvoke r14.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r6);
+
+        goto label22;
+
+     label21:
+        virtualinvoke $r0.<java.io.FileReader: void close()>();
+
+     label22:
+        throw $r7;
+
+     label23:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label01 to label13 with label15;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label15 to label17 with label16;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.PolicyParser: java.lang.String EXTDIRS_EXPANSION> = "${{java.ext.dirs}}";
+
+        <sun.security.provider.PolicyParser: java.lang.String OLD_EXTDIRS_EXPANSION> = "${java.ext.dirs}";
+
+        <sun.security.provider.PolicyParser: java.lang.String EXTDIRS_PROPERTY> = "java.ext.dirs";
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("parser", "\t[Policy Parser]");
+
+        <sun.security.provider.PolicyParser: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

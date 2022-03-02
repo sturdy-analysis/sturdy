@@ -1,0 +1,226 @@
+class sun.net.ftp.impl.FtpClient$MLSxParser extends java.lang.Object implements sun.net.ftp.FtpDirParser
+{
+    private java.text.SimpleDateFormat df;
+    final sun.net.ftp.impl.FtpClient this$0;
+
+    private void <init>(sun.net.ftp.impl.FtpClient)
+    {
+        sun.net.ftp.impl.FtpClient$MLSxParser r0;
+        java.text.SimpleDateFormat $r2;
+        sun.net.ftp.impl.FtpClient r1;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$MLSxParser;
+
+        r1 := @parameter0: sun.net.ftp.impl.FtpClient;
+
+        r0.<sun.net.ftp.impl.FtpClient$MLSxParser: sun.net.ftp.impl.FtpClient this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new java.text.SimpleDateFormat;
+
+        specialinvoke $r2.<java.text.SimpleDateFormat: void <init>(java.lang.String)>("yyyyMMddhhmmss");
+
+        r0.<sun.net.ftp.impl.FtpClient$MLSxParser: java.text.SimpleDateFormat df> = $r2;
+
+        return;
+    }
+
+    public sun.net.ftp.FtpDirEntry parseLine(java.lang.String)
+    {
+        java.util.Date r19, r21;
+        sun.net.ftp.FtpDirEntry $r0;
+        java.text.ParseException $r13, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.net.ftp.FtpDirEntry$Type $r3, $r4, $r5, $r6;
+        java.text.SimpleDateFormat $r8, $r9;
+        long $l1;
+        int $i0, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r1, $r2, $r10, $r11, $r12, r15, r16, r17, r18, $r20, $r22;
+        sun.net.ftp.impl.FtpClient$MLSxParser r7;
+
+        r7 := @this: sun.net.ftp.impl.FtpClient$MLSxParser;
+
+        r15 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r15.<java.lang.String: int lastIndexOf(java.lang.String)>(";");
+
+        if $i0 <= 0 goto label01;
+
+        $i6 = $i0 + 1;
+
+        $r12 = virtualinvoke r15.<java.lang.String: java.lang.String substring(int)>($i6);
+
+        r16 = virtualinvoke $r12.<java.lang.String: java.lang.String trim()>();
+
+        r17 = virtualinvoke r15.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label02;
+
+     label01:
+        r16 = virtualinvoke r15.<java.lang.String: java.lang.String trim()>();
+
+        r17 = "";
+
+     label02:
+        $r0 = new sun.net.ftp.FtpDirEntry;
+
+        specialinvoke $r0.<sun.net.ftp.FtpDirEntry: void <init>(java.lang.String)>(r16);
+
+     label03:
+        $z4 = virtualinvoke r17.<java.lang.String: boolean isEmpty()>();
+
+        if $z4 != 0 goto label07;
+
+        $i2 = virtualinvoke r17.<java.lang.String: int indexOf(java.lang.String)>(";");
+
+        if $i2 <= 0 goto label04;
+
+        r18 = virtualinvoke r17.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $i5 = $i2 + 1;
+
+        r17 = virtualinvoke r17.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        goto label05;
+
+     label04:
+        r18 = r17;
+
+        r17 = "";
+
+     label05:
+        $i3 = virtualinvoke r18.<java.lang.String: int indexOf(java.lang.String)>("=");
+
+        if $i3 <= 0 goto label06;
+
+        $r10 = virtualinvoke r18.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        $i4 = $i3 + 1;
+
+        $r11 = virtualinvoke r18.<java.lang.String: java.lang.String substring(int)>($i4);
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry addFact(java.lang.String,java.lang.String)>($r10, $r11);
+
+     label06:
+        goto label03;
+
+     label07:
+        $r1 = virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: java.lang.String getFact(java.lang.String)>("Size");
+
+        if $r1 == null goto label08;
+
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setSize(long)>($l1);
+
+     label08:
+        $r2 = virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: java.lang.String getFact(java.lang.String)>("Modify");
+
+        if $r2 == null goto label13;
+
+        r19 = null;
+
+     label09:
+        $r9 = r7.<sun.net.ftp.impl.FtpClient$MLSxParser: java.text.SimpleDateFormat df>;
+
+        r19 = virtualinvoke $r9.<java.text.SimpleDateFormat: java.util.Date parse(java.lang.String)>($r2);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r14 := @caughtexception;
+
+     label12:
+        if r19 == null goto label13;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setLastModified(java.util.Date)>(r19);
+
+     label13:
+        $r20 = virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: java.lang.String getFact(java.lang.String)>("Create");
+
+        if $r20 == null goto label18;
+
+        r21 = null;
+
+     label14:
+        $r8 = r7.<sun.net.ftp.impl.FtpClient$MLSxParser: java.text.SimpleDateFormat df>;
+
+        r21 = virtualinvoke $r8.<java.text.SimpleDateFormat: java.util.Date parse(java.lang.String)>($r20);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r13 := @caughtexception;
+
+     label17:
+        if r21 == null goto label18;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setCreated(java.util.Date)>(r21);
+
+     label18:
+        $r22 = virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: java.lang.String getFact(java.lang.String)>("Type");
+
+        if $r22 == null goto label22;
+
+        $z0 = virtualinvoke $r22.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("file");
+
+        if $z0 == 0 goto label19;
+
+        $r6 = <sun.net.ftp.FtpDirEntry$Type: sun.net.ftp.FtpDirEntry$Type FILE>;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setType(sun.net.ftp.FtpDirEntry$Type)>($r6);
+
+     label19:
+        $z1 = virtualinvoke $r22.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("dir");
+
+        if $z1 == 0 goto label20;
+
+        $r5 = <sun.net.ftp.FtpDirEntry$Type: sun.net.ftp.FtpDirEntry$Type DIR>;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setType(sun.net.ftp.FtpDirEntry$Type)>($r5);
+
+     label20:
+        $z2 = virtualinvoke $r22.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("cdir");
+
+        if $z2 == 0 goto label21;
+
+        $r4 = <sun.net.ftp.FtpDirEntry$Type: sun.net.ftp.FtpDirEntry$Type CDIR>;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setType(sun.net.ftp.FtpDirEntry$Type)>($r4);
+
+     label21:
+        $z3 = virtualinvoke $r22.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("pdir");
+
+        if $z3 == 0 goto label22;
+
+        $r3 = <sun.net.ftp.FtpDirEntry$Type: sun.net.ftp.FtpDirEntry$Type PDIR>;
+
+        virtualinvoke $r0.<sun.net.ftp.FtpDirEntry: sun.net.ftp.FtpDirEntry setType(sun.net.ftp.FtpDirEntry$Type)>($r3);
+
+     label22:
+        return $r0;
+
+        catch java.text.ParseException from label09 to label10 with label11;
+        catch java.text.ParseException from label14 to label15 with label16;
+    }
+
+    void <init>(sun.net.ftp.impl.FtpClient, sun.net.ftp.impl.FtpClient$1)
+    {
+        sun.net.ftp.impl.FtpClient$MLSxParser r0;
+        sun.net.ftp.impl.FtpClient$1 r2;
+        sun.net.ftp.impl.FtpClient r1;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$MLSxParser;
+
+        r1 := @parameter0: sun.net.ftp.impl.FtpClient;
+
+        r2 := @parameter1: sun.net.ftp.impl.FtpClient$1;
+
+        specialinvoke r0.<sun.net.ftp.impl.FtpClient$MLSxParser: void <init>(sun.net.ftp.impl.FtpClient)>(r1);
+
+        return;
+    }
+}

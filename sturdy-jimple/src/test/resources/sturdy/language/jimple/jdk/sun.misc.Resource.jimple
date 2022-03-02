@@ -1,0 +1,298 @@
+public abstract class sun.misc.Resource extends java.lang.Object
+{
+    private java.io.InputStream cis;
+
+    public void <init>()
+    {
+        sun.misc.Resource r0;
+
+        r0 := @this: sun.misc.Resource;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public abstract java.lang.String getName();
+
+    public abstract java.net.URL getURL();
+
+    public abstract java.net.URL getCodeSourceURL();
+
+    public abstract java.io.InputStream getInputStream() throws java.io.IOException;
+
+    public abstract int getContentLength() throws java.io.IOException;
+
+    private synchronized java.io.InputStream cachedInputStream() throws java.io.IOException
+    {
+        sun.misc.Resource r0;
+        java.io.InputStream $r1, $r2, $r3;
+
+        r0 := @this: sun.misc.Resource;
+
+        $r1 = r0.<sun.misc.Resource: java.io.InputStream cis>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<sun.misc.Resource: java.io.InputStream getInputStream()>();
+
+        r0.<sun.misc.Resource: java.io.InputStream cis> = $r3;
+
+     label1:
+        $r2 = r0.<sun.misc.Resource: java.io.InputStream cis>;
+
+        return $r2;
+    }
+
+    public byte[] getBytes() throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        byte[] r12;
+        java.io.InterruptedIOException $r6, $r9, $r10, $r11;
+        java.lang.Thread $r2, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, i13, i14, $i16;
+        boolean z0;
+        java.io.IOException $r4, $r8;
+        java.io.EOFException $r13;
+        sun.misc.Resource r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.misc.Resource;
+
+        $r1 = specialinvoke r0.<sun.misc.Resource: java.io.InputStream cachedInputStream()>();
+
+        z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+     label01:
+        $i0 = virtualinvoke r0.<sun.misc.Resource: int getContentLength()>();
+
+        i11 = $i0;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        z0 = 1;
+
+        goto label01;
+
+     label04:
+        r12 = newarray (byte)[0];
+
+        $i16 = (int) -1;
+
+        if $i0 != $i16 goto label05;
+
+        i11 = 2147483647;
+
+     label05:
+        i12 = 0;
+
+     label06:
+        if i12 >= i11 goto label15;
+
+        $i1 = lengthof r12;
+
+        if i12 < $i1 goto label07;
+
+        $i6 = i11 - i12;
+
+        $i4 = lengthof r12;
+
+        $i5 = $i4 + 1024;
+
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>($i6, $i5);
+
+        i13 = $i7;
+
+        $i9 = lengthof r12;
+
+        $i8 = i12 + $i7;
+
+        if $i9 >= $i8 goto label08;
+
+        $i10 = i12 + $i7;
+
+        r12 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r12, $i10);
+
+        goto label08;
+
+     label07:
+        $i2 = lengthof r12;
+
+        i13 = $i2 - i12;
+
+     label08:
+        i14 = 0;
+
+     label09:
+        i14 = virtualinvoke $r1.<java.io.InputStream: int read(byte[],int,int)>(r12, i12, i13);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r10 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        z0 = 1;
+
+     label12:
+        if i14 >= 0 goto label14;
+
+        if i11 == 2147483647 goto label13;
+
+        $r13 = new java.io.EOFException;
+
+        specialinvoke $r13.<java.io.EOFException: void <init>(java.lang.String)>("Detect premature EOF");
+
+        throw $r13;
+
+     label13:
+        $i3 = lengthof r12;
+
+        if $i3 == i12 goto label15;
+
+        r12 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r12, i12);
+
+        goto label15;
+
+     label14:
+        i12 = i12 + i14;
+
+        goto label06;
+
+     label15:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label16:
+        goto label19;
+
+     label17:
+        $r9 := @caughtexception;
+
+        z0 = 1;
+
+        goto label19;
+
+     label18:
+        $r8 := @caughtexception;
+
+     label19:
+        if z0 == 0 goto label27;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        goto label27;
+
+     label20:
+        $r7 := @caughtexception;
+
+     label21:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label22:
+        goto label25;
+
+     label23:
+        $r6 := @caughtexception;
+
+        z0 = 1;
+
+        goto label25;
+
+     label24:
+        $r4 := @caughtexception;
+
+     label25:
+        if z0 == 0 goto label26;
+
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r5.<java.lang.Thread: void interrupt()>();
+
+     label26:
+        throw $r7;
+
+     label27:
+        return r12;
+
+        catch java.io.InterruptedIOException from label01 to label02 with label03;
+        catch java.io.InterruptedIOException from label09 to label10 with label11;
+        catch java.io.InterruptedIOException from label15 to label16 with label17;
+        catch java.io.IOException from label15 to label16 with label18;
+        catch java.lang.Throwable from label04 to label15 with label20;
+        catch java.io.InterruptedIOException from label21 to label22 with label23;
+        catch java.io.IOException from label21 to label22 with label24;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    public java.nio.ByteBuffer getByteBuffer() throws java.io.IOException
+    {
+        sun.nio.ByteBuffered $r2;
+        sun.misc.Resource r0;
+        java.nio.ByteBuffer $r3;
+        java.io.InputStream $r1;
+        boolean $z0;
+
+        r0 := @this: sun.misc.Resource;
+
+        $r1 = specialinvoke r0.<sun.misc.Resource: java.io.InputStream cachedInputStream()>();
+
+        $z0 = $r1 instanceof sun.nio.ByteBuffered;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (sun.nio.ByteBuffered) $r1;
+
+        $r3 = interfaceinvoke $r2.<sun.nio.ByteBuffered: java.nio.ByteBuffer getByteBuffer()>();
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public java.util.jar.Manifest getManifest() throws java.io.IOException
+    {
+        sun.misc.Resource r0;
+
+        r0 := @this: sun.misc.Resource;
+
+        return null;
+    }
+
+    public java.security.cert.Certificate[] getCertificates()
+    {
+        sun.misc.Resource r0;
+
+        r0 := @this: sun.misc.Resource;
+
+        return null;
+    }
+
+    public java.security.CodeSigner[] getCodeSigners()
+    {
+        sun.misc.Resource r0;
+
+        r0 := @this: sun.misc.Resource;
+
+        return null;
+    }
+
+    public java.lang.Exception getDataError()
+    {
+        sun.misc.Resource r0;
+
+        r0 := @this: sun.misc.Resource;
+
+        return null;
+    }
+}

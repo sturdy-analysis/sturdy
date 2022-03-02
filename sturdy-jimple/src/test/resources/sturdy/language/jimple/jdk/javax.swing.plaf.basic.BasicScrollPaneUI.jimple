@@ -1,0 +1,1506 @@
+public class javax.swing.plaf.basic.BasicScrollPaneUI extends javax.swing.plaf.ScrollPaneUI implements javax.swing.ScrollPaneConstants
+{
+    protected javax.swing.JScrollPane scrollpane;
+    protected javax.swing.event.ChangeListener vsbChangeListener;
+    protected javax.swing.event.ChangeListener hsbChangeListener;
+    protected javax.swing.event.ChangeListener viewportChangeListener;
+    protected java.beans.PropertyChangeListener spPropertyChangeListener;
+    private java.awt.event.MouseWheelListener mouseScrollListener;
+    private int oldExtent;
+    private java.beans.PropertyChangeListener vsbPropertyChangeListener;
+    private java.beans.PropertyChangeListener hsbPropertyChangeListener;
+    private javax.swing.plaf.basic.BasicScrollPaneUI$Handler handler;
+    private boolean setValueCalled;
+
+    public void <init>()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        specialinvoke r0.<javax.swing.plaf.ScrollPaneUI: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: int oldExtent> = -2147483648;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: boolean setValueCalled> = 0;
+
+        return;
+    }
+
+    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicScrollPaneUI $r0;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void <init>()>();
+
+        return $r0;
+    }
+
+    static void loadActionMap(javax.swing.plaf.basic.LazyActionMap)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI$Actions $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        javax.swing.plaf.basic.LazyActionMap r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.LazyActionMap;
+
+        $r1 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollUp");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r1);
+
+        $r2 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollDown");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r2);
+
+        $r3 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollHome");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r3);
+
+        $r4 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r4.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollEnd");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r4);
+
+        $r5 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r5.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("unitScrollUp");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r5);
+
+        $r6 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r6.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("unitScrollDown");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r6);
+
+        $r7 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r7.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollLeft");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r7);
+
+        $r8 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r8.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("scrollRight");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r8);
+
+        $r9 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r9.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("unitScrollRight");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r9);
+
+        $r10 = new javax.swing.plaf.basic.BasicScrollPaneUI$Actions;
+
+        specialinvoke $r10.<javax.swing.plaf.basic.BasicScrollPaneUI$Actions: void <init>(java.lang.String)>("unitScrollLeft");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r10);
+
+        return;
+    }
+
+    public void paint(java.awt.Graphics, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r7;
+        java.awt.Rectangle $r4;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.border.Border $r2;
+        javax.swing.JScrollPane $r1, $r3, $r6;
+        java.awt.Graphics r5;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r5 := @parameter0: java.awt.Graphics;
+
+        r7 := @parameter1: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JScrollPane: javax.swing.border.Border getViewportBorder()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JScrollPane: java.awt.Rectangle getViewportBorderBounds()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $i3 = $r4.<java.awt.Rectangle: int x>;
+
+        $i2 = $r4.<java.awt.Rectangle: int y>;
+
+        $i1 = $r4.<java.awt.Rectangle: int width>;
+
+        $i0 = $r4.<java.awt.Rectangle: int height>;
+
+        interfaceinvoke $r2.<javax.swing.border.Border: void paintBorder(java.awt.Component,java.awt.Graphics,int,int,int,int)>($r6, r5, $i3, $i2, $i1, $i0);
+
+     label1:
+        return;
+    }
+
+    public java.awt.Dimension getMaximumSize(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Dimension $r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new java.awt.Dimension;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>(32767, 32767);
+
+        return $r0;
+    }
+
+    protected void installDefaults(javax.swing.JScrollPane)
+    {
+        javax.swing.JScrollPane r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI r3;
+        java.lang.Boolean $r4;
+        javax.swing.border.Border $r1, $r2;
+        boolean $z0;
+
+        r3 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: javax.swing.JScrollPane;
+
+        staticinvoke <javax.swing.LookAndFeel: void installBorder(javax.swing.JComponent,java.lang.String)>(r0, "ScrollPane.border");
+
+        staticinvoke <javax.swing.LookAndFeel: void installColorsAndFont(javax.swing.JComponent,java.lang.String,java.lang.String,java.lang.String)>(r0, "ScrollPane.background", "ScrollPane.foreground", "ScrollPane.font");
+
+        $r1 = virtualinvoke r0.<javax.swing.JScrollPane: javax.swing.border.Border getViewportBorder()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = $r1 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = staticinvoke <javax.swing.UIManager: javax.swing.border.Border getBorder(java.lang.Object)>("ScrollPane.viewportBorder");
+
+        virtualinvoke r0.<javax.swing.JScrollPane: void setViewportBorder(javax.swing.border.Border)>($r2);
+
+     label2:
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>(r0, "opaque", $r4);
+
+        return;
+    }
+
+    protected void installListeners(javax.swing.JScrollPane)
+    {
+        javax.swing.BoundedRangeModel $r18, $r21;
+        javax.swing.event.ChangeListener $r1, $r3, $r5, $r19, $r22, $r24;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.JScrollPane $r7, $r9, $r11, $r14, $r17, r25;
+        java.beans.PropertyChangeListener $r2, $r4, $r6, $r13, $r20, $r23;
+        javax.swing.JScrollBar $r10, $r12;
+        java.awt.event.MouseWheelListener $r15, $r16;
+        javax.swing.JViewport $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r25 := @parameter0: javax.swing.JScrollPane;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener createVSBChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener vsbChangeListener> = $r1;
+
+        $r2 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener createVSBPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener vsbPropertyChangeListener> = $r2;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener createHSBChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener hsbChangeListener> = $r3;
+
+        $r4 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener createHSBPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener hsbPropertyChangeListener> = $r4;
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener createViewportChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener> = $r5;
+
+        $r6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener createPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener spPropertyChangeListener> = $r6;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JScrollPane: javax.swing.JScrollBar getVerticalScrollBar()>();
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JScrollPane: javax.swing.JScrollBar getHorizontalScrollBar()>();
+
+        if $r8 == null goto label1;
+
+        $r24 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener>;
+
+        virtualinvoke $r8.<javax.swing.JViewport: void addChangeListener(javax.swing.event.ChangeListener)>($r24);
+
+     label1:
+        if $r10 == null goto label2;
+
+        $r21 = virtualinvoke $r10.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        $r22 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener vsbChangeListener>;
+
+        interfaceinvoke $r21.<javax.swing.BoundedRangeModel: void addChangeListener(javax.swing.event.ChangeListener)>($r22);
+
+        $r23 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener vsbPropertyChangeListener>;
+
+        virtualinvoke $r10.<javax.swing.JScrollBar: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r23);
+
+     label2:
+        if $r12 == null goto label3;
+
+        $r18 = virtualinvoke $r12.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener hsbChangeListener>;
+
+        interfaceinvoke $r18.<javax.swing.BoundedRangeModel: void addChangeListener(javax.swing.event.ChangeListener)>($r19);
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener hsbPropertyChangeListener>;
+
+        virtualinvoke $r12.<javax.swing.JScrollBar: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r20);
+
+     label3:
+        $r14 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener spPropertyChangeListener>;
+
+        virtualinvoke $r14.<javax.swing.JScrollPane: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r13);
+
+        $r15 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener createMouseWheelListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener mouseScrollListener> = $r15;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener mouseScrollListener>;
+
+        virtualinvoke $r17.<javax.swing.JScrollPane: void addMouseWheelListener(java.awt.event.MouseWheelListener)>($r16);
+
+        return;
+    }
+
+    protected void installKeyboardActions(javax.swing.JScrollPane)
+    {
+        javax.swing.JScrollPane r2;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.InputMap $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r2 := @parameter0: javax.swing.JScrollPane;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.InputMap getInputMap(int)>(1);
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>(r2, 1, $r1);
+
+        staticinvoke <javax.swing.plaf.basic.LazyActionMap: void installLazyActionMap(javax.swing.JComponent,java.lang.Class,java.lang.String)>(r2, class "Ljavax/swing/plaf/basic/BasicScrollPaneUI;", "ScrollPane.actionMap");
+
+        return;
+    }
+
+    javax.swing.InputMap getInputMap(int)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.awt.ComponentOrientation $r5;
+        javax.swing.JScrollPane $r1, $r4, $r6;
+        int i0;
+        java.lang.Object $r2, $r7;
+        javax.swing.InputMap r3, $r8;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        i0 := @parameter0: int;
+
+        if i0 != 1 goto label3;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "ScrollPane.ancestorInputMap");
+
+        r3 = (javax.swing.InputMap) $r2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JScrollPane: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r5.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r7 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r6, r0, "ScrollPane.ancestorInputMap.RightToLeft");
+
+        $r8 = (javax.swing.InputMap) $r7;
+
+        if $r8 != null goto label2;
+
+     label1:
+        return r3;
+
+     label2:
+        virtualinvoke $r8.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>(r3);
+
+        return $r8;
+
+     label3:
+        return null;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.JScrollPane $r2, $r3, $r4, $r5;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = (javax.swing.JScrollPane) r1;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane> = $r2;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void installDefaults(javax.swing.JScrollPane)>($r3);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void installListeners(javax.swing.JScrollPane)>($r4);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void installKeyboardActions(javax.swing.JScrollPane)>($r5);
+
+        return;
+    }
+
+    protected void uninstallDefaults(javax.swing.JScrollPane)
+    {
+        javax.swing.JScrollPane $r1, $r2, $r4, r5;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.border.Border $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r5 := @parameter0: javax.swing.JScrollPane;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void uninstallBorder(javax.swing.JComponent)>($r1);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JScrollPane: javax.swing.border.Border getViewportBorder()>();
+
+        $z0 = $r3 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke $r4.<javax.swing.JScrollPane: void setViewportBorder(javax.swing.border.Border)>(null);
+
+     label1:
+        return;
+    }
+
+    protected void uninstallListeners(javax.swing.JComponent)
+    {
+        javax.swing.BoundedRangeModel $r12, $r15;
+        javax.swing.event.ChangeListener $r13, $r16, $r18;
+        javax.swing.JComponent r19;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.JScrollPane $r1, $r3, $r5, $r8, $r11;
+        java.beans.PropertyChangeListener $r7, $r14, $r17;
+        javax.swing.JScrollBar $r4, $r6;
+        java.awt.event.MouseWheelListener $r9, $r10;
+        javax.swing.JViewport $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r19 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JScrollPane: javax.swing.JScrollBar getVerticalScrollBar()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JScrollPane: javax.swing.JScrollBar getHorizontalScrollBar()>();
+
+        if $r2 == null goto label1;
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener>;
+
+        virtualinvoke $r2.<javax.swing.JViewport: void removeChangeListener(javax.swing.event.ChangeListener)>($r18);
+
+     label1:
+        if $r4 == null goto label2;
+
+        $r15 = virtualinvoke $r4.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener vsbChangeListener>;
+
+        interfaceinvoke $r15.<javax.swing.BoundedRangeModel: void removeChangeListener(javax.swing.event.ChangeListener)>($r16);
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener vsbPropertyChangeListener>;
+
+        virtualinvoke $r4.<javax.swing.JScrollBar: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r17);
+
+     label2:
+        if $r6 == null goto label3;
+
+        $r12 = virtualinvoke $r6.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener hsbChangeListener>;
+
+        interfaceinvoke $r12.<javax.swing.BoundedRangeModel: void removeChangeListener(javax.swing.event.ChangeListener)>($r13);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener hsbPropertyChangeListener>;
+
+        virtualinvoke $r6.<javax.swing.JScrollBar: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r14);
+
+     label3:
+        $r8 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener spPropertyChangeListener>;
+
+        virtualinvoke $r8.<javax.swing.JScrollPane: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r7);
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener mouseScrollListener>;
+
+        if $r9 == null goto label4;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener mouseScrollListener>;
+
+        virtualinvoke $r11.<javax.swing.JScrollPane: void removeMouseWheelListener(java.awt.event.MouseWheelListener)>($r10);
+
+     label4:
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener vsbChangeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener hsbChangeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener spPropertyChangeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.awt.event.MouseWheelListener mouseScrollListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler handler> = null;
+
+        return;
+    }
+
+    protected void uninstallKeyboardActions(javax.swing.JScrollPane)
+    {
+        javax.swing.JScrollPane r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: javax.swing.JScrollPane;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>(r0, null);
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>(r0, 1, null);
+
+        return;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.JScrollPane $r1, $r2, $r3;
+        javax.swing.JComponent r4;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r4 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void uninstallDefaults(javax.swing.JScrollPane)>($r1);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void uninstallListeners(javax.swing.JComponent)>($r2);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void uninstallKeyboardActions(javax.swing.JScrollPane)>($r3);
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane> = null;
+
+        return;
+    }
+
+    private javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicScrollPaneUI$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicScrollPaneUI$Handler: void <init>(javax.swing.plaf.basic.BasicScrollPaneUI)>(r0);
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler handler>;
+
+        return $r2;
+    }
+
+    protected void syncScrollPaneWithViewport()
+    {
+        java.awt.Point $r15, $r16, $r17, $r18, $r19, $r20;
+        boolean $z0, $z1;
+        java.awt.Dimension $r13, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, i26, i27, i28, i29, i30;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.awt.ComponentOrientation $r12;
+        javax.swing.JScrollPane $r1, $r3, $r5, $r7, $r9, $r11;
+        javax.swing.JScrollBar $r4, $r6;
+        javax.swing.JViewport $r2, $r8, $r10;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JScrollPane: javax.swing.JScrollBar getVerticalScrollBar()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JScrollPane: javax.swing.JScrollBar getHorizontalScrollBar()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JScrollPane: javax.swing.JViewport getRowHeader()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JScrollPane: javax.swing.JViewport getColumnHeader()>();
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JScrollPane: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r12.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $r2 == null goto label10;
+
+        $r13 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        $r14 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Dimension getViewSize()>();
+
+        $r15 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        if $r4 == null goto label01;
+
+        i26 = $r13.<java.awt.Dimension: int height>;
+
+        i27 = $r14.<java.awt.Dimension: int height>;
+
+        $i23 = $r15.<java.awt.Point: int y>;
+
+        $i22 = i27 - i26;
+
+        $i24 = staticinvoke <java.lang.Math: int min(int,int)>($i23, $i22);
+
+        $i25 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i24);
+
+        virtualinvoke $r4.<javax.swing.JScrollBar: void setValues(int,int,int,int)>($i25, i26, 0, i27);
+
+     label01:
+        if $r6 == null goto label06;
+
+        i28 = $r13.<java.awt.Dimension: int width>;
+
+        i29 = $r14.<java.awt.Dimension: int width>;
+
+        if $z0 == 0 goto label02;
+
+        $i20 = $r15.<java.awt.Point: int x>;
+
+        $i19 = i29 - i28;
+
+        $i21 = staticinvoke <java.lang.Math: int min(int,int)>($i20, $i19);
+
+        i30 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i21);
+
+        goto label05;
+
+     label02:
+        $i4 = virtualinvoke $r6.<javax.swing.JScrollBar: int getValue()>();
+
+        $z1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: boolean setValueCalled>;
+
+        if $z1 == 0 goto label03;
+
+        $i16 = i29 - $i4;
+
+        $i15 = $r15.<java.awt.Point: int x>;
+
+        if $i16 != $i15 goto label03;
+
+        $i17 = i29 - i28;
+
+        $i18 = staticinvoke <java.lang.Math: int min(int,int)>($i17, $i4);
+
+        i30 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i18);
+
+        if i28 == 0 goto label05;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: boolean setValueCalled> = 0;
+
+        goto label05;
+
+     label03:
+        if i28 <= i29 goto label04;
+
+        $i14 = i29 - i28;
+
+        $r15.<java.awt.Point: int x> = $i14;
+
+        virtualinvoke $r2.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r15);
+
+        i30 = 0;
+
+        goto label05;
+
+     label04:
+        $i8 = i29 - i28;
+
+        $i6 = i29 - i28;
+
+        $i5 = $r15.<java.awt.Point: int x>;
+
+        $i7 = $i6 - $i5;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>($i8, $i7);
+
+        $i10 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i9);
+
+        i30 = $i10;
+
+        $i11 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: int oldExtent>;
+
+        if $i11 <= i28 goto label05;
+
+        $i12 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: int oldExtent>;
+
+        $i13 = $i12 - i28;
+
+        i30 = $i10 - $i13;
+
+     label05:
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: int oldExtent> = i28;
+
+        virtualinvoke $r6.<javax.swing.JScrollBar: void setValues(int,int,int,int)>(i30, i28, 0, i29);
+
+     label06:
+        if $r8 == null goto label07;
+
+        $r19 = virtualinvoke $r8.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $r20 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i3 = $r20.<java.awt.Point: int y>;
+
+        $r19.<java.awt.Point: int y> = $i3;
+
+        $r19.<java.awt.Point: int x> = 0;
+
+        virtualinvoke $r8.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r19);
+
+     label07:
+        if $r10 == null goto label10;
+
+        $r16 = virtualinvoke $r10.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        if $z0 == 0 goto label08;
+
+        $r18 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i2 = $r18.<java.awt.Point: int x>;
+
+        $r16.<java.awt.Point: int x> = $i2;
+
+        goto label09;
+
+     label08:
+        $r17 = virtualinvoke $r2.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i0 = $r17.<java.awt.Point: int x>;
+
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i0);
+
+        $r16.<java.awt.Point: int x> = $i1;
+
+     label09:
+        $r16.<java.awt.Point: int y> = 0;
+
+        virtualinvoke $r10.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r16);
+
+     label10:
+        return;
+    }
+
+    public int getBaseline(javax.swing.JComponent, int, int)
+    {
+        java.lang.NullPointerException $r22;
+        javax.swing.border.Border $r12;
+        boolean $z0, $z1, $z2;
+        java.awt.Component $r16, $r20, r21;
+        java.awt.Dimension $r13, $r17, $r19;
+        java.awt.Insets $r6, $r15;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, i25, i26, i27, i28, i29, $i30, $i31, $i33;
+        javax.swing.JComponent r0;
+        java.awt.Component$BaselineResizeBehavior $r9, $r10;
+        javax.swing.plaf.basic.BasicScrollPaneUI r2;
+        java.lang.IllegalArgumentException $r23;
+        javax.swing.JScrollPane $r3, $r5, $r7, $r11, $r14;
+        javax.swing.JViewport $r4, $r8;
+
+        r2 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        i25 := @parameter1: int;
+
+        i26 := @parameter2: int;
+
+        if r0 != null goto label01;
+
+        $r22 = new java.lang.NullPointerException;
+
+        specialinvoke $r22.<java.lang.NullPointerException: void <init>(java.lang.String)>("Component must be non-null");
+
+        throw $r22;
+
+     label01:
+        if i25 < 0 goto label02;
+
+        if i26 >= 0 goto label03;
+
+     label02:
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Width and height must be >= 0");
+
+        throw $r23;
+
+     label03:
+        $r3 = r2.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r5 = r2.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JScrollPane: java.awt.Insets getInsets()>();
+
+        i27 = $r6.<java.awt.Insets: int top>;
+
+        $i0 = $r6.<java.awt.Insets: int top>;
+
+        $i2 = i26 - $i0;
+
+        $i1 = $r6.<java.awt.Insets: int bottom>;
+
+        i28 = $i2 - $i1;
+
+        $i3 = $r6.<java.awt.Insets: int left>;
+
+        $i5 = i25 - $i3;
+
+        $i4 = $r6.<java.awt.Insets: int right>;
+
+        i29 = $i5 - $i4;
+
+        $r7 = r2.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JScrollPane: javax.swing.JViewport getColumnHeader()>();
+
+        if $r8 == null goto label05;
+
+        $z1 = virtualinvoke $r8.<javax.swing.JViewport: boolean isVisible()>();
+
+        if $z1 == 0 goto label05;
+
+        $r16 = virtualinvoke $r8.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r16 == null goto label04;
+
+        $z2 = virtualinvoke $r16.<java.awt.Component: boolean isVisible()>();
+
+        if $z2 == 0 goto label04;
+
+        $r17 = virtualinvoke $r16.<java.awt.Component: java.awt.Dimension getPreferredSize()>();
+
+        $i22 = $r17.<java.awt.Dimension: int width>;
+
+        $i21 = $r17.<java.awt.Dimension: int height>;
+
+        $i23 = virtualinvoke $r16.<java.awt.Component: int getBaseline(int,int)>($i22, $i21);
+
+        if $i23 < 0 goto label04;
+
+        $i24 = i27 + $i23;
+
+        return $i24;
+
+     label04:
+        $r19 = virtualinvoke $r8.<javax.swing.JViewport: java.awt.Dimension getPreferredSize()>();
+
+        $i30 = $r19.<java.awt.Dimension: int height>;
+
+        i28 = i28 - $i30;
+
+        $i31 = $r19.<java.awt.Dimension: int height>;
+
+        i27 = i27 + $i31;
+
+     label05:
+        if $r4 != null goto label06;
+
+        $r20 = null;
+
+        goto label07;
+
+     label06:
+        $r20 = virtualinvoke $r4.<javax.swing.JViewport: java.awt.Component getView()>();
+
+     label07:
+        r21 = $r20;
+
+        if $r20 == null goto label10;
+
+        $z0 = virtualinvoke $r20.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 == 0 goto label10;
+
+        $r9 = virtualinvoke $r20.<java.awt.Component: java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior()>();
+
+        $r10 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_ASCENT>;
+
+        if $r9 != $r10 goto label10;
+
+        $r11 = r2.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JScrollPane: javax.swing.border.Border getViewportBorder()>();
+
+        if $r12 == null goto label08;
+
+        $r14 = r2.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r15 = interfaceinvoke $r12.<javax.swing.border.Border: java.awt.Insets getBorderInsets(java.awt.Component)>($r14);
+
+        $i14 = $r15.<java.awt.Insets: int top>;
+
+        i27 = i27 + $i14;
+
+        $i15 = $r15.<java.awt.Insets: int top>;
+
+        $i17 = i28 - $i15;
+
+        $i16 = $r15.<java.awt.Insets: int bottom>;
+
+        i28 = $i17 - $i16;
+
+        $i18 = $r15.<java.awt.Insets: int left>;
+
+        $i20 = i29 - $i18;
+
+        $i19 = $r15.<java.awt.Insets: int right>;
+
+        i29 = $i20 - $i19;
+
+     label08:
+        $i6 = virtualinvoke r21.<java.awt.Component: int getWidth()>();
+
+        if $i6 <= 0 goto label09;
+
+        $i9 = virtualinvoke r21.<java.awt.Component: int getHeight()>();
+
+        if $i9 <= 0 goto label09;
+
+        $r13 = virtualinvoke r21.<java.awt.Component: java.awt.Dimension getMinimumSize()>();
+
+        $i10 = $r13.<java.awt.Dimension: int width>;
+
+        $i11 = virtualinvoke r21.<java.awt.Component: int getWidth()>();
+
+        i29 = staticinvoke <java.lang.Math: int max(int,int)>($i10, $i11);
+
+        $i12 = $r13.<java.awt.Dimension: int height>;
+
+        $i13 = virtualinvoke r21.<java.awt.Component: int getHeight()>();
+
+        i28 = staticinvoke <java.lang.Math: int max(int,int)>($i12, $i13);
+
+     label09:
+        if i29 <= 0 goto label10;
+
+        if i28 <= 0 goto label10;
+
+        $i7 = virtualinvoke r21.<java.awt.Component: int getBaseline(int,int)>(i29, i28);
+
+        if $i7 <= 0 goto label10;
+
+        $i8 = i27 + $i7;
+
+        return $i8;
+
+     label10:
+        $i33 = (int) -1;
+
+        return $i33;
+    }
+
+    public java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.awt.Component$BaselineResizeBehavior $r2;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        specialinvoke r0.<javax.swing.plaf.ScrollPaneUI: java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior(javax.swing.JComponent)>(r1);
+
+        $r2 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_ASCENT>;
+
+        return $r2;
+    }
+
+    protected javax.swing.event.ChangeListener createViewportChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private java.beans.PropertyChangeListener createHSBPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected javax.swing.event.ChangeListener createHSBChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private java.beans.PropertyChangeListener createVSBPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected javax.swing.event.ChangeListener createVSBChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.MouseWheelListener createMouseWheelListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected void updateScrollBarDisplayPolicy(java.beans.PropertyChangeEvent)
+    {
+        javax.swing.JScrollPane $r1, $r2;
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.beans.PropertyChangeEvent r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r3 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke $r1.<javax.swing.JScrollPane: void revalidate()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke $r2.<javax.swing.JScrollPane: void repaint()>();
+
+        return;
+    }
+
+    protected void updateViewport(java.beans.PropertyChangeEvent)
+    {
+        java.awt.Point $r7;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        javax.swing.event.ChangeListener $r13, $r14;
+        java.beans.PropertyChangeEvent r0;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicScrollPaneUI r8;
+        java.awt.ComponentOrientation $r10;
+        javax.swing.JScrollPane $r9;
+        java.awt.Dimension $r11, $r12;
+        java.lang.Object $r1, $r4;
+        javax.swing.JViewport $r2, r3, $r5, r6;
+
+        r8 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getOldValue()>();
+
+        $r2 = (javax.swing.JViewport) $r1;
+
+        r3 = (javax.swing.JViewport) $r2;
+
+        $r4 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r5 = (javax.swing.JViewport) $r4;
+
+        r6 = (javax.swing.JViewport) $r5;
+
+        if r3 == null goto label1;
+
+        $r13 = r8.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener>;
+
+        virtualinvoke r3.<javax.swing.JViewport: void removeChangeListener(javax.swing.event.ChangeListener)>($r13);
+
+     label1:
+        if r6 == null goto label5;
+
+        $r7 = virtualinvoke r6.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $r9 = r8.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JScrollPane: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r10.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label2;
+
+        $i7 = $r7.<java.awt.Point: int x>;
+
+        $i8 = staticinvoke <java.lang.Math: int max(int,int)>($i7, 0);
+
+        $r7.<java.awt.Point: int x> = $i8;
+
+        goto label4;
+
+     label2:
+        $r11 = virtualinvoke r6.<javax.swing.JViewport: java.awt.Dimension getViewSize()>();
+
+        i0 = $r11.<java.awt.Dimension: int width>;
+
+        $r12 = virtualinvoke r6.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        i1 = $r12.<java.awt.Dimension: int width>;
+
+        if i1 <= i0 goto label3;
+
+        $i6 = i0 - i1;
+
+        $r7.<java.awt.Point: int x> = $i6;
+
+        goto label4;
+
+     label3:
+        $i3 = i0 - i1;
+
+        $i2 = $r7.<java.awt.Point: int x>;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i2);
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i4);
+
+        $r7.<java.awt.Point: int x> = $i5;
+
+     label4:
+        $i9 = $r7.<java.awt.Point: int y>;
+
+        $i10 = staticinvoke <java.lang.Math: int max(int,int)>($i9, 0);
+
+        $r7.<java.awt.Point: int y> = $i10;
+
+        virtualinvoke r6.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r7);
+
+        $r14 = r8.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener viewportChangeListener>;
+
+        virtualinvoke r6.<javax.swing.JViewport: void addChangeListener(javax.swing.event.ChangeListener)>($r14);
+
+     label5:
+        return;
+    }
+
+    protected void updateRowHeader(java.beans.PropertyChangeEvent)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r4;
+        java.awt.Point $r7, $r8;
+        javax.swing.JScrollPane $r5;
+        int $i0;
+        java.lang.Object $r1;
+        java.beans.PropertyChangeEvent r0;
+        javax.swing.JViewport $r2, r3, $r6;
+
+        r4 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r2 = (javax.swing.JViewport) $r1;
+
+        r3 = (javax.swing.JViewport) $r2;
+
+        if r3 == null goto label3;
+
+        $r5 = r4.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r7 = virtualinvoke r3.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        if $r6 == null goto label1;
+
+        $r8 = virtualinvoke $r6.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i0 = $r8.<java.awt.Point: int y>;
+
+        goto label2;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $r7.<java.awt.Point: int y> = $i0;
+
+        virtualinvoke r3.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r7);
+
+     label3:
+        return;
+    }
+
+    protected void updateColumnHeader(java.beans.PropertyChangeEvent)
+    {
+        java.awt.Point $r7, $r10, $r11;
+        int $i0, $i1, $i2;
+        java.beans.PropertyChangeEvent r0;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicScrollPaneUI r4;
+        java.awt.ComponentOrientation $r9;
+        javax.swing.JScrollPane $r5, $r8, $r12;
+        java.lang.Object $r1;
+        javax.swing.JViewport $r2, r3, $r6;
+
+        r4 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r2 = (javax.swing.JViewport) $r1;
+
+        r3 = (javax.swing.JViewport) $r2;
+
+        if r3 == null goto label4;
+
+        $r5 = r4.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JScrollPane: javax.swing.JViewport getViewport()>();
+
+        $r7 = virtualinvoke r3.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        if $r6 != null goto label1;
+
+        $r7.<java.awt.Point: int x> = 0;
+
+        goto label3;
+
+     label1:
+        $r8 = r4.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        $r9 = virtualinvoke $r8.<javax.swing.JScrollPane: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r9.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label2;
+
+        $r11 = virtualinvoke $r6.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i2 = $r11.<java.awt.Point: int x>;
+
+        $r7.<java.awt.Point: int x> = $i2;
+
+        goto label3;
+
+     label2:
+        $r10 = virtualinvoke $r6.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $i0 = $r10.<java.awt.Point: int x>;
+
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i0);
+
+        $r7.<java.awt.Point: int x> = $i1;
+
+     label3:
+        virtualinvoke r3.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r7);
+
+        $r12 = r4.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.JScrollPane scrollpane>;
+
+        virtualinvoke $r12.<javax.swing.JScrollPane: void add(java.awt.Component,java.lang.Object)>(r3, "COLUMN_HEADER");
+
+     label4:
+        return;
+    }
+
+    private void updateHorizontalScrollBar(java.beans.PropertyChangeEvent)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.beans.PropertyChangeListener $r2;
+        javax.swing.event.ChangeListener $r3;
+        java.beans.PropertyChangeEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener hsbChangeListener>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener hsbPropertyChangeListener>;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void updateScrollBar(java.beans.PropertyChangeEvent,javax.swing.event.ChangeListener,java.beans.PropertyChangeListener)>(r1, $r3, $r2);
+
+        return;
+    }
+
+    private void updateVerticalScrollBar(java.beans.PropertyChangeEvent)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.beans.PropertyChangeListener $r2;
+        javax.swing.event.ChangeListener $r3;
+        java.beans.PropertyChangeEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.event.ChangeListener vsbChangeListener>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicScrollPaneUI: java.beans.PropertyChangeListener vsbPropertyChangeListener>;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void updateScrollBar(java.beans.PropertyChangeEvent,javax.swing.event.ChangeListener,java.beans.PropertyChangeListener)>(r1, $r3, $r2);
+
+        return;
+    }
+
+    private void updateScrollBar(java.beans.PropertyChangeEvent, javax.swing.event.ChangeListener, java.beans.PropertyChangeListener)
+    {
+        javax.swing.BoundedRangeModel $r4, $r5;
+        javax.swing.plaf.basic.BasicScrollPaneUI r6;
+        java.beans.PropertyChangeListener r3;
+        javax.swing.JScrollBar r7, $r9;
+        java.lang.Object $r1, $r8;
+        javax.swing.event.ChangeListener r2;
+        java.beans.PropertyChangeEvent r0;
+
+        r6 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        r2 := @parameter1: javax.swing.event.ChangeListener;
+
+        r3 := @parameter2: java.beans.PropertyChangeListener;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getOldValue()>();
+
+        r7 = (javax.swing.JScrollBar) $r1;
+
+        if r7 == null goto label2;
+
+        if r2 == null goto label1;
+
+        $r5 = virtualinvoke r7.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        interfaceinvoke $r5.<javax.swing.BoundedRangeModel: void removeChangeListener(javax.swing.event.ChangeListener)>(r2);
+
+     label1:
+        if r3 == null goto label2;
+
+        virtualinvoke r7.<javax.swing.JScrollBar: void removePropertyChangeListener(java.beans.PropertyChangeListener)>(r3);
+
+     label2:
+        $r8 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r9 = (javax.swing.JScrollBar) $r8;
+
+        if $r9 == null goto label4;
+
+        if r2 == null goto label3;
+
+        $r4 = virtualinvoke $r9.<javax.swing.JScrollBar: javax.swing.BoundedRangeModel getModel()>();
+
+        interfaceinvoke $r4.<javax.swing.BoundedRangeModel: void addChangeListener(javax.swing.event.ChangeListener)>(r2);
+
+     label3:
+        if r3 == null goto label4;
+
+        virtualinvoke $r9.<javax.swing.JScrollBar: void addPropertyChangeListener(java.beans.PropertyChangeListener)>(r3);
+
+     label4:
+        return;
+    }
+
+    protected java.beans.PropertyChangeListener createPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static javax.swing.plaf.basic.BasicScrollPaneUI$Handler access$000(javax.swing.plaf.basic.BasicScrollPaneUI)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        javax.swing.plaf.basic.BasicScrollPaneUI$Handler $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: javax.swing.plaf.basic.BasicScrollPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static boolean access$102(javax.swing.plaf.basic.BasicScrollPaneUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicScrollPaneUI: boolean setValueCalled> = z0;
+
+        return z0;
+    }
+
+    static void access$200(javax.swing.plaf.basic.BasicScrollPaneUI, java.beans.PropertyChangeEvent)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.beans.PropertyChangeEvent r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter1: java.beans.PropertyChangeEvent;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void updateVerticalScrollBar(java.beans.PropertyChangeEvent)>(r1);
+
+        return;
+    }
+
+    static void access$300(javax.swing.plaf.basic.BasicScrollPaneUI, java.beans.PropertyChangeEvent)
+    {
+        javax.swing.plaf.basic.BasicScrollPaneUI r0;
+        java.beans.PropertyChangeEvent r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicScrollPaneUI;
+
+        r1 := @parameter1: java.beans.PropertyChangeEvent;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicScrollPaneUI: void updateHorizontalScrollBar(java.beans.PropertyChangeEvent)>(r1);
+
+        return;
+    }
+}

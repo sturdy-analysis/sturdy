@@ -1,0 +1,157 @@
+public class sun.net.httpserver.AuthFilter extends com.sun.net.httpserver.Filter
+{
+    private com.sun.net.httpserver.Authenticator authenticator;
+
+    public void <init>(com.sun.net.httpserver.Authenticator)
+    {
+        sun.net.httpserver.AuthFilter r0;
+        com.sun.net.httpserver.Authenticator r1;
+
+        r0 := @this: sun.net.httpserver.AuthFilter;
+
+        r1 := @parameter0: com.sun.net.httpserver.Authenticator;
+
+        specialinvoke r0.<com.sun.net.httpserver.Filter: void <init>()>();
+
+        r0.<sun.net.httpserver.AuthFilter: com.sun.net.httpserver.Authenticator authenticator> = r1;
+
+        return;
+    }
+
+    public java.lang.String description()
+    {
+        sun.net.httpserver.AuthFilter r0;
+
+        r0 := @this: sun.net.httpserver.AuthFilter;
+
+        return "Authentication filter";
+    }
+
+    public void setAuthenticator(com.sun.net.httpserver.Authenticator)
+    {
+        sun.net.httpserver.AuthFilter r0;
+        com.sun.net.httpserver.Authenticator r1;
+
+        r0 := @this: sun.net.httpserver.AuthFilter;
+
+        r1 := @parameter0: com.sun.net.httpserver.Authenticator;
+
+        r0.<sun.net.httpserver.AuthFilter: com.sun.net.httpserver.Authenticator authenticator> = r1;
+
+        return;
+    }
+
+    public void consumeInput(com.sun.net.httpserver.HttpExchange) throws java.io.IOException
+    {
+        byte[] r2;
+        int $i0, $i2;
+        sun.net.httpserver.AuthFilter r3;
+        com.sun.net.httpserver.HttpExchange r0;
+        java.io.InputStream $r1;
+
+        r3 := @this: sun.net.httpserver.AuthFilter;
+
+        r0 := @parameter0: com.sun.net.httpserver.HttpExchange;
+
+        $r1 = virtualinvoke r0.<com.sun.net.httpserver.HttpExchange: java.io.InputStream getRequestBody()>();
+
+        r2 = newarray (byte)[4096];
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r2);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        return;
+    }
+
+    public void doFilter(com.sun.net.httpserver.HttpExchange, com.sun.net.httpserver.Filter$Chain) throws java.io.IOException
+    {
+        sun.net.httpserver.ExchangeImpl $r6;
+        com.sun.net.httpserver.Filter$Chain r2;
+        com.sun.net.httpserver.Authenticator$Retry r9;
+        com.sun.net.httpserver.Authenticator $r1, $r4;
+        com.sun.net.httpserver.Authenticator$Result $r5;
+        com.sun.net.httpserver.Authenticator$Success r8;
+        int $i0, $i1;
+        com.sun.net.httpserver.HttpPrincipal $r7;
+        boolean $z0, $z1, $z2;
+        com.sun.net.httpserver.Authenticator$Failure r10;
+        sun.net.httpserver.AuthFilter r0;
+        com.sun.net.httpserver.HttpExchange r3;
+
+        r0 := @this: sun.net.httpserver.AuthFilter;
+
+        r3 := @parameter0: com.sun.net.httpserver.HttpExchange;
+
+        r2 := @parameter1: com.sun.net.httpserver.Filter$Chain;
+
+        $r1 = r0.<sun.net.httpserver.AuthFilter: com.sun.net.httpserver.Authenticator authenticator>;
+
+        if $r1 == null goto label4;
+
+        $r4 = r0.<sun.net.httpserver.AuthFilter: com.sun.net.httpserver.Authenticator authenticator>;
+
+        $r5 = virtualinvoke $r4.<com.sun.net.httpserver.Authenticator: com.sun.net.httpserver.Authenticator$Result authenticate(com.sun.net.httpserver.HttpExchange)>(r3);
+
+        $z0 = $r5 instanceof com.sun.net.httpserver.Authenticator$Success;
+
+        if $z0 == 0 goto label1;
+
+        r8 = (com.sun.net.httpserver.Authenticator$Success) $r5;
+
+        $r6 = staticinvoke <sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ExchangeImpl get(com.sun.net.httpserver.HttpExchange)>(r3);
+
+        $r7 = virtualinvoke r8.<com.sun.net.httpserver.Authenticator$Success: com.sun.net.httpserver.HttpPrincipal getPrincipal()>();
+
+        virtualinvoke $r6.<sun.net.httpserver.ExchangeImpl: void setPrincipal(com.sun.net.httpserver.HttpPrincipal)>($r7);
+
+        virtualinvoke r2.<com.sun.net.httpserver.Filter$Chain: void doFilter(com.sun.net.httpserver.HttpExchange)>(r3);
+
+        goto label3;
+
+     label1:
+        $z1 = $r5 instanceof com.sun.net.httpserver.Authenticator$Retry;
+
+        if $z1 == 0 goto label2;
+
+        r9 = (com.sun.net.httpserver.Authenticator$Retry) $r5;
+
+        virtualinvoke r0.<sun.net.httpserver.AuthFilter: void consumeInput(com.sun.net.httpserver.HttpExchange)>(r3);
+
+        $i1 = virtualinvoke r9.<com.sun.net.httpserver.Authenticator$Retry: int getResponseCode()>();
+
+        virtualinvoke r3.<com.sun.net.httpserver.HttpExchange: void sendResponseHeaders(int,long)>($i1, -1L);
+
+        goto label3;
+
+     label2:
+        $z2 = $r5 instanceof com.sun.net.httpserver.Authenticator$Failure;
+
+        if $z2 == 0 goto label3;
+
+        r10 = (com.sun.net.httpserver.Authenticator$Failure) $r5;
+
+        virtualinvoke r0.<sun.net.httpserver.AuthFilter: void consumeInput(com.sun.net.httpserver.HttpExchange)>(r3);
+
+        $i0 = virtualinvoke r10.<com.sun.net.httpserver.Authenticator$Failure: int getResponseCode()>();
+
+        virtualinvoke r3.<com.sun.net.httpserver.HttpExchange: void sendResponseHeaders(int,long)>($i0, -1L);
+
+     label3:
+        goto label5;
+
+     label4:
+        virtualinvoke r2.<com.sun.net.httpserver.Filter$Chain: void doFilter(com.sun.net.httpserver.HttpExchange)>(r3);
+
+     label5:
+        return;
+    }
+}

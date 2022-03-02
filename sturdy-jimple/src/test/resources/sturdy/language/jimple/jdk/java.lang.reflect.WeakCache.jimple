@@ -1,0 +1,267 @@
+final class java.lang.reflect.WeakCache extends java.lang.Object
+{
+    private final java.lang.ref.ReferenceQueue refQueue;
+    private final java.util.concurrent.ConcurrentMap map;
+    private final java.util.concurrent.ConcurrentMap reverseMap;
+    private final java.util.function.BiFunction subKeyFactory;
+    private final java.util.function.BiFunction valueFactory;
+
+    public void <init>(java.util.function.BiFunction, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r4, $r6, r7, $r9;
+        java.util.concurrent.ConcurrentHashMap $r2, $r3;
+        java.lang.reflect.WeakCache r0;
+        java.lang.ref.ReferenceQueue $r1;
+        java.lang.Object $r5, $r8;
+
+        r0 := @this: java.lang.reflect.WeakCache;
+
+        r4 := @parameter0: java.util.function.BiFunction;
+
+        r7 := @parameter1: java.util.function.BiFunction;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r1.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        r0.<java.lang.reflect.WeakCache: java.lang.ref.ReferenceQueue refQueue> = $r1;
+
+        $r2 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap map> = $r2;
+
+        $r3 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap reverseMap> = $r3;
+
+        $r5 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r4);
+
+        $r6 = (java.util.function.BiFunction) $r5;
+
+        r0.<java.lang.reflect.WeakCache: java.util.function.BiFunction subKeyFactory> = $r6;
+
+        $r8 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r7);
+
+        $r9 = (java.util.function.BiFunction) $r8;
+
+        r0.<java.lang.reflect.WeakCache: java.util.function.BiFunction valueFactory> = $r9;
+
+        return;
+    }
+
+    public java.lang.Object get(java.lang.Object, java.lang.Object)
+    {
+        java.util.function.BiFunction $r16;
+        java.lang.reflect.WeakCache$Factory $r9, r21;
+        java.util.function.Supplier r20;
+        java.lang.ref.ReferenceQueue $r3;
+        java.util.concurrent.ConcurrentMap $r5, $r12, r14, r15;
+        boolean $z0;
+        java.util.concurrent.ConcurrentHashMap $r11;
+        java.lang.reflect.WeakCache r1;
+        java.lang.Object r0, r2, $r4, $r6, $r7, $r8, $r10, $r13, $r17, $r18, $r19;
+
+        r1 := @this: java.lang.reflect.WeakCache;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        specialinvoke r1.<java.lang.reflect.WeakCache: void expungeStaleEntries()>();
+
+        $r3 = r1.<java.lang.reflect.WeakCache: java.lang.ref.ReferenceQueue refQueue>;
+
+        $r4 = staticinvoke <java.lang.reflect.WeakCache$CacheKey: java.lang.Object valueOf(java.lang.Object,java.lang.ref.ReferenceQueue)>(r2, $r3);
+
+        $r5 = r1.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap map>;
+
+        $r6 = interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        r14 = (java.util.concurrent.ConcurrentMap) $r6;
+
+        if r14 != null goto label1;
+
+        $r12 = r1.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap map>;
+
+        $r11 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r11.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r14 = $r11;
+
+        $r13 = interfaceinvoke $r12.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r4, $r11);
+
+        r15 = (java.util.concurrent.ConcurrentMap) $r13;
+
+        if r15 == null goto label1;
+
+        r14 = r15;
+
+     label1:
+        $r16 = r1.<java.lang.reflect.WeakCache: java.util.function.BiFunction subKeyFactory>;
+
+        $r17 = interfaceinvoke $r16.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r2, r0);
+
+        $r18 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>($r17);
+
+        $r19 = interfaceinvoke r14.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r18);
+
+        r20 = (java.util.function.Supplier) $r19;
+
+        r21 = null;
+
+     label2:
+        if r20 == null goto label3;
+
+        $r10 = interfaceinvoke r20.<java.util.function.Supplier: java.lang.Object get()>();
+
+        if $r10 == null goto label3;
+
+        return $r10;
+
+     label3:
+        if r21 != null goto label4;
+
+        $r9 = new java.lang.reflect.WeakCache$Factory;
+
+        specialinvoke $r9.<java.lang.reflect.WeakCache$Factory: void <init>(java.lang.reflect.WeakCache,java.lang.Object,java.lang.Object,java.lang.Object,java.util.concurrent.ConcurrentMap)>(r1, r2, r0, $r18, r14);
+
+        r21 = $r9;
+
+     label4:
+        if r20 != null goto label5;
+
+        $r8 = interfaceinvoke r14.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r18, r21);
+
+        r20 = (java.util.function.Supplier) $r8;
+
+        if r20 != null goto label2;
+
+        r20 = r21;
+
+        goto label2;
+
+     label5:
+        $z0 = interfaceinvoke r14.<java.util.concurrent.ConcurrentMap: boolean replace(java.lang.Object,java.lang.Object,java.lang.Object)>($r18, r20, r21);
+
+        if $z0 == 0 goto label6;
+
+        r20 = r21;
+
+        goto label2;
+
+     label6:
+        $r7 = interfaceinvoke r14.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r18);
+
+        r20 = (java.util.function.Supplier) $r7;
+
+        goto label2;
+    }
+
+    public boolean containsValue(java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.lang.reflect.WeakCache r1;
+        java.lang.reflect.WeakCache$LookupValue $r2;
+        java.util.concurrent.ConcurrentMap $r3;
+        boolean $z0;
+
+        r1 := @this: java.lang.reflect.WeakCache;
+
+        r0 := @parameter0: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        specialinvoke r1.<java.lang.reflect.WeakCache: void expungeStaleEntries()>();
+
+        $r3 = r1.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap reverseMap>;
+
+        $r2 = new java.lang.reflect.WeakCache$LookupValue;
+
+        specialinvoke $r2.<java.lang.reflect.WeakCache$LookupValue: void <init>(java.lang.Object)>(r0);
+
+        $z0 = interfaceinvoke $r3.<java.util.concurrent.ConcurrentMap: boolean containsKey(java.lang.Object)>($r2);
+
+        return $z0;
+    }
+
+    public int size()
+    {
+        int $i0;
+        java.lang.reflect.WeakCache r0;
+        java.util.concurrent.ConcurrentMap $r1;
+
+        r0 := @this: java.lang.reflect.WeakCache;
+
+        specialinvoke r0.<java.lang.reflect.WeakCache: void expungeStaleEntries()>();
+
+        $r1 = r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap reverseMap>;
+
+        $i0 = interfaceinvoke $r1.<java.util.concurrent.ConcurrentMap: int size()>();
+
+        return $i0;
+    }
+
+    private void expungeStaleEntries()
+    {
+        java.lang.ref.Reference $r2;
+        java.lang.reflect.WeakCache$CacheKey $r3;
+        java.lang.reflect.WeakCache r0;
+        java.lang.ref.ReferenceQueue $r1;
+        java.util.concurrent.ConcurrentMap $r4, $r5;
+
+        r0 := @this: java.lang.reflect.WeakCache;
+
+     label1:
+        $r1 = r0.<java.lang.reflect.WeakCache: java.lang.ref.ReferenceQueue refQueue>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r3 = (java.lang.reflect.WeakCache$CacheKey) $r2;
+
+        if $r3 == null goto label2;
+
+        $r5 = r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap map>;
+
+        $r4 = r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap reverseMap>;
+
+        virtualinvoke $r3.<java.lang.reflect.WeakCache$CacheKey: void expungeFrom(java.util.concurrent.ConcurrentMap,java.util.concurrent.ConcurrentMap)>($r5, $r4);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static java.util.function.BiFunction access$000(java.lang.reflect.WeakCache)
+    {
+        java.lang.reflect.WeakCache r0;
+        java.util.function.BiFunction $r1;
+
+        r0 := @parameter0: java.lang.reflect.WeakCache;
+
+        $r1 = r0.<java.lang.reflect.WeakCache: java.util.function.BiFunction valueFactory>;
+
+        return $r1;
+    }
+
+    static java.util.concurrent.ConcurrentMap access$100(java.lang.reflect.WeakCache)
+    {
+        java.lang.reflect.WeakCache r0;
+        java.util.concurrent.ConcurrentMap $r1;
+
+        r0 := @parameter0: java.lang.reflect.WeakCache;
+
+        $r1 = r0.<java.lang.reflect.WeakCache: java.util.concurrent.ConcurrentMap reverseMap>;
+
+        return $r1;
+    }
+}

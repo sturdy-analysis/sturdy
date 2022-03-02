@@ -1,0 +1,827 @@
+public class sun.instrument.InstrumentationImpl extends java.lang.Object implements java.lang.instrument.Instrumentation
+{
+    private final sun.instrument.TransformerManager mTransformerManager;
+    private sun.instrument.TransformerManager mRetransfomableTransformerManager;
+    private final long mNativeAgent;
+    private final boolean mEnvironmentSupportsRedefineClasses;
+    private volatile boolean mEnvironmentSupportsRetransformClassesKnown;
+    private volatile boolean mEnvironmentSupportsRetransformClasses;
+    private final boolean mEnvironmentSupportsNativeMethodPrefix;
+
+    private void <init>(long, boolean, boolean)
+    {
+        sun.instrument.InstrumentationImpl r0;
+        long l0;
+        sun.instrument.TransformerManager $r1;
+        boolean z0, z1;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        l0 := @parameter0: long;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new sun.instrument.TransformerManager;
+
+        specialinvoke $r1.<sun.instrument.TransformerManager: void <init>(boolean)>(0);
+
+        r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mTransformerManager> = $r1;
+
+        r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager> = null;
+
+        r0.<sun.instrument.InstrumentationImpl: long mNativeAgent> = l0;
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRedefineClasses> = z0;
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClassesKnown> = 0;
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClasses> = 0;
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsNativeMethodPrefix> = z1;
+
+        return;
+    }
+
+    public void addTransformer(java.lang.instrument.ClassFileTransformer)
+    {
+        java.lang.instrument.ClassFileTransformer r1;
+        sun.instrument.InstrumentationImpl r0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.instrument.ClassFileTransformer;
+
+        virtualinvoke r0.<sun.instrument.InstrumentationImpl: void addTransformer(java.lang.instrument.ClassFileTransformer,boolean)>(r1, 0);
+
+        return;
+    }
+
+    public synchronized void addTransformer(java.lang.instrument.ClassFileTransformer, boolean)
+    {
+        java.lang.UnsupportedOperationException $r7;
+        sun.instrument.InstrumentationImpl r1;
+        long $l1;
+        sun.instrument.TransformerManager $r2, $r3, $r4, $r5, $r6;
+        java.lang.NullPointerException $r8;
+        java.lang.instrument.ClassFileTransformer r0;
+        int $i0;
+        boolean z0, $z1;
+
+        r1 := @this: sun.instrument.InstrumentationImpl;
+
+        r0 := @parameter0: java.lang.instrument.ClassFileTransformer;
+
+        z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'transformer\' in addTransformer");
+
+        throw $r8;
+
+     label1:
+        if z0 == 0 goto label4;
+
+        $z1 = virtualinvoke r1.<sun.instrument.InstrumentationImpl: boolean isRetransformClassesSupported()>();
+
+        if $z1 != 0 goto label2;
+
+        $r7 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r7.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("adding retransformable transformers is not supported in this environment");
+
+        throw $r7;
+
+     label2:
+        $r3 = r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        if $r3 != null goto label3;
+
+        $r6 = new sun.instrument.TransformerManager;
+
+        specialinvoke $r6.<sun.instrument.TransformerManager: void <init>(boolean)>(1);
+
+        r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager> = $r6;
+
+     label3:
+        $r4 = r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        virtualinvoke $r4.<sun.instrument.TransformerManager: void addTransformer(java.lang.instrument.ClassFileTransformer)>(r0);
+
+        $r5 = r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        $i0 = virtualinvoke $r5.<sun.instrument.TransformerManager: int getTransformerCount()>();
+
+        if $i0 != 1 goto label5;
+
+        $l1 = r1.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        specialinvoke r1.<sun.instrument.InstrumentationImpl: void setHasRetransformableTransformers(long,boolean)>($l1, 1);
+
+        goto label5;
+
+     label4:
+        $r2 = r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mTransformerManager>;
+
+        virtualinvoke $r2.<sun.instrument.TransformerManager: void addTransformer(java.lang.instrument.ClassFileTransformer)>(r0);
+
+     label5:
+        return;
+    }
+
+    public synchronized boolean removeTransformer(java.lang.instrument.ClassFileTransformer)
+    {
+        java.lang.instrument.ClassFileTransformer r0;
+        sun.instrument.InstrumentationImpl r1;
+        int $i0;
+        long $l1;
+        sun.instrument.TransformerManager $r2;
+        java.lang.NullPointerException $r3;
+        boolean $z0;
+
+        r1 := @this: sun.instrument.InstrumentationImpl;
+
+        r0 := @parameter0: java.lang.instrument.ClassFileTransformer;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'transformer\' in removeTransformer");
+
+        throw $r3;
+
+     label1:
+        $r2 = specialinvoke r1.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager findTransformerManager(java.lang.instrument.ClassFileTransformer)>(r0);
+
+        if $r2 == null goto label3;
+
+        virtualinvoke $r2.<sun.instrument.TransformerManager: boolean removeTransformer(java.lang.instrument.ClassFileTransformer)>(r0);
+
+        $z0 = virtualinvoke $r2.<sun.instrument.TransformerManager: boolean isRetransformable()>();
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke $r2.<sun.instrument.TransformerManager: int getTransformerCount()>();
+
+        if $i0 != 0 goto label2;
+
+        $l1 = r1.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        specialinvoke r1.<sun.instrument.InstrumentationImpl: void setHasRetransformableTransformers(long,boolean)>($l1, 0);
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public boolean isModifiableClass(java.lang.Class)
+    {
+        sun.instrument.InstrumentationImpl r1;
+        java.lang.Class r0;
+        long $l0;
+        java.lang.NullPointerException $r2;
+        boolean $z0;
+
+        r1 := @this: sun.instrument.InstrumentationImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'theClass\' in isModifiableClass");
+
+        throw $r2;
+
+     label1:
+        $l0 = r1.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $z0 = specialinvoke r1.<sun.instrument.InstrumentationImpl: boolean isModifiableClass0(long,java.lang.Class)>($l0, r0);
+
+        return $z0;
+    }
+
+    public boolean isRetransformClassesSupported()
+    {
+        sun.instrument.InstrumentationImpl r0;
+        long $l0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        $z0 = r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClassesKnown>;
+
+        if $z0 != 0 goto label1;
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $z2 = specialinvoke r0.<sun.instrument.InstrumentationImpl: boolean isRetransformClassesSupported0(long)>($l0);
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClasses> = $z2;
+
+        r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClassesKnown> = 1;
+
+     label1:
+        $z1 = r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRetransformClasses>;
+
+        return $z1;
+    }
+
+    public transient void retransformClasses(java.lang.Class[])
+    {
+        java.lang.UnsupportedOperationException $r2;
+        sun.instrument.InstrumentationImpl r0;
+        java.lang.Class[] r1;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.Class[];
+
+        $z0 = virtualinvoke r0.<sun.instrument.InstrumentationImpl: boolean isRetransformClassesSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("retransformClasses is not supported in this environment");
+
+        throw $r2;
+
+     label1:
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void retransformClasses0(long,java.lang.Class[])>($l0, r1);
+
+        return;
+    }
+
+    public boolean isRedefineClassesSupported()
+    {
+        sun.instrument.InstrumentationImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        $z0 = r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsRedefineClasses>;
+
+        return $z0;
+    }
+
+    public transient void redefineClasses(java.lang.instrument.ClassDefinition[]) throws java.lang.ClassNotFoundException
+    {
+        java.lang.UnsupportedOperationException $r5;
+        sun.instrument.InstrumentationImpl r0;
+        long $l2;
+        java.lang.instrument.ClassDefinition[] r1;
+        java.lang.NullPointerException $r3, $r4;
+        java.lang.instrument.ClassDefinition $r2;
+        int $i0, $i1, i3;
+        boolean $z0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.instrument.ClassDefinition[];
+
+        $z0 = virtualinvoke r0.<sun.instrument.InstrumentationImpl: boolean isRedefineClassesSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r5.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("redefineClasses is not supported in this environment");
+
+        throw $r5;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'definitions\' in redefineClasses");
+
+        throw $r4;
+
+     label2:
+        i3 = 0;
+
+     label3:
+        $i0 = lengthof r1;
+
+        if i3 >= $i0 goto label5;
+
+        $r2 = r1[i3];
+
+        if $r2 != null goto label4;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("element of \'definitions\' is null in redefineClasses");
+
+        throw $r3;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label5:
+        $i1 = lengthof r1;
+
+        if $i1 != 0 goto label6;
+
+        return;
+
+     label6:
+        $l2 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void redefineClasses0(long,java.lang.instrument.ClassDefinition[])>($l2, r1);
+
+        return;
+    }
+
+    public java.lang.Class[] getAllLoadedClasses()
+    {
+        java.lang.Class[] $r1;
+        long $l0;
+        sun.instrument.InstrumentationImpl r0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $r1 = specialinvoke r0.<sun.instrument.InstrumentationImpl: java.lang.Class[] getAllLoadedClasses0(long)>($l0);
+
+        return $r1;
+    }
+
+    public java.lang.Class[] getInitiatedClasses(java.lang.ClassLoader)
+    {
+        sun.instrument.InstrumentationImpl r0;
+        java.lang.Class[] $r2;
+        long $l0;
+        java.lang.ClassLoader r1;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $r2 = specialinvoke r0.<sun.instrument.InstrumentationImpl: java.lang.Class[] getInitiatedClasses0(long,java.lang.ClassLoader)>($l0, r1);
+
+        return $r2;
+    }
+
+    public long getObjectSize(java.lang.Object)
+    {
+        sun.instrument.InstrumentationImpl r1;
+        java.lang.Object r0;
+        long $l0, $l1;
+        java.lang.NullPointerException $r2;
+
+        r1 := @this: sun.instrument.InstrumentationImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'objectToSize\' in getObjectSize");
+
+        throw $r2;
+
+     label1:
+        $l0 = r1.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $l1 = specialinvoke r1.<sun.instrument.InstrumentationImpl: long getObjectSize0(long,java.lang.Object)>($l0, r0);
+
+        return $l1;
+    }
+
+    public void appendToBootstrapClassLoaderSearch(java.util.jar.JarFile)
+    {
+        sun.instrument.InstrumentationImpl r0;
+        java.util.jar.JarFile r1;
+        long $l0;
+        java.lang.String $r2;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $r2 = virtualinvoke r1.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void appendToClassLoaderSearch0(long,java.lang.String,boolean)>($l0, $r2, 1);
+
+        return;
+    }
+
+    public void appendToSystemClassLoaderSearch(java.util.jar.JarFile)
+    {
+        sun.instrument.InstrumentationImpl r0;
+        java.util.jar.JarFile r1;
+        long $l0;
+        java.lang.String $r2;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $r2 = virtualinvoke r1.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void appendToClassLoaderSearch0(long,java.lang.String,boolean)>($l0, $r2, 0);
+
+        return;
+    }
+
+    public boolean isNativeMethodPrefixSupported()
+    {
+        sun.instrument.InstrumentationImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        $z0 = r0.<sun.instrument.InstrumentationImpl: boolean mEnvironmentSupportsNativeMethodPrefix>;
+
+        return $z0;
+    }
+
+    public synchronized void setNativeMethodPrefix(java.lang.instrument.ClassFileTransformer, java.lang.String)
+    {
+        java.lang.UnsupportedOperationException $r7;
+        sun.instrument.InstrumentationImpl r0;
+        java.lang.String[] $r4;
+        long $l0;
+        java.lang.IllegalArgumentException $r5;
+        sun.instrument.TransformerManager $r2;
+        java.lang.NullPointerException $r6;
+        java.lang.instrument.ClassFileTransformer r1;
+        java.lang.String r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.instrument.ClassFileTransformer;
+
+        r3 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<sun.instrument.InstrumentationImpl: boolean isNativeMethodPrefixSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r7.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("setNativeMethodPrefix is not supported in this environment");
+
+        throw $r7;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("null passed as \'transformer\' in setNativeMethodPrefix");
+
+        throw $r6;
+
+     label2:
+        $r2 = specialinvoke r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager findTransformerManager(java.lang.instrument.ClassFileTransformer)>(r1);
+
+        if $r2 != null goto label3;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("transformer not registered in setNativeMethodPrefix");
+
+        throw $r5;
+
+     label3:
+        virtualinvoke $r2.<sun.instrument.TransformerManager: boolean setNativeMethodPrefix(java.lang.instrument.ClassFileTransformer,java.lang.String)>(r1, r3);
+
+        $r4 = virtualinvoke $r2.<sun.instrument.TransformerManager: java.lang.String[] getNativeMethodPrefixes()>();
+
+        $l0 = r0.<sun.instrument.InstrumentationImpl: long mNativeAgent>;
+
+        $z1 = virtualinvoke $r2.<sun.instrument.TransformerManager: boolean isRetransformable()>();
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void setNativeMethodPrefixes(long,java.lang.String[],boolean)>($l0, $r4, $z1);
+
+        return;
+    }
+
+    private sun.instrument.TransformerManager findTransformerManager(java.lang.instrument.ClassFileTransformer)
+    {
+        sun.instrument.InstrumentationImpl r0;
+        sun.instrument.TransformerManager $r2, $r3, $r4, $r5, $r6;
+        java.lang.instrument.ClassFileTransformer r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.instrument.ClassFileTransformer;
+
+        $r2 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mTransformerManager>;
+
+        $z0 = virtualinvoke $r2.<sun.instrument.TransformerManager: boolean includesTransformer(java.lang.instrument.ClassFileTransformer)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mTransformerManager>;
+
+        return $r6;
+
+     label1:
+        $r3 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        if $r3 == null goto label2;
+
+        $r4 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        $z1 = virtualinvoke $r4.<sun.instrument.TransformerManager: boolean includesTransformer(java.lang.instrument.ClassFileTransformer)>(r1);
+
+        if $z1 == 0 goto label2;
+
+        $r5 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        return $r5;
+
+     label2:
+        return null;
+    }
+
+    private native boolean isModifiableClass0(long, java.lang.Class);
+
+    private native boolean isRetransformClassesSupported0(long);
+
+    private native void setHasRetransformableTransformers(long, boolean);
+
+    private native void retransformClasses0(long, java.lang.Class[]);
+
+    private native void redefineClasses0(long, java.lang.instrument.ClassDefinition[]) throws java.lang.ClassNotFoundException;
+
+    private native java.lang.Class[] getAllLoadedClasses0(long);
+
+    private native java.lang.Class[] getInitiatedClasses0(long, java.lang.ClassLoader);
+
+    private native long getObjectSize0(long, java.lang.Object);
+
+    private native void appendToClassLoaderSearch0(long, java.lang.String, boolean);
+
+    private native void setNativeMethodPrefixes(long, java.lang.String[], boolean);
+
+    private static void setAccessible(java.lang.reflect.AccessibleObject, boolean)
+    {
+        sun.instrument.InstrumentationImpl$1 $r0;
+        java.lang.reflect.AccessibleObject r1;
+        boolean z0;
+
+        r1 := @parameter0: java.lang.reflect.AccessibleObject;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new sun.instrument.InstrumentationImpl$1;
+
+        specialinvoke $r0.<sun.instrument.InstrumentationImpl$1: void <init>(java.lang.reflect.AccessibleObject,boolean)>(r1, z0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    private void loadClassAndStartAgent(java.lang.String, java.lang.String, java.lang.String) throws java.lang.Throwable
+    {
+        java.lang.Object[] $r5, $r7;
+        java.lang.NoSuchMethodException $r12, $r13, $r14, $r15, r17;
+        java.lang.String r1, r3, r6;
+        java.lang.reflect.Method r16;
+        boolean z0;
+        sun.instrument.InstrumentationImpl r8;
+        java.lang.Class[] $r4, $r9, $r10, $r11;
+        java.lang.Class $r2;
+        java.lang.ClassLoader $r0;
+
+        r8 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r1);
+
+        r16 = null;
+
+        r17 = null;
+
+        z0 = 0;
+
+     label01:
+        $r4 = newarray (java.lang.Class)[2];
+
+        $r4[0] = class "Ljava/lang/String;";
+
+        $r4[1] = class "Ljava/lang/instrument/Instrumentation;";
+
+        r16 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getDeclaredMethod(java.lang.String,java.lang.Class[])>(r3, $r4);
+
+        z0 = 1;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r15 := @caughtexception;
+
+        r17 = $r15;
+
+     label04:
+        if r16 != null goto label08;
+
+     label05:
+        $r11 = newarray (java.lang.Class)[1];
+
+        $r11[0] = class "Ljava/lang/String;";
+
+        r16 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getDeclaredMethod(java.lang.String,java.lang.Class[])>(r3, $r11);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r14 := @caughtexception;
+
+     label08:
+        if r16 != null goto label12;
+
+     label09:
+        $r10 = newarray (java.lang.Class)[2];
+
+        $r10[0] = class "Ljava/lang/String;";
+
+        $r10[1] = class "Ljava/lang/instrument/Instrumentation;";
+
+        r16 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>(r3, $r10);
+
+        z0 = 1;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r13 := @caughtexception;
+
+     label12:
+        if r16 != null goto label16;
+
+     label13:
+        $r9 = newarray (java.lang.Class)[1];
+
+        $r9[0] = class "Ljava/lang/String;";
+
+        r16 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>(r3, $r9);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r12 := @caughtexception;
+
+        throw r17;
+
+     label16:
+        staticinvoke <sun.instrument.InstrumentationImpl: void setAccessible(java.lang.reflect.AccessibleObject,boolean)>(r16, 1);
+
+        if z0 == 0 goto label17;
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = r6;
+
+        $r7[1] = r8;
+
+        virtualinvoke r16.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r7);
+
+        goto label18;
+
+     label17:
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = r6;
+
+        virtualinvoke r16.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r5);
+
+     label18:
+        staticinvoke <sun.instrument.InstrumentationImpl: void setAccessible(java.lang.reflect.AccessibleObject,boolean)>(r16, 0);
+
+        return;
+
+        catch java.lang.NoSuchMethodException from label01 to label02 with label03;
+        catch java.lang.NoSuchMethodException from label05 to label06 with label07;
+        catch java.lang.NoSuchMethodException from label09 to label10 with label11;
+        catch java.lang.NoSuchMethodException from label13 to label14 with label15;
+    }
+
+    private void loadClassAndCallPremain(java.lang.String, java.lang.String) throws java.lang.Throwable
+    {
+        java.lang.String r1, r2;
+        sun.instrument.InstrumentationImpl r0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void loadClassAndStartAgent(java.lang.String,java.lang.String,java.lang.String)>(r1, "premain", r2);
+
+        return;
+    }
+
+    private void loadClassAndCallAgentmain(java.lang.String, java.lang.String) throws java.lang.Throwable
+    {
+        java.lang.String r1, r2;
+        sun.instrument.InstrumentationImpl r0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.instrument.InstrumentationImpl: void loadClassAndStartAgent(java.lang.String,java.lang.String,java.lang.String)>(r1, "agentmain", r2);
+
+        return;
+    }
+
+    private byte[] transform(java.lang.ClassLoader, java.lang.String, java.lang.Class, java.security.ProtectionDomain, byte[], boolean)
+    {
+        byte[] r5, $r6;
+        sun.instrument.InstrumentationImpl r0;
+        sun.instrument.TransformerManager $r7;
+        java.security.ProtectionDomain r4;
+        java.lang.Class r3;
+        java.lang.ClassLoader r1;
+        java.lang.String r2;
+        boolean z0;
+
+        r0 := @this: sun.instrument.InstrumentationImpl;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Class;
+
+        r4 := @parameter3: java.security.ProtectionDomain;
+
+        r5 := @parameter4: byte[];
+
+        z0 := @parameter5: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r7 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mRetransfomableTransformerManager>;
+
+        goto label2;
+
+     label1:
+        $r7 = r0.<sun.instrument.InstrumentationImpl: sun.instrument.TransformerManager mTransformerManager>;
+
+     label2:
+        if $r7 != null goto label3;
+
+        return null;
+
+     label3:
+        $r6 = virtualinvoke $r7.<sun.instrument.TransformerManager: byte[] transform(java.lang.ClassLoader,java.lang.String,java.lang.Class,java.security.ProtectionDomain,byte[])>(r1, r2, r3, r4, r5);
+
+        return $r6;
+    }
+
+    static void <clinit>()
+    {
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("instrument");
+
+        return;
+    }
+}

@@ -1,0 +1,564 @@
+class sun.util.locale.provider.BreakDictionary extends java.lang.Object
+{
+    private static int supportedVersion;
+    private sun.text.CompactByteArray columnMap;
+    private sun.text.SupplementaryCharacterData supplementaryCharColumnMap;
+    private int numCols;
+    private int numColGroups;
+    private short[] table;
+    private short[] rowIndex;
+    private int[] rowIndexFlags;
+    private short[] rowIndexFlagsIndex;
+    private byte[] rowIndexShifts;
+
+    void <init>(java.lang.String) throws java.io.IOException, java.util.MissingResourceException
+    {
+        java.lang.String r1;
+        sun.util.locale.provider.BreakDictionary r0;
+
+        r0 := @this: sun.util.locale.provider.BreakDictionary;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.util.locale.provider.BreakDictionary: sun.text.CompactByteArray columnMap> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: sun.text.SupplementaryCharacterData supplementaryCharColumnMap> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: short[] table> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndex> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: int[] rowIndexFlags> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex> = null;
+
+        r0.<sun.util.locale.provider.BreakDictionary: byte[] rowIndexShifts> = null;
+
+        specialinvoke r0.<sun.util.locale.provider.BreakDictionary: void readDictionaryFile(java.lang.String)>(r1);
+
+        return;
+    }
+
+    private void readDictionaryFile(java.lang.String) throws java.io.IOException, java.util.MissingResourceException
+    {
+        byte[] $r10, $r14, r29, r30, r31;
+        java.io.BufferedInputStream r4;
+        byte $b17, $b21;
+        java.lang.InternalError $r27;
+        java.util.MissingResourceException $r18, $r19, $r25;
+        java.lang.StringBuilder $r20, $r21, $r22, $r23;
+        sun.util.locale.provider.BreakDictionary$1 $r0;
+        sun.util.locale.provider.BreakDictionary r1;
+        sun.text.SupplementaryCharacterData $r12;
+        short $s16, $s19, $s20, $s22;
+        java.lang.String r2, $r24, $r28;
+        java.security.PrivilegedActionException $r26;
+        int[] $r9, $r15, r32;
+        short[] r5, $r7, $r8, $r11, $r13, $r16, $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i18, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40;
+        sun.text.CompactByteArray $r6;
+        java.lang.Object $r3;
+
+        r1 := @this: sun.util.locale.provider.BreakDictionary;
+
+        r2 := @parameter0: java.lang.String;
+
+     label01:
+        $r0 = new sun.util.locale.provider.BreakDictionary$1;
+
+        specialinvoke $r0.<sun.util.locale.provider.BreakDictionary$1: void <init>(sun.util.locale.provider.BreakDictionary,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        r4 = (java.io.BufferedInputStream) $r3;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r26 := @caughtexception;
+
+        $r27 = new java.lang.InternalError;
+
+        $r28 = virtualinvoke $r26.<java.security.PrivilegedActionException: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r28, $r26);
+
+        throw $r27;
+
+     label04:
+        r29 = newarray (byte)[8];
+
+        $i0 = virtualinvoke r4.<java.io.BufferedInputStream: int read(byte[])>(r29);
+
+        if $i0 == 8 goto label05;
+
+        $r25 = new java.util.MissingResourceException;
+
+        specialinvoke $r25.<java.util.MissingResourceException: void <init>(java.lang.String,java.lang.String,java.lang.String)>("Wrong data length", r2, "");
+
+        throw $r25;
+
+     label05:
+        $i1 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r29, 0);
+
+        $i2 = <sun.util.locale.provider.BreakDictionary: int supportedVersion>;
+
+        if $i1 == $i2 goto label06;
+
+        $r19 = new java.util.MissingResourceException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dictionary version(");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") is unsupported");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.util.MissingResourceException: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r24, r2, "");
+
+        throw $r19;
+
+     label06:
+        $i3 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r29, 4);
+
+        r30 = newarray (byte)[$i3];
+
+        $i4 = virtualinvoke r4.<java.io.BufferedInputStream: int read(byte[])>(r30);
+
+        if $i4 == $i3 goto label07;
+
+        $r18 = new java.util.MissingResourceException;
+
+        specialinvoke $r18.<java.util.MissingResourceException: void <init>(java.lang.String,java.lang.String,java.lang.String)>("Wrong data length", r2, "");
+
+        throw $r18;
+
+     label07:
+        virtualinvoke r4.<java.io.BufferedInputStream: void close()>();
+
+        $i5 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, 0);
+
+        i23 = 4;
+
+        r5 = newarray (short)[$i5];
+
+        i24 = 0;
+
+     label08:
+        if i24 >= $i5 goto label09;
+
+        $s22 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: short getShort(byte[],int)>(r30, i23);
+
+        r5[i24] = $s22;
+
+        i24 = i24 + 1;
+
+        i23 = i23 + 2;
+
+        goto label08;
+
+     label09:
+        $i6 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i23);
+
+        i25 = i23 + 4;
+
+        r31 = newarray (byte)[$i6];
+
+        i26 = 0;
+
+     label10:
+        if i26 >= $i6 goto label11;
+
+        $b21 = r30[i25];
+
+        r31[i26] = $b21;
+
+        i26 = i26 + 1;
+
+        i25 = i25 + 1;
+
+        goto label10;
+
+     label11:
+        $r6 = new sun.text.CompactByteArray;
+
+        specialinvoke $r6.<sun.text.CompactByteArray: void <init>(short[],byte[])>(r5, r31);
+
+        r1.<sun.util.locale.provider.BreakDictionary: sun.text.CompactByteArray columnMap> = $r6;
+
+        $i7 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i25);
+
+        r1.<sun.util.locale.provider.BreakDictionary: int numCols> = $i7;
+
+        i27 = i25 + 4;
+
+        $i8 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i27);
+
+        r1.<sun.util.locale.provider.BreakDictionary: int numColGroups> = $i8;
+
+        i28 = i27 + 4;
+
+        $i9 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i28);
+
+        i29 = i28 + 4;
+
+        $r7 = newarray (short)[$i9];
+
+        r1.<sun.util.locale.provider.BreakDictionary: short[] rowIndex> = $r7;
+
+        i30 = 0;
+
+     label12:
+        if i30 >= $i9 goto label13;
+
+        $r17 = r1.<sun.util.locale.provider.BreakDictionary: short[] rowIndex>;
+
+        $s20 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: short getShort(byte[],int)>(r30, i29);
+
+        $r17[i30] = $s20;
+
+        i30 = i30 + 1;
+
+        i29 = i29 + 2;
+
+        goto label12;
+
+     label13:
+        $i10 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i29);
+
+        i31 = i29 + 4;
+
+        $r8 = newarray (short)[$i10];
+
+        r1.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex> = $r8;
+
+        i32 = 0;
+
+     label14:
+        if i32 >= $i10 goto label15;
+
+        $r16 = r1.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex>;
+
+        $s19 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: short getShort(byte[],int)>(r30, i31);
+
+        $r16[i32] = $s19;
+
+        i32 = i32 + 1;
+
+        i31 = i31 + 2;
+
+        goto label14;
+
+     label15:
+        $i11 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i31);
+
+        i33 = i31 + 4;
+
+        $r9 = newarray (int)[$i11];
+
+        r1.<sun.util.locale.provider.BreakDictionary: int[] rowIndexFlags> = $r9;
+
+        i34 = 0;
+
+     label16:
+        if i34 >= $i11 goto label17;
+
+        $r15 = r1.<sun.util.locale.provider.BreakDictionary: int[] rowIndexFlags>;
+
+        $i18 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i33);
+
+        $r15[i34] = $i18;
+
+        i34 = i34 + 1;
+
+        i33 = i33 + 4;
+
+        goto label16;
+
+     label17:
+        $i12 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i33);
+
+        i35 = i33 + 4;
+
+        $r10 = newarray (byte)[$i12];
+
+        r1.<sun.util.locale.provider.BreakDictionary: byte[] rowIndexShifts> = $r10;
+
+        i36 = 0;
+
+     label18:
+        if i36 >= $i12 goto label19;
+
+        $r14 = r1.<sun.util.locale.provider.BreakDictionary: byte[] rowIndexShifts>;
+
+        $b17 = r30[i35];
+
+        $r14[i36] = $b17;
+
+        i36 = i36 + 1;
+
+        i35 = i35 + 1;
+
+        goto label18;
+
+     label19:
+        $i13 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i35);
+
+        i37 = i35 + 4;
+
+        $r11 = newarray (short)[$i13];
+
+        r1.<sun.util.locale.provider.BreakDictionary: short[] table> = $r11;
+
+        i38 = 0;
+
+     label20:
+        if i38 >= $i13 goto label21;
+
+        $r13 = r1.<sun.util.locale.provider.BreakDictionary: short[] table>;
+
+        $s16 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: short getShort(byte[],int)>(r30, i37);
+
+        $r13[i38] = $s16;
+
+        i38 = i38 + 1;
+
+        i37 = i37 + 2;
+
+        goto label20;
+
+     label21:
+        $i14 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i37);
+
+        i39 = i37 + 4;
+
+        r32 = newarray (int)[$i14];
+
+        i40 = 0;
+
+     label22:
+        if i40 >= $i14 goto label23;
+
+        $i15 = staticinvoke <sun.util.locale.provider.RuleBasedBreakIterator: int getInt(byte[],int)>(r30, i39);
+
+        r32[i40] = $i15;
+
+        i40 = i40 + 1;
+
+        i39 = i39 + 4;
+
+        goto label22;
+
+     label23:
+        $r12 = new sun.text.SupplementaryCharacterData;
+
+        specialinvoke $r12.<sun.text.SupplementaryCharacterData: void <init>(int[])>(r32);
+
+        r1.<sun.util.locale.provider.BreakDictionary: sun.text.SupplementaryCharacterData supplementaryCharColumnMap> = $r12;
+
+        return;
+
+        catch java.security.PrivilegedActionException from label01 to label02 with label03;
+    }
+
+    public final short getNextStateFromCharacter(int, int)
+    {
+        sun.util.locale.provider.BreakDictionary r0;
+        sun.text.CompactByteArray $r2;
+        sun.text.SupplementaryCharacterData $r1;
+        char $c3;
+        short $s2;
+        byte $b5;
+        int i0, i1, i4, $i6;
+
+        r0 := @this: sun.util.locale.provider.BreakDictionary;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 65536 goto label1;
+
+        $r2 = r0.<sun.util.locale.provider.BreakDictionary: sun.text.CompactByteArray columnMap>;
+
+        $c3 = (char) i0;
+
+        $b5 = virtualinvoke $r2.<sun.text.CompactByteArray: byte elementAt(char)>($c3);
+
+        $i6 = (int) $b5;
+
+        i4 = $i6;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.util.locale.provider.BreakDictionary: sun.text.SupplementaryCharacterData supplementaryCharColumnMap>;
+
+        i4 = virtualinvoke $r1.<sun.text.SupplementaryCharacterData: int getValue(int)>(i0);
+
+     label2:
+        $s2 = virtualinvoke r0.<sun.util.locale.provider.BreakDictionary: short getNextState(int,int)>(i1, i4);
+
+        return $s2;
+    }
+
+    public final short getNextState(int, int)
+    {
+        byte[] $r2;
+        sun.util.locale.provider.BreakDictionary r0;
+        short $s4, $s5;
+        byte $b2;
+        int i0, i1, $i3, $i6, $i7;
+        short[] $r1;
+        boolean $z0;
+
+        r0 := @this: sun.util.locale.provider.BreakDictionary;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $z0 = specialinvoke r0.<sun.util.locale.provider.BreakDictionary: boolean cellIsPopulated(int,int)>(i0, i1);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndex>;
+
+        $s4 = $r1[i0];
+
+        $r2 = r0.<sun.util.locale.provider.BreakDictionary: byte[] rowIndexShifts>;
+
+        $b2 = $r2[i0];
+
+        $i6 = (int) $b2;
+
+        $i3 = i1 + $i6;
+
+        $i7 = (int) $s4;
+
+        $s5 = specialinvoke r0.<sun.util.locale.provider.BreakDictionary: short internalAt(int,int)>($i7, $i3);
+
+        return $s5;
+
+     label1:
+        return 0;
+    }
+
+    private boolean cellIsPopulated(int, int)
+    {
+        sun.util.locale.provider.BreakDictionary r0;
+        short $s1, $s4, $s10;
+        int[] $r3;
+        int i0, i2, $i3, $i5, i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14;
+        boolean $z0, $z1;
+        short[] $r1, $r2, $r4;
+
+        r0 := @this: sun.util.locale.provider.BreakDictionary;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r1 = r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex>;
+
+        $s1 = $r1[i0];
+
+        $i12 = (int) $s1;
+
+        if $i12 >= 0 goto label3;
+
+        $r4 = r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex>;
+
+        $s10 = $r4[i0];
+
+        $i13 = (int) $s10;
+
+        $i11 = neg $i13;
+
+        if i2 != $i11 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r3 = r0.<sun.util.locale.provider.BreakDictionary: int[] rowIndexFlags>;
+
+        $r2 = r0.<sun.util.locale.provider.BreakDictionary: short[] rowIndexFlagsIndex>;
+
+        $s4 = $r2[i0];
+
+        $i3 = i2 >> 5;
+
+        $i14 = (int) $s4;
+
+        $i5 = $i14 + $i3;
+
+        i6 = $r3[$i5];
+
+        $i7 = i2 & 31;
+
+        $i8 = 1 << $i7;
+
+        $i9 = i6 & $i8;
+
+        if $i9 == 0 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+    }
+
+    private short internalAt(int, int)
+    {
+        sun.util.locale.provider.BreakDictionary r0;
+        short $s5;
+        int i0, $i1, i2, $i3, $i4;
+        short[] $r1;
+
+        r0 := @this: sun.util.locale.provider.BreakDictionary;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r1 = r0.<sun.util.locale.provider.BreakDictionary: short[] table>;
+
+        $i1 = r0.<sun.util.locale.provider.BreakDictionary: int numCols>;
+
+        $i3 = i0 * $i1;
+
+        $i4 = $i3 + i2;
+
+        $s5 = $r1[$i4];
+
+        return $s5;
+    }
+
+    static void <clinit>()
+    {
+        <sun.util.locale.provider.BreakDictionary: int supportedVersion> = 1;
+
+        return;
+    }
+}

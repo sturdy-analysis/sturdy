@@ -1,0 +1,278 @@
+final class sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r49;
+        java.security.spec.ECPublicKeySpec $r52;
+        sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer r46;
+        sun.security.ssl.ECDHKeyExchange$ECDHEPossession r47;
+        java.util.EnumSet $r58;
+        sun.security.ssl.ServerHandshakeContext r1;
+        javax.net.ssl.SSLHandshakeException $r29, $r42, $r44, $r45;
+        java.security.CryptoPrimitive $r57;
+        java.lang.Exception $r41;
+        javax.net.ssl.SSLException $r28, $r33, $r36, $r39;
+        sun.security.ssl.SSLPossession r48;
+        java.lang.StringBuilder $r21, $r24, $r26;
+        sun.security.ssl.CipherSuite $r7;
+        javax.crypto.SecretKey $r16;
+        java.lang.Throwable $r43;
+        java.lang.Object[] $r30;
+        sun.security.ssl.ECDHClientKeyExchange$ECDHClientKeyExchangeMessage $r11;
+        sun.security.ssl.ProtocolVersion $r8, $r18, $r25;
+        sun.security.ssl.CipherSuite$KeyExchange $r9;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String $r27;
+        sun.security.ssl.TransportContext $r22, $r32, $r35, $r38;
+        java.security.spec.ECParameterSpec $r5;
+        java.security.AlgorithmConstraints $r56;
+        sun.security.ssl.Alert $r23, $r31, $r34, $r37;
+        java.security.spec.ECPoint $r51;
+        sun.security.ssl.SSLSessionImpl $r17;
+        java.nio.ByteBuffer r12;
+        sun.security.ssl.ECDHKeyExchange$ECDHECredentials $r13;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.security.spec.EllipticCurve $r50;
+        java.security.KeyFactory $r53;
+        java.util.List $r2, $r14;
+        sun.security.ssl.SSLTrafficKeyDerivation $r19;
+        java.security.interfaces.ECPublicKey $r4, $r55;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r6;
+        java.util.Iterator $r3;
+        java.security.PublicKey $r54;
+        sun.security.ssl.SSLKeyExchange $r10;
+        sun.security.ssl.SSLKeyDerivation $r15, $r20;
+        java.lang.Object $r40;
+
+        r46 := @this: sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r12 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        r47 = null;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r40 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r48 = (sun.security.ssl.SSLPossession) $r40;
+
+        $z3 = r48 instanceof sun.security.ssl.ECDHKeyExchange$ECDHEPossession;
+
+        if $z3 == 0 goto label02;
+
+        r47 = (sun.security.ssl.ECDHKeyExchange$ECDHEPossession) r48;
+
+        goto label03;
+
+     label02:
+        goto label01;
+
+     label03:
+        if r47 != null goto label04;
+
+        $r38 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r37 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r39 = virtualinvoke $r38.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r37, "No expected ECDHE possessions for client key exchange");
+
+        throw $r39;
+
+     label04:
+        $r4 = r47.<sun.security.ssl.ECDHKeyExchange$ECDHEPossession: java.security.interfaces.ECPublicKey publicKey>;
+
+        $r5 = interfaceinvoke $r4.<java.security.interfaces.ECPublicKey: java.security.spec.ECParameterSpec getParams()>();
+
+        $r6 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(java.security.spec.ECParameterSpec)>($r5);
+
+        if $r6 != null goto label05;
+
+        $r35 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r36 = virtualinvoke $r35.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r34, "Unsupported EC server cert for ECDHE client key exchange");
+
+        throw $r36;
+
+     label05:
+        $r7 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r9 = $r7.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r8 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r10 = staticinvoke <sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.CipherSuite$KeyExchange,sun.security.ssl.ProtocolVersion)>($r9, $r8);
+
+        if $r10 != null goto label06;
+
+        $r32 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r31 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r33 = virtualinvoke $r32.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r31, "Not supported key exchange type");
+
+        throw $r33;
+
+     label06:
+        $r11 = new sun.security.ssl.ECDHClientKeyExchange$ECDHClientKeyExchangeMessage;
+
+        specialinvoke $r11.<sun.security.ssl.ECDHClientKeyExchange$ECDHClientKeyExchangeMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r1, r12);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label07;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label07;
+
+        $r30 = newarray (java.lang.Object)[1];
+
+        $r30[0] = $r11;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming ECDHE ClientKeyExchange handshake message", $r30);
+
+     label07:
+        $r49 = staticinvoke <sun.security.ssl.ECDHClientKeyExchange$ECDHClientKeyExchangeMessage: byte[] access$400(sun.security.ssl.ECDHClientKeyExchange$ECDHClientKeyExchangeMessage)>($r11);
+
+        $r50 = virtualinvoke $r5.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $r51 = staticinvoke <sun.security.ssl.JsseJce: java.security.spec.ECPoint decodePoint(byte[],java.security.spec.EllipticCurve)>($r49, $r50);
+
+        $r52 = new java.security.spec.ECPublicKeySpec;
+
+        specialinvoke $r52.<java.security.spec.ECPublicKeySpec: void <init>(java.security.spec.ECPoint,java.security.spec.ECParameterSpec)>($r51, $r5);
+
+        $r53 = staticinvoke <sun.security.ssl.JsseJce: java.security.KeyFactory getKeyFactory(java.lang.String)>("EC");
+
+        $r54 = virtualinvoke $r53.<java.security.KeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>($r52);
+
+        $r55 = (java.security.interfaces.ECPublicKey) $r54;
+
+        $r56 = r1.<sun.security.ssl.ServerHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r57 = <java.security.CryptoPrimitive: java.security.CryptoPrimitive KEY_AGREEMENT>;
+
+        $r58 = staticinvoke <java.util.EnumSet: java.util.EnumSet of(java.lang.Enum)>($r57);
+
+        $z4 = interfaceinvoke $r56.<java.security.AlgorithmConstraints: boolean permits(java.util.Set,java.security.Key)>($r58, $r55);
+
+        if $z4 != 0 goto label08;
+
+        $r29 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r29.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("ECPublicKey does not comply to algorithm constraints");
+
+        throw $r29;
+
+     label08:
+        $r14 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r13 = new sun.security.ssl.ECDHKeyExchange$ECDHECredentials;
+
+        specialinvoke $r13.<sun.security.ssl.ECDHKeyExchange$ECDHECredentials: void <init>(java.security.interfaces.ECPublicKey,sun.security.ssl.SupportedGroupsExtension$NamedGroup)>($r55, $r6);
+
+        interfaceinvoke $r14.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r41 := @caughtexception;
+
+        $r42 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r42.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not generate ECPublicKey");
+
+        $r43 = virtualinvoke $r42.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r41);
+
+        $r44 = (javax.net.ssl.SSLHandshakeException) $r43;
+
+        $r45 = (javax.net.ssl.SSLHandshakeException) $r44;
+
+        throw $r45;
+
+     label11:
+        $r15 = virtualinvoke $r10.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext)>(r1);
+
+        $r16 = interfaceinvoke $r15.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("MasterSecret", null);
+
+        $r17 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r17.<sun.security.ssl.SSLSessionImpl: void setMasterSecret(javax.crypto.SecretKey)>($r16);
+
+        $r18 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r19 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLTrafficKeyDerivation valueOf(sun.security.ssl.ProtocolVersion)>($r18);
+
+        if $r19 != null goto label12;
+
+        $r22 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r23 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not supported key derivation: ");
+
+        $r25 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r28 = virtualinvoke $r22.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r23, $r27);
+
+        throw $r28;
+
+     label12:
+        $r20 = virtualinvoke $r19.<sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r1, $r16);
+
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation> = $r20;
+
+        return;
+
+        catch java.security.GeneralSecurityException from label07 to label09 with label10;
+        catch java.io.IOException from label07 to label09 with label10;
+    }
+
+    void <init>(sun.security.ssl.ECDHClientKeyExchange$1)
+    {
+        sun.security.ssl.ECDHClientKeyExchange$1 r1;
+        sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer;
+
+        r1 := @parameter0: sun.security.ssl.ECDHClientKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.ECDHClientKeyExchange$ECDHEClientKeyExchangeConsumer: void <init>()>();
+
+        return;
+    }
+}

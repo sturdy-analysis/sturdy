@@ -1,0 +1,6151 @@
+public class javax.swing.text.html.parser.Parser extends java.lang.Object implements javax.swing.text.html.parser.DTDConstants
+{
+    private char[] text;
+    private int textpos;
+    private javax.swing.text.html.parser.TagElement last;
+    private boolean space;
+    private char[] str;
+    private int strpos;
+    protected javax.swing.text.html.parser.DTD dtd;
+    private int ch;
+    private int ln;
+    private java.io.Reader in;
+    private javax.swing.text.html.parser.Element recent;
+    private javax.swing.text.html.parser.TagStack stack;
+    private boolean skipTag;
+    private javax.swing.text.html.parser.TagElement lastFormSent;
+    private javax.swing.text.SimpleAttributeSet attributes;
+    private boolean seenHtml;
+    private boolean seenHead;
+    private boolean seenBody;
+    private boolean ignoreSpace;
+    protected boolean strict;
+    private int crlfCount;
+    private int crCount;
+    private int lfCount;
+    private int currentBlockStartPos;
+    private int lastBlockStartPos;
+    private static final char[] cp1252Map;
+    private static final java.lang.String START_COMMENT;
+    private static final java.lang.String END_COMMENT;
+    private static final char[] SCRIPT_END_TAG;
+    private static final char[] SCRIPT_END_TAG_UPPER_CASE;
+    private char[] buf;
+    private int pos;
+    private int len;
+    private int currentPosition;
+
+    public void <init>(javax.swing.text.html.parser.DTD)
+    {
+        javax.swing.text.SimpleAttributeSet $r3;
+        javax.swing.text.html.parser.Parser r0;
+        char[] $r1, $r2, $r4;
+        javax.swing.text.html.parser.DTD r5;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r5 := @parameter0: javax.swing.text.html.parser.DTD;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (char)[1024];
+
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = $r1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = 0;
+
+        $r2 = newarray (char)[128];
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = $r2;
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd> = null;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean skipTag> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement lastFormSent> = null;
+
+        $r3 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r3.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes> = $r3;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenHtml> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenHead> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenBody> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean strict> = 0;
+
+        $r4 = newarray (char)[1];
+
+        r0.<javax.swing.text.html.parser.Parser: char[] buf> = $r4;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd> = r5;
+
+        return;
+    }
+
+    protected int getCurrentLine()
+    {
+        int $i0;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        return $i0;
+    }
+
+    int getBlockStartPosition()
+    {
+        int $i0, $i1, $i2;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int lastBlockStartPos>;
+
+        $i1 = $i0 - 1;
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i1);
+
+        return $i2;
+    }
+
+    protected javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element, boolean)
+    {
+        javax.swing.text.html.parser.TagElement $r0;
+        javax.swing.text.html.parser.Element r1;
+        javax.swing.text.html.parser.Parser r2;
+        boolean z0;
+
+        r2 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.Element;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new javax.swing.text.html.parser.TagElement;
+
+        specialinvoke $r0.<javax.swing.text.html.parser.TagElement: void <init>(javax.swing.text.html.parser.Element,boolean)>(r1, z0);
+
+        return $r0;
+    }
+
+    protected javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element)
+    {
+        javax.swing.text.html.parser.TagElement $r2;
+        javax.swing.text.html.parser.Parser r0;
+        javax.swing.text.html.parser.Element r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.Element;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    protected javax.swing.text.SimpleAttributeSet getAttributes()
+    {
+        javax.swing.text.html.parser.Parser r0;
+        javax.swing.text.SimpleAttributeSet $r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        return $r1;
+    }
+
+    protected void flushAttributes()
+    {
+        javax.swing.text.html.parser.Parser r0;
+        javax.swing.text.SimpleAttributeSet $r1, $r2;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $r2 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        virtualinvoke $r2.<javax.swing.text.SimpleAttributeSet: void removeAttributes(javax.swing.text.AttributeSet)>($r1);
+
+        return;
+    }
+
+    protected void handleText(char[])
+    {
+        javax.swing.text.html.parser.Parser r0;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: char[];
+
+        return;
+    }
+
+    protected void handleTitle(char[])
+    {
+        javax.swing.text.html.parser.Parser r0;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: char[];
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleText(char[])>(r1);
+
+        return;
+    }
+
+    protected void handleComment(char[])
+    {
+        javax.swing.text.html.parser.Parser r0;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: char[];
+
+        return;
+    }
+
+    protected void handleEOFInComment()
+    {
+        java.io.CharArrayReader $r3;
+        java.io.IOException $r5;
+        java.io.Reader $r2;
+        int $i0, $i1;
+        javax.swing.text.html.parser.Parser r0;
+        char[] $r1, $r4;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: int strIndexOf(char)>(10);
+
+        if $i0 < 0 goto label5;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: char[] getChars(int,int)>(0, $i0);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleComment(char[])>($r1);
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.parser.Parser: java.io.Reader in>;
+
+        virtualinvoke $r2.<java.io.Reader: void close()>();
+
+        $r3 = new java.io.CharArrayReader;
+
+        $i1 = $i0 + 1;
+
+        $r4 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: char[] getChars(int)>($i1);
+
+        specialinvoke $r3.<java.io.CharArrayReader: void <init>(char[])>($r4);
+
+        r0.<javax.swing.text.html.parser.Parser: java.io.Reader in> = $r3;
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = 62;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("ioexception");
+
+     label4:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void resetStrBuffer()>();
+
+        goto label6;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("eof.comment");
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected void handleEmptyTag(javax.swing.text.html.parser.TagElement) throws javax.swing.text.ChangedCharSetException
+    {
+        javax.swing.text.html.parser.TagElement r1;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        return;
+    }
+
+    protected void handleStartTag(javax.swing.text.html.parser.TagElement)
+    {
+        javax.swing.text.html.parser.TagElement r1;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        return;
+    }
+
+    protected void handleEndTag(javax.swing.text.html.parser.TagElement)
+    {
+        javax.swing.text.html.parser.TagElement r1;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        return;
+    }
+
+    protected void handleError(int, java.lang.String)
+    {
+        int i0;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        return;
+    }
+
+    void handleText(javax.swing.text.html.parser.TagElement)
+    {
+        javax.swing.text.html.parser.TagElement r0, $r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        javax.swing.text.html.parser.TagStack $r8, $r12;
+        javax.swing.text.html.parser.Element $r4, $r11, $r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        javax.swing.text.html.parser.Parser r1;
+        java.lang.String $r17;
+        char[] $r2, $r3, $r5, $r6, $r7, r13, $r14, $r15;
+        javax.swing.text.html.parser.DTD $r10;
+
+        r1 := @this: javax.swing.text.html.parser.Parser;
+
+        r0 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z0 == 0 goto label1;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+        $z8 = r1.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z8 != 0 goto label1;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace> = 1;
+
+     label1:
+        $i9 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i9 != 0 goto label3;
+
+        $z5 = r1.<javax.swing.text.html.parser.Parser: boolean space>;
+
+        if $z5 == 0 goto label2;
+
+        $r8 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r8 == null goto label2;
+
+        $r9 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        $z6 = virtualinvoke $r9.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z6 != 0 goto label2;
+
+        $r12 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r10 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r11 = $r10.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element pcdata>;
+
+        $z7 = virtualinvoke $r12.<javax.swing.text.html.parser.TagStack: boolean advance(javax.swing.text.html.parser.Element)>($r11);
+
+        if $z7 != 0 goto label3;
+
+     label2:
+        r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last> = r0;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+        $i10 = r1.<javax.swing.text.html.parser.Parser: int currentBlockStartPos>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i10;
+
+        return;
+
+     label3:
+        $z1 = r1.<javax.swing.text.html.parser.Parser: boolean space>;
+
+        if $z1 == 0 goto label6;
+
+        $z2 = r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace>;
+
+        if $z2 != 0 goto label5;
+
+        $i1 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i3 = $i1 + 1;
+
+        $r2 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i2 = lengthof $r2;
+
+        if $i3 <= $i2 goto label4;
+
+        $r5 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i6 = lengthof $r5;
+
+        $i7 = $i6 + 200;
+
+        r13 = newarray (char)[$i7];
+
+        $r7 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $r6 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i8 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, r13, 0, $i8);
+
+        r1.<javax.swing.text.html.parser.Parser: char[] text> = r13;
+
+     label4:
+        $r3 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i4 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i5 = $i4 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = $i5;
+
+        $r3[$i4] = 32;
+
+        $z3 = r1.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z3 != 0 goto label5;
+
+        $r4 = virtualinvoke r0.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $z4 = virtualinvoke $r4.<javax.swing.text.html.parser.Element: boolean isEmpty()>();
+
+        if $z4 != 0 goto label5;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace> = 1;
+
+     label5:
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+     label6:
+        $i11 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $r14 = newarray (char)[$i11];
+
+        $r15 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i12 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r15, 0, $r14, 0, $i12);
+
+        $r16 = virtualinvoke r0.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $r17 = virtualinvoke $r16.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z9 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>("title");
+
+        if $z9 == 0 goto label7;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void handleTitle(char[])>($r14);
+
+        goto label8;
+
+     label7:
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void handleText(char[])>($r14);
+
+     label8:
+        $i0 = r1.<javax.swing.text.html.parser.Parser: int currentBlockStartPos>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i0;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = 0;
+
+        r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last> = r0;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+        return;
+    }
+
+    protected void error(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        int $i0;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.StringBuilder $r1, $r3, $r4, $r6, $r7, $r9, $r10, $r12;
+        java.lang.String r2, r5, r8, r11, $r13;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r2 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: java.lang.String;
+
+        r11 := @parameter3: java.lang.String;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleError(int,java.lang.String)>($i0, $r13);
+
+        return;
+    }
+
+    protected void error(java.lang.String, java.lang.String, java.lang.String)
+    {
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String r1, r2, r3;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r1, r2, r3, "?");
+
+        return;
+    }
+
+    protected void error(java.lang.String, java.lang.String)
+    {
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r1, r2, "?", "?");
+
+        return;
+    }
+
+    protected void error(java.lang.String)
+    {
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r1, "?", "?", "?");
+
+        return;
+    }
+
+    protected void startTag(javax.swing.text.html.parser.TagElement) throws javax.swing.text.ChangedCharSetException
+    {
+        javax.swing.text.SimpleAttributeSet $r5, $r9, $r11;
+        javax.swing.text.html.parser.AttributeList r15;
+        javax.swing.text.html.parser.TagElement r0, $r13, $r14;
+        javax.swing.text.html.HTML$Attribute $r12;
+        int $i0, $i1, $i2;
+        javax.swing.text.html.parser.Parser r2;
+        java.lang.String $r6, $r7, $r8, $r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.swing.text.html.parser.TagStack $r3, $r4;
+        javax.swing.text.html.parser.Element $r1;
+
+        r2 := @this: javax.swing.text.html.parser.Parser;
+
+        r0 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $z0 = virtualinvoke $r1.<javax.swing.text.html.parser.Element: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+        $r13 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        if $r13 == null goto label01;
+
+        $r14 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        $z5 = virtualinvoke $r14.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z5 == 0 goto label02;
+
+     label01:
+        $i2 = r2.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i2 == 0 goto label03;
+
+     label02:
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void handleText(javax.swing.text.html.parser.TagElement)>(r0);
+
+        goto label04;
+
+     label03:
+        r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last> = r0;
+
+        r2.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+     label04:
+        $i0 = r2.<javax.swing.text.html.parser.Parser: int currentBlockStartPos>;
+
+        r2.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i0;
+
+        r15 = $r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList atts>;
+
+     label05:
+        if r15 == null goto label08;
+
+        $i1 = r15.<javax.swing.text.html.parser.AttributeList: int modifier>;
+
+        if $i1 != 2 goto label07;
+
+        $r5 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $z2 = virtualinvoke $r5.<javax.swing.text.SimpleAttributeSet: boolean isEmpty()>();
+
+        if $z2 != 0 goto label06;
+
+        $r9 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $r8 = r15.<javax.swing.text.html.parser.AttributeList: java.lang.String name>;
+
+        $z3 = virtualinvoke $r9.<javax.swing.text.SimpleAttributeSet: boolean isDefined(java.lang.Object)>($r8);
+
+        if $z3 != 0 goto label07;
+
+        $r11 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $r10 = r15.<javax.swing.text.html.parser.AttributeList: java.lang.String name>;
+
+        $r12 = staticinvoke <javax.swing.text.html.HTML: javax.swing.text.html.HTML$Attribute getAttributeKey(java.lang.String)>($r10);
+
+        $z4 = virtualinvoke $r11.<javax.swing.text.SimpleAttributeSet: boolean isDefined(java.lang.Object)>($r12);
+
+        if $z4 != 0 goto label07;
+
+     label06:
+        $r6 = virtualinvoke r15.<javax.swing.text.html.parser.AttributeList: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("req.att ", $r6, $r7);
+
+     label07:
+        r15 = r15.<javax.swing.text.html.parser.AttributeList: javax.swing.text.html.parser.AttributeList next>;
+
+        goto label05;
+
+     label08:
+        $z1 = virtualinvoke $r1.<javax.swing.text.html.parser.Element: boolean isEmpty()>();
+
+        if $z1 == 0 goto label09;
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void handleEmptyTag(javax.swing.text.html.parser.TagElement)>(r0);
+
+        goto label10;
+
+     label09:
+        r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent> = $r1;
+
+        $r3 = new javax.swing.text.html.parser.TagStack;
+
+        $r4 = r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        specialinvoke $r3.<javax.swing.text.html.parser.TagStack: void <init>(javax.swing.text.html.parser.TagElement,javax.swing.text.html.parser.TagStack)>(r0, $r4);
+
+        r2.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r3;
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void handleStartTag(javax.swing.text.html.parser.TagElement)>(r0);
+
+     label10:
+        return;
+    }
+
+    protected void endTag(boolean)
+    {
+        javax.swing.text.html.parser.TagElement $r2, $r14;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String $r7, $r12;
+        boolean z0, $z1, $z2;
+        javax.swing.text.html.parser.TagStack $r1, $r3, $r4, $r5, $r8, $r10, $r13, $r15, $r16, $r17;
+        javax.swing.text.html.parser.Element $r6, $r9, $r11, $r18;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r2 = $r1.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleText(javax.swing.text.html.parser.TagElement)>($r2);
+
+        if z0 == 0 goto label1;
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r9 = $r8.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z2 = virtualinvoke $r9.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z2 != 0 goto label1;
+
+        $r10 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r11 = $r10.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("end.missing", $r12);
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z1 = virtualinvoke $r3.<javax.swing.text.html.parser.TagStack: boolean terminate()>();
+
+        if $z1 != 0 goto label2;
+
+        $r5 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r6 = $r5.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("end.unexpected", $r7);
+
+     label2:
+        $r13 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r14 = $r13.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEndTag(javax.swing.text.html.parser.TagElement)>($r14);
+
+        $r15 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r16 = $r15.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r16;
+
+        $r17 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r17 == null goto label3;
+
+        $r4 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r18 = $r4.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        goto label4;
+
+     label3:
+        $r18 = null;
+
+     label4:
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent> = $r18;
+
+        return;
+    }
+
+    boolean ignoreElement(javax.swing.text.html.parser.Element)
+    {
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String $r3, $r5, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19;
+        javax.swing.text.html.parser.TagStack $r1, $r6, r9;
+        javax.swing.text.html.parser.Element $r2, r4, $r7;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r4 := @parameter0: javax.swing.text.html.parser.Element;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r2 = $r1.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $r5 = virtualinvoke r4.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("html");
+
+        if $z0 == 0 goto label01;
+
+        $z18 = r0.<javax.swing.text.html.parser.Parser: boolean seenHtml>;
+
+        if $z18 != 0 goto label03;
+
+     label01:
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("head");
+
+        if $z1 == 0 goto label02;
+
+        $z17 = r0.<javax.swing.text.html.parser.Parser: boolean seenHead>;
+
+        if $z17 != 0 goto label03;
+
+     label02:
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("body");
+
+        if $z2 == 0 goto label04;
+
+        $z16 = r0.<javax.swing.text.html.parser.Parser: boolean seenBody>;
+
+        if $z16 == 0 goto label04;
+
+     label03:
+        return 1;
+
+     label04:
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("dt");
+
+        if $z3 != 0 goto label05;
+
+        $z15 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("dd");
+
+        if $z15 == 0 goto label08;
+
+     label05:
+        r9 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+     label06:
+        if r9 == null goto label07;
+
+        $r7 = r9.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z14 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("dl");
+
+        if $z14 != 0 goto label07;
+
+        r9 = r9.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        goto label06;
+
+     label07:
+        if r9 != null goto label08;
+
+        return 1;
+
+     label08:
+        $z4 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z4 == 0 goto label09;
+
+        $z12 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("#pcdata");
+
+        if $z12 != 0 goto label09;
+
+        $z13 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("input");
+
+        if $z13 == 0 goto label13;
+
+     label09:
+        $z19 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("font");
+
+        if $z19 == 0 goto label10;
+
+        $z10 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("ul");
+
+        if $z10 != 0 goto label13;
+
+        $z11 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("ol");
+
+        if $z11 != 0 goto label13;
+
+     label10:
+        $z5 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("meta");
+
+        if $z5 == 0 goto label11;
+
+        $r6 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r6 != null goto label13;
+
+     label11:
+        $z6 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("style");
+
+        if $z6 == 0 goto label12;
+
+        $z9 = r0.<javax.swing.text.html.parser.Parser: boolean seenBody>;
+
+        if $z9 != 0 goto label13;
+
+     label12:
+        $z7 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z7 == 0 goto label14;
+
+        $z8 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("a");
+
+        if $z8 == 0 goto label14;
+
+     label13:
+        return 1;
+
+     label14:
+        return 0;
+    }
+
+    protected void markFirstTime(javax.swing.text.html.parser.Element)
+    {
+        char $c1;
+        javax.swing.text.html.parser.Element r0;
+        int $i0;
+        javax.swing.text.html.parser.Parser r2;
+        char[] $r3, r4, $r5;
+        java.lang.String $r1;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: javax.swing.text.html.parser.Parser;
+
+        r0 := @parameter0: javax.swing.text.html.parser.Element;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("html");
+
+        if $z0 == 0 goto label1;
+
+        r2.<javax.swing.text.html.parser.Parser: boolean seenHtml> = 1;
+
+        goto label4;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("head");
+
+        if $z1 == 0 goto label2;
+
+        r2.<javax.swing.text.html.parser.Parser: boolean seenHead> = 1;
+
+        goto label4;
+
+     label2:
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("body");
+
+        if $z2 == 0 goto label4;
+
+        $r3 = r2.<javax.swing.text.html.parser.Parser: char[] buf>;
+
+        $i0 = lengthof $r3;
+
+        if $i0 != 1 goto label3;
+
+        r4 = newarray (char)[256];
+
+        $r5 = r2.<javax.swing.text.html.parser.Parser: char[] buf>;
+
+        $c1 = $r5[0];
+
+        r4[0] = $c1;
+
+        r2.<javax.swing.text.html.parser.Parser: char[] buf> = r4;
+
+     label3:
+        r2.<javax.swing.text.html.parser.Parser: boolean seenBody> = 1;
+
+     label4:
+        return;
+    }
+
+    boolean legalElementContext(javax.swing.text.html.parser.Element) throws javax.swing.text.ChangedCharSetException
+    {
+        java.util.Vector $r19;
+        javax.swing.text.html.parser.AttributeList r57;
+        java.lang.String $r6, $r7, $r14, $r26, $r30, $r42, $r45, $r46, $r47, $r48;
+        javax.swing.text.html.parser.ContentModel $r18, $r24;
+        javax.swing.text.html.parser.TagElement $r25, $r29, $r41, $r53;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, $z32, $z33, $z34, $z35, z36, $z37, $z38, $z39, $z40, z41, $z42, z43, z44;
+        javax.swing.text.html.parser.TagStack $r1, $r3, $r4, $r8, $r12, $r15, $r17, $r23, $r33, $r34, $r36, $r37, $r43, r54, $r55, $r58;
+        javax.swing.text.html.parser.Element r2, $r5, $r10, $r11, $r13, $r16, r22, $r28, $r32, $r35, $r38, $r40, $r44, $r50, $r52, $r56;
+        int $i0, $i1;
+        javax.swing.text.html.parser.Parser r0;
+        java.util.Iterator $r20;
+        javax.swing.text.html.parser.DTD $r9, $r27, $r31, $r39, $r49, $r51;
+        java.lang.Object $r21;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r2 := @parameter0: javax.swing.text.html.parser.Element;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r1 != null goto label02;
+
+        $r49 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r50 = $r49.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element html>;
+
+        if r2 == $r50 goto label01;
+
+        $r51 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r52 = $r51.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element html>;
+
+        $r53 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r52, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r53);
+
+        $z35 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>(r2);
+
+        return $z35;
+
+     label01:
+        return 1;
+
+     label02:
+        $r3 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.text.html.parser.TagStack: boolean advance(javax.swing.text.html.parser.Element)>(r2);
+
+        if $z0 == 0 goto label03;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void markFirstTime(javax.swing.text.html.parser.Element)>(r2);
+
+        return 1;
+
+     label03:
+        z36 = 0;
+
+        z44 = 0;
+
+        z43 = 0;
+
+        $r4 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r5 = $r4.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $r7 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z1 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z1 != 0 goto label07;
+
+        $z29 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z29 == 0 goto label04;
+
+        $z34 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("td");
+
+        if $z34 != 0 goto label06;
+
+     label04:
+        $z30 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z30 == 0 goto label05;
+
+        $z33 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("th");
+
+        if $z33 != 0 goto label06;
+
+     label05:
+        $z31 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("tr");
+
+        if $z31 == 0 goto label07;
+
+        $z32 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("tr");
+
+        if $z32 != 0 goto label07;
+
+     label06:
+        z36 = 1;
+
+        z44 = 1;
+
+        z43 = 1;
+
+     label07:
+        $z37 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z37 != 0 goto label09;
+
+        if z43 != 0 goto label09;
+
+        $r43 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r44 = $r43.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r45 = virtualinvoke $r44.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $r46 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        if $r45 != $r46 goto label08;
+
+        $r48 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z28 = virtualinvoke $r48.<java.lang.String: boolean equals(java.lang.Object)>("body");
+
+        if $z28 == 0 goto label09;
+
+     label08:
+        $z26 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean ignoreElement(javax.swing.text.html.parser.Element)>(r2);
+
+        r0.<javax.swing.text.html.parser.Parser: boolean skipTag> = $z26;
+
+        if $z26 == 0 goto label09;
+
+        $r47 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("tag.ignore", $r47);
+
+        $z27 = r0.<javax.swing.text.html.parser.Parser: boolean skipTag>;
+
+        return $z27;
+
+     label09:
+        $z38 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z38 != 0 goto label10;
+
+        $z20 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z20 == 0 goto label10;
+
+        $z21 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("tr");
+
+        if $z21 != 0 goto label10;
+
+        $z22 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("td");
+
+        if $z22 != 0 goto label10;
+
+        $z23 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("th");
+
+        if $z23 != 0 goto label10;
+
+        $z24 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("caption");
+
+        if $z24 != 0 goto label10;
+
+        $r39 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r40 = virtualinvoke $r39.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>("tr");
+
+        $r41 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r40, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>($r41);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r41);
+
+        $r42 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("start.missing", $r42);
+
+        $z25 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>(r2);
+
+        return $z25;
+
+     label10:
+        if z44 != 0 goto label17;
+
+        $r33 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z13 = virtualinvoke $r33.<javax.swing.text.html.parser.TagStack: boolean terminate()>();
+
+        if $z13 == 0 goto label17;
+
+        $z14 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z14 == 0 goto label11;
+
+        $r37 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r38 = $r37.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z19 = virtualinvoke $r38.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z19 == 0 goto label17;
+
+     label11:
+        $r34 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        r54 = $r34.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+     label12:
+        if r54 == null goto label17;
+
+        $z15 = virtualinvoke r54.<javax.swing.text.html.parser.TagStack: boolean advance(javax.swing.text.html.parser.Element)>(r2);
+
+        if $z15 == 0 goto label15;
+
+     label13:
+        $r36 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r36 == r54 goto label14;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        goto label13;
+
+     label14:
+        return 1;
+
+     label15:
+        $z16 = virtualinvoke r54.<javax.swing.text.html.parser.TagStack: boolean terminate()>();
+
+        if $z16 == 0 goto label17;
+
+        $z17 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z17 == 0 goto label16;
+
+        $r35 = r54.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z18 = virtualinvoke $r35.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z18 != 0 goto label16;
+
+        goto label17;
+
+     label16:
+        r54 = r54.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        goto label12;
+
+     label17:
+        $r55 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r56 = virtualinvoke $r55.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element first()>();
+
+        if $r56 == null goto label21;
+
+        $z9 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z9 == 0 goto label18;
+
+        $z12 = virtualinvoke $r56.<javax.swing.text.html.parser.Element: boolean omitStart()>();
+
+        if $z12 == 0 goto label21;
+
+     label18:
+        $r27 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r28 = $r27.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element head>;
+
+        if $r56 != $r28 goto label19;
+
+        $r31 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r32 = $r31.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element pcdata>;
+
+        if r2 == $r32 goto label21;
+
+     label19:
+        $r29 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r56, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>($r29);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r29);
+
+        $z10 = virtualinvoke $r56.<javax.swing.text.html.parser.Element: boolean omitStart()>();
+
+        if $z10 != 0 goto label20;
+
+        $r30 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("start.missing", $r30);
+
+     label20:
+        $z11 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>(r2);
+
+        return $z11;
+
+     label21:
+        $z39 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z39 != 0 goto label29;
+
+        $r17 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r18 = virtualinvoke $r17.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.ContentModel contentModel()>();
+
+        $r19 = new java.util.Vector;
+
+        specialinvoke $r19.<java.util.Vector: void <init>()>();
+
+        if $r18 == null goto label29;
+
+        virtualinvoke $r18.<javax.swing.text.html.parser.ContentModel: void getElements(java.util.Vector)>($r19);
+
+        $r20 = virtualinvoke $r19.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label22:
+        $z40 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+        if $z40 == 0 goto label29;
+
+        $r21 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (javax.swing.text.html.parser.Element) $r21;
+
+        $r23 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $i0 = virtualinvoke r22.<javax.swing.text.html.parser.Element: int getIndex()>();
+
+        $z6 = virtualinvoke $r23.<javax.swing.text.html.parser.TagStack: boolean excluded(int)>($i0);
+
+        if $z6 == 0 goto label23;
+
+        goto label22;
+
+     label23:
+        z41 = 0;
+
+        r57 = virtualinvoke r22.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttributes()>();
+
+     label24:
+        if r57 == null goto label26;
+
+        $i1 = r57.<javax.swing.text.html.parser.AttributeList: int modifier>;
+
+        if $i1 != 2 goto label25;
+
+        z41 = 1;
+
+        goto label26;
+
+     label25:
+        r57 = r57.<javax.swing.text.html.parser.AttributeList: javax.swing.text.html.parser.AttributeList next>;
+
+        goto label24;
+
+     label26:
+        if z41 == 0 goto label27;
+
+        goto label22;
+
+     label27:
+        $r24 = virtualinvoke r22.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.ContentModel getContent()>();
+
+        if $r24 == null goto label28;
+
+        $z7 = virtualinvoke $r24.<javax.swing.text.html.parser.ContentModel: boolean first(java.lang.Object)>(r2);
+
+        if $z7 == 0 goto label28;
+
+        $r25 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>(r22, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>($r25);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r25);
+
+        $r26 = virtualinvoke r22.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("start.missing", $r26);
+
+        $z8 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>(r2);
+
+        return $z8;
+
+     label28:
+        goto label22;
+
+     label29:
+        $r58 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z42 = virtualinvoke $r58.<javax.swing.text.html.parser.TagStack: boolean terminate()>();
+
+        if $z42 == 0 goto label32;
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r11 = $r8.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r9 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r10 = $r9.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element body>;
+
+        if $r11 == $r10 goto label32;
+
+        $z2 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z2 == 0 goto label30;
+
+        $r15 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r16 = $r15.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z5 = virtualinvoke $r16.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z5 == 0 goto label32;
+
+     label30:
+        $r12 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r13 = $r12.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z3 = virtualinvoke $r13.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z3 != 0 goto label31;
+
+        $r14 = virtualinvoke r2.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("end.missing", $r14);
+
+     label31:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        $z4 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>(r2);
+
+        return $z4;
+
+     label32:
+        return 0;
+    }
+
+    void legalTagContext(javax.swing.text.html.parser.TagElement) throws javax.swing.text.ChangedCharSetException
+    {
+        javax.swing.text.html.parser.TagElement r1, $r5, $r12;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String $r4;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.html.parser.TagStack $r9, $r10, $r11, r14;
+        javax.swing.text.html.parser.Element $r2, $r3, $r6, $r8, $r13;
+        javax.swing.text.html.parser.DTD $r7;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.TagElement;
+
+        $r2 = virtualinvoke r1.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r13 = virtualinvoke r1.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void markFirstTime(javax.swing.text.html.parser.Element)>($r13);
+
+        return;
+
+     label1:
+        $z1 = virtualinvoke r1.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z1 == 0 goto label2;
+
+        $r10 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r10 == null goto label2;
+
+        $r11 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r12 = $r11.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        $z2 = virtualinvoke $r12.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z2 != 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>(r1);
+
+        return;
+
+     label2:
+        r14 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+     label3:
+        if r14 == null goto label7;
+
+        $r5 = r14.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $r7 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r8 = $r7.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element head>;
+
+        if $r6 != $r8 goto label6;
+
+     label4:
+        $r9 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r9 == r14 goto label5;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        goto label4;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>(r1);
+
+        return;
+
+     label6:
+        r14 = r14.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        goto label3;
+
+     label7:
+        $r3 = virtualinvoke r1.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("tag.unexpected", $r4);
+
+        return;
+    }
+
+    void errorContext() throws javax.swing.text.ChangedCharSetException
+    {
+        javax.swing.text.html.parser.TagElement $r7, $r9, $r14;
+        javax.swing.text.html.parser.Parser r0;
+        javax.swing.text.html.parser.TagStack $r1, $r2, $r8, $r13, $r15, $r16;
+        javax.swing.text.html.parser.Element $r4, $r6, $r10, $r12;
+        javax.swing.text.html.parser.DTD $r3, $r5, $r11;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+     label1:
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r1 == null goto label2;
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r9 = $r8.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.text.html.parser.TagElement: javax.swing.text.html.parser.Element getElement()>();
+
+        $r11 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r12 = $r11.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element body>;
+
+        if $r10 == $r12 goto label2;
+
+        $r13 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r14 = $r13.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEndTag(javax.swing.text.html.parser.TagElement)>($r14);
+
+        $r15 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r16 = $r15.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r16;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r2 != null goto label3;
+
+        $r3 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r4 = $r3.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element body>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>($r4);
+
+        $r5 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r6 = $r5.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element body>;
+
+        $r7 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r6, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r7);
+
+     label3:
+        return;
+    }
+
+    void addString(int)
+    {
+        int $i0, $i1, $i2, $i3, i4, $i6, $i7, $i8;
+        javax.swing.text.html.parser.Parser r0;
+        char $c5;
+        char[] $r1, $r2, $r3, r4, $r5, $r6;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        i4 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 != $i0 goto label1;
+
+        $r3 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i6 = lengthof $r3;
+
+        $i7 = $i6 + 128;
+
+        r4 = newarray (char)[$i7];
+
+        $r6 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $r5 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i8 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r4, 0, $i8);
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = r4;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i2 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = $i3;
+
+        $c5 = (char) i4;
+
+        $r2[$i2] = $c5;
+
+        return;
+    }
+
+    java.lang.String getString(int)
+    {
+        int i0, $i1, $i2, $i3, $i4;
+        javax.swing.text.html.parser.Parser r0;
+        char[] r1, $r2;
+        java.lang.String $r3;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i2 = $i1 - i0;
+
+        r1 = newarray (char)[$i2];
+
+        $r2 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i4 = $i3 - i0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, i0, r1, 0, $i4);
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = i0;
+
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(char[])>(r1);
+
+        return $r3;
+    }
+
+    char[] getChars(int)
+    {
+        int i0, $i1, $i2, $i3, $i4;
+        javax.swing.text.html.parser.Parser r0;
+        char[] r1, $r2;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i2 = $i1 - i0;
+
+        r1 = newarray (char)[$i2];
+
+        $r2 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i4 = $i3 - i0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, i0, r1, 0, $i4);
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = i0;
+
+        return r1;
+    }
+
+    char[] getChars(int, int)
+    {
+        int i0, i1, $i2, $i3;
+        char[] r0, $r2;
+        javax.swing.text.html.parser.Parser r1;
+
+        r1 := @this: javax.swing.text.html.parser.Parser;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $i2 = i0 - i1;
+
+        r0 = newarray (char)[$i2];
+
+        $r2 = r1.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i3 = i0 - i1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, i1, r0, 0, $i3);
+
+        return r0;
+    }
+
+    void resetStrBuffer()
+    {
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = 0;
+
+        return;
+    }
+
+    int strIndexOf(char)
+    {
+        char c1, $c2;
+        int $i0, i3, $i4, $i5, $i7;
+        javax.swing.text.html.parser.Parser r0;
+        char[] $r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        c1 := @parameter0: char;
+
+        i3 = 0;
+
+     label1:
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        if i3 >= $i0 goto label3;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $c2 = $r1[i3];
+
+        $i4 = (int) $c2;
+
+        $i5 = (int) c1;
+
+        if $i4 != $i5 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+
+    void skipSpace() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+     label1:
+        $i14 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i14)
+        {
+            case 9: goto label5;
+            case 10: goto label2;
+            case 13: goto label3;
+            case 32: goto label5;
+            default: goto label6;
+        };
+
+     label2:
+        $i8 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i9 = $i8 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i9;
+
+        $i10 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i10;
+
+        $i11 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i12 = $i11 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i12;
+
+        goto label1;
+
+     label3:
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i1 = $i0 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i1;
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        if $i2 != 10 goto label4;
+
+        $i5 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i5;
+
+        $i6 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i7 = $i6 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i7;
+
+        goto label1;
+
+     label4:
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i4 = $i3 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i4;
+
+        goto label1;
+
+     label5:
+        $i13 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i13;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    boolean parseIdentifier(boolean) throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        javax.swing.text.html.parser.Parser r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        tableswitch($i0)
+        {
+            case 65: goto label1;
+            case 66: goto label1;
+            case 67: goto label1;
+            case 68: goto label1;
+            case 69: goto label1;
+            case 70: goto label1;
+            case 71: goto label1;
+            case 72: goto label1;
+            case 73: goto label1;
+            case 74: goto label1;
+            case 75: goto label1;
+            case 76: goto label1;
+            case 77: goto label1;
+            case 78: goto label1;
+            case 79: goto label1;
+            case 80: goto label1;
+            case 81: goto label1;
+            case 82: goto label1;
+            case 83: goto label1;
+            case 84: goto label1;
+            case 85: goto label1;
+            case 86: goto label1;
+            case 87: goto label1;
+            case 88: goto label1;
+            case 89: goto label1;
+            case 90: goto label1;
+            case 91: goto label3;
+            case 92: goto label3;
+            case 93: goto label3;
+            case 94: goto label3;
+            case 95: goto label3;
+            case 96: goto label3;
+            case 97: goto label2;
+            case 98: goto label2;
+            case 99: goto label2;
+            case 100: goto label2;
+            case 101: goto label2;
+            case 102: goto label2;
+            case 103: goto label2;
+            case 104: goto label2;
+            case 105: goto label2;
+            case 106: goto label2;
+            case 107: goto label2;
+            case 108: goto label2;
+            case 109: goto label2;
+            case 110: goto label2;
+            case 111: goto label2;
+            case 112: goto label2;
+            case 113: goto label2;
+            case 114: goto label2;
+            case 115: goto label2;
+            case 116: goto label2;
+            case 117: goto label2;
+            case 118: goto label2;
+            case 119: goto label2;
+            case 120: goto label2;
+            case 121: goto label2;
+            case 122: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $i6 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i7 = $i6 - 65;
+
+        $i8 = 97 + $i7;
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i8;
+
+     label2:
+        goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>($i1);
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        tableswitch($i2)
+        {
+            case 45: goto label6;
+            case 46: goto label6;
+            case 47: goto label7;
+            case 48: goto label6;
+            case 49: goto label6;
+            case 50: goto label6;
+            case 51: goto label6;
+            case 52: goto label6;
+            case 53: goto label6;
+            case 54: goto label6;
+            case 55: goto label6;
+            case 56: goto label6;
+            case 57: goto label6;
+            case 58: goto label7;
+            case 59: goto label7;
+            case 60: goto label7;
+            case 61: goto label7;
+            case 62: goto label7;
+            case 63: goto label7;
+            case 64: goto label7;
+            case 65: goto label5;
+            case 66: goto label5;
+            case 67: goto label5;
+            case 68: goto label5;
+            case 69: goto label5;
+            case 70: goto label5;
+            case 71: goto label5;
+            case 72: goto label5;
+            case 73: goto label5;
+            case 74: goto label5;
+            case 75: goto label5;
+            case 76: goto label5;
+            case 77: goto label5;
+            case 78: goto label5;
+            case 79: goto label5;
+            case 80: goto label5;
+            case 81: goto label5;
+            case 82: goto label5;
+            case 83: goto label5;
+            case 84: goto label5;
+            case 85: goto label5;
+            case 86: goto label5;
+            case 87: goto label5;
+            case 88: goto label5;
+            case 89: goto label5;
+            case 90: goto label5;
+            case 91: goto label7;
+            case 92: goto label7;
+            case 93: goto label7;
+            case 94: goto label7;
+            case 95: goto label6;
+            case 96: goto label7;
+            case 97: goto label6;
+            case 98: goto label6;
+            case 99: goto label6;
+            case 100: goto label6;
+            case 101: goto label6;
+            case 102: goto label6;
+            case 103: goto label6;
+            case 104: goto label6;
+            case 105: goto label6;
+            case 106: goto label6;
+            case 107: goto label6;
+            case 108: goto label6;
+            case 109: goto label6;
+            case 110: goto label6;
+            case 111: goto label6;
+            case 112: goto label6;
+            case 113: goto label6;
+            case 114: goto label6;
+            case 115: goto label6;
+            case 116: goto label6;
+            case 117: goto label6;
+            case 118: goto label6;
+            case 119: goto label6;
+            case 120: goto label6;
+            case 121: goto label6;
+            case 122: goto label6;
+            default: goto label7;
+        };
+
+     label5:
+        if z0 == 0 goto label6;
+
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i4 = $i3 - 65;
+
+        $i5 = 97 + $i4;
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i5;
+
+     label6:
+        goto label4;
+
+     label7:
+        return 1;
+    }
+
+    private char[] parseEntityReference() throws java.io.IOException
+    {
+        javax.swing.text.html.parser.Entity $r16, r17;
+        java.lang.StringBuilder $r2, $r3, $r4, $r19;
+        java.lang.String $r5, $r10, $r14, $r18;
+        char[] $r6, $r7, $r8, $r11, $r12, $r13;
+        boolean $z0, $z1, $z2, z3, $z4;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, i54, $i55, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68;
+        javax.swing.text.html.parser.Parser r0;
+        char c56;
+        javax.swing.text.html.parser.DTD $r9, $r15;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        i0 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        if $i1 != 35 goto label18;
+
+        i54 = 0;
+
+        $i20 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i20;
+
+        $i21 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i21 < 48 goto label01;
+
+        $i53 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i53 <= 57 goto label02;
+
+     label01:
+        $i22 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i22 == 120 goto label02;
+
+        $i52 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i52 != 88 goto label16;
+
+     label02:
+        $i55 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i55 < 48 goto label04;
+
+        $i45 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i45 > 57 goto label04;
+
+     label03:
+        $i46 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i46 < 48 goto label10;
+
+        $i47 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i47 > 57 goto label10;
+
+        $i49 = i54 * 10;
+
+        $i48 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i50 = $i49 + $i48;
+
+        i54 = $i50 - 48;
+
+        $i51 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i51;
+
+        goto label03;
+
+     label04:
+        $i23 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i23;
+
+        $i24 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i25 = staticinvoke <java.lang.Character: int toLowerCase(int)>($i24);
+
+        c56 = (char) $i25;
+
+     label05:
+        $i61 = (int) c56;
+
+        if $i61 < 48 goto label06;
+
+        $i62 = (int) c56;
+
+        if $i62 <= 57 goto label07;
+
+     label06:
+        $i63 = (int) c56;
+
+        if $i63 < 97 goto label10;
+
+        $i64 = (int) c56;
+
+        if $i64 > 102 goto label10;
+
+     label07:
+        $i65 = (int) c56;
+
+        if $i65 < 48 goto label08;
+
+        $i66 = (int) c56;
+
+        if $i66 > 57 goto label08;
+
+        $i43 = i54 * 16;
+
+        $i67 = (int) c56;
+
+        $i44 = $i43 + $i67;
+
+        i54 = $i44 - 48;
+
+        goto label09;
+
+     label08:
+        $i40 = i54 * 16;
+
+        $i68 = (int) c56;
+
+        $i41 = $i40 + $i68;
+
+        $i42 = $i41 - 97;
+
+        i54 = $i42 + 10;
+
+     label09:
+        $i57 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i57;
+
+        $i58 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i59 = staticinvoke <java.lang.Character: int toLowerCase(int)>($i58);
+
+        c56 = (char) $i59;
+
+        goto label05;
+
+     label10:
+        $i60 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i60)
+        {
+            case 10: goto label11;
+            case 13: goto label12;
+            case 59: goto label14;
+            default: goto label15;
+        };
+
+     label11:
+        $i35 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i36 = $i35 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i36;
+
+        $i37 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i37;
+
+        $i38 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i39 = $i38 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i39;
+
+        goto label15;
+
+     label12:
+        $i27 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i28 = $i27 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i28;
+
+        $i29 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i29;
+
+        if $i29 != 10 goto label13;
+
+        $i32 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i32;
+
+        $i33 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i34 = $i33 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i34;
+
+        goto label15;
+
+     label13:
+        $i30 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i31 = $i30 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i31;
+
+        goto label15;
+
+     label14:
+        $i26 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i26;
+
+     label15:
+        $r13 = specialinvoke r0.<javax.swing.text.html.parser.Parser: char[] mapNumericReference(int)>(i54);
+
+        return $r13;
+
+     label16:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(35);
+
+        $z2 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(0);
+
+        if $z2 != 0 goto label17;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("ident.expected");
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = i0;
+
+        $r12 = newarray (char)[2];
+
+        $r12[0] = 38;
+
+        $r12[1] = 35;
+
+        return $r12;
+
+     label17:
+        goto label19;
+
+     label18:
+        $z0 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(0);
+
+        if $z0 != 0 goto label19;
+
+        $r11 = newarray (char)[1];
+
+        $r11[0] = 38;
+
+        return $r11;
+
+     label19:
+        z3 = 0;
+
+        $i2 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i2)
+        {
+            case 10: goto label20;
+            case 13: goto label21;
+            case 59: goto label23;
+            default: goto label24;
+        };
+
+     label20:
+        $i15 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i16 = $i15 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i16;
+
+        $i17 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i17;
+
+        $i18 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i19 = $i18 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i19;
+
+        goto label24;
+
+     label21:
+        $i7 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i8 = $i7 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i8;
+
+        $i9 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i9;
+
+        if $i9 != 10 goto label22;
+
+        $i12 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i12;
+
+        $i13 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i14 = $i13 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i14;
+
+        goto label24;
+
+     label22:
+        $i10 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i11 = $i10 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i11;
+
+        goto label24;
+
+     label23:
+        z3 = 1;
+
+        $i3 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i3;
+
+     label24:
+        $r14 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(i0);
+
+        $r15 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r16 = virtualinvoke $r15.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Entity getEntity(java.lang.String)>($r14);
+
+        r17 = $r16;
+
+        $z4 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z4 != 0 goto label25;
+
+        if $r16 != null goto label25;
+
+        $r9 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r10 = virtualinvoke $r14.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r17 = virtualinvoke $r9.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Entity getEntity(java.lang.String)>($r10);
+
+     label25:
+        if r17 == null goto label26;
+
+        $z1 = virtualinvoke r17.<javax.swing.text.html.parser.Entity: boolean isGeneral()>();
+
+        if $z1 != 0 goto label30;
+
+     label26:
+        $i4 = virtualinvoke $r14.<java.lang.String: int length()>();
+
+        if $i4 != 0 goto label27;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("invalid.entref", $r14);
+
+        $r7 = newarray (char)[0];
+
+        return $r7;
+
+     label27:
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("&");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        if z3 == 0 goto label28;
+
+        $r18 = ";";
+
+        goto label29;
+
+     label28:
+        $r18 = "";
+
+     label29:
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i5 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $r6 = newarray (char)[$i5];
+
+        $i6 = lengthof $r6;
+
+        virtualinvoke $r5.<java.lang.String: void getChars(int,int,char[],int)>(0, $i6, $r6, 0);
+
+        return $r6;
+
+     label30:
+        $r8 = virtualinvoke r17.<javax.swing.text.html.parser.Entity: char[] getData()>();
+
+        return $r8;
+    }
+
+    private char[] mapNumericReference(int)
+    {
+        char $c2;
+        java.lang.IllegalArgumentException $r2;
+        int i0, $i1, $i4;
+        char[] $r0, $r1, r4;
+        javax.swing.text.html.parser.Parser r3;
+
+        r3 := @this: javax.swing.text.html.parser.Parser;
+
+        i0 := @parameter0: int;
+
+        $i4 = (int) 65535;
+
+        if i0 < $i4 goto label4;
+
+     label1:
+        r4 = staticinvoke <java.lang.Character: char[] toChars(int)>(i0);
+
+     label2:
+        goto label8;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r4 = newarray (char)[0];
+
+        goto label8;
+
+     label4:
+        r4 = newarray (char)[1];
+
+        $r1 = r4;
+
+        if i0 < 130 goto label5;
+
+        if i0 <= 159 goto label6;
+
+     label5:
+        $c2 = (char) i0;
+
+        goto label7;
+
+     label6:
+        $r0 = <javax.swing.text.html.parser.Parser: char[] cp1252Map>;
+
+        $i1 = i0 - 130;
+
+        $c2 = $r0[$i1];
+
+     label7:
+        $r1[0] = $c2;
+
+     label8:
+        return r4;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    void parseComment() throws java.io.IOException
+    {
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, i27, $i28, $i29;
+        javax.swing.text.html.parser.Parser r0;
+        char $c8;
+        char[] $r1;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+     label01:
+        $i26 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        i27 = $i26;
+
+        lookupswitch($i26)
+        {
+            case -1: goto label10;
+            case 10: goto label11;
+            case 13: goto label13;
+            case 45: goto label02;
+            case 62: goto label12;
+            default: goto label16;
+        };
+
+     label02:
+        $z0 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z0 != 0 goto label05;
+
+        $i5 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        if $i5 == 0 goto label05;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: char[] str>;
+
+        $i6 = r0.<javax.swing.text.html.parser.Parser: int strpos>;
+
+        $i7 = $i6 - 1;
+
+        $c8 = $r1[$i7];
+
+        $i29 = (int) $c8;
+
+        if $i29 != 45 goto label05;
+
+        $i9 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i9;
+
+        if $i9 != 62 goto label03;
+
+        return;
+
+     label03:
+        $i10 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i10 != 33 goto label17;
+
+        $i11 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i11;
+
+        if $i11 != 62 goto label04;
+
+        return;
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(45);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(33);
+
+        goto label01;
+
+     label05:
+        $i28 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i28;
+
+        if $i28 != 45 goto label17;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        $z1 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z1 != 0 goto label06;
+
+        $i2 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i2 != 62 goto label07;
+
+     label06:
+        return;
+
+     label07:
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i3 != 33 goto label09;
+
+        $i4 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i4;
+
+        if $i4 != 62 goto label08;
+
+        return;
+
+     label08:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(45);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(33);
+
+        goto label01;
+
+     label09:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(45);
+
+        goto label17;
+
+     label10:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEOFInComment()>();
+
+        return;
+
+     label11:
+        $i20 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i21 = $i20 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i21;
+
+        $i22 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i22;
+
+        $i23 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i24 = $i23 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i24;
+
+        goto label17;
+
+     label12:
+        $i0 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+        goto label17;
+
+     label13:
+        $i12 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i13 = $i12 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i13;
+
+        $i14 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i14;
+
+        if $i14 != 10 goto label14;
+
+        $i17 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i17;
+
+        $i18 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i19 = $i18 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i19;
+
+        goto label15;
+
+     label14:
+        $i15 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i16 = $i15 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i16;
+
+     label15:
+        i27 = 10;
+
+        goto label17;
+
+     label16:
+        $i25 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i25;
+
+     label17:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(i27);
+
+        goto label01;
+    }
+
+    void parseLiteral(boolean) throws java.io.IOException
+    {
+        java.lang.String $r3, $r12, $r17, $r27;
+        char[] $r4, $r5, $r6, $r7, $r8, $r9, $r13, $r14, $r18, $r19, $r20, $r21, r22, $r23, $r24, $r28, r29;
+        boolean z0;
+        javax.swing.text.html.parser.TagStack $r1, $r10, $r15, $r25;
+        javax.swing.text.html.parser.Element $r2, $r11, $r16, $r26;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i23, $i26, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, i60, i61, i62, i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70;
+        javax.swing.text.html.parser.Parser r0;
+        char $c6, $c10, $c11, $c21, $c24, $c25, $c27;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        z0 := @parameter0: boolean;
+
+     label01:
+        $i59 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        i60 = $i59;
+
+        lookupswitch($i59)
+        {
+            case -1: goto label02;
+            case 10: goto label09;
+            case 13: goto label10;
+            case 38: goto label07;
+            case 62: goto label03;
+            default: goto label13;
+        };
+
+     label02:
+        $r25 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r26 = $r25.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r27 = virtualinvoke $r26.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("eof.literal", $r27);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        return;
+
+     label03:
+        $i0 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r2 = $r1.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r3 = $r2.<javax.swing.text.html.parser.Element: java.lang.String name>;
+
+        $i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i3 = $i2 + 2;
+
+        i61 = $i1 - $i3;
+
+        i62 = 0;
+
+        if i61 < 0 goto label14;
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        i63 = i61 + 1;
+
+        $c10 = $r8[i61];
+
+        $i66 = (int) $c10;
+
+        if $i66 != 60 goto label14;
+
+        $r9 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $c11 = $r9[i63];
+
+        $i67 = (int) $c11;
+
+        if $i67 != 47 goto label14;
+
+     label04:
+        i63 = i63 + 1;
+
+        $i12 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if i63 >= $i12 goto label05;
+
+        $r14 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $c24 = $r14[i63];
+
+        $c25 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c24);
+
+        $r15 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r16 = $r15.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r17 = $r16.<javax.swing.text.html.parser.Element: java.lang.String name>;
+
+        $i26 = i62;
+
+        i62 = i62 + 1;
+
+        $c27 = virtualinvoke $r17.<java.lang.String: char charAt(int)>($i26);
+
+        $i68 = (int) $c25;
+
+        $i69 = (int) $c27;
+
+        if $i68 != $i69 goto label05;
+
+        goto label04;
+
+     label05:
+        $i13 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if i63 != $i13 goto label14;
+
+        $i14 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $r10 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r11 = $r10.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r12 = $r11.<javax.swing.text.html.parser.Element: java.lang.String name>;
+
+        $i15 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        $i16 = $i15 + 2;
+
+        $i17 = $i14 - $i16;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i17;
+
+        $i18 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i18 <= 0 goto label06;
+
+        $r13 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i19 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i20 = $i19 - 1;
+
+        $c21 = $r13[$i20];
+
+        $i70 = (int) $c21;
+
+        if $i70 != 10 goto label06;
+
+        $i22 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i23 = $i22 - 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i23;
+
+     label06:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(0);
+
+        return;
+
+     label07:
+        $r18 = specialinvoke r0.<javax.swing.text.html.parser.Parser: char[] parseEntityReference()>();
+
+        $i29 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i28 = lengthof $r18;
+
+        $i31 = $i29 + $i28;
+
+        $r19 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i30 = lengthof $r19;
+
+        if $i31 <= $i30 goto label08;
+
+        $i38 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i37 = lengthof $r18;
+
+        $i39 = $i38 + $i37;
+
+        $i42 = $i39 + 128;
+
+        $r21 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i40 = lengthof $r21;
+
+        $i41 = $i40 * 2;
+
+        $i43 = staticinvoke <java.lang.Math: int max(int,int)>($i42, $i41);
+
+        r22 = newarray (char)[$i43];
+
+        $r24 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $r23 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i44 = lengthof $r23;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r24, 0, r22, 0, $i44);
+
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = r22;
+
+     label08:
+        $r20 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i33 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i32 = lengthof $r18;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r18, 0, $r20, $i33, $i32);
+
+        $i35 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i34 = lengthof $r18;
+
+        $i36 = $i35 + $i34;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i36;
+
+        goto label01;
+
+     label09:
+        $i53 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i54 = $i53 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i54;
+
+        $i55 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i55;
+
+        $i56 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i57 = $i56 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i57;
+
+        goto label14;
+
+     label10:
+        $i45 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i46 = $i45 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i46;
+
+        $i47 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i47;
+
+        if $i47 != 10 goto label11;
+
+        $i50 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i50;
+
+        $i51 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i52 = $i51 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i52;
+
+        goto label12;
+
+     label11:
+        $i48 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i49 = $i48 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i49;
+
+     label12:
+        i60 = 10;
+
+        goto label14;
+
+     label13:
+        $i58 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i58;
+
+     label14:
+        $i64 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $r28 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i65 = lengthof $r28;
+
+        if $i64 != $i65 goto label15;
+
+        $r5 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i7 = lengthof $r5;
+
+        $i8 = $i7 + 128;
+
+        r29 = newarray (char)[$i8];
+
+        $r7 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $r6 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i9 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, r29, 0, $i9);
+
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = r29;
+
+     label15:
+        $r4 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i4 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i5 = $i4 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i5;
+
+        $c6 = (char) i60;
+
+        $r4[$i4] = $c6;
+
+        goto label01;
+    }
+
+    java.lang.String parseAttributeValue(boolean) throws java.io.IOException
+    {
+        boolean $z0, $z1, z2, $z3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, i22, $i23, i24, $i25, i26, $i27, $i29, $i30, $i32, $i34, $i35, $i36, $i37, $i38;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String $r1, $r2, $r4, $r5, $r6, $r7, $r8, $r9;
+        char c28;
+        char[] $r3;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        z2 := @parameter0: boolean;
+
+        $i32 = (int) -1;
+
+        i22 = $i32;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i0)
+        {
+            case 34: goto label01;
+            case 39: goto label01;
+            default: goto label02;
+        };
+
+     label01:
+        i22 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+     label02:
+        $i23 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        i24 = $i23;
+
+        lookupswitch($i23)
+        {
+            case -1: goto label22;
+            case 9: goto label07;
+            case 10: goto label03;
+            case 13: goto label04;
+            case 32: goto label08;
+            case 34: goto label11;
+            case 38: goto label16;
+            case 39: goto label11;
+            case 60: goto label09;
+            case 61: goto label14;
+            case 62: goto label09;
+            default: goto label23;
+        };
+
+     label03:
+        $i16 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i17 = $i16 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i17;
+
+        $i18 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i18;
+
+        $i19 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i20 = $i19 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i20;
+
+        if i22 >= 0 goto label25;
+
+        $r8 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r8;
+
+     label04:
+        $i8 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i9 = $i8 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i9;
+
+        $i10 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i10;
+
+        if $i10 != 10 goto label05;
+
+        $i13 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i13;
+
+        $i14 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i15 = $i14 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i15;
+
+        goto label06;
+
+     label05:
+        $i11 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i12 = $i11 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i12;
+
+     label06:
+        if i22 >= 0 goto label25;
+
+        $r7 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r7;
+
+     label07:
+        if i22 >= 0 goto label08;
+
+        i24 = 32;
+
+     label08:
+        $i25 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i25;
+
+        if i22 >= 0 goto label25;
+
+        $r6 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r6;
+
+     label09:
+        if i22 >= 0 goto label10;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r2;
+
+     label10:
+        $i3 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i3;
+
+        goto label25;
+
+     label11:
+        $i6 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i6;
+
+        if $i23 != i22 goto label12;
+
+        $r5 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r5;
+
+     label12:
+        $i34 = (int) -1;
+
+        if i22 != $i34 goto label25;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("attvalerr");
+
+        $z3 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z3 != 0 goto label13;
+
+        $i7 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i7 != 32 goto label02;
+
+     label13:
+        $r4 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r4;
+
+     label14:
+        if i22 >= 0 goto label15;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("attvalerr");
+
+        $z0 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z0 == 0 goto label15;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r1;
+
+     label15:
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        goto label25;
+
+     label16:
+        $z1 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z1 == 0 goto label17;
+
+        if i22 >= 0 goto label17;
+
+        $i5 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i5;
+
+        goto label25;
+
+     label17:
+        $r3 = specialinvoke r0.<javax.swing.text.html.parser.Parser: char[] parseEntityReference()>();
+
+        i26 = 0;
+
+     label18:
+        $i27 = lengthof $r3;
+
+        if i26 >= $i27 goto label21;
+
+        c28 = $r3[i26];
+
+        if z2 == 0 goto label19;
+
+        $i35 = (int) c28;
+
+        if $i35 < 65 goto label19;
+
+        $i36 = (int) c28;
+
+        if $i36 > 90 goto label19;
+
+        $i37 = (int) c28;
+
+        $i4 = 97 + $i37;
+
+        $i29 = $i4 - 65;
+
+        goto label20;
+
+     label19:
+        $i38 = (int) c28;
+
+        $i29 = $i38;
+
+     label20:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>($i29);
+
+        i26 = i26 + 1;
+
+        goto label18;
+
+     label21:
+        goto label02;
+
+     label22:
+        $r9 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        return $r9;
+
+     label23:
+        if z2 == 0 goto label24;
+
+        if $i23 < 65 goto label24;
+
+        if $i23 > 90 goto label24;
+
+        $i21 = 97 + $i23;
+
+        i24 = $i21 - 65;
+
+     label24:
+        $i30 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i30;
+
+     label25:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void addString(int)>(i24);
+
+        goto label02;
+    }
+
+    void parseAttributeSpecificationList(javax.swing.text.html.parser.Element) throws java.io.IOException
+    {
+        java.util.Vector $r13, $r14;
+        javax.swing.text.SimpleAttributeSet $r6, $r10, $r11, $r12;
+        javax.swing.text.html.parser.AttributeList $r8, $r22, $r23, $r24, $r26, $r27, $r28, r30;
+        java.lang.String $r2, $r4, $r5, $r7, $r9, $r15, $r16, $r17, $r19, $r20, $r21, $r25, r29, r31, $r32;
+        char[] $r3, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        javax.swing.text.html.parser.Element r1;
+        javax.swing.text.html.HTML$Attribute $r33;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30;
+        javax.swing.text.html.parser.Parser r0;
+        char $c4, $c15;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: javax.swing.text.html.parser.Element;
+
+     label01:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i30 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i30)
+        {
+            case -1: goto label02;
+            case 45: goto label03;
+            case 47: goto label02;
+            case 60: goto label02;
+            case 62: goto label02;
+            default: goto label05;
+        };
+
+     label02:
+        return;
+
+     label03:
+        $i0 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+        if $i0 != 45 goto label04;
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseComment()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int strpos> = 0;
+
+        goto label01;
+
+     label04:
+        $r2 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("invalid.tagchar", "-", $r2);
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        goto label01;
+
+     label05:
+        $z0 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(1);
+
+        if $z0 == 0 goto label10;
+
+        $r25 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        r29 = $r25;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i25 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i25 != 61 goto label08;
+
+        $i26 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i26;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $r28 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttribute(java.lang.String)>($r25);
+
+        r30 = $r28;
+
+        if $r28 == null goto label06;
+
+        $i27 = $r28.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i27 == 1 goto label06;
+
+        $i28 = $r28.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i28 == 11 goto label06;
+
+        $i29 = $r28.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i29 == 7 goto label06;
+
+        $z9 = 1;
+
+        goto label07;
+
+     label06:
+        $z9 = 0;
+
+     label07:
+        r31 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String parseAttributeValue(boolean)>($z9);
+
+        goto label23;
+
+     label08:
+        r31 = $r25;
+
+        $r26 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttributeByValue(java.lang.String)>($r25);
+
+        r30 = $r26;
+
+        if $r26 != null goto label23;
+
+        $r27 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttribute(java.lang.String)>($r25);
+
+        r30 = $r27;
+
+        if $r27 == null goto label09;
+
+        r31 = virtualinvoke $r27.<javax.swing.text.html.parser.AttributeList: java.lang.String getValue()>();
+
+        goto label23;
+
+     label09:
+        r31 = null;
+
+        goto label23;
+
+     label10:
+        $z1 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z1 != 0 goto label11;
+
+        $i23 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i23 != 44 goto label11;
+
+        $i24 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i24;
+
+        goto label01;
+
+     label11:
+        $z2 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z2 != 0 goto label17;
+
+        $i12 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i12 != 34 goto label17;
+
+        $i13 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i13;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $z8 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(1);
+
+        if $z8 == 0 goto label16;
+
+        $r21 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        r29 = $r21;
+
+        $i17 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i17 != 34 goto label12;
+
+        $i22 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i22;
+
+     label12:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i18 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i18 != 61 goto label15;
+
+        $i19 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i19;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $r24 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttribute(java.lang.String)>($r21);
+
+        r30 = $r24;
+
+        if $r24 == null goto label13;
+
+        $i20 = $r24.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i20 == 1 goto label13;
+
+        $i21 = $r24.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i21 == 11 goto label13;
+
+        $z10 = 1;
+
+        goto label14;
+
+     label13:
+        $z10 = 0;
+
+     label14:
+        r31 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String parseAttributeValue(boolean)>($z10);
+
+        goto label23;
+
+     label15:
+        r31 = $r21;
+
+        $r22 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttributeByValue(java.lang.String)>($r21);
+
+        r30 = $r22;
+
+        if $r22 != null goto label23;
+
+        $r23 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttribute(java.lang.String)>($r21);
+
+        r30 = $r23;
+
+        if $r23 == null goto label23;
+
+        r31 = virtualinvoke $r23.<javax.swing.text.html.parser.AttributeList: java.lang.String getValue()>();
+
+        goto label23;
+
+     label16:
+        $r18 = newarray (char)[1];
+
+        $i14 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c15 = (char) $i14;
+
+        $r18[0] = $c15;
+
+        $r19 = new java.lang.String;
+
+        specialinvoke $r19.<java.lang.String: void <init>(char[])>($r18);
+
+        $r20 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("invalid.tagchar", $r19, $r20);
+
+        $i16 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i16;
+
+        goto label01;
+
+     label17:
+        $z3 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z3 != 0 goto label20;
+
+        $r6 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $z5 = virtualinvoke $r6.<javax.swing.text.SimpleAttributeSet: boolean isEmpty()>();
+
+        if $z5 == 0 goto label20;
+
+        $i8 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i8 != 61 goto label20;
+
+        $i9 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i9;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $r7 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        r29 = $r7;
+
+        $r8 = virtualinvoke r1.<javax.swing.text.html.parser.Element: javax.swing.text.html.parser.AttributeList getAttribute(java.lang.String)>($r7);
+
+        r30 = $r8;
+
+        if $r8 == null goto label18;
+
+        $i10 = $r8.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i10 == 1 goto label18;
+
+        $i11 = $r8.<javax.swing.text.html.parser.AttributeList: int type>;
+
+        if $i11 == 11 goto label18;
+
+        $z11 = 1;
+
+        goto label19;
+
+     label18:
+        $z11 = 0;
+
+     label19:
+        r31 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String parseAttributeValue(boolean)>($z11);
+
+        goto label23;
+
+     label20:
+        $z12 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z12 != 0 goto label21;
+
+        $i6 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i6 != 61 goto label21;
+
+        $i7 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i7;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String parseAttributeValue(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("attvalerr");
+
+        return;
+
+     label21:
+        $r3 = newarray (char)[1];
+
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c4 = (char) $i3;
+
+        $r3[0] = $c4;
+
+        $r4 = new java.lang.String;
+
+        specialinvoke $r4.<java.lang.String: void <init>(char[])>($r3);
+
+        $r5 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("invalid.tagchar", $r4, $r5);
+
+        $z4 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z4 != 0 goto label22;
+
+        $i5 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i5;
+
+        goto label01;
+
+     label22:
+        return;
+
+     label23:
+        if r30 == null goto label24;
+
+        r29 = virtualinvoke r30.<javax.swing.text.html.parser.AttributeList: java.lang.String getName()>();
+
+        goto label25;
+
+     label24:
+        $r9 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("invalid.tagatt", r29, $r9);
+
+     label25:
+        $r10 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $z6 = virtualinvoke $r10.<javax.swing.text.SimpleAttributeSet: boolean isDefined(java.lang.Object)>(r29);
+
+        if $z6 == 0 goto label26;
+
+        $r17 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("multi.tagatt", r29, $r17);
+
+     label26:
+        if r31 != null goto label29;
+
+        if r30 == null goto label27;
+
+        $r16 = r30.<javax.swing.text.html.parser.AttributeList: java.lang.String value>;
+
+        if $r16 == null goto label27;
+
+        $r32 = r30.<javax.swing.text.html.parser.AttributeList: java.lang.String value>;
+
+        goto label28;
+
+     label27:
+        $r32 = "#DEFAULT";
+
+     label28:
+        r31 = $r32;
+
+        goto label30;
+
+     label29:
+        if r30 == null goto label30;
+
+        $r13 = r30.<javax.swing.text.html.parser.AttributeList: java.util.Vector values>;
+
+        if $r13 == null goto label30;
+
+        $r14 = r30.<javax.swing.text.html.parser.AttributeList: java.util.Vector values>;
+
+        $z7 = virtualinvoke $r14.<java.util.Vector: boolean contains(java.lang.Object)>(r31);
+
+        if $z7 != 0 goto label30;
+
+        $r15 = virtualinvoke r1.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("invalid.tagattval", r29, $r15);
+
+     label30:
+        $r33 = staticinvoke <javax.swing.text.html.HTML: javax.swing.text.html.HTML$Attribute getAttributeKey(java.lang.String)>(r29);
+
+        if $r33 != null goto label31;
+
+        $r12 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        virtualinvoke $r12.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>(r29, r31);
+
+        goto label32;
+
+     label31:
+        $r11 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        virtualinvoke $r11.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r33, r31);
+
+     label32:
+        goto label01;
+    }
+
+    public java.lang.String parseDTDMarkup() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i19, $i20;
+        javax.swing.text.html.parser.Parser r1;
+        java.lang.String $r2, $r3;
+        char $c18;
+        java.lang.StringBuilder $r0;
+
+        r1 := @this: javax.swing.text.html.parser.Parser;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+     label1:
+        $i20 = r1.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i20)
+        {
+            case -1: goto label3;
+            case 10: goto label4;
+            case 13: goto label6;
+            case 34: goto label5;
+            case 62: goto label2;
+            default: goto label8;
+        };
+
+     label2:
+        $i1 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+
+     label3:
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("invalid.markup");
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+
+     label4:
+        $i11 = r1.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i12 = $i11 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int ln> = $i12;
+
+        $i13 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i13;
+
+        $i14 = r1.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i15 = $i14 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int lfCount> = $i15;
+
+        goto label1;
+
+     label5:
+        $i2 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        goto label1;
+
+     label6:
+        $i3 = r1.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i4 = $i3 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int ln> = $i4;
+
+        $i5 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i5;
+
+        if $i5 != 10 goto label7;
+
+        $i8 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i8;
+
+        $i9 = r1.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i10 = $i9 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int crlfCount> = $i10;
+
+        goto label1;
+
+     label7:
+        $i6 = r1.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i7 = $i6 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int crCount> = $i7;
+
+        goto label1;
+
+     label8:
+        $i16 = r1.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i17 = $i16 & 255;
+
+        $c18 = (char) $i17;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c18);
+
+        $i19 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i19;
+
+        goto label1;
+    }
+
+    protected boolean parseMarkupDeclarations(java.lang.StringBuffer) throws java.io.IOException
+    {
+        java.lang.StringBuffer r0;
+        int $i0, $i1;
+        javax.swing.text.html.parser.Parser r4;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0;
+
+        r4 := @this: javax.swing.text.html.parser.Parser;
+
+        r0 := @parameter0: java.lang.StringBuffer;
+
+        $i0 = virtualinvoke r0.<java.lang.StringBuffer: int length()>();
+
+        $r1 = "DOCTYPE";
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("DOCTYPE");
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r4.<javax.swing.text.html.parser.Parser: java.lang.String parseDTDMarkup()>();
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    void parseInvalidTag() throws java.io.IOException
+    {
+        int $i0, $i1, $i2;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+     label1:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i0)
+        {
+            case -1: goto label2;
+            case 60: goto label3;
+            case 62: goto label2;
+            default: goto label4;
+        };
+
+     label2:
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        goto label1;
+    }
+
+    void parseTag() throws java.io.IOException
+    {
+        javax.swing.text.SimpleAttributeSet $r21;
+        java.lang.StringBuffer $r56;
+        javax.swing.text.html.parser.TagElement $r19, $r22, $r32, $r55;
+        javax.swing.text.html.parser.TagStack $r3, $r4, $r6, $r8, $r11, $r24, $r39, $r40, $r50, r51, $r52;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i81, $i82, $i84, $i85, $i86, $i87;
+        javax.swing.text.html.parser.DTD $r27, $r30, $r37, $r38, $r42, $r47, $r48;
+        java.lang.String $r2, $r9, $r13, $r14, $r15, $r16, $r17, $r18, $r26, $r29, $r36, $r41, $r46, r54;
+        char[] $r23, $r25, $r28, $r33, $r34, r44;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, z22, z23, z24, $z25, $z26, $z27, $z28, z29, z30, z31, z32, z33, z34;
+        javax.swing.text.html.parser.Element $r1, $r5, $r7, $r10, $r12, $r31, $r43, r45, $r49, r53;
+        javax.swing.text.html.HTML$Attribute $r20;
+        javax.swing.text.html.parser.Parser r0;
+        char $c6, $c12, $c20, $c32, $c80;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        z22 = 0;
+
+        z32 = 0;
+
+        z31 = 0;
+
+        z23 = 0;
+
+        z34 = 0;
+
+        z33 = 0;
+
+        z24 = 0;
+
+        z30 = 0;
+
+        z29 = 0;
+
+        $i0 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+        lookupswitch($i0)
+        {
+            case -1: goto label52;
+            case 33: goto label01;
+            case 47: goto label21;
+            default: goto label53;
+        };
+
+     label01:
+        $i28 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i28;
+
+        lookupswitch($i28)
+        {
+            case 45: goto label02;
+            default: goto label12;
+        };
+
+     label02:
+        $i76 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i76 != 45 goto label07;
+
+        $z13 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z13 == 0 goto label03;
+
+        $i39 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i39;
+
+        if $i39 != 45 goto label06;
+
+     label03:
+        $i33 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i33;
+
+        $z14 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z14 != 0 goto label04;
+
+        $i37 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i37 != 45 goto label04;
+
+        $i38 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i38;
+
+     label04:
+        $i77 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i77 == 0 goto label05;
+
+        $i34 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        r44 = newarray (char)[$i34];
+
+        $r34 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i35 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r34, 0, r44, 0, $i35);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleText(char[])>(r44);
+
+        $i36 = r0.<javax.swing.text.html.parser.Parser: int currentBlockStartPos>;
+
+        r0.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i36;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = 0;
+
+     label05:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseComment()>();
+
+        $r30 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r31 = virtualinvoke $r30.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>("comment");
+
+        $r32 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r31, 1);
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last> = $r32;
+
+        $r33 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: char[] getChars(int)>(0);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleComment(char[])>($r33);
+
+        goto label02;
+
+     label06:
+        if z34 != 0 goto label07;
+
+        z23 = 1;
+
+        z34 = 1;
+
+        z33 = 1;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("invalid.commentchar", "-");
+
+     label07:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i78 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i78)
+        {
+            case -1: goto label10;
+            case 45: goto label08;
+            case 62: goto label09;
+            default: goto label11;
+        };
+
+     label08:
+        goto label02;
+
+     label09:
+        $i29 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i29;
+
+     label10:
+        return;
+
+     label11:
+        $i30 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i30;
+
+        if z33 != 0 goto label02;
+
+        z23 = 1;
+
+        z34 = 1;
+
+        z33 = 1;
+
+        $i31 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c32 = (char) $i31;
+
+        $r29 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c32);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("invalid.commentchar", $r29);
+
+        goto label02;
+
+     label12:
+        $r56 = new java.lang.StringBuffer;
+
+        specialinvoke $r56.<java.lang.StringBuffer: void <init>()>();
+
+     label13:
+        $i79 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c80 = (char) $i79;
+
+        virtualinvoke $r56.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c80);
+
+        $z25 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseMarkupDeclarations(java.lang.StringBuffer)>($r56);
+
+        if $z25 == 0 goto label14;
+
+        return;
+
+     label14:
+        $i40 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i40)
+        {
+            case -1: goto label16;
+            case 10: goto label17;
+            case 13: goto label18;
+            case 62: goto label15;
+            default: goto label20;
+        };
+
+     label15:
+        $i41 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i41;
+
+     label16:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("invalid.markup");
+
+        return;
+
+     label17:
+        $i50 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i51 = $i50 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i51;
+
+        $i52 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i52;
+
+        $i53 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i54 = $i53 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i54;
+
+        goto label13;
+
+     label18:
+        $i42 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i43 = $i42 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i43;
+
+        $i44 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i44;
+
+        if $i44 != 10 goto label19;
+
+        $i47 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i47;
+
+        $i48 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i49 = $i48 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i49;
+
+        goto label13;
+
+     label19:
+        $i45 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i46 = $i45 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i46;
+
+        goto label13;
+
+     label20:
+        $i55 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i55;
+
+        goto label13;
+
+     label21:
+        $i1 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i1;
+
+        lookupswitch($i1)
+        {
+            case 60: goto label23;
+            case 62: goto label22;
+            default: goto label25;
+        };
+
+     label22:
+        $i2 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+     label23:
+        $r1 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent>;
+
+        if $r1 != null goto label24;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("invalid.shortend");
+
+        return;
+
+     label24:
+        r45 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent>;
+
+        goto label35;
+
+     label25:
+        $z12 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(1);
+
+        if $z12 != 0 goto label26;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("expected.endtagname");
+
+        return;
+
+     label26:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void skipSpace()>();
+
+        $i15 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i15)
+        {
+            case 60: goto label28;
+            case 62: goto label27;
+            default: goto label29;
+        };
+
+     label27:
+        $i16 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i16;
+
+     label28:
+        goto label32;
+
+     label29:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("expected", "\'>\'");
+
+     label30:
+        $i23 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i84 = (int) -1;
+
+        if $i23 == $i84 goto label31;
+
+        $i25 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i25 == 10 goto label31;
+
+        $i26 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i26 == 62 goto label31;
+
+        $i27 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i27;
+
+        goto label30;
+
+     label31:
+        $i81 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i81 != 62 goto label32;
+
+        $i24 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i24;
+
+     label32:
+        $r46 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        $r47 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $z26 = virtualinvoke $r47.<javax.swing.text.html.parser.DTD: boolean elementExists(java.lang.String)>($r46);
+
+        if $z26 != 0 goto label34;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("end.unrecognized", $r46);
+
+        $i17 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i17 <= 0 goto label33;
+
+        $r28 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i18 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i19 = $i18 - 1;
+
+        $c20 = $r28[$i19];
+
+        $i85 = (int) $c20;
+
+        if $i85 != 10 goto label33;
+
+        $i21 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i22 = $i21 - 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i22;
+
+     label33:
+        $r48 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r49 = virtualinvoke $r48.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>("unknown");
+
+        r45 = $r49;
+
+        $r49.<javax.swing.text.html.parser.Element: java.lang.String name> = $r46;
+
+        z24 = 1;
+
+        z29 = 1;
+
+        goto label35;
+
+     label34:
+        $r27 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        r45 = virtualinvoke $r27.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>($r46);
+
+     label35:
+        $r50 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r50 != null goto label36;
+
+        $r26 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("end.extra.tag", $r26);
+
+        return;
+
+     label36:
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i3 <= 0 goto label38;
+
+        $r23 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i4 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i5 = $i4 - 1;
+
+        $c6 = $r23[$i5];
+
+        $i86 = (int) $c6;
+
+        if $i86 != 10 goto label38;
+
+        $r24 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z11 = $r24.<javax.swing.text.html.parser.TagStack: boolean pre>;
+
+        if $z11 == 0 goto label37;
+
+        $i9 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i9 <= 1 goto label38;
+
+        $r25 = r0.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i10 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i11 = $i10 - 2;
+
+        $c12 = $r25[$i11];
+
+        $i87 = (int) $c12;
+
+        if $i87 == 10 goto label38;
+
+        $i13 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i14 = $i13 - 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i14;
+
+        goto label38;
+
+     label37:
+        $i7 = r0.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i8 = $i7 - 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int textpos> = $i8;
+
+     label38:
+        if z29 == 0 goto label39;
+
+        $r19 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element)>(r45);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleText(javax.swing.text.html.parser.TagElement)>($r19);
+
+        $r21 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.SimpleAttributeSet attributes>;
+
+        $r20 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ENDTAG>;
+
+        virtualinvoke $r21.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r20, "true");
+
+        $r22 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element)>(r45);
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEmptyTag(javax.swing.text.html.parser.TagElement)>($r22);
+
+        return;
+
+     label39:
+        $z0 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z0 != 0 goto label42;
+
+        $r11 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r12 = $r11.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z5 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z5 == 0 goto label40;
+
+        $r17 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z10 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z10 != 0 goto label40;
+
+        $r18 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("tag.ignore", $r18);
+
+        return;
+
+     label40:
+        $z6 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("tr");
+
+        if $z6 != 0 goto label41;
+
+        $z9 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("td");
+
+        if $z9 == 0 goto label42;
+
+     label41:
+        $r14 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z7 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("table");
+
+        if $z7 != 0 goto label42;
+
+        $r15 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z8 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z8 != 0 goto label42;
+
+        $r16 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("tag.ignore", $r16);
+
+        return;
+
+     label42:
+        r51 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+     label43:
+        if r51 == null goto label44;
+
+        $r10 = r51.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        if r45 == $r10 goto label44;
+
+        r51 = r51.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        goto label43;
+
+     label44:
+        if r51 != null goto label45;
+
+        $r9 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("unmatched.endtag", $r9);
+
+        return;
+
+     label45:
+        $r2 = virtualinvoke r45.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $r3 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r3 == r51 goto label50;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("font");
+
+        if $z1 != 0 goto label46;
+
+        $z4 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("center");
+
+        if $z4 == 0 goto label50;
+
+     label46:
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("center");
+
+        if $z2 == 0 goto label49;
+
+     label47:
+        $r4 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r5 = $r4.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        $z3 = virtualinvoke $r5.<javax.swing.text.html.parser.Element: boolean omitEnd()>();
+
+        if $z3 == 0 goto label48;
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r8 == r51 goto label48;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        goto label47;
+
+     label48:
+        $r6 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r7 = $r6.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.Element elem>;
+
+        if $r7 != r45 goto label49;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(0);
+
+     label49:
+        return;
+
+     label50:
+        $r52 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r52 == r51 goto label51;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        goto label50;
+
+     label51:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(0);
+
+        return;
+
+     label52:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("eof");
+
+        return;
+
+     label53:
+        $z15 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: boolean parseIdentifier(boolean)>(1);
+
+        if $z15 != 0 goto label55;
+
+        r53 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent>;
+
+        $i75 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i75 != 62 goto label54;
+
+        if r53 != null goto label58;
+
+     label54:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("expected.tagname");
+
+        return;
+
+     label55:
+        $r36 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: java.lang.String getString(int)>(0);
+
+        r54 = $r36;
+
+        $z16 = virtualinvoke $r36.<java.lang.String: boolean equals(java.lang.Object)>("image");
+
+        if $z16 == 0 goto label56;
+
+        r54 = "img";
+
+     label56:
+        $r37 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $z17 = virtualinvoke $r37.<javax.swing.text.html.parser.DTD: boolean elementExists(java.lang.String)>(r54);
+
+        if $z17 != 0 goto label57;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("tag.unrecognized ", r54);
+
+        $r42 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r43 = virtualinvoke $r42.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>("unknown");
+
+        r53 = $r43;
+
+        $r43.<javax.swing.text.html.parser.Element: java.lang.String name> = r54;
+
+        z24 = 1;
+
+        z30 = 1;
+
+        goto label58;
+
+     label57:
+        $r38 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        r53 = virtualinvoke $r38.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>(r54);
+
+     label58:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseAttributeSpecificationList(javax.swing.text.html.parser.Element)>(r53);
+
+        $i82 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i82)
+        {
+            case 47: goto label59;
+            case 60: goto label61;
+            case 62: goto label60;
+            default: goto label62;
+        };
+
+     label59:
+        z22 = 1;
+
+        z32 = 1;
+
+        z31 = 1;
+
+     label60:
+        $i56 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i56;
+
+        $i57 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i57 != 62 goto label61;
+
+        if z32 == 0 goto label61;
+
+        $i74 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i74;
+
+     label61:
+        goto label63;
+
+     label62:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String)>("expected", "\'>\'");
+
+     label63:
+        $z18 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z18 != 0 goto label64;
+
+        $r41 = virtualinvoke r53.<javax.swing.text.html.parser.Element: java.lang.String getName()>();
+
+        $z21 = virtualinvoke $r41.<java.lang.String: boolean equals(java.lang.Object)>("script");
+
+        if $z21 == 0 goto label64;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("javascript.unsupported");
+
+     label64:
+        $z27 = virtualinvoke r53.<javax.swing.text.html.parser.Element: boolean isEmpty()>();
+
+        if $z27 != 0 goto label67;
+
+        $i59 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i59 != 10 goto label65;
+
+        $i69 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i70 = $i69 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i70;
+
+        $i71 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i72 = $i71 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = $i72;
+
+        $i73 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i73;
+
+        goto label67;
+
+     label65:
+        $i60 = r0.<javax.swing.text.html.parser.Parser: int ch>;
+
+        if $i60 != 13 goto label67;
+
+        $i61 = r0.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i62 = $i61 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = $i62;
+
+        $i63 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i63;
+
+        if $i63 != 10 goto label66;
+
+        $i66 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i66;
+
+        $i67 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i68 = $i67 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = $i68;
+
+        goto label67;
+
+     label66:
+        $i64 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i65 = $i64 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = $i65;
+
+     label67:
+        $r55 = virtualinvoke r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>(r53, 0);
+
+        if z30 != 0 goto label68;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void legalTagContext(javax.swing.text.html.parser.TagElement)>($r55);
+
+        $z19 = r0.<javax.swing.text.html.parser.Parser: boolean strict>;
+
+        if $z19 != 0 goto label68;
+
+        $z20 = r0.<javax.swing.text.html.parser.Parser: boolean skipTag>;
+
+        if $z20 == 0 goto label68;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean skipTag> = 0;
+
+        return;
+
+     label68:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void startTag(javax.swing.text.html.parser.TagElement)>($r55);
+
+        $z28 = virtualinvoke r53.<javax.swing.text.html.parser.Element: boolean isEmpty()>();
+
+        if $z28 != 0 goto label72;
+
+        $i58 = virtualinvoke r53.<javax.swing.text.html.parser.Element: int getType()>();
+
+        lookupswitch($i58)
+        {
+            case 1: goto label69;
+            case 16: goto label70;
+            default: goto label71;
+        };
+
+     label69:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseLiteral(boolean)>(0);
+
+        goto label72;
+
+     label70:
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseLiteral(boolean)>(1);
+
+        goto label72;
+
+     label71:
+        $r39 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r39 == null goto label72;
+
+        $r40 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r40.<javax.swing.text.html.parser.TagStack: boolean net> = z31;
+
+     label72:
+        return;
+    }
+
+    void parseScript() throws java.io.IOException
+    {
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        char[] $r0, r1, $r10, $r11, $r12, $r13;
+        boolean z0, z1, z2, z3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i18, $i19, $i21, $i22, $i24, $i27, $i28, $i30, $i31, $i33, $i34, $i35, $i37, $i39, $i40, i42, $i43, i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51;
+        javax.swing.text.html.parser.Parser r2;
+        char $c17, $c20, $c23, $c25, $c26, $c29, $c32, $c36, $c38, $c41;
+
+        r2 := @this: javax.swing.text.html.parser.Parser;
+
+        $r0 = <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG>;
+
+        $i0 = lengthof $r0;
+
+        r1 = newarray (char)[$i0];
+
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+     label01:
+        i42 = 0;
+
+     label02:
+        if z2 != 0 goto label04;
+
+        $r10 = <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG>;
+
+        $i34 = lengthof $r10;
+
+        if i42 >= $i34 goto label04;
+
+        $r11 = <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG>;
+
+        $c36 = $r11[i42];
+
+        $i35 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i45 = (int) $c36;
+
+        if $i45 == $i35 goto label03;
+
+        $r12 = <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG_UPPER_CASE>;
+
+        $c41 = $r12[i42];
+
+        $i40 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i46 = (int) $c41;
+
+        if $i46 != $i40 goto label04;
+
+     label03:
+        $i37 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c38 = (char) $i37;
+
+        r1[i42] = $c38;
+
+        $i39 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i39;
+
+        i42 = i42 + 1;
+
+        goto label02;
+
+     label04:
+        $r13 = <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG>;
+
+        $i43 = lengthof $r13;
+
+        if i42 != $i43 goto label05;
+
+        return;
+
+     label05:
+        if z1 != 0 goto label08;
+
+        if i42 != 1 goto label08;
+
+        $c25 = r1[0];
+
+        $r6 = "<!--";
+
+        $c26 = virtualinvoke $r6.<java.lang.String: char charAt(int)>(0);
+
+        $i47 = (int) $c25;
+
+        $i48 = (int) $c26;
+
+        if $i47 != $i48 goto label08;
+
+     label06:
+        $r7 = "<!--";
+
+        $i27 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if i42 >= $i27 goto label07;
+
+        $r9 = "<!--";
+
+        $c29 = virtualinvoke $r9.<java.lang.String: char charAt(int)>(i42);
+
+        $i30 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i49 = (int) $c29;
+
+        if $i49 != $i30 goto label07;
+
+        $i31 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c32 = (char) $i31;
+
+        r1[i42] = $c32;
+
+        $i33 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i33;
+
+        i42 = i42 + 1;
+
+        goto label06;
+
+     label07:
+        $r8 = "<!--";
+
+        $i28 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        if i42 != $i28 goto label08;
+
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label08:
+        if z3 == 0 goto label11;
+
+     label09:
+        $r3 = "-->";
+
+        $i18 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i42 >= $i18 goto label10;
+
+        $r5 = "-->";
+
+        $c20 = virtualinvoke $r5.<java.lang.String: char charAt(int)>(i42);
+
+        $i21 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i50 = (int) $c20;
+
+        if $i50 != $i21 goto label10;
+
+        $i22 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $c23 = (char) $i22;
+
+        r1[i42] = $c23;
+
+        $i24 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i24;
+
+        i42 = i42 + 1;
+
+        goto label09;
+
+     label10:
+        $r4 = "-->";
+
+        $i19 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i42 != $i19 goto label11;
+
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+     label11:
+        if i42 <= 0 goto label14;
+
+        i44 = 0;
+
+     label12:
+        if i44 >= i42 goto label13;
+
+        $c17 = r1[i44];
+
+        $i51 = (int) $c17;
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void addString(int)>($i51);
+
+        i44 = i44 + 1;
+
+        goto label12;
+
+     label13:
+        goto label01;
+
+     label14:
+        $i1 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        lookupswitch($i1)
+        {
+            case -1: goto label15;
+            case 10: goto label16;
+            case 13: goto label17;
+            default: goto label20;
+        };
+
+     label15:
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("eof.script");
+
+        return;
+
+     label16:
+        $i10 = r2.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i11 = $i10 + 1;
+
+        r2.<javax.swing.text.html.parser.Parser: int ln> = $i11;
+
+        $i12 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i12;
+
+        $i13 = r2.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i14 = $i13 + 1;
+
+        r2.<javax.swing.text.html.parser.Parser: int lfCount> = $i14;
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void addString(int)>(10);
+
+        goto label21;
+
+     label17:
+        $i2 = r2.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i3 = $i2 + 1;
+
+        r2.<javax.swing.text.html.parser.Parser: int ln> = $i3;
+
+        $i4 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i4;
+
+        if $i4 != 10 goto label18;
+
+        $i7 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i7;
+
+        $i8 = r2.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i9 = $i8 + 1;
+
+        r2.<javax.swing.text.html.parser.Parser: int crlfCount> = $i9;
+
+        goto label19;
+
+     label18:
+        $i5 = r2.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i6 = $i5 + 1;
+
+        r2.<javax.swing.text.html.parser.Parser: int crCount> = $i6;
+
+     label19:
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void addString(int)>(10);
+
+        goto label21;
+
+     label20:
+        $i15 = r2.<javax.swing.text.html.parser.Parser: int ch>;
+
+        virtualinvoke r2.<javax.swing.text.html.parser.Parser: void addString(int)>($i15);
+
+        $i16 = specialinvoke r2.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r2.<javax.swing.text.html.parser.Parser: int ch> = $i16;
+
+     label21:
+        goto label01;
+    }
+
+    void parseContent() throws java.io.IOException
+    {
+        java.lang.Thread $r0;
+        javax.swing.text.html.parser.TagElement $r12, $r21, $r30, $r33;
+        javax.swing.text.html.parser.TagStack $r5, $r13, $r22, $r23, $r24, $r25, $r26, $r27;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, i56, i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69;
+        javax.swing.text.html.parser.DTD $r2, $r10, $r19, $r28, $r31;
+        java.lang.String $r34, $r36, $r37, $r38, $r39, $r40, r41;
+        char[] $r6, $r7, $r8, $r9, $r14, $r15, $r16, $r17, $r18, $r35, $r42, $r43, $r44, r45, $r46, r47, $r48;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        javax.swing.text.html.parser.Element $r3, $r4, $r11, $r20, $r29, $r32;
+        javax.swing.text.html.parser.Parser r1;
+        char $c70;
+
+        r1 := @this: javax.swing.text.html.parser.Parser;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+     label01:
+        $z17 = virtualinvoke $r0.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z17 == 0 goto label02;
+
+        virtualinvoke $r0.<java.lang.Thread: void interrupt()>();
+
+        goto label33;
+
+     label02:
+        i56 = r1.<javax.swing.text.html.parser.Parser: int ch>;
+
+        $i0 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int currentBlockStartPos> = $i0;
+
+        $r4 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.Element recent>;
+
+        $r2 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r3 = $r2.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element script>;
+
+        if $r4 != $r3 goto label04;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void parseScript()>();
+
+        $r31 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r32 = virtualinvoke $r31.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element getElement(java.lang.String)>("comment");
+
+        $r33 = virtualinvoke r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement makeTag(javax.swing.text.html.parser.Element,boolean)>($r32, 1);
+
+        r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last> = $r33;
+
+        $r34 = new java.lang.String;
+
+        $r35 = virtualinvoke r1.<javax.swing.text.html.parser.Parser: char[] getChars(int)>(0);
+
+        specialinvoke $r34.<java.lang.String: void <init>(char[])>($r35);
+
+        $r36 = virtualinvoke $r34.<java.lang.String: java.lang.String trim()>();
+
+        r41 = $r36;
+
+        $r37 = "<!--";
+
+        $i49 = virtualinvoke $r37.<java.lang.String: int length()>();
+
+        $r38 = "-->";
+
+        $i50 = virtualinvoke $r38.<java.lang.String: int length()>();
+
+        i57 = $i49 + $i50;
+
+        $z15 = virtualinvoke $r36.<java.lang.String: boolean startsWith(java.lang.String)>("<!--");
+
+        if $z15 == 0 goto label03;
+
+        $z16 = virtualinvoke $r36.<java.lang.String: boolean endsWith(java.lang.String)>("-->");
+
+        if $z16 == 0 goto label03;
+
+        $i51 = virtualinvoke $r36.<java.lang.String: int length()>();
+
+        if $i51 < i57 goto label03;
+
+        $r39 = "<!--";
+
+        $i52 = virtualinvoke $r39.<java.lang.String: int length()>();
+
+        $i53 = virtualinvoke $r36.<java.lang.String: int length()>();
+
+        $r40 = "-->";
+
+        $i54 = virtualinvoke $r40.<java.lang.String: int length()>();
+
+        $i55 = $i53 - $i54;
+
+        r41 = virtualinvoke $r36.<java.lang.String: java.lang.String substring(int,int)>($i52, $i55);
+
+     label03:
+        $r42 = virtualinvoke r41.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void handleComment(char[])>($r42);
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(0);
+
+        $i58 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i58;
+
+        goto label01;
+
+     label04:
+        lookupswitch(i56)
+        {
+            case -1: goto label09;
+            case 9: goto label23;
+            case 10: goto label15;
+            case 13: goto label18;
+            case 32: goto label23;
+            case 38: goto label10;
+            case 47: goto label06;
+            case 60: goto label05;
+            default: goto label26;
+        };
+
+     label05:
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void parseTag()>();
+
+        $i1 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i1;
+
+        goto label01;
+
+     label06:
+        $i2 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i2;
+
+        $r5 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r5 == null goto label07;
+
+        $r13 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z3 = $r13.<javax.swing.text.html.parser.TagStack: boolean net>;
+
+        if $z3 == 0 goto label07;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(0);
+
+        goto label01;
+
+     label07:
+        $i3 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i3 != 0 goto label29;
+
+        $r10 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r11 = $r10.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element pcdata>;
+
+        $z1 = virtualinvoke r1.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>($r11);
+
+        if $z1 != 0 goto label08;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("unexpected.pcdata");
+
+     label08:
+        $r12 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        $z2 = virtualinvoke $r12.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z2 == 0 goto label29;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+        goto label29;
+
+     label09:
+        return;
+
+     label10:
+        $i12 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i12 != 0 goto label12;
+
+        $r19 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r20 = $r19.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element pcdata>;
+
+        $z5 = virtualinvoke r1.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>($r20);
+
+        if $z5 != 0 goto label11;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("unexpected.pcdata");
+
+     label11:
+        $r21 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        $z6 = virtualinvoke $r21.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z6 == 0 goto label12;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+     label12:
+        $r43 = specialinvoke r1.<javax.swing.text.html.parser.Parser: char[] parseEntityReference()>();
+
+        $i59 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i60 = lengthof $r43;
+
+        $i61 = $i59 + $i60;
+
+        $i62 = $i61 + 1;
+
+        $r44 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i63 = lengthof $r44;
+
+        if $i62 <= $i63 goto label13;
+
+        $i21 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i20 = lengthof $r43;
+
+        $i22 = $i21 + $i20;
+
+        $i25 = $i22 + 128;
+
+        $r16 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i23 = lengthof $r16;
+
+        $i24 = $i23 * 2;
+
+        $i26 = staticinvoke <java.lang.Math: int max(int,int)>($i25, $i24);
+
+        r45 = newarray (char)[$i26];
+
+        $r18 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $r17 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i27 = lengthof $r17;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r18, 0, r45, 0, $i27);
+
+        r1.<javax.swing.text.html.parser.Parser: char[] text> = r45;
+
+     label13:
+        $z4 = r1.<javax.swing.text.html.parser.Parser: boolean space>;
+
+        if $z4 == 0 goto label14;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+        $r15 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i18 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i19 = $i18 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = $i19;
+
+        $r15[$i18] = 32;
+
+     label14:
+        $r14 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i14 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i13 = lengthof $r43;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r43, 0, $r14, $i14, $i13);
+
+        $i16 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i15 = lengthof $r43;
+
+        $i17 = $i16 + $i15;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = $i17;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace> = 0;
+
+        goto label01;
+
+     label15:
+        $i38 = r1.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i39 = $i38 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int ln> = $i39;
+
+        $i40 = r1.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i41 = $i40 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int lfCount> = $i41;
+
+        $i42 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i42;
+
+        $r24 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r24 == null goto label16;
+
+        $r25 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z10 = $r25.<javax.swing.text.html.parser.TagStack: boolean pre>;
+
+        if $z10 == 0 goto label16;
+
+        goto label29;
+
+     label16:
+        $i43 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i43 != 0 goto label17;
+
+        $i44 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i44;
+
+     label17:
+        $z9 = r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace>;
+
+        if $z9 != 0 goto label01;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 1;
+
+        goto label01;
+
+     label18:
+        $i28 = r1.<javax.swing.text.html.parser.Parser: int ln>;
+
+        $i29 = $i28 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int ln> = $i29;
+
+        i56 = 10;
+
+        $i30 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i30;
+
+        if $i30 != 10 goto label19;
+
+        $i35 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i35;
+
+        $i36 = r1.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i37 = $i36 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int crlfCount> = $i37;
+
+        goto label20;
+
+     label19:
+        $i31 = r1.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i32 = $i31 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int crCount> = $i32;
+
+     label20:
+        $r22 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r22 == null goto label21;
+
+        $r23 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z8 = $r23.<javax.swing.text.html.parser.TagStack: boolean pre>;
+
+        if $z8 == 0 goto label21;
+
+        goto label29;
+
+     label21:
+        $i33 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i33 != 0 goto label22;
+
+        $i34 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i34;
+
+     label22:
+        $z7 = r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace>;
+
+        if $z7 != 0 goto label01;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 1;
+
+        goto label01;
+
+     label23:
+        $i45 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i45;
+
+        $r26 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r26 == null goto label24;
+
+        $r27 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $z12 = $r27.<javax.swing.text.html.parser.TagStack: boolean pre>;
+
+        if $z12 == 0 goto label24;
+
+        goto label29;
+
+     label24:
+        $i46 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i46 != 0 goto label25;
+
+        $i47 = r1.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i47;
+
+     label25:
+        $z11 = r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace>;
+
+        if $z11 != 0 goto label01;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 1;
+
+        goto label01;
+
+     label26:
+        $i48 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i48 != 0 goto label28;
+
+        $r28 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.DTD dtd>;
+
+        $r29 = $r28.<javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.Element pcdata>;
+
+        $z13 = virtualinvoke r1.<javax.swing.text.html.parser.Parser: boolean legalElementContext(javax.swing.text.html.parser.Element)>($r29);
+
+        if $z13 != 0 goto label27;
+
+        virtualinvoke r1.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("unexpected.pcdata");
+
+     label27:
+        $r30 = r1.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagElement last>;
+
+        $z14 = virtualinvoke $r30.<javax.swing.text.html.parser.TagElement: boolean breaksFlow()>();
+
+        if $z14 == 0 goto label28;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+     label28:
+        $i64 = specialinvoke r1.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r1.<javax.swing.text.html.parser.Parser: int ch> = $i64;
+
+     label29:
+        $i65 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i66 = $i65 + 2;
+
+        $r46 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i67 = lengthof $r46;
+
+        if $i66 <= $i67 goto label30;
+
+        $r7 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i9 = lengthof $r7;
+
+        $i10 = $i9 + 128;
+
+        r47 = newarray (char)[$i10];
+
+        $r9 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $r8 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i11 = lengthof $r8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, r47, 0, $i11);
+
+        r1.<javax.swing.text.html.parser.Parser: char[] text> = r47;
+
+     label30:
+        $z0 = r1.<javax.swing.text.html.parser.Parser: boolean space>;
+
+        if $z0 == 0 goto label32;
+
+        $i4 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        if $i4 != 0 goto label31;
+
+        $i7 = r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos>;
+
+        $i8 = $i7 - 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int lastBlockStartPos> = $i8;
+
+     label31:
+        $r6 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i5 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i6 = $i5 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = $i6;
+
+        $r6[$i5] = 32;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean space> = 0;
+
+     label32:
+        $r48 = r1.<javax.swing.text.html.parser.Parser: char[] text>;
+
+        $i68 = r1.<javax.swing.text.html.parser.Parser: int textpos>;
+
+        $i69 = $i68 + 1;
+
+        r1.<javax.swing.text.html.parser.Parser: int textpos> = $i69;
+
+        $c70 = (char) i56;
+
+        $r48[$i68] = $c70;
+
+        r1.<javax.swing.text.html.parser.Parser: boolean ignoreSpace> = 0;
+
+        goto label01;
+
+     label33:
+        return;
+    }
+
+    java.lang.String getEndOfLineString()
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        if $i1 < $i0 goto label2;
+
+        $i5 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        $i4 = r0.<javax.swing.text.html.parser.Parser: int crlfCount>;
+
+        if $i5 < $i4 goto label1;
+
+        return "\n";
+
+     label1:
+        return "\r\n";
+
+     label2:
+        $i3 = r0.<javax.swing.text.html.parser.Parser: int crCount>;
+
+        $i2 = r0.<javax.swing.text.html.parser.Parser: int lfCount>;
+
+        if $i3 <= $i2 goto label3;
+
+        return "\r";
+
+     label3:
+        return "\n";
+    }
+
+    public synchronized void parse(java.io.Reader) throws java.io.IOException
+    {
+        java.lang.Throwable $r10;
+        javax.swing.text.html.parser.TagElement $r7, $r13, $r23;
+        int $i0;
+        javax.swing.text.html.parser.Parser r0;
+        java.lang.String $r19, $r20;
+        java.io.IOException $r26;
+        java.io.Reader r1;
+        javax.swing.text.html.parser.TagStack $r4, $r5, $r6, $r8, $r9, $r11, $r12, $r14, $r15, $r21, $r22, $r24, $r25;
+        java.lang.Exception $r17;
+        java.lang.ThreadDeath $r16;
+        char[] $r2, $r3;
+        java.lang.Class $r18;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        r1 := @parameter0: java.io.Reader;
+
+        r0.<javax.swing.text.html.parser.Parser: java.io.Reader in> = r1;
+
+        r0.<javax.swing.text.html.parser.Parser: int ln> = 1;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenHtml> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenHead> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: boolean seenBody> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: int crlfCount> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: int lfCount> = 0;
+
+        r0.<javax.swing.text.html.parser.Parser: int crCount> = 0;
+
+     label01:
+        $i0 = specialinvoke r0.<javax.swing.text.html.parser.Parser: int readCh()>();
+
+        r0.<javax.swing.text.html.parser.Parser: int ch> = $i0;
+
+        $r2 = newarray (char)[1024];
+
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = $r2;
+
+        $r3 = newarray (char)[128];
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = $r3;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void parseContent()>();
+
+     label02:
+        $r4 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r4 == null goto label03;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void endTag(boolean)>(1);
+
+        goto label02;
+
+     label03:
+        virtualinvoke r1.<java.io.Reader: void close()>();
+
+     label04:
+        $r5 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r5 == null goto label05;
+
+        $r6 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r7 = $r6.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEndTag(javax.swing.text.html.parser.TagElement)>($r7);
+
+        $r8 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r9 = $r8.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r9;
+
+        goto label04;
+
+     label05:
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = null;
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = null;
+
+        goto label14;
+
+     label06:
+        $r26 := @caughtexception;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void errorContext()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("ioexception");
+
+        throw $r26;
+
+     label07:
+        $r17 := @caughtexception;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void errorContext()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.Class: java.lang.String getName()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.Exception: java.lang.String getMessage()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String,java.lang.String,java.lang.String)>("exception", $r19, $r20);
+
+        virtualinvoke $r17.<java.lang.Exception: void printStackTrace()>();
+
+     label08:
+        $r21 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r21 == null goto label09;
+
+        $r22 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r23 = $r22.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEndTag(javax.swing.text.html.parser.TagElement)>($r23);
+
+        $r24 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r25 = $r24.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r25;
+
+        goto label08;
+
+     label09:
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = null;
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = null;
+
+        goto label14;
+
+     label10:
+        $r16 := @caughtexception;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void errorContext()>();
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void error(java.lang.String)>("terminated");
+
+        virtualinvoke $r16.<java.lang.ThreadDeath: void printStackTrace()>();
+
+        throw $r16;
+
+     label11:
+        $r10 := @caughtexception;
+
+     label12:
+        $r11 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        if $r11 == null goto label13;
+
+        $r12 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r13 = $r12.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagElement tag>;
+
+        virtualinvoke r0.<javax.swing.text.html.parser.Parser: void handleEndTag(javax.swing.text.html.parser.TagElement)>($r13);
+
+        $r14 = r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack>;
+
+        $r15 = $r14.<javax.swing.text.html.parser.TagStack: javax.swing.text.html.parser.TagStack next>;
+
+        r0.<javax.swing.text.html.parser.Parser: javax.swing.text.html.parser.TagStack stack> = $r15;
+
+        goto label12;
+
+     label13:
+        r0.<javax.swing.text.html.parser.Parser: char[] text> = null;
+
+        r0.<javax.swing.text.html.parser.Parser: char[] str> = null;
+
+        throw $r10;
+
+     label14:
+        return;
+
+        catch java.io.IOException from label01 to label04 with label06;
+        catch java.lang.Exception from label01 to label04 with label07;
+        catch java.lang.ThreadDeath from label01 to label04 with label10;
+        catch java.lang.Throwable from label01 to label04 with label11;
+        catch java.lang.Throwable from label06 to label08 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+    }
+
+    private final int readCh() throws java.io.IOException
+    {
+        java.io.InterruptedIOException $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i10, $i11;
+        javax.swing.text.html.parser.Parser r0;
+        char $c6;
+        java.io.Reader $r3;
+        char[] $r1, $r2;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i1 = r0.<javax.swing.text.html.parser.Parser: int pos>;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int len>;
+
+        if $i1 < $i0 goto label6;
+
+     label1:
+        $r3 = r0.<javax.swing.text.html.parser.Parser: java.io.Reader in>;
+
+        $r2 = r0.<javax.swing.text.html.parser.Parser: char[] buf>;
+
+        $i7 = virtualinvoke $r3.<java.io.Reader: int read(char[])>($r2);
+
+        r0.<javax.swing.text.html.parser.Parser: int len> = $i7;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        throw $r4;
+
+     label4:
+        $i8 = r0.<javax.swing.text.html.parser.Parser: int len>;
+
+        if $i8 > 0 goto label5;
+
+        $i10 = (int) -1;
+
+        return $i10;
+
+     label5:
+        r0.<javax.swing.text.html.parser.Parser: int pos> = 0;
+
+     label6:
+        $i2 = r0.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        $i3 = $i2 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int currentPosition> = $i3;
+
+        $r1 = r0.<javax.swing.text.html.parser.Parser: char[] buf>;
+
+        $i4 = r0.<javax.swing.text.html.parser.Parser: int pos>;
+
+        $i5 = $i4 + 1;
+
+        r0.<javax.swing.text.html.parser.Parser: int pos> = $i5;
+
+        $c6 = $r1[$i4];
+
+        $i11 = (int) $c6;
+
+        return $i11;
+
+        catch java.io.InterruptedIOException from label1 to label2 with label3;
+    }
+
+    protected int getCurrentPos()
+    {
+        int $i0;
+        javax.swing.text.html.parser.Parser r0;
+
+        r0 := @this: javax.swing.text.html.parser.Parser;
+
+        $i0 = r0.<javax.swing.text.html.parser.Parser: int currentPosition>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r0, $r2, $r4;
+        java.lang.String $r1, $r3;
+
+        <javax.swing.text.html.parser.Parser: java.lang.String END_COMMENT> = "-->";
+
+        <javax.swing.text.html.parser.Parser: java.lang.String START_COMMENT> = "<!--";
+
+        $r0 = newarray (char)[30];
+
+        $r0[0] = 8218;
+
+        $r0[1] = 402;
+
+        $r0[2] = 8222;
+
+        $r0[3] = 8230;
+
+        $r0[4] = 8224;
+
+        $r0[5] = 8225;
+
+        $r0[6] = 710;
+
+        $r0[7] = 8240;
+
+        $r0[8] = 352;
+
+        $r0[9] = 8249;
+
+        $r0[10] = 338;
+
+        $r0[11] = 141;
+
+        $r0[12] = 142;
+
+        $r0[13] = 143;
+
+        $r0[14] = 144;
+
+        $r0[15] = 8216;
+
+        $r0[16] = 8217;
+
+        $r0[17] = 8220;
+
+        $r0[18] = 8221;
+
+        $r0[19] = 8226;
+
+        $r0[20] = 8211;
+
+        $r0[21] = 8212;
+
+        $r0[22] = 732;
+
+        $r0[23] = 8482;
+
+        $r0[24] = 353;
+
+        $r0[25] = 8250;
+
+        $r0[26] = 339;
+
+        $r0[27] = 157;
+
+        $r0[28] = 158;
+
+        $r0[29] = 376;
+
+        <javax.swing.text.html.parser.Parser: char[] cp1252Map> = $r0;
+
+        $r1 = "</script>";
+
+        $r2 = virtualinvoke $r1.<java.lang.String: char[] toCharArray()>();
+
+        <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG> = $r2;
+
+        $r3 = "</SCRIPT>";
+
+        $r4 = virtualinvoke $r3.<java.lang.String: char[] toCharArray()>();
+
+        <javax.swing.text.html.parser.Parser: char[] SCRIPT_END_TAG_UPPER_CASE> = $r4;
+
+        return;
+    }
+}

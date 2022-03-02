@@ -1,0 +1,553 @@
+public class sun.awt.datatransfer.DataTransferer$ReencodingInputStream extends java.io.InputStream
+{
+    protected java.io.BufferedReader wrapped;
+    protected final char[] in;
+    protected byte[] out;
+    protected java.nio.charset.CharsetEncoder encoder;
+    protected java.nio.CharBuffer inBuf;
+    protected java.nio.ByteBuffer outBuf;
+    protected char[] eoln;
+    protected int numTerminators;
+    protected boolean eos;
+    protected int index;
+    protected int limit;
+    final sun.awt.datatransfer.DataTransferer this$0;
+
+    public void <init>(sun.awt.datatransfer.DataTransferer, java.io.InputStream, long, java.lang.String, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] $r11, $r14, $r28, $r29;
+        sun.awt.datatransfer.DataTransferer r1;
+        java.lang.Integer $r21;
+        java.nio.ByteBuffer $r15;
+        java.lang.NullPointerException $r22;
+        java.lang.Long $r3;
+        java.util.Map $r16, $r18;
+        boolean $z0, $z1;
+        java.awt.datatransfer.UnsupportedFlavorException $r39;
+        java.nio.CharBuffer $r13;
+        java.nio.charset.CharsetEncoder $r9, $r10;
+        float $f0, $f1;
+        java.nio.charset.UnsupportedCharsetException $r33;
+        java.awt.datatransfer.DataFlavor $r24, $r26;
+        java.awt.datatransfer.Transferable r23;
+        long l0;
+        java.nio.charset.Charset $r8;
+        int $i1, $i2;
+        java.nio.charset.IllegalCharsetNameException $r36;
+        java.lang.String r7, $r25, $r32, $r35, $r38, r40, r41;
+        double $d0, $d1;
+        java.lang.UnsupportedOperationException $r30;
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+        java.io.IOException $r31, $r34, $r37;
+        java.io.InputStreamReader $r5;
+        char[] $r2, $r12, $r20;
+        java.lang.Object $r17, $r19, $r27;
+        java.io.BufferedReader $r4;
+        java.io.InputStream r6;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        r1 := @parameter0: sun.awt.datatransfer.DataTransferer;
+
+        r6 := @parameter1: java.io.InputStream;
+
+        l0 := @parameter2: long;
+
+        r7 := @parameter3: java.lang.String;
+
+        r23 := @parameter4: java.awt.datatransfer.Transferable;
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: sun.awt.datatransfer.DataTransferer this$0> = r1;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        $r2 = newarray (char)[2];
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] in> = $r2;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        r40 = null;
+
+        $z0 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: boolean isLocaleDependentTextFormat(long)>(l0);
+
+        if $z0 == 0 goto label04;
+
+        if r23 == null goto label04;
+
+        $r24 = <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $z1 = interfaceinvoke r23.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>($r24);
+
+        if $z1 == 0 goto label04;
+
+     label01:
+        $r25 = new java.lang.String;
+
+        $r26 = <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $r27 = interfaceinvoke r23.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>($r26);
+
+        $r28 = (byte[]) $r27;
+
+        $r29 = (byte[]) $r28;
+
+        specialinvoke $r25.<java.lang.String: void <init>(byte[],java.lang.String)>($r29, "UTF-8");
+
+        r40 = $r25;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r39 := @caughtexception;
+
+        goto label05;
+
+     label04:
+        r40 = virtualinvoke r1.<sun.awt.datatransfer.DataTransferer: java.lang.String getCharsetForTextFormat(java.lang.Long)>($r3);
+
+     label05:
+        if r40 != null goto label06;
+
+        r40 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.lang.String getDefaultTextCharset()>();
+
+     label06:
+        $r4 = new java.io.BufferedReader;
+
+        $r5 = new java.io.InputStreamReader;
+
+        specialinvoke $r5.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>(r6, r40);
+
+        specialinvoke $r4.<java.io.BufferedReader: void <init>(java.io.Reader)>($r5);
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped> = $r4;
+
+        if r7 != null goto label07;
+
+        $r22 = new java.lang.NullPointerException;
+
+        specialinvoke $r22.<java.lang.NullPointerException: void <init>(java.lang.String)>("null target encoding");
+
+        throw $r22;
+
+     label07:
+        $r8 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r7);
+
+        $r9 = virtualinvoke $r8.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.charset.CharsetEncoder encoder> = $r9;
+
+        $r10 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.charset.CharsetEncoder encoder>;
+
+        $f0 = virtualinvoke $r10.<java.nio.charset.CharsetEncoder: float maxBytesPerChar()>();
+
+        $f1 = $f0 * 2.0F;
+
+        $d0 = (double) $f1;
+
+        $d1 = $d0 + 0.5;
+
+        $i1 = (int) $d1;
+
+        $r11 = newarray (byte)[$i1];
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: byte[] out> = $r11;
+
+        $r12 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] in>;
+
+        $r13 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(char[])>($r12);
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.CharBuffer inBuf> = $r13;
+
+        $r14 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: byte[] out>;
+
+        $r15 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r14);
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.ByteBuffer outBuf> = $r15;
+
+     label08:
+        goto label12;
+
+     label09:
+        $r36 := @caughtexception;
+
+        $r37 = new java.io.IOException;
+
+        $r38 = virtualinvoke $r36.<java.nio.charset.IllegalCharsetNameException: java.lang.String toString()>();
+
+        specialinvoke $r37.<java.io.IOException: void <init>(java.lang.String)>($r38);
+
+        throw $r37;
+
+     label10:
+        $r33 := @caughtexception;
+
+        $r34 = new java.io.IOException;
+
+        $r35 = virtualinvoke $r33.<java.nio.charset.UnsupportedCharsetException: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.io.IOException: void <init>(java.lang.String)>($r35);
+
+        throw $r34;
+
+     label11:
+        $r30 := @caughtexception;
+
+        $r31 = new java.io.IOException;
+
+        $r32 = virtualinvoke $r30.<java.lang.UnsupportedOperationException: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.io.IOException: void <init>(java.lang.String)>($r32);
+
+        throw $r31;
+
+     label12:
+        $r16 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.util.Map access$400()>();
+
+        $r17 = interfaceinvoke $r16.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r41 = (java.lang.String) $r17;
+
+        if r41 == null goto label13;
+
+        $r20 = virtualinvoke r41.<java.lang.String: char[] toCharArray()>();
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] eoln> = $r20;
+
+     label13:
+        $r18 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.util.Map access$500()>();
+
+        $r19 = interfaceinvoke $r18.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r21 = (java.lang.Integer) $r19;
+
+        if $r21 == null goto label14;
+
+        $i2 = virtualinvoke $r21.<java.lang.Integer: int intValue()>();
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int numTerminators> = $i2;
+
+     label14:
+        return;
+
+        catch java.awt.datatransfer.UnsupportedFlavorException from label01 to label02 with label03;
+        catch java.nio.charset.IllegalCharsetNameException from label07 to label08 with label09;
+        catch java.nio.charset.UnsupportedCharsetException from label07 to label08 with label10;
+        catch java.lang.UnsupportedOperationException from label07 to label08 with label11;
+    }
+
+    private int readChar() throws java.io.IOException
+    {
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+        int $i0, $i1, i2, $i4, $i6, $i8;
+        char[] $r2, $r3;
+        java.io.BufferedReader $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        $r1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped>;
+
+        $i0 = virtualinvoke $r1.<java.io.BufferedReader: int read()>();
+
+        i2 = $i0;
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label1;
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: boolean eos> = 1;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label1:
+        $i1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int numTerminators>;
+
+        if $i1 <= 0 goto label2;
+
+        if $i0 != 0 goto label2;
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: boolean eos> = 1;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+     label2:
+        $r2 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] eoln>;
+
+        if $r2 == null goto label3;
+
+        $r3 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] eoln>;
+
+        $z0 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: boolean matchCharArray(char[],int)>($r3, $i0);
+
+        if $z0 == 0 goto label3;
+
+        i2 = 10;
+
+     label3:
+        return i2;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] $r1, $r9;
+        java.nio.ByteBuffer $r8, $r13, $r14, $r15;
+        byte $b4;
+        boolean $z0, $z1;
+        java.nio.CharBuffer $r4, $r6, $r7, $r12;
+        java.nio.charset.CharsetEncoder $r11;
+        short $s5, $s22;
+        java.nio.Buffer $r10;
+        int $i0, $i1, $i2, $i3, $i6, $i9, $i11, $i12, $i13, $i15, $i17, $i19, $i21, $i23;
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+        char $c7, $c8, $c10;
+        char[] $r2, $r3, $r5;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        $z0 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: boolean eos>;
+
+        if $z0 == 0 goto label1;
+
+        $i15 = (int) -1;
+
+        return $i15;
+
+     label1:
+        $i1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int index>;
+
+        $i0 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int limit>;
+
+        if $i1 < $i0 goto label4;
+
+        $i6 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int readChar()>();
+
+        $i17 = (int) -1;
+
+        if $i6 != $i17 goto label2;
+
+        $i19 = (int) -1;
+
+        return $i19;
+
+     label2:
+        $r2 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] in>;
+
+        $c7 = (char) $i6;
+
+        $r2[0] = $c7;
+
+        $r3 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] in>;
+
+        $r3[1] = 0;
+
+        $r4 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.CharBuffer inBuf>;
+
+        virtualinvoke $r4.<java.nio.CharBuffer: java.nio.Buffer limit(int)>(1);
+
+        $c8 = (char) $i6;
+
+        $z1 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>($c8);
+
+        if $z1 == 0 goto label3;
+
+        $i9 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int readChar()>();
+
+        $i21 = (int) -1;
+
+        if $i9 == $i21 goto label3;
+
+        $r5 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: char[] in>;
+
+        $c10 = (char) $i9;
+
+        $r5[1] = $c10;
+
+        $r6 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.CharBuffer inBuf>;
+
+        virtualinvoke $r6.<java.nio.CharBuffer: java.nio.Buffer limit(int)>(2);
+
+     label3:
+        $r7 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.CharBuffer inBuf>;
+
+        virtualinvoke $r7.<java.nio.CharBuffer: java.nio.Buffer rewind()>();
+
+        $r8 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.ByteBuffer outBuf>;
+
+        $r9 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: byte[] out>;
+
+        $i11 = lengthof $r9;
+
+        $r10 = virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i11);
+
+        virtualinvoke $r10.<java.nio.Buffer: java.nio.Buffer rewind()>();
+
+        $r11 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.charset.CharsetEncoder encoder>;
+
+        $r12 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.CharBuffer inBuf>;
+
+        $r13 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.ByteBuffer outBuf>;
+
+        virtualinvoke $r11.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>($r12, $r13, 0);
+
+        $r14 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.ByteBuffer outBuf>;
+
+        virtualinvoke $r14.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $r15 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.nio.ByteBuffer outBuf>;
+
+        $i12 = virtualinvoke $r15.<java.nio.ByteBuffer: int limit()>();
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int limit> = $i12;
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int index> = 0;
+
+        $i13 = virtualinvoke r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int read()>();
+
+        return $i13;
+
+     label4:
+        $r1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: byte[] out>;
+
+        $i2 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int index>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int index> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s22 = (short) $b4;
+
+        $s5 = $s22 & 255;
+
+        $i23 = (int) $s5;
+
+        return $i23;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        $z0 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: boolean eos>;
+
+        if $z0 == 0 goto label1;
+
+        $i2 = 0;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int limit>;
+
+        $i0 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: int index>;
+
+        $i2 = $i1 - $i0;
+
+     label2:
+        return $i2;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.BufferedReader $r1;
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        $r1 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped>;
+
+        virtualinvoke $r1.<java.io.BufferedReader: void close()>();
+
+        return;
+    }
+
+    private boolean matchCharArray(char[], int) throws java.io.IOException
+    {
+        int $i0, $i3, $i4, i7, i8, $i9, $i10, $i11, $i13, $i14, $i15;
+        sun.awt.datatransfer.DataTransferer$ReencodingInputStream r0;
+        char $c1, $c2, $c5, $c6;
+        char[] r1;
+        java.io.BufferedReader $r2, $r3, $r4;
+
+        r0 := @this: sun.awt.datatransfer.DataTransferer$ReencodingInputStream;
+
+        r1 := @parameter0: char[];
+
+        i7 := @parameter1: int;
+
+        $r2 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped>;
+
+        $i0 = lengthof r1;
+
+        virtualinvoke $r2.<java.io.BufferedReader: void mark(int)>($i0);
+
+        i8 = 0;
+
+        $c2 = (char) i7;
+
+        $c1 = r1[0];
+
+        $i10 = (int) $c2;
+
+        $i11 = (int) $c1;
+
+        if $i10 != $i11 goto label3;
+
+        i8 = 1;
+
+     label1:
+        $i3 = lengthof r1;
+
+        if i8 >= $i3 goto label3;
+
+        $r4 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped>;
+
+        $i4 = virtualinvoke $r4.<java.io.BufferedReader: int read()>();
+
+        $i13 = (int) -1;
+
+        if $i4 == $i13 goto label3;
+
+        $c6 = (char) $i4;
+
+        $c5 = r1[i8];
+
+        $i14 = (int) $c6;
+
+        $i15 = (int) $c5;
+
+        if $i14 == $i15 goto label2;
+
+        goto label3;
+
+     label2:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label3:
+        $i9 = lengthof r1;
+
+        if i8 != $i9 goto label4;
+
+        return 1;
+
+     label4:
+        $r3 = r0.<sun.awt.datatransfer.DataTransferer$ReencodingInputStream: java.io.BufferedReader wrapped>;
+
+        virtualinvoke $r3.<java.io.BufferedReader: void reset()>();
+
+        return 0;
+    }
+}

@@ -1,0 +1,861 @@
+public class sun.java2d.opengl.WGLGraphicsConfig extends sun.awt.Win32GraphicsConfig implements sun.java2d.opengl.OGLGraphicsConfig
+{
+    protected static boolean wglAvailable;
+    private static java.awt.ImageCapabilities imageCaps;
+    private java.awt.BufferCapabilities bufferCaps;
+    private long pConfigInfo;
+    private sun.java2d.pipe.hw.ContextCapabilities oglCaps;
+    private sun.java2d.opengl.OGLContext context;
+    private java.lang.Object disposerReferent;
+
+    public static native int getDefaultPixFmt(int);
+
+    private static native boolean initWGL();
+
+    private static native long getWGLConfigInfo(int, int);
+
+    private static native int getOGLCapabilities(long);
+
+    protected void <init>(sun.awt.Win32GraphicsDevice, int, long, sun.java2d.pipe.hw.ContextCapabilities)
+    {
+        sun.java2d.opengl.OGLRenderQueue $r5;
+        sun.java2d.opengl.WGLGraphicsConfig$WGLGCDisposerRecord $r6;
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        long l1, $l2;
+        sun.java2d.pipe.hw.ContextCapabilities r3;
+        sun.java2d.opengl.OGLContext $r4;
+        int i0, $i3;
+        java.lang.Object $r2, $r7;
+        sun.awt.Win32GraphicsDevice r1;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r1 := @parameter0: sun.awt.Win32GraphicsDevice;
+
+        i0 := @parameter1: int;
+
+        l1 := @parameter2: long;
+
+        r3 := @parameter3: sun.java2d.pipe.hw.ContextCapabilities;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsConfig: void <init>(java.awt.GraphicsDevice,int)>(r1, i0);
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.opengl.WGLGraphicsConfig: java.lang.Object disposerReferent> = $r2;
+
+        r0.<sun.java2d.opengl.WGLGraphicsConfig: long pConfigInfo> = l1;
+
+        r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.pipe.hw.ContextCapabilities oglCaps> = r3;
+
+        $r4 = new sun.java2d.opengl.OGLContext;
+
+        $r5 = staticinvoke <sun.java2d.opengl.OGLRenderQueue: sun.java2d.opengl.OGLRenderQueue getInstance()>();
+
+        specialinvoke $r4.<sun.java2d.opengl.OGLContext: void <init>(sun.java2d.pipe.RenderQueue,sun.java2d.opengl.OGLGraphicsConfig)>($r5, r0);
+
+        r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.opengl.OGLContext context> = $r4;
+
+        $r7 = r0.<sun.java2d.opengl.WGLGraphicsConfig: java.lang.Object disposerReferent>;
+
+        $r6 = new sun.java2d.opengl.WGLGraphicsConfig$WGLGCDisposerRecord;
+
+        $l2 = r0.<sun.java2d.opengl.WGLGraphicsConfig: long pConfigInfo>;
+
+        $i3 = virtualinvoke r1.<sun.awt.Win32GraphicsDevice: int getScreen()>();
+
+        specialinvoke $r6.<sun.java2d.opengl.WGLGraphicsConfig$WGLGCDisposerRecord: void <init>(long,int)>($l2, $i3);
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r7, $r6);
+
+        return;
+    }
+
+    public java.lang.Object getProxyKey()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        return r0;
+    }
+
+    public sun.java2d.SurfaceData createManagedSurface(int, int, int)
+    {
+        java.awt.image.ColorModel $r1;
+        sun.java2d.opengl.WGLSurfaceData$WGLOffScreenSurfaceData $r2;
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        int i0, i1, i2;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<sun.java2d.opengl.WGLGraphicsConfig: java.awt.image.ColorModel getColorModel(int)>(i2);
+
+        $r2 = staticinvoke <sun.java2d.opengl.WGLSurfaceData: sun.java2d.opengl.WGLSurfaceData$WGLOffScreenSurfaceData createData(sun.java2d.opengl.WGLGraphicsConfig,int,int,java.awt.image.ColorModel,java.awt.Image,int)>(r0, i0, i1, $r1, null, 3);
+
+        return $r2;
+    }
+
+    public static sun.java2d.opengl.WGLGraphicsConfig getConfig(sun.awt.Win32GraphicsDevice, int)
+    {
+        java.lang.Throwable $r8;
+        sun.java2d.opengl.OGLContext$OGLContextCaps $r4;
+        java.lang.String[] r0;
+        long $l2;
+        sun.java2d.opengl.WGLGraphicsConfig$WGLGetConfigInfo $r2;
+        byte $b3, $b4;
+        int $i0, i1, $i5;
+        java.lang.String $r5;
+        boolean $z0;
+        sun.awt.Win32GraphicsDevice r3;
+        sun.java2d.opengl.OGLRenderQueue $r1;
+        sun.java2d.opengl.WGLGraphicsConfig $r6;
+        sun.java2d.opengl.WGLGraphicsConfig$1 $r7;
+
+        r3 := @parameter0: sun.awt.Win32GraphicsDevice;
+
+        i1 := @parameter1: int;
+
+        $z0 = <sun.java2d.opengl.WGLGraphicsConfig: boolean wglAvailable>;
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        r0 = newarray (java.lang.String)[1];
+
+        $r1 = staticinvoke <sun.java2d.opengl.OGLRenderQueue: sun.java2d.opengl.OGLRenderQueue getInstance()>();
+
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void lock()>();
+
+     label2:
+        staticinvoke <sun.java2d.opengl.OGLContext: void invalidateCurrentContext()>();
+
+        $r2 = new sun.java2d.opengl.WGLGraphicsConfig$WGLGetConfigInfo;
+
+        $i0 = virtualinvoke r3.<sun.awt.Win32GraphicsDevice: int getScreen()>();
+
+        specialinvoke $r2.<sun.java2d.opengl.WGLGraphicsConfig$WGLGetConfigInfo: void <init>(int,int,sun.java2d.opengl.WGLGraphicsConfig$1)>($i0, i1, null);
+
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r2);
+
+        $l2 = virtualinvoke $r2.<sun.java2d.opengl.WGLGraphicsConfig$WGLGetConfigInfo: long getConfigInfo()>();
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label3;
+
+        staticinvoke <sun.java2d.opengl.OGLContext: void setScratchSurface(long)>($l2);
+
+        $r7 = new sun.java2d.opengl.WGLGraphicsConfig$1;
+
+        specialinvoke $r7.<sun.java2d.opengl.WGLGraphicsConfig$1: void <init>(java.lang.String[])>(r0);
+
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r7);
+
+     label3:
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+     label5:
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void unlock()>();
+
+        throw $r8;
+
+     label6:
+        $b4 = $l2 cmp 0L;
+
+        if $b4 != 0 goto label7;
+
+        return null;
+
+     label7:
+        $i5 = staticinvoke <sun.java2d.opengl.WGLGraphicsConfig: int getOGLCapabilities(long)>($l2);
+
+        $r4 = new sun.java2d.opengl.OGLContext$OGLContextCaps;
+
+        $r5 = r0[0];
+
+        specialinvoke $r4.<sun.java2d.opengl.OGLContext$OGLContextCaps: void <init>(int,java.lang.String)>($i5, $r5);
+
+        $r6 = new sun.java2d.opengl.WGLGraphicsConfig;
+
+        specialinvoke $r6.<sun.java2d.opengl.WGLGraphicsConfig: void <init>(sun.awt.Win32GraphicsDevice,int,long,sun.java2d.pipe.hw.ContextCapabilities)>(r3, i1, $l2, $r4);
+
+        return $r6;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static boolean isWGLAvailable()
+    {
+        boolean $z0;
+
+        $z0 = <sun.java2d.opengl.WGLGraphicsConfig: boolean wglAvailable>;
+
+        return $z0;
+    }
+
+    public final boolean isCapPresent(int)
+    {
+        sun.java2d.pipe.hw.ContextCapabilities $r1;
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        int $i0, i1, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.pipe.hw.ContextCapabilities oglCaps>;
+
+        $i0 = virtualinvoke $r1.<sun.java2d.pipe.hw.ContextCapabilities: int getCaps()>();
+
+        $i2 = $i0 & i1;
+
+        if $i2 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final long getNativeConfigInfo()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        long $l0;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $l0 = r0.<sun.java2d.opengl.WGLGraphicsConfig: long pConfigInfo>;
+
+        return $l0;
+    }
+
+    public final sun.java2d.opengl.OGLContext getContext()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        sun.java2d.opengl.OGLContext $r1;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r1 = r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.opengl.OGLContext context>;
+
+        return $r1;
+    }
+
+    public synchronized void displayChanged()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        sun.java2d.opengl.OGLRenderQueue $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsConfig: void displayChanged()>();
+
+        $r1 = staticinvoke <sun.java2d.opengl.OGLRenderQueue: sun.java2d.opengl.OGLRenderQueue getInstance()>();
+
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void lock()>();
+
+     label1:
+        staticinvoke <sun.java2d.opengl.OGLContext: void invalidateCurrentContext()>();
+
+     label2:
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r1.<sun.java2d.opengl.OGLRenderQueue: void unlock()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.awt.image.ColorModel getColorModel(int)
+    {
+        java.awt.image.DirectColorModel $r5, $r6, $r7;
+        sun.java2d.opengl.WGLGraphicsConfig r4;
+        java.awt.color.ColorSpace $r0;
+        int i0, $i2, $i4, $i6;
+
+        r4 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r5 = new java.awt.image.DirectColorModel;
+
+        $i2 = (int) 65280;
+
+        specialinvoke $r5.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, $i2, 255);
+
+        return $r5;
+
+     label2:
+        $r6 = new java.awt.image.DirectColorModel;
+
+        $i4 = (int) 65280;
+
+        specialinvoke $r6.<java.awt.image.DirectColorModel: void <init>(int,int,int,int,int)>(25, 16711680, $i4, 255, 16777216);
+
+        return $r6;
+
+     label3:
+        $r0 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1000);
+
+        $r7 = new java.awt.image.DirectColorModel;
+
+        $i6 = (int) 65280;
+
+        specialinvoke $r7.<java.awt.image.DirectColorModel: void <init>(java.awt.color.ColorSpace,int,int,int,int,int,boolean,int)>($r0, 32, 16711680, $i6, 255, -16777216, 1, 3);
+
+        return $r7;
+
+     label4:
+        return null;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r2;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r6, $r7;
+        java.lang.String $r8;
+        sun.awt.Win32GraphicsDevice $r3;
+
+        r2 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WGLGraphicsConfig[dev=");
+
+        $r3 = r2.<sun.java2d.opengl.WGLGraphicsConfig: sun.awt.Win32GraphicsDevice screen>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",pixfmt=");
+
+        $i0 = r2.<sun.java2d.opengl.WGLGraphicsConfig: int visual>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    public sun.java2d.SurfaceData createSurfaceData(sun.awt.windows.WComponentPeer, int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.opengl.WGLSurfaceData$WGLWindowSurfaceData $r1;
+        sun.java2d.opengl.WGLGraphicsConfig r2;
+        int i0;
+        sun.java2d.SurfaceData r3;
+
+        r2 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter1: int;
+
+        $r1 = staticinvoke <sun.java2d.opengl.WGLSurfaceData: sun.java2d.opengl.WGLSurfaceData$WGLWindowSurfaceData createData(sun.awt.windows.WComponentPeer)>(r0);
+
+        r3 = $r1;
+
+        if $r1 != null goto label1;
+
+        r3 = staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIWindowSurfaceData createData(sun.awt.windows.WComponentPeer)>(r0);
+
+     label1:
+        return r3;
+    }
+
+    public void assertOperationSupported(java.awt.Component, int, java.awt.BufferCapabilities) throws java.awt.AWTException
+    {
+        java.awt.BufferCapabilities$FlipContents $r3, $r4;
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        java.awt.Component r8;
+        java.awt.AWTException $r5, $r6, $r7;
+        int i0;
+        java.awt.BufferCapabilities $r1, r2;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r8 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.awt.BufferCapabilities;
+
+        if i0 <= 2 goto label1;
+
+        $r7 = new java.awt.AWTException;
+
+        specialinvoke $r7.<java.awt.AWTException: void <init>(java.lang.String)>("Only double or single buffering is supported");
+
+        throw $r7;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.java2d.opengl.WGLGraphicsConfig: java.awt.BufferCapabilities getBufferCapabilities()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.BufferCapabilities: boolean isPageFlipping()>();
+
+        if $z0 != 0 goto label2;
+
+        $r6 = new java.awt.AWTException;
+
+        specialinvoke $r6.<java.awt.AWTException: void <init>(java.lang.String)>("Page flipping is not supported");
+
+        throw $r6;
+
+     label2:
+        $r3 = virtualinvoke r2.<java.awt.BufferCapabilities: java.awt.BufferCapabilities$FlipContents getFlipContents()>();
+
+        $r4 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents PRIOR>;
+
+        if $r3 != $r4 goto label3;
+
+        $r5 = new java.awt.AWTException;
+
+        specialinvoke $r5.<java.awt.AWTException: void <init>(java.lang.String)>("FlipContents.PRIOR is not supported");
+
+        throw $r5;
+
+     label3:
+        return;
+    }
+
+    public java.awt.image.VolatileImage createBackBuffer(sun.awt.windows.WComponentPeer)
+    {
+        sun.awt.image.SunVolatileImage $r3;
+        sun.java2d.opengl.WGLGraphicsConfig r5;
+        java.awt.Component r2;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Boolean $r4;
+        java.lang.Object $r1;
+
+        r5 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        r2 = (java.awt.Component) $r1;
+
+        $i0 = virtualinvoke r2.<java.awt.Component: int getWidth()>();
+
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(1, $i0);
+
+        $i2 = virtualinvoke r2.<java.awt.Component: int getHeight()>();
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>(1, $i2);
+
+        $r3 = new sun.awt.image.SunVolatileImage;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        specialinvoke $r3.<sun.awt.image.SunVolatileImage: void <init>(java.awt.Component,int,int,java.lang.Object)>(r2, $i1, $i3, $r4);
+
+        return $r3;
+    }
+
+    public void flip(sun.awt.windows.WComponentPeer, java.awt.Component, java.awt.image.VolatileImage, int, int, int, int, java.awt.BufferCapabilities$FlipContents)
+    {
+        java.awt.Color $r8, $r14, $r15;
+        java.lang.Throwable $r16, $r17, $r18;
+        sun.java2d.opengl.WGLSurfaceData$WGLVSyncOffScreenSurfaceData r20;
+        java.awt.BufferCapabilities$FlipContents r0, $r1, $r2, $r4;
+        long $l0;
+        sun.awt.image.SurfaceManager $r9;
+        int $i1, $i2, i3, i4, i5, i6;
+        boolean $z0;
+        sun.java2d.opengl.WGLGraphicsConfig r19;
+        sun.java2d.SurfaceData $r10, $r12;
+        java.awt.Component r7;
+        java.awt.image.VolatileImage r5;
+        sun.awt.windows.WComponentPeer r3;
+        java.awt.Graphics $r6, $r11;
+        sun.java2d.SunGraphics2D $r13;
+
+        r19 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r3 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r7 := @parameter1: java.awt.Component;
+
+        r5 := @parameter2: java.awt.image.VolatileImage;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        i6 := @parameter6: int;
+
+        r0 := @parameter7: java.awt.BufferCapabilities$FlipContents;
+
+        $r1 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents COPIED>;
+
+        if r0 != $r1 goto label13;
+
+        $r9 = staticinvoke <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager getManager(java.awt.Image)>(r5);
+
+        $r10 = virtualinvoke $r9.<sun.awt.image.SurfaceManager: sun.java2d.SurfaceData getPrimarySurfaceData()>();
+
+        $z0 = $r10 instanceof sun.java2d.opengl.WGLSurfaceData$WGLVSyncOffScreenSurfaceData;
+
+        if $z0 == 0 goto label06;
+
+        r20 = (sun.java2d.opengl.WGLSurfaceData$WGLVSyncOffScreenSurfaceData) $r10;
+
+        $r12 = virtualinvoke r20.<sun.java2d.opengl.WGLSurfaceData$WGLVSyncOffScreenSurfaceData: sun.java2d.SurfaceData getFlipSurface()>();
+
+        $r13 = new sun.java2d.SunGraphics2D;
+
+        $r15 = <java.awt.Color: java.awt.Color black>;
+
+        $r14 = <java.awt.Color: java.awt.Color white>;
+
+        specialinvoke $r13.<sun.java2d.SunGraphics2D: void <init>(sun.java2d.SurfaceData,java.awt.Color,java.awt.Color,java.awt.Font)>($r12, $r15, $r14, null);
+
+     label01:
+        virtualinvoke $r13.<java.awt.Graphics2D: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>(r5, 0, 0, null);
+
+     label02:
+        virtualinvoke $r13.<java.awt.Graphics2D: void dispose()>();
+
+        goto label05;
+
+     label03:
+        $r18 := @caughtexception;
+
+     label04:
+        virtualinvoke $r13.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r18;
+
+     label05:
+        goto label12;
+
+     label06:
+        $r11 = virtualinvoke r3.<sun.awt.windows.WComponentPeer: java.awt.Graphics getGraphics()>();
+
+     label07:
+        virtualinvoke $r11.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,int,int,int,int,int,int,java.awt.image.ImageObserver)>(r5, i3, i4, i5, i6, i3, i4, i5, i6, null);
+
+     label08:
+        virtualinvoke $r11.<java.awt.Graphics: void dispose()>();
+
+        goto label11;
+
+     label09:
+        $r17 := @caughtexception;
+
+     label10:
+        virtualinvoke $r11.<java.awt.Graphics: void dispose()>();
+
+        throw $r17;
+
+     label11:
+        return;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r2 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents PRIOR>;
+
+        if r0 != $r2 goto label14;
+
+        return;
+
+     label14:
+        $l0 = virtualinvoke r3.<sun.awt.windows.WComponentPeer: long getData()>();
+
+        staticinvoke <sun.java2d.opengl.OGLSurfaceData: void swapBuffers(long)>($l0);
+
+        $r4 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents BACKGROUND>;
+
+        if r0 != $r4 goto label19;
+
+        $r6 = virtualinvoke r5.<java.awt.image.VolatileImage: java.awt.Graphics getGraphics()>();
+
+     label15:
+        $r8 = virtualinvoke r7.<java.awt.Component: java.awt.Color getBackground()>();
+
+        virtualinvoke $r6.<java.awt.Graphics: void setColor(java.awt.Color)>($r8);
+
+        $i1 = virtualinvoke r5.<java.awt.image.VolatileImage: int getWidth()>();
+
+        $i2 = virtualinvoke r5.<java.awt.image.VolatileImage: int getHeight()>();
+
+        virtualinvoke $r6.<java.awt.Graphics: void fillRect(int,int,int,int)>(0, 0, $i1, $i2);
+
+     label16:
+        virtualinvoke $r6.<java.awt.Graphics: void dispose()>();
+
+        goto label19;
+
+     label17:
+        $r16 := @caughtexception;
+
+     label18:
+        virtualinvoke $r6.<java.awt.Graphics: void dispose()>();
+
+        throw $r16;
+
+     label19:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    public java.awt.BufferCapabilities getBufferCapabilities()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        java.awt.BufferCapabilities $r1, $r2;
+        sun.java2d.opengl.WGLGraphicsConfig$WGLBufferCaps $r3;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r1 = r0.<sun.java2d.opengl.WGLGraphicsConfig: java.awt.BufferCapabilities bufferCaps>;
+
+        if $r1 != null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.java2d.opengl.WGLGraphicsConfig: boolean isCapPresent(int)>(65536);
+
+        $r3 = new sun.java2d.opengl.WGLGraphicsConfig$WGLBufferCaps;
+
+        specialinvoke $r3.<sun.java2d.opengl.WGLGraphicsConfig$WGLBufferCaps: void <init>(boolean)>($z0);
+
+        r0.<sun.java2d.opengl.WGLGraphicsConfig: java.awt.BufferCapabilities bufferCaps> = $r3;
+
+     label1:
+        $r2 = r0.<sun.java2d.opengl.WGLGraphicsConfig: java.awt.BufferCapabilities bufferCaps>;
+
+        return $r2;
+    }
+
+    public java.awt.ImageCapabilities getImageCapabilities()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r1;
+        java.awt.ImageCapabilities $r0;
+
+        r1 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r0 = <sun.java2d.opengl.WGLGraphicsConfig: java.awt.ImageCapabilities imageCaps>;
+
+        return $r0;
+    }
+
+    public java.awt.image.VolatileImage createCompatibleVolatileImage(int, int, int, int)
+    {
+        sun.java2d.Surface $r2;
+        sun.java2d.opengl.WGLGraphicsConfig r1;
+        int i0, i1, i2, i3, $i4;
+        sun.java2d.pipe.hw.AccelTypedVolatileImage $r0, r4;
+        sun.java2d.pipe.hw.AccelSurface $r3;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if i0 == 5 goto label1;
+
+        if i0 != 3 goto label2;
+
+     label1:
+        if i1 == 2 goto label2;
+
+        if i0 != 5 goto label3;
+
+        $z1 = virtualinvoke r1.<sun.java2d.opengl.WGLGraphicsConfig: boolean isCapPresent(int)>(12);
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r0 = new sun.java2d.pipe.hw.AccelTypedVolatileImage;
+
+        specialinvoke $r0.<sun.java2d.pipe.hw.AccelTypedVolatileImage: void <init>(java.awt.GraphicsConfiguration,int,int,int,int)>(r1, i2, i3, i1, i0);
+
+        r4 = $r0;
+
+        $r2 = virtualinvoke $r0.<sun.awt.image.SunVolatileImage: sun.java2d.Surface getDestSurface()>();
+
+        $z0 = $r2 instanceof sun.java2d.pipe.hw.AccelSurface;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = (sun.java2d.pipe.hw.AccelSurface) $r2;
+
+        $i4 = interfaceinvoke $r3.<sun.java2d.pipe.hw.AccelSurface: int getType()>();
+
+        if $i4 == i0 goto label5;
+
+     label4:
+        virtualinvoke $r0.<sun.awt.image.SunVolatileImage: void flush()>();
+
+        r4 = null;
+
+     label5:
+        return r4;
+    }
+
+    public sun.java2d.pipe.hw.ContextCapabilities getContextCapabilities()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        sun.java2d.pipe.hw.ContextCapabilities $r1;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r1 = r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.pipe.hw.ContextCapabilities oglCaps>;
+
+        return $r1;
+    }
+
+    public void addDeviceEventListener(sun.java2d.pipe.hw.AccelDeviceEventListener)
+    {
+        sun.java2d.pipe.hw.AccelDeviceEventListener r0;
+        sun.java2d.opengl.WGLGraphicsConfig r1;
+        int $i0;
+        sun.awt.Win32GraphicsDevice $r2;
+
+        r1 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r0 := @parameter0: sun.java2d.pipe.hw.AccelDeviceEventListener;
+
+        $r2 = r1.<sun.java2d.opengl.WGLGraphicsConfig: sun.awt.Win32GraphicsDevice screen>;
+
+        $i0 = virtualinvoke $r2.<sun.awt.Win32GraphicsDevice: int getScreen()>();
+
+        staticinvoke <sun.java2d.pipe.hw.AccelDeviceEventNotifier: void addListener(sun.java2d.pipe.hw.AccelDeviceEventListener,int)>(r0, $i0);
+
+        return;
+    }
+
+    public void removeDeviceEventListener(sun.java2d.pipe.hw.AccelDeviceEventListener)
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r1;
+        sun.java2d.pipe.hw.AccelDeviceEventListener r0;
+
+        r1 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        r0 := @parameter0: sun.java2d.pipe.hw.AccelDeviceEventListener;
+
+        staticinvoke <sun.java2d.pipe.hw.AccelDeviceEventNotifier: void removeListener(sun.java2d.pipe.hw.AccelDeviceEventListener)>(r0);
+
+        return;
+    }
+
+    public volatile sun.java2d.pipe.BufferedContext getContext()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig r0;
+        sun.java2d.opengl.OGLContext $r1;
+
+        r0 := @this: sun.java2d.opengl.WGLGraphicsConfig;
+
+        $r1 = virtualinvoke r0.<sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.opengl.OGLContext getContext()>();
+
+        return $r1;
+    }
+
+    static long access$200(int, int)
+    {
+        int i0, i1;
+        long $l2;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $l2 = staticinvoke <sun.java2d.opengl.WGLGraphicsConfig: long getWGLConfigInfo(int,int)>(i0, i1);
+
+        return $l2;
+    }
+
+    static java.awt.ImageCapabilities access$400()
+    {
+        java.awt.ImageCapabilities $r0;
+
+        $r0 = <sun.java2d.opengl.WGLGraphicsConfig: java.awt.ImageCapabilities imageCaps>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.java2d.opengl.WGLGraphicsConfig$WGLImageCaps $r0;
+        boolean $z0;
+
+        $r0 = new sun.java2d.opengl.WGLGraphicsConfig$WGLImageCaps;
+
+        specialinvoke $r0.<sun.java2d.opengl.WGLGraphicsConfig$WGLImageCaps: void <init>(sun.java2d.opengl.WGLGraphicsConfig$1)>(null);
+
+        <sun.java2d.opengl.WGLGraphicsConfig: java.awt.ImageCapabilities imageCaps> = $r0;
+
+        $z0 = staticinvoke <sun.java2d.opengl.WGLGraphicsConfig: boolean initWGL()>();
+
+        <sun.java2d.opengl.WGLGraphicsConfig: boolean wglAvailable> = $z0;
+
+        return;
+    }
+}

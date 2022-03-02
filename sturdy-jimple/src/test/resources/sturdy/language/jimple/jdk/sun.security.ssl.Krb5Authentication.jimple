@@ -1,0 +1,251 @@
+final enum class sun.security.ssl.Krb5Authentication extends java.lang.Enum implements sun.security.ssl.SSLAuthentication
+{
+    public static final enum sun.security.ssl.Krb5Authentication KRB5;
+    final java.lang.String keyType;
+    final sun.security.ssl.SSLPossessionGenerator possessionGenerator;
+    private static final sun.security.ssl.Krb5Authentication[] $VALUES;
+
+    public static sun.security.ssl.Krb5Authentication[] values()
+    {
+        java.lang.Object $r1;
+        sun.security.ssl.Krb5Authentication[] $r0, $r2;
+
+        $r0 = <sun.security.ssl.Krb5Authentication: sun.security.ssl.Krb5Authentication[] $VALUES>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (sun.security.ssl.Krb5Authentication[]) $r1;
+
+        return $r2;
+    }
+
+    public static sun.security.ssl.Krb5Authentication valueOf(java.lang.String)
+    {
+        java.lang.String r0;
+        java.lang.Enum $r1;
+        sun.security.ssl.Krb5Authentication $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.Enum: java.lang.Enum valueOf(java.lang.Class,java.lang.String)>(class "Lsun/security/ssl/Krb5Authentication;", r0);
+
+        $r2 = (sun.security.ssl.Krb5Authentication) $r1;
+
+        return $r2;
+    }
+
+    private void <init>(java.lang.String, int, java.lang.String, sun.security.ssl.SSLPossessionGenerator)
+    {
+        sun.security.ssl.SSLPossessionGenerator r3;
+        sun.security.ssl.Krb5Authentication r0;
+        int i0;
+        java.lang.String r1, r2;
+
+        r0 := @this: sun.security.ssl.Krb5Authentication;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: sun.security.ssl.SSLPossessionGenerator;
+
+        specialinvoke r0.<java.lang.Enum: void <init>(java.lang.String,int)>(r1, i0);
+
+        r0.<sun.security.ssl.Krb5Authentication: java.lang.String keyType> = r2;
+
+        r0.<sun.security.ssl.Krb5Authentication: sun.security.ssl.SSLPossessionGenerator possessionGenerator> = r3;
+
+        return;
+    }
+
+    public sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)
+    {
+        sun.security.ssl.SSLPossessionGenerator $r2;
+        sun.security.ssl.Krb5Authentication r0;
+        sun.security.ssl.SSLPossession $r3;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.Krb5Authentication;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r2 = r0.<sun.security.ssl.Krb5Authentication: sun.security.ssl.SSLPossessionGenerator possessionGenerator>;
+
+        $r3 = interfaceinvoke $r2.<sun.security.ssl.SSLPossessionGenerator: sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)>(r1);
+
+        return $r3;
+    }
+
+    private static java.lang.Object setupKerberosKeys(sun.security.ssl.ServerHandshakeContext)
+    {
+        java.security.AccessControlContext r17;
+        java.lang.Object[] $r4, $r7, $r14, $r16;
+        sun.security.ssl.Krb5Authentication$1 $r2;
+        java.lang.SecurityException $r15;
+        java.lang.String $r11, $r13, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.security.PrivilegedActionException $r8;
+        sun.security.ssl.ServerHandshakeContext r0;
+        sun.security.ssl.TransportContext $r1;
+        java.lang.SecurityManager $r5;
+        java.security.Permission $r6;
+        java.lang.Object $r3, r18;
+        java.lang.StringBuilder $r9, $r10, $r12;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+     label01:
+        $r1 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        r17 = $r1.<sun.security.ssl.TransportContext: java.security.AccessControlContext acc>;
+
+        $r2 = new sun.security.ssl.Krb5Authentication$1;
+
+        specialinvoke $r2.<sun.security.ssl.Krb5Authentication$1: void <init>(java.security.AccessControlContext)>(r17);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r2);
+
+        r18 = $r3;
+
+        if $r3 == null goto label07;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label02;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("handshake");
+
+        if $z3 == 0 goto label02;
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Using Kerberos creds", $r7);
+
+     label02:
+        $r19 = staticinvoke <sun.security.ssl.Krb5Helper: java.lang.String getServerPrincipalName(java.lang.Object)>($r3);
+
+        if $r19 == null goto label06;
+
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+     label03:
+        if $r5 == null goto label04;
+
+        $r6 = staticinvoke <sun.security.ssl.Krb5Helper: java.security.Permission getServicePermission(java.lang.String,java.lang.String)>($r19, "accept");
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkPermission(java.security.Permission,java.lang.Object)>($r6, r17);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r15 := @caughtexception;
+
+        r18 = null;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label06;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("handshake");
+
+        if $z7 == 0 goto label06;
+
+        $r16 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Permission to access Kerberos secret key denied", $r16);
+
+     label06:
+        goto label08;
+
+     label07:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label08;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("handshake");
+
+        if $z1 == 0 goto label08;
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No Kerberos creds obtained", $r4);
+
+     label08:
+        return r18;
+
+     label09:
+        $r8 := @caughtexception;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label10;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("handshake");
+
+        if $z5 == 0 goto label10;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempt to obtain Kerberos key failed: ");
+
+        $r11 = virtualinvoke $r8.<java.security.PrivilegedActionException: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r13, $r14);
+
+     label10:
+        return null;
+
+        catch java.lang.SecurityException from label03 to label04 with label05;
+        catch java.security.PrivilegedActionException from label01 to label08 with label09;
+    }
+
+    static java.lang.Object access$100(sun.security.ssl.ServerHandshakeContext)
+    {
+        java.lang.Object $r1;
+        sun.security.ssl.ServerHandshakeContext r0;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        $r1 = staticinvoke <sun.security.ssl.Krb5Authentication: java.lang.Object setupKerberosKeys(sun.security.ssl.ServerHandshakeContext)>(r0);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.ssl.Krb5Authentication[] $r2;
+        sun.security.ssl.Krb5Authentication $r0, $r3;
+        sun.security.ssl.Krb5Authentication$Krb5PossessionGenerator $r1;
+
+        $r0 = new sun.security.ssl.Krb5Authentication;
+
+        $r1 = new sun.security.ssl.Krb5Authentication$Krb5PossessionGenerator;
+
+        specialinvoke $r1.<sun.security.ssl.Krb5Authentication$Krb5PossessionGenerator: void <init>(sun.security.ssl.Krb5Authentication$1)>(null);
+
+        specialinvoke $r0.<sun.security.ssl.Krb5Authentication: void <init>(java.lang.String,int,java.lang.String,sun.security.ssl.SSLPossessionGenerator)>("KRB5", 0, "KRB5", $r1);
+
+        <sun.security.ssl.Krb5Authentication: sun.security.ssl.Krb5Authentication KRB5> = $r0;
+
+        $r2 = newarray (sun.security.ssl.Krb5Authentication)[1];
+
+        $r3 = <sun.security.ssl.Krb5Authentication: sun.security.ssl.Krb5Authentication KRB5>;
+
+        $r2[0] = $r3;
+
+        <sun.security.ssl.Krb5Authentication: sun.security.ssl.Krb5Authentication[] $VALUES> = $r2;
+
+        return;
+    }
+}

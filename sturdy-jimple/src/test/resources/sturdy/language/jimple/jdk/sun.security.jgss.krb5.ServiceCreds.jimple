@@ -1,0 +1,598 @@
+public final class sun.security.jgss.krb5.ServiceCreds extends java.lang.Object
+{
+    private javax.security.auth.kerberos.KerberosPrincipal kp;
+    private java.util.Set allPrincs;
+    private java.util.List ktabs;
+    private java.util.List kk;
+    private javax.security.auth.kerberos.KerberosTicket tgt;
+    private boolean destroyed;
+
+    private void <init>()
+    {
+        sun.security.jgss.krb5.ServiceCreds r0;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static sun.security.jgss.krb5.ServiceCreds getInstance(javax.security.auth.Subject, java.lang.String)
+    {
+        boolean $z0, $z1, $z2, $z3, z4, $z5;
+        javax.security.auth.kerberos.KerberosPrincipal $r13, $r14, $r17, $r20;
+        java.util.Set $r2, $r5, $r10, $r19;
+        javax.security.auth.kerberos.KerberosTicket $r7, $r26;
+        java.util.List $r3, $r6, $r8, $r23, $r24, $r27;
+        int $i0;
+        java.lang.String r21;
+        sun.security.jgss.krb5.ServiceCreds $r0;
+        javax.security.auth.kerberos.KerberosKey r22;
+        java.util.Iterator $r4, $r9, $r11;
+        javax.security.auth.Subject r1;
+        javax.security.auth.kerberos.KeyTab r16;
+        java.lang.Object $r12, $r15, $r18, $r25;
+
+        r1 := @parameter0: javax.security.auth.Subject;
+
+        r21 := @parameter1: java.lang.String;
+
+        $r0 = new sun.security.jgss.krb5.ServiceCreds;
+
+        specialinvoke $r0.<sun.security.jgss.krb5.ServiceCreds: void <init>()>();
+
+        $r2 = virtualinvoke r1.<javax.security.auth.Subject: java.util.Set getPrincipals(java.lang.Class)>(class "Ljavax/security/auth/kerberos/KerberosPrincipal;");
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs> = $r2;
+
+        $r3 = staticinvoke <sun.security.jgss.krb5.SubjectComber: java.util.List findMany(javax.security.auth.Subject,java.lang.String,java.lang.String,java.lang.Class)>(r1, r21, null, class "Ljavax/security/auth/kerberos/KerberosKey;");
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r18 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (javax.security.auth.kerberos.KerberosKey) $r18;
+
+        $r19 = $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $r20 = virtualinvoke r22.<javax.security.auth.kerberos.KerberosKey: javax.security.auth.kerberos.KerberosPrincipal getPrincipal()>();
+
+        interfaceinvoke $r19.<java.util.Set: boolean add(java.lang.Object)>($r20);
+
+        goto label1;
+
+     label2:
+        if r21 == null goto label3;
+
+        $r17 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        specialinvoke $r17.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>(r21);
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp> = $r17;
+
+        goto label7;
+
+     label3:
+        $r5 = $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $i0 = interfaceinvoke $r5.<java.util.Set: int size()>();
+
+        if $i0 != 1 goto label7;
+
+        z4 = 0;
+
+        $r8 = staticinvoke <sun.security.jgss.krb5.SubjectComber: java.util.List findMany(javax.security.auth.Subject,java.lang.String,java.lang.String,java.lang.Class)>(r1, null, null, class "Ljavax/security/auth/kerberos/KeyTab;");
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r15 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (javax.security.auth.kerberos.KeyTab) $r15;
+
+        $z3 = virtualinvoke r16.<javax.security.auth.kerberos.KeyTab: boolean isBound()>();
+
+        if $z3 != 0 goto label5;
+
+        z4 = 1;
+
+        goto label6;
+
+     label5:
+        goto label4;
+
+     label6:
+        if z4 != 0 goto label7;
+
+        $r10 = $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $r11 = interfaceinvoke $r10.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        $r13 = (javax.security.auth.kerberos.KerberosPrincipal) $r12;
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp> = $r13;
+
+        $r14 = $r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        r21 = virtualinvoke $r14.<javax.security.auth.kerberos.KerberosPrincipal: java.lang.String getName()>();
+
+     label7:
+        $r23 = staticinvoke <sun.security.jgss.krb5.SubjectComber: java.util.List findMany(javax.security.auth.Subject,java.lang.String,java.lang.String,java.lang.Class)>(r1, r21, null, class "Ljavax/security/auth/kerberos/KeyTab;");
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List ktabs> = $r23;
+
+        $r24 = staticinvoke <sun.security.jgss.krb5.SubjectComber: java.util.List findMany(javax.security.auth.Subject,java.lang.String,java.lang.String,java.lang.Class)>(r1, r21, null, class "Ljavax/security/auth/kerberos/KerberosKey;");
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List kk> = $r24;
+
+        $r25 = staticinvoke <sun.security.jgss.krb5.SubjectComber: java.lang.Object find(javax.security.auth.Subject,java.lang.String,java.lang.String,java.lang.Class)>(r1, null, r21, class "Ljavax/security/auth/kerberos/KerberosTicket;");
+
+        $r26 = (javax.security.auth.kerberos.KerberosTicket) $r25;
+
+        $r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosTicket tgt> = $r26;
+
+        $r27 = $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List ktabs>;
+
+        $z5 = interfaceinvoke $r27.<java.util.List: boolean isEmpty()>();
+
+        if $z5 == 0 goto label8;
+
+        $r6 = $r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List kk>;
+
+        $z1 = interfaceinvoke $r6.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label8;
+
+        $r7 = $r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosTicket tgt>;
+
+        if $r7 != null goto label8;
+
+        return null;
+
+     label8:
+        $r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed> = 0;
+
+        return $r0;
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.IllegalStateException $r3;
+        javax.security.auth.kerberos.KerberosPrincipal $r1, $r2;
+        java.lang.String $r4;
+        sun.security.jgss.krb5.ServiceCreds r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        $z0 = r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This object is destroyed");
+
+        throw $r3;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        if $r1 != null goto label2;
+
+        $r4 = null;
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        $r4 = virtualinvoke $r2.<javax.security.auth.kerberos.KerberosPrincipal: java.lang.String getName()>();
+
+     label3:
+        return $r4;
+    }
+
+    public javax.security.auth.kerberos.KerberosKey[] getKKeys()
+    {
+        java.lang.IllegalStateException $r15;
+        sun.security.krb5.internal.ktab.KeyTab $r7;
+        sun.security.krb5.PrincipalName $r8;
+        javax.security.auth.kerberos.KerberosKey[] $r1, $r2;
+        java.lang.String $r10;
+        sun.security.jgss.krb5.ServiceCreds r0;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r4, $r13;
+        javax.security.auth.kerberos.KerberosPrincipal $r9, r16;
+        java.util.Set $r11, $r12;
+        javax.security.auth.kerberos.KeyTab r6;
+        java.util.List $r3;
+        java.lang.Object $r5, $r14;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        $z0 = r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = new java.lang.IllegalStateException;
+
+        specialinvoke $r15.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This object is destroyed");
+
+        throw $r15;
+
+     label1:
+        r16 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        if r16 != null goto label2;
+
+        $r11 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $z2 = interfaceinvoke $r11.<java.util.Set: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $r12 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (javax.security.auth.kerberos.KerberosPrincipal) $r14;
+
+     label2:
+        if r16 != null goto label5;
+
+        $r3 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List ktabs>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (javax.security.auth.kerberos.KeyTab) $r5;
+
+        $r7 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.internal.ktab.KeyTab snapshotFromJavaxKeyTab(javax.security.auth.kerberos.KeyTab)>(r6);
+
+        $r8 = virtualinvoke $r7.<sun.security.krb5.internal.ktab.KeyTab: sun.security.krb5.PrincipalName getOneName()>();
+
+        if $r8 == null goto label4;
+
+        $r9 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        $r10 = virtualinvoke $r8.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke $r9.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>($r10);
+
+        r16 = $r9;
+
+        goto label5;
+
+     label4:
+        goto label3;
+
+     label5:
+        if r16 == null goto label6;
+
+        $r2 = virtualinvoke r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosKey[] getKKeys(javax.security.auth.kerberos.KerberosPrincipal)>(r16);
+
+        return $r2;
+
+     label6:
+        $r1 = newarray (javax.security.auth.kerberos.KerberosKey)[0];
+
+        return $r1;
+    }
+
+    public javax.security.auth.kerberos.KerberosKey[] getKKeys(javax.security.auth.kerberos.KerberosPrincipal)
+    {
+        java.lang.IllegalStateException $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.security.auth.kerberos.KerberosPrincipal $r2, $r11, r12, $r16, $r17;
+        java.util.Set $r14;
+        java.util.List $r3, $r5;
+        java.lang.Object[] $r8;
+        java.util.ArrayList $r1;
+        javax.security.auth.kerberos.KerberosKey[] $r7, $r9, $r18, $r22;
+        int $i0, $i1, i2;
+        sun.security.jgss.krb5.ServiceCreds r0;
+        javax.security.auth.kerberos.KerberosKey r13, r20;
+        java.util.Iterator $r4, $r6;
+        javax.security.auth.kerberos.KeyTab r21;
+        java.lang.Object $r10, $r15;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        r12 := @parameter0: javax.security.auth.kerberos.KerberosPrincipal;
+
+        $z0 = r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed>;
+
+        if $z0 == 0 goto label01;
+
+        $r19 = new java.lang.IllegalStateException;
+
+        specialinvoke $r19.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This object is destroyed");
+
+        throw $r19;
+
+     label01:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        if $r2 == null goto label02;
+
+        $r17 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp>;
+
+        $z4 = virtualinvoke r12.<javax.security.auth.kerberos.KerberosPrincipal: boolean equals(java.lang.Object)>($r17);
+
+        if $z4 != 0 goto label02;
+
+        $r18 = newarray (javax.security.auth.kerberos.KerberosKey)[0];
+
+        return $r18;
+
+     label02:
+        $r3 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List kk>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z5 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label05;
+
+        $r15 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (javax.security.auth.kerberos.KerberosKey) $r15;
+
+        $r16 = virtualinvoke r20.<javax.security.auth.kerberos.KerberosKey: javax.security.auth.kerberos.KerberosPrincipal getPrincipal()>();
+
+        $z3 = virtualinvoke $r16.<javax.security.auth.kerberos.KerberosPrincipal: boolean equals(java.lang.Object)>(r12);
+
+        if $z3 == 0 goto label04;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>(r20);
+
+     label04:
+        goto label03;
+
+     label05:
+        $r5 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List ktabs>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z6 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label10;
+
+        $r10 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r21 = (javax.security.auth.kerberos.KeyTab) $r10;
+
+        $r11 = virtualinvoke r21.<javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KerberosPrincipal getPrincipal()>();
+
+        if $r11 != null goto label07;
+
+        $z1 = virtualinvoke r21.<javax.security.auth.kerberos.KeyTab: boolean isBound()>();
+
+        if $z1 == 0 goto label07;
+
+        $r14 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.Set allPrincs>;
+
+        $z2 = interfaceinvoke $r14.<java.util.Set: boolean contains(java.lang.Object)>(r12);
+
+        if $z2 != 0 goto label07;
+
+        goto label06;
+
+     label07:
+        $r22 = virtualinvoke r21.<javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KerberosKey[] getKeys(javax.security.auth.kerberos.KerberosPrincipal)>(r12);
+
+        $i1 = lengthof $r22;
+
+        i2 = 0;
+
+     label08:
+        if i2 >= $i1 goto label09;
+
+        r13 = $r22[i2];
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>(r13);
+
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label09:
+        goto label06;
+
+     label10:
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $r7 = newarray (javax.security.auth.kerberos.KerberosKey)[$i0];
+
+        $r8 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r7);
+
+        $r9 = (javax.security.auth.kerberos.KerberosKey[]) $r8;
+
+        return $r9;
+    }
+
+    public sun.security.krb5.EncryptionKey[] getEKeys(sun.security.krb5.PrincipalName)
+    {
+        byte[] $r7;
+        java.lang.IllegalStateException $r12;
+        sun.security.krb5.PrincipalName r2;
+        java.lang.Integer $r9;
+        javax.security.auth.kerberos.KerberosKey[] $r4, r13;
+        int $i0, $i1, $i2, $i3, i4, $i5;
+        java.lang.String $r3;
+        sun.security.jgss.krb5.ServiceCreds r0;
+        boolean $z0;
+        javax.security.auth.kerberos.KerberosKey $r6, $r8, $r10;
+        javax.security.auth.kerberos.KerberosPrincipal $r1;
+        sun.security.krb5.EncryptionKey $r5;
+        sun.security.krb5.EncryptionKey[] $r11;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        r2 := @parameter0: sun.security.krb5.PrincipalName;
+
+        $z0 = r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed>;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = new java.lang.IllegalStateException;
+
+        specialinvoke $r12.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This object is destroyed");
+
+        throw $r12;
+
+     label1:
+        $r1 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        $r3 = virtualinvoke r2.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke $r1.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosKey[] getKKeys(javax.security.auth.kerberos.KerberosPrincipal)>($r1);
+
+        r13 = $r4;
+
+        $i0 = lengthof $r4;
+
+        if $i0 != 0 goto label2;
+
+        r13 = virtualinvoke r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosKey[] getKKeys()>();
+
+     label2:
+        $i1 = lengthof r13;
+
+        $r11 = newarray (sun.security.krb5.EncryptionKey)[$i1];
+
+        i4 = 0;
+
+     label3:
+        $i5 = lengthof $r11;
+
+        if i4 >= $i5 goto label4;
+
+        $r5 = new sun.security.krb5.EncryptionKey;
+
+        $r6 = r13[i4];
+
+        $r7 = virtualinvoke $r6.<javax.security.auth.kerberos.KerberosKey: byte[] getEncoded()>();
+
+        $r8 = r13[i4];
+
+        $i2 = virtualinvoke $r8.<javax.security.auth.kerberos.KerberosKey: int getKeyType()>();
+
+        $r9 = new java.lang.Integer;
+
+        $r10 = r13[i4];
+
+        $i3 = virtualinvoke $r10.<javax.security.auth.kerberos.KerberosKey: int getVersionNumber()>();
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>($i3);
+
+        specialinvoke $r5.<sun.security.krb5.EncryptionKey: void <init>(byte[],int,java.lang.Integer)>($r7, $i2, $r9);
+
+        $r11[i4] = $r5;
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        return $r11;
+    }
+
+    public sun.security.krb5.Credentials getInitCred()
+    {
+        java.lang.IllegalStateException $r4;
+        javax.security.auth.kerberos.KerberosTicket $r1, $r2;
+        sun.security.jgss.krb5.ServiceCreds r0;
+        sun.security.krb5.Credentials $r3;
+        java.lang.Exception $r5;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        $z0 = r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This object is destroyed");
+
+        throw $r4;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosTicket tgt>;
+
+        if $r1 != null goto label2;
+
+        return null;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosTicket tgt>;
+
+        $r3 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.Credentials ticketToCreds(javax.security.auth.kerberos.KerberosTicket)>($r2);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch sun.security.krb5.KrbException from label2 to label3 with label4;
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public void destroy()
+    {
+        java.util.List $r1, $r2;
+        sun.security.jgss.krb5.ServiceCreds r0;
+
+        r0 := @this: sun.security.jgss.krb5.ServiceCreds;
+
+        r0.<sun.security.jgss.krb5.ServiceCreds: boolean destroyed> = 1;
+
+        r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosPrincipal kp> = null;
+
+        $r1 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List ktabs>;
+
+        interfaceinvoke $r1.<java.util.List: void clear()>();
+
+        $r2 = r0.<sun.security.jgss.krb5.ServiceCreds: java.util.List kk>;
+
+        interfaceinvoke $r2.<java.util.List: void clear()>();
+
+        r0.<sun.security.jgss.krb5.ServiceCreds: javax.security.auth.kerberos.KerberosTicket tgt> = null;
+
+        return;
+    }
+}

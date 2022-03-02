@@ -1,0 +1,1370 @@
+class sun.reflect.MethodAccessorGenerator extends sun.reflect.AccessorGenerator
+{
+    private static final short NUM_BASE_CPOOL_ENTRIES;
+    private static final short NUM_METHODS;
+    private static final short NUM_SERIALIZATION_CPOOL_ENTRIES;
+    private static volatile int methodSymnum;
+    private static volatile int constructorSymnum;
+    private static volatile int serializationConstructorSymnum;
+    private java.lang.Class declaringClass;
+    private java.lang.Class[] parameterTypes;
+    private java.lang.Class returnType;
+    private boolean isConstructor;
+    private boolean forSerialization;
+    private short targetMethodRef;
+    private short invokeIdx;
+    private short invokeDescriptorIdx;
+    private short nonPrimitiveParametersBaseIdx;
+
+    void <init>()
+    {
+        sun.reflect.MethodAccessorGenerator r0;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        specialinvoke r0.<sun.reflect.AccessorGenerator: void <init>()>();
+
+        return;
+    }
+
+    public sun.reflect.MethodAccessor generateMethod(java.lang.Class, java.lang.String, java.lang.Class[], java.lang.Class, java.lang.Class[], int)
+    {
+        sun.reflect.MethodAccessor $r7;
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class[] r3, r5;
+        sun.reflect.MagicAccessorImpl $r6;
+        int i0;
+        java.lang.Class r1, r4;
+        java.lang.String r2;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Class[];
+
+        r4 := @parameter3: java.lang.Class;
+
+        r5 := @parameter4: java.lang.Class[];
+
+        i0 := @parameter5: int;
+
+        $r6 = specialinvoke r0.<sun.reflect.MethodAccessorGenerator: sun.reflect.MagicAccessorImpl generate(java.lang.Class,java.lang.String,java.lang.Class[],java.lang.Class,java.lang.Class[],int,boolean,boolean,java.lang.Class)>(r1, r2, r3, r4, r5, i0, 0, 0, null);
+
+        $r7 = (sun.reflect.MethodAccessor) $r6;
+
+        return $r7;
+    }
+
+    public sun.reflect.ConstructorAccessor generateConstructor(java.lang.Class, java.lang.Class[], java.lang.Class[], int)
+    {
+        sun.reflect.ConstructorAccessor $r6;
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class[] r2, r3;
+        sun.reflect.MagicAccessorImpl $r5;
+        int i0;
+        java.lang.Class r1, $r4;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.Class[];
+
+        r3 := @parameter2: java.lang.Class[];
+
+        i0 := @parameter3: int;
+
+        $r4 = <java.lang.Void: java.lang.Class TYPE>;
+
+        $r5 = specialinvoke r0.<sun.reflect.MethodAccessorGenerator: sun.reflect.MagicAccessorImpl generate(java.lang.Class,java.lang.String,java.lang.Class[],java.lang.Class,java.lang.Class[],int,boolean,boolean,java.lang.Class)>(r1, "<init>", r2, $r4, r3, i0, 1, 0, null);
+
+        $r6 = (sun.reflect.ConstructorAccessor) $r5;
+
+        return $r6;
+    }
+
+    public sun.reflect.SerializationConstructorAccessorImpl generateSerializationConstructor(java.lang.Class, java.lang.Class[], java.lang.Class[], int, java.lang.Class)
+    {
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class[] r2, r3;
+        sun.reflect.MagicAccessorImpl $r6;
+        int i0;
+        java.lang.Class r1, r4, $r5;
+        sun.reflect.SerializationConstructorAccessorImpl $r7;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.Class[];
+
+        r3 := @parameter2: java.lang.Class[];
+
+        i0 := @parameter3: int;
+
+        r4 := @parameter4: java.lang.Class;
+
+        $r5 = <java.lang.Void: java.lang.Class TYPE>;
+
+        $r6 = specialinvoke r0.<sun.reflect.MethodAccessorGenerator: sun.reflect.MagicAccessorImpl generate(java.lang.Class,java.lang.String,java.lang.Class[],java.lang.Class,java.lang.Class[],int,boolean,boolean,java.lang.Class)>(r1, "<init>", r2, $r5, r3, i0, 1, 1, r4);
+
+        $r7 = (sun.reflect.SerializationConstructorAccessorImpl) $r6;
+
+        return $r7;
+    }
+
+    private sun.reflect.MagicAccessorImpl generate(java.lang.Class, java.lang.String, java.lang.Class[], java.lang.Class, java.lang.Class[], int, boolean, boolean, java.lang.Class)
+    {
+        byte[] $r36;
+        sun.reflect.ByteVector $r0;
+        java.lang.InternalError $r80;
+        java.lang.StringBuilder $r42, $r44, $r45, $r46, $r47, $r79;
+        short $s3, $s5, $s6, $s7, $s8, $s9, $s10, $s11, $s12, $s13, $s14, $s15, $s16, $s17, $s18, $s19, $s20, $s21, $s22, $s23, $s24, $s25, $s27, s28, $s29, $s30, $s31, $s32, s33, $s34;
+        sun.reflect.ClassFileAssembler $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r15, $r16, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r43, $r50, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r61, $r63, $r64, $r65, $r66, $r67, $r69, $r70, $r71, $r72, $r74, $r75, $r76, $r77, $r78;
+        java.lang.String $r8, r14, $r17, $r48, $r51, $r62, $r73;
+        java.lang.Class[] r4, r68;
+        boolean z0, z1, $z2, $z3, $z4;
+        sun.reflect.MethodAccessorGenerator r1;
+        sun.reflect.MagicAccessorImpl $r39;
+        sun.reflect.MethodAccessorGenerator$1 $r81;
+        int i0, $i1, $i2, $i4, $i26, i35, $i36, $i37, $i38, $i39, $i40, $i41;
+        java.lang.Class r3, r5, r49, r60;
+        java.lang.Object $r38;
+
+        r1 := @this: sun.reflect.MethodAccessorGenerator;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r14 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Class[];
+
+        r5 := @parameter3: java.lang.Class;
+
+        r68 := @parameter4: java.lang.Class[];
+
+        i0 := @parameter5: int;
+
+        z0 := @parameter6: boolean;
+
+        z1 := @parameter7: boolean;
+
+        r60 := @parameter8: java.lang.Class;
+
+        $r0 = staticinvoke <sun.reflect.ByteVectorFactory: sun.reflect.ByteVector create()>();
+
+        $r78 = new sun.reflect.ClassFileAssembler;
+
+        specialinvoke $r78.<sun.reflect.ClassFileAssembler: void <init>(sun.reflect.ByteVector)>($r0);
+
+        r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm> = $r78;
+
+        r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class declaringClass> = r3;
+
+        r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes> = r4;
+
+        r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType> = r5;
+
+        r1.<sun.reflect.MethodAccessorGenerator: int modifiers> = i0;
+
+        r1.<sun.reflect.MethodAccessorGenerator: boolean isConstructor> = z0;
+
+        r1.<sun.reflect.MethodAccessorGenerator: boolean forSerialization> = z1;
+
+        $r6 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r6.<sun.reflect.ClassFileAssembler: void emitMagicAndVersion()>();
+
+        s28 = 42;
+
+        $z2 = specialinvoke r1.<sun.reflect.MethodAccessorGenerator: boolean usesPrimitiveTypes()>();
+
+        if $z2 == 0 goto label01;
+
+        s28 = (short) 114;
+
+     label01:
+        if z1 == 0 goto label02;
+
+        $i26 = s28 + 2;
+
+        s28 = (short) $i26;
+
+     label02:
+        $i1 = specialinvoke r1.<sun.reflect.MethodAccessorGenerator: int numNonPrimitiveParameterTypes()>();
+
+        $i2 = 2 * $i1;
+
+        $s3 = (short) $i2;
+
+        $i37 = (int) $s3;
+
+        $i4 = s28 + $i37;
+
+        $s27 = (short) $i4;
+
+        $r7 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s5 = staticinvoke <sun.reflect.MethodAccessorGenerator: short add(short,short)>($s27, 1);
+
+        virtualinvoke $r7.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s5);
+
+        $r8 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String generateName(boolean,boolean)>(z0, z1);
+
+        $r9 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r9.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>($r8);
+
+        $r11 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r10 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s6 = virtualinvoke $r10.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r11.<sun.reflect.ClassFileAssembler: void emitConstantPoolClass(short)>($s6);
+
+        $r12 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s7 = virtualinvoke $r12.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short thisClass> = $s7;
+
+        if z0 == 0 goto label04;
+
+        if z1 == 0 goto label03;
+
+        $r67 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r67.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("sun/reflect/SerializationConstructorAccessorImpl");
+
+        goto label05;
+
+     label03:
+        $r66 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r66.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("sun/reflect/ConstructorAccessorImpl");
+
+        goto label05;
+
+     label04:
+        $r13 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r13.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("sun/reflect/MethodAccessorImpl");
+
+     label05:
+        $r69 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r70 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s29 = virtualinvoke $r70.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r69.<sun.reflect.ClassFileAssembler: void emitConstantPoolClass(short)>($s29);
+
+        $r71 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s30 = virtualinvoke $r71.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short superClass> = $s30;
+
+        $r72 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r73 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String getClassName(java.lang.Class,boolean)>(r3, 0);
+
+        virtualinvoke $r72.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>($r73);
+
+        $r74 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r75 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s31 = virtualinvoke $r75.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r74.<sun.reflect.ClassFileAssembler: void emitConstantPoolClass(short)>($s31);
+
+        $r76 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s32 = virtualinvoke $r76.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short targetClass> = $s32;
+
+        s33 = 0;
+
+        if z1 == 0 goto label06;
+
+        $r61 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r62 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String getClassName(java.lang.Class,boolean)>(r60, 0);
+
+        virtualinvoke $r61.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>($r62);
+
+        $r64 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r63 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s25 = virtualinvoke $r63.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r64.<sun.reflect.ClassFileAssembler: void emitConstantPoolClass(short)>($s25);
+
+        $r65 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        s33 = virtualinvoke $r65.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+     label06:
+        $r15 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r15.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>(r14);
+
+        $r16 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r17 = specialinvoke r1.<sun.reflect.MethodAccessorGenerator: java.lang.String buildInternalSignature()>();
+
+        virtualinvoke $r16.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>($r17);
+
+        $r19 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r18 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s8 = virtualinvoke $r18.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        $s9 = staticinvoke <sun.reflect.MethodAccessorGenerator: short sub(short,short)>($s8, 1);
+
+        $r20 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s10 = virtualinvoke $r20.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r19.<sun.reflect.ClassFileAssembler: void emitConstantPoolNameAndType(short,short)>($s9, $s10);
+
+        $z3 = specialinvoke r1.<sun.reflect.MethodAccessorGenerator: boolean isInterface()>();
+
+        if $z3 == 0 goto label07;
+
+        $r59 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s23 = r1.<sun.reflect.MethodAccessorGenerator: short targetClass>;
+
+        $r58 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s24 = virtualinvoke $r58.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r59.<sun.reflect.ClassFileAssembler: void emitConstantPoolInterfaceMethodref(short,short)>($s23, $s24);
+
+        goto label09;
+
+     label07:
+        if z1 == 0 goto label08;
+
+        $r57 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r56 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s22 = virtualinvoke $r56.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r57.<sun.reflect.ClassFileAssembler: void emitConstantPoolMethodref(short,short)>(s33, $s22);
+
+        goto label09;
+
+     label08:
+        $r22 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s11 = r1.<sun.reflect.MethodAccessorGenerator: short targetClass>;
+
+        $r21 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s12 = virtualinvoke $r21.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r22.<sun.reflect.ClassFileAssembler: void emitConstantPoolMethodref(short,short)>($s11, $s12);
+
+     label09:
+        $r77 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s34 = virtualinvoke $r77.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short targetMethodRef> = $s34;
+
+        if z0 == 0 goto label10;
+
+        $r55 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r55.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("newInstance");
+
+        goto label11;
+
+     label10:
+        $r23 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r23.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("invoke");
+
+     label11:
+        $r24 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s13 = virtualinvoke $r24.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short invokeIdx> = $s13;
+
+        if z0 == 0 goto label12;
+
+        $r54 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r54.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("([Ljava/lang/Object;)Ljava/lang/Object;");
+
+        goto label13;
+
+     label12:
+        $r25 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r25.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>("(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
+
+     label13:
+        $r26 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s14 = virtualinvoke $r26.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        r1.<sun.reflect.MethodAccessorGenerator: short invokeDescriptorIdx> = $s14;
+
+        $r27 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s15 = virtualinvoke $r27.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        $s16 = staticinvoke <sun.reflect.MethodAccessorGenerator: short add(short,short)>($s15, 2);
+
+        r1.<sun.reflect.MethodAccessorGenerator: short nonPrimitiveParametersBaseIdx> = $s16;
+
+        i35 = 0;
+
+     label14:
+        $i36 = lengthof r4;
+
+        if i35 >= $i36 goto label16;
+
+        r49 = r4[i35];
+
+        $z4 = staticinvoke <sun.reflect.MethodAccessorGenerator: boolean isPrimitive(java.lang.Class)>(r49);
+
+        if $z4 != 0 goto label15;
+
+        $r50 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r51 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String getClassName(java.lang.Class,boolean)>(r49, 0);
+
+        virtualinvoke $r50.<sun.reflect.ClassFileAssembler: void emitConstantPoolUTF8(java.lang.String)>($r51);
+
+        $r53 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $r52 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s21 = virtualinvoke $r52.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        virtualinvoke $r53.<sun.reflect.ClassFileAssembler: void emitConstantPoolClass(short)>($s21);
+
+     label15:
+        i35 = i35 + 1;
+
+        goto label14;
+
+     label16:
+        virtualinvoke r1.<sun.reflect.MethodAccessorGenerator: void emitCommonConstantPoolEntries()>();
+
+        if $z2 == 0 goto label17;
+
+        virtualinvoke r1.<sun.reflect.MethodAccessorGenerator: void emitBoxingContantPoolEntries()>();
+
+     label17:
+        $r28 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s17 = virtualinvoke $r28.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        $i38 = (int) $s17;
+
+        $i39 = (int) $s27;
+
+        if $i38 == $i39 goto label18;
+
+        $r80 = new java.lang.InternalError;
+
+        $r79 = new java.lang.StringBuilder;
+
+        specialinvoke $r79.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Adjust this code (cpi = ");
+
+        $r43 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s20 = virtualinvoke $r43.<sun.reflect.ClassFileAssembler: short cpi()>();
+
+        $i40 = (int) $s20;
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i40);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", numCPEntries = ");
+
+        $i41 = (int) $s27;
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i41);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r80.<java.lang.InternalError: void <init>(java.lang.String)>($r48);
+
+        throw $r80;
+
+     label18:
+        $r29 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r29.<sun.reflect.ClassFileAssembler: void emitShort(short)>(1);
+
+        $r30 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s18 = r1.<sun.reflect.MethodAccessorGenerator: short thisClass>;
+
+        virtualinvoke $r30.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s18);
+
+        $r31 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        $s19 = r1.<sun.reflect.MethodAccessorGenerator: short superClass>;
+
+        virtualinvoke $r31.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s19);
+
+        $r32 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void emitShort(short)>(0);
+
+        $r33 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r33.<sun.reflect.ClassFileAssembler: void emitShort(short)>(0);
+
+        $r34 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r34.<sun.reflect.ClassFileAssembler: void emitShort(short)>(2);
+
+        virtualinvoke r1.<sun.reflect.MethodAccessorGenerator: void emitConstructor()>();
+
+        specialinvoke r1.<sun.reflect.MethodAccessorGenerator: void emitInvoke()>();
+
+        $r35 = r1.<sun.reflect.MethodAccessorGenerator: sun.reflect.ClassFileAssembler asm>;
+
+        virtualinvoke $r35.<sun.reflect.ClassFileAssembler: void emitShort(short)>(0);
+
+        interfaceinvoke $r0.<sun.reflect.ByteVector: void trim()>();
+
+        $r36 = interfaceinvoke $r0.<sun.reflect.ByteVector: byte[] getData()>();
+
+        $r81 = new sun.reflect.MethodAccessorGenerator$1;
+
+        specialinvoke $r81.<sun.reflect.MethodAccessorGenerator$1: void <init>(sun.reflect.MethodAccessorGenerator,java.lang.String,byte[],java.lang.Class)>(r1, $r8, $r36, r3);
+
+        $r38 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r81);
+
+        $r39 = (sun.reflect.MagicAccessorImpl) $r38;
+
+        return $r39;
+    }
+
+    private void emitInvoke()
+    {
+        byte $b17, b34;
+        java.lang.InternalError $r31, $r37;
+        short $s2, $s3, $s4, $s5, $s6, $s8, $s10, $s12, $s13, $s15, $s19, $s20, $s21, $s22, $s23, $s24, $s26, $s27, $s28, $s29, $s30, s31, s33, $s39, $s40, $s41, $s42, $s43, $s44, $s45, $s46, $s47, $s48, $s49, $s50, $s51, $s52;
+        sun.reflect.ClassFileAssembler $r32, $r38;
+        java.lang.Class[] $r1, $r4, $r13, $r16, $r22, $r24, $r27;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        sun.reflect.Label r23, r26, $r33, $r34, $r35, $r36;
+        sun.reflect.MethodAccessorGenerator r0;
+        short[] $r30;
+        int $i0, $i1, $i7, $i9, $i11, $i14, $i16, $i18, $i25, $i32, i35, $i36, i37, $i38, $i54, $i55, $i56;
+        java.lang.Class $r3, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r19, r25, r28;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        $r1 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i0 = lengthof $r1;
+
+        $i54 = (int) 65535;
+
+        if $i0 <= $i54 goto label01;
+
+        $r31 = new java.lang.InternalError;
+
+        specialinvoke $r31.<java.lang.InternalError: void <init>(java.lang.String)>("Can\'t handle more than 65535 parameters");
+
+        throw $r31;
+
+     label01:
+        $r32 = new sun.reflect.ClassFileAssembler;
+
+        specialinvoke $r32.<sun.reflect.ClassFileAssembler: void <init>()>();
+
+        $z0 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void setMaxLocals(int)>(2);
+
+        goto label03;
+
+     label02:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void setMaxLocals(int)>(3);
+
+     label03:
+        s31 = 0;
+
+        $z1 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z1 == 0 goto label04;
+
+        $s30 = r0.<sun.reflect.MethodAccessorGenerator: short targetClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s30);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup()>();
+
+        goto label06;
+
+     label04:
+        $r3 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $z2 = staticinvoke <sun.reflect.MethodAccessorGenerator: boolean isPrimitive(java.lang.Class)>($r3);
+
+        if $z2 == 0 goto label05;
+
+        $r19 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $s29 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: short indexForPrimitiveType(java.lang.Class)>($r19);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s29);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup()>();
+
+     label05:
+        $z3 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: boolean isStatic()>();
+
+        if $z3 != 0 goto label06;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_1()>();
+
+        $r33 = new sun.reflect.Label;
+
+        specialinvoke $r33.<sun.reflect.Label: void <init>()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_ifnonnull(sun.reflect.Label)>($r33);
+
+        $s26 = r0.<sun.reflect.MethodAccessorGenerator: short nullPointerClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s26);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup()>();
+
+        $s27 = r0.<sun.reflect.MethodAccessorGenerator: short nullPointerCtorIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s27, 0, 0);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_athrow()>();
+
+        virtualinvoke $r33.<sun.reflect.Label: void bind()>();
+
+        s31 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getLength()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_1()>();
+
+        $s28 = r0.<sun.reflect.MethodAccessorGenerator: short targetClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_checkcast(short)>($s28);
+
+     label06:
+        $r34 = new sun.reflect.Label;
+
+        specialinvoke $r34.<sun.reflect.Label: void <init>()>();
+
+        $r22 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i32 = lengthof $r22;
+
+        if $i32 != 0 goto label09;
+
+        $z15 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z15 == 0 goto label07;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_1()>();
+
+        goto label08;
+
+     label07:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_2()>();
+
+     label08:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_ifnull(sun.reflect.Label)>($r34);
+
+     label09:
+        $z16 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z16 == 0 goto label10;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_1()>();
+
+        goto label11;
+
+     label10:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_2()>();
+
+     label11:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_arraylength()>();
+
+        $r4 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i1 = lengthof $r4;
+
+        $s2 = (short) $i1;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_sipush(short)>($s2);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_if_icmpeq(sun.reflect.Label)>($r34);
+
+        $s3 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s3);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup()>();
+
+        $s4 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentCtorIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s4, 0, 0);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_athrow()>();
+
+        virtualinvoke $r34.<sun.reflect.Label: void bind()>();
+
+        s33 = r0.<sun.reflect.MethodAccessorGenerator: short nonPrimitiveParametersBaseIdx>;
+
+        r23 = null;
+
+        b34 = 1;
+
+        i35 = 0;
+
+     label12:
+        $r24 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i36 = lengthof $r24;
+
+        if i35 >= $i36 goto label29;
+
+        $r13 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        r25 = $r13[i35];
+
+        $i16 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>(r25);
+
+        $b17 = (byte) $i16;
+
+        $i55 = (int) $b17;
+
+        $i18 = b34 + $i55;
+
+        b34 = (byte) $i18;
+
+        if r23 == null goto label13;
+
+        virtualinvoke r23.<sun.reflect.Label: void bind()>();
+
+        r23 = null;
+
+     label13:
+        $z9 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z9 == 0 goto label14;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_1()>();
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_2()>();
+
+     label15:
+        $s19 = (short) i35;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_sipush(short)>($s19);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aaload()>();
+
+        $z10 = staticinvoke <sun.reflect.MethodAccessorGenerator: boolean isPrimitive(java.lang.Class)>(r25);
+
+        if $z10 == 0 goto label27;
+
+        $z11 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z11 == 0 goto label16;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_astore_2()>();
+
+        goto label17;
+
+     label16:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_astore_3()>();
+
+     label17:
+        r26 = null;
+
+        $r35 = new sun.reflect.Label;
+
+        specialinvoke $r35.<sun.reflect.Label: void <init>()>();
+
+        r23 = $r35;
+
+        i37 = 0;
+
+     label18:
+        $r27 = <sun.reflect.MethodAccessorGenerator: java.lang.Class[] primitiveTypes>;
+
+        $i38 = lengthof $r27;
+
+        if i37 >= $i38 goto label25;
+
+        $r16 = <sun.reflect.MethodAccessorGenerator: java.lang.Class[] primitiveTypes>;
+
+        r28 = $r16[i37];
+
+        $z12 = staticinvoke <sun.reflect.MethodAccessorGenerator: boolean canWidenTo(java.lang.Class,java.lang.Class)>(r28, r25);
+
+        if $z12 == 0 goto label24;
+
+        if r26 == null goto label19;
+
+        virtualinvoke r26.<sun.reflect.Label: void bind()>();
+
+     label19:
+        $z13 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z13 == 0 goto label20;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_2()>();
+
+        goto label21;
+
+     label20:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_3()>();
+
+     label21:
+        $s22 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: short indexForPrimitiveType(java.lang.Class)>(r28);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_instanceof(short)>($s22);
+
+        $r36 = new sun.reflect.Label;
+
+        specialinvoke $r36.<sun.reflect.Label: void <init>()>();
+
+        r26 = $r36;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_ifeq(sun.reflect.Label)>($r36);
+
+        $z14 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z14 == 0 goto label22;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_2()>();
+
+        goto label23;
+
+     label22:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aload_3()>();
+
+     label23:
+        $s23 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: short indexForPrimitiveType(java.lang.Class)>(r28);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_checkcast(short)>($s23);
+
+        $s24 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: short unboxingMethodForPrimitiveType(java.lang.Class)>(r28);
+
+        $i25 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>(r28);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokevirtual(short,int,int)>($s24, 0, $i25);
+
+        staticinvoke <sun.reflect.MethodAccessorGenerator: void emitWideningBytecodeForPrimitiveConversion(sun.reflect.ClassFileAssembler,java.lang.Class,java.lang.Class)>($r32, r28, r25);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_goto(sun.reflect.Label)>($r35);
+
+     label24:
+        i37 = i37 + 1;
+
+        goto label18;
+
+     label25:
+        if r26 != null goto label26;
+
+        $r37 = new java.lang.InternalError;
+
+        specialinvoke $r37.<java.lang.InternalError: void <init>(java.lang.String)>("Must have found at least identity conversion");
+
+        throw $r37;
+
+     label26:
+        virtualinvoke r26.<sun.reflect.Label: void bind()>();
+
+        $s20 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s20);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup()>();
+
+        $s21 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentCtorIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s21, 0, 0);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_athrow()>();
+
+        goto label28;
+
+     label27:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_checkcast(short)>(s33);
+
+        s33 = staticinvoke <sun.reflect.MethodAccessorGenerator: short add(short,short)>(s33, 2);
+
+     label28:
+        i35 = i35 + 1;
+
+        goto label12;
+
+     label29:
+        if r23 == null goto label30;
+
+        virtualinvoke r23.<sun.reflect.Label: void bind()>();
+
+     label30:
+        $s5 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getLength()>();
+
+        $z4 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z4 == 0 goto label31;
+
+        $s15 = r0.<sun.reflect.MethodAccessorGenerator: short targetMethodRef>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s15, b34, 0);
+
+        goto label35;
+
+     label31:
+        $z5 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: boolean isStatic()>();
+
+        if $z5 == 0 goto label32;
+
+        $s13 = r0.<sun.reflect.MethodAccessorGenerator: short targetMethodRef>;
+
+        $r12 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $i14 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>($r12);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokestatic(short,int,int)>($s13, b34, $i14);
+
+        goto label35;
+
+     label32:
+        $z6 = specialinvoke r0.<sun.reflect.MethodAccessorGenerator: boolean isInterface()>();
+
+        if $z6 == 0 goto label34;
+
+        $z8 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: boolean isPrivate()>();
+
+        if $z8 == 0 goto label33;
+
+        $s12 = r0.<sun.reflect.MethodAccessorGenerator: short targetMethodRef>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s12, b34, 0);
+
+        goto label35;
+
+     label33:
+        $s10 = r0.<sun.reflect.MethodAccessorGenerator: short targetMethodRef>;
+
+        $r11 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $i11 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>($r11);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokeinterface(short,int,byte,int)>($s10, b34, b34, $i11);
+
+        goto label35;
+
+     label34:
+        $s6 = r0.<sun.reflect.MethodAccessorGenerator: short targetMethodRef>;
+
+        $r5 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $i7 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>($r5);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokevirtual(short,int,int)>($s6, b34, $i7);
+
+     label35:
+        $s39 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getLength()>();
+
+        $z17 = r0.<sun.reflect.MethodAccessorGenerator: boolean isConstructor>;
+
+        if $z17 != 0 goto label37;
+
+        $r6 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $z7 = staticinvoke <sun.reflect.MethodAccessorGenerator: boolean isPrimitive(java.lang.Class)>($r6);
+
+        if $z7 == 0 goto label36;
+
+        $r9 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $s8 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: short ctorIndexForPrimitiveType(java.lang.Class)>($r9);
+
+        $r10 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $i9 = virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: int typeSizeInStackSlots(java.lang.Class)>($r10);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s8, $i9, 0);
+
+        goto label37;
+
+     label36:
+        $r8 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $r7 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r8 != $r7 goto label37;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_aconst_null()>();
+
+     label37:
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_areturn()>();
+
+        $s40 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getLength()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void setStack(int)>(1);
+
+        $s41 = r0.<sun.reflect.MethodAccessorGenerator: short toStringIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s41, 0, 1);
+
+        $s42 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s42);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup_x1()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_swap()>();
+
+        $s43 = r0.<sun.reflect.MethodAccessorGenerator: short illegalArgumentStringCtorIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s43, 1, 0);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_athrow()>();
+
+        $s44 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getLength()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void setStack(int)>(1);
+
+        $s45 = r0.<sun.reflect.MethodAccessorGenerator: short invocationTargetClass>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_new(short)>($s45);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_dup_x1()>();
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_swap()>();
+
+        $s46 = r0.<sun.reflect.MethodAccessorGenerator: short invocationTargetCtorIdx>;
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_invokespecial(short,int,int)>($s46, 1, 0);
+
+        virtualinvoke $r32.<sun.reflect.ClassFileAssembler: void opc_athrow()>();
+
+        $r38 = new sun.reflect.ClassFileAssembler;
+
+        specialinvoke $r38.<sun.reflect.ClassFileAssembler: void <init>()>();
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>(s31);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s5);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s40);
+
+        $s47 = r0.<sun.reflect.MethodAccessorGenerator: short classCastClass>;
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s47);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>(s31);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s5);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s40);
+
+        $s48 = r0.<sun.reflect.MethodAccessorGenerator: short nullPointerClass>;
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s48);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s5);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s39);
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s44);
+
+        $s49 = r0.<sun.reflect.MethodAccessorGenerator: short throwableClass>;
+
+        virtualinvoke $r38.<sun.reflect.ClassFileAssembler: void emitShort(short)>($s49);
+
+        $s50 = r0.<sun.reflect.MethodAccessorGenerator: short invokeIdx>;
+
+        $s51 = virtualinvoke $r32.<sun.reflect.ClassFileAssembler: short getMaxLocals()>();
+
+        $r30 = newarray (short)[1];
+
+        $s52 = r0.<sun.reflect.MethodAccessorGenerator: short invocationTargetClass>;
+
+        $r30[0] = $s52;
+
+        $i56 = (int) $s51;
+
+        virtualinvoke r0.<sun.reflect.MethodAccessorGenerator: void emitMethod(short,int,sun.reflect.ClassFileAssembler,sun.reflect.ClassFileAssembler,short[])>($s50, $i56, $r32, $r38, $r30);
+
+        return;
+    }
+
+    private boolean usesPrimitiveTypes()
+    {
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class[] $r2, $r3;
+        int $i0, i1;
+        java.lang.Class $r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        $r1 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $r2 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label4;
+
+        $r3 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $r4 = $r3[i1];
+
+        $z1 = virtualinvoke $r4.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    private int numNonPrimitiveParameterTypes()
+    {
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class[] $r1, $r2;
+        int $i0, i1, i2;
+        java.lang.Class $r3;
+        boolean $z0;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label1:
+        $r1 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label3;
+
+        $r2 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $r3 = $r2[i2];
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 != 0 goto label2;
+
+        i1 = i1 + 1;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return i1;
+    }
+
+    private boolean isInterface()
+    {
+        sun.reflect.MethodAccessorGenerator r0;
+        java.lang.Class $r1;
+        boolean $z0;
+
+        r0 := @this: sun.reflect.MethodAccessorGenerator;
+
+        $r1 = r0.<sun.reflect.MethodAccessorGenerator: java.lang.Class declaringClass>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isInterface()>();
+
+        return $z0;
+    }
+
+    private java.lang.String buildInternalSignature()
+    {
+        sun.reflect.MethodAccessorGenerator r1;
+        java.lang.Class[] $r2, $r6;
+        java.lang.StringBuffer $r0;
+        int $i0, i1;
+        java.lang.Class $r3, $r7;
+        java.lang.String $r4, $r5, $r8;
+
+        r1 := @this: sun.reflect.MethodAccessorGenerator;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("(");
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r6 = r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class[] parameterTypes>;
+
+        $r7 = $r6[i1];
+
+        $r8 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String getClassName(java.lang.Class,boolean)>($r7, 1);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r8);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(")");
+
+        $r3 = r1.<sun.reflect.MethodAccessorGenerator: java.lang.Class returnType>;
+
+        $r4 = staticinvoke <sun.reflect.MethodAccessorGenerator: java.lang.String getClassName(java.lang.Class,boolean)>($r3, 1);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private static synchronized java.lang.String generateName(boolean, boolean)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r3, $r7, $r11;
+        boolean z0, z1;
+        java.lang.StringBuilder $r0, $r1, $r2, $r4, $r5, $r6, $r8, $r9, $r10;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        if z0 == 0 goto label2;
+
+        if z1 == 0 goto label1;
+
+        $i4 = <sun.reflect.MethodAccessorGenerator: int serializationConstructorSymnum>;
+
+        $i5 = $i4 + 1;
+
+        <sun.reflect.MethodAccessorGenerator: int serializationConstructorSymnum> = $i5;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun/reflect/GeneratedSerializationConstructorAccessor");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+
+     label1:
+        $i2 = <sun.reflect.MethodAccessorGenerator: int constructorSymnum>;
+
+        $i3 = $i2 + 1;
+
+        <sun.reflect.MethodAccessorGenerator: int constructorSymnum> = $i3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun/reflect/GeneratedConstructorAccessor");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+
+     label2:
+        $i0 = <sun.reflect.MethodAccessorGenerator: int methodSymnum>;
+
+        $i1 = $i0 + 1;
+
+        <sun.reflect.MethodAccessorGenerator: int methodSymnum> = $i1;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun/reflect/GeneratedMethodAccessor");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        <sun.reflect.MethodAccessorGenerator: short NUM_SERIALIZATION_CPOOL_ENTRIES> = 2;
+
+        <sun.reflect.MethodAccessorGenerator: short NUM_METHODS> = 2;
+
+        <sun.reflect.MethodAccessorGenerator: short NUM_BASE_CPOOL_ENTRIES> = 12;
+
+        <sun.reflect.MethodAccessorGenerator: int methodSymnum> = 0;
+
+        <sun.reflect.MethodAccessorGenerator: int constructorSymnum> = 0;
+
+        <sun.reflect.MethodAccessorGenerator: int serializationConstructorSymnum> = 0;
+
+        return;
+    }
+}

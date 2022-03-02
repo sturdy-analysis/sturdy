@@ -1,0 +1,887 @@
+public class com.sun.org.apache.xerces.internal.util.SymbolTable extends java.lang.Object
+{
+    protected static final int TABLE_SIZE;
+    protected static final int MAX_HASH_COLLISIONS;
+    protected static final int MULTIPLIERS_SIZE;
+    protected static final int MULTIPLIERS_MASK;
+    protected com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets;
+    protected int fTableSize;
+    protected transient int fCount;
+    protected int fThreshold;
+    protected float fLoadFactor;
+    protected final int fCollisionThreshold;
+    protected int[] fHashMultipliers;
+
+    public void <init>(int, float)
+    {
+        byte $b0;
+        int $i1, $i2, $i3, $i4, i5, $i6;
+        java.lang.String $r5, $r11;
+        boolean $z0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        java.lang.IllegalArgumentException $r13, $r15;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r6;
+        float f0, $f1, $f2, $f3;
+        java.lang.StringBuilder $r3, $r4, $r9, $r10, $r12, $r14;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        i5 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets> = null;
+
+        if i5 >= 0 goto label1;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal Capacity: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r13;
+
+     label1:
+        $b0 = f0 cmpg 0.0F;
+
+        $i6 = (int) $b0;
+
+        if $i6 <= 0 goto label2;
+
+        $z0 = staticinvoke <java.lang.Float: boolean isNaN(float)>(f0);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal Load: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r15;
+
+     label3:
+        if i5 != 0 goto label4;
+
+        i5 = 1;
+
+     label4:
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: float fLoadFactor> = f0;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize> = i5;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        $r6 = newarray (com.sun.org.apache.xerces.internal.util.SymbolTable$Entry)[$i1];
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets> = $r6;
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        $f1 = (float) $i2;
+
+        $f2 = $f1 * f0;
+
+        $i3 = (int) $f2;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fThreshold> = $i3;
+
+        $f3 = 40.0F * f0;
+
+        $i4 = (int) $f3;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCollisionThreshold> = $i4;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount> = 0;
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        int i0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void <init>(int,float)>(i0, 0.75F);
+
+        return;
+    }
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void <init>(int,float)>(101, 0.75F);
+
+        return;
+    }
+
+    public java.lang.String addSymbol(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry r6;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r2;
+        int $i0, $i1, i2, i3;
+        java.lang.String r1, $r3, $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        i3 = 0;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(java.lang.String)>(r1);
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i2 = $i0 % $i1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        r6 = $r2[i2];
+
+     label1:
+        if r6 == null goto label3;
+
+        $r4 = r6.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r6.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        return $r5;
+
+     label2:
+        i3 = i3 + 1;
+
+        r6 = r6.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next>;
+
+        goto label1;
+
+     label3:
+        $r3 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol0(java.lang.String,int,int)>(r1, i2, i3);
+
+        return $r3;
+    }
+
+    private java.lang.String addSymbol0(java.lang.String, int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry $r2, $r4;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, $i10;
+        java.lang.String r1, $r6;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r3, $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        i8 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount>;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fThreshold>;
+
+        if $i1 < $i0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rehash()>();
+
+        $i6 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(java.lang.String)>(r1);
+
+        $i7 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i8 = $i6 % $i7;
+
+        goto label2;
+
+     label1:
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCollisionThreshold>;
+
+        if i2 < $i3 goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rebalance()>();
+
+        $i4 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(java.lang.String)>(r1);
+
+        $i5 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i8 = $i4 % $i5;
+
+     label2:
+        $r2 = new com.sun.org.apache.xerces.internal.util.SymbolTable$Entry;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $r4 = $r3[i8];
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: void <init>(java.lang.String,com.sun.org.apache.xerces.internal.util.SymbolTable$Entry)>(r1, $r4);
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $r5[i8] = $r2;
+
+        $i9 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount>;
+
+        $i10 = $i9 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount> = $i10;
+
+        $r6 = $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        return $r6;
+    }
+
+    public java.lang.String addSymbol(char[], int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry r7;
+        int i0, i1, $i2, $i3, i4, $i5, $i6, i9, i10, $i11, $i12;
+        java.lang.String $r3, $r5;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        char $c7, $c8;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r2;
+        char[] r1, $r4, $r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i9 = 0;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(char[],int,int)>(r1, i0, i1);
+
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i4 = $i2 % $i3;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        r7 = $r2[i4];
+
+     label1:
+        if r7 == null goto label7;
+
+        $r4 = r7.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $i5 = lengthof $r4;
+
+        if i1 != $i5 goto label5;
+
+        i10 = 0;
+
+     label2:
+        if i10 >= i1 goto label4;
+
+        $i6 = i0 + i10;
+
+        $c8 = r1[$i6];
+
+        $r6 = r7.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $c7 = $r6[i10];
+
+        $i11 = (int) $c8;
+
+        $i12 = (int) $c7;
+
+        if $i11 == $i12 goto label3;
+
+        i9 = i9 + 1;
+
+        goto label6;
+
+     label3:
+        i10 = i10 + 1;
+
+        goto label2;
+
+     label4:
+        $r5 = r7.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        return $r5;
+
+     label5:
+        i9 = i9 + 1;
+
+     label6:
+        r7 = r7.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next>;
+
+        goto label1;
+
+     label7:
+        $r3 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol0(char[],int,int,int,int)>(r1, i0, i1, i4, i9);
+
+        return $r3;
+    }
+
+    private java.lang.String addSymbol0(char[], int, int, int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry $r2, $r4;
+        int $i0, $i1, i2, $i3, i4, i5, $i6, $i7, $i8, $i9, i10, $i11, $i12;
+        java.lang.String $r6;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r3, $r5;
+        char[] r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: char[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i10 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount>;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fThreshold>;
+
+        if $i1 < $i0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rehash()>();
+
+        $i8 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(char[],int,int)>(r1, i4, i5);
+
+        $i9 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i10 = $i8 % $i9;
+
+        goto label2;
+
+     label1:
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCollisionThreshold>;
+
+        if i2 < $i3 goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rebalance()>();
+
+        $i6 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(char[],int,int)>(r1, i4, i5);
+
+        $i7 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i10 = $i6 % $i7;
+
+     label2:
+        $r2 = new com.sun.org.apache.xerces.internal.util.SymbolTable$Entry;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $r4 = $r3[i10];
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: void <init>(char[],int,int,com.sun.org.apache.xerces.internal.util.SymbolTable$Entry)>(r1, i4, i5, $r4);
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $r5[i10] = $r2;
+
+        $i11 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount>;
+
+        $i12 = $i11 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fCount> = $i12;
+
+        $r6 = $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        return $r6;
+    }
+
+    public int hash(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        int[] $r1;
+        int $i0, $i1, $i2;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $i1 = virtualinvoke r2.<java.lang.String: int hashCode()>();
+
+        $i2 = $i1 & 2147483647;
+
+        return $i2;
+
+     label1:
+        $i0 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash0(java.lang.String)>(r2);
+
+        return $i0;
+    }
+
+    private int hash0(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r1;
+        char $c5;
+        int[] r2;
+        int $i0, $i1, $i2, $i3, $i4, i6, i7, $i8;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r0 := @parameter0: java.lang.String;
+
+        i6 = 0;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        r2 = r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        i7 = 0;
+
+     label1:
+        if i7 >= $i0 goto label2;
+
+        $i2 = i7 & 31;
+
+        $i3 = r2[$i2];
+
+        $i4 = i6 * $i3;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        $i8 = (int) $c5;
+
+        i6 = $i4 + $i8;
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = i6 & 2147483647;
+
+        return $i1;
+    }
+
+    public int hash(char[], int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        char $c5;
+        int[] $r1;
+        int i0, i1, $i2, $i3, $i4, $i6, i7, i8, $i9;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        if $r1 != null goto label3;
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i1 goto label2;
+
+        $i6 = i7 * 31;
+
+        $i4 = i0 + i8;
+
+        $c5 = r2[$i4];
+
+        $i9 = (int) $c5;
+
+        i7 = $i6 + $i9;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        $i3 = i7 & 2147483647;
+
+        return $i3;
+
+     label3:
+        $i2 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash0(char[],int,int)>(r2, i0, i1);
+
+        return $i2;
+    }
+
+    private int hash0(char[], int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        char $c6;
+        int[] r1;
+        int i0, $i1, $i2, $i3, i4, $i5, $i7, i8, i9, $i10;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r2 := @parameter0: char[];
+
+        i4 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i8 = 0;
+
+        r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        i9 = 0;
+
+     label1:
+        if i9 >= i0 goto label2;
+
+        $i2 = i9 & 31;
+
+        $i3 = r1[$i2];
+
+        $i7 = i8 * $i3;
+
+        $i5 = i4 + i9;
+
+        $c6 = r2[$i5];
+
+        $i10 = (int) $c6;
+
+        i8 = $i7 + $i10;
+
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = i8 & 2147483647;
+
+        return $i1;
+    }
+
+    protected void rehash()
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r1;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 * 2;
+
+        $i2 = $i1 + 1;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rehashCommon(int)>($i2);
+
+        return;
+    }
+
+    protected void rebalance()
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        int[] $r1, $r2, $r4;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r3;
+        int $i0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $r4 = newarray (int)[32];
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers> = $r4;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int[] fHashMultipliers>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.util.PrimeNumberSequenceGenerator: void generateSequence(int[])>($r2);
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $i0 = lengthof $r3;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void rehashCommon(int)>($i0);
+
+        return;
+    }
+
+    private void rehashCommon(int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry r5, $r7, r8;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, i7, $i9;
+        java.lang.String $r6;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r1, r2, r3, $r4;
+        float $f0, $f1, $f2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        i0 = lengthof $r1;
+
+        r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        r3 = newarray (com.sun.org.apache.xerces.internal.util.SymbolTable$Entry)[i1];
+
+        $f1 = (float) i1;
+
+        $f0 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: float fLoadFactor>;
+
+        $f2 = $f1 * $f0;
+
+        $i2 = (int) $f2;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fThreshold> = $i2;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets> = r3;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        $i3 = lengthof $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize> = $i3;
+
+        i7 = i0;
+
+     label1:
+        $i4 = i7;
+
+        $i9 = (int) -1;
+
+        i7 = i7 + $i9;
+
+        if $i4 <= 0 goto label4;
+
+        r8 = r2[i7];
+
+     label2:
+        if r8 == null goto label3;
+
+        r5 = r8;
+
+        r8 = r8.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next>;
+
+        $r6 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: java.lang.String symbol>;
+
+        $i5 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(java.lang.String)>($r6);
+
+        i6 = $i5 % i1;
+
+        $r7 = r3[i6];
+
+        r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next> = $r7;
+
+        r3[i6] = r5;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public boolean containsSymbol(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry r5;
+        int $i0, $i1, i2, $i3, $i4, i7, $i8, $i9;
+        java.lang.String r1;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        char $c5, $c6;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r2;
+        char[] $r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(java.lang.String)>(r1);
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i2 = $i0 % $i1;
+
+        $i3 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        r5 = $r2[i2];
+
+     label1:
+        if r5 == null goto label6;
+
+        $r3 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $i4 = lengthof $r3;
+
+        if $i3 != $i4 goto label5;
+
+        i7 = 0;
+
+     label2:
+        if i7 >= $i3 goto label4;
+
+        $c5 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i7);
+
+        $r4 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $c6 = $r4[i7];
+
+        $i8 = (int) $c5;
+
+        $i9 = (int) $c6;
+
+        if $i8 == $i9 goto label3;
+
+        goto label5;
+
+     label3:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+
+     label5:
+        r5 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next>;
+
+        goto label1;
+
+     label6:
+        return 0;
+    }
+
+    public boolean containsSymbol(char[], int, int)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry r5;
+        int i0, i1, $i2, $i3, i4, $i5, $i6, i9, $i10, $i11;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r0;
+        char $c7, $c8;
+        com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] $r2;
+        char[] r1, $r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int hash(char[],int,int)>(r1, i0, i1);
+
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: int fTableSize>;
+
+        i4 = $i2 % $i3;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry[] fBuckets>;
+
+        r5 = $r2[i4];
+
+     label1:
+        if r5 == null goto label6;
+
+        $r3 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $i5 = lengthof $r3;
+
+        if i1 != $i5 goto label5;
+
+        i9 = 0;
+
+     label2:
+        if i9 >= i1 goto label4;
+
+        $i6 = i0 + i9;
+
+        $c8 = r1[$i6];
+
+        $r4 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: char[] characters>;
+
+        $c7 = $r4[i9];
+
+        $i10 = (int) $c8;
+
+        $i11 = (int) $c7;
+
+        if $i10 == $i11 goto label3;
+
+        goto label5;
+
+     label3:
+        i9 = i9 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+
+     label5:
+        r5 = r5.<com.sun.org.apache.xerces.internal.util.SymbolTable$Entry: com.sun.org.apache.xerces.internal.util.SymbolTable$Entry next>;
+
+        goto label1;
+
+     label6:
+        return 0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xerces.internal.util.SymbolTable: int MULTIPLIERS_MASK> = 31;
+
+        <com.sun.org.apache.xerces.internal.util.SymbolTable: int MULTIPLIERS_SIZE> = 32;
+
+        <com.sun.org.apache.xerces.internal.util.SymbolTable: int MAX_HASH_COLLISIONS> = 40;
+
+        <com.sun.org.apache.xerces.internal.util.SymbolTable: int TABLE_SIZE> = 101;
+
+        return;
+    }
+}

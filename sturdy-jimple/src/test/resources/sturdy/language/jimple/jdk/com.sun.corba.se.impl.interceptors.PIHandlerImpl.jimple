@@ -1,0 +1,1984 @@
+public class com.sun.corba.se.impl.interceptors.PIHandlerImpl extends java.lang.Object implements com.sun.corba.se.spi.protocol.PIHandler
+{
+    boolean printPushPopEnabled;
+    int pushLevel;
+    private com.sun.corba.se.spi.orb.ORB orb;
+    com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper;
+    com.sun.corba.se.impl.logging.ORBUtilSystemException orbutilWrapper;
+    com.sun.corba.se.impl.logging.OMGSystemException omgWrapper;
+    private int serverRequestIdCounter;
+    org.omg.IOP.CodecFactory codecFactory;
+    java.lang.String[] arguments;
+    private com.sun.corba.se.impl.interceptors.InterceptorList interceptorList;
+    private boolean hasIORInterceptors;
+    private boolean hasClientInterceptors;
+    private boolean hasServerInterceptors;
+    private com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker;
+    private com.sun.corba.se.impl.interceptors.PICurrent current;
+    private java.util.HashMap policyFactoryTable;
+    private static final short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS;
+    private java.lang.ThreadLocal threadLocalClientRequestInfoStack;
+    private java.lang.ThreadLocal threadLocalServerRequestInfoStack;
+
+    private void printPush()
+    {
+        java.io.PrintStream $r1;
+        int $i0, $i1, $i2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean printPushPopEnabled>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printSpaces(int)>($i0);
+
+        $i1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel> = $i2;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("PUSH");
+
+        return;
+    }
+
+    private void printPop()
+    {
+        java.io.PrintStream $r1;
+        int $i0, $i1, $i2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean printPushPopEnabled>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel> = $i1;
+
+        $i2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printSpaces(int)>($i2);
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("POP");
+
+        return;
+    }
+
+    private void printSpaces(int)
+    {
+        java.io.PrintStream $r0;
+        int i0, i1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r1;
+
+        r1 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        $r0 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void close()
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException orbutilWrapper> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: org.omg.IOP.CodecFactory codecFactory> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.String[] arguments> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalServerRequestInfoStack> = null;
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, java.lang.String[])
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5;
+        com.sun.corba.se.impl.logging.OMGSystemException $r6;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r12;
+        java.lang.String[] r7;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r4, $r10;
+        com.sun.corba.se.impl.interceptors.InterceptorList $r9, $r14;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.interceptors.CodecFactoryImpl $r8;
+        com.sun.corba.se.spi.resolver.LocalResolver $r15, $r18;
+        com.sun.corba.se.impl.interceptors.PICurrent $r11, $r13, $r16;
+        com.sun.corba.se.spi.orb.ORB r3;
+        org.omg.IOP.CodecFactory $r19;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$1 $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$2 $r2;
+        com.sun.corba.se.spi.orbutil.closure.Closure $r17, $r20;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r3 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r7 := @parameter1: java.lang.String[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean printPushPopEnabled> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int pushLevel> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int serverRequestIdCounter> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: org.omg.IOP.CodecFactory codecFactory> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.String[] arguments> = null;
+
+        $r1 = new com.sun.corba.se.impl.interceptors.PIHandlerImpl$1;
+
+        specialinvoke $r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$1: void <init>(com.sun.corba.se.impl.interceptors.PIHandlerImpl)>(r0);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack> = $r1;
+
+        $r2 = new com.sun.corba.se.impl.interceptors.PIHandlerImpl$2;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$2: void <init>(com.sun.corba.se.impl.interceptors.PIHandlerImpl)>(r0);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalServerRequestInfoStack> = $r2;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb> = r3;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.logging.InterceptorsSystemException: com.sun.corba.se.impl.logging.InterceptorsSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r3, "rpc.protocol");
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper> = $r4;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r3, "rpc.protocol");
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException orbutilWrapper> = $r5;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.logging.OMGSystemException: com.sun.corba.se.impl.logging.OMGSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r3, "rpc.protocol");
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper> = $r6;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.String[] arguments> = r7;
+
+        $r8 = new com.sun.corba.se.impl.interceptors.CodecFactoryImpl;
+
+        specialinvoke $r8.<com.sun.corba.se.impl.interceptors.CodecFactoryImpl: void <init>(org.omg.CORBA.ORB)>(r3);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: org.omg.IOP.CodecFactory codecFactory> = $r8;
+
+        $r9 = new com.sun.corba.se.impl.interceptors.InterceptorList;
+
+        $r10 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.interceptors.InterceptorList: void <init>(com.sun.corba.se.impl.logging.InterceptorsSystemException)>($r10);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList> = $r9;
+
+        $r11 = new com.sun.corba.se.impl.interceptors.PICurrent;
+
+        specialinvoke $r11.<com.sun.corba.se.impl.interceptors.PICurrent: void <init>(com.sun.corba.se.spi.orb.ORB)>(r3);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current> = $r11;
+
+        $r12 = new com.sun.corba.se.impl.interceptors.InterceptorInvoker;
+
+        $r14 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        $r13 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current>;
+
+        specialinvoke $r12.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.impl.interceptors.InterceptorList,com.sun.corba.se.impl.interceptors.PICurrent)>(r3, $r14, $r13);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker> = $r12;
+
+        $r15 = virtualinvoke r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r16 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current>;
+
+        $r17 = staticinvoke <com.sun.corba.se.spi.orbutil.closure.ClosureFactory: com.sun.corba.se.spi.orbutil.closure.Closure makeConstant(java.lang.Object)>($r16);
+
+        interfaceinvoke $r15.<com.sun.corba.se.spi.resolver.LocalResolver: void register(java.lang.String,com.sun.corba.se.spi.orbutil.closure.Closure)>("PICurrent", $r17);
+
+        $r18 = virtualinvoke r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r19 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: org.omg.IOP.CodecFactory codecFactory>;
+
+        $r20 = staticinvoke <com.sun.corba.se.spi.orbutil.closure.ClosureFactory: com.sun.corba.se.spi.orbutil.closure.Closure makeConstant(java.lang.Object)>($r19);
+
+        interfaceinvoke $r18.<com.sun.corba.se.spi.resolver.LocalResolver: void register(java.lang.String,com.sun.corba.se.spi.orbutil.closure.Closure)>("CodecFactory", $r20);
+
+        return;
+    }
+
+    public void initialize()
+    {
+        com.sun.corba.se.impl.interceptors.InterceptorList $r6, $r8, $r9;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r10;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.interceptors.PICurrent $r5, $r7;
+        com.sun.corba.se.spi.orb.ORB $r1;
+        com.sun.corba.se.impl.interceptors.ORBInitInfoImpl $r4;
+        com.sun.corba.se.spi.orb.ORBData $r2;
+        org.omg.PortableInterceptor.ORBInitializer[] $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.orb.ORBData: org.omg.PortableInterceptor.ORBInitializer[] getORBInitializers()>();
+
+        if $r3 == null goto label1;
+
+        $r4 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ORBInitInfoImpl createORBInitInfo()>();
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current>;
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.interceptors.PICurrent: void setORBInitializing(boolean)>(1);
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void preInitORBInitializers(com.sun.corba.se.impl.interceptors.ORBInitInfoImpl)>($r4);
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void postInitORBInitializers(com.sun.corba.se.impl.interceptors.ORBInitInfoImpl)>($r4);
+
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.interceptors.InterceptorList: void sortInterceptors()>();
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current>;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.interceptors.PICurrent: void setORBInitializing(boolean)>(0);
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.interceptors.ORBInitInfoImpl: void setStage(int)>(2);
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        $z0 = virtualinvoke $r8.<com.sun.corba.se.impl.interceptors.InterceptorList: boolean hasInterceptorsOfType(int)>(2);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasIORInterceptors> = $z0;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors> = 1;
+
+        $r9 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        $z1 = virtualinvoke $r9.<com.sun.corba.se.impl.interceptors.InterceptorList: boolean hasInterceptorsOfType(int)>(1);
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors> = $z1;
+
+        $r10 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r10.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void setEnabled(boolean)>(1);
+
+     label1:
+        return;
+    }
+
+    public void destroyInterceptors()
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.interceptors.InterceptorList $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.InterceptorList: void destroyAll()>();
+
+        return;
+    }
+
+    public void objectAdapterCreated(com.sun.corba.se.spi.oa.ObjectAdapter)
+    {
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.spi.oa.ObjectAdapter r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.oa.ObjectAdapter;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasIORInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void objectAdapterCreated(com.sun.corba.se.spi.oa.ObjectAdapter)>(r1);
+
+        return;
+    }
+
+    public void adapterManagerStateChanged(int, short)
+    {
+        short s1;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r1;
+        int i0;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        s1 := @parameter1: short;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasIORInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void adapterManagerStateChanged(int,short)>(i0, s1);
+
+        return;
+    }
+
+    public void adapterStateChanged(org.omg.PortableInterceptor.ObjectReferenceTemplate[], short)
+    {
+        org.omg.PortableInterceptor.ObjectReferenceTemplate[] r1;
+        short s0;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r1 := @parameter0: org.omg.PortableInterceptor.ObjectReferenceTemplate[];
+
+        s0 := @parameter1: short;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasIORInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void adapterStateChanged(org.omg.PortableInterceptor.ObjectReferenceTemplate[],short)>(r1, s0);
+
+        return;
+    }
+
+    public void disableInterceptorsThisThread()
+    {
+        java.lang.ThreadLocal $r1;
+        int $i0, $i1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $i0 = r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: int disableCount>;
+
+        $i1 = $i0 + 1;
+
+        r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: int disableCount> = $i1;
+
+        return;
+    }
+
+    public void enableInterceptorsThisThread()
+    {
+        java.lang.ThreadLocal $r1;
+        int $i0, $i1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $i0 = r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: int disableCount>;
+
+        $i1 = $i0 - 1;
+
+        r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: int disableCount> = $i1;
+
+        return;
+    }
+
+    public void invokeClientPIStartingPoint() throws org.omg.CORBA.portable.RemarshalException
+    {
+        org.omg.CORBA.INTERNAL $r6, $r10;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r2;
+        org.omg.CORBA.SystemException $r8;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r5, $r9;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl $r1;
+        short $s0;
+        int $i1, $i2, $i3, $i5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        org.omg.CORBA.portable.RemarshalException $r7;
+        java.lang.Exception $r3, $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label02;
+
+        return;
+
+     label02:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void invokeClientInterceptorStartingPoint(com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl)>($r1);
+
+        $s0 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: short getReplyStatus()>();
+
+        if $s0 == 1 goto label03;
+
+        $i2 = (int) $s0;
+
+        if $i2 != 3 goto label09;
+
+     label03:
+        $i1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int convertPIReplyStatusToReplyMessage(short)>($s0);
+
+        $r3 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception getException()>();
+
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>($i1, $r3);
+
+        if $r4 != null goto label04;
+
+     label04:
+        $z2 = $r4 instanceof org.omg.CORBA.SystemException;
+
+        if $z2 == 0 goto label05;
+
+        $r8 = (org.omg.CORBA.SystemException) $r4;
+
+        throw $r8;
+
+     label05:
+        $z3 = $r4 instanceof org.omg.CORBA.portable.RemarshalException;
+
+        if $z3 == 0 goto label06;
+
+        $r7 = (org.omg.CORBA.portable.RemarshalException) $r4;
+
+        throw $r7;
+
+     label06:
+        $z4 = $r4 instanceof org.omg.CORBA.UserException;
+
+        if $z4 != 0 goto label07;
+
+        $z5 = $r4 instanceof org.omg.CORBA.portable.ApplicationException;
+
+        if $z5 == 0 goto label08;
+
+     label07:
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL exceptionInvalid()>();
+
+        throw $r6;
+
+     label08:
+        goto label10;
+
+     label09:
+        $i3 = (int) $s0;
+
+        $i5 = (int) -1;
+
+        if $i3 == $i5 goto label10;
+
+        $r9 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL replyStatusNotInit()>();
+
+        throw $r10;
+
+     label10:
+        return;
+    }
+
+    public java.lang.Exception makeCompletedClientRequest(int, java.lang.Exception)
+    {
+        int i0;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Exception r1, $r2;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Exception;
+
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.Exception handleClientPIEndingPoint(int,java.lang.Exception,boolean)>(i0, r1, 0);
+
+        return $r2;
+    }
+
+    public java.lang.Exception invokeClientPIEndingPoint(int, java.lang.Exception)
+    {
+        int i0;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Exception r1, $r2;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Exception;
+
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.Exception handleClientPIEndingPoint(int,java.lang.Exception,boolean)>(i0, r1, 1);
+
+        return $r2;
+    }
+
+    public java.lang.Exception handleClientPIEndingPoint(int, java.lang.Exception, boolean)
+    {
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r6;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl $r2;
+        short s1;
+        int i0, $i2, $i3, $i4;
+        boolean $z0, $z1, z2;
+        com.sun.corba.se.spi.protocol.RetryType $r3, $r5;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        org.omg.CORBA.portable.RemarshalException $r8;
+        java.lang.Exception r7;
+        short[] $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        r7 := @parameter1: java.lang.Exception;
+
+        z2 := @parameter2: boolean;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return r7;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label2;
+
+        return r7;
+
+     label2:
+        $r1 = <com.sun.corba.se.impl.interceptors.PIHandlerImpl: short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS>;
+
+        s1 = $r1[i0];
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()>();
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setReplyStatus(short)>(s1);
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setException(java.lang.Exception)>(r7);
+
+        if z2 == 0 goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void invokeClientInterceptorEndingPoint(com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl)>($r2);
+
+        s1 = virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: short getReplyStatus()>();
+
+     label3:
+        $i2 = (int) s1;
+
+        if $i2 == 3 goto label4;
+
+        $i3 = (int) s1;
+
+        if $i3 != 4 goto label7;
+
+     label4:
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void reset()>();
+
+        if z2 == 0 goto label5;
+
+        $r5 = <com.sun.corba.se.spi.protocol.RetryType: com.sun.corba.se.spi.protocol.RetryType AFTER_RESPONSE>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setRetryRequest(com.sun.corba.se.spi.protocol.RetryType)>($r5);
+
+        goto label6;
+
+     label5:
+        $r3 = <com.sun.corba.se.spi.protocol.RetryType: com.sun.corba.se.spi.protocol.RetryType BEFORE_RESPONSE>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setRetryRequest(com.sun.corba.se.spi.protocol.RetryType)>($r3);
+
+     label6:
+        $r8 = new org.omg.CORBA.portable.RemarshalException;
+
+        specialinvoke $r8.<org.omg.CORBA.portable.RemarshalException: void <init>()>();
+
+        r7 = $r8;
+
+        goto label9;
+
+     label7:
+        if s1 == 1 goto label8;
+
+        $i4 = (int) s1;
+
+        if $i4 != 2 goto label9;
+
+     label8:
+        r7 = virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception getException()>();
+
+     label9:
+        return r7;
+    }
+
+    public void initiateClientPIRequest(boolean)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r8, $r10;
+        short $s1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0, $z1, $z2, z3, $z4, $z5;
+        java.lang.ThreadLocal $r1;
+        com.sun.corba.se.spi.protocol.RetryType $r6, $r9;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r5;
+        java.lang.Object $r2, $r7;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        z3 := @parameter0: boolean;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        r8 = null;
+
+        $z2 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: boolean empty()>();
+
+        if $z2 != 0 goto label3;
+
+        $r7 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object peek()>();
+
+        r8 = (com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl) $r7;
+
+     label3:
+        if z3 != 0 goto label4;
+
+        if r8 == null goto label4;
+
+        $z5 = virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean isDIIInitiate()>();
+
+        if $z5 == 0 goto label4;
+
+        virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setDIIInitiate(boolean)>(0);
+
+        goto label7;
+
+     label4:
+        if r8 == null goto label5;
+
+        $r6 = virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType getRetryRequest()>();
+
+        $z4 = virtualinvoke $r6.<com.sun.corba.se.spi.protocol.RetryType: boolean isRetry()>();
+
+        if $z4 != 0 goto label6;
+
+     label5:
+        $r10 = new com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r10.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>($r5);
+
+        r8 = $r10;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object push(java.lang.Object)>($r10);
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printPush()>();
+
+     label6:
+        $r9 = <com.sun.corba.se.spi.protocol.RetryType: com.sun.corba.se.spi.protocol.RetryType NONE>;
+
+        virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setRetryRequest(com.sun.corba.se.spi.protocol.RetryType)>($r9);
+
+        virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void incrementEntryCount()>();
+
+        $s1 = (short) -1;
+
+        virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setReplyStatus(short)>($s1);
+
+        if z3 == 0 goto label7;
+
+        virtualinvoke r8.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setDIIInitiate(boolean)>(1);
+
+     label7:
+        return;
+    }
+
+    public void cleanupClientPIRequest()
+    {
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r8;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl $r1;
+        short $s0;
+        org.omg.CORBA.CompletionStatus $r7;
+        int $i1, $i2, $i4;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.ThreadLocal $r5;
+        com.sun.corba.se.spi.protocol.RetryType $r2, $r3, $r4;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        org.omg.CORBA.UNKNOWN $r9;
+        java.lang.Object $r6;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType getRetryRequest()>();
+
+        $r3 = <com.sun.corba.se.spi.protocol.RetryType: com.sun.corba.se.spi.protocol.RetryType BEFORE_RESPONSE>;
+
+        $z2 = virtualinvoke $r2.<com.sun.corba.se.spi.protocol.RetryType: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 != 0 goto label3;
+
+        $s0 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: short getReplyStatus()>();
+
+        $i2 = (int) $s0;
+
+        $i4 = (int) -1;
+
+        if $i2 != $i4 goto label3;
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r7 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.UNKNOWN unknownRequestInvoke(org.omg.CORBA.CompletionStatus)>($r7);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r9);
+
+     label3:
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void decrementEntryCount()>();
+
+        $i1 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int getEntryCount()>();
+
+        if $i1 != 0 goto label4;
+
+        $r4 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType getRetryRequest()>();
+
+        $z3 = virtualinvoke $r4.<com.sun.corba.se.spi.protocol.RetryType: boolean isRetry()>();
+
+        if $z3 != 0 goto label4;
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r6 = virtualinvoke $r5.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r10 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r6;
+
+        virtualinvoke r10.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object pop()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printPop()>();
+
+     label4:
+        return;
+    }
+
+    public void setClientPIInfo(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0, $z1;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r2;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setInfo(com.sun.corba.se.pept.protocol.MessageMediator)>(r2);
+
+        return;
+    }
+
+    public void setClientPIInfo(com.sun.corba.se.impl.corba.RequestImpl)
+    {
+        com.sun.corba.se.impl.corba.RequestImpl r2;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: com.sun.corba.se.impl.corba.RequestImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasClientInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean isClientPIEnabledForThisThread()>();
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void setDIIRequest(org.omg.CORBA.Request)>(r2);
+
+        return;
+    }
+
+    public void invokeServerPIStartingPoint()
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void invokeServerInterceptorStartingPoint(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)>($r1);
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void serverPIHandleExceptions(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)>($r1);
+
+        return;
+    }
+
+    public void invokeServerPIIntermediatePoint()
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void invokeServerInterceptorIntermediatePoint(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)>($r1);
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void releaseServant()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void serverPIHandleExceptions(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)>($r1);
+
+        return;
+    }
+
+    public void invokeServerPIEndingPoint(com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage)
+    {
+        com.sun.corba.se.impl.logging.OMGSystemException $r11;
+        com.sun.corba.se.impl.interceptors.InterceptorInvoker $r14;
+        org.omg.CORBA.SystemException $r9;
+        short s1, $s2;
+        org.omg.CORBA.CompletionStatus $r10;
+        int $i0, $i3, $i4, $i5, $i6, $i7;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.spi.ior.IOR $r4, $r5, $r6;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r8;
+        java.lang.Exception $r13, $r15;
+        com.sun.corba.se.spi.protocol.ForwardException $r16;
+        org.omg.CORBA.UNKNOWN $r12;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage r2;
+        short[] $r3;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setReplyMessage(com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage)>(r2);
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setCurrentExecutionPoint(int)>(2);
+
+        $z1 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: boolean getAlreadyExecuted()>();
+
+        if $z1 != 0 goto label7;
+
+        $i0 = interfaceinvoke r2.<com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage: int getReplyStatus()>();
+
+        $r3 = <com.sun.corba.se.impl.interceptors.PIHandlerImpl: short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS>;
+
+        s1 = $r3[$i0];
+
+        $i3 = (int) s1;
+
+        if $i3 == 3 goto label2;
+
+        $i4 = (int) s1;
+
+        if $i4 != 4 goto label3;
+
+     label2:
+        $r4 = interfaceinvoke r2.<com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage: com.sun.corba.se.spi.ior.IOR getIOR()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setForwardRequest(com.sun.corba.se.spi.ior.IOR)>($r4);
+
+     label3:
+        $r13 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: java.lang.Exception getException()>();
+
+        $z3 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: boolean isDynamic()>();
+
+        if $z3 != 0 goto label4;
+
+        $i5 = (int) s1;
+
+        if $i5 != 2 goto label4;
+
+        $r11 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r10 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.UNKNOWN unknownUserException(org.omg.CORBA.CompletionStatus)>($r10);
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setException(java.lang.Exception)>($r12);
+
+     label4:
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setReplyStatus(short)>(s1);
+
+        $r14 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorInvoker interceptorInvoker>;
+
+        virtualinvoke $r14.<com.sun.corba.se.impl.interceptors.InterceptorInvoker: void invokeServerInterceptorEndingPoint(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)>($r1);
+
+        $s2 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: short getReplyStatus()>();
+
+        $r15 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: java.lang.Exception getException()>();
+
+        if $s2 != 1 goto label5;
+
+        if $r15 == $r13 goto label5;
+
+        $r9 = (org.omg.CORBA.SystemException) $r15;
+
+        throw $r9;
+
+     label5:
+        $i6 = (int) $s2;
+
+        if $i6 != 3 goto label7;
+
+        $i7 = (int) s1;
+
+        if $i7 == 3 goto label6;
+
+        $r6 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: com.sun.corba.se.spi.ior.IOR getForwardRequestIOR()>();
+
+        $r16 = new com.sun.corba.se.spi.protocol.ForwardException;
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r16.<com.sun.corba.se.spi.protocol.ForwardException: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.ior.IOR)>($r8, $r6);
+
+        throw $r16;
+
+     label6:
+        $z2 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: boolean isForwardRequestRaisedInEnding()>();
+
+        if $z2 == 0 goto label7;
+
+        $r5 = virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: com.sun.corba.se.spi.ior.IOR getForwardRequestIOR()>();
+
+        interfaceinvoke r2.<com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage: void setIOR(com.sun.corba.se.spi.ior.IOR)>($r5);
+
+     label7:
+        return;
+    }
+
+    public void setServerPIInfo(java.lang.Exception)
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Exception r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: java.lang.Exception;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setException(java.lang.Exception)>(r2);
+
+        return;
+    }
+
+    public void setServerPIInfo(org.omg.CORBA.NVList)
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        org.omg.CORBA.NVList r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: org.omg.CORBA.NVList;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setDSIArguments(org.omg.CORBA.NVList)>(r2);
+
+        return;
+    }
+
+    public void setServerPIExceptionInfo(org.omg.CORBA.Any)
+    {
+        org.omg.CORBA.Any r2;
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: org.omg.CORBA.Any;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setDSIException(org.omg.CORBA.Any)>(r2);
+
+        return;
+    }
+
+    public void setServerPIInfo(org.omg.CORBA.Any)
+    {
+        org.omg.CORBA.Any r2;
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: org.omg.CORBA.Any;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setDSIResult(org.omg.CORBA.Any)>(r2);
+
+        return;
+    }
+
+    public void initializeServerPIInfo(com.sun.corba.se.spi.protocol.CorbaMessageMediator, com.sun.corba.se.spi.oa.ObjectAdapter, byte[], com.sun.corba.se.spi.ior.ObjectKeyTemplate)
+    {
+        byte[] r8;
+        java.lang.ThreadLocal $r1;
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r4;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.spi.oa.ObjectAdapter r7;
+        com.sun.corba.se.spi.orb.ORB $r5;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r6;
+        com.sun.corba.se.spi.ior.ObjectKeyTemplate r9;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r6 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        r7 := @parameter1: com.sun.corba.se.spi.oa.ObjectAdapter;
+
+        r8 := @parameter2: byte[];
+
+        r9 := @parameter3: com.sun.corba.se.spi.ior.ObjectKeyTemplate;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalServerRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $r4 = new com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl;
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>($r5);
+
+        virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object push(java.lang.Object)>($r4);
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printPush()>();
+
+        interfaceinvoke r6.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void setExecutePIInResponseConstructor(boolean)>(1);
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setInfo(com.sun.corba.se.spi.protocol.CorbaMessageMediator,com.sun.corba.se.spi.oa.ObjectAdapter,byte[],com.sun.corba.se.spi.ior.ObjectKeyTemplate)>(r6, r7, r8, r9);
+
+        return;
+    }
+
+    public void setServerPIInfo(java.lang.Object, java.lang.String)
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Object r2;
+        java.lang.String r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.String;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: void setInfo(java.lang.Object,java.lang.String)>(r2, r3);
+
+        return;
+    }
+
+    public void cleanupServerPIRequest()
+    {
+        java.lang.ThreadLocal $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: boolean hasServerInterceptors>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalServerRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object pop()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void printPop()>();
+
+        return;
+    }
+
+    private void serverPIHandleExceptions(com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl)
+    {
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl r0;
+        org.omg.PortableInterceptor.ForwardRequest $r1;
+        com.sun.corba.se.spi.ior.IOR $r2;
+        org.omg.CORBA.SystemException $r7;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r4;
+        com.sun.corba.se.spi.protocol.ForwardException $r3;
+        com.sun.corba.se.spi.orb.ORB $r5;
+        java.lang.Exception $r6;
+        int $i0;
+
+        r4 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl;
+
+        $i0 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: int getEndingPointCall()>();
+
+        if $i0 != 1 goto label1;
+
+        $r6 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: java.lang.Exception getException()>();
+
+        $r7 = (org.omg.CORBA.SystemException) $r6;
+
+        throw $r7;
+
+     label1:
+        if $i0 != 2 goto label2;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: org.omg.PortableInterceptor.ForwardRequest getForwardRequestException()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl: com.sun.corba.se.spi.ior.IOR getForwardRequestIOR()>();
+
+        $r3 = new com.sun.corba.se.spi.protocol.ForwardException;
+
+        $r5 = r4.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r3.<com.sun.corba.se.spi.protocol.ForwardException: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.ior.IOR)>($r5, $r2);
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    private int convertPIReplyStatusToReplyMessage(short)
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r2;
+        short s1, $s2;
+        int $i0, i3, i4, $i5, $i6;
+        short[] $r0, $r1;
+
+        r2 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        s1 := @parameter0: short;
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r0 = <com.sun.corba.se.impl.interceptors.PIHandlerImpl: short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS>;
+
+        $i0 = lengthof $r0;
+
+        if i4 >= $i0 goto label3;
+
+        $r1 = <com.sun.corba.se.impl.interceptors.PIHandlerImpl: short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS>;
+
+        $s2 = $r1[i4];
+
+        $i5 = (int) $s2;
+
+        $i6 = (int) s1;
+
+        if $i5 != $i6 goto label2;
+
+        i3 = i4;
+
+        goto label3;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return i3;
+    }
+
+    private com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl peekClientRequestInfoImplStack()
+    {
+        org.omg.CORBA.INTERNAL $r5;
+        java.lang.ThreadLocal $r1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r4;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r7;
+        java.lang.Object $r2, $r6;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $z0 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: boolean empty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object peek()>();
+
+        r7 = (com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl) $r6;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL clientInfoStackNull()>();
+
+        throw $r5;
+
+     label2:
+        return r7;
+    }
+
+    private com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl peekServerRequestInfoImplStack()
+    {
+        org.omg.CORBA.INTERNAL $r5;
+        java.lang.ThreadLocal $r1;
+        com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl r7;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r4;
+        java.lang.Object $r2, $r6;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalServerRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $z0 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: boolean empty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = virtualinvoke r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: java.lang.Object peek()>();
+
+        r7 = (com.sun.corba.se.impl.interceptors.ServerRequestInfoImpl) $r6;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL serverInfoStackNull()>();
+
+        throw $r5;
+
+     label2:
+        return r7;
+    }
+
+    private boolean isClientPIEnabledForThisThread()
+    {
+        java.lang.ThreadLocal $r1;
+        int $i0;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.ThreadLocal threadLocalClientRequestInfoStack>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack) $r2;
+
+        $i0 = r3.<com.sun.corba.se.impl.interceptors.PIHandlerImpl$RequestInfoStack: int disableCount>;
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void preInitORBInitializers(com.sun.corba.se.impl.interceptors.ORBInitInfoImpl)
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r1;
+        org.omg.PortableInterceptor.ORBInitializer r8;
+        com.sun.corba.se.spi.orb.ORB $r2, $r5;
+        java.lang.Exception $r9;
+        com.sun.corba.se.impl.interceptors.ORBInitInfoImpl r0;
+        int $i0, i1;
+        com.sun.corba.se.spi.orb.ORBData $r3, $r6;
+        org.omg.PortableInterceptor.ORBInitializer[] $r4, $r7;
+
+        r1 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.interceptors.ORBInitInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ORBInitInfoImpl: void setStage(int)>(0);
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: org.omg.PortableInterceptor.ORBInitializer[] getORBInitializers()>();
+
+        $i0 = lengthof $r4;
+
+        if i1 >= $i0 goto label6;
+
+        $r5 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r7 = interfaceinvoke $r6.<com.sun.corba.se.spi.orb.ORBData: org.omg.PortableInterceptor.ORBInitializer[] getORBInitializers()>();
+
+        r8 = $r7[i1];
+
+        if r8 == null goto label5;
+
+     label2:
+        interfaceinvoke r8.<org.omg.PortableInterceptor.ORBInitializer: void pre_init(org.omg.PortableInterceptor.ORBInitInfo)>(r0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    private void postInitORBInitializers(com.sun.corba.se.impl.interceptors.ORBInitInfoImpl)
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r1;
+        org.omg.PortableInterceptor.ORBInitializer r8;
+        com.sun.corba.se.spi.orb.ORB $r2, $r5;
+        java.lang.Exception $r9;
+        com.sun.corba.se.impl.interceptors.ORBInitInfoImpl r0;
+        int $i0, i1;
+        com.sun.corba.se.spi.orb.ORBData $r3, $r6;
+        org.omg.PortableInterceptor.ORBInitializer[] $r4, $r7;
+
+        r1 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.interceptors.ORBInitInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ORBInitInfoImpl: void setStage(int)>(1);
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: org.omg.PortableInterceptor.ORBInitializer[] getORBInitializers()>();
+
+        $i0 = lengthof $r4;
+
+        if i1 >= $i0 goto label6;
+
+        $r5 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r7 = interfaceinvoke $r6.<com.sun.corba.se.spi.orb.ORBData: org.omg.PortableInterceptor.ORBInitializer[] getORBInitializers()>();
+
+        r8 = $r7[i1];
+
+        if r8 == null goto label5;
+
+     label2:
+        interfaceinvoke r8.<org.omg.PortableInterceptor.ORBInitializer: void post_init(org.omg.PortableInterceptor.ORBInitInfo)>(r0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    private com.sun.corba.se.impl.interceptors.ORBInitInfoImpl createORBInitInfo()
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.lang.String[] $r6;
+        com.sun.corba.se.spi.orb.ORB $r1, $r7;
+        org.omg.IOP.CodecFactory $r5;
+        com.sun.corba.se.impl.interceptors.ORBInitInfoImpl $r4;
+        java.lang.String $r3;
+        com.sun.corba.se.spi.orb.ORBData $r2;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.orb.ORBData: java.lang.String getORBId()>();
+
+        $r4 = new com.sun.corba.se.impl.interceptors.ORBInitInfoImpl;
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.lang.String[] arguments>;
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: org.omg.IOP.CodecFactory codecFactory>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.interceptors.ORBInitInfoImpl: void <init>(com.sun.corba.se.spi.orb.ORB,java.lang.String[],java.lang.String,org.omg.IOP.CodecFactory)>($r7, $r6, $r3, $r5);
+
+        return $r4;
+    }
+
+    public void register_interceptor(org.omg.PortableInterceptor.Interceptor, int) throws org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateName
+    {
+        org.omg.CORBA.BAD_PARAM $r3, $r8;
+        org.omg.PortableInterceptor.Interceptor r4;
+        com.sun.corba.se.impl.interceptors.InterceptorList $r6;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r2, $r7;
+        java.lang.Integer $r1;
+        int i0;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        r4 := @parameter0: org.omg.PortableInterceptor.Interceptor;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 3 goto label1;
+
+        if i0 >= 0 goto label2;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.BAD_PARAM typeOutOfRange(java.lang.Object)>($r1);
+
+        throw $r3;
+
+     label2:
+        $r5 = interfaceinvoke r4.<org.omg.PortableInterceptor.Interceptor: java.lang.String name()>();
+
+        if $r5 != null goto label3;
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.BAD_PARAM nameNull()>();
+
+        throw $r8;
+
+     label3:
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.InterceptorList interceptorList>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.interceptors.InterceptorList: void register_interceptor(org.omg.PortableInterceptor.Interceptor,int)>(r4, i0);
+
+        return;
+    }
+
+    public org.omg.PortableInterceptor.Current getPICurrent()
+    {
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.interceptors.PICurrent $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.interceptors.PICurrent current>;
+
+        return $r1;
+    }
+
+    private void nullParam() throws org.omg.CORBA.BAD_PARAM
+    {
+        org.omg.CORBA.BAD_PARAM $r2;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException orbutilWrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM nullParam()>();
+
+        throw $r2;
+    }
+
+    public org.omg.CORBA.Policy create_policy(int, org.omg.CORBA.Any) throws org.omg.CORBA.PolicyError
+    {
+        org.omg.CORBA.Any r0;
+        org.omg.PortableInterceptor.PolicyFactory r6;
+        org.omg.CORBA.Policy $r7;
+        java.util.HashMap $r2, $r4;
+        java.lang.Integer $r3;
+        org.omg.CORBA.PolicyError $r8, $r13;
+        int i0;
+        java.lang.String $r12, $r17;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r1;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r9, $r10, $r11, $r14, $r15, $r16;
+
+        r1 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: org.omg.CORBA.Any;
+
+        if r0 != null goto label1;
+
+        specialinvoke r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: void nullParam()>();
+
+     label1:
+        $r2 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable>;
+
+        if $r2 != null goto label2;
+
+        $r13 = new org.omg.CORBA.PolicyError;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("There is no PolicyFactory Registered for type ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<org.omg.CORBA.PolicyError: void <init>(java.lang.String,short)>($r17, 0);
+
+        throw $r13;
+
+     label2:
+        $r4 = r1.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable>;
+
+        $r3 = new java.lang.Integer;
+
+        specialinvoke $r3.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        r6 = (org.omg.PortableInterceptor.PolicyFactory) $r5;
+
+        if r6 != null goto label3;
+
+        $r8 = new org.omg.CORBA.PolicyError;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Could Not Find PolicyFactory for the Type ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<org.omg.CORBA.PolicyError: void <init>(java.lang.String,short)>($r12, 0);
+
+        throw $r8;
+
+     label3:
+        $r7 = interfaceinvoke r6.<org.omg.PortableInterceptor.PolicyFactory: org.omg.CORBA.Policy create_policy(int,org.omg.CORBA.Any)>(i0, r0);
+
+        return $r7;
+    }
+
+    public void registerPolicyFactory(int, org.omg.PortableInterceptor.PolicyFactory)
+    {
+        org.omg.PortableInterceptor.PolicyFactory r8;
+        com.sun.corba.se.impl.logging.OMGSystemException $r6;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+        java.util.HashMap $r1, $r3, $r9, $r10;
+        java.lang.Integer $r2, $r5;
+        org.omg.CORBA.BAD_INV_ORDER $r7;
+        int i0;
+        java.lang.Object $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        i0 := @parameter0: int;
+
+        r8 := @parameter1: org.omg.PortableInterceptor.PolicyFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable>;
+
+        if $r1 != null goto label1;
+
+        $r10 = new java.util.HashMap;
+
+        specialinvoke $r10.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable> = $r10;
+
+     label1:
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        if $r4 != null goto label2;
+
+        $r9 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: java.util.HashMap policyFactoryTable>;
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r8);
+
+        goto label3;
+
+     label2:
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r5 = new java.lang.Integer;
+
+        specialinvoke $r5.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_INV_ORDER policyFactoryRegFailed(java.lang.Object)>($r5);
+
+        throw $r7;
+
+     label3:
+        return;
+    }
+
+    public synchronized int allocateServerRequestId()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.interceptors.PIHandlerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.PIHandlerImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int serverRequestIdCounter>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.interceptors.PIHandlerImpl: int serverRequestIdCounter> = $i1;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        short[] $r0;
+
+        $r0 = newarray (short)[6];
+
+        $r0[0] = 0;
+
+        $r0[1] = 2;
+
+        $r0[2] = 1;
+
+        $r0[3] = 3;
+
+        $r0[4] = 3;
+
+        $r0[5] = 4;
+
+        <com.sun.corba.se.impl.interceptors.PIHandlerImpl: short[] REPLY_MESSAGE_TO_PI_REPLY_STATUS> = $r0;
+
+        return;
+    }
+}

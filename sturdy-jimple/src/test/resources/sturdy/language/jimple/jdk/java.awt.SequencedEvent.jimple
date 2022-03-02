@@ -1,0 +1,523 @@
+class java.awt.SequencedEvent extends java.awt.AWTEvent implements java.awt.ActiveEvent
+{
+    private static final long serialVersionUID;
+    private static final int ID;
+    private static final java.util.LinkedList list;
+    private final java.awt.AWTEvent nested;
+    private sun.awt.AppContext appContext;
+    private boolean disposed;
+    private final java.util.LinkedList pendingEvents;
+
+    public void <init>(java.awt.AWTEvent)
+    {
+        java.lang.Throwable $r5;
+        java.awt.AWTEvent r1;
+        java.awt.SequencedEvent r0;
+        java.lang.Object $r2;
+        java.util.LinkedList $r3, $r4;
+
+        r0 := @this: java.awt.SequencedEvent;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        specialinvoke r0.<java.awt.AWTEvent: void <init>(java.lang.Object,int)>($r2, 1006);
+
+        $r3 = new java.util.LinkedList;
+
+        specialinvoke $r3.<java.util.LinkedList: void <init>()>();
+
+        r0.<java.awt.SequencedEvent: java.util.LinkedList pendingEvents> = $r3;
+
+        r0.<java.awt.SequencedEvent: java.awt.AWTEvent nested> = r1;
+
+        staticinvoke <sun.awt.SunToolkit: void setSystemGenerated(java.awt.AWTEvent)>(r1);
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label1:
+        $r4 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        virtualinvoke $r4.<java.util.LinkedList: boolean add(java.lang.Object)>(r0);
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label4:
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final void dispatch()
+    {
+        java.lang.Throwable $r10, $r11;
+        java.awt.AWTEvent $r5;
+        java.awt.SequencedEvent r0, $r2;
+        sun.awt.AppContext $r1;
+        java.lang.Thread $r7;
+        java.awt.SequencedEvent$SequencedEventsFilter $r9;
+        boolean $z0, $z1, $z2;
+        java.awt.EventQueue $r4;
+        java.awt.EventDispatchThread r13;
+        java.awt.KeyboardFocusManager $r3;
+        java.lang.InterruptedException $r12;
+        java.lang.Class $r6;
+        java.awt.Conditional $r8;
+
+        r0 := @this: java.awt.SequencedEvent;
+
+     label01:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        r0.<java.awt.SequencedEvent: sun.awt.AppContext appContext> = $r1;
+
+        $r2 = staticinvoke <java.awt.SequencedEvent: java.awt.SequencedEvent getFirst()>();
+
+        if $r2 == r0 goto label12;
+
+        $z0 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z0 == 0 goto label02;
+
+        $r7 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r13 = (java.awt.EventDispatchThread) $r7;
+
+        $r8 = staticinvoke <java.awt.SequencedEvent$lambda_dispatch_0__445: java.awt.Conditional bootstrap$(java.awt.SequencedEvent)>(r0);
+
+        $r9 = new java.awt.SequencedEvent$SequencedEventsFilter;
+
+        specialinvoke $r9.<java.awt.SequencedEvent$SequencedEventsFilter: void <init>(java.awt.SequencedEvent,java.awt.SequencedEvent$1)>(r0, null);
+
+        virtualinvoke r13.<java.awt.EventDispatchThread: void pumpEventsForFilter(java.awt.Conditional,java.awt.EventFilter)>($r8, $r9);
+
+        goto label12;
+
+     label02:
+        $z1 = virtualinvoke r0.<java.awt.SequencedEvent: boolean isFirstOrDisposed()>();
+
+        if $z1 != 0 goto label12;
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label03:
+        $r6 = class "Ljava/awt/SequencedEvent;";
+
+        virtualinvoke $r6.<java.lang.Object: void wait(long)>(1000L);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r12 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label06:
+        goto label12;
+
+     label07:
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label08:
+        goto label11;
+
+     label09:
+        $r11 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label10:
+        throw $r11;
+
+     label11:
+        goto label02;
+
+     label12:
+        $z2 = r0.<java.awt.SequencedEvent: boolean disposed>;
+
+        if $z2 != 0 goto label13;
+
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        virtualinvoke $r3.<java.awt.KeyboardFocusManager: void setCurrentSequencedEvent(java.awt.SequencedEvent)>(r0);
+
+        $r4 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        $r5 = r0.<java.awt.SequencedEvent: java.awt.AWTEvent nested>;
+
+        virtualinvoke $r4.<java.awt.EventQueue: void dispatchEvent(java.awt.AWTEvent)>($r5);
+
+     label13:
+        virtualinvoke r0.<java.awt.SequencedEvent: void dispose()>();
+
+        goto label16;
+
+     label14:
+        $r10 := @caughtexception;
+
+     label15:
+        virtualinvoke r0.<java.awt.SequencedEvent: void dispose()>();
+
+        throw $r10;
+
+     label16:
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    private static final boolean isOwnerAppContextDisposed(java.awt.SequencedEvent)
+    {
+        java.awt.AWTEvent $r1;
+        java.awt.SequencedEvent r0;
+        sun.awt.AppContext $r4;
+        java.lang.Object $r2;
+        java.awt.Component $r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.SequencedEvent;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.awt.SequencedEvent: java.awt.AWTEvent nested>;
+
+        $r2 = virtualinvoke $r1.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $z0 = $r2 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.awt.Component) $r2;
+
+        $r4 = $r3.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        $z1 = virtualinvoke $r4.<sun.awt.AppContext: boolean isDisposed()>();
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    public final boolean isFirstOrDisposed()
+    {
+        java.awt.SequencedEvent r0, $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.awt.SequencedEvent;
+
+        $z0 = r0.<java.awt.SequencedEvent: boolean disposed>;
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r1 = staticinvoke <java.awt.SequencedEvent: java.awt.SequencedEvent getFirstWithContext()>();
+
+        if r0 == $r1 goto label2;
+
+        $z1 = r0.<java.awt.SequencedEvent: boolean disposed>;
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    private static final synchronized java.awt.SequencedEvent getFirst()
+    {
+        java.lang.Object $r1;
+        java.util.LinkedList $r0;
+        java.awt.SequencedEvent $r2;
+
+        $r0 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        $r1 = virtualinvoke $r0.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        $r2 = (java.awt.SequencedEvent) $r1;
+
+        return $r2;
+    }
+
+    private static final java.awt.SequencedEvent getFirstWithContext()
+    {
+        java.awt.SequencedEvent r0;
+        boolean $z0;
+
+        r0 = staticinvoke <java.awt.SequencedEvent: java.awt.SequencedEvent getFirst()>();
+
+     label1:
+        $z0 = staticinvoke <java.awt.SequencedEvent: boolean isOwnerAppContextDisposed(java.awt.SequencedEvent)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<java.awt.SequencedEvent: void dispose()>();
+
+        r0 = staticinvoke <java.awt.SequencedEvent: java.awt.SequencedEvent getFirst()>();
+
+        goto label1;
+
+     label2:
+        return r0;
+    }
+
+    final void dispose()
+    {
+        java.lang.Throwable $r17, $r18;
+        java.awt.AWTEvent r22;
+        java.awt.SequencedEvent r0, $r2, r19;
+        sun.awt.AppContext $r8, $r9, $r11;
+        java.util.LinkedList $r4, $r6, $r12, $r13, $r14, $r20;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r21;
+        java.awt.SentEvent $r10;
+        java.awt.KeyboardFocusManager $r1, $r16;
+        java.lang.Class $r3;
+        java.lang.Object $r5, $r7, $r15;
+
+        r0 := @this: java.awt.SequencedEvent;
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label01:
+        $z0 = r0.<java.awt.SequencedEvent: boolean disposed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label02:
+        return;
+
+     label03:
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent getCurrentSequencedEvent()>();
+
+        if $r2 != r0 goto label04;
+
+        $r16 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        virtualinvoke $r16.<java.awt.KeyboardFocusManager: void setCurrentSequencedEvent(java.awt.SequencedEvent)>(null);
+
+     label04:
+        r0.<java.awt.SequencedEvent: boolean disposed> = 1;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label05:
+        goto label08;
+
+     label06:
+        $r18 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label07:
+        throw $r18;
+
+     label08:
+        r19 = null;
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label09:
+        $r3 = class "Ljava/awt/SequencedEvent;";
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        $r4 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        if $r5 != r0 goto label10;
+
+        $r12 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        virtualinvoke $r12.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r13 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        $z1 = virtualinvoke $r13.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z1 != 0 goto label11;
+
+        $r14 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        $r15 = virtualinvoke $r14.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        r19 = (java.awt.SequencedEvent) $r15;
+
+        goto label11;
+
+     label10:
+        $r6 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        virtualinvoke $r6.<java.util.LinkedList: boolean remove(java.lang.Object)>(r0);
+
+     label11:
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label12:
+        goto label15;
+
+     label13:
+        $r17 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label14:
+        throw $r17;
+
+     label15:
+        if r19 == null goto label16;
+
+        $r9 = r19.<java.awt.SequencedEvent: sun.awt.AppContext appContext>;
+
+        if $r9 == null goto label16;
+
+        $r11 = r19.<java.awt.SequencedEvent: sun.awt.AppContext appContext>;
+
+        $r10 = new java.awt.SentEvent;
+
+        specialinvoke $r10.<java.awt.SentEvent: void <init>()>();
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r11, $r10);
+
+     label16:
+        $r20 = r0.<java.awt.SequencedEvent: java.util.LinkedList pendingEvents>;
+
+        $r21 = virtualinvoke $r20.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label17:
+        $z2 = interfaceinvoke $r21.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label18;
+
+        $r7 = interfaceinvoke $r21.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.awt.AWTEvent) $r7;
+
+        $r8 = r0.<java.awt.SequencedEvent: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r8, r22);
+
+        goto label17;
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label06;
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label09 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public boolean lambda$dispatch$0()
+    {
+        java.awt.SequencedEvent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.SequencedEvent;
+
+        $z0 = virtualinvoke r0.<java.awt.SequencedEvent: boolean isFirstOrDisposed()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    static java.awt.AWTEvent access$000(java.awt.SequencedEvent)
+    {
+        java.awt.AWTEvent $r1;
+        java.awt.SequencedEvent r0;
+
+        r0 := @parameter0: java.awt.SequencedEvent;
+
+        $r1 = r0.<java.awt.SequencedEvent: java.awt.AWTEvent nested>;
+
+        return $r1;
+    }
+
+    static java.util.LinkedList access$100()
+    {
+        java.util.LinkedList $r0;
+
+        $r0 = <java.awt.SequencedEvent: java.util.LinkedList list>;
+
+        return $r0;
+    }
+
+    static java.util.LinkedList access$200(java.awt.SequencedEvent)
+    {
+        java.util.LinkedList $r1;
+        java.awt.SequencedEvent r0;
+
+        r0 := @parameter0: java.awt.SequencedEvent;
+
+        $r1 = r0.<java.awt.SequencedEvent: java.util.LinkedList pendingEvents>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.SequencedEvent$1 $r1;
+        java.util.LinkedList $r0;
+
+        <java.awt.SequencedEvent: int ID> = 1006;
+
+        <java.awt.SequencedEvent: long serialVersionUID> = 547742659238625067L;
+
+        $r0 = new java.util.LinkedList;
+
+        specialinvoke $r0.<java.util.LinkedList: void <init>()>();
+
+        <java.awt.SequencedEvent: java.util.LinkedList list> = $r0;
+
+        $r1 = new java.awt.SequencedEvent$1;
+
+        specialinvoke $r1.<java.awt.SequencedEvent$1: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setSequencedEventAccessor(sun.awt.AWTAccessor$SequencedEventAccessor)>($r1);
+
+        return;
+    }
+}

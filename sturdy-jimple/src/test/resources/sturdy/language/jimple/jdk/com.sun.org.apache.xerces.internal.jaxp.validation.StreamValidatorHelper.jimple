@@ -1,0 +1,377 @@
+final class com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper extends java.lang.Object implements com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHelper
+{
+    private static final java.lang.String PARSER_SETTINGS;
+    private static final java.lang.String ENTITY_RESOLVER;
+    private static final java.lang.String ERROR_HANDLER;
+    private static final java.lang.String ERROR_REPORTER;
+    private static final java.lang.String SCHEMA_VALIDATOR;
+    private static final java.lang.String SYMBOL_TABLE;
+    private static final java.lang.String VALIDATION_MANAGER;
+    private static final java.lang.String SECURITY_MANAGER;
+    private java.lang.ref.SoftReference fConfiguration;
+    private com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator fSchemaValidator;
+    private com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager;
+    private com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl handler;
+
+    public void <init>(com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager)
+    {
+        com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager r2, $r3;
+        com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper r0;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator $r5;
+        java.lang.Object $r4;
+        java.lang.ref.SoftReference $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r1.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(null);
+
+        r0.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.ref.SoftReference fConfiguration> = $r1;
+
+        r0.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl handler> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager> = r2;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/validator/schema");
+
+        $r5 = (com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator) $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator fSchemaValidator> = $r5;
+
+        return;
+    }
+
+    public void validate(javax.xml.transform.Source, javax.xml.transform.Result) throws org.xml.sax.SAXException, java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl $r18, $r20, $r41;
+        javax.xml.transform.Result r0;
+        java.util.Locale $r24;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r21, r38;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParseException $r34;
+        java.io.Reader $r6;
+        com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager $r10, $r11, $r13, $r15, $r19, $r23, $r39;
+        org.xml.sax.SAXException $r33;
+        java.lang.Object[] $r25;
+        javax.xml.transform.stream.StreamSource $r31;
+        javax.xml.transform.Source r1;
+        javax.xml.transform.sax.SAXTransformerFactory $r16;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator $r40;
+        javax.xml.transform.TransformerFactoryConfigurationError $r37;
+        java.lang.String $r3, $r4, $r27, $r29, $r30;
+        java.lang.ref.SoftReference $r8;
+        com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper r7;
+        javax.xml.transform.TransformerConfigurationException $r36;
+        java.lang.IllegalArgumentException $r22;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r32;
+        org.xml.sax.SAXParseException $r35;
+        java.lang.Object $r9, $r12, $r14;
+        java.lang.Class $r26, $r28;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r2;
+        javax.xml.transform.sax.TransformerHandler $r17;
+        java.io.InputStream $r5;
+
+        r7 := @this: com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper;
+
+        r1 := @parameter0: javax.xml.transform.Source;
+
+        r0 := @parameter1: javax.xml.transform.Result;
+
+        if r0 == null goto label01;
+
+        $z2 = r0 instanceof javax.xml.transform.stream.StreamResult;
+
+        if $z2 == 0 goto label14;
+
+     label01:
+        $r31 = (javax.xml.transform.stream.StreamSource) r1;
+
+        if r0 == null goto label06;
+
+     label02:
+        $r15 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $z1 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: boolean getFeature(java.lang.String)>("jdk.xml.overrideDefaultParser");
+
+        $r16 = staticinvoke <jdk.xml.internal.JdkXmlUtils: javax.xml.transform.sax.SAXTransformerFactory getSAXTransformFactory(boolean)>($z1);
+
+        $r17 = virtualinvoke $r16.<javax.xml.transform.sax.SAXTransformerFactory: javax.xml.transform.sax.TransformerHandler newTransformerHandler()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r36 := @caughtexception;
+
+        $r37 = new javax.xml.transform.TransformerFactoryConfigurationError;
+
+        specialinvoke $r37.<javax.xml.transform.TransformerFactoryConfigurationError: void <init>(java.lang.Exception)>($r36);
+
+        throw $r37;
+
+     label05:
+        $r18 = new com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl;
+
+        $r19 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        specialinvoke $r18.<com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl: void <init>(com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager)>($r19);
+
+        r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl handler> = $r18;
+
+        $r20 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl handler>;
+
+        virtualinvoke $r20.<com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl: void setContentHandler(org.xml.sax.ContentHandler)>($r17);
+
+        interfaceinvoke $r17.<javax.xml.transform.sax.TransformerHandler: void setResult(javax.xml.transform.Result)>(r0);
+
+     label06:
+        $r2 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r3 = virtualinvoke $r31.<javax.xml.transform.stream.StreamSource: java.lang.String getPublicId()>();
+
+        $r4 = virtualinvoke $r31.<javax.xml.transform.stream.StreamSource: java.lang.String getSystemId()>();
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r3, $r4, null);
+
+        $r5 = virtualinvoke $r31.<javax.xml.transform.stream.StreamSource: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void setByteStream(java.io.InputStream)>($r5);
+
+        $r6 = virtualinvoke $r31.<javax.xml.transform.stream.StreamSource: java.io.Reader getReader()>();
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void setCharacterStream(java.io.Reader)>($r6);
+
+        $r8 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.ref.SoftReference fConfiguration>;
+
+        $r9 = virtualinvoke $r8.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        $r21 = (com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration) $r9;
+
+        r38 = $r21;
+
+        if $r21 != null goto label07;
+
+        r38 = specialinvoke r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration initialize()>();
+
+        goto label08;
+
+     label07:
+        $r10 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $z0 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: boolean getFeature(java.lang.String)>("http://apache.org/xml/features/internal/parser-settings");
+
+        if $z0 == 0 goto label08;
+
+        $r11 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        interfaceinvoke $r21.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", $r12);
+
+        $r13 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r14 = virtualinvoke $r13.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-handler");
+
+        interfaceinvoke $r21.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler", $r14);
+
+     label08:
+        $r39 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        virtualinvoke $r39.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: void reset()>();
+
+        $r40 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator fSchemaValidator>;
+
+        $r41 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.ValidatorHandlerImpl handler>;
+
+        virtualinvoke $r40.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator: void setDocumentHandler(com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler)>($r41);
+
+     label09:
+        interfaceinvoke r38.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void parse(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r2);
+
+     label10:
+        goto label13;
+
+     label11:
+        $r34 := @caughtexception;
+
+        $r35 = staticinvoke <com.sun.org.apache.xerces.internal.jaxp.validation.Util: org.xml.sax.SAXParseException toSAXParseException(com.sun.org.apache.xerces.internal.xni.parser.XMLParseException)>($r34);
+
+        throw $r35;
+
+     label12:
+        $r32 := @caughtexception;
+
+        $r33 = staticinvoke <com.sun.org.apache.xerces.internal.jaxp.validation.Util: org.xml.sax.SAXException toSAXException(com.sun.org.apache.xerces.internal.xni.XNIException)>($r32);
+
+        throw $r33;
+
+     label13:
+        return;
+
+     label14:
+        $r22 = new java.lang.IllegalArgumentException;
+
+        $r23 = r7.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r24 = virtualinvoke $r23.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.util.Locale getLocale()>();
+
+        $r25 = newarray (java.lang.Object)[2];
+
+        $r26 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.Class: java.lang.String getName()>();
+
+        $r25[0] = $r27;
+
+        $r28 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.Class: java.lang.String getName()>();
+
+        $r25[1] = $r29;
+
+        $r30 = staticinvoke <com.sun.org.apache.xerces.internal.jaxp.validation.JAXPValidationMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r24, "SourceResultMismatch", $r25);
+
+        specialinvoke $r22.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r30);
+
+        throw $r22;
+
+        catch javax.xml.transform.TransformerConfigurationException from label02 to label03 with label04;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLParseException from label09 to label10 with label11;
+        catch com.sun.org.apache.xerces.internal.xni.XNIException from label09 to label10 with label12;
+    }
+
+    private com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration initialize()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r22;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator $r14;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r9;
+        java.lang.ref.SoftReference $r19;
+        boolean $z0;
+        com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter $r20;
+        com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper r1;
+        com.sun.org.apache.xerces.internal.parsers.XML11Configuration $r0;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityManager $r21;
+        com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager $r2, $r3, $r5, $r7, $r10, $r12, $r15, $r17;
+        java.lang.Object $r4, $r6, $r8, $r11, $r13, $r16, $r18;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper;
+
+        $r0 = new com.sun.org.apache.xerces.internal.parsers.XML11Configuration;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void <init>()>();
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $z0 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: boolean getFeature(java.lang.String)>("http://javax.xml.XMLConstants/feature/secure-processing");
+
+        if $z0 == 0 goto label1;
+
+        $r21 = new com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+
+        specialinvoke $r21.<com.sun.org.apache.xerces.internal.utils.XMLSecurityManager: void <init>()>();
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/security-manager", $r21);
+
+     label1:
+        $r3 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", $r4);
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-handler");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler", $r6);
+
+        $r7 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r8 = virtualinvoke $r7.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        $r22 = (com.sun.org.apache.xerces.internal.impl.XMLErrorReporter) $r8;
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-reporter", $r22);
+
+        $r9 = virtualinvoke $r22.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/1998/REC-xml-19980210");
+
+        if $r9 != null goto label2;
+
+        $r20 = new com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter;
+
+        specialinvoke $r20.<com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter: void <init>()>();
+
+        virtualinvoke $r22.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void putMessageFormatter(java.lang.String,com.sun.org.apache.xerces.internal.util.MessageFormatter)>("http://www.w3.org/TR/1998/REC-xml-19980210", $r20);
+
+        virtualinvoke $r22.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void putMessageFormatter(java.lang.String,com.sun.org.apache.xerces.internal.util.MessageFormatter)>("http://www.w3.org/TR/1999/REC-xml-names-19990114", $r20);
+
+     label2:
+        $r10 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r11 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/symbol-table");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/symbol-table", $r11);
+
+        $r12 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r13 = virtualinvoke $r12.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/validation-manager");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/validation-manager", $r13);
+
+        $r14 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator fSchemaValidator>;
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setDocumentHandler(com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler)>($r14);
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setDTDHandler(com.sun.org.apache.xerces.internal.xni.XMLDTDHandler)>(null);
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setDTDContentModelHandler(com.sun.org.apache.xerces.internal.xni.XMLDTDContentModelHandler)>(null);
+
+        $r15 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r16 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager", $r16);
+
+        $r17 = r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager fComponentManager>;
+
+        $r18 = virtualinvoke $r17.<com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaValidatorComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/security-manager");
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.parsers.XML11Configuration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/security-manager", $r18);
+
+        $r19 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r19.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r0);
+
+        r1.<com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.ref.SoftReference fConfiguration> = $r19;
+
+        return $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String SECURITY_MANAGER> = "http://apache.org/xml/properties/security-manager";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String VALIDATION_MANAGER> = "http://apache.org/xml/properties/internal/validation-manager";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String SYMBOL_TABLE> = "http://apache.org/xml/properties/internal/symbol-table";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String SCHEMA_VALIDATOR> = "http://apache.org/xml/properties/internal/validator/schema";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String ERROR_REPORTER> = "http://apache.org/xml/properties/internal/error-reporter";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String ERROR_HANDLER> = "http://apache.org/xml/properties/internal/error-handler";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String ENTITY_RESOLVER> = "http://apache.org/xml/properties/internal/entity-resolver";
+
+        <com.sun.org.apache.xerces.internal.jaxp.validation.StreamValidatorHelper: java.lang.String PARSER_SETTINGS> = "http://apache.org/xml/features/internal/parser-settings";
+
+        return;
+    }
+}

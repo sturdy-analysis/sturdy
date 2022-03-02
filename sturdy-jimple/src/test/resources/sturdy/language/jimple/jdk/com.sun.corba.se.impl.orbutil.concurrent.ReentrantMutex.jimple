@@ -1,0 +1,995 @@
+public class com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex extends java.lang.Object implements com.sun.corba.se.impl.orbutil.concurrent.Sync
+{
+    protected java.lang.Thread holder_;
+    protected int counter_;
+    protected boolean debug;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: void <init>(boolean)>(0);
+
+        return;
+    }
+
+    public void <init>(boolean)
+    {
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = null;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug> = z0;
+
+        return;
+    }
+
+    public void acquire() throws java.lang.InterruptedException
+    {
+        org.omg.CORBA.INTERNAL $r11;
+        java.lang.Thread $r1, $r2, $r5, $r14, $r25;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r3, $r4, $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r18, $r23, $r24, $r27, $r28, $r29;
+        java.lang.Throwable $r21, $r22;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r6, $r10, $r15, $r19, $r26, $r30;
+        java.lang.InterruptedException $r20, $r31;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r20 = new java.lang.InterruptedException;
+
+        specialinvoke $r20.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r20;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z1 == 0 goto label03;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquire enter: holder_=");
+
+        $r14 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r15 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r14);
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r19);
+
+     label03:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        if $r2 == $r1 goto label09;
+
+     label04:
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i3 <= 0 goto label05;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label04;
+
+     label05:
+        $i4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i4 == 0 goto label06;
+
+        $r11 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r11.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("counter not 0 when first acquiring mutex");
+
+        throw $r11;
+
+     label06:
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = $r1;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r31 := @caughtexception;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        throw $r31;
+
+     label09:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = $i1;
+
+     label10:
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z2 == 0 goto label14;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquire exit: holder_=");
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r5);
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r10);
+
+        goto label14;
+
+     label11:
+        $r22 := @caughtexception;
+
+     label12:
+        $z3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z3 == 0 goto label13;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquire exit: holder_=");
+
+        $r25 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r26 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r25);
+
+        $r27 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i6 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r30);
+
+     label13:
+        throw $r22;
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r21 := @caughtexception;
+
+        exitmonitor r0;
+
+     label17:
+        throw $r21;
+
+     label18:
+        return;
+
+        catch java.lang.InterruptedException from label04 to label07 with label08;
+        catch java.lang.Throwable from label02 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label02 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    void acquireAll(int) throws java.lang.InterruptedException
+    {
+        org.omg.CORBA.INTERNAL $r13, $r14;
+        java.lang.Thread $r1, $r2, $r7, $r19, $r32;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r9, $r10, $r11, $r15, $r16, $r17, $r18, $r21, $r22, $r23, $r28, $r29, $r30, $r31, $r34, $r35, $r36;
+        java.lang.Throwable $r26, $r27;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+        java.lang.String $r8, $r12, $r20, $r24, $r33, $r37;
+        java.lang.InterruptedException $r25, $r38;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        i2 := @parameter0: int;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r25 = new java.lang.InterruptedException;
+
+        specialinvoke $r25.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r25;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z1 == 0 goto label03;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquireAll enter: count=");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" holder_=");
+
+        $r19 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r20 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r19);
+
+        $r21 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r24);
+
+     label03:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        if $r2 != $r1 goto label04;
+
+        $r14 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r14.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("Cannot acquireAll while holding the mutex");
+
+        throw $r14;
+
+     label04:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i0 <= 0 goto label05;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label04;
+
+     label05:
+        $i1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i1 == 0 goto label06;
+
+        $r13 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r13.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("counter not 0 when first acquiring mutex");
+
+        throw $r13;
+
+     label06:
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = $r1;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r38 := @caughtexception;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        throw $r38;
+
+     label09:
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = i2;
+
+     label10:
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z2 == 0 goto label14;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquireAll exit: count=");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" holder_=");
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r8 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r7);
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r12);
+
+        goto label14;
+
+     label11:
+        $r27 := @caughtexception;
+
+     label12:
+        $z3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z3 == 0 goto label13;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acquireAll exit: count=");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" holder_=");
+
+        $r32 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r33 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r32);
+
+        $r34 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r37);
+
+     label13:
+        throw $r27;
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r26 := @caughtexception;
+
+        exitmonitor r0;
+
+     label17:
+        throw $r26;
+
+     label18:
+        return;
+
+        catch java.lang.InterruptedException from label04 to label07 with label08;
+        catch java.lang.Throwable from label02 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label02 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public synchronized void release()
+    {
+        org.omg.CORBA.INTERNAL $r11;
+        java.lang.Thread $r1, $r2, $r5, $r14, $r23;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r3, $r4, $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r18, $r21, $r22, $r25, $r26, $r27;
+        java.lang.Throwable $r20;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r6, $r10, $r15, $r19, $r24, $r28;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+     label1:
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("release enter:  holder_=");
+
+        $r14 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r15 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r14);
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r19);
+
+     label2:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        if $r1 == $r2 goto label3;
+
+        $r11 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r11.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("Attempt to release Mutex by thread not holding the Mutex");
+
+        throw $r11;
+
+     label3:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = $i1;
+
+        $i2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i2 != 0 goto label4;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = null;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+     label4:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z1 == 0 goto label7;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("release exit:  holder_=");
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r5);
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r10);
+
+        goto label7;
+
+     label5:
+        $r20 := @caughtexception;
+
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z2 == 0 goto label6;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("release exit:  holder_=");
+
+        $r23 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r24 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r23);
+
+        $r25 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r28);
+
+     label6:
+        throw $r20;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    synchronized int releaseAll()
+    {
+        org.omg.CORBA.INTERNAL $r11;
+        java.lang.Thread $r1, $r2, $r5, $r14, $r23;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r3, $r4, $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r18, $r21, $r22, $r25, $r26, $r27;
+        java.lang.Throwable $r20;
+        int i0, $i1, $i2, $i3;
+        java.lang.String $r6, $r10, $r15, $r19, $r24, $r28;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+     label1:
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("releaseAll enter:  holder_=");
+
+        $r14 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r15 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r14);
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r19);
+
+     label2:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        if $r1 == $r2 goto label3;
+
+        $r11 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r11.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("Attempt to releaseAll Mutex by thread not holding the Mutex");
+
+        throw $r11;
+
+     label3:
+        i0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = null;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+     label4:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z1 == 0 goto label5;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("releaseAll exit:  holder_=");
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r5);
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r10);
+
+     label5:
+        return i0;
+
+     label6:
+        $r20 := @caughtexception;
+
+     label7:
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z2 == 0 goto label8;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("releaseAll exit:  holder_=");
+
+        $r23 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r24 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r23);
+
+        $r25 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r28);
+
+     label8:
+        throw $r20;
+
+        catch java.lang.Throwable from label1 to label4 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public boolean attempt(long) throws java.lang.InterruptedException
+    {
+        byte $b2, $b7;
+        java.lang.Thread $r1, $r4, $r12, $r20, $r28, $r38, $r49;
+        java.lang.StringBuilder $r3, $r6, $r7, $r8, $r11, $r14, $r15, $r16, $r19, $r22, $r23, $r24, $r27, $r30, $r31, $r32, $r35, $r36, $r37, $r40, $r41, $r42, $r48, $r51, $r52, $r53, $r57, $r58, $r59, $r60, $r61, $r62;
+        java.lang.Throwable $r45, $r46;
+        long l1, $l3, $l5, $l6, l14;
+        java.lang.String $r5, $r9, $r13, $r17, $r21, $r25, $r29, $r33, $r39, $r43, $r50, $r54;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        int $i0, $i4, $i8, $i9, $i10, $i11, $i12, $i13, $i15, $i16;
+        java.lang.InterruptedException $r55, $r56;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        l1 := @parameter0: long;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r56 = new java.lang.InterruptedException;
+
+        specialinvoke $r56.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r56;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z1 == 0 goto label03;
+
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt enter: msecs=");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l1);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" holder_=");
+
+        $r38 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r39 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r38);
+
+        $r40 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i12 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r43);
+
+     label03:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i0 != 0 goto label07;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = 1;
+
+     label04:
+        $z5 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z5 == 0 goto label05;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt exit:  holder_=");
+
+        $r28 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r29 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r28);
+
+        $r30 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i11 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r33);
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        return 1;
+
+     label07:
+        $b2 = l1 cmp 0L;
+
+        $i15 = (int) $b2;
+
+        if $i15 > 0 goto label11;
+
+     label08:
+        $z4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z4 == 0 goto label09;
+
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt exit:  holder_=");
+
+        $r20 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r21 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r20);
+
+        $r22 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i10 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r25);
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        return 0;
+
+     label11:
+        l14 = l1;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label12:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(l14);
+
+        $i4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        if $i4 != 0 goto label16;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_> = 1;
+
+     label13:
+        $z3 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z3 == 0 goto label14;
+
+        $r60 = new java.lang.StringBuilder;
+
+        specialinvoke $r60.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt exit:  holder_=");
+
+        $r12 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r13 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r12);
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i9 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r17);
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        return 1;
+
+     label16:
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l6 = $l5 - $l3;
+
+        l14 = l1 - $l6;
+
+        $b7 = l14 cmp 0L;
+
+        $i16 = (int) $b7;
+
+        if $i16 > 0 goto label12;
+
+     label17:
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z2 == 0 goto label18;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt exit:  holder_=");
+
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r4);
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i8 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label18:
+        exitmonitor r0;
+
+     label19:
+        return 0;
+
+     label20:
+        $r55 := @caughtexception;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        throw $r55;
+
+     label21:
+        $r46 := @caughtexception;
+
+     label22:
+        $z6 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: boolean debug>;
+
+        if $z6 == 0 goto label23;
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempt exit:  holder_=");
+
+        $r49 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: java.lang.Thread holder_>;
+
+        $r50 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String getThreadName(java.lang.Thread)>($r49);
+
+        $r51 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" counter_=");
+
+        $i13 = r0.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: int counter_>;
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprintTrace(java.lang.Object,java.lang.String)>(r0, $r54);
+
+     label23:
+        throw $r46;
+
+     label24:
+        $r45 := @caughtexception;
+
+        exitmonitor r0;
+
+     label25:
+        throw $r45;
+
+        catch java.lang.InterruptedException from label12 to label13 with label20;
+        catch java.lang.InterruptedException from label16 to label17 with label20;
+        catch java.lang.Throwable from label02 to label04 with label21;
+        catch java.lang.Throwable from label07 to label08 with label21;
+        catch java.lang.Throwable from label11 to label13 with label21;
+        catch java.lang.Throwable from label16 to label17 with label21;
+        catch java.lang.Throwable from label20 to label22 with label21;
+        catch java.lang.Throwable from label02 to label06 with label24;
+        catch java.lang.Throwable from label07 to label10 with label24;
+        catch java.lang.Throwable from label11 to label15 with label24;
+        catch java.lang.Throwable from label16 to label19 with label24;
+        catch java.lang.Throwable from label20 to label25 with label24;
+    }
+}

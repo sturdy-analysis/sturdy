@@ -1,0 +1,353 @@
+final class java.util.Vector$VectorSpliterator extends java.lang.Object implements java.util.Spliterator
+{
+    private final java.util.Vector list;
+    private java.lang.Object[] array;
+    private int index;
+    private int fence;
+    private int expectedModCount;
+
+    void <init>(java.util.Vector, java.lang.Object[], int, int, int)
+    {
+        java.util.Vector r1;
+        java.lang.Object[] r2;
+        int i0, i1, i2;
+        java.util.Vector$VectorSpliterator r0;
+
+        r0 := @this: java.util.Vector$VectorSpliterator;
+
+        r1 := @parameter0: java.util.Vector;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.Vector$VectorSpliterator: java.util.Vector list> = r1;
+
+        r0.<java.util.Vector$VectorSpliterator: java.lang.Object[] array> = r2;
+
+        r0.<java.util.Vector$VectorSpliterator: int index> = i0;
+
+        r0.<java.util.Vector$VectorSpliterator: int fence> = i1;
+
+        r0.<java.util.Vector$VectorSpliterator: int expectedModCount> = i2;
+
+        return;
+    }
+
+    private int getFence()
+    {
+        java.lang.Throwable $r6;
+        java.lang.Object[] $r3;
+        java.util.Vector $r1, $r2, $r4, $r5;
+        int $i0, $i1, $i2, i3;
+        java.util.Vector$VectorSpliterator r0;
+
+        r0 := @this: java.util.Vector$VectorSpliterator;
+
+        $i0 = r0.<java.util.Vector$VectorSpliterator: int fence>;
+
+        i3 = $i0;
+
+        if $i0 >= 0 goto label5;
+
+        $r1 = r0.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        $r3 = $r2.<java.util.Vector: java.lang.Object[] elementData>;
+
+        r0.<java.util.Vector$VectorSpliterator: java.lang.Object[] array> = $r3;
+
+        $r4 = r0.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        $i1 = $r4.<java.util.Vector: int modCount>;
+
+        r0.<java.util.Vector$VectorSpliterator: int expectedModCount> = $i1;
+
+        $r5 = r0.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        $i2 = $r5.<java.util.Vector: int elementCount>;
+
+        r0.<java.util.Vector$VectorSpliterator: int fence> = $i2;
+
+        i3 = $i2;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+     label5:
+        return i3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.util.Spliterator trySplit()
+    {
+        java.lang.Object[] $r2;
+        java.util.Vector $r1;
+        int $i0, i1, $i2, i3, $i4;
+        java.util.Vector$VectorSpliterator r0, $r3;
+
+        r0 := @this: java.util.Vector$VectorSpliterator;
+
+        $i0 = specialinvoke r0.<java.util.Vector$VectorSpliterator: int getFence()>();
+
+        i1 = r0.<java.util.Vector$VectorSpliterator: int index>;
+
+        $i2 = i1 + $i0;
+
+        i3 = $i2 >>> 1;
+
+        if i1 < i3 goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.Vector$VectorSpliterator;
+
+        $r1 = r0.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        $r2 = r0.<java.util.Vector$VectorSpliterator: java.lang.Object[] array>;
+
+        r0.<java.util.Vector$VectorSpliterator: int index> = i3;
+
+        $i4 = r0.<java.util.Vector$VectorSpliterator: int expectedModCount>;
+
+        specialinvoke $r3.<java.util.Vector$VectorSpliterator: void <init>(java.util.Vector,java.lang.Object[],int,int,int)>($r1, $r2, i1, i3, $i4);
+
+     label2:
+        return $r3;
+    }
+
+    public boolean tryAdvance(java.util.function.Consumer)
+    {
+        java.lang.Object[] $r2;
+        java.lang.NullPointerException $r6;
+        java.util.function.Consumer r0;
+        java.util.Vector $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Object $r3;
+        java.util.ConcurrentModificationException $r5;
+        java.util.Vector$VectorSpliterator r1;
+
+        r1 := @this: java.util.Vector$VectorSpliterator;
+
+        r0 := @parameter0: java.util.function.Consumer;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $i0 = specialinvoke r1.<java.util.Vector$VectorSpliterator: int getFence()>();
+
+        $i1 = r1.<java.util.Vector$VectorSpliterator: int index>;
+
+        if $i0 <= $i1 goto label3;
+
+        $i2 = $i1 + 1;
+
+        r1.<java.util.Vector$VectorSpliterator: int index> = $i2;
+
+        $r2 = r1.<java.util.Vector$VectorSpliterator: java.lang.Object[] array>;
+
+        $r3 = $r2[$i1];
+
+        interfaceinvoke r0.<java.util.function.Consumer: void accept(java.lang.Object)>($r3);
+
+        $r4 = r1.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        $i4 = $r4.<java.util.Vector: int modCount>;
+
+        $i3 = r1.<java.util.Vector$VectorSpliterator: int expectedModCount>;
+
+        if $i4 == $i3 goto label2;
+
+        $r5 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r5.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void forEachRemaining(java.util.function.Consumer)
+    {
+        java.lang.Throwable $r6;
+        java.lang.Object[] $r4, r7;
+        java.lang.NullPointerException $r5;
+        java.util.Vector $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9;
+        java.util.function.Consumer r0;
+        java.lang.Object $r3;
+        java.util.ConcurrentModificationException $r8;
+        java.util.Vector$VectorSpliterator r1;
+
+        r1 := @this: java.util.Vector$VectorSpliterator;
+
+        r0 := @parameter0: java.util.function.Consumer;
+
+        if r0 != null goto label01;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        $r2 = r1.<java.util.Vector$VectorSpliterator: java.util.Vector list>;
+
+        if $r2 == null goto label11;
+
+        $i0 = r1.<java.util.Vector$VectorSpliterator: int fence>;
+
+        i8 = $i0;
+
+        if $i0 >= 0 goto label07;
+
+        entermonitor $r2;
+
+     label02:
+        $i6 = $r2.<java.util.Vector: int modCount>;
+
+        r1.<java.util.Vector$VectorSpliterator: int expectedModCount> = $i6;
+
+        $r4 = $r2.<java.util.Vector: java.lang.Object[] elementData>;
+
+        r1.<java.util.Vector$VectorSpliterator: java.lang.Object[] array> = $r4;
+
+        r7 = $r4;
+
+        $i7 = $r2.<java.util.Vector: int elementCount>;
+
+        r1.<java.util.Vector$VectorSpliterator: int fence> = $i7;
+
+        i8 = $i7;
+
+        exitmonitor $r2;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label05:
+        throw $r6;
+
+     label06:
+        goto label08;
+
+     label07:
+        r7 = r1.<java.util.Vector$VectorSpliterator: java.lang.Object[] array>;
+
+     label08:
+        if r7 == null goto label11;
+
+        $i1 = r1.<java.util.Vector$VectorSpliterator: int index>;
+
+        i9 = $i1;
+
+        if $i1 < 0 goto label11;
+
+        r1.<java.util.Vector$VectorSpliterator: int index> = i8;
+
+        $i2 = lengthof r7;
+
+        if i8 > $i2 goto label11;
+
+     label09:
+        if i9 >= i8 goto label10;
+
+        $i5 = i9;
+
+        i9 = i9 + 1;
+
+        $r3 = r7[$i5];
+
+        interfaceinvoke r0.<java.util.function.Consumer: void accept(java.lang.Object)>($r3);
+
+        goto label09;
+
+     label10:
+        $i4 = $r2.<java.util.Vector: int modCount>;
+
+        $i3 = r1.<java.util.Vector$VectorSpliterator: int expectedModCount>;
+
+        if $i4 != $i3 goto label11;
+
+        return;
+
+     label11:
+        $r8 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r8.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+    }
+
+    public long estimateSize()
+    {
+        int $i0, $i1, $i2;
+        long $l3;
+        java.util.Vector$VectorSpliterator r0;
+
+        r0 := @this: java.util.Vector$VectorSpliterator;
+
+        $i0 = specialinvoke r0.<java.util.Vector$VectorSpliterator: int getFence()>();
+
+        $i1 = r0.<java.util.Vector$VectorSpliterator: int index>;
+
+        $i2 = $i0 - $i1;
+
+        $l3 = (long) $i2;
+
+        return $l3;
+    }
+
+    public int characteristics()
+    {
+        java.util.Vector$VectorSpliterator r0;
+
+        r0 := @this: java.util.Vector$VectorSpliterator;
+
+        return 16464;
+    }
+}

@@ -1,0 +1,344 @@
+abstract class sun.nio.cs.UnicodeDecoder extends java.nio.charset.CharsetDecoder
+{
+    protected static final char BYTE_ORDER_MARK;
+    protected static final char REVERSED_MARK;
+    protected static final int NONE;
+    protected static final int BIG;
+    protected static final int LITTLE;
+    private final int expectedByteOrder;
+    private int currentByteOrder;
+    private int defaultByteOrder;
+
+    public void <init>(java.nio.charset.Charset, int)
+    {
+        int i0;
+        java.nio.charset.Charset r1;
+        sun.nio.cs.UnicodeDecoder r0;
+
+        r0 := @this: sun.nio.cs.UnicodeDecoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.nio.charset.CharsetDecoder: void <init>(java.nio.charset.Charset,float,float)>(r1, 0.5F, 1.0F);
+
+        r0.<sun.nio.cs.UnicodeDecoder: int defaultByteOrder> = 1;
+
+        r0.<sun.nio.cs.UnicodeDecoder: int currentByteOrder> = i0;
+
+        r0.<sun.nio.cs.UnicodeDecoder: int expectedByteOrder> = i0;
+
+        return;
+    }
+
+    public void <init>(java.nio.charset.Charset, int, int)
+    {
+        java.nio.charset.Charset r1;
+        int i0, i1;
+        sun.nio.cs.UnicodeDecoder r0;
+
+        r0 := @this: sun.nio.cs.UnicodeDecoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.nio.cs.UnicodeDecoder: void <init>(java.nio.charset.Charset,int)>(r1, i0);
+
+        r0.<sun.nio.cs.UnicodeDecoder: int defaultByteOrder> = i1;
+
+        return;
+    }
+
+    private char decode(int, int)
+    {
+        char $c5, $c8;
+        sun.nio.cs.UnicodeDecoder r0;
+        int $i0, i1, i2, $i3, $i4, $i6, $i7;
+
+        r0 := @this: sun.nio.cs.UnicodeDecoder;
+
+        i2 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i0 = r0.<sun.nio.cs.UnicodeDecoder: int currentByteOrder>;
+
+        if $i0 != 1 goto label1;
+
+        $i6 = i2 << 8;
+
+        $i7 = $i6 | i1;
+
+        $c8 = (char) $i7;
+
+        return $c8;
+
+     label1:
+        $i3 = i1 << 8;
+
+        $i4 = $i3 | i2;
+
+        $c5 = (char) $i4;
+
+        return $c5;
+    }
+
+    protected java.nio.charset.CoderResult decodeLoop(java.nio.ByteBuffer, java.nio.CharBuffer)
+    {
+        java.nio.ByteBuffer r0;
+        byte $b0, $b1, $b6, $b8;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.CharBuffer r2;
+        java.lang.Throwable $r6;
+        short s2, $s7, $s9, s17, $s19, $s20, $s34, $s35;
+        java.nio.charset.CoderResult $r3, $r4, $r5, r7, r8, r9, r10;
+        int $i3, $i5, $i11, $i12, $i13, $i14, i15, $i16, $i21, $i22, $i23, $i25, $i26, $i28, $i29, $i30, $i31, $i33, $i36, $i37;
+        char $c4, $c10, c18;
+        sun.nio.cs.UnicodeDecoder r1;
+
+        r1 := @this: sun.nio.cs.UnicodeDecoder;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.CharBuffer;
+
+        i15 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+     label01:
+        $i16 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i16 <= 1 goto label18;
+
+        $b0 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s19 = (short) $b0;
+
+        s17 = $s19 & 255;
+
+        $b1 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s20 = (short) $b1;
+
+        s2 = $s20 & 255;
+
+        $i3 = r1.<sun.nio.cs.UnicodeDecoder: int currentByteOrder>;
+
+        if $i3 != 0 goto label04;
+
+        $i21 = (int) s17;
+
+        $i12 = $i21 << 8;
+
+        $i22 = (int) s2;
+
+        $i13 = $i12 | $i22;
+
+        c18 = (char) $i13;
+
+        $i23 = (int) c18;
+
+        $i25 = (int) 65279;
+
+        if $i23 != $i25 goto label02;
+
+        r1.<sun.nio.cs.UnicodeDecoder: int currentByteOrder> = 1;
+
+        i15 = i15 + 2;
+
+        goto label01;
+
+     label02:
+        $i26 = (int) c18;
+
+        $i28 = (int) 65534;
+
+        if $i26 != $i28 goto label03;
+
+        r1.<sun.nio.cs.UnicodeDecoder: int currentByteOrder> = 2;
+
+        i15 = i15 + 2;
+
+        goto label01;
+
+     label03:
+        $i14 = r1.<sun.nio.cs.UnicodeDecoder: int defaultByteOrder>;
+
+        r1.<sun.nio.cs.UnicodeDecoder: int currentByteOrder> = $i14;
+
+     label04:
+        $i29 = (int) s17;
+
+        $i30 = (int) s2;
+
+        $c4 = specialinvoke r1.<sun.nio.cs.UnicodeDecoder: char decode(int,int)>($i29, $i30);
+
+        $i31 = (int) $c4;
+
+        $i33 = (int) 65534;
+
+        if $i31 != $i33 goto label06;
+
+        $r5 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(2);
+
+     label05:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return $r5;
+
+     label06:
+        $z0 = staticinvoke <java.lang.Character: boolean isSurrogate(char)>($c4);
+
+        if $z0 == 0 goto label15;
+
+        $z2 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>($c4);
+
+        if $z2 == 0 goto label13;
+
+        $i5 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i5 >= 2 goto label08;
+
+        r7 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label07:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return r7;
+
+     label08:
+        $b6 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s34 = (short) $b6;
+
+        $s7 = $s34 & 255;
+
+        $b8 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s35 = (short) $b8;
+
+        $s9 = $s35 & 255;
+
+        $i36 = (int) $s7;
+
+        $i37 = (int) $s9;
+
+        $c10 = specialinvoke r1.<sun.nio.cs.UnicodeDecoder: char decode(int,int)>($i36, $i37);
+
+        $z3 = staticinvoke <java.lang.Character: boolean isLowSurrogate(char)>($c10);
+
+        if $z3 != 0 goto label10;
+
+        $r4 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(4);
+
+     label09:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return $r4;
+
+     label10:
+        $i11 = virtualinvoke r2.<java.nio.CharBuffer: int remaining()>();
+
+        if $i11 >= 2 goto label12;
+
+        r8 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label11:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return r8;
+
+     label12:
+        i15 = i15 + 4;
+
+        virtualinvoke r2.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c4);
+
+        virtualinvoke r2.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c10);
+
+        goto label01;
+
+     label13:
+        $r3 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(2);
+
+     label14:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return $r3;
+
+     label15:
+        $z1 = virtualinvoke r2.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z1 != 0 goto label17;
+
+        r9 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label16:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return r9;
+
+     label17:
+        i15 = i15 + 2;
+
+        virtualinvoke r2.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c4);
+
+        goto label01;
+
+     label18:
+        r10 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label19:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        return r10;
+
+     label20:
+        $r6 := @caughtexception;
+
+     label21:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i15);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label01 to label05 with label20;
+        catch java.lang.Throwable from label06 to label07 with label20;
+        catch java.lang.Throwable from label08 to label09 with label20;
+        catch java.lang.Throwable from label10 to label11 with label20;
+        catch java.lang.Throwable from label12 to label14 with label20;
+        catch java.lang.Throwable from label15 to label16 with label20;
+        catch java.lang.Throwable from label17 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    protected void implReset()
+    {
+        int $i0;
+        sun.nio.cs.UnicodeDecoder r0;
+
+        r0 := @this: sun.nio.cs.UnicodeDecoder;
+
+        $i0 = r0.<sun.nio.cs.UnicodeDecoder: int expectedByteOrder>;
+
+        r0.<sun.nio.cs.UnicodeDecoder: int currentByteOrder> = $i0;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.nio.cs.UnicodeDecoder: int LITTLE> = 2;
+
+        <sun.nio.cs.UnicodeDecoder: int BIG> = 1;
+
+        <sun.nio.cs.UnicodeDecoder: int NONE> = 0;
+
+        <sun.nio.cs.UnicodeDecoder: char REVERSED_MARK> = 65534;
+
+        <sun.nio.cs.UnicodeDecoder: char BYTE_ORDER_MARK> = 65279;
+
+        return;
+    }
+}

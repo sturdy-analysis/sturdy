@@ -1,0 +1,961 @@
+final class sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage extends sun.security.ssl.SSLHandshake$HandshakeMessage
+{
+    private static final byte[] serverSignHead;
+    private static final byte[] clientSignHead;
+    private final sun.security.ssl.SignatureScheme signatureScheme;
+    private final byte[] signature;
+
+    void <init>(sun.security.ssl.HandshakeContext, sun.security.ssl.X509Authentication$X509Possession) throws java.io.IOException
+    {
+        byte[] $r10, $r12, $r13, $r14, $r15, $r17, $r18, $r19, $r20, $r21, r37;
+        sun.security.ssl.SSLConfiguration $r11;
+        boolean $z0;
+        java.security.SignatureException $r33;
+        sun.security.ssl.X509Authentication$X509Possession r2;
+        java.security.Signature $r22;
+        java.util.List $r4;
+        javax.net.ssl.SSLException $r32, $r36;
+        sun.security.ssl.HandshakeHash $r9;
+        java.security.PrivateKey $r27;
+        java.lang.StringBuilder $r23, $r26, $r29, $r30;
+        sun.security.ssl.ProtocolVersion $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String $r28, $r31;
+        java.util.Map$Entry $r6;
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r0;
+        sun.security.ssl.TransportContext $r24, $r35;
+        java.security.AlgorithmConstraints $r5;
+        sun.security.ssl.Alert $r25, $r34;
+        java.lang.Object $r7, $r16;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r8;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: sun.security.ssl.X509Authentication$X509Possession;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        $r5 = r1.<sun.security.ssl.HandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r4 = r1.<sun.security.ssl.HandshakeContext: java.util.List peerRequestedSignatureSchemes>;
+
+        $r3 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r6 = staticinvoke <sun.security.ssl.SignatureScheme: java.util.Map$Entry getSignerOfPreferableAlgorithm(java.security.AlgorithmConstraints,java.util.List,sun.security.ssl.X509Authentication$X509Possession,sun.security.ssl.ProtocolVersion)>($r5, $r4, r2, $r3);
+
+        if $r6 != null goto label1;
+
+        $r24 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r25 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No supported CertificateVerify signature algorithm for ");
+
+        $r27 = r2.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r28 = interfaceinvoke $r27.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  key");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = virtualinvoke $r24.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r25, $r31);
+
+        throw $r32;
+
+     label1:
+        $r7 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r8 = (sun.security.ssl.SignatureScheme) $r7;
+
+        r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r8;
+
+        $r9 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r10 = virtualinvoke $r9.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r11 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r11.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label2;
+
+        $r19 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $r18 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $i6 = lengthof $r18;
+
+        $i5 = lengthof $r10;
+
+        $i7 = $i6 + $i5;
+
+        $r20 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r19, $i7);
+
+        r37 = $r20;
+
+        $r21 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $i9 = lengthof $r21;
+
+        $i8 = lengthof $r10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, $r20, $i9, $i8);
+
+        goto label3;
+
+     label2:
+        $r13 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $r12 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $i1 = lengthof $r12;
+
+        $i0 = lengthof $r10;
+
+        $i2 = $i1 + $i0;
+
+        $r14 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r13, $i2);
+
+        r37 = $r14;
+
+        $r15 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $i4 = lengthof $r15;
+
+        $i3 = lengthof $r10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, $r14, $i4, $i3);
+
+     label3:
+        $r16 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r22 = (java.security.Signature) $r16;
+
+        virtualinvoke $r22.<java.security.Signature: void update(byte[])>(r37);
+
+        $r17 = virtualinvoke $r22.<java.security.Signature: byte[] sign()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r33 := @caughtexception;
+
+        $r35 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r36 = virtualinvoke $r35.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r34, "Cannot produce CertificateVerify signature", $r33);
+
+        throw $r36;
+
+     label6:
+        r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature> = $r17;
+
+        return;
+
+        catch java.security.SignatureException from label3 to label4 with label5;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r13, $r15, $r17, $r18, $r19, $r20, $r24, $r28, $r29, $r30, $r31, r71;
+        java.security.GeneralSecurityException $r54, $r58;
+        sun.security.ssl.SSLConfiguration $r16;
+        java.security.Signature $r23;
+        javax.net.ssl.SSLException $r11, $r27, $r42, $r50, $r53, $r57, $r68;
+        sun.security.ssl.HandshakeHash $r14;
+        java.lang.StringBuilder $r33, $r36, $r39, $r40, $r43, $r46, $r47, $r48, $r59, $r62, $r65, $r66;
+        sun.security.ssl.X509Authentication$X509Credentials r69;
+        java.lang.String $r38, $r41, $r49, $r64, $r67;
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r0;
+        sun.security.ssl.TransportContext $r10, $r26, $r34, $r44, $r52, $r56, $r60;
+        sun.security.ssl.Alert $r9, $r25, $r35, $r45, $r51, $r55, $r61;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r3, $r4, $r5, $r22, $r37, $r63;
+        sun.security.ssl.SSLCredentials r70;
+        java.nio.ByteBuffer r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.List $r6, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.util.Iterator $r8;
+        java.security.PublicKey $r12, $r21;
+        java.lang.Object $r32;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        $i0 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 4 goto label01;
+
+        $r52 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r51 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r53 = virtualinvoke $r52.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r51, "Invalid CertificateVerify message: no sufficient data");
+
+        throw $r53;
+
+     label01:
+        $i1 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r2);
+
+        $r3 = staticinvoke <sun.security.ssl.SignatureScheme: sun.security.ssl.SignatureScheme valueOf(int)>($i1);
+
+        r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r3;
+
+        $r4 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        if $r4 != null goto label02;
+
+        $r44 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r45 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid signature algorithm (");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r50 = virtualinvoke $r44.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r45, $r49);
+
+        throw $r50;
+
+     label02:
+        $r6 = r1.<sun.security.ssl.HandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $r5 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $z0 = interfaceinvoke $r6.<java.util.List: boolean contains(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label03;
+
+        $r34 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r35 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm (");
+
+        $r37 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r38 = $r37.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r39 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r42 = virtualinvoke $r34.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r35, $r41);
+
+        throw $r42;
+
+     label03:
+        r69 = null;
+
+        $r7 = r1.<sun.security.ssl.HandshakeContext: java.util.List handshakeCredentials>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label06;
+
+        $r32 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r70 = (sun.security.ssl.SSLCredentials) $r32;
+
+        $z4 = r70 instanceof sun.security.ssl.X509Authentication$X509Credentials;
+
+        if $z4 == 0 goto label05;
+
+        r69 = (sun.security.ssl.X509Authentication$X509Credentials) r70;
+
+        goto label06;
+
+     label05:
+        goto label04;
+
+     label06:
+        if r69 == null goto label07;
+
+        $r12 = r69.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        if $r12 != null goto label08;
+
+     label07:
+        $r10 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r11 = virtualinvoke $r10.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r9, "No X509 credentials negotiated for CertificateVerify");
+
+        throw $r11;
+
+     label08:
+        $r13 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r2);
+
+        r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature> = $r13;
+
+        $r14 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r15 = virtualinvoke $r14.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r16 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z2 = $r16.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z2 == 0 goto label09;
+
+        $r29 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $r28 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $i8 = lengthof $r28;
+
+        $i7 = lengthof $r15;
+
+        $i9 = $i8 + $i7;
+
+        $r30 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r29, $i9);
+
+        r71 = $r30;
+
+        $r31 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead>;
+
+        $i11 = lengthof $r31;
+
+        $i10 = lengthof $r15;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r15, 0, $r30, $i11, $i10);
+
+        goto label10;
+
+     label09:
+        $r18 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $r17 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $i3 = lengthof $r17;
+
+        $i2 = lengthof $r15;
+
+        $i4 = $i3 + $i2;
+
+        $r19 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r18, $i4);
+
+        r71 = $r19;
+
+        $r20 = <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead>;
+
+        $i6 = lengthof $r20;
+
+        $i5 = lengthof $r15;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r15, 0, $r19, $i6, $i5);
+
+     label10:
+        $r22 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r21 = r69.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        $r23 = virtualinvoke $r22.<sun.security.ssl.SignatureScheme: java.security.Signature getVerifier(java.security.PublicKey)>($r21);
+
+        virtualinvoke $r23.<java.security.Signature: void update(byte[])>(r71);
+
+        $r24 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature>;
+
+        $z3 = virtualinvoke $r23.<java.security.Signature: boolean verify(byte[])>($r24);
+
+        if $z3 != 0 goto label11;
+
+        $r26 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r25 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r27 = virtualinvoke $r26.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r25, "Invalid CertificateVerify signature");
+
+        throw $r27;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r58 := @caughtexception;
+
+        $r60 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r61 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm (");
+
+        $r63 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r64 = $r63.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r65 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r64);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r68 = virtualinvoke $r60.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r61, $r67, $r58);
+
+        throw $r68;
+
+     label13:
+        $r54 := @caughtexception;
+
+        $r56 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r55 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r57 = virtualinvoke $r56.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r55, "Cannot verify CertificateVerify signature", $r54);
+
+        throw $r57;
+
+     label14:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label10 to label11 with label12;
+        catch java.security.InvalidAlgorithmParameterException from label10 to label11 with label12;
+        catch java.security.InvalidKeyException from label10 to label11 with label13;
+        catch java.security.SignatureException from label10 to label11 with label13;
+    }
+
+    public sun.security.ssl.SSLHandshake handshakeType()
+    {
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r1;
+        sun.security.ssl.SSLHandshake $r0;
+
+        r1 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        $r0 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        return $r0;
+    }
+
+    public int messageLength()
+    {
+        byte[] $r1;
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        $r1 = r0.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 4 + $i0;
+
+        return $i1;
+    }
+
+    public void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] $r3;
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r1;
+        int $i0;
+        sun.security.ssl.HandshakeOutStream r0;
+        sun.security.ssl.SignatureScheme $r2;
+
+        r1 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $r2 = r1.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $i0 = $r2.<sun.security.ssl.SignatureScheme: int id>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i0);
+
+        $r3 = r1.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>($r3);
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r7;
+        java.lang.Object[] $r3;
+        sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage r4;
+        java.text.MessageFormat $r0;
+        java.util.Locale $r1;
+        java.lang.String $r6, $r8, $r9, $r10;
+        sun.misc.HexDumpEncoder $r2;
+        sun.security.ssl.SignatureScheme $r5;
+
+        r4 := @this: sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"CertificateVerify\": \'{\'\n  \"signature algorithm\": {0}\n  \"signature\": \'{\'\n{1}\n  \'}\'\n\'}\'", $r1);
+
+        $r2 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r2.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r5 = r4.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r6 = $r5.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r3[0] = $r6;
+
+        $r7 = r4.<sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] signature>;
+
+        $r8 = virtualinvoke $r2.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r7);
+
+        $r9 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r8, "    ");
+
+        $r3[1] = $r9;
+
+        $r10 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r3);
+
+        return $r10;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0, $r1;
+
+        $r0 = newarray (byte)[98];
+
+        $r0[0] = 32;
+
+        $r0[1] = 32;
+
+        $r0[2] = 32;
+
+        $r0[3] = 32;
+
+        $r0[4] = 32;
+
+        $r0[5] = 32;
+
+        $r0[6] = 32;
+
+        $r0[7] = 32;
+
+        $r0[8] = 32;
+
+        $r0[9] = 32;
+
+        $r0[10] = 32;
+
+        $r0[11] = 32;
+
+        $r0[12] = 32;
+
+        $r0[13] = 32;
+
+        $r0[14] = 32;
+
+        $r0[15] = 32;
+
+        $r0[16] = 32;
+
+        $r0[17] = 32;
+
+        $r0[18] = 32;
+
+        $r0[19] = 32;
+
+        $r0[20] = 32;
+
+        $r0[21] = 32;
+
+        $r0[22] = 32;
+
+        $r0[23] = 32;
+
+        $r0[24] = 32;
+
+        $r0[25] = 32;
+
+        $r0[26] = 32;
+
+        $r0[27] = 32;
+
+        $r0[28] = 32;
+
+        $r0[29] = 32;
+
+        $r0[30] = 32;
+
+        $r0[31] = 32;
+
+        $r0[32] = 32;
+
+        $r0[33] = 32;
+
+        $r0[34] = 32;
+
+        $r0[35] = 32;
+
+        $r0[36] = 32;
+
+        $r0[37] = 32;
+
+        $r0[38] = 32;
+
+        $r0[39] = 32;
+
+        $r0[40] = 32;
+
+        $r0[41] = 32;
+
+        $r0[42] = 32;
+
+        $r0[43] = 32;
+
+        $r0[44] = 32;
+
+        $r0[45] = 32;
+
+        $r0[46] = 32;
+
+        $r0[47] = 32;
+
+        $r0[48] = 32;
+
+        $r0[49] = 32;
+
+        $r0[50] = 32;
+
+        $r0[51] = 32;
+
+        $r0[52] = 32;
+
+        $r0[53] = 32;
+
+        $r0[54] = 32;
+
+        $r0[55] = 32;
+
+        $r0[56] = 32;
+
+        $r0[57] = 32;
+
+        $r0[58] = 32;
+
+        $r0[59] = 32;
+
+        $r0[60] = 32;
+
+        $r0[61] = 32;
+
+        $r0[62] = 32;
+
+        $r0[63] = 32;
+
+        $r0[64] = 84;
+
+        $r0[65] = 76;
+
+        $r0[66] = 83;
+
+        $r0[67] = 32;
+
+        $r0[68] = 49;
+
+        $r0[69] = 46;
+
+        $r0[70] = 51;
+
+        $r0[71] = 44;
+
+        $r0[72] = 32;
+
+        $r0[73] = 115;
+
+        $r0[74] = 101;
+
+        $r0[75] = 114;
+
+        $r0[76] = 118;
+
+        $r0[77] = 101;
+
+        $r0[78] = 114;
+
+        $r0[79] = 32;
+
+        $r0[80] = 67;
+
+        $r0[81] = 101;
+
+        $r0[82] = 114;
+
+        $r0[83] = 116;
+
+        $r0[84] = 105;
+
+        $r0[85] = 102;
+
+        $r0[86] = 105;
+
+        $r0[87] = 99;
+
+        $r0[88] = 97;
+
+        $r0[89] = 116;
+
+        $r0[90] = 101;
+
+        $r0[91] = 86;
+
+        $r0[92] = 101;
+
+        $r0[93] = 114;
+
+        $r0[94] = 105;
+
+        $r0[95] = 102;
+
+        $r0[96] = 121;
+
+        $r0[97] = 0;
+
+        <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] serverSignHead> = $r0;
+
+        $r1 = newarray (byte)[98];
+
+        $r1[0] = 32;
+
+        $r1[1] = 32;
+
+        $r1[2] = 32;
+
+        $r1[3] = 32;
+
+        $r1[4] = 32;
+
+        $r1[5] = 32;
+
+        $r1[6] = 32;
+
+        $r1[7] = 32;
+
+        $r1[8] = 32;
+
+        $r1[9] = 32;
+
+        $r1[10] = 32;
+
+        $r1[11] = 32;
+
+        $r1[12] = 32;
+
+        $r1[13] = 32;
+
+        $r1[14] = 32;
+
+        $r1[15] = 32;
+
+        $r1[16] = 32;
+
+        $r1[17] = 32;
+
+        $r1[18] = 32;
+
+        $r1[19] = 32;
+
+        $r1[20] = 32;
+
+        $r1[21] = 32;
+
+        $r1[22] = 32;
+
+        $r1[23] = 32;
+
+        $r1[24] = 32;
+
+        $r1[25] = 32;
+
+        $r1[26] = 32;
+
+        $r1[27] = 32;
+
+        $r1[28] = 32;
+
+        $r1[29] = 32;
+
+        $r1[30] = 32;
+
+        $r1[31] = 32;
+
+        $r1[32] = 32;
+
+        $r1[33] = 32;
+
+        $r1[34] = 32;
+
+        $r1[35] = 32;
+
+        $r1[36] = 32;
+
+        $r1[37] = 32;
+
+        $r1[38] = 32;
+
+        $r1[39] = 32;
+
+        $r1[40] = 32;
+
+        $r1[41] = 32;
+
+        $r1[42] = 32;
+
+        $r1[43] = 32;
+
+        $r1[44] = 32;
+
+        $r1[45] = 32;
+
+        $r1[46] = 32;
+
+        $r1[47] = 32;
+
+        $r1[48] = 32;
+
+        $r1[49] = 32;
+
+        $r1[50] = 32;
+
+        $r1[51] = 32;
+
+        $r1[52] = 32;
+
+        $r1[53] = 32;
+
+        $r1[54] = 32;
+
+        $r1[55] = 32;
+
+        $r1[56] = 32;
+
+        $r1[57] = 32;
+
+        $r1[58] = 32;
+
+        $r1[59] = 32;
+
+        $r1[60] = 32;
+
+        $r1[61] = 32;
+
+        $r1[62] = 32;
+
+        $r1[63] = 32;
+
+        $r1[64] = 84;
+
+        $r1[65] = 76;
+
+        $r1[66] = 83;
+
+        $r1[67] = 32;
+
+        $r1[68] = 49;
+
+        $r1[69] = 46;
+
+        $r1[70] = 51;
+
+        $r1[71] = 44;
+
+        $r1[72] = 32;
+
+        $r1[73] = 99;
+
+        $r1[74] = 108;
+
+        $r1[75] = 105;
+
+        $r1[76] = 101;
+
+        $r1[77] = 110;
+
+        $r1[78] = 116;
+
+        $r1[79] = 32;
+
+        $r1[80] = 67;
+
+        $r1[81] = 101;
+
+        $r1[82] = 114;
+
+        $r1[83] = 116;
+
+        $r1[84] = 105;
+
+        $r1[85] = 102;
+
+        $r1[86] = 105;
+
+        $r1[87] = 99;
+
+        $r1[88] = 97;
+
+        $r1[89] = 116;
+
+        $r1[90] = 101;
+
+        $r1[91] = 86;
+
+        $r1[92] = 101;
+
+        $r1[93] = 114;
+
+        $r1[94] = 105;
+
+        $r1[95] = 102;
+
+        $r1[96] = 121;
+
+        $r1[97] = 0;
+
+        <sun.security.ssl.CertificateVerify$T13CertificateVerifyMessage: byte[] clientSignHead> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,349 @@
+public class sun.misc.IOUtils extends java.lang.Object
+{
+    private static final int DEFAULT_BUFFER_SIZE;
+    private static final int MAX_BUFFER_SIZE;
+
+    public void <init>()
+    {
+        sun.misc.IOUtils r0;
+
+        r0 := @this: sun.misc.IOUtils;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static byte[] readExactlyNBytes(java.io.InputStream, int) throws java.io.IOException
+    {
+        byte[] $r1;
+        int i0, $i1;
+        java.io.EOFException $r2;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        $r1 = staticinvoke <sun.misc.IOUtils: byte[] readNBytesOrEOF(java.io.InputStream,int)>(r0, i0);
+
+        $i1 = lengthof $r1;
+
+        if $i1 >= i0 goto label1;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        return $r1;
+    }
+
+    public static byte[] readNBytesOrEOF(java.io.InputStream, int) throws java.io.IOException
+    {
+        byte[] r3, $r4, $r5, r14, $r15, r16;
+        boolean $z0;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.util.ArrayList $r6, r13;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, $i9, $i10, $i11, $i12, i13, i14;
+        java.lang.String $r12;
+        java.util.Iterator $r1;
+        java.io.IOException $r8;
+        java.lang.Object $r2;
+        java.lang.OutOfMemoryError $r7;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label01;
+
+        $r8 = new java.io.IOException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("length cannot be negative: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label01:
+        r13 = null;
+
+        r14 = null;
+
+        i6 = 0;
+
+        i7 = i0;
+
+     label02:
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>(i7, 8192);
+
+        $r5 = newarray (byte)[$i1];
+
+        i8 = 0;
+
+     label03:
+        $i9 = lengthof $r5;
+
+        $i10 = $i9 - i8;
+
+        $i11 = staticinvoke <java.lang.Math: int min(int,int)>($i10, i7);
+
+        $i12 = virtualinvoke r0.<java.io.InputStream: int read(byte[],int,int)>($r5, i8, $i11);
+
+        if $i12 <= 0 goto label04;
+
+        i8 = i8 + $i12;
+
+        i7 = i7 - $i12;
+
+        goto label03;
+
+     label04:
+        if i8 <= 0 goto label08;
+
+        $i5 = 2147483639 - i6;
+
+        if $i5 >= i8 goto label05;
+
+        $r7 = new java.lang.OutOfMemoryError;
+
+        specialinvoke $r7.<java.lang.OutOfMemoryError: void <init>(java.lang.String)>("Required array size too large");
+
+        throw $r7;
+
+     label05:
+        i6 = i6 + i8;
+
+        if r14 != null goto label06;
+
+        r14 = $r5;
+
+        goto label08;
+
+     label06:
+        if r13 != null goto label07;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r13 = $r6;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>(r14);
+
+     label07:
+        interfaceinvoke r13.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label08:
+        if $i12 < 0 goto label09;
+
+        if i7 > 0 goto label02;
+
+     label09:
+        if r13 != null goto label13;
+
+        if r14 != null goto label10;
+
+        $r4 = newarray (byte)[0];
+
+        return $r4;
+
+     label10:
+        $i4 = lengthof r14;
+
+        if $i4 != i6 goto label11;
+
+        $r15 = r14;
+
+        goto label12;
+
+     label11:
+        $r15 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r14, i6);
+
+     label12:
+        return $r15;
+
+     label13:
+        r16 = newarray (byte)[i6];
+
+        i13 = 0;
+
+        i14 = i6;
+
+        $r1 = interfaceinvoke r13.<java.util.List: java.util.Iterator iterator()>();
+
+     label14:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label15;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (byte[]) $r2;
+
+        $i2 = lengthof r3;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i2, i14);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, r16, i13, $i3);
+
+        i13 = i13 + $i3;
+
+        i14 = i14 - $i3;
+
+        goto label14;
+
+     label15:
+        return r16;
+    }
+
+    public static byte[] readFully(java.io.InputStream, int, boolean) throws java.io.IOException
+    {
+        byte[] r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12, $i13, $i15;
+        boolean z0;
+        java.io.EOFException $r3;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        i10 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        r2 = newarray (byte)[0];
+
+        $i15 = (int) -1;
+
+        if i10 != $i15 goto label1;
+
+        i10 = 2147483647;
+
+     label1:
+        i11 = 0;
+
+     label2:
+        if i11 >= i10 goto label7;
+
+        $i0 = lengthof r2;
+
+        if i11 < $i0 goto label3;
+
+        $i5 = i10 - i11;
+
+        $i3 = lengthof r2;
+
+        $i4 = $i3 + 1024;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i4);
+
+        i12 = $i6;
+
+        $i8 = lengthof r2;
+
+        $i7 = i11 + $i6;
+
+        if $i8 >= $i7 goto label4;
+
+        $i9 = i11 + $i6;
+
+        r2 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r2, $i9);
+
+        goto label4;
+
+     label3:
+        $i1 = lengthof r2;
+
+        i12 = $i1 - i11;
+
+     label4:
+        $i13 = virtualinvoke r0.<java.io.InputStream: int read(byte[],int,int)>(r2, i11, i12);
+
+        if $i13 >= 0 goto label6;
+
+        if z0 == 0 goto label5;
+
+        if i10 == 2147483647 goto label5;
+
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>(java.lang.String)>("Detect premature EOF");
+
+        throw $r3;
+
+     label5:
+        $i2 = lengthof r2;
+
+        if $i2 == i11 goto label7;
+
+        r2 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r2, i11);
+
+        goto label7;
+
+     label6:
+        i11 = i11 + $i13;
+
+        goto label2;
+
+     label7:
+        return r2;
+    }
+
+    public static byte[] readNBytes(java.io.InputStream, int) throws java.io.IOException
+    {
+        byte[] $r1;
+        java.io.IOException $r2;
+        int i0;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("length cannot be negative: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.misc.IOUtils: byte[] readFully(java.io.InputStream,int,boolean)>(r0, i0, 1);
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.misc.IOUtils: int MAX_BUFFER_SIZE> = 2147483639;
+
+        <sun.misc.IOUtils: int DEFAULT_BUFFER_SIZE> = 8192;
+
+        return;
+    }
+}

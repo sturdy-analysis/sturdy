@@ -1,0 +1,173 @@
+public class sun.security.krb5.internal.util.KrbDataInputStream extends java.io.BufferedInputStream
+{
+    private boolean bigEndian;
+
+    public void setNativeByteOrder()
+    {
+        java.nio.ByteOrder $r0, $r1;
+        sun.security.krb5.internal.util.KrbDataInputStream r2;
+        boolean $z0;
+
+        r2 := @this: sun.security.krb5.internal.util.KrbDataInputStream;
+
+        $r0 = staticinvoke <java.nio.ByteOrder: java.nio.ByteOrder nativeOrder()>();
+
+        $r1 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        $z0 = virtualinvoke $r0.<java.lang.Object: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        r2.<sun.security.krb5.internal.util.KrbDataInputStream: boolean bigEndian> = 1;
+
+        goto label2;
+
+     label1:
+        r2.<sun.security.krb5.internal.util.KrbDataInputStream: boolean bigEndian> = 0;
+
+     label2:
+        return;
+    }
+
+    public void <init>(java.io.InputStream)
+    {
+        sun.security.krb5.internal.util.KrbDataInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.krb5.internal.util.KrbDataInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.security.krb5.internal.util.KrbDataInputStream: boolean bigEndian> = 1;
+
+        return;
+    }
+
+    public final int readLength4() throws java.io.IOException
+    {
+        int $i0;
+        sun.security.krb5.internal.util.KrbDataInputStream r0;
+        java.io.IOException $r1;
+
+        r0 := @this: sun.security.krb5.internal.util.KrbDataInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.util.KrbDataInputStream: int read(int)>(4);
+
+        if $i0 >= 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Invalid encoding");
+
+        throw $r1;
+
+     label1:
+        return $i0;
+    }
+
+    public int read(int) throws java.io.IOException
+    {
+        byte[] r0;
+        sun.security.krb5.internal.util.KrbDataInputStream r1;
+        short $s4, $s10, $s14, $s16;
+        byte $b2, $b6;
+        int i0, $i1, $i3, $i5, $i7, $i8, $i9, $i11, i12, i13, $i15, $i17;
+        boolean $z0;
+        java.io.IOException $r3;
+
+        r1 := @this: sun.security.krb5.internal.util.KrbDataInputStream;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (byte)[i0];
+
+        $i1 = virtualinvoke r1.<sun.security.krb5.internal.util.KrbDataInputStream: int read(byte[],int,int)>(r0, 0, i0);
+
+        if $i1 == i0 goto label1;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Premature end of stream reached");
+
+        throw $r3;
+
+     label1:
+        i12 = 0;
+
+        i13 = 0;
+
+     label2:
+        if i13 >= i0 goto label5;
+
+        $z0 = r1.<sun.security.krb5.internal.util.KrbDataInputStream: boolean bigEndian>;
+
+        if $z0 == 0 goto label3;
+
+        $b6 = r0[i13];
+
+        $s14 = (short) $b6;
+
+        $s10 = $s14 & 255;
+
+        $i7 = i0 - i13;
+
+        $i8 = $i7 - 1;
+
+        $i9 = $i8 * 8;
+
+        $i15 = (int) $s10;
+
+        $i11 = $i15 << $i9;
+
+        i12 = i12 | $i11;
+
+        goto label4;
+
+     label3:
+        $b2 = r0[i13];
+
+        $s16 = (short) $b2;
+
+        $s4 = $s16 & 255;
+
+        $i3 = i13 * 8;
+
+        $i17 = (int) $s4;
+
+        $i5 = $i17 << $i3;
+
+        i12 = i12 | $i5;
+
+     label4:
+        i13 = i13 + 1;
+
+        goto label2;
+
+     label5:
+        return i12;
+    }
+
+    public int readVersion() throws java.io.IOException
+    {
+        sun.security.krb5.internal.util.KrbDataInputStream r0;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+
+        r0 := @this: sun.security.krb5.internal.util.KrbDataInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.util.KrbDataInputStream: int read()>();
+
+        $i1 = $i0 & 255;
+
+        i2 = $i1 << 8;
+
+        $i3 = virtualinvoke r0.<sun.security.krb5.internal.util.KrbDataInputStream: int read()>();
+
+        $i4 = $i3 & 255;
+
+        $i5 = i2 | $i4;
+
+        return $i5;
+    }
+}

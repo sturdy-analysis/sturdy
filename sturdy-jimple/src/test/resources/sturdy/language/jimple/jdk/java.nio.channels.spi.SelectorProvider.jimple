@@ -1,0 +1,281 @@
+public abstract class java.nio.channels.spi.SelectorProvider extends java.lang.Object
+{
+    private static final java.lang.Object lock;
+    private static java.nio.channels.spi.SelectorProvider provider;
+
+    protected void <init>()
+    {
+        java.nio.channels.spi.SelectorProvider r0;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager $r1;
+
+        r0 := @this: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("selectorProvider");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        return;
+    }
+
+    private static boolean loadProviderFromProperty()
+    {
+        java.lang.IllegalAccessException $r9;
+        java.nio.channels.spi.SelectorProvider $r4;
+        java.lang.InstantiationException $r7;
+        java.util.ServiceConfigurationError $r6, $r8, $r10, $r12;
+        java.lang.Class $r2;
+        java.lang.Object $r3;
+        java.lang.SecurityException $r5;
+        java.lang.ClassNotFoundException $r11;
+        java.lang.String $r0;
+        java.lang.ClassLoader $r1;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.nio.channels.spi.SelectorProvider");
+
+        if $r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r0, 1, $r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r4 = (java.nio.channels.spi.SelectorProvider) $r3;
+
+        <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider> = $r4;
+
+     label2:
+        return 1;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = new java.util.ServiceConfigurationError;
+
+        specialinvoke $r12.<java.util.ServiceConfigurationError: void <init>(java.lang.String,java.lang.Throwable)>(null, $r11);
+
+        throw $r12;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new java.util.ServiceConfigurationError;
+
+        specialinvoke $r10.<java.util.ServiceConfigurationError: void <init>(java.lang.String,java.lang.Throwable)>(null, $r9);
+
+        throw $r10;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new java.util.ServiceConfigurationError;
+
+        specialinvoke $r8.<java.util.ServiceConfigurationError: void <init>(java.lang.String,java.lang.Throwable)>(null, $r7);
+
+        throw $r8;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = new java.util.ServiceConfigurationError;
+
+        specialinvoke $r6.<java.util.ServiceConfigurationError: void <init>(java.lang.String,java.lang.Throwable)>(null, $r5);
+
+        throw $r6;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label4;
+        catch java.lang.InstantiationException from label1 to label2 with label5;
+        catch java.lang.SecurityException from label1 to label2 with label6;
+    }
+
+    private static boolean loadProviderAsService()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r2;
+        java.util.ServiceLoader $r1;
+        java.nio.channels.spi.SelectorProvider $r4;
+        java.util.ServiceConfigurationError $r5;
+        java.lang.Object $r3;
+        java.lang.ClassLoader $r0;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r1 = staticinvoke <java.util.ServiceLoader: java.util.ServiceLoader load(java.lang.Class,java.lang.ClassLoader)>(class "Ljava/nio/channels/spi/SelectorProvider;", $r0);
+
+        $r2 = virtualinvoke $r1.<java.util.ServiceLoader: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (java.nio.channels.spi.SelectorProvider) $r3;
+
+        <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider> = $r4;
+
+     label4:
+        return 1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke $r5.<java.util.ServiceConfigurationError: java.lang.Throwable getCause()>();
+
+        $z1 = $r6 instanceof java.lang.SecurityException;
+
+        if $z1 == 0 goto label6;
+
+        goto label1;
+
+     label6:
+        throw $r5;
+
+        catch java.util.ServiceConfigurationError from label1 to label2 with label5;
+        catch java.util.ServiceConfigurationError from label3 to label4 with label5;
+    }
+
+    public static java.nio.channels.spi.SelectorProvider provider()
+    {
+        java.lang.Throwable $r6;
+        java.nio.channels.spi.SelectorProvider $r1, $r4, $r5;
+        java.nio.channels.spi.SelectorProvider$1 $r2;
+        java.lang.Object $r0, $r3;
+
+        $r0 = <java.nio.channels.spi.SelectorProvider: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider>;
+
+        if $r1 == null goto label3;
+
+        $r5 = <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider>;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r2 = new java.nio.channels.spi.SelectorProvider$1;
+
+        specialinvoke $r2.<java.nio.channels.spi.SelectorProvider$1: void <init>()>();
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.nio.channels.spi.SelectorProvider) $r3;
+
+        exitmonitor $r0;
+
+     label4:
+        return $r4;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public abstract java.nio.channels.DatagramChannel openDatagramChannel() throws java.io.IOException;
+
+    public abstract java.nio.channels.DatagramChannel openDatagramChannel(java.net.ProtocolFamily) throws java.io.IOException;
+
+    public abstract java.nio.channels.Pipe openPipe() throws java.io.IOException;
+
+    public abstract java.nio.channels.spi.AbstractSelector openSelector() throws java.io.IOException;
+
+    public abstract java.nio.channels.ServerSocketChannel openServerSocketChannel() throws java.io.IOException;
+
+    public abstract java.nio.channels.SocketChannel openSocketChannel() throws java.io.IOException;
+
+    public java.nio.channels.Channel inheritedChannel() throws java.io.IOException
+    {
+        java.nio.channels.spi.SelectorProvider r0;
+
+        r0 := @this: java.nio.channels.spi.SelectorProvider;
+
+        return null;
+    }
+
+    static boolean access$000()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <java.nio.channels.spi.SelectorProvider: boolean loadProviderFromProperty()>();
+
+        return $z0;
+    }
+
+    static java.nio.channels.spi.SelectorProvider access$100()
+    {
+        java.nio.channels.spi.SelectorProvider $r0;
+
+        $r0 = <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider>;
+
+        return $r0;
+    }
+
+    static boolean access$200()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <java.nio.channels.spi.SelectorProvider: boolean loadProviderAsService()>();
+
+        return $z0;
+    }
+
+    static java.nio.channels.spi.SelectorProvider access$102(java.nio.channels.spi.SelectorProvider)
+    {
+        java.nio.channels.spi.SelectorProvider r0;
+
+        r0 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider> = r0;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <java.nio.channels.spi.SelectorProvider: java.lang.Object lock> = $r0;
+
+        <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider> = null;
+
+        return;
+    }
+}

@@ -1,0 +1,1337 @@
+class javax.swing.text.rtf.RTFReader extends javax.swing.text.rtf.RTFParser
+{
+    javax.swing.text.StyledDocument target;
+    java.util.Dictionary parserState;
+    javax.swing.text.rtf.RTFReader$Destination rtfDestination;
+    javax.swing.text.MutableAttributeSet documentAttributes;
+    java.util.Dictionary fontTable;
+    java.awt.Color[] colorTable;
+    java.util.Map characterStyles;
+    java.util.Map paragraphStyles;
+    java.util.Map sectionStyles;
+    int rtfversion;
+    boolean ignoreGroupIfUnknownKeyword;
+    int skippingCharacters;
+    private static java.util.Dictionary straightforwardAttributes;
+    private javax.swing.text.rtf.MockAttributeSet mockery;
+    static java.util.Dictionary textKeywords;
+    static final java.lang.String TabAlignmentKey;
+    static final java.lang.String TabLeaderKey;
+    static java.util.Dictionary characterSets;
+    static boolean useNeXTForAnsi;
+
+    public void <init>(javax.swing.text.StyledDocument)
+    {
+        javax.swing.text.rtf.MockAttributeSet $r8;
+        javax.swing.text.SimpleAttributeSet $r9;
+        int $i1;
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.StyledDocument r1;
+        java.util.Hashtable $r6, $r7;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r1 := @parameter0: javax.swing.text.StyledDocument;
+
+        specialinvoke r0.<javax.swing.text.rtf.RTFParser: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.StyledDocument target> = r1;
+
+        $r6 = new java.util.Hashtable;
+
+        specialinvoke $r6.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState> = $r6;
+
+        $r7 = new java.util.Hashtable;
+
+        specialinvoke $r7.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary fontTable> = $r7;
+
+        $i1 = (int) -1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int rtfversion> = $i1;
+
+        $r8 = new javax.swing.text.rtf.MockAttributeSet;
+
+        specialinvoke $r8.<javax.swing.text.rtf.MockAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.MockAttributeSet mockery> = $r8;
+
+        $r9 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r9.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.MutableAttributeSet documentAttributes> = $r9;
+
+        return;
+    }
+
+    public void handleBinaryBlob(byte[])
+    {
+        byte[] r1;
+        int $i0, $i1, $i2;
+        javax.swing.text.rtf.RTFReader r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        $i2 = $i1 - 1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = $i2;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void handleText(java.lang.String)
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.RTFReader$Destination $r1, $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String r3;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r3 := @parameter0: java.lang.String;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        $i2 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        if $i1 < $i2 goto label1;
+
+        $i4 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        $i5 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        $i6 = $i4 - $i5;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = $i6;
+
+        return;
+
+     label1:
+        $i3 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = 0;
+
+     label2:
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        interfaceinvoke $r2.<javax.swing.text.rtf.RTFReader$Destination: void handleText(java.lang.String)>(r3);
+
+        return;
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void warning(java.lang.String)>("Text with no destination. oops.");
+
+        return;
+    }
+
+    java.awt.Color defaultColor()
+    {
+        java.awt.Color $r0;
+        javax.swing.text.rtf.RTFReader r1;
+
+        r1 := @this: javax.swing.text.rtf.RTFReader;
+
+        $r0 = <java.awt.Color: java.awt.Color black>;
+
+        return $r0;
+    }
+
+    public void begingroup()
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.RTFReader$Destination $r7, $r8;
+        int $i0;
+        java.lang.Object $r2, $r5;
+        java.util.Dictionary $r1, $r3, $r6, $r9, $r10;
+        java.util.Hashtable $r4;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = 0;
+
+     label1:
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("_savedState");
+
+        if $r2 == null goto label2;
+
+        $r9 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        virtualinvoke $r9.<java.util.Dictionary: java.lang.Object remove(java.lang.Object)>("_savedState");
+
+     label2:
+        $r3 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r4 = (java.util.Hashtable) $r3;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object clone()>();
+
+        $r10 = (java.util.Dictionary) $r5;
+
+        if $r2 == null goto label3;
+
+        virtualinvoke $r10.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("_savedState", $r2);
+
+     label3:
+        $r6 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        virtualinvoke $r6.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("_savedState", $r10);
+
+        $r7 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r7 == null goto label4;
+
+        $r8 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        interfaceinvoke $r8.<javax.swing.text.rtf.RTFReader$Destination: void begingroup()>();
+
+     label4:
+        return;
+    }
+
+    public void endgroup()
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.RTFReader$Destination $r4, $r5, $r6, $r7, $r10;
+        int $i0;
+        java.lang.Object $r2, $r3;
+        java.util.Dictionary $r1, $r8, $r9;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = 0;
+
+     label1:
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("_savedState");
+
+        $r9 = (java.util.Dictionary) $r2;
+
+        $r3 = virtualinvoke $r9.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("dst");
+
+        $r10 = (javax.swing.text.rtf.RTFReader$Destination) $r3;
+
+        $r4 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r10 == $r4 goto label2;
+
+        $r7 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        interfaceinvoke $r7.<javax.swing.text.rtf.RTFReader$Destination: void close()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination> = $r10;
+
+     label2:
+        $r8 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState> = $r9;
+
+        $r5 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r5 == null goto label3;
+
+        $r6 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        interfaceinvoke $r6.<javax.swing.text.rtf.RTFReader$Destination: void endgroup(java.util.Dictionary)>($r8);
+
+     label3:
+        return;
+    }
+
+    protected void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.RTFReader$Destination r4, $r5, $r7, $r9;
+        java.lang.Object $r2, $r6;
+        java.util.Dictionary $r1, r3, $r8;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r4 := @parameter0: javax.swing.text.rtf.RTFReader$Destination;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("_savedState");
+
+        r3 = (java.util.Dictionary) $r2;
+
+        if r3 == null goto label1;
+
+        $r5 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        $r6 = virtualinvoke r3.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("dst");
+
+        if $r5 == $r6 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void warning(java.lang.String)>("Warning, RTF destination overridden, invalid RTF.");
+
+        $r7 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        interfaceinvoke $r7.<javax.swing.text.rtf.RTFReader$Destination: void close()>();
+
+     label1:
+        r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination> = r4;
+
+        $r8 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r9 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        virtualinvoke $r8.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("dst", $r9);
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.util.Enumeration $r2;
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.StyledDocument $r5;
+        javax.swing.text.MutableAttributeSet $r1, $r4;
+        java.lang.Object $r3, $r6;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.MutableAttributeSet documentAttributes>;
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.MutableAttributeSet: java.util.Enumeration getAttributeNames()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.StyledDocument target>;
+
+        $r4 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.MutableAttributeSet documentAttributes>;
+
+        $r6 = interfaceinvoke $r4.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        interfaceinvoke $r5.<javax.swing.text.StyledDocument: void putProperty(java.lang.Object,java.lang.Object)>($r3, $r6);
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void warning(java.lang.String)>("RTF filter done.");
+
+        specialinvoke r0.<javax.swing.text.rtf.RTFParser: void close()>();
+
+        return;
+    }
+
+    public boolean handleKeyword(java.lang.String)
+    {
+        javax.swing.text.rtf.RTFReader$Destination $r5, $r7;
+        javax.swing.text.rtf.RTFReader$StylesheetDestination $r9;
+        java.util.Dictionary $r2;
+        java.lang.String r1, $r4;
+        javax.swing.text.rtf.RTFReader$DiscardingDestination $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, $z32, $z33, $z34, $z35, $z36, $z37, $z38, $z39, $z40, $z41, $z42, $z43, $z44, $z45, $z46, $z47, $z48, $z49, $z50, $z51, $z52, $z53, $z54, $z55, $z56, $z57, $z58, $z59, $z60, z61;
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.RTFReader$InfoDestination $r8;
+        int $i0, $i1, $i2;
+        javax.swing.text.rtf.RTFReader$ColortblDestination $r10;
+        javax.swing.text.rtf.RTFReader$FonttblDestination $r11;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        z61 = r0.<javax.swing.text.rtf.RTFReader: boolean ignoreGroupIfUnknownKeyword>;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label01;
+
+        $i1 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        $i2 = $i1 - 1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = $i2;
+
+        return 1;
+
+     label01:
+        r0.<javax.swing.text.rtf.RTFReader: boolean ignoreGroupIfUnknownKeyword> = 0;
+
+        $r2 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        $r3 = virtualinvoke $r2.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (java.lang.String) $r3;
+
+        if $r4 == null goto label02;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void handleText(java.lang.String)>($r4);
+
+        return 1;
+
+     label02:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("fonttbl");
+
+        if $z0 == 0 goto label03;
+
+        $r11 = new javax.swing.text.rtf.RTFReader$FonttblDestination;
+
+        specialinvoke $r11.<javax.swing.text.rtf.RTFReader$FonttblDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r11);
+
+        return 1;
+
+     label03:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("colortbl");
+
+        if $z1 == 0 goto label04;
+
+        $r10 = new javax.swing.text.rtf.RTFReader$ColortblDestination;
+
+        specialinvoke $r10.<javax.swing.text.rtf.RTFReader$ColortblDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r10);
+
+        return 1;
+
+     label04:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("stylesheet");
+
+        if $z2 == 0 goto label05;
+
+        $r9 = new javax.swing.text.rtf.RTFReader$StylesheetDestination;
+
+        specialinvoke $r9.<javax.swing.text.rtf.RTFReader$StylesheetDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r9);
+
+        return 1;
+
+     label05:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("info");
+
+        if $z3 == 0 goto label06;
+
+        $r8 = new javax.swing.text.rtf.RTFReader$InfoDestination;
+
+        specialinvoke $r8.<javax.swing.text.rtf.RTFReader$InfoDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r8);
+
+        return 0;
+
+     label06:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("mac");
+
+        if $z4 == 0 goto label07;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("mac");
+
+        return 1;
+
+     label07:
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("ansi");
+
+        if $z5 == 0 goto label10;
+
+        $z60 = <javax.swing.text.rtf.RTFReader: boolean useNeXTForAnsi>;
+
+        if $z60 == 0 goto label08;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("NeXT");
+
+        goto label09;
+
+     label08:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("ansi");
+
+     label09:
+        return 1;
+
+     label10:
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("next");
+
+        if $z6 == 0 goto label11;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("NeXT");
+
+        return 1;
+
+     label11:
+        $z7 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pc");
+
+        if $z7 == 0 goto label12;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("cpg437");
+
+        return 1;
+
+     label12:
+        $z8 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pca");
+
+        if $z8 == 0 goto label13;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setCharacterSet(java.lang.String)>("cpg850");
+
+        return 1;
+
+     label13:
+        $z9 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z9 == 0 goto label14;
+
+        r0.<javax.swing.text.rtf.RTFReader: boolean ignoreGroupIfUnknownKeyword> = 1;
+
+        return 1;
+
+     label14:
+        $r5 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r5 == null goto label15;
+
+        $r7 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        $z59 = interfaceinvoke $r7.<javax.swing.text.rtf.RTFReader$Destination: boolean handleKeyword(java.lang.String)>(r1);
+
+        if $z59 == 0 goto label15;
+
+        return 1;
+
+     label15:
+        $z10 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("aftncn");
+
+        if $z10 != 0 goto label16;
+
+        $z11 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("aftnsep");
+
+        if $z11 != 0 goto label16;
+
+        $z12 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("aftnsepc");
+
+        if $z12 != 0 goto label16;
+
+        $z13 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("annotation");
+
+        if $z13 != 0 goto label16;
+
+        $z14 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atnauthor");
+
+        if $z14 != 0 goto label16;
+
+        $z15 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atnicn");
+
+        if $z15 != 0 goto label16;
+
+        $z16 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atnid");
+
+        if $z16 != 0 goto label16;
+
+        $z17 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atnref");
+
+        if $z17 != 0 goto label16;
+
+        $z18 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atntime");
+
+        if $z18 != 0 goto label16;
+
+        $z19 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atrfend");
+
+        if $z19 != 0 goto label16;
+
+        $z20 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("atrfstart");
+
+        if $z20 != 0 goto label16;
+
+        $z21 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("bkmkend");
+
+        if $z21 != 0 goto label16;
+
+        $z22 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("bkmkstart");
+
+        if $z22 != 0 goto label16;
+
+        $z23 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("datafield");
+
+        if $z23 != 0 goto label16;
+
+        $z24 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("do");
+
+        if $z24 != 0 goto label16;
+
+        $z25 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("dptxbxtext");
+
+        if $z25 != 0 goto label16;
+
+        $z26 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("falt");
+
+        if $z26 != 0 goto label16;
+
+        $z27 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("field");
+
+        if $z27 != 0 goto label16;
+
+        $z28 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("file");
+
+        if $z28 != 0 goto label16;
+
+        $z29 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("filetbl");
+
+        if $z29 != 0 goto label16;
+
+        $z30 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("fname");
+
+        if $z30 != 0 goto label16;
+
+        $z31 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("fontemb");
+
+        if $z31 != 0 goto label16;
+
+        $z32 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("fontfile");
+
+        if $z32 != 0 goto label16;
+
+        $z33 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("footer");
+
+        if $z33 != 0 goto label16;
+
+        $z34 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("footerf");
+
+        if $z34 != 0 goto label16;
+
+        $z35 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("footerl");
+
+        if $z35 != 0 goto label16;
+
+        $z36 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("footerr");
+
+        if $z36 != 0 goto label16;
+
+        $z37 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("footnote");
+
+        if $z37 != 0 goto label16;
+
+        $z38 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("ftncn");
+
+        if $z38 != 0 goto label16;
+
+        $z39 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("ftnsep");
+
+        if $z39 != 0 goto label16;
+
+        $z40 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("ftnsepc");
+
+        if $z40 != 0 goto label16;
+
+        $z41 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("header");
+
+        if $z41 != 0 goto label16;
+
+        $z42 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("headerf");
+
+        if $z42 != 0 goto label16;
+
+        $z43 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("headerl");
+
+        if $z43 != 0 goto label16;
+
+        $z44 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("headerr");
+
+        if $z44 != 0 goto label16;
+
+        $z45 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("keycode");
+
+        if $z45 != 0 goto label16;
+
+        $z46 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("nextfile");
+
+        if $z46 != 0 goto label16;
+
+        $z47 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("object");
+
+        if $z47 != 0 goto label16;
+
+        $z48 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pict");
+
+        if $z48 != 0 goto label16;
+
+        $z49 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pn");
+
+        if $z49 != 0 goto label16;
+
+        $z50 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pnseclvl");
+
+        if $z50 != 0 goto label16;
+
+        $z51 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pntxtb");
+
+        if $z51 != 0 goto label16;
+
+        $z52 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("pntxta");
+
+        if $z52 != 0 goto label16;
+
+        $z53 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("revtbl");
+
+        if $z53 != 0 goto label16;
+
+        $z54 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("rxe");
+
+        if $z54 != 0 goto label16;
+
+        $z55 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("tc");
+
+        if $z55 != 0 goto label16;
+
+        $z56 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("template");
+
+        if $z56 != 0 goto label16;
+
+        $z57 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("txe");
+
+        if $z57 != 0 goto label16;
+
+        $z58 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("xe");
+
+        if $z58 == 0 goto label17;
+
+     label16:
+        z61 = 1;
+
+     label17:
+        if z61 == 0 goto label18;
+
+        $r6 = new javax.swing.text.rtf.RTFReader$DiscardingDestination;
+
+        specialinvoke $r6.<javax.swing.text.rtf.RTFReader$DiscardingDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r6);
+
+     label18:
+        return 0;
+    }
+
+    public boolean handleKeyword(java.lang.String, int)
+    {
+        java.lang.Integer $r10;
+        javax.swing.text.rtf.RTFReader$Destination $r3, $r11;
+        int $i0, $i2, $i3, $i4, i5;
+        java.lang.String r1;
+        java.lang.Number $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6;
+        javax.swing.text.rtf.RTFReader$DocumentDestination $r4;
+        javax.swing.text.rtf.RTFReader r0;
+        char $c1;
+        javax.swing.text.rtf.RTFReader$DiscardingDestination $r2;
+        java.lang.Object $r6;
+        java.util.Dictionary $r5, $r9;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        i5 := @parameter1: int;
+
+        z6 = r0.<javax.swing.text.rtf.RTFReader: boolean ignoreGroupIfUnknownKeyword>;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        if $i0 <= 0 goto label01;
+
+        $i3 = r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters>;
+
+        $i4 = $i3 - 1;
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = $i4;
+
+        return 1;
+
+     label01:
+        r0.<javax.swing.text.rtf.RTFReader: boolean ignoreGroupIfUnknownKeyword> = 0;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("uc");
+
+        if $z0 == 0 goto label02;
+
+        $r9 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i5);
+
+        virtualinvoke $r9.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("UnicodeSkip", $r10);
+
+        return 1;
+
+     label02:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("u");
+
+        if $z1 == 0 goto label06;
+
+        if i5 >= 0 goto label03;
+
+        i5 = i5 + 65536;
+
+     label03:
+        $c1 = (char) i5;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void handleText(char)>($c1);
+
+        $r5 = r0.<javax.swing.text.rtf.RTFReader: java.util.Dictionary parserState>;
+
+        $r6 = virtualinvoke $r5.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>("UnicodeSkip");
+
+        $r7 = (java.lang.Number) $r6;
+
+        $r8 = (java.lang.Number) $r7;
+
+        if $r8 == null goto label04;
+
+        $i2 = virtualinvoke $r8.<java.lang.Number: int intValue()>();
+
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = $i2;
+
+        goto label05;
+
+     label04:
+        r0.<javax.swing.text.rtf.RTFReader: int skippingCharacters> = 1;
+
+     label05:
+        return 1;
+
+     label06:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("rtf");
+
+        if $z2 == 0 goto label07;
+
+        r0.<javax.swing.text.rtf.RTFReader: int rtfversion> = i5;
+
+        $r4 = new javax.swing.text.rtf.RTFReader$DocumentDestination;
+
+        specialinvoke $r4.<javax.swing.text.rtf.RTFReader$DocumentDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r4);
+
+        return 1;
+
+     label07:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("NeXT");
+
+        if $z3 != 0 goto label08;
+
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("private");
+
+        if $z5 == 0 goto label09;
+
+     label08:
+        z6 = 1;
+
+     label09:
+        $r11 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        if $r11 == null goto label10;
+
+        $r3 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.RTFReader$Destination rtfDestination>;
+
+        $z4 = interfaceinvoke $r3.<javax.swing.text.rtf.RTFReader$Destination: boolean handleKeyword(java.lang.String,int)>(r1, i5);
+
+        if $z4 == 0 goto label10;
+
+        return 1;
+
+     label10:
+        if z6 == 0 goto label11;
+
+        $r2 = new javax.swing.text.rtf.RTFReader$DiscardingDestination;
+
+        specialinvoke $r2.<javax.swing.text.rtf.RTFReader$DiscardingDestination: void <init>(javax.swing.text.rtf.RTFReader)>(r0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFReader: void setRTFDestination(javax.swing.text.rtf.RTFReader$Destination)>($r2);
+
+     label11:
+        return 0;
+    }
+
+    private void setTargetAttribute(java.lang.String, java.lang.Object)
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        java.lang.Object r2;
+        java.lang.String r1;
+
+        r0 := @this: javax.swing.text.rtf.RTFReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        return;
+    }
+
+    public void setCharacterSet(java.lang.String)
+    {
+        java.lang.InternalError $r13;
+        java.lang.String r0, $r6, $r18, $r25;
+        boolean $z0;
+        javax.swing.text.rtf.RTFReader r1;
+        java.io.IOException $r12;
+        java.lang.Exception $r19;
+        char[] $r8, $r9, $r10, $r11;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r14, $r15, $r16, $r17, $r20, $r21, $r22, $r23, $r24;
+        java.lang.Object $r7, r26;
+
+        r1 := @this: javax.swing.text.rtf.RTFReader;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        r26 = staticinvoke <javax.swing.text.rtf.RTFReader: java.lang.Object getCharacterSet(java.lang.String)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r19 := @caughtexception;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception loading RTF character set \"");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\": ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<javax.swing.text.rtf.RTFReader: void warning(java.lang.String)>($r25);
+
+        r26 = null;
+
+     label4:
+        if r26 == null goto label5;
+
+        $r10 = (char[]) r26;
+
+        $r11 = (char[]) $r10;
+
+        r1.<javax.swing.text.rtf.RTFReader: char[] translationTable> = $r11;
+
+        goto label9;
+
+     label5:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown RTF character set \"");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<javax.swing.text.rtf.RTFReader: void warning(java.lang.String)>($r6);
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("ansi");
+
+        if $z0 != 0 goto label9;
+
+     label6:
+        $r7 = staticinvoke <javax.swing.text.rtf.RTFReader: java.lang.Object getCharacterSet(java.lang.String)>("ansi");
+
+        $r8 = (char[]) $r7;
+
+        $r9 = (char[]) $r8;
+
+        r1.<javax.swing.text.rtf.RTFReader: char[] translationTable> = $r9;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.InternalError;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RTFReader: Unable to find character set resources (");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r18, $r12);
+
+        throw $r13;
+
+     label9:
+        specialinvoke r1.<javax.swing.text.rtf.RTFReader: void setTargetAttribute(java.lang.String,java.lang.Object)>("rtfCharacterSet", r0);
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+        catch java.io.IOException from label6 to label7 with label8;
+    }
+
+    public static void defineCharacterSet(java.lang.String, char[])
+    {
+        int $i0;
+        char[] r0;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r3;
+        java.util.Dictionary $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: char[];
+
+        $i0 = lengthof r0;
+
+        if $i0 >= 256 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Translation table must have 256 entries.");
+
+        throw $r3;
+
+     label1:
+        $r2 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary characterSets>;
+
+        virtualinvoke $r2.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r0);
+
+        return;
+    }
+
+    public static java.lang.Object getCharacterSet(java.lang.String) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFReader$1 $r3;
+        char[] $r6, r7;
+        java.lang.Object $r2, $r4;
+        java.lang.String r0;
+        java.util.Dictionary $r1;
+        java.io.InputStream r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary characterSets>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r0);
+
+        r7 = (char[]) $r2;
+
+        if r7 != null goto label1;
+
+        $r3 = new javax.swing.text.rtf.RTFReader$1;
+
+        specialinvoke $r3.<javax.swing.text.rtf.RTFReader$1: void <init>(java.lang.String)>(r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r5 = (java.io.InputStream) $r4;
+
+        $r6 = staticinvoke <javax.swing.text.rtf.RTFReader: char[] readCharset(java.io.InputStream)>(r5);
+
+        r7 = $r6;
+
+        staticinvoke <javax.swing.text.rtf.RTFReader: void defineCharacterSet(java.lang.String,char[])>(r0, $r6);
+
+     label1:
+        return r7;
+    }
+
+    static char[] readCharset(java.io.InputStream) throws java.io.IOException
+    {
+        int $i0, $i1, i3, $i5;
+        java.io.StreamTokenizer $r15;
+        java.lang.String $r12;
+        double $d0;
+        char $c2;
+        java.io.IOException $r17, $r18;
+        java.io.InputStreamReader $r13;
+        java.lang.Exception $r6;
+        char[] r0;
+        java.lang.StringBuilder $r9, $r10, $r11, $r16;
+        java.io.BufferedReader $r14;
+        java.io.InputStream r4;
+
+        r4 := @parameter0: java.io.InputStream;
+
+        r0 = newarray (char)[256];
+
+        $r15 = new java.io.StreamTokenizer;
+
+        $r14 = new java.io.BufferedReader;
+
+        $r13 = new java.io.InputStreamReader;
+
+        specialinvoke $r13.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>(r4, "ISO-8859-1");
+
+        specialinvoke $r14.<java.io.BufferedReader: void <init>(java.io.Reader)>($r13);
+
+        specialinvoke $r15.<java.io.StreamTokenizer: void <init>(java.io.Reader)>($r14);
+
+        virtualinvoke $r15.<java.io.StreamTokenizer: void eolIsSignificant(boolean)>(0);
+
+        virtualinvoke $r15.<java.io.StreamTokenizer: void commentChar(int)>(35);
+
+        virtualinvoke $r15.<java.io.StreamTokenizer: void slashSlashComments(boolean)>(1);
+
+        virtualinvoke $r15.<java.io.StreamTokenizer: void slashStarComments(boolean)>(1);
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 256 goto label7;
+
+     label2:
+        $i0 = virtualinvoke $r15.<java.io.StreamTokenizer: int nextToken()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r17 = new java.io.IOException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to read from character set file (");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r17;
+
+     label5:
+        $i5 = (int) -2;
+
+        if $i0 == $i5 goto label6;
+
+        $r18 = new java.io.IOException;
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>("Unexpected token in character set file");
+
+        throw $r18;
+
+     label6:
+        $d0 = $r15.<java.io.StreamTokenizer: double nval>;
+
+        $i1 = (int) $d0;
+
+        $c2 = (char) $i1;
+
+        r0[i3] = $c2;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label7:
+        return r0;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    static char[] readCharset(java.net.URL) throws java.io.IOException
+    {
+        char[] $r2;
+        java.net.URL r0;
+        java.io.InputStream $r1;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.io.InputStream openStream()>();
+
+        $r2 = staticinvoke <javax.swing.text.rtf.RTFReader: char[] readCharset(java.io.InputStream)>($r1);
+
+        return $r2;
+    }
+
+    static java.util.Dictionary access$000()
+    {
+        java.util.Dictionary $r0;
+
+        $r0 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary straightforwardAttributes>;
+
+        return $r0;
+    }
+
+    static javax.swing.text.rtf.MockAttributeSet access$100(javax.swing.text.rtf.RTFReader)
+    {
+        javax.swing.text.rtf.RTFReader r0;
+        javax.swing.text.rtf.MockAttributeSet $r1;
+
+        r0 := @parameter0: javax.swing.text.rtf.RTFReader;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFReader: javax.swing.text.rtf.MockAttributeSet mockery>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Hashtable $r1, $r23;
+        java.util.Dictionary $r0, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22;
+
+        <javax.swing.text.rtf.RTFReader: java.lang.String TabLeaderKey> = "tab_leader";
+
+        <javax.swing.text.rtf.RTFReader: java.lang.String TabAlignmentKey> = "tab_alignment";
+
+        $r0 = staticinvoke <javax.swing.text.rtf.RTFAttributes: java.util.Dictionary attributesByKeyword()>();
+
+        <javax.swing.text.rtf.RTFReader: java.util.Dictionary straightforwardAttributes> = $r0;
+
+        <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords> = null;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords> = $r1;
+
+        $r2 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r2.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("\\", "\\");
+
+        $r3 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r3.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("{", "{");
+
+        $r4 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r4.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("}", "}");
+
+        $r5 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r5.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>(" ", "\u00a0");
+
+        $r6 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r6.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("~", "\u00a0");
+
+        $r7 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r7.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("_", "\u2011");
+
+        $r8 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r8.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("bullet", "\u2022");
+
+        $r9 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r9.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("emdash", "\u2014");
+
+        $r10 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r10.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("emspace", "\u2003");
+
+        $r11 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r11.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("endash", "\u2013");
+
+        $r12 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r12.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("enspace", "\u2002");
+
+        $r13 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r13.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("ldblquote", "\u201c");
+
+        $r14 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r14.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("lquote", "\u2018");
+
+        $r15 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r15.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("ltrmark", "\u200e");
+
+        $r16 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r16.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("rdblquote", "\u201d");
+
+        $r17 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r17.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("rquote", "\u2019");
+
+        $r18 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r18.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("rtlmark", "\u200f");
+
+        $r19 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r19.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("tab", "\t");
+
+        $r20 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r20.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("zwj", "\u200d");
+
+        $r21 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r21.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("zwnj", "\u200c");
+
+        $r22 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        virtualinvoke $r22.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>("-", "\u2027");
+
+        <javax.swing.text.rtf.RTFReader: boolean useNeXTForAnsi> = 0;
+
+        $r23 = new java.util.Hashtable;
+
+        specialinvoke $r23.<java.util.Hashtable: void <init>()>();
+
+        <javax.swing.text.rtf.RTFReader: java.util.Dictionary characterSets> = $r23;
+
+        return;
+    }
+}

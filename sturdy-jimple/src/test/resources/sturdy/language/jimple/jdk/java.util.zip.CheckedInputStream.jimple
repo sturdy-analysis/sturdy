@@ -1,0 +1,154 @@
+public class java.util.zip.CheckedInputStream extends java.io.FilterInputStream
+{
+    private java.util.zip.Checksum cksum;
+
+    public void <init>(java.io.InputStream, java.util.zip.Checksum)
+    {
+        java.util.zip.Checksum r2;
+        java.util.zip.CheckedInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.zip.CheckedInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.util.zip.Checksum;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<java.util.zip.CheckedInputStream: java.util.zip.Checksum cksum> = r2;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.util.zip.Checksum $r2;
+        java.util.zip.CheckedInputStream r0;
+        int $i0, $i2;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.util.zip.CheckedInputStream;
+
+        $r1 = r0.<java.util.zip.CheckedInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r2 = r0.<java.util.zip.CheckedInputStream: java.util.zip.Checksum cksum>;
+
+        interfaceinvoke $r2.<java.util.zip.Checksum: void update(int)>($i0);
+
+     label1:
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.util.zip.CheckedInputStream r0;
+        java.util.zip.Checksum $r3;
+        int i0, $i1, i2, $i4;
+        java.io.InputStream $r2;
+
+        r0 := @this: java.util.zip.CheckedInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r2 = r0.<java.util.zip.CheckedInputStream: java.io.InputStream in>;
+
+        $i1 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i0, i2);
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label1;
+
+        $r3 = r0.<java.util.zip.CheckedInputStream: java.util.zip.Checksum cksum>;
+
+        interfaceinvoke $r3.<java.util.zip.Checksum: void update(byte[],int,int)>(r1, i0, $i1);
+
+     label1:
+        return $i1;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte[] r0;
+        java.util.zip.CheckedInputStream r1;
+        long l0, $l3, $l7, l8, l9;
+        byte $b1, $b4, $b6;
+        int $i2, $i5, $i10, $i11, $i12;
+
+        r1 := @this: java.util.zip.CheckedInputStream;
+
+        l0 := @parameter0: long;
+
+        r0 = newarray (byte)[512];
+
+        l8 = 0L;
+
+     label1:
+        $b1 = l8 cmp l0;
+
+        $i11 = (int) $b1;
+
+        if $i11 >= 0 goto label5;
+
+        l9 = l0 - l8;
+
+        $i2 = lengthof r0;
+
+        $l3 = (long) $i2;
+
+        $b4 = l9 cmp $l3;
+
+        $i12 = (int) $b4;
+
+        if $i12 >= 0 goto label2;
+
+        $i10 = (int) l9;
+
+        goto label3;
+
+     label2:
+        $i10 = lengthof r0;
+
+     label3:
+        $i5 = virtualinvoke r1.<java.util.zip.CheckedInputStream: int read(byte[],int,int)>(r0, 0, $i10);
+
+        $l7 = (long) $i5;
+
+        $b6 = $l7 cmp -1L;
+
+        if $b6 != 0 goto label4;
+
+        return l8;
+
+     label4:
+        l8 = l8 + $l7;
+
+        goto label1;
+
+     label5:
+        return l8;
+    }
+
+    public java.util.zip.Checksum getChecksum()
+    {
+        java.util.zip.Checksum $r1;
+        java.util.zip.CheckedInputStream r0;
+
+        r0 := @this: java.util.zip.CheckedInputStream;
+
+        $r1 = r0.<java.util.zip.CheckedInputStream: java.util.zip.Checksum cksum>;
+
+        return $r1;
+    }
+}

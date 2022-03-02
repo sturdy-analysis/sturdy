@@ -1,0 +1,831 @@
+final class com.sun.jmx.snmp.daemon.SnmpSocket extends java.lang.Object implements java.lang.Runnable
+{
+    private java.net.DatagramSocket _socket;
+    private com.sun.jmx.snmp.daemon.SnmpResponseHandler _dgramHdlr;
+    private java.lang.Thread _sockThread;
+    private byte[] _buffer;
+    private transient boolean isClosing;
+    int _socketPort;
+    int responseBufSize;
+
+    public void <init>(com.sun.jmx.snmp.daemon.SnmpResponseHandler, java.net.InetAddress, int) throws java.net.SocketException
+    {
+        byte[] $r6;
+        java.util.logging.Level $r1, $r12;
+        java.net.DatagramSocket $r3, $r5;
+        java.net.InetAddress r4;
+        java.lang.Thread $r8, $r9;
+        int $i0, i1, $i2;
+        java.lang.String $r13;
+        boolean $z0;
+        com.sun.jmx.snmp.daemon.SnmpResponseHandler r7;
+        java.util.logging.Logger $r2, $r11;
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+        java.lang.Class $r10;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r7 := @parameter0: com.sun.jmx.snmp.daemon.SnmpResponseHandler;
+
+        r4 := @parameter1: java.net.InetAddress;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: com.sun.jmx.snmp.daemon.SnmpResponseHandler _dgramHdlr> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: byte[] _buffer> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int _socketPort> = 0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int responseBufSize> = 1024;
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r11 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r10 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r13 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r11.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r12, $r13, "constructor", "Creating new SNMP datagram socket");
+
+     label1:
+        $r3 = new java.net.DatagramSocket;
+
+        specialinvoke $r3.<java.net.DatagramSocket: void <init>(int,java.net.InetAddress)>(0, r4);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket> = $r3;
+
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        $i0 = virtualinvoke $r5.<java.net.DatagramSocket: int getLocalPort()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int _socketPort> = $i0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int responseBufSize> = i1;
+
+        $i2 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int responseBufSize>;
+
+        $r6 = newarray (byte)[$i2];
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: byte[] _buffer> = $r6;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: com.sun.jmx.snmp.daemon.SnmpResponseHandler _dgramHdlr> = r7;
+
+        $r8 = new java.lang.Thread;
+
+        specialinvoke $r8.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>(r0, "SnmpSocket");
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread> = $r8;
+
+        $r9 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        virtualinvoke $r9.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public synchronized void sendPacket(byte[], int, java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r2;
+        byte[] r1;
+        int i0, i1;
+        com.sun.jmx.snmp.daemon.SnmpSocket r3;
+        java.net.DatagramPacket $r0;
+
+        r3 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.net.InetAddress;
+
+        i1 := @parameter3: int;
+
+        $r0 = new java.net.DatagramPacket;
+
+        specialinvoke $r0.<java.net.DatagramPacket: void <init>(byte[],int,java.net.InetAddress,int)>(r1, i0, r2, i1);
+
+        virtualinvoke r3.<com.sun.jmx.snmp.daemon.SnmpSocket: void sendPacket(java.net.DatagramPacket)>($r0);
+
+        return;
+    }
+
+    public synchronized void sendPacket(java.net.DatagramPacket) throws java.io.IOException
+    {
+        java.util.logging.Level $r2, $r8, $r19, $r23;
+        java.net.DatagramSocket $r5, $r14;
+        int $i0;
+        java.lang.String $r9, $r15, $r17, $r24;
+        boolean $z0, $z1, $z2;
+        java.io.IOException $r1, $r18;
+        java.util.logging.Logger $r3, $r7, $r20, $r22;
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+        java.lang.Class $r6, $r21;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r16;
+        java.net.DatagramPacket r4;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r4 := @parameter0: java.net.DatagramPacket;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isValid()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r6 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r9 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sending DatagramPacket. Length = ");
+
+        $i0 = virtualinvoke r4.<java.net.DatagramPacket: int getLength()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" through socket = ");
+
+        $r14 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        $r15 = virtualinvoke $r14.<java.lang.Object: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r8, $r9, "sendPacket", $r17);
+
+     label2:
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        virtualinvoke $r5.<java.net.DatagramSocket: void send(java.net.DatagramPacket)>(r4);
+
+        goto label4;
+
+     label3:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Invalid state of SNMP datagram socket.");
+
+        throw $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r18 := @caughtexception;
+
+        $r20 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r19 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r20.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r19);
+
+        if $z2 == 0 goto label6;
+
+        $r22 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r21 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r24 = virtualinvoke $r21.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r22.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r23, $r24, "sendPacket", "I/O error while sending", $r18);
+
+     label6:
+        throw $r18;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public synchronized boolean isValid()
+    {
+        java.net.DatagramSocket $r1;
+        java.lang.Thread $r2, $r3;
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public synchronized void close()
+    {
+        byte[] $r21;
+        java.util.logging.Level $r1, $r14;
+        java.net.DatagramSocket $r3, $r6, $r11;
+        java.net.InetAddress $r5;
+        java.lang.Thread $r7, $r8, $r9, $r10;
+        int $i0;
+        java.lang.String $r15, $r18, $r20;
+        boolean $z0, $z1;
+        java.util.logging.Logger $r2, $r13;
+        java.lang.Exception $r23;
+        java.lang.InterruptedException $r22;
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+        java.lang.Class $r12;
+        java.lang.StringBuilder $r16, $r17, $r19;
+        java.net.DatagramPacket $r4;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing> = 1;
+
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        $r13 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r12 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r15 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Closing and destroying the SNMP datagram socket -> ");
+
+        $r18 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r14, $r15, "close", $r20);
+
+     label01:
+        $r3 = new java.net.DatagramSocket;
+
+        specialinvoke $r3.<java.net.DatagramSocket: void <init>(int)>(0);
+
+        $r21 = newarray (byte)[1];
+
+        $r4 = new java.net.DatagramPacket;
+
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        $i0 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: int _socketPort>;
+
+        specialinvoke $r4.<java.net.DatagramPacket: void <init>(byte[],int,java.net.InetAddress,int)>($r21, 1, $r5, $i0);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void send(java.net.DatagramPacket)>($r4);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void close()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r23 := @caughtexception;
+
+     label04:
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        if $r6 == null goto label05;
+
+        $r11 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        virtualinvoke $r11.<java.net.DatagramSocket: void close()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket> = null;
+
+     label05:
+        $r7 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        if $r7 == null goto label10;
+
+        $r8 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        $z1 = virtualinvoke $r8.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 == 0 goto label10;
+
+        $r9 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        virtualinvoke $r9.<java.lang.Thread: void interrupt()>();
+
+     label06:
+        $r10 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread>;
+
+        virtualinvoke $r10.<java.lang.Thread: void join()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r22 := @caughtexception;
+
+     label09:
+        r0.<com.sun.jmx.snmp.daemon.SnmpSocket: java.lang.Thread _sockThread> = null;
+
+     label10:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.InterruptedException from label06 to label07 with label08;
+    }
+
+    public void run()
+    {
+        byte[] $r79, $r80;
+        java.net.InetAddress $r17;
+        java.lang.Thread $r0, $r13, $r29, $r40;
+        java.lang.Exception $r64;
+        java.lang.ThreadDeath $r52;
+        com.sun.jmx.snmp.daemon.SnmpSocket r1;
+        java.lang.StringBuilder $r11, $r12, $r15, $r16, $r19, $r20, $r21, $r27, $r28, $r31, $r32, $r38, $r39, $r42, $r43, $r59, $r60, $r62;
+        java.net.DatagramPacket $r78;
+        java.lang.Error $r45;
+        java.net.DatagramSocket $r2;
+        java.lang.String $r10, $r14, $r18, $r22, $r26, $r30, $r33, $r37, $r41, $r44, $r51, $r58, $r61, $r63, $r70, $r77;
+        java.io.IOException $r71;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.util.logging.Logger $r4, $r6, $r8, $r24, $r35, $r47, $r49, $r54, $r56, $r66, $r68, $r73, $r75, $r81;
+        java.util.logging.Level $r3, $r5, $r9, $r25, $r36, $r46, $r50, $r53, $r57, $r65, $r69, $r72, $r76, $r82;
+        int $i0, $i1, $i2;
+        java.lang.Class $r7, $r23, $r34, $r48, $r55, $r67, $r74;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r0.<java.lang.Thread: void setPriority(int)>(8);
+
+     label01:
+        $r78 = new java.net.DatagramPacket;
+
+        $r79 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: byte[] _buffer>;
+
+        $r80 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: byte[] _buffer>;
+
+        $i2 = lengthof $r80;
+
+        specialinvoke $r78.<java.net.DatagramPacket: void <init>(byte[],int)>($r79, $i2);
+
+        $r81 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r82 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z10 = virtualinvoke $r81.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r82);
+
+        if $z10 == 0 goto label02;
+
+        $r35 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r36 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r34 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r37 = virtualinvoke $r34.<java.lang.Class: java.lang.String getName()>();
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r40 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.Thread: java.lang.String toString()>();
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:Blocking for receiving packet");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r36, $r37, "run", $r44);
+
+     label02:
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        virtualinvoke $r2.<java.net.DatagramSocket: void receive(java.net.DatagramPacket)>($r78);
+
+        $z0 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing>;
+
+        if $z0 == 0 goto label04;
+
+     label03:
+        goto label21;
+
+     label04:
+        $r4 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r4.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z1 == 0 goto label05;
+
+        $r24 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r23 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r26 = virtualinvoke $r23.<java.lang.Class: java.lang.String getName()>();
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r29 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.Thread: java.lang.String toString()>();
+
+        $r31 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:Received a packet");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r25, $r26, "run", $r33);
+
+     label05:
+        $i0 = virtualinvoke $r78.<java.net.DatagramPacket: int getLength()>();
+
+        if $i0 > 0 goto label07;
+
+     label06:
+        goto label01;
+
+     label07:
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r6.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z2 == 0 goto label08;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r7 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r10 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r13 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.Thread: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:Received a packet from : ");
+
+        $r17 = virtualinvoke $r78.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        $r18 = virtualinvoke $r17.<java.net.InetAddress: java.lang.String toString()>();
+
+        $r19 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", Length = ");
+
+        $i1 = virtualinvoke $r78.<java.net.DatagramPacket: int getLength()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r9, $r10, "run", $r22);
+
+     label08:
+        specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpSocket: void handleDatagram(java.net.DatagramPacket)>($r78);
+
+        $z3 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing>;
+
+        if $z3 == 0 goto label10;
+
+     label09:
+        goto label21;
+
+     label10:
+        goto label01;
+
+     label11:
+        $r71 := @caughtexception;
+
+        $z8 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing>;
+
+        if $z8 == 0 goto label12;
+
+        goto label21;
+
+     label12:
+        $r73 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r72 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z9 = virtualinvoke $r73.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r72);
+
+        if $z9 == 0 goto label13;
+
+        $r75 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r76 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r74 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r77 = virtualinvoke $r74.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r75.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r76, $r77, "run", "IOEXception while receiving datagram", $r71);
+
+     label13:
+        goto label01;
+
+     label14:
+        $r64 := @caughtexception;
+
+        $z6 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: boolean isClosing>;
+
+        if $z6 == 0 goto label15;
+
+        goto label21;
+
+     label15:
+        $r66 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r65 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z7 = virtualinvoke $r66.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r65);
+
+        if $z7 == 0 goto label16;
+
+        $r68 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r69 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r67 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r70 = virtualinvoke $r67.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r68.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r69, $r70, "run", "Exception in socket thread...", $r64);
+
+     label16:
+        goto label01;
+
+     label17:
+        $r52 := @caughtexception;
+
+        $r54 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r53 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z5 = virtualinvoke $r54.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r53);
+
+        if $z5 == 0 goto label18;
+
+        $r56 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r57 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r55 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r58 = virtualinvoke $r55.<java.lang.Class: java.lang.String getName()>();
+
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Socket Thread DEAD...");
+
+        $r61 = virtualinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r62 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r56.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r57, $r58, "run", $r63, $r52);
+
+     label18:
+        virtualinvoke r1.<com.sun.jmx.snmp.daemon.SnmpSocket: void close()>();
+
+        throw $r52;
+
+     label19:
+        $r45 := @caughtexception;
+
+        $r47 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r46 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z4 = virtualinvoke $r47.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r46);
+
+        if $z4 == 0 goto label20;
+
+        $r49 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r50 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r48 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r51 = virtualinvoke $r48.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r49.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r50, $r51, "run", "Got unexpected error", $r45);
+
+     label20:
+        specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpSocket: void handleJavaError(java.lang.Throwable)>($r45);
+
+        goto label01;
+
+     label21:
+        return;
+
+        catch java.io.IOException from label01 to label03 with label11;
+        catch java.io.IOException from label04 to label06 with label11;
+        catch java.io.IOException from label07 to label09 with label11;
+        catch java.lang.Exception from label01 to label03 with label14;
+        catch java.lang.Exception from label04 to label06 with label14;
+        catch java.lang.Exception from label07 to label09 with label14;
+        catch java.lang.ThreadDeath from label01 to label03 with label17;
+        catch java.lang.ThreadDeath from label04 to label06 with label17;
+        catch java.lang.ThreadDeath from label07 to label09 with label17;
+        catch java.lang.Error from label01 to label03 with label19;
+        catch java.lang.Error from label04 to label06 with label19;
+        catch java.lang.Error from label07 to label09 with label19;
+    }
+
+    protected synchronized void finalize()
+    {
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpSocket: void close()>();
+
+        return;
+    }
+
+    private synchronized void handleJavaError(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.util.logging.Level $r3, $r7, $r10, $r14;
+        java.net.DatagramSocket $r2, $r9;
+        java.lang.String $r8, $r15;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r4, $r6, $r11, $r13;
+        com.sun.jmx.snmp.daemon.SnmpSocket r1;
+        java.lang.Class $r5, $r12;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        $z0 = r0 instanceof java.lang.OutOfMemoryError;
+
+        if $z0 == 0 goto label2;
+
+        $r11 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r10 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = virtualinvoke $r11.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r10);
+
+        if $z2 == 0 goto label1;
+
+        $r13 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r12 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r15 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r13.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r14, $r15, "handleJavaError", "OutOfMemory error", r0);
+
+     label1:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        return;
+
+     label2:
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        if $r2 == null goto label3;
+
+        $r9 = r1.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket>;
+
+        virtualinvoke $r9.<java.net.DatagramSocket: void close()>();
+
+        r1.<com.sun.jmx.snmp.daemon.SnmpSocket: java.net.DatagramSocket _socket> = null;
+
+     label3:
+        $r4 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r4.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z1 == 0 goto label4;
+
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_ADAPTOR_LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r5 = class "Lcom/sun/jmx/snmp/daemon/SnmpSocket;";
+
+        $r8 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r6.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r7, $r8, "handleJavaError", "Global Internal error");
+
+     label4:
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        return;
+    }
+
+    private synchronized void handleDatagram(java.net.DatagramPacket)
+    {
+        com.sun.jmx.snmp.daemon.SnmpSocket r0;
+        com.sun.jmx.snmp.daemon.SnmpResponseHandler $r2;
+        java.net.DatagramPacket r1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpSocket;
+
+        r1 := @parameter0: java.net.DatagramPacket;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpSocket: com.sun.jmx.snmp.daemon.SnmpResponseHandler _dgramHdlr>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SnmpResponseHandler: void processDatagram(java.net.DatagramPacket)>(r1);
+
+        return;
+    }
+}

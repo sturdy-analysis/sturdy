@@ -1,0 +1,1327 @@
+public class javax.security.auth.SubjectDomainCombiner extends java.lang.Object implements java.security.DomainCombiner
+{
+    private javax.security.auth.Subject subject;
+    private javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs;
+    private java.util.Set principalSet;
+    private java.security.Principal[] principals;
+    private static final sun.security.util.Debug debug;
+    private static final boolean useJavaxPolicy;
+    private static final boolean allowCaching;
+    private static final sun.misc.JavaSecurityProtectionDomainAccess pdAccess;
+
+    public void <init>(javax.security.auth.Subject)
+    {
+        java.security.Principal[] $r6, $r8;
+        java.lang.Object[] $r7;
+        javax.security.auth.SubjectDomainCombiner r0;
+        java.util.Set $r3, $r4, $r5;
+        javax.security.auth.Subject r2;
+        javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap $r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: javax.security.auth.SubjectDomainCombiner;
+
+        r2 := @parameter0: javax.security.auth.Subject;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap;
+
+        specialinvoke $r1.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: void <init>(javax.security.auth.SubjectDomainCombiner$1)>(null);
+
+        r0.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs> = $r1;
+
+        r0.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject> = r2;
+
+        $z0 = virtualinvoke r2.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = virtualinvoke r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        r0.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet> = $r3;
+
+        $r5 = r0.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $r4 = r0.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $i0 = interfaceinvoke $r4.<java.util.Set: int size()>();
+
+        $r6 = newarray (java.security.Principal)[$i0];
+
+        $r7 = interfaceinvoke $r5.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (java.security.Principal[]) $r7;
+
+        r0.<javax.security.auth.SubjectDomainCombiner: java.security.Principal[] principals> = $r8;
+
+     label1:
+        return;
+    }
+
+    public javax.security.auth.Subject getSubject()
+    {
+        javax.security.auth.SubjectDomainCombiner r1;
+        java.lang.SecurityManager $r0;
+        javax.security.auth.Subject $r2;
+        javax.security.auth.AuthPermission $r3;
+
+        r1 := @this: javax.security.auth.SubjectDomainCombiner;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new javax.security.auth.AuthPermission;
+
+        specialinvoke $r3.<javax.security.auth.AuthPermission: void <init>(java.lang.String)>("getSubjectFromDomainCombiner");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        $r2 = r1.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        return $r2;
+    }
+
+    public java.security.ProtectionDomain[] combine(java.security.ProtectionDomain[], java.security.ProtectionDomain[])
+    {
+        javax.security.auth.SubjectDomainCombiner$1 $r59;
+        java.util.Set $r42, $r43, $r45, $r47, $r48;
+        sun.security.util.Debug $r0, $r3, $r7, $r8, $r9, $r11, $r19, $r21, $r53, $r54, $r57, $r60, $r68;
+        java.lang.StringBuilder $r10, $r12, $r13, $r14, $r17, $r20, $r22, $r23, $r24, $r27;
+        java.lang.ClassLoader $r35;
+        java.lang.Throwable $r61, $r62;
+        java.lang.Object[] $r50;
+        sun.misc.JavaSecurityProtectionDomainAccess $r31;
+        javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap $r5, $r29, $r37, $r52;
+        java.lang.String $r16, $r18, $r26, $r28;
+        javax.security.auth.SubjectDomainCombiner r4;
+        java.security.ProtectionDomain $r15, $r25, $r32, $r38, r66, r67;
+        java.security.CodeSource $r33, $r39;
+        boolean $z0, $z1, $z2, $z3, z4;
+        java.security.Principal[] $r36, $r49, $r51;
+        java.util.HashSet $r46;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, i10, i11, i12;
+        java.security.PermissionCollection $r34, $r40;
+        javax.security.auth.Subject $r6, $r41, $r44, $r58, r64;
+        java.security.ProtectionDomain[] r1, $r2, $r55, $r56, r63, r65;
+        java.lang.Object $r30;
+
+        r4 := @this: javax.security.auth.SubjectDomainCombiner;
+
+        r63 := @parameter0: java.security.ProtectionDomain[];
+
+        r1 := @parameter1: java.security.ProtectionDomain[];
+
+        $r0 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label03;
+
+        $r58 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        if $r58 != null goto label01;
+
+        $r60 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r60.<sun.security.util.Debug: void println(java.lang.String)>("null subject");
+
+        goto label02;
+
+     label01:
+        r64 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r59 = new javax.security.auth.SubjectDomainCombiner$1;
+
+        specialinvoke $r59.<javax.security.auth.SubjectDomainCombiner$1: void <init>(javax.security.auth.SubjectDomainCombiner,javax.security.auth.Subject)>(r4, r64);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r59);
+
+     label02:
+        staticinvoke <javax.security.auth.SubjectDomainCombiner: void printInputDomains(java.security.ProtectionDomain[],java.security.ProtectionDomain[])>(r63, r1);
+
+     label03:
+        if r63 == null goto label04;
+
+        $i0 = lengthof r63;
+
+        if $i0 != 0 goto label05;
+
+     label04:
+        return r1;
+
+     label05:
+        $r2 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.security.ProtectionDomain[] optimize(java.security.ProtectionDomain[])>(r63);
+
+        $r3 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label06;
+
+        $r57 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r57.<sun.security.util.Debug: void println(java.lang.String)>("after optimize");
+
+        staticinvoke <javax.security.auth.SubjectDomainCombiner: void printInputDomains(java.security.ProtectionDomain[],java.security.ProtectionDomain[])>($r2, r1);
+
+     label06:
+        if $r2 != null goto label07;
+
+        if r1 != null goto label07;
+
+        return null;
+
+     label07:
+        $z0 = <javax.security.auth.SubjectDomainCombiner: boolean useJavaxPolicy>;
+
+        if $z0 == 0 goto label08;
+
+        $r56 = specialinvoke r4.<javax.security.auth.SubjectDomainCombiner: java.security.ProtectionDomain[] combineJavaxPolicy(java.security.ProtectionDomain[],java.security.ProtectionDomain[])>($r2, r1);
+
+        return $r56;
+
+     label08:
+        if $r2 != null goto label09;
+
+        $i7 = 0;
+
+        goto label10;
+
+     label09:
+        $i7 = lengthof $r2;
+
+     label10:
+        i8 = $i7;
+
+        if r1 != null goto label11;
+
+        $i9 = 0;
+
+        goto label12;
+
+     label11:
+        $i9 = lengthof r1;
+
+     label12:
+        i1 = $i9;
+
+        $i2 = i8 + $i9;
+
+        $r55 = newarray (java.security.ProtectionDomain)[$i2];
+
+        r65 = $r55;
+
+        z4 = 1;
+
+        $r5 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        entermonitor $r5;
+
+     label13:
+        $r6 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $z1 = virtualinvoke $r6.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z1 != 0 goto label19;
+
+        $r41 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r42 = virtualinvoke $r41.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r43 = r4.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $z3 = interfaceinvoke $r42.<java.util.Set: boolean equals(java.lang.Object)>($r43);
+
+        if $z3 != 0 goto label19;
+
+        $r44 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r45 = virtualinvoke $r44.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        entermonitor $r45;
+
+     label14:
+        $r46 = new java.util.HashSet;
+
+        specialinvoke $r46.<java.util.HashSet: void <init>(java.util.Collection)>($r45);
+
+        r4.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet> = $r46;
+
+        exitmonitor $r45;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r62 := @caughtexception;
+
+        exitmonitor $r45;
+
+     label17:
+        throw $r62;
+
+     label18:
+        $r48 = r4.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $r47 = r4.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $i6 = interfaceinvoke $r47.<java.util.Set: int size()>();
+
+        $r49 = newarray (java.security.Principal)[$i6];
+
+        $r50 = interfaceinvoke $r48.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r49);
+
+        $r51 = (java.security.Principal[]) $r50;
+
+        r4.<javax.security.auth.SubjectDomainCombiner: java.security.Principal[] principals> = $r51;
+
+        $r52 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        virtualinvoke $r52.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: void clear()>();
+
+        $r53 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r53 == null goto label19;
+
+        $r54 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r54.<sun.security.util.Debug: void println(java.lang.String)>("Subject mutated - clearing cache");
+
+     label19:
+        i10 = 0;
+
+     label20:
+        if i10 >= i8 goto label25;
+
+        r66 = $r2[i10];
+
+        $r29 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        $r30 = virtualinvoke $r29.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: java.lang.Object getValue(java.lang.Object)>(r66);
+
+        r67 = (java.security.ProtectionDomain) $r30;
+
+        if r67 != null goto label23;
+
+        $r31 = <javax.security.auth.SubjectDomainCombiner: sun.misc.JavaSecurityProtectionDomainAccess pdAccess>;
+
+        $z2 = interfaceinvoke $r31.<sun.misc.JavaSecurityProtectionDomainAccess: boolean getStaticPermissionsField(java.security.ProtectionDomain)>(r66);
+
+        if $z2 == 0 goto label21;
+
+        $r38 = new java.security.ProtectionDomain;
+
+        $r39 = virtualinvoke r66.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r40 = virtualinvoke r66.<java.security.ProtectionDomain: java.security.PermissionCollection getPermissions()>();
+
+        specialinvoke $r38.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r39, $r40);
+
+        r67 = $r38;
+
+        goto label22;
+
+     label21:
+        $r32 = new java.security.ProtectionDomain;
+
+        $r33 = virtualinvoke r66.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r34 = virtualinvoke r66.<java.security.ProtectionDomain: java.security.PermissionCollection getPermissions()>();
+
+        $r35 = virtualinvoke r66.<java.security.ProtectionDomain: java.lang.ClassLoader getClassLoader()>();
+
+        $r36 = r4.<javax.security.auth.SubjectDomainCombiner: java.security.Principal[] principals>;
+
+        specialinvoke $r32.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection,java.lang.ClassLoader,java.security.Principal[])>($r33, $r34, $r35, $r36);
+
+        r67 = $r32;
+
+     label22:
+        $r37 = r4.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        virtualinvoke $r37.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: java.lang.Object putValue(java.lang.Object,java.lang.Object)>(r66, r67);
+
+        goto label24;
+
+     label23:
+        z4 = 0;
+
+     label24:
+        $r55[i10] = r67;
+
+        i10 = i10 + 1;
+
+        goto label20;
+
+     label25:
+        exitmonitor $r5;
+
+     label26:
+        goto label29;
+
+     label27:
+        $r61 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label28:
+        throw $r61;
+
+     label29:
+        $r7 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label31;
+
+        $r19 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r19.<sun.security.util.Debug: void println(java.lang.String)>("updated current: ");
+
+        i11 = 0;
+
+     label30:
+        if i11 >= i8 goto label31;
+
+        $r21 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\tupdated[");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i11);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] = ");
+
+        $r25 = $r55[i11];
+
+        $r26 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.lang.String printDomain(java.security.ProtectionDomain)>($r25);
+
+        $r27 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r28);
+
+        i11 = i11 + 1;
+
+        goto label30;
+
+     label31:
+        if i1 <= 0 goto label32;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r55, i8, i1);
+
+        if z4 != 0 goto label32;
+
+        r65 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.security.ProtectionDomain[] optimize(java.security.ProtectionDomain[])>($r55);
+
+     label32:
+        $r68 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r68 == null goto label36;
+
+        if r65 == null goto label33;
+
+        $i4 = lengthof r65;
+
+        if $i4 != 0 goto label34;
+
+     label33:
+        $r8 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>("returning null");
+
+        goto label36;
+
+     label34:
+        $r9 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>("combinedDomains: ");
+
+        i12 = 0;
+
+     label35:
+        $i5 = lengthof r65;
+
+        if i12 >= $i5 goto label36;
+
+        $r11 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("newDomain ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r15 = r65[i12];
+
+        $r16 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.lang.String printDomain(java.security.ProtectionDomain)>($r15);
+
+        $r17 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r18);
+
+        i12 = i12 + 1;
+
+        goto label35;
+
+     label36:
+        if r65 == null goto label37;
+
+        $i3 = lengthof r65;
+
+        if $i3 != 0 goto label38;
+
+     label37:
+        return null;
+
+     label38:
+        return r65;
+
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label13 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+    }
+
+    private java.security.ProtectionDomain[] combineJavaxPolicy(java.security.ProtectionDomain[], java.security.ProtectionDomain[])
+    {
+        java.util.Enumeration $r35, $r49;
+        javax.security.auth.SubjectDomainCombiner$3 $r33;
+        javax.security.auth.SubjectDomainCombiner$2 $r71;
+        java.util.Set $r57, $r58, $r60, $r62, $r63;
+        sun.security.util.Debug $r5, $r6, $r7, $r8, $r10, $r18, $r20, $r42, $r44, $r68, $r69;
+        java.security.Permission r41, r78;
+        java.lang.StringBuilder $r9, $r11, $r12, $r13, $r16, $r19, $r21, $r22, $r23, $r25, $r43, $r45, $r46, $r47;
+        java.lang.ClassLoader $r37;
+        java.lang.Throwable $r72, $r73, $r74, $r75;
+        java.lang.Object[] $r65;
+        sun.misc.JavaSecurityProtectionDomainAccess $r29;
+        javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap $r3, $r27, $r39, $r67;
+        java.lang.String $r15, $r17, $r26, $r48;
+        javax.security.auth.SubjectDomainCombiner r2;
+        java.security.ProtectionDomain $r14, $r24, $r36, $r53, r76, r77;
+        java.security.CodeSource $r32, $r54;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.security.Principal[] $r38, $r64, $r66;
+        java.util.HashSet $r61;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, i11;
+        java.security.Permissions $r30;
+        java.security.PermissionCollection $r31, $r51, $r55;
+        javax.security.auth.Subject $r4, $r50, $r56, $r59;
+        java.security.ProtectionDomain[] r0, r1, $r70;
+        java.lang.Object $r28, $r34, $r40, $r52;
+
+        r2 := @this: javax.security.auth.SubjectDomainCombiner;
+
+        r0 := @parameter0: java.security.ProtectionDomain[];
+
+        r1 := @parameter1: java.security.ProtectionDomain[];
+
+        $z0 = <javax.security.auth.SubjectDomainCombiner: boolean allowCaching>;
+
+        if $z0 != 0 goto label01;
+
+        $r71 = new javax.security.auth.SubjectDomainCombiner$2;
+
+        specialinvoke $r71.<javax.security.auth.SubjectDomainCombiner$2: void <init>(javax.security.auth.SubjectDomainCombiner)>(r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r71);
+
+     label01:
+        if r0 != null goto label02;
+
+        $i7 = 0;
+
+        goto label03;
+
+     label02:
+        $i7 = lengthof r0;
+
+     label03:
+        i0 = $i7;
+
+        if r1 != null goto label04;
+
+        $i8 = 0;
+
+        goto label05;
+
+     label04:
+        $i8 = lengthof r1;
+
+     label05:
+        i1 = $i8;
+
+        $i2 = i0 + $i8;
+
+        $r70 = newarray (java.security.ProtectionDomain)[$i2];
+
+        $r3 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        entermonitor $r3;
+
+     label06:
+        $r4 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $z1 = virtualinvoke $r4.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z1 != 0 goto label12;
+
+        $r56 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r57 = virtualinvoke $r56.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r58 = r2.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $z6 = interfaceinvoke $r57.<java.util.Set: boolean equals(java.lang.Object)>($r58);
+
+        if $z6 != 0 goto label12;
+
+        $r59 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r60 = virtualinvoke $r59.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        entermonitor $r60;
+
+     label07:
+        $r61 = new java.util.HashSet;
+
+        specialinvoke $r61.<java.util.HashSet: void <init>(java.util.Collection)>($r60);
+
+        r2.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet> = $r61;
+
+        exitmonitor $r60;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r75 := @caughtexception;
+
+        exitmonitor $r60;
+
+     label10:
+        throw $r75;
+
+     label11:
+        $r63 = r2.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $r62 = r2.<javax.security.auth.SubjectDomainCombiner: java.util.Set principalSet>;
+
+        $i6 = interfaceinvoke $r62.<java.util.Set: int size()>();
+
+        $r64 = newarray (java.security.Principal)[$i6];
+
+        $r65 = interfaceinvoke $r63.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r64);
+
+        $r66 = (java.security.Principal[]) $r65;
+
+        r2.<javax.security.auth.SubjectDomainCombiner: java.security.Principal[] principals> = $r66;
+
+        $r67 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        virtualinvoke $r67.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: void clear()>();
+
+        $r68 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r68 == null goto label12;
+
+        $r69 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r69.<sun.security.util.Debug: void println(java.lang.String)>("Subject mutated - clearing cache");
+
+     label12:
+        i9 = 0;
+
+     label13:
+        if i9 >= i0 goto label32;
+
+        r76 = r0[i9];
+
+        $r27 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        $r28 = virtualinvoke $r27.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: java.lang.Object getValue(java.lang.Object)>(r76);
+
+        r77 = (java.security.ProtectionDomain) $r28;
+
+        if r77 != null goto label31;
+
+        $r29 = <javax.security.auth.SubjectDomainCombiner: sun.misc.JavaSecurityProtectionDomainAccess pdAccess>;
+
+        $z2 = interfaceinvoke $r29.<sun.misc.JavaSecurityProtectionDomainAccess: boolean getStaticPermissionsField(java.security.ProtectionDomain)>(r76);
+
+        if $z2 == 0 goto label14;
+
+        $r53 = new java.security.ProtectionDomain;
+
+        $r54 = virtualinvoke r76.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r55 = virtualinvoke r76.<java.security.ProtectionDomain: java.security.PermissionCollection getPermissions()>();
+
+        specialinvoke $r53.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r54, $r55);
+
+        r77 = $r53;
+
+        goto label30;
+
+     label14:
+        $r30 = new java.security.Permissions;
+
+        specialinvoke $r30.<java.security.Permissions: void <init>()>();
+
+        $r31 = virtualinvoke r76.<java.security.ProtectionDomain: java.security.PermissionCollection getPermissions()>();
+
+        if $r31 == null goto label21;
+
+        entermonitor $r31;
+
+     label15:
+        $r49 = virtualinvoke $r31.<java.security.PermissionCollection: java.util.Enumeration elements()>();
+
+     label16:
+        $z5 = interfaceinvoke $r49.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z5 == 0 goto label17;
+
+        $r52 = interfaceinvoke $r49.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r78 = (java.security.Permission) $r52;
+
+        virtualinvoke $r30.<java.security.Permissions: void add(java.security.Permission)>(r78);
+
+        goto label16;
+
+     label17:
+        exitmonitor $r31;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r74 := @caughtexception;
+
+        exitmonitor $r31;
+
+     label20:
+        throw $r74;
+
+     label21:
+        $r32 = virtualinvoke r76.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r50 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.Subject subject>;
+
+        $r33 = new javax.security.auth.SubjectDomainCombiner$3;
+
+        specialinvoke $r33.<javax.security.auth.SubjectDomainCombiner$3: void <init>(javax.security.auth.SubjectDomainCombiner,javax.security.auth.Subject,java.security.CodeSource)>(r2, $r50, $r32);
+
+        $r34 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r33);
+
+        $r51 = (java.security.PermissionCollection) $r34;
+
+        entermonitor $r51;
+
+     label22:
+        $r35 = virtualinvoke $r51.<java.security.PermissionCollection: java.util.Enumeration elements()>();
+
+     label23:
+        $z7 = interfaceinvoke $r35.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z7 == 0 goto label25;
+
+        $r40 = interfaceinvoke $r35.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r41 = (java.security.Permission) $r40;
+
+        $z4 = virtualinvoke $r30.<java.security.Permissions: boolean implies(java.security.Permission)>(r41);
+
+        if $z4 != 0 goto label24;
+
+        virtualinvoke $r30.<java.security.Permissions: void add(java.security.Permission)>(r41);
+
+        $r42 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r42 == null goto label24;
+
+        $r44 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Adding perm ");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r41);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r44.<sun.security.util.Debug: void println(java.lang.String)>($r48);
+
+     label24:
+        goto label23;
+
+     label25:
+        exitmonitor $r51;
+
+     label26:
+        goto label29;
+
+     label27:
+        $r73 := @caughtexception;
+
+        exitmonitor $r51;
+
+     label28:
+        throw $r73;
+
+     label29:
+        $r36 = new java.security.ProtectionDomain;
+
+        $r37 = virtualinvoke r76.<java.security.ProtectionDomain: java.lang.ClassLoader getClassLoader()>();
+
+        $r38 = r2.<javax.security.auth.SubjectDomainCombiner: java.security.Principal[] principals>;
+
+        specialinvoke $r36.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection,java.lang.ClassLoader,java.security.Principal[])>($r32, $r30, $r37, $r38);
+
+        r77 = $r36;
+
+     label30:
+        $z3 = <javax.security.auth.SubjectDomainCombiner: boolean allowCaching>;
+
+        if $z3 == 0 goto label31;
+
+        $r39 = r2.<javax.security.auth.SubjectDomainCombiner: javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap cachedPDs>;
+
+        virtualinvoke $r39.<javax.security.auth.SubjectDomainCombiner$WeakKeyValueMap: java.lang.Object putValue(java.lang.Object,java.lang.Object)>(r76, r77);
+
+     label31:
+        $r70[i9] = r77;
+
+        i9 = i9 + 1;
+
+        goto label13;
+
+     label32:
+        exitmonitor $r3;
+
+     label33:
+        goto label36;
+
+     label34:
+        $r72 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label35:
+        throw $r72;
+
+     label36:
+        $r5 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r5 == null goto label38;
+
+        $r18 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r18.<sun.security.util.Debug: void println(java.lang.String)>("updated current: ");
+
+        i10 = 0;
+
+     label37:
+        if i10 >= i0 goto label38;
+
+        $r20 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\tupdated[");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i10);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] = ");
+
+        $r24 = $r70[i10];
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<sun.security.util.Debug: void println(java.lang.String)>($r26);
+
+        i10 = i10 + 1;
+
+        goto label37;
+
+     label38:
+        if i1 <= 0 goto label39;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r70, i0, i1);
+
+     label39:
+        $r6 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label43;
+
+        if $r70 == null goto label40;
+
+        $i4 = lengthof $r70;
+
+        if $i4 != 0 goto label41;
+
+     label40:
+        $r7 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r7.<sun.security.util.Debug: void println(java.lang.String)>("returning null");
+
+        goto label43;
+
+     label41:
+        $r8 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>("combinedDomains: ");
+
+        i11 = 0;
+
+     label42:
+        $i5 = lengthof $r70;
+
+        if i11 >= $i5 goto label43;
+
+        $r10 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("newDomain ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r14 = $r70[i11];
+
+        $r15 = virtualinvoke $r14.<java.security.ProtectionDomain: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+        i11 = i11 + 1;
+
+        goto label42;
+
+     label43:
+        if $r70 == null goto label44;
+
+        $i3 = lengthof $r70;
+
+        if $i3 != 0 goto label45;
+
+     label44:
+        return null;
+
+     label45:
+        return $r70;
+
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label15 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+        catch java.lang.Throwable from label22 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+        catch java.lang.Throwable from label06 to label33 with label34;
+        catch java.lang.Throwable from label34 to label35 with label34;
+    }
+
+    private static java.security.ProtectionDomain[] optimize(java.security.ProtectionDomain[])
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9;
+        boolean z0, $z1;
+        java.security.ProtectionDomain[] r0, r3, r4, $r5;
+        java.security.ProtectionDomain $r1, $r2;
+
+        r0 := @parameter0: java.security.ProtectionDomain[];
+
+        if r0 == null goto label01;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        return null;
+
+     label02:
+        $i1 = lengthof r0;
+
+        r3 = newarray (java.security.ProtectionDomain)[$i1];
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label03:
+        $i2 = lengthof r0;
+
+        if i8 >= $i2 goto label09;
+
+        $r1 = r0[i8];
+
+        if $r1 == null goto label08;
+
+        z0 = 0;
+
+        i9 = 0;
+
+     label04:
+        if i9 >= i7 goto label07;
+
+        if z0 != 0 goto label07;
+
+        $r2 = r3[i9];
+
+        if $r2 != $r1 goto label05;
+
+        $z1 = 1;
+
+        goto label06;
+
+     label05:
+        $z1 = 0;
+
+     label06:
+        z0 = $z1;
+
+        i9 = i9 + 1;
+
+        goto label04;
+
+     label07:
+        if z0 != 0 goto label08;
+
+        $i6 = i7;
+
+        i7 = i7 + 1;
+
+        r3[$i6] = $r1;
+
+     label08:
+        i8 = i8 + 1;
+
+        goto label03;
+
+     label09:
+        if i7 <= 0 goto label10;
+
+        $i4 = lengthof r0;
+
+        if i7 >= $i4 goto label10;
+
+        r4 = newarray (java.security.ProtectionDomain)[i7];
+
+        $i5 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, r4, 0, $i5);
+
+        r3 = r4;
+
+     label10:
+        if i7 == 0 goto label11;
+
+        $i3 = lengthof r3;
+
+        if $i3 != 0 goto label12;
+
+     label11:
+        $r5 = null;
+
+        goto label13;
+
+     label12:
+        $r5 = r3;
+
+     label13:
+        return $r5;
+    }
+
+    private static boolean cachePolicy()
+    {
+        java.lang.Object $r1;
+        java.lang.String r2;
+        javax.security.auth.SubjectDomainCombiner$4 $r0;
+        boolean $z0;
+
+        $r0 = new javax.security.auth.SubjectDomainCombiner$4;
+
+        specialinvoke $r0.<javax.security.auth.SubjectDomainCombiner$4: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label1;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>(r2);
+
+        return $z0;
+
+     label1:
+        return 1;
+    }
+
+    private static void printInputDomains(java.security.ProtectionDomain[], java.security.ProtectionDomain[])
+    {
+        sun.security.util.Debug $r1, $r3, $r4, $r7, $r16, $r23, $r32;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10, $r13, $r15, $r17, $r18, $r19, $r22, $r24, $r25, $r26, $r29, $r31, $r33, $r34, $r35;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String $r12, $r14, $r20, $r28, $r30, $r36;
+        java.security.ProtectionDomain[] r0, r2;
+        java.security.ProtectionDomain $r5, $r11, $r21, $r27;
+
+        r0 := @parameter0: java.security.ProtectionDomain[];
+
+        r2 := @parameter1: java.security.ProtectionDomain[];
+
+        if r0 == null goto label01;
+
+        $i2 = lengthof r0;
+
+        if $i2 != 0 goto label02;
+
+     label01:
+        $r1 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r1.<sun.security.util.Debug: void println(java.lang.String)>("currentDomains null or 0 length");
+
+        goto label06;
+
+     label02:
+        i4 = 0;
+
+     label03:
+        if r0 == null goto label06;
+
+        $i3 = lengthof r0;
+
+        if i4 >= $i3 goto label06;
+
+        $r21 = r0[i4];
+
+        if $r21 != null goto label04;
+
+        $r32 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("currentDomain ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": SystemDomain");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<sun.security.util.Debug: void println(java.lang.String)>($r36);
+
+        goto label05;
+
+     label04:
+        $r23 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("currentDomain ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r27 = r0[i4];
+
+        $r28 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.lang.String printDomain(java.security.ProtectionDomain)>($r27);
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<sun.security.util.Debug: void println(java.lang.String)>($r30);
+
+     label05:
+        i4 = i4 + 1;
+
+        goto label03;
+
+     label06:
+        if r2 == null goto label07;
+
+        $i0 = lengthof r2;
+
+        if $i0 != 0 goto label08;
+
+     label07:
+        $r3 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r3.<sun.security.util.Debug: void println(java.lang.String)>("assignedDomains null or 0 length");
+
+        goto label12;
+
+     label08:
+        $r4 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>("assignedDomains = ");
+
+        i5 = 0;
+
+     label09:
+        if r2 == null goto label12;
+
+        $i1 = lengthof r2;
+
+        if i5 >= $i1 goto label12;
+
+        $r5 = r2[i5];
+
+        if $r5 != null goto label10;
+
+        $r16 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("assignedDomain ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": SystemDomain");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r20);
+
+        goto label11;
+
+     label10:
+        $r7 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("assignedDomain ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r11 = r2[i5];
+
+        $r12 = staticinvoke <javax.security.auth.SubjectDomainCombiner: java.lang.String printDomain(java.security.ProtectionDomain)>($r11);
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label11:
+        i5 = i5 + 1;
+
+        goto label09;
+
+     label12:
+        return;
+    }
+
+    private static java.lang.String printDomain(java.security.ProtectionDomain)
+    {
+        java.security.ProtectionDomain r0;
+        javax.security.auth.SubjectDomainCombiner$5 $r1;
+        java.lang.Object $r2;
+        java.lang.String $r3;
+
+        r0 := @parameter0: java.security.ProtectionDomain;
+
+        if r0 != null goto label1;
+
+        return "null";
+
+     label1:
+        $r1 = new javax.security.auth.SubjectDomainCombiner$5;
+
+        specialinvoke $r1.<javax.security.auth.SubjectDomainCombiner$5: void <init>(java.security.ProtectionDomain)>(r0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        return $r3;
+    }
+
+    static sun.security.util.Debug access$100()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.JavaSecurityProtectionDomainAccess $r2;
+        sun.security.util.Debug $r0, $r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("combiner", "\t[SubjectDomainCombiner]");
+
+        <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug> = $r0;
+
+        $r1 = <javax.security.auth.SubjectDomainCombiner: sun.security.util.Debug debug>;
+
+        $z0 = staticinvoke <javax.security.auth.Policy: boolean isCustomPolicySet(sun.security.util.Debug)>($r1);
+
+        <javax.security.auth.SubjectDomainCombiner: boolean useJavaxPolicy> = $z0;
+
+        $z1 = <javax.security.auth.SubjectDomainCombiner: boolean useJavaxPolicy>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = staticinvoke <javax.security.auth.SubjectDomainCombiner: boolean cachePolicy()>();
+
+        if $z2 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        <javax.security.auth.SubjectDomainCombiner: boolean allowCaching> = $z3;
+
+        $r2 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecurityProtectionDomainAccess getJavaSecurityProtectionDomainAccess()>();
+
+        <javax.security.auth.SubjectDomainCombiner: sun.misc.JavaSecurityProtectionDomainAccess pdAccess> = $r2;
+
+        return;
+    }
+}

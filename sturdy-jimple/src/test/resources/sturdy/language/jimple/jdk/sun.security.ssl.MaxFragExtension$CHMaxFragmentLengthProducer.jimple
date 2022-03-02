@@ -1,0 +1,174 @@
+final class sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer r0;
+
+        r0 := @this: sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r14;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r20;
+        byte $b1, $b2;
+        sun.security.ssl.MaxFragExtension$MaxFragLenSpec $r22;
+        java.util.Map $r12;
+        sun.security.ssl.SSLConfiguration $r3, $r4, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.StringBuilder $r6, $r7, $r8, $r23;
+        sun.security.ssl.MaxFragExtension$MaxFragLenEnum $r21;
+        java.lang.Object[] $r10, $r18;
+        sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer r19;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, i3, i4, $i6, $i8, $i10;
+        java.lang.String $r9;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r13;
+        sun.security.ssl.SSLSessionImpl $r16, $r17;
+
+        r19 := @this: sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r20 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_MAX_FRAGMENT_LENGTH>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label1;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label1;
+
+        $r18 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unavailable max_fragment_length extension", $r18);
+
+     label1:
+        return null;
+
+     label2:
+        $z1 = r1.<sun.security.ssl.ClientHandshakeContext: boolean isResumption>;
+
+        if $z1 == 0 goto label3;
+
+        $r16 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        if $r16 == null goto label3;
+
+        $r17 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        i3 = virtualinvoke $r17.<sun.security.ssl.SSLSessionImpl: int getNegotiatedMaxFragSize()>();
+
+        goto label5;
+
+     label3:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $i0 = $r4.<sun.security.ssl.SSLConfiguration: int maximumPacketSize>;
+
+        if $i0 == 0 goto label4;
+
+        $r15 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        i4 = $r15.<sun.security.ssl.SSLConfiguration: int maximumPacketSize>;
+
+        $i6 = (int) -325;
+
+        i3 = i4 + $i6;
+
+        goto label5;
+
+     label4:
+        $i8 = (int) -1;
+
+        i3 = $i8;
+
+     label5:
+        $r21 = staticinvoke <sun.security.ssl.MaxFragExtension$MaxFragLenEnum: sun.security.ssl.MaxFragExtension$MaxFragLenEnum valueOf(int)>(i3);
+
+        if $r21 == null goto label6;
+
+        $r12 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r13 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_MAX_FRAGMENT_LENGTH>;
+
+        $r22 = new sun.security.ssl.MaxFragExtension$MaxFragLenSpec;
+
+        $b1 = $r21.<sun.security.ssl.MaxFragExtension$MaxFragLenEnum: byte id>;
+
+        specialinvoke $r22.<sun.security.ssl.MaxFragExtension$MaxFragLenSpec: void <init>(byte,sun.security.ssl.MaxFragExtension$1)>($b1, null);
+
+        interfaceinvoke $r12.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r22);
+
+        $r14 = newarray (byte)[1];
+
+        $b2 = $r21.<sun.security.ssl.MaxFragExtension$MaxFragLenEnum: byte id>;
+
+        $r14[0] = $b2;
+
+        return $r14;
+
+     label6:
+        $i10 = (int) -1;
+
+        r1.<sun.security.ssl.ClientHandshakeContext: int maxFragmentLength> = $i10;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label7;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z3 == 0 goto label7;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No available max_fragment_length extension can be used for fragment size of ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r9, $r10);
+
+     label7:
+        return null;
+    }
+
+    void <init>(sun.security.ssl.MaxFragExtension$1)
+    {
+        sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer r0;
+        sun.security.ssl.MaxFragExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer;
+
+        r1 := @parameter0: sun.security.ssl.MaxFragExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.MaxFragExtension$CHMaxFragmentLengthProducer: void <init>()>();
+
+        return;
+    }
+}

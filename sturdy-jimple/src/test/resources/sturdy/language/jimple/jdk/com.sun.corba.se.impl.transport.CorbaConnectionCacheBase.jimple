@@ -1,0 +1,789 @@
+public abstract class com.sun.corba.se.impl.transport.CorbaConnectionCacheBase extends java.lang.Object implements com.sun.corba.se.pept.transport.ConnectionCache, com.sun.corba.se.spi.transport.CorbaConnectionCache
+{
+    protected com.sun.corba.se.spi.orb.ORB orb;
+    protected long timestamp;
+    protected java.lang.String cacheType;
+    protected java.lang.String monitoringName;
+    protected com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+
+    protected void <init>(com.sun.corba.se.spi.orb.ORB, java.lang.String, java.lang.String)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.String r2, r3;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long timestamp> = 0L;
+
+        r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String cacheType> = r2;
+
+        r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String monitoringName> = r3;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.transport");
+
+        r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r4;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void registerWithMonitoring()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprintCreation()>();
+
+        return;
+    }
+
+    public java.lang.String getCacheType()
+    {
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String cacheType>;
+
+        return $r1;
+    }
+
+    public synchronized void stampTime(com.sun.corba.se.pept.transport.Connection)
+    {
+        com.sun.corba.se.pept.transport.Connection r0;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r1;
+        long $l0, $l1;
+
+        r1 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        r0 := @parameter0: com.sun.corba.se.pept.transport.Connection;
+
+        $l0 = r1.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long timestamp>;
+
+        $l1 = $l0 + 1L;
+
+        r1.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long timestamp> = $l1;
+
+        interfaceinvoke r0.<com.sun.corba.se.pept.transport.Connection: void setTimeStamp(long)>($l0);
+
+        return;
+    }
+
+    public long numberOfConnections()
+    {
+        java.lang.Throwable $r3;
+        java.util.Collection $r2;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        int $i0;
+        java.lang.Object $r1;
+        long $l1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.Object backingStore()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.util.Collection values()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.Collection: int size()>();
+
+        $l1 = (long) $i0;
+
+        exitmonitor $r1;
+
+     label2:
+        return $l1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void close()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r3;
+        java.util.Collection $r2;
+        com.sun.corba.se.spi.transport.CorbaConnection $r5;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.Object $r1, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.Object backingStore()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.sun.corba.se.spi.transport.CorbaConnection) $r4;
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.transport.CorbaConnection: void closeConnectionResources()>();
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public long numberOfIdleConnections()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r3;
+        java.util.Collection $r2;
+        long l0;
+        com.sun.corba.se.pept.transport.Connection $r5;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.Object $r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        l0 = 0L;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.Object backingStore()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.sun.corba.se.pept.transport.Connection) $r4;
+
+        $z0 = interfaceinvoke $r5.<com.sun.corba.se.pept.transport.Connection: boolean isBusy()>();
+
+        if $z0 != 0 goto label2;
+
+        l0 = l0 + 1L;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+     label7:
+        return l0;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public long numberOfBusyConnections()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r3;
+        java.util.Collection $r2;
+        long l0;
+        com.sun.corba.se.pept.transport.Connection $r5;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.Object $r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        l0 = 0L;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.Object backingStore()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.sun.corba.se.pept.transport.Connection) $r4;
+
+        $z0 = interfaceinvoke $r5.<com.sun.corba.se.pept.transport.Connection: boolean isBusy()>();
+
+        if $z0 == 0 goto label2;
+
+        l0 = l0 + 1L;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+     label7:
+        return l0;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public synchronized boolean reclaim()
+    {
+        byte $b3, $b7, $b14;
+        java.lang.Exception $r62;
+        java.lang.StringBuilder $r6, $r7, $r17, $r18, $r21, $r22, $r23, $r29, $r30, $r34, $r35, $r39, $r40, $r41, $r44, $r45, $r48, $r49, $r52, $r53, $r58, $r59, $r65, $r66, $r67, $r68, $r69, $r70, $r71;
+        java.lang.Throwable $r55, $r61;
+        long $l0, $l2, $l4, $l6, $l9, $l10, $l11, $l12, $l13, $l18, l20;
+        java.lang.String $r8, $r19, $r24, $r31, $r36, $r54, $r60;
+        com.sun.corba.se.spi.orb.ORB $r1, $r2, $r4, $r9, $r12, $r14, $r15, $r27, $r32, $r42, $r46, $r50, $r56;
+        com.sun.corba.se.pept.transport.Connection r63, r64;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.Collection $r25;
+        int $i1, $i5, $i8, $i15, $i16, $i17, i19, $i21, $i22, $i23;
+        java.util.Iterator $r26;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.Object $r11, $r37;
+        com.sun.corba.se.spi.orb.ORBData $r3, $r10, $r13, $r43, $r47, $r51;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+     label01:
+        $l0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim->: ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $r42 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r43 = virtualinvoke $r42.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i15 = interfaceinvoke $r43.<com.sun.corba.se.spi.orb.ORBData: int getHighWaterMark()>();
+
+        $r44 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r46 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r47 = virtualinvoke $r46.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i16 = interfaceinvoke $r47.<com.sun.corba.se.spi.orb.ORBData: int getLowWaterMark()>();
+
+        $r48 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i16);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r50 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r51 = virtualinvoke $r50.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i17 = interfaceinvoke $r51.<com.sun.corba.se.spi.orb.ORBData: int getNumberToReclaim()>();
+
+        $r52 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r54);
+
+     label02:
+        $r2 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i1 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: int getHighWaterMark()>();
+
+        $l2 = (long) $i1;
+
+        $b3 = $l0 cmp $l2;
+
+        $i21 = (int) $b3;
+
+        if $i21 <= 0 goto label03;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i5 = interfaceinvoke $r10.<com.sun.corba.se.spi.orb.ORBData: int getLowWaterMark()>();
+
+        $l6 = (long) $i5;
+
+        $b7 = $l0 cmp $l6;
+
+        $i22 = (int) $b7;
+
+        if $i22 >= 0 goto label05;
+
+     label03:
+        $r4 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r4.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label04;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim<-: ");
+
+        $l4 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l4);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r8);
+
+     label04:
+        return 0;
+
+     label05:
+        $r11 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.Object backingStore()>();
+
+        entermonitor $r11;
+
+     label06:
+        i19 = 0;
+
+     label07:
+        $r12 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i8 = interfaceinvoke $r13.<com.sun.corba.se.spi.orb.ORBData: int getNumberToReclaim()>();
+
+        if i19 >= $i8 goto label18;
+
+        r63 = null;
+
+        l20 = 9223372036854775807L;
+
+        $r25 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.util.Collection values()>();
+
+        $r26 = interfaceinvoke $r25.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label08:
+        $z4 = interfaceinvoke $r26.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label10;
+
+        $r37 = interfaceinvoke $r26.<java.util.Iterator: java.lang.Object next()>();
+
+        r64 = (com.sun.corba.se.pept.transport.Connection) $r37;
+
+        $z7 = interfaceinvoke r64.<com.sun.corba.se.pept.transport.Connection: boolean isBusy()>();
+
+        if $z7 != 0 goto label09;
+
+        $l13 = interfaceinvoke r64.<com.sun.corba.se.pept.transport.Connection: long getTimeStamp()>();
+
+        $b14 = $l13 cmp l20;
+
+        $i23 = (int) $b14;
+
+        if $i23 >= 0 goto label09;
+
+        r63 = r64;
+
+        l20 = interfaceinvoke r64.<com.sun.corba.se.pept.transport.Connection: long getTimeStamp()>();
+
+     label09:
+        goto label08;
+
+     label10:
+        if r63 != null goto label13;
+
+        exitmonitor $r11;
+
+     label11:
+        $r32 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r32.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label12;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim<-: ");
+
+        $l12 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l12);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r36);
+
+     label12:
+        return 0;
+
+     label13:
+        $r27 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r27.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label14;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim: closing: ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r63);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r31);
+
+     label14:
+        interfaceinvoke r63.<com.sun.corba.se.pept.transport.Connection: void close()>();
+
+     label15:
+        goto label17;
+
+     label16:
+        $r62 := @caughtexception;
+
+     label17:
+        i19 = i19 + 1;
+
+        goto label07;
+
+     label18:
+        $r14 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label19;
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim: connections reclaimed (");
+
+        $l10 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $l11 = $l0 - $l10;
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l11);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r24);
+
+     label19:
+        exitmonitor $r11;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r61 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label22:
+        throw $r61;
+
+     label23:
+        $r15 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r15.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label24;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim<-: ");
+
+        $l9 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l9);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r19);
+
+     label24:
+        return 1;
+
+     label25:
+        $r55 := @caughtexception;
+
+     label26:
+        $r56 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r56.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label27;
+
+        $r71 = new java.lang.StringBuilder;
+
+        specialinvoke $r71.<java.lang.StringBuilder: void <init>()>();
+
+        $r58 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".reclaim<-: ");
+
+        $l18 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l18);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r60);
+
+     label27:
+        throw $r55;
+
+        catch java.lang.Exception from label13 to label15 with label16;
+        catch java.lang.Throwable from label06 to label11 with label21;
+        catch java.lang.Throwable from label13 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label01 to label03 with label25;
+        catch java.lang.Throwable from label05 to label11 with label25;
+        catch java.lang.Throwable from label13 to label23 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+    }
+
+    public java.lang.String getMonitoringName()
+    {
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String monitoringName>;
+
+        return $r1;
+    }
+
+    public abstract java.util.Collection values();
+
+    protected abstract java.lang.Object backingStore();
+
+    protected abstract void registerWithMonitoring();
+
+    protected void dprintCreation()
+    {
+        com.sun.corba.se.spi.orb.ORB $r1;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r8;
+        java.lang.String $r4, $r7, $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".constructor: cacheType: ");
+
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String getCacheType()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" monitoringName: ");
+
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: java.lang.String getMonitoringName()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r9);
+
+     label1:
+        return;
+    }
+
+    protected void dprintStatistics()
+    {
+        long $l0, $l1, $l2;
+        int $i3, $i4, $i5;
+        java.lang.String $r22;
+        boolean $z0;
+        com.sun.corba.se.spi.orb.ORB $r1, $r10, $r14, $r18;
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r20, $r21;
+        com.sun.corba.se.spi.orb.ORBData $r11, $r15, $r19;
+
+        r0 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".stats: ");
+
+        $l0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfConnections()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/total ");
+
+        $l1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfBusyConnections()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/busy ");
+
+        $l2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: long numberOfIdleConnections()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/idle (");
+
+        $r10 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r11 = virtualinvoke $r10.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i3 = interfaceinvoke $r11.<com.sun.corba.se.spi.orb.ORBData: int getHighWaterMark()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r15 = virtualinvoke $r14.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i4 = interfaceinvoke $r15.<com.sun.corba.se.spi.orb.ORBData: int getLowWaterMark()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r18 = r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r19 = virtualinvoke $r18.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i5 = interfaceinvoke $r19.<com.sun.corba.se.spi.orb.ORBData: int getNumberToReclaim()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.CorbaConnectionCacheBase: void dprint(java.lang.String)>($r22);
+
+     label1:
+        return;
+    }
+
+    protected void dprint(java.lang.String)
+    {
+        com.sun.corba.se.impl.transport.CorbaConnectionCacheBase r1;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.corba.se.impl.transport.CorbaConnectionCacheBase;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.String,java.lang.String)>("CorbaConnectionCacheBase", r0);
+
+        return;
+    }
+}

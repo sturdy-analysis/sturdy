@@ -1,0 +1,328 @@
+public final class sun.rmi.transport.proxy.CGIHandler extends java.lang.Object
+{
+    static int ContentLength;
+    static java.lang.String QueryString;
+    static java.lang.String RequestMethod;
+    static java.lang.String ServerName;
+    static int ServerPort;
+    private static sun.rmi.transport.proxy.CGICommandHandler[] commands;
+    private static java.util.Hashtable commandLookup;
+
+    private void <init>()
+    {
+        sun.rmi.transport.proxy.CGIHandler r0;
+
+        r0 := @this: sun.rmi.transport.proxy.CGIHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] r16;
+        sun.rmi.transport.proxy.CGICommandHandler $r5;
+        sun.rmi.transport.proxy.CGIServerException $r12;
+        sun.rmi.transport.proxy.CGIClientException $r14;
+        int $i0, $i1, $i3;
+        java.lang.String $r0, $r1, $r2, $r9, $r11, $r13, $r15, r17, r18;
+        java.util.Hashtable $r3;
+        java.lang.Exception $r6;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r8, $r10, $r19;
+
+        r16 := @parameter0: java.lang.String[];
+
+     label01:
+        $r0 = <sun.rmi.transport.proxy.CGIHandler: java.lang.String QueryString>;
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>("=");
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label02;
+
+        r17 = <sun.rmi.transport.proxy.CGIHandler: java.lang.String QueryString>;
+
+        r18 = "";
+
+        goto label03;
+
+     label02:
+        $r1 = <sun.rmi.transport.proxy.CGIHandler: java.lang.String QueryString>;
+
+        r17 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r2 = <sun.rmi.transport.proxy.CGIHandler: java.lang.String QueryString>;
+
+        $i1 = $i0 + 1;
+
+        r18 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+     label03:
+        $r3 = <sun.rmi.transport.proxy.CGIHandler: java.util.Hashtable commandLookup>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r17);
+
+        $r5 = (sun.rmi.transport.proxy.CGICommandHandler) $r4;
+
+        if $r5 == null goto label08;
+
+     label04:
+        interfaceinvoke $r5.<sun.rmi.transport.proxy.CGICommandHandler: void execute(java.lang.String)>(r18);
+
+     label05:
+        goto label09;
+
+     label06:
+        $r14 := @caughtexception;
+
+        virtualinvoke $r14.<sun.rmi.transport.proxy.CGIClientException: void printStackTrace()>();
+
+        $r15 = virtualinvoke $r14.<sun.rmi.transport.proxy.CGIClientException: java.lang.String getMessage()>();
+
+        staticinvoke <sun.rmi.transport.proxy.CGIHandler: void returnClientError(java.lang.String)>($r15);
+
+        goto label09;
+
+     label07:
+        $r12 := @caughtexception;
+
+        virtualinvoke $r12.<sun.rmi.transport.proxy.CGIServerException: void printStackTrace()>();
+
+        $r13 = virtualinvoke $r12.<sun.rmi.transport.proxy.CGIServerException: java.lang.String getMessage()>();
+
+        staticinvoke <sun.rmi.transport.proxy.CGIHandler: void returnServerError(java.lang.String)>($r13);
+
+        goto label09;
+
+     label08:
+        staticinvoke <sun.rmi.transport.proxy.CGIHandler: void returnClientError(java.lang.String)>("invalid command.");
+
+     label09:
+        goto label11;
+
+     label10:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r6.<java.lang.Exception: void printStackTrace()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("internal error: ");
+
+        $r9 = virtualinvoke $r6.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.rmi.transport.proxy.CGIHandler: void returnServerError(java.lang.String)>($r11);
+
+     label11:
+        staticinvoke <java.lang.System: void exit(int)>(0);
+
+        return;
+
+        catch sun.rmi.transport.proxy.CGIClientException from label04 to label05 with label06;
+        catch sun.rmi.transport.proxy.CGIServerException from label04 to label05 with label07;
+        catch java.lang.Exception from label01 to label09 with label10;
+    }
+
+    private static void returnClientError(java.lang.String)
+    {
+        java.io.PrintStream $r1, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        java.lang.StringBuilder $r0, $r2, $r4;
+        java.lang.String r3, $r5;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Status: 400 Bad Request: ");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>("Content-type: text/html");
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("<HTML><HEAD><TITLE>Java RMI Client Error</TITLE></HEAD><BODY>");
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>("<H1>Java RMI Client Error</H1>");
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>(r3);
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>("</BODY></HTML>");
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return;
+    }
+
+    private static void returnServerError(java.lang.String)
+    {
+        java.io.PrintStream $r1, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        java.lang.StringBuilder $r0, $r2, $r4;
+        java.lang.String r3, $r5;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Status: 500 Server Error: ");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>("Content-type: text/html");
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("<HTML><HEAD><TITLE>Java RMI Server Error</TITLE></HEAD><BODY>");
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>("<H1>Java RMI Server Error</H1>");
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>(r3);
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>("</BODY></HTML>");
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.rmi.transport.proxy.CGIGethostnameCommand $r3;
+        sun.rmi.transport.proxy.CGICommandHandler $r9, $r13;
+        sun.rmi.transport.proxy.CGIHandler$1 $r0;
+        sun.rmi.transport.proxy.CGIPingCommand $r4;
+        int $i0, i1;
+        sun.rmi.transport.proxy.CGICommandHandler[] $r1, $r7, $r8, $r12;
+        java.lang.String $r11;
+        java.util.Hashtable $r6, $r10;
+        sun.rmi.transport.proxy.CGITryHostnameCommand $r5;
+        sun.rmi.transport.proxy.CGIForwardCommand $r2;
+
+        $r0 = new sun.rmi.transport.proxy.CGIHandler$1;
+
+        specialinvoke $r0.<sun.rmi.transport.proxy.CGIHandler$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r1 = newarray (sun.rmi.transport.proxy.CGICommandHandler)[4];
+
+        $r2 = new sun.rmi.transport.proxy.CGIForwardCommand;
+
+        specialinvoke $r2.<sun.rmi.transport.proxy.CGIForwardCommand: void <init>()>();
+
+        $r1[0] = $r2;
+
+        $r3 = new sun.rmi.transport.proxy.CGIGethostnameCommand;
+
+        specialinvoke $r3.<sun.rmi.transport.proxy.CGIGethostnameCommand: void <init>()>();
+
+        $r1[1] = $r3;
+
+        $r4 = new sun.rmi.transport.proxy.CGIPingCommand;
+
+        specialinvoke $r4.<sun.rmi.transport.proxy.CGIPingCommand: void <init>()>();
+
+        $r1[2] = $r4;
+
+        $r5 = new sun.rmi.transport.proxy.CGITryHostnameCommand;
+
+        specialinvoke $r5.<sun.rmi.transport.proxy.CGITryHostnameCommand: void <init>()>();
+
+        $r1[3] = $r5;
+
+        <sun.rmi.transport.proxy.CGIHandler: sun.rmi.transport.proxy.CGICommandHandler[] commands> = $r1;
+
+        $r6 = new java.util.Hashtable;
+
+        specialinvoke $r6.<java.util.Hashtable: void <init>()>();
+
+        <sun.rmi.transport.proxy.CGIHandler: java.util.Hashtable commandLookup> = $r6;
+
+        i1 = 0;
+
+     label1:
+        $r7 = <sun.rmi.transport.proxy.CGIHandler: sun.rmi.transport.proxy.CGICommandHandler[] commands>;
+
+        $i0 = lengthof $r7;
+
+        if i1 >= $i0 goto label2;
+
+        $r10 = <sun.rmi.transport.proxy.CGIHandler: java.util.Hashtable commandLookup>;
+
+        $r8 = <sun.rmi.transport.proxy.CGIHandler: sun.rmi.transport.proxy.CGICommandHandler[] commands>;
+
+        $r9 = $r8[i1];
+
+        $r11 = interfaceinvoke $r9.<sun.rmi.transport.proxy.CGICommandHandler: java.lang.String getName()>();
+
+        $r12 = <sun.rmi.transport.proxy.CGIHandler: sun.rmi.transport.proxy.CGICommandHandler[] commands>;
+
+        $r13 = $r12[i1];
+
+        virtualinvoke $r10.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r13);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+}

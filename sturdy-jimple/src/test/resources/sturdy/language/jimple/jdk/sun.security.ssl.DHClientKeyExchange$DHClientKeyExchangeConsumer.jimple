@@ -1,0 +1,270 @@
+final class sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r48;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer r41;
+        java.nio.ByteBuffer r9;
+        java.math.BigInteger $r47, $r49, $r50;
+        java.util.EnumSet $r56;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.ssl.ServerHandshakeContext r1;
+        javax.net.ssl.SSLHandshakeException $r27, $r37, $r39, $r40;
+        java.security.CryptoPrimitive $r55;
+        javax.crypto.spec.DHParameterSpec $r45;
+        java.lang.Exception $r36;
+        java.security.KeyFactory $r51;
+        java.util.List $r2, $r12;
+        javax.net.ssl.SSLException $r26, $r31, $r34;
+        javax.crypto.interfaces.DHPublicKey $r44, $r53;
+        sun.security.ssl.SSLPossession r43;
+        java.lang.StringBuilder $r19, $r22, $r24;
+        sun.security.ssl.CipherSuite $r4;
+        javax.crypto.SecretKey $r14;
+        sun.security.ssl.SSLTrafficKeyDerivation $r17;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r10;
+        java.lang.Throwable $r38;
+        java.lang.Object[] $r28;
+        sun.security.ssl.ProtocolVersion $r5, $r16, $r23;
+        sun.security.ssl.CipherSuite$KeyExchange $r6;
+        sun.security.ssl.ConnectionContext r0;
+        javax.crypto.spec.DHPublicKeySpec $r46;
+        java.lang.String $r25;
+        sun.security.ssl.DHKeyExchange$DHECredentials $r11;
+        java.util.Iterator $r3;
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage $r8;
+        java.security.PublicKey $r52;
+        sun.security.ssl.TransportContext $r20, $r30, $r33;
+        java.security.AlgorithmConstraints $r54;
+        sun.security.ssl.SSLKeyExchange $r7;
+        sun.security.ssl.Alert $r21, $r29, $r32;
+        sun.security.ssl.SSLKeyDerivation $r13, $r18;
+        java.lang.Object $r35;
+        sun.security.ssl.DHKeyExchange$DHEPossession r42;
+        sun.security.ssl.SSLSessionImpl $r15;
+
+        r41 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r9 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        r42 = null;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r35 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r43 = (sun.security.ssl.SSLPossession) $r35;
+
+        $z3 = r43 instanceof sun.security.ssl.DHKeyExchange$DHEPossession;
+
+        if $z3 == 0 goto label02;
+
+        r42 = (sun.security.ssl.DHKeyExchange$DHEPossession) r43;
+
+        goto label03;
+
+     label02:
+        goto label01;
+
+     label03:
+        if r42 != null goto label04;
+
+        $r33 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r32 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r34 = virtualinvoke $r33.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r32, "No expected DHE possessions for client key exchange");
+
+        throw $r34;
+
+     label04:
+        $r4 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r6 = $r4.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r5 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r7 = staticinvoke <sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.CipherSuite$KeyExchange,sun.security.ssl.ProtocolVersion)>($r6, $r5);
+
+        if $r7 != null goto label05;
+
+        $r30 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r29 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r31 = virtualinvoke $r30.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r29, "Not supported key exchange type");
+
+        throw $r31;
+
+     label05:
+        $r8 = new sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage;
+
+        specialinvoke $r8.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r1, r9);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label06;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label06;
+
+        $r28 = newarray (java.lang.Object)[1];
+
+        $r28[0] = $r8;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming DH ClientKeyExchange handshake message", $r28);
+
+     label06:
+        $r44 = r42.<sun.security.ssl.DHKeyExchange$DHEPossession: javax.crypto.interfaces.DHPublicKey publicKey>;
+
+        $r45 = interfaceinvoke $r44.<javax.crypto.interfaces.DHPublicKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r46 = new javax.crypto.spec.DHPublicKeySpec;
+
+        $r47 = new java.math.BigInteger;
+
+        $r48 = staticinvoke <sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage: byte[] access$200(sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeMessage)>($r8);
+
+        specialinvoke $r47.<java.math.BigInteger: void <init>(int,byte[])>(1, $r48);
+
+        $r49 = virtualinvoke $r45.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getP()>();
+
+        $r50 = virtualinvoke $r45.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        specialinvoke $r46.<javax.crypto.spec.DHPublicKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r47, $r49, $r50);
+
+        $r51 = staticinvoke <sun.security.ssl.JsseJce: java.security.KeyFactory getKeyFactory(java.lang.String)>("DiffieHellman");
+
+        $r52 = virtualinvoke $r51.<java.security.KeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>($r46);
+
+        $r53 = (javax.crypto.interfaces.DHPublicKey) $r52;
+
+        $r54 = r1.<sun.security.ssl.ServerHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r55 = <java.security.CryptoPrimitive: java.security.CryptoPrimitive KEY_AGREEMENT>;
+
+        $r56 = staticinvoke <java.util.EnumSet: java.util.EnumSet of(java.lang.Enum)>($r55);
+
+        $z4 = interfaceinvoke $r54.<java.security.AlgorithmConstraints: boolean permits(java.util.Set,java.security.Key)>($r56, $r53);
+
+        if $z4 != 0 goto label07;
+
+        $r27 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r27.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("DHPublicKey does not comply to algorithm constraints");
+
+        throw $r27;
+
+     label07:
+        $r10 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(javax.crypto.spec.DHParameterSpec)>($r45);
+
+        $r12 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r11 = new sun.security.ssl.DHKeyExchange$DHECredentials;
+
+        specialinvoke $r11.<sun.security.ssl.DHKeyExchange$DHECredentials: void <init>(javax.crypto.interfaces.DHPublicKey,sun.security.ssl.SupportedGroupsExtension$NamedGroup)>($r53, $r10);
+
+        interfaceinvoke $r12.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r36 := @caughtexception;
+
+        $r37 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r37.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not generate DHPublicKey");
+
+        $r38 = virtualinvoke $r37.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r36);
+
+        $r39 = (javax.net.ssl.SSLHandshakeException) $r38;
+
+        $r40 = (javax.net.ssl.SSLHandshakeException) $r39;
+
+        throw $r40;
+
+     label10:
+        $r13 = virtualinvoke $r7.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext)>(r1);
+
+        $r14 = interfaceinvoke $r13.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("MasterSecret", null);
+
+        $r15 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r15.<sun.security.ssl.SSLSessionImpl: void setMasterSecret(javax.crypto.SecretKey)>($r14);
+
+        $r16 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r17 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLTrafficKeyDerivation valueOf(sun.security.ssl.ProtocolVersion)>($r16);
+
+        if $r17 != null goto label11;
+
+        $r20 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r21 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not supported key derivation: ");
+
+        $r23 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = virtualinvoke $r20.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r21, $r25);
+
+        throw $r26;
+
+     label11:
+        $r18 = virtualinvoke $r17.<sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r1, $r14);
+
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation> = $r18;
+
+        return;
+
+        catch java.security.GeneralSecurityException from label06 to label08 with label09;
+        catch java.io.IOException from label06 to label08 with label09;
+    }
+
+    void <init>(sun.security.ssl.DHClientKeyExchange$1)
+    {
+        sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer r0;
+        sun.security.ssl.DHClientKeyExchange$1 r1;
+
+        r0 := @this: sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer;
+
+        r1 := @parameter0: sun.security.ssl.DHClientKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.DHClientKeyExchange$DHClientKeyExchangeConsumer: void <init>()>();
+
+        return;
+    }
+}

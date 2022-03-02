@@ -1,0 +1,716 @@
+public class sun.security.provider.certpath.X509CertPath extends java.security.cert.CertPath
+{
+    private static final long serialVersionUID;
+    private java.util.List certs;
+    private static final java.lang.String COUNT_ENCODING;
+    private static final java.lang.String PKCS7_ENCODING;
+    private static final java.lang.String PKIPATH_ENCODING;
+    private static final java.util.Collection encodingList;
+
+    public void <init>(java.util.List) throws java.security.cert.CertificateException
+    {
+        java.util.Iterator $r2;
+        java.security.cert.CertificateException $r6;
+        java.util.ArrayList $r3;
+        java.util.List r1, $r4;
+        sun.security.provider.certpath.X509CertPath r0;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r7, $r8, $r11;
+        java.lang.Class $r9;
+        java.lang.String $r10, $r12;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        r1 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.security.cert.CertPath: void <init>(java.lang.String)>("X.509");
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r5 instanceof java.security.cert.X509Certificate;
+
+        if $z1 != 0 goto label2;
+
+        $r6 = new java.security.cert.CertificateException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("List is not all X509Certificates: ");
+
+        $r9 = virtualinvoke $r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r12);
+
+        throw $r6;
+
+     label2:
+        goto label1;
+
+     label3:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(java.util.Collection)>(r1);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r3);
+
+        r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs> = $r4;
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        sun.security.provider.certpath.X509CertPath r0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertPath: void <init>(java.io.InputStream,java.lang.String)>(r1, "PkiPath");
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, java.lang.String) throws java.security.cert.CertificateException
+    {
+        java.security.cert.CertificateException $r5;
+        java.util.List $r3, $r4;
+        byte b1;
+        int $i0;
+        sun.security.provider.certpath.X509CertPath r0;
+        java.lang.String r1;
+        boolean $z0, $z1;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.security.cert.CertPath: void <init>(java.lang.String)>("X.509");
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case 76183020: goto label2;
+            case 1148619507: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("PkiPath");
+
+        if $z0 == 0 goto label3;
+
+        b1 = 0;
+
+        goto label3;
+
+     label2:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("PKCS7");
+
+        if $z1 == 0 goto label3;
+
+        b1 = 1;
+
+     label3:
+        lookupswitch(b1)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            default: goto label6;
+        };
+
+     label4:
+        $r4 = staticinvoke <sun.security.provider.certpath.X509CertPath: java.util.List parsePKIPATH(java.io.InputStream)>(r2);
+
+        r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs> = $r4;
+
+        goto label7;
+
+     label5:
+        $r3 = staticinvoke <sun.security.provider.certpath.X509CertPath: java.util.List parsePKCS7(java.io.InputStream)>(r2);
+
+        r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs> = $r3;
+
+        goto label7;
+
+     label6:
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.String)>("unsupported encoding");
+
+        throw $r5;
+
+     label7:
+        return;
+    }
+
+    private static java.util.List parsePKIPATH(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate $r11;
+        byte[] $r2, $r9;
+        java.security.cert.CertificateFactory $r4;
+        sun.security.util.DerInputStream $r21;
+        sun.security.util.DerValue[] $r3;
+        java.util.ArrayList $r22;
+        java.io.ByteArrayInputStream $r23;
+        int $i0, $i1, $i2, i3, $i5;
+        java.lang.String $r19;
+        sun.security.util.DerValue $r8;
+        java.io.IOException $r14;
+        java.security.cert.CertificateException $r20, $r25;
+        java.util.List $r6, $r12;
+        java.security.cert.Certificate $r10;
+        java.lang.StringBuilder $r17, $r18, $r24;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        if r0 != null goto label1;
+
+        $r20 = new java.security.cert.CertificateException;
+
+        specialinvoke $r20.<java.security.cert.CertificateException: void <init>(java.lang.String)>("input stream is null");
+
+        throw $r20;
+
+     label1:
+        $r21 = new sun.security.util.DerInputStream;
+
+        $r2 = staticinvoke <sun.security.provider.certpath.X509CertPath: byte[] readAllBytes(java.io.InputStream)>(r0);
+
+        specialinvoke $r21.<sun.security.util.DerInputStream: void <init>(byte[])>($r2);
+
+        $r3 = virtualinvoke $r21.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(3);
+
+        $i0 = lengthof $r3;
+
+        if $i0 != 0 goto label3;
+
+        $r12 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+     label2:
+        return $r12;
+
+     label3:
+        $r4 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        $r22 = new java.util.ArrayList;
+
+        $i1 = lengthof $r3;
+
+        specialinvoke $r22.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $i2 = lengthof $r3;
+
+        i3 = $i2 - 1;
+
+     label4:
+        if i3 < 0 goto label5;
+
+        $r23 = new java.io.ByteArrayInputStream;
+
+        $r8 = $r3[i3];
+
+        $r9 = virtualinvoke $r8.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        specialinvoke $r23.<java.io.ByteArrayInputStream: void <init>(byte[])>($r9);
+
+        $r10 = virtualinvoke $r4.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r23);
+
+        $r11 = (java.security.cert.X509Certificate) $r10;
+
+        interfaceinvoke $r22.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        goto label4;
+
+     label5:
+        $r6 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r22);
+
+     label6:
+        return $r6;
+
+     label7:
+        $r14 := @caughtexception;
+
+        $r25 = new java.security.cert.CertificateException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException parsing PkiPath data: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r14);
+
+        throw $r25;
+
+        catch java.io.IOException from label1 to label2 with label7;
+        catch java.io.IOException from label3 to label6 with label7;
+    }
+
+    private static java.util.List parsePKCS7(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        byte[] $r5;
+        java.util.ArrayList $r2;
+        java.io.ByteArrayInputStream $r4;
+        java.lang.String $r12;
+        boolean $z0;
+        java.io.IOException $r7;
+        java.security.cert.CertificateException $r6, $r8;
+        java.util.List $r3, r14;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        sun.security.pkcs.PKCS7 $r0;
+        java.security.cert.X509Certificate[] $r1;
+        java.io.InputStream r13;
+
+        r13 := @parameter0: java.io.InputStream;
+
+        if r13 != null goto label1;
+
+        $r6 = new java.security.cert.CertificateException;
+
+        specialinvoke $r6.<java.security.cert.CertificateException: void <init>(java.lang.String)>("input stream is null");
+
+        throw $r6;
+
+     label1:
+        $z0 = virtualinvoke r13.<java.io.InputStream: boolean markSupported()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new java.io.ByteArrayInputStream;
+
+        $r5 = staticinvoke <sun.security.provider.certpath.X509CertPath: byte[] readAllBytes(java.io.InputStream)>(r13);
+
+        specialinvoke $r4.<java.io.ByteArrayInputStream: void <init>(byte[])>($r5);
+
+        r13 = $r4;
+
+     label2:
+        $r0 = new sun.security.pkcs.PKCS7;
+
+        specialinvoke $r0.<sun.security.pkcs.PKCS7: void <init>(java.io.InputStream)>(r13);
+
+        $r1 = virtualinvoke $r0.<sun.security.pkcs.PKCS7: java.security.cert.X509Certificate[] getCertificates()>();
+
+        if $r1 == null goto label3;
+
+        r14 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        goto label4;
+
+     label3:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>(0);
+
+        r14 = $r2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new java.security.cert.CertificateException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException parsing PKCS7 data: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label6:
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>(r14);
+
+        return $r3;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    private static byte[] readAllBytes(java.io.InputStream) throws java.io.IOException
+    {
+        byte[] r0, $r3;
+        java.io.ByteArrayOutputStream $r4;
+        int $i0, $i2;
+        java.io.InputStream r2;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r0 = newarray (byte)[8192];
+
+        $r4 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r4.<java.io.ByteArrayOutputStream: void <init>(int)>(2048);
+
+     label1:
+        $i0 = virtualinvoke r2.<java.io.InputStream: int read(byte[])>(r0);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r0, 0, $i0);
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r4.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r3;
+    }
+
+    public byte[] getEncoded() throws java.security.cert.CertificateEncodingException
+    {
+        sun.security.provider.certpath.X509CertPath r0;
+        byte[] $r1;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        $r1 = specialinvoke r0.<sun.security.provider.certpath.X509CertPath: byte[] encodePKIPATH()>();
+
+        return $r1;
+    }
+
+    private byte[] encodePKIPATH() throws java.security.cert.CertificateEncodingException
+    {
+        java.security.cert.X509Certificate r18;
+        byte[] $r6, $r10;
+        java.util.ListIterator $r3;
+        int $i0, $i1, $i2;
+        sun.security.provider.certpath.X509CertPath r0;
+        java.lang.String $r17;
+        boolean $z0;
+        java.io.IOException $r12;
+        java.util.List $r1, $r2, $r8, $r9;
+        sun.security.util.DerOutputStream $r4, $r5;
+        java.lang.Object $r7;
+        java.lang.StringBuilder $r14, $r15, $r16;
+        java.security.cert.CertificateEncodingException $r11, $r13;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        $r2 = r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $r1 = r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.ListIterator listIterator(int)>($i0);
+
+     label1:
+        $r4 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.ListIterator: boolean hasPrevious()>();
+
+        if $z0 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r3.<java.util.ListIterator: java.lang.Object previous()>();
+
+        r18 = (java.security.cert.X509Certificate) $r7;
+
+        $r8 = r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $i1 = interfaceinvoke $r8.<java.util.List: int lastIndexOf(java.lang.Object)>(r18);
+
+        $r9 = r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $i2 = interfaceinvoke $r9.<java.util.List: int indexOf(java.lang.Object)>(r18);
+
+        if $i1 == $i2 goto label3;
+
+        $r11 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r11.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Duplicate Certificate");
+
+        throw $r11;
+
+     label3:
+        $r10 = virtualinvoke r18.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void write(byte[])>($r10);
+
+        goto label2;
+
+     label4:
+        $r5 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r5.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r5.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r4);
+
+        $r6 = virtualinvoke $r5.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+     label5:
+        return $r6;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r13 = new java.security.cert.CertificateEncodingException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException encoding PkiPath data: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r12);
+
+        throw $r13;
+
+        catch java.io.IOException from label1 to label5 with label6;
+    }
+
+    private byte[] encodePKCS7() throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r12;
+        java.lang.Object[] $r8;
+        sun.security.x509.AlgorithmId[] $r3;
+        int $i0;
+        sun.security.provider.certpath.X509CertPath r4;
+        sun.security.util.ObjectIdentifier $r2;
+        java.lang.String $r15;
+        java.io.IOException $r13;
+        sun.security.pkcs.ContentInfo $r1;
+        java.util.List $r5, $r6;
+        sun.security.util.DerOutputStream $r11;
+        sun.security.pkcs.PKCS7 $r0;
+        java.security.cert.X509Certificate[] $r7, $r10;
+        sun.security.pkcs.SignerInfo[] $r9;
+        java.security.cert.CertificateEncodingException $r14;
+
+        r4 := @this: sun.security.provider.certpath.X509CertPath;
+
+        $r0 = new sun.security.pkcs.PKCS7;
+
+        $r3 = newarray (sun.security.x509.AlgorithmId)[0];
+
+        $r1 = new sun.security.pkcs.ContentInfo;
+
+        $r2 = <sun.security.pkcs.ContentInfo: sun.security.util.ObjectIdentifier DATA_OID>;
+
+        specialinvoke $r1.<sun.security.pkcs.ContentInfo: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r2, null);
+
+        $r6 = r4.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $r5 = r4.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        $i0 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $r7 = newarray (java.security.cert.X509Certificate)[$i0];
+
+        $r8 = interfaceinvoke $r6.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r7);
+
+        $r10 = (java.security.cert.X509Certificate[]) $r8;
+
+        $r9 = newarray (sun.security.pkcs.SignerInfo)[0];
+
+        specialinvoke $r0.<sun.security.pkcs.PKCS7: void <init>(sun.security.x509.AlgorithmId[],sun.security.pkcs.ContentInfo,java.security.cert.X509Certificate[],sun.security.pkcs.SignerInfo[])>($r3, $r1, $r10, $r9);
+
+        $r11 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r11.<sun.security.util.DerOutputStream: void <init>()>();
+
+     label1:
+        virtualinvoke $r0.<sun.security.pkcs.PKCS7: void encodeSignedData(sun.security.util.DerOutputStream)>($r11);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r13 := @caughtexception;
+
+        $r14 = new java.security.cert.CertificateEncodingException;
+
+        $r15 = virtualinvoke $r13.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r14.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r15);
+
+        throw $r14;
+
+     label4:
+        $r12 = virtualinvoke $r11.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        return $r12;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public byte[] getEncoded(java.lang.String) throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r2, $r3;
+        byte b1;
+        int $i0;
+        sun.security.provider.certpath.X509CertPath r1;
+        java.lang.String r0;
+        boolean $z0, $z1;
+        java.security.cert.CertificateEncodingException $r4;
+
+        r1 := @this: sun.security.provider.certpath.X509CertPath;
+
+        r0 := @parameter0: java.lang.String;
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case 76183020: goto label2;
+            case 1148619507: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("PkiPath");
+
+        if $z0 == 0 goto label3;
+
+        b1 = 0;
+
+        goto label3;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("PKCS7");
+
+        if $z1 == 0 goto label3;
+
+        b1 = 1;
+
+     label3:
+        lookupswitch(b1)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            default: goto label6;
+        };
+
+     label4:
+        $r3 = specialinvoke r1.<sun.security.provider.certpath.X509CertPath: byte[] encodePKIPATH()>();
+
+        return $r3;
+
+     label5:
+        $r2 = specialinvoke r1.<sun.security.provider.certpath.X509CertPath: byte[] encodePKCS7()>();
+
+        return $r2;
+
+     label6:
+        $r4 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r4.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("unsupported encoding");
+
+        throw $r4;
+    }
+
+    public static java.util.Iterator getEncodingsStatic()
+    {
+        java.util.Iterator $r1;
+        java.util.Collection $r0;
+
+        $r0 = <sun.security.provider.certpath.X509CertPath: java.util.Collection encodingList>;
+
+        $r1 = interfaceinvoke $r0.<java.util.Collection: java.util.Iterator iterator()>();
+
+        return $r1;
+    }
+
+    public java.util.Iterator getEncodings()
+    {
+        sun.security.provider.certpath.X509CertPath r1;
+        java.util.Iterator $r0;
+
+        r1 := @this: sun.security.provider.certpath.X509CertPath;
+
+        $r0 = staticinvoke <sun.security.provider.certpath.X509CertPath: java.util.Iterator getEncodingsStatic()>();
+
+        return $r0;
+    }
+
+    public java.util.List getCertificates()
+    {
+        sun.security.provider.certpath.X509CertPath r0;
+        java.util.List $r1;
+
+        r0 := @this: sun.security.provider.certpath.X509CertPath;
+
+        $r1 = r0.<sun.security.provider.certpath.X509CertPath: java.util.List certs>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.ArrayList $r0;
+        java.util.Collection $r1;
+
+        <sun.security.provider.certpath.X509CertPath: java.lang.String PKIPATH_ENCODING> = "PkiPath";
+
+        <sun.security.provider.certpath.X509CertPath: java.lang.String PKCS7_ENCODING> = "PKCS7";
+
+        <sun.security.provider.certpath.X509CertPath: java.lang.String COUNT_ENCODING> = "count";
+
+        <sun.security.provider.certpath.X509CertPath: long serialVersionUID> = 4989800333263052980L;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>(int)>(2);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>("PkiPath");
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>("PKCS7");
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r0);
+
+        <sun.security.provider.certpath.X509CertPath: java.util.Collection encodingList> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,272 @@
+public abstract class javax.net.ssl.HttpsURLConnection extends java.net.HttpURLConnection
+{
+    private static javax.net.ssl.HostnameVerifier defaultHostnameVerifier;
+    protected javax.net.ssl.HostnameVerifier hostnameVerifier;
+    private static javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory;
+    private javax.net.ssl.SSLSocketFactory sslSocketFactory;
+
+    protected void <init>(java.net.URL)
+    {
+        javax.net.ssl.HttpsURLConnection r0;
+        java.net.URL r1;
+        javax.net.ssl.HostnameVerifier $r2;
+        javax.net.ssl.SSLSocketFactory $r3;
+
+        r0 := @this: javax.net.ssl.HttpsURLConnection;
+
+        r1 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<java.net.HttpURLConnection: void <init>(java.net.URL)>(r1);
+
+        $r2 = <javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier defaultHostnameVerifier>;
+
+        r0.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier hostnameVerifier> = $r2;
+
+        $r3 = staticinvoke <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory getDefaultSSLSocketFactory()>();
+
+        r0.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory sslSocketFactory> = $r3;
+
+        return;
+    }
+
+    public abstract java.lang.String getCipherSuite();
+
+    public abstract java.security.cert.Certificate[] getLocalCertificates();
+
+    public abstract java.security.cert.Certificate[] getServerCertificates() throws javax.net.ssl.SSLPeerUnverifiedException;
+
+    public java.security.Principal getPeerPrincipal() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        java.security.cert.X509Certificate $r3;
+        javax.net.ssl.HttpsURLConnection r0;
+        java.security.cert.Certificate $r2;
+        javax.security.auth.x500.X500Principal $r4;
+        java.security.cert.Certificate[] $r1;
+
+        r0 := @this: javax.net.ssl.HttpsURLConnection;
+
+        $r1 = virtualinvoke r0.<javax.net.ssl.HttpsURLConnection: java.security.cert.Certificate[] getServerCertificates()>();
+
+        $r2 = $r1[0];
+
+        $r3 = (java.security.cert.X509Certificate) $r2;
+
+        $r4 = virtualinvoke $r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        return $r4;
+    }
+
+    public java.security.Principal getLocalPrincipal()
+    {
+        java.security.cert.X509Certificate $r3;
+        javax.net.ssl.HttpsURLConnection r0;
+        java.security.cert.Certificate $r2;
+        javax.security.auth.x500.X500Principal $r4;
+        java.security.cert.Certificate[] $r1;
+
+        r0 := @this: javax.net.ssl.HttpsURLConnection;
+
+        $r1 = virtualinvoke r0.<javax.net.ssl.HttpsURLConnection: java.security.cert.Certificate[] getLocalCertificates()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = $r1[0];
+
+        $r3 = (java.security.cert.X509Certificate) $r2;
+
+        $r4 = virtualinvoke $r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    public static void setDefaultHostnameVerifier(javax.net.ssl.HostnameVerifier)
+    {
+        javax.net.ssl.SSLPermission $r2;
+        javax.net.ssl.HostnameVerifier r0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.SecurityManager $r1;
+
+        r0 := @parameter0: javax.net.ssl.HostnameVerifier;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("no default HostnameVerifier specified");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = new javax.net.ssl.SSLPermission;
+
+        specialinvoke $r2.<javax.net.ssl.SSLPermission: void <init>(java.lang.String)>("setHostnameVerifier");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        <javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier defaultHostnameVerifier> = r0;
+
+        return;
+    }
+
+    public static javax.net.ssl.HostnameVerifier getDefaultHostnameVerifier()
+    {
+        javax.net.ssl.HostnameVerifier $r0;
+
+        $r0 = <javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier defaultHostnameVerifier>;
+
+        return $r0;
+    }
+
+    public void setHostnameVerifier(javax.net.ssl.HostnameVerifier)
+    {
+        javax.net.ssl.HttpsURLConnection r1;
+        javax.net.ssl.HostnameVerifier r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r1 := @this: javax.net.ssl.HttpsURLConnection;
+
+        r0 := @parameter0: javax.net.ssl.HostnameVerifier;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("no HostnameVerifier specified");
+
+        throw $r2;
+
+     label1:
+        r1.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier hostnameVerifier> = r0;
+
+        return;
+    }
+
+    public javax.net.ssl.HostnameVerifier getHostnameVerifier()
+    {
+        javax.net.ssl.HttpsURLConnection r0;
+        javax.net.ssl.HostnameVerifier $r1;
+
+        r0 := @this: javax.net.ssl.HttpsURLConnection;
+
+        $r1 = r0.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier hostnameVerifier>;
+
+        return $r1;
+    }
+
+    public static void setDefaultSSLSocketFactory(javax.net.ssl.SSLSocketFactory)
+    {
+        java.lang.IllegalArgumentException $r2;
+        java.lang.SecurityManager $r1;
+        javax.net.ssl.SSLSocketFactory r0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("no default SSLSocketFactory specified");
+
+        throw $r2;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label2:
+        <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory> = r0;
+
+        return;
+    }
+
+    public static javax.net.ssl.SSLSocketFactory getDefaultSSLSocketFactory()
+    {
+        javax.net.SocketFactory $r2;
+        javax.net.ssl.SSLSocketFactory $r0, $r1, $r3;
+
+        $r0 = <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory>;
+
+        if $r0 != null goto label1;
+
+        $r2 = staticinvoke <javax.net.ssl.SSLSocketFactory: javax.net.SocketFactory getDefault()>();
+
+        $r3 = (javax.net.ssl.SSLSocketFactory) $r2;
+
+        <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory> = $r3;
+
+     label1:
+        $r1 = <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory>;
+
+        return $r1;
+    }
+
+    public void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)
+    {
+        javax.net.ssl.HttpsURLConnection r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.SecurityManager $r1;
+        javax.net.ssl.SSLSocketFactory r0;
+
+        r2 := @this: javax.net.ssl.HttpsURLConnection;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("no SSLSocketFactory specified");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label2:
+        r2.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory sslSocketFactory> = r0;
+
+        return;
+    }
+
+    public javax.net.ssl.SSLSocketFactory getSSLSocketFactory()
+    {
+        javax.net.ssl.HttpsURLConnection r0;
+        javax.net.ssl.SSLSocketFactory $r1;
+
+        r0 := @this: javax.net.ssl.HttpsURLConnection;
+
+        $r1 = r0.<javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        javax.net.ssl.HttpsURLConnection$DefaultHostnameVerifier $r0;
+
+        $r0 = new javax.net.ssl.HttpsURLConnection$DefaultHostnameVerifier;
+
+        specialinvoke $r0.<javax.net.ssl.HttpsURLConnection$DefaultHostnameVerifier: void <init>(javax.net.ssl.HttpsURLConnection$1)>(null);
+
+        <javax.net.ssl.HttpsURLConnection: javax.net.ssl.HostnameVerifier defaultHostnameVerifier> = $r0;
+
+        <javax.net.ssl.HttpsURLConnection: javax.net.ssl.SSLSocketFactory defaultSSLSocketFactory> = null;
+
+        return;
+    }
+}

@@ -1,0 +1,538 @@
+public final class com.sun.corba.se.impl.oa.toa.TransientObjectManager extends java.lang.Object
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private int maxSize;
+    private com.sun.corba.se.impl.oa.toa.Element[] elementArray;
+    private com.sun.corba.se.impl.oa.toa.Element freeList;
+
+    void dprint(java.lang.String)
+    {
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, r1);
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.oa.toa.Element[] $r2, $r4, $r5, $r8, $r10;
+        com.sun.corba.se.impl.oa.toa.Element $r6, $r9, $r11, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i9;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize> = 128;
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $r2 = newarray (com.sun.corba.se.impl.oa.toa.Element)[$i0];
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray> = $r2;
+
+        $r4 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $i1 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i4 = $i1 - 1;
+
+        $r11 = new com.sun.corba.se.impl.oa.toa.Element;
+
+        $i2 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i3 = $i2 - 1;
+
+        specialinvoke $r11.<com.sun.corba.se.impl.oa.toa.Element: void <init>(int,java.lang.Object)>($i3, null);
+
+        $r4[$i4] = $r11;
+
+        $i5 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        i7 = $i5 - 2;
+
+     label1:
+        if i7 < 0 goto label2;
+
+        $r10 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r12 = new com.sun.corba.se.impl.oa.toa.Element;
+
+        $r8 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $i6 = i7 + 1;
+
+        $r9 = $r8[$i6];
+
+        specialinvoke $r12.<com.sun.corba.se.impl.oa.toa.Element: void <init>(int,java.lang.Object)>(i7, $r9);
+
+        $r10[i7] = $r12;
+
+        $i9 = (int) -1;
+
+        i7 = i7 + $i9;
+
+        goto label1;
+
+     label2:
+        $r5 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r6 = $r5[0];
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList> = $r6;
+
+        return;
+    }
+
+    public synchronized byte[] storeServant(java.lang.Object, java.lang.Object)
+    {
+        byte[] $r7;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r0;
+        com.sun.corba.se.spi.orb.ORB $r8;
+        com.sun.corba.se.impl.oa.toa.Element $r1, $r2, $r4, $r13;
+        java.lang.Object $r3, r5, r6;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.lang.String $r12;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r5 := @parameter0: java.lang.Object;
+
+        r6 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void doubleSize()>();
+
+     label1:
+        $r13 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList>;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList>;
+
+        $r3 = $r2.<com.sun.corba.se.impl.oa.toa.Element: java.lang.Object servant>;
+
+        $r4 = (com.sun.corba.se.impl.oa.toa.Element) $r3;
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList> = $r4;
+
+        $r7 = virtualinvoke $r13.<com.sun.corba.se.impl.oa.toa.Element: byte[] getKey(java.lang.Object,java.lang.Object)>(r5, r6);
+
+        $r8 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z0 == 0 goto label2;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("storeServant returns key for element ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>($r12);
+
+     label2:
+        return $r7;
+    }
+
+    public synchronized java.lang.Object lookupServant(byte[])
+    {
+        byte[] r0;
+        com.sun.corba.se.impl.oa.toa.Element[] $r3, $r6, $r9;
+        com.sun.corba.se.impl.oa.toa.Element $r4, $r7, $r10;
+        int $i0, $i1, $i2;
+        java.lang.String $r17;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r1;
+        com.sun.corba.se.spi.orb.ORB $r2, $r5, $r8;
+        java.lang.Object $r11;
+        java.lang.StringBuilder $r12, $r13, $r14, $r15, $r16;
+
+        r1 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int bytesToInt(byte[],int)>(r0, 0);
+
+        $i1 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int bytesToInt(byte[],int)>(r0, 4);
+
+        $r2 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r2.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lookupServant called with index=");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", counter=");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>($r17);
+
+     label1:
+        $r3 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r4 = $r3[$i0];
+
+        $i2 = $r4.<com.sun.corba.se.impl.oa.toa.Element: int counter>;
+
+        if $i2 != $i1 goto label3;
+
+        $r6 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r7 = $r6[$i0];
+
+        $z2 = $r7.<com.sun.corba.se.impl.oa.toa.Element: boolean valid>;
+
+        if $z2 == 0 goto label3;
+
+        $r8 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z3 == 0 goto label2;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>("\tcounter is valid");
+
+     label2:
+        $r9 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r10 = $r9[$i0];
+
+        $r11 = $r10.<com.sun.corba.se.impl.oa.toa.Element: java.lang.Object servant>;
+
+        return $r11;
+
+     label3:
+        $r5 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r5.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z1 == 0 goto label4;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>("\tcounter is invalid");
+
+     label4:
+        return null;
+    }
+
+    public synchronized java.lang.Object lookupServantData(byte[])
+    {
+        byte[] r0;
+        com.sun.corba.se.impl.oa.toa.Element[] $r3, $r6, $r9;
+        com.sun.corba.se.impl.oa.toa.Element $r4, $r7, $r10;
+        int $i0, $i1, $i2;
+        java.lang.String $r17;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r1;
+        com.sun.corba.se.spi.orb.ORB $r2, $r5, $r8;
+        java.lang.Object $r11;
+        java.lang.StringBuilder $r12, $r13, $r14, $r15, $r16;
+
+        r1 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int bytesToInt(byte[],int)>(r0, 0);
+
+        $i1 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int bytesToInt(byte[],int)>(r0, 4);
+
+        $r2 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r2.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lookupServantData called with index=");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", counter=");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>($r17);
+
+     label1:
+        $r3 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r4 = $r3[$i0];
+
+        $i2 = $r4.<com.sun.corba.se.impl.oa.toa.Element: int counter>;
+
+        if $i2 != $i1 goto label3;
+
+        $r6 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r7 = $r6[$i0];
+
+        $z2 = $r7.<com.sun.corba.se.impl.oa.toa.Element: boolean valid>;
+
+        if $z2 == 0 goto label3;
+
+        $r8 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z3 == 0 goto label2;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>("\tcounter is valid");
+
+     label2:
+        $r9 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r10 = $r9[$i0];
+
+        $r11 = $r10.<com.sun.corba.se.impl.oa.toa.Element: java.lang.Object servantData>;
+
+        return $r11;
+
+     label3:
+        $r5 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r5.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z1 == 0 goto label4;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>("\tcounter is invalid");
+
+     label4:
+        return null;
+    }
+
+    public synchronized void deleteServant(byte[])
+    {
+        byte[] r0;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r1;
+        com.sun.corba.se.impl.oa.toa.Element[] $r3, $r6;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        com.sun.corba.se.impl.oa.toa.Element $r4, $r5, $r7;
+        int $i0;
+        java.lang.StringBuilder $r8, $r9, $r10;
+        java.lang.String $r11;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int bytesToInt(byte[],int)>(r0, 0);
+
+        $r2 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r2.<com.sun.corba.se.spi.orb.ORB: boolean transientObjectManagerDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("deleting servant at index=");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: void dprint(java.lang.String)>($r11);
+
+     label1:
+        $r3 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r5 = $r3[$i0];
+
+        $r4 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList>;
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.oa.toa.Element: void delete(com.sun.corba.se.impl.oa.toa.Element)>($r4);
+
+        $r6 = r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r7 = $r6[$i0];
+
+        r1.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList> = $r7;
+
+        return;
+    }
+
+    public synchronized byte[] getKey(java.lang.Object)
+    {
+        byte[] $r9;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r0;
+        com.sun.corba.se.impl.oa.toa.Element[] $r1, $r3, $r7;
+        com.sun.corba.se.impl.oa.toa.Element $r2, $r4, $r8;
+        int $i0, i1;
+        java.lang.Object r5, $r6;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r5 := @parameter0: java.lang.Object;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r2 = $r1[i1];
+
+        $z0 = $r2.<com.sun.corba.se.impl.oa.toa.Element: boolean valid>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r4 = $r3[i1];
+
+        $r6 = $r4.<com.sun.corba.se.impl.oa.toa.Element: java.lang.Object servant>;
+
+        if $r6 != r5 goto label2;
+
+        $r7 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r8 = $r7[i1];
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.oa.toa.Element: byte[] toBytes()>();
+
+        return $r9;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private void doubleSize()
+    {
+        com.sun.corba.se.impl.oa.toa.Element[] r1, $r2, $r4, $r5, $r8, $r10, $r12;
+        com.sun.corba.se.impl.oa.toa.Element $r6, $r9, $r11, $r13, $r14;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i13;
+        com.sun.corba.se.impl.oa.toa.TransientObjectManager r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.toa.TransientObjectManager;
+
+        r1 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        i0 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i1 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i2 = $i1 * 2;
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize> = $i2;
+
+        $i3 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $r2 = newarray (com.sun.corba.se.impl.oa.toa.Element)[$i3];
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray> = $r2;
+
+        i10 = 0;
+
+     label1:
+        if i10 >= i0 goto label2;
+
+        $r12 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r11 = r1[i10];
+
+        $r12[i10] = $r11;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $i4 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i7 = $i4 - 1;
+
+        $r13 = new com.sun.corba.se.impl.oa.toa.Element;
+
+        $i5 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        $i6 = $i5 - 1;
+
+        specialinvoke $r13.<com.sun.corba.se.impl.oa.toa.Element: void <init>(int,java.lang.Object)>($i6, null);
+
+        $r4[$i7] = $r13;
+
+        $i8 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: int maxSize>;
+
+        i11 = $i8 - 2;
+
+     label3:
+        if i11 < i0 goto label4;
+
+        $r10 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r14 = new com.sun.corba.se.impl.oa.toa.Element;
+
+        $r8 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $i9 = i11 + 1;
+
+        $r9 = $r8[$i9];
+
+        specialinvoke $r14.<com.sun.corba.se.impl.oa.toa.Element: void <init>(int,java.lang.Object)>(i11, $r9);
+
+        $r10[i11] = $r14;
+
+        $i13 = (int) -1;
+
+        i11 = i11 + $i13;
+
+        goto label3;
+
+     label4:
+        $r5 = r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element[] elementArray>;
+
+        $r6 = $r5[i0];
+
+        r0.<com.sun.corba.se.impl.oa.toa.TransientObjectManager: com.sun.corba.se.impl.oa.toa.Element freeList> = $r6;
+
+        return;
+    }
+}

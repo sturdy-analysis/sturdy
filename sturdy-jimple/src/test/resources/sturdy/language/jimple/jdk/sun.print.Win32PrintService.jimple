@@ -1,0 +1,5242 @@
+public class sun.print.Win32PrintService extends java.lang.Object implements javax.print.PrintService, sun.print.AttributeUpdater, sun.print.SunPrinterJobService
+{
+    public static javax.print.attribute.standard.MediaSize[] predefMedia;
+    private static final javax.print.DocFlavor[] supportedFlavors;
+    private static final java.lang.Class[] serviceAttrCats;
+    private static java.lang.Class[] otherAttrCats;
+    public static final javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService;
+    private static final javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService;
+    private static int DM_PAPERSIZE;
+    private static int DM_PRINTQUALITY;
+    private static int DM_YRESOLUTION;
+    private static final int DMRES_MEDIUM;
+    private static final int DMRES_HIGH;
+    private static final int DMORIENT_LANDSCAPE;
+    private static final int DMDUP_VERTICAL;
+    private static final int DMDUP_HORIZONTAL;
+    private static final int DMCOLLATE_TRUE;
+    private static final int DMCOLOR_MONOCHROME;
+    private static final int DMCOLOR_COLOR;
+    private static final int DMPAPER_A2;
+    private static final int DMPAPER_A6;
+    private static final int DMPAPER_B6_JIS;
+    private static final int DEVCAP_COLOR;
+    private static final int DEVCAP_DUPLEX;
+    private static final int DEVCAP_COLLATE;
+    private static final int DEVCAP_QUALITY;
+    private static final int DEVCAP_POSTSCRIPT;
+    private java.lang.String printer;
+    private javax.print.attribute.standard.PrinterName name;
+    private java.lang.String port;
+    private transient javax.print.attribute.PrintServiceAttributeSet lastSet;
+    private transient sun.print.ServiceNotifier notifier;
+    private javax.print.attribute.standard.MediaSizeName[] mediaSizeNames;
+    private javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables;
+    private javax.print.attribute.standard.MediaTray[] mediaTrays;
+    private javax.print.attribute.standard.PrinterResolution[] printRes;
+    private java.util.HashMap mpaMap;
+    private int nCopies;
+    private int prnCaps;
+    private int[] defaultSettings;
+    private boolean gotTrays;
+    private boolean gotCopies;
+    private boolean mediaInitialized;
+    private boolean mpaListInitialized;
+    private java.util.ArrayList idList;
+    private javax.print.attribute.standard.MediaSize[] mediaSizes;
+    private boolean isInvalid;
+    private sun.print.Win32PrintService$Win32DocumentPropertiesUI docPropertiesUI;
+    private sun.print.Win32PrintService$Win32ServiceUIFactory uiFactory;
+
+    void <init>(java.lang.String)
+    {
+        sun.print.Win32PrintService r0;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier> = null;
+
+        r0.<sun.print.Win32PrintService: sun.print.Win32PrintService$Win32DocumentPropertiesUI docPropertiesUI> = null;
+
+        r0.<sun.print.Win32PrintService: sun.print.Win32PrintService$Win32ServiceUIFactory uiFactory> = null;
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null printer name");
+
+        throw $r2;
+
+     label1:
+        r0.<sun.print.Win32PrintService: java.lang.String printer> = r1;
+
+        r0.<sun.print.Win32PrintService: boolean mediaInitialized> = 0;
+
+        r0.<sun.print.Win32PrintService: boolean gotTrays> = 0;
+
+        r0.<sun.print.Win32PrintService: boolean gotCopies> = 0;
+
+        r0.<sun.print.Win32PrintService: boolean isInvalid> = 0;
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] printRes> = null;
+
+        r0.<sun.print.Win32PrintService: int prnCaps> = 0;
+
+        r0.<sun.print.Win32PrintService: int[] defaultSettings> = null;
+
+        r0.<sun.print.Win32PrintService: java.lang.String port> = null;
+
+        return;
+    }
+
+    public void invalidateService()
+    {
+        sun.print.Win32PrintService r0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r0.<sun.print.Win32PrintService: boolean isInvalid> = 1;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        return $r1;
+    }
+
+    private javax.print.attribute.standard.PrinterName getPrinterName()
+    {
+        javax.print.attribute.standard.PrinterName $r1, $r2, $r3;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r4;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterName name>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.print.attribute.standard.PrinterName;
+
+        $r4 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        specialinvoke $r3.<javax.print.attribute.standard.PrinterName: void <init>(java.lang.String,java.util.Locale)>($r4, null);
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterName name> = $r3;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterName name>;
+
+        return $r2;
+    }
+
+    public int findPaperID(javax.print.attribute.standard.MediaSizeName)
+    {
+        java.lang.Integer $r16;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.print.attribute.standard.MediaSize $r12;
+        javax.print.attribute.standard.MediaSizeName r0, $r2, $r3, $r4, $r13, $r18;
+        javax.print.attribute.standard.MediaSize[] $r7, $r9, $r11;
+        java.util.ArrayList $r6, $r8, $r10, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8;
+        sun.print.Win32PrintService r5;
+        sun.print.Win32MediaSize r19;
+        java.lang.Object $r15;
+        javax.print.attribute.standard.MediaSizeName[] $r1, $r17;
+
+        r5 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.attribute.standard.MediaSizeName;
+
+        $z0 = r0 instanceof sun.print.Win32MediaSize;
+
+        if $z0 == 0 goto label01;
+
+        r19 = (sun.print.Win32MediaSize) r0;
+
+        $i6 = virtualinvoke r19.<sun.print.Win32MediaSize: int getDMPaper()>();
+
+        return $i6;
+
+     label01:
+        i7 = 0;
+
+     label02:
+        $r1 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService>;
+
+        $i0 = lengthof $r1;
+
+        if i7 >= $i0 goto label04;
+
+        $r17 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService>;
+
+        $r18 = $r17[i7];
+
+        $z4 = virtualinvoke $r18.<javax.print.attribute.standard.MediaSizeName: boolean equals(java.lang.Object)>(r0);
+
+        if $z4 == 0 goto label03;
+
+        $i5 = i7 + 1;
+
+        return $i5;
+
+     label03:
+        i7 = i7 + 1;
+
+        goto label02;
+
+     label04:
+        $r2 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A2>;
+
+        $z1 = virtualinvoke r0.<javax.print.attribute.standard.MediaSizeName: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label05;
+
+        return 66;
+
+     label05:
+        $r3 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A6>;
+
+        $z2 = virtualinvoke r0.<javax.print.attribute.standard.MediaSizeName: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label06;
+
+        return 70;
+
+     label06:
+        $r4 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B6>;
+
+        $z3 = virtualinvoke r0.<javax.print.attribute.standard.MediaSizeName: boolean equals(java.lang.Object)>($r4);
+
+        if $z3 == 0 goto label07;
+
+        return 88;
+
+     label07:
+        specialinvoke r5.<sun.print.Win32PrintService: void initMedia()>();
+
+        $r6 = r5.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        if $r6 == null goto label10;
+
+        $r7 = r5.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        if $r7 == null goto label10;
+
+        $r8 = r5.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i1 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        $r9 = r5.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i2 = lengthof $r9;
+
+        if $i1 != $i2 goto label10;
+
+        i8 = 0;
+
+     label08:
+        $r10 = r5.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i3 = virtualinvoke $r10.<java.util.ArrayList: int size()>();
+
+        if i8 >= $i3 goto label10;
+
+        $r11 = r5.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r12 = $r11[i8];
+
+        $r13 = virtualinvoke $r12.<javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSizeName getMediaSizeName()>();
+
+        if $r13 != r0 goto label09;
+
+        $r14 = r5.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $r15 = virtualinvoke $r14.<java.util.ArrayList: java.lang.Object get(int)>(i8);
+
+        $r16 = (java.lang.Integer) $r15;
+
+        $i4 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+        return $i4;
+
+     label09:
+        i8 = i8 + 1;
+
+        goto label08;
+
+     label10:
+        return 0;
+    }
+
+    public int findTrayID(javax.print.attribute.standard.MediaTray)
+    {
+        javax.print.attribute.standard.MediaTray r1, $r4;
+        sun.print.Win32MediaTray r5;
+        javax.print.attribute.standard.MediaTray[] $r2, $r3;
+        int $i0, $i1, $i2, i3;
+        sun.print.Win32PrintService r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: javax.print.attribute.standard.MediaTray;
+
+        specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] getMediaTrays()>();
+
+        $z0 = r1 instanceof sun.print.Win32MediaTray;
+
+        if $z0 == 0 goto label1;
+
+        r5 = (sun.print.Win32MediaTray) r1;
+
+        $i2 = virtualinvoke r5.<sun.print.Win32MediaTray: int getDMBinID()>();
+
+        return $i2;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r2 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label4;
+
+        $r3 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $r4 = $r3[i3];
+
+        $z1 = virtualinvoke r1.<javax.print.attribute.standard.MediaTray: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+        $i1 = i3 + 1;
+
+        return $i1;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    public javax.print.attribute.standard.MediaTray findMediaTray(int)
+    {
+        sun.print.Win32MediaTray $r2, r5;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        sun.print.Win32PrintService r0;
+        boolean $z0;
+        javax.print.attribute.standard.MediaTray $r3, $r4, $r8;
+        javax.print.attribute.standard.MediaTray[] $r1, $r6, $r7;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        i0 := @parameter0: int;
+
+        if i0 < 1 goto label1;
+
+        $r6 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i3 = lengthof $r6;
+
+        if i0 > $i3 goto label1;
+
+        $r7 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i4 = i0 - 1;
+
+        $r8 = $r7[$i4];
+
+        return $r8;
+
+     label1:
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] getMediaTrays()>();
+
+        if $r1 == null goto label4;
+
+        i5 = 0;
+
+     label2:
+        $i1 = lengthof $r1;
+
+        if i5 >= $i1 goto label4;
+
+        $r3 = $r1[i5];
+
+        $z0 = $r3 instanceof sun.print.Win32MediaTray;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = $r1[i5];
+
+        r5 = (sun.print.Win32MediaTray) $r4;
+
+        $i2 = r5.<sun.print.Win32MediaTray: int winID>;
+
+        if $i2 != i0 goto label3;
+
+        return r5;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray AUTO>;
+
+        return $r2;
+    }
+
+    public javax.print.attribute.standard.MediaSizeName findWin32Media(int)
+    {
+        javax.print.attribute.standard.MediaSizeName $r0, $r1, $r2, $r5;
+        int i0, $i1, $i2;
+        sun.print.Win32PrintService r6;
+        javax.print.attribute.standard.MediaSizeName[] $r3, $r4;
+
+        r6 := @this: sun.print.Win32PrintService;
+
+        i0 := @parameter0: int;
+
+        if i0 < 1 goto label1;
+
+        $r3 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService>;
+
+        $i1 = lengthof $r3;
+
+        if i0 > $i1 goto label1;
+
+        $r4 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService>;
+
+        $i2 = i0 - 1;
+
+        $r5 = $r4[$i2];
+
+        return $r5;
+
+     label1:
+        lookupswitch(i0)
+        {
+            case 66: goto label2;
+            case 70: goto label3;
+            case 88: goto label4;
+            default: goto label5;
+        };
+
+     label2:
+        $r2 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A2>;
+
+        return $r2;
+
+     label3:
+        $r1 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A6>;
+
+        return $r1;
+
+     label4:
+        $r0 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B6>;
+
+        return $r0;
+
+     label5:
+        return null;
+    }
+
+    private boolean addToUniqueList(java.util.ArrayList, javax.print.attribute.standard.MediaSizeName)
+    {
+        javax.print.attribute.standard.MediaSizeName r1, r3;
+        int $i0, i1;
+        java.lang.Object $r2;
+        sun.print.Win32PrintService r4;
+        java.util.ArrayList r0;
+
+        r4 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.util.ArrayList;
+
+        r1 := @parameter1: javax.print.attribute.standard.MediaSizeName;
+
+        i1 = 0;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.ArrayList: int size()>();
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = virtualinvoke r0.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        r3 = (javax.print.attribute.standard.MediaSizeName) $r2;
+
+        if r3 != r1 goto label2;
+
+        return 0;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke r0.<java.util.ArrayList: boolean add(java.lang.Object)>(r1);
+
+        return 1;
+    }
+
+    private synchronized void initMedia()
+    {
+        java.lang.Integer $r18, $r31, $r47;
+        byte $b13, $b14;
+        java.util.ArrayList $r9, $r11, $r16, $r20, $r24, $r28, $r38, $r42, $r46, $r52, $r53, $r54, $r55, $r56;
+        java.lang.String $r1, $r2, $r22, $r29;
+        sun.print.Win32MediaSize $r23, r50, r51, $r57;
+        javax.print.attribute.standard.MediaSizeName[] $r13, $r14;
+        int[] $r3;
+        boolean $z0, $z1, $z2, z3, z4;
+        javax.print.attribute.standard.MediaSize $r34, $r37, $r41, $r44, r49, $r58;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11;
+        javax.print.attribute.standard.MediaSize[] $r10, $r25, $r33, $r35, $r36, $r39, $r40, $r43, $r45;
+        javax.print.attribute.standard.MediaSizeName $r19, r48;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i15, i16, i17, $i18, $i19;
+        sun.print.Win32PrintService r0;
+        java.util.Iterator $r12;
+        java.lang.Object $r15, $r17, $r21, $r27, $r30;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $z0 = r0.<sun.print.Win32PrintService: boolean mediaInitialized>;
+
+        if $z0 != 1 goto label01;
+
+        return;
+
+     label01:
+        r0.<sun.print.Win32PrintService: boolean mediaInitialized> = 1;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r2 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $r3 = specialinvoke r0.<sun.print.Win32PrintService: int[] getAllMediaIDs(java.lang.String,java.lang.String)>($r1, $r2);
+
+        if $r3 != null goto label02;
+
+        return;
+
+     label02:
+        $r52 = new java.util.ArrayList;
+
+        specialinvoke $r52.<java.util.ArrayList: void <init>()>();
+
+        $r53 = new java.util.ArrayList;
+
+        specialinvoke $r53.<java.util.ArrayList: void <init>()>();
+
+        $r54 = new java.util.ArrayList;
+
+        specialinvoke $r54.<java.util.ArrayList: void <init>()>();
+
+        $r55 = new java.util.ArrayList;
+
+        specialinvoke $r55.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.print.Win32PrintService: java.util.ArrayList idList> = $r55;
+
+        i16 = 0;
+
+     label03:
+        $i0 = lengthof $r3;
+
+        if i16 >= $i0 goto label04;
+
+        $r46 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i15 = $r3[i16];
+
+        $r47 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i15);
+
+        virtualinvoke $r46.<java.util.ArrayList: boolean add(java.lang.Object)>($r47);
+
+        i16 = i16 + 1;
+
+        goto label03;
+
+     label04:
+        $r56 = new java.util.ArrayList;
+
+        specialinvoke $r56.<java.util.ArrayList: void <init>()>();
+
+        $r9 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $r10 = specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] getMediaSizes(java.util.ArrayList,int[],java.util.ArrayList)>($r9, $r3, $r56);
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes> = $r10;
+
+        i17 = 0;
+
+     label05:
+        $r11 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i1 = virtualinvoke $r11.<java.util.ArrayList: int size()>();
+
+        if i17 >= $i1 goto label16;
+
+        $r16 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $r17 = virtualinvoke $r16.<java.util.ArrayList: java.lang.Object get(int)>(i17);
+
+        $r18 = (java.lang.Integer) $r17;
+
+        $i3 = virtualinvoke $r18.<java.lang.Integer: int intValue()>();
+
+        $r19 = virtualinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName findWin32Media(int)>($i3);
+
+        r48 = $r19;
+
+        if $r19 == null goto label07;
+
+        $r42 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i11 = virtualinvoke $r42.<java.util.ArrayList: int size()>();
+
+        $r43 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i12 = lengthof $r43;
+
+        if $i11 != $i12 goto label07;
+
+        $r44 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r19);
+
+        $r45 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        r49 = $r45[i17];
+
+        $f2 = virtualinvoke $r44.<javax.print.attribute.standard.MediaSize: float getX(int)>(1);
+
+        $f3 = virtualinvoke r49.<javax.print.attribute.standard.MediaSize: float getX(int)>(1);
+
+        $f4 = $f2 - $f3;
+
+        $f5 = staticinvoke <java.lang.Math: float abs(float)>($f4);
+
+        $f6 = (float) 2540;
+
+        $b13 = $f5 cmpl $f6;
+
+        $i18 = (int) $b13;
+
+        if $i18 > 0 goto label06;
+
+        $f7 = virtualinvoke $r44.<javax.print.attribute.standard.MediaSize: float getY(int)>(1);
+
+        $f8 = virtualinvoke r49.<javax.print.attribute.standard.MediaSize: float getY(int)>(1);
+
+        $f9 = $f7 - $f8;
+
+        $f10 = staticinvoke <java.lang.Math: float abs(float)>($f9);
+
+        $f11 = (float) 2540;
+
+        $b14 = $f10 cmpl $f11;
+
+        $i19 = (int) $b14;
+
+        if $i19 <= 0 goto label07;
+
+     label06:
+        r48 = null;
+
+     label07:
+        if r48 == null goto label08;
+
+        $z2 = 1;
+
+        goto label09;
+
+     label08:
+        $z2 = 0;
+
+     label09:
+        z3 = $z2;
+
+        if r48 != null goto label10;
+
+        $r38 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i9 = virtualinvoke $r38.<java.util.ArrayList: int size()>();
+
+        $r39 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i10 = lengthof $r39;
+
+        if $i9 != $i10 goto label10;
+
+        $r40 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r41 = $r40[i17];
+
+        r48 = virtualinvoke $r41.<javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSizeName getMediaSizeName()>();
+
+     label10:
+        z4 = 0;
+
+        if r48 == null goto label11;
+
+        z4 = specialinvoke r0.<sun.print.Win32PrintService: boolean addToUniqueList(java.util.ArrayList,javax.print.attribute.standard.MediaSizeName)>($r52, r48);
+
+     label11:
+        if z3 == 0 goto label12;
+
+        if z4 != 0 goto label15;
+
+     label12:
+        $r20 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i4 = virtualinvoke $r20.<java.util.ArrayList: int size()>();
+
+        $i5 = virtualinvoke $r56.<java.util.ArrayList: int size()>();
+
+        if $i4 != $i5 goto label15;
+
+        $r21 = virtualinvoke $r56.<java.util.ArrayList: java.lang.Object get(int)>(i17);
+
+        $r22 = (java.lang.String) $r21;
+
+        $r23 = staticinvoke <sun.print.Win32MediaSize: sun.print.Win32MediaSize findMediaName(java.lang.String)>($r22);
+
+        r50 = $r23;
+
+        if $r23 != null goto label13;
+
+        $r24 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i6 = virtualinvoke $r24.<java.util.ArrayList: int size()>();
+
+        $r25 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i7 = lengthof $r25;
+
+        if $i6 != $i7 goto label13;
+
+        $r57 = new sun.print.Win32MediaSize;
+
+        $r27 = virtualinvoke $r56.<java.util.ArrayList: java.lang.Object get(int)>(i17);
+
+        $r29 = (java.lang.String) $r27;
+
+        $r28 = r0.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $r30 = virtualinvoke $r28.<java.util.ArrayList: java.lang.Object get(int)>(i17);
+
+        $r31 = (java.lang.Integer) $r30;
+
+        $i8 = virtualinvoke $r31.<java.lang.Integer: int intValue()>();
+
+        specialinvoke $r57.<sun.print.Win32MediaSize: void <init>(java.lang.String,int)>($r29, $i8);
+
+        r50 = $r57;
+
+        $r35 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r58 = new javax.print.attribute.standard.MediaSize;
+
+        $r33 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r34 = $r33[i17];
+
+        $f0 = virtualinvoke $r34.<javax.print.attribute.standard.MediaSize: float getX(int)>(1000);
+
+        $r36 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r37 = $r36[i17];
+
+        $f1 = virtualinvoke $r37.<javax.print.attribute.standard.MediaSize: float getY(int)>(1000);
+
+        specialinvoke $r58.<javax.print.attribute.standard.MediaSize: void <init>(float,float,int,javax.print.attribute.standard.MediaSizeName)>($f0, $f1, 1000, $r57);
+
+        $r35[i17] = $r58;
+
+     label13:
+        if r50 == null goto label15;
+
+        if r50 == r48 goto label15;
+
+        if z4 != 0 goto label14;
+
+        specialinvoke r0.<sun.print.Win32PrintService: boolean addToUniqueList(java.util.ArrayList,javax.print.attribute.standard.MediaSizeName)>($r52, r50);
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r53.<java.util.ArrayList: boolean add(java.lang.Object)>(r50);
+
+     label15:
+        i17 = i17 + 1;
+
+        goto label05;
+
+     label16:
+        $r12 = virtualinvoke $r53.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label17:
+        $z1 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label18;
+
+        $r15 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r51 = (sun.print.Win32MediaSize) $r15;
+
+        specialinvoke r0.<sun.print.Win32PrintService: boolean addToUniqueList(java.util.ArrayList,javax.print.attribute.standard.MediaSizeName)>($r52, r51);
+
+        goto label17;
+
+     label18:
+        $i2 = virtualinvoke $r52.<java.util.ArrayList: int size()>();
+
+        $r13 = newarray (javax.print.attribute.standard.MediaSizeName)[$i2];
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames> = $r13;
+
+        $r14 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        virtualinvoke $r52.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r14);
+
+        return;
+    }
+
+    private synchronized javax.print.attribute.standard.MediaPrintableArea[] getMediaPrintables(javax.print.attribute.standard.MediaSizeName)
+    {
+        boolean $z0;
+        java.util.Collection $r7;
+        javax.print.attribute.standard.MediaSize $r21;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        javax.print.attribute.standard.MediaSizeName r0, r18;
+        java.lang.Object[] $r9;
+        java.util.HashMap $r2, $r4, $r5, $r6, $r13, $r15, $r19, $r23, $r25, $r27, $r28, $r30;
+        float[] $r39;
+        int $i0, $i1, $i2, i3, $i4;
+        sun.print.Win32PrintService r1;
+        java.lang.String $r26;
+        java.lang.IllegalArgumentException $r34, $r35;
+        javax.print.attribute.standard.MediaPrintableArea $r17, $r22, $r24, $r32;
+        java.lang.Object $r14, $r16, $r20, $r29, $r31;
+        javax.print.attribute.standard.MediaSizeName[] $r3, $r37, r38;
+        javax.print.attribute.standard.MediaPrintableArea[] $r8, $r10, $r11, $r12, $r33, r36, r40;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.attribute.standard.MediaSizeName;
+
+        if r0 != null goto label01;
+
+        $z0 = r1.<sun.print.Win32PrintService: boolean mpaListInitialized>;
+
+        if $z0 != 1 goto label02;
+
+        $r33 = r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables>;
+
+        return $r33;
+
+     label01:
+        $r2 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        if $r2 == null goto label02;
+
+        $r28 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r29 = virtualinvoke $r28.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r29 == null goto label02;
+
+        r36 = newarray (javax.print.attribute.standard.MediaPrintableArea)[1];
+
+        $r30 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r31 = virtualinvoke $r30.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r32 = (javax.print.attribute.standard.MediaPrintableArea) $r31;
+
+        r36[0] = $r32;
+
+        return r36;
+
+     label02:
+        specialinvoke r1.<sun.print.Win32PrintService: void initMedia()>();
+
+        $r37 = r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r37 == null goto label03;
+
+        $r3 = r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $i0 = lengthof $r3;
+
+        if $i0 != 0 goto label04;
+
+     label03:
+        return null;
+
+     label04:
+        if r0 == null goto label05;
+
+        r38 = newarray (javax.print.attribute.standard.MediaSizeName)[1];
+
+        r38[0] = r0;
+
+        goto label06;
+
+     label05:
+        r38 = r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+     label06:
+        $r4 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        if $r4 != null goto label07;
+
+        $r27 = new java.util.HashMap;
+
+        specialinvoke $r27.<java.util.HashMap: void <init>()>();
+
+        r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap> = $r27;
+
+     label07:
+        i3 = 0;
+
+     label08:
+        $i4 = lengthof r38;
+
+        if i3 >= $i4 goto label20;
+
+        r18 = r38[i3];
+
+        $r19 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r20 = virtualinvoke $r19.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r18);
+
+        if $r20 == null goto label09;
+
+        goto label19;
+
+     label09:
+        if r18 == null goto label19;
+
+        $i2 = virtualinvoke r1.<sun.print.Win32PrintService: int findPaperID(javax.print.attribute.standard.MediaSizeName)>(r18);
+
+        if $i2 == 0 goto label10;
+
+        $r26 = r1.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r39 = specialinvoke r1.<sun.print.Win32PrintService: float[] getMediaPrintableArea(java.lang.String,int)>($r26, $i2);
+
+        goto label11;
+
+     label10:
+        $r39 = null;
+
+     label11:
+        if $r39 == null goto label15;
+
+     label12:
+        $r24 = new javax.print.attribute.standard.MediaPrintableArea;
+
+        $f5 = $r39[0];
+
+        $f4 = $r39[1];
+
+        $f3 = $r39[2];
+
+        $f2 = $r39[3];
+
+        specialinvoke $r24.<javax.print.attribute.standard.MediaPrintableArea: void <init>(float,float,float,float,int)>($f5, $f4, $f3, $f2, 25400);
+
+        $r25 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        virtualinvoke $r25.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r18, $r24);
+
+     label13:
+        goto label19;
+
+     label14:
+        $r35 := @caughtexception;
+
+        goto label19;
+
+     label15:
+        $r21 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>(r18);
+
+        if $r21 == null goto label19;
+
+     label16:
+        $r22 = new javax.print.attribute.standard.MediaPrintableArea;
+
+        $f0 = virtualinvoke $r21.<javax.print.attribute.standard.MediaSize: float getX(int)>(25400);
+
+        $f1 = virtualinvoke $r21.<javax.print.attribute.standard.MediaSize: float getY(int)>(25400);
+
+        specialinvoke $r22.<javax.print.attribute.standard.MediaPrintableArea: void <init>(float,float,float,float,int)>(0.0F, 0.0F, $f0, $f1, 25400);
+
+        $r23 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        virtualinvoke $r23.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r18, $r22);
+
+     label17:
+        goto label19;
+
+     label18:
+        $r34 := @caughtexception;
+
+     label19:
+        i3 = i3 + 1;
+
+        goto label08;
+
+     label20:
+        $r5 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $i1 = virtualinvoke $r5.<java.util.HashMap: int size()>();
+
+        if $i1 != 0 goto label21;
+
+        return null;
+
+     label21:
+        if r0 == null goto label23;
+
+        $r13 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r14 = virtualinvoke $r13.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r14 != null goto label22;
+
+        return null;
+
+     label22:
+        r40 = newarray (javax.print.attribute.standard.MediaPrintableArea)[1];
+
+        $r15 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r16 = virtualinvoke $r15.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r17 = (javax.print.attribute.standard.MediaPrintableArea) $r16;
+
+        r40[0] = $r17;
+
+        return r40;
+
+     label23:
+        $r6 = r1.<sun.print.Win32PrintService: java.util.HashMap mpaMap>;
+
+        $r7 = virtualinvoke $r6.<java.util.HashMap: java.util.Collection values()>();
+
+        $r8 = newarray (javax.print.attribute.standard.MediaPrintableArea)[0];
+
+        $r9 = interfaceinvoke $r7.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r8);
+
+        $r10 = (javax.print.attribute.standard.MediaPrintableArea[]) $r9;
+
+        $r11 = (javax.print.attribute.standard.MediaPrintableArea[]) $r10;
+
+        r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables> = $r11;
+
+        r1.<sun.print.Win32PrintService: boolean mpaListInitialized> = 1;
+
+        $r12 = r1.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables>;
+
+        return $r12;
+
+        catch java.lang.IllegalArgumentException from label12 to label13 with label14;
+        catch java.lang.IllegalArgumentException from label16 to label17 with label18;
+    }
+
+    private synchronized javax.print.attribute.standard.MediaTray[] getMediaTrays()
+    {
+        int[] $r3;
+        sun.print.Win32MediaTray $r8;
+        boolean $z0;
+        java.lang.String[] $r5;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, i13, i14;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1, $r2, $r4, $r9;
+        javax.print.attribute.standard.MediaTray $r11, $r13;
+        javax.print.attribute.standard.MediaTray[] $r6, $r7, $r10, $r12, $r14, $r15, r16;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $z0 = r0.<sun.print.Win32PrintService: boolean gotTrays>;
+
+        if $z0 != 1 goto label01;
+
+        $r14 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] mediaTrays>;
+
+        if $r14 == null goto label01;
+
+        $r15 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] mediaTrays>;
+
+        return $r15;
+
+     label01:
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $r2 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r3 = specialinvoke r0.<sun.print.Win32PrintService: int[] getAllMediaTrays(java.lang.String,java.lang.String)>($r2, $r1);
+
+        $r4 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r5 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String[] getAllMediaTrayNames(java.lang.String,java.lang.String)>($r4, $r1);
+
+        if $r3 == null goto label02;
+
+        if $r5 != null goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        i11 = 0;
+
+        i12 = 0;
+
+     label04:
+        $i0 = lengthof $r3;
+
+        if i12 >= $i0 goto label06;
+
+        $i10 = $r3[i12];
+
+        if $i10 <= 0 goto label05;
+
+        i11 = i11 + 1;
+
+     label05:
+        i12 = i12 + 1;
+
+        goto label04;
+
+     label06:
+        r16 = newarray (javax.print.attribute.standard.MediaTray)[i11];
+
+        i13 = 0;
+
+        i14 = 0;
+
+     label07:
+        $i2 = lengthof $r3;
+
+        $i1 = lengthof $r5;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i1);
+
+        if i13 >= $i3 goto label11;
+
+        i4 = $r3[i13];
+
+        if i4 <= 0 goto label10;
+
+        $r7 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i5 = lengthof $r7;
+
+        if i4 > $i5 goto label08;
+
+        $r10 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i7 = i4 - 1;
+
+        $r11 = $r10[$i7];
+
+        if $r11 != null goto label09;
+
+     label08:
+        $i6 = i14;
+
+        i14 = i14 + 1;
+
+        $r8 = new sun.print.Win32MediaTray;
+
+        $r9 = $r5[i13];
+
+        specialinvoke $r8.<sun.print.Win32MediaTray: void <init>(int,java.lang.String)>(i4, $r9);
+
+        r16[$i6] = $r8;
+
+        goto label10;
+
+     label09:
+        $i8 = i14;
+
+        i14 = i14 + 1;
+
+        $r12 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService>;
+
+        $i9 = i4 - 1;
+
+        $r13 = $r12[$i9];
+
+        r16[$i8] = $r13;
+
+     label10:
+        i13 = i13 + 1;
+
+        goto label07;
+
+     label11:
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] mediaTrays> = r16;
+
+        r0.<sun.print.Win32PrintService: boolean gotTrays> = 1;
+
+        $r6 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] mediaTrays>;
+
+        return $r6;
+    }
+
+    private boolean isSameSize(float, float, float, float)
+    {
+        byte $b0, $b1, $b2, $b3;
+        int $i4, $i5, $i6, $i7;
+        sun.print.Win32PrintService r0;
+        float f0, f1, f2, f3, f4, f5, f6, f7, $f8, $f9, $f10, $f11;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        f0 := @parameter0: float;
+
+        f3 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        f4 := @parameter3: float;
+
+        f2 = f0 - f1;
+
+        f5 = f3 - f4;
+
+        f6 = f0 - f4;
+
+        f7 = f3 - f1;
+
+        $f8 = staticinvoke <java.lang.Math: float abs(float)>(f2);
+
+        $b0 = $f8 cmpg 1.0F;
+
+        $i4 = (int) $b0;
+
+        if $i4 > 0 goto label1;
+
+        $f11 = staticinvoke <java.lang.Math: float abs(float)>(f5);
+
+        $b3 = $f11 cmpg 1.0F;
+
+        $i5 = (int) $b3;
+
+        if $i5 <= 0 goto label2;
+
+     label1:
+        $f9 = staticinvoke <java.lang.Math: float abs(float)>(f6);
+
+        $b1 = $f9 cmpg 1.0F;
+
+        $i6 = (int) $b1;
+
+        if $i6 > 0 goto label3;
+
+        $f10 = staticinvoke <java.lang.Math: float abs(float)>(f7);
+
+        $b2 = $f10 cmpg 1.0F;
+
+        $i7 = (int) $b2;
+
+        if $i7 > 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public javax.print.attribute.standard.MediaSizeName findMatchingMediaSizeNameMM(float, float)
+    {
+        javax.print.attribute.standard.MediaSize[] $r0, $r1, $r2, $r5, $r7, $r9;
+        javax.print.attribute.standard.MediaSizeName $r11;
+        int $i0, i1;
+        sun.print.Win32PrintService r4;
+        boolean $z0;
+        javax.print.attribute.standard.MediaSize $r3, $r6, $r8, $r10;
+        float $f0, $f1, f2, f3;
+
+        r4 := @this: sun.print.Win32PrintService;
+
+        f2 := @parameter0: float;
+
+        f3 := @parameter1: float;
+
+        $r0 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        if $r0 == null goto label4;
+
+        i1 = 0;
+
+     label1:
+        $r1 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label4;
+
+        $r2 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        $r3 = $r2[i1];
+
+        if $r3 != null goto label2;
+
+        goto label3;
+
+     label2:
+        $r5 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        $r6 = $r5[i1];
+
+        $f0 = virtualinvoke $r6.<javax.print.attribute.standard.MediaSize: float getX(int)>(1000);
+
+        $r7 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        $r8 = $r7[i1];
+
+        $f1 = virtualinvoke $r8.<javax.print.attribute.standard.MediaSize: float getY(int)>(1000);
+
+        $z0 = specialinvoke r4.<sun.print.Win32PrintService: boolean isSameSize(float,float,float,float)>($f0, $f1, f2, f3);
+
+        if $z0 == 0 goto label3;
+
+        $r9 = <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia>;
+
+        $r10 = $r9[i1];
+
+        $r11 = virtualinvoke $r10.<javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSizeName getMediaSizeName()>();
+
+        return $r11;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return null;
+    }
+
+    private javax.print.attribute.standard.MediaSize[] getMediaSizes(java.util.ArrayList, int[], java.util.ArrayList)
+    {
+        java.lang.Integer $r8, $r20;
+        byte $b8, $b12;
+        int[] $r3, r7;
+        javax.print.attribute.standard.MediaSize r22, $r28;
+        float $f0, f1, $f2, f3;
+        javax.print.attribute.standard.MediaSizeName $r10;
+        javax.print.attribute.standard.MediaSize[] r24;
+        java.lang.String[] $r5;
+        java.util.ArrayList r9, r21, $r25, $r26;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11, $i13, $i14, $i15, $i16, i17, $i18, $i19;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1, $r2, $r4, $r11, $r14, $r16, $r17;
+        sun.print.Win32MediaSize $r12, r23, $r27;
+        java.lang.IllegalArgumentException $r19;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r9 := @parameter0: java.util.ArrayList;
+
+        r7 := @parameter1: int[];
+
+        r21 := @parameter2: java.util.ArrayList;
+
+        if r21 != null goto label01;
+
+        $r25 = new java.util.ArrayList;
+
+        specialinvoke $r25.<java.util.ArrayList: void <init>()>();
+
+        r21 = $r25;
+
+     label01:
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $r2 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r3 = specialinvoke r0.<sun.print.Win32PrintService: int[] getAllMediaSizes(java.lang.String,java.lang.String)>($r2, $r1);
+
+        $r4 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r5 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String[] getAllMediaNames(java.lang.String,java.lang.String)>($r4, $r1);
+
+        r22 = null;
+
+        if $r3 == null goto label02;
+
+        if $r5 != null goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $i0 = lengthof $r3;
+
+        i1 = $i0 / 2;
+
+        $r26 = new java.util.ArrayList;
+
+        specialinvoke $r26.<java.util.ArrayList: void <init>()>();
+
+        i17 = 0;
+
+     label04:
+        if i17 >= i1 goto label13;
+
+        $i3 = i17 * 2;
+
+        $i4 = $r3[$i3];
+
+        $f0 = (float) $i4;
+
+        f1 = $f0 / 10.0F;
+
+        $i5 = i17 * 2;
+
+        $i6 = $i5 + 1;
+
+        $i7 = $r3[$i6];
+
+        $f2 = (float) $i7;
+
+        f3 = $f2 / 10.0F;
+
+        $b8 = f1 cmpg 0.0F;
+
+        $i18 = (int) $b8;
+
+        if $i18 <= 0 goto label05;
+
+        $b12 = f3 cmpg 0.0F;
+
+        $i19 = (int) $b12;
+
+        if $i19 > 0 goto label06;
+
+     label05:
+        $i9 = lengthof r7;
+
+        if i1 != $i9 goto label12;
+
+        $i10 = r7[i17];
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i10);
+
+        $i11 = virtualinvoke r9.<java.util.ArrayList: int indexOf(java.lang.Object)>($r8);
+
+        virtualinvoke r9.<java.util.ArrayList: java.lang.Object remove(int)>($i11);
+
+        goto label12;
+
+     label06:
+        $r10 = virtualinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName findMatchingMediaSizeNameMM(float,float)>(f1, f3);
+
+        if $r10 == null goto label07;
+
+        r22 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r10);
+
+     label07:
+        if r22 == null goto label08;
+
+        virtualinvoke $r26.<java.util.ArrayList: boolean add(java.lang.Object)>(r22);
+
+        $r17 = $r5[i17];
+
+        virtualinvoke r21.<java.util.ArrayList: boolean add(java.lang.Object)>($r17);
+
+        goto label12;
+
+     label08:
+        $r11 = $r5[i17];
+
+        $r12 = staticinvoke <sun.print.Win32MediaSize: sun.print.Win32MediaSize findMediaName(java.lang.String)>($r11);
+
+        r23 = $r12;
+
+        if $r12 != null goto label09;
+
+        $r27 = new sun.print.Win32MediaSize;
+
+        $r16 = $r5[i17];
+
+        $i13 = r7[i17];
+
+        specialinvoke $r27.<sun.print.Win32MediaSize: void <init>(java.lang.String,int)>($r16, $i13);
+
+        r23 = $r27;
+
+     label09:
+        $r28 = new javax.print.attribute.standard.MediaSize;
+
+        specialinvoke $r28.<javax.print.attribute.standard.MediaSize: void <init>(float,float,int,javax.print.attribute.standard.MediaSizeName)>(f1, f3, 1000, r23);
+
+        virtualinvoke $r26.<java.util.ArrayList: boolean add(java.lang.Object)>($r28);
+
+        $r14 = $r5[i17];
+
+        virtualinvoke r21.<java.util.ArrayList: boolean add(java.lang.Object)>($r14);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r19 := @caughtexception;
+
+        $i14 = lengthof r7;
+
+        if i1 != $i14 goto label12;
+
+        $i15 = r7[i17];
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i15);
+
+        $i16 = virtualinvoke r9.<java.util.ArrayList: int indexOf(java.lang.Object)>($r20);
+
+        virtualinvoke r9.<java.util.ArrayList: java.lang.Object remove(int)>($i16);
+
+     label12:
+        i17 = i17 + 1;
+
+        r22 = null;
+
+        goto label04;
+
+     label13:
+        $i2 = virtualinvoke $r26.<java.util.ArrayList: int size()>();
+
+        r24 = newarray (javax.print.attribute.standard.MediaSize)[$i2];
+
+        virtualinvoke $r26.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>(r24);
+
+        return r24;
+
+        catch java.lang.IllegalArgumentException from label09 to label10 with label11;
+    }
+
+    private javax.print.attribute.standard.PrinterIsAcceptingJobs getPrinterIsAcceptingJobs()
+    {
+        int $i0;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r2, $r3;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $i0 = specialinvoke r0.<sun.print.Win32PrintService: int getJobStatus(java.lang.String,int)>($r1, 2);
+
+        if $i0 == 1 goto label1;
+
+        $r3 = <javax.print.attribute.standard.PrinterIsAcceptingJobs: javax.print.attribute.standard.PrinterIsAcceptingJobs NOT_ACCEPTING_JOBS>;
+
+        return $r3;
+
+     label1:
+        $r2 = <javax.print.attribute.standard.PrinterIsAcceptingJobs: javax.print.attribute.standard.PrinterIsAcceptingJobs ACCEPTING_JOBS>;
+
+        return $r2;
+    }
+
+    private javax.print.attribute.standard.PrinterState getPrinterState()
+    {
+        sun.print.Win32PrintService r0;
+        javax.print.attribute.standard.PrinterState $r1;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $z0 = r0.<sun.print.Win32PrintService: boolean isInvalid>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <javax.print.attribute.standard.PrinterState: javax.print.attribute.standard.PrinterState STOPPED>;
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private javax.print.attribute.standard.PrinterStateReasons getPrinterStateReasons()
+    {
+        javax.print.attribute.standard.PrinterStateReason $r3;
+        javax.print.attribute.standard.PrinterStateReasons $r1;
+        sun.print.Win32PrintService r0;
+        boolean $z0;
+        javax.print.attribute.standard.Severity $r2;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $z0 = r0.<sun.print.Win32PrintService: boolean isInvalid>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new javax.print.attribute.standard.PrinterStateReasons;
+
+        specialinvoke $r1.<javax.print.attribute.standard.PrinterStateReasons: void <init>()>();
+
+        $r3 = <javax.print.attribute.standard.PrinterStateReason: javax.print.attribute.standard.PrinterStateReason SHUTDOWN>;
+
+        $r2 = <javax.print.attribute.standard.Severity: javax.print.attribute.standard.Severity ERROR>;
+
+        virtualinvoke $r1.<javax.print.attribute.standard.PrinterStateReasons: javax.print.attribute.standard.Severity put(javax.print.attribute.standard.PrinterStateReason,javax.print.attribute.standard.Severity)>($r3, $r2);
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private javax.print.attribute.standard.QueuedJobCount getQueuedJobCount()
+    {
+        javax.print.attribute.standard.QueuedJobCount $r4, $r5;
+        int $i0, $i2;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $i0 = specialinvoke r0.<sun.print.Win32PrintService: int getJobStatus(java.lang.String,int)>($r1, 1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r4 = new javax.print.attribute.standard.QueuedJobCount;
+
+        specialinvoke $r4.<javax.print.attribute.standard.QueuedJobCount: void <init>(int)>($i0);
+
+        return $r4;
+
+     label1:
+        $r5 = new javax.print.attribute.standard.QueuedJobCount;
+
+        specialinvoke $r5.<javax.print.attribute.standard.QueuedJobCount: void <init>(int)>(0);
+
+        return $r5;
+    }
+
+    private boolean isSupportedCopies(javax.print.attribute.standard.Copies)
+    {
+        java.lang.Throwable $r4;
+        javax.print.attribute.standard.Copies r1;
+        int $i0, $i1, $i2;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: javax.print.attribute.standard.Copies;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.print.Win32PrintService: boolean gotCopies>;
+
+        if $z0 != 0 goto label2;
+
+        $r2 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r3 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $i2 = specialinvoke r0.<sun.print.Win32PrintService: int getCopiesSupported(java.lang.String,java.lang.String)>($r2, $r3);
+
+        r0.<sun.print.Win32PrintService: int nCopies> = $i2;
+
+        r0.<sun.print.Win32PrintService: boolean gotCopies> = 1;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r4;
+
+     label6:
+        $i0 = virtualinvoke r1.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        if $i0 <= 0 goto label7;
+
+        $i1 = r0.<sun.print.Win32PrintService: int nCopies>;
+
+        if $i0 > $i1 goto label7;
+
+        $z1 = 1;
+
+        goto label8;
+
+     label7:
+        $z1 = 0;
+
+     label8:
+        return $z1;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private boolean isSupportedMedia(javax.print.attribute.standard.MediaSizeName)
+    {
+        javax.print.attribute.standard.MediaSizeName r3, $r5;
+        int $i0, i1;
+        sun.print.Win32PrintService r0;
+        javax.print.attribute.standard.MediaSizeName[] $r1, $r2, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r3 := @parameter0: javax.print.attribute.standard.MediaSizeName;
+
+        specialinvoke r0.<sun.print.Win32PrintService: void initMedia()>();
+
+        $r1 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $r5 = $r4[i1];
+
+        $z0 = virtualinvoke r3.<javax.print.attribute.standard.MediaSizeName: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private boolean isSupportedMediaPrintableArea(javax.print.attribute.standard.MediaPrintableArea)
+    {
+        javax.print.attribute.standard.MediaPrintableArea r3, $r5;
+        int $i0, i1;
+        sun.print.Win32PrintService r0;
+        javax.print.attribute.standard.MediaPrintableArea[] $r1, $r2, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r3 := @parameter0: javax.print.attribute.standard.MediaPrintableArea;
+
+        specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] getMediaPrintables(javax.print.attribute.standard.MediaSizeName)>(null);
+
+        $r1 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables>;
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] mediaPrintables>;
+
+        $r5 = $r4[i1];
+
+        $z0 = virtualinvoke r3.<javax.print.attribute.standard.MediaPrintableArea: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private boolean isSupportedMediaTray(javax.print.attribute.standard.MediaTray)
+    {
+        javax.print.attribute.standard.MediaTray r2, $r3;
+        javax.print.attribute.standard.MediaTray[] $r1;
+        int $i0, i1;
+        sun.print.Win32PrintService r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r2 := @parameter0: javax.print.attribute.standard.MediaTray;
+
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] getMediaTrays()>();
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = $r1[i1];
+
+        $z0 = virtualinvoke r2.<javax.print.attribute.standard.MediaTray: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private int getPrinterCapabilities()
+    {
+        int $i0, $i1, $i2;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $i0 = r0.<sun.print.Win32PrintService: int prnCaps>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r2 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $i2 = specialinvoke r0.<sun.print.Win32PrintService: int getCapabilities(java.lang.String,java.lang.String)>($r1, $r2);
+
+        r0.<sun.print.Win32PrintService: int prnCaps> = $i2;
+
+     label1:
+        $i1 = r0.<sun.print.Win32PrintService: int prnCaps>;
+
+        return $i1;
+    }
+
+    private java.lang.String getPort()
+    {
+        sun.print.Win32PrintService r0;
+        java.lang.String $r1, $r2, $r3, $r4;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: java.lang.String port>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r4 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPrinterPort(java.lang.String)>($r3);
+
+        r0.<sun.print.Win32PrintService: java.lang.String port> = $r4;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: java.lang.String port>;
+
+        return $r2;
+    }
+
+    private int[] getDefaultPrinterSettings()
+    {
+        int[] $r1, $r2, $r5;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r3, $r4;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: int[] defaultSettings>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r4 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $r5 = specialinvoke r0.<sun.print.Win32PrintService: int[] getDefaultSettings(java.lang.String,java.lang.String)>($r3, $r4);
+
+        r0.<sun.print.Win32PrintService: int[] defaultSettings> = $r5;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: int[] defaultSettings>;
+
+        return $r2;
+    }
+
+    private javax.print.attribute.standard.PrinterResolution[] getPrintResolutions()
+    {
+        javax.print.attribute.standard.PrinterResolution $r10;
+        java.lang.Object[] $r7;
+        java.util.ArrayList $r5;
+        int[] $r4;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, i8;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r2, $r3;
+        java.lang.IllegalArgumentException $r12;
+        javax.print.attribute.standard.PrinterResolution[] $r1, $r6, $r8, $r9, $r11, $r13;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] printRes>;
+
+        if $r1 != null goto label8;
+
+        $r2 = r0.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r3 = specialinvoke r0.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $r4 = specialinvoke r0.<sun.print.Win32PrintService: int[] getAllResolutions(java.lang.String,java.lang.String)>($r2, $r3);
+
+        if $r4 != null goto label1;
+
+        $r11 = newarray (javax.print.attribute.standard.PrinterResolution)[0];
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] printRes> = $r11;
+
+        goto label8;
+
+     label1:
+        $i0 = lengthof $r4;
+
+        i1 = $i0 / 2;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        i8 = 0;
+
+     label2:
+        if i8 >= i1 goto label7;
+
+     label3:
+        $r10 = new javax.print.attribute.standard.PrinterResolution;
+
+        $i3 = i8 * 2;
+
+        $i7 = $r4[$i3];
+
+        $i4 = i8 * 2;
+
+        $i5 = $i4 + 1;
+
+        $i6 = $r4[$i5];
+
+        specialinvoke $r10.<javax.print.attribute.standard.PrinterResolution: void <init>(int,int,int)>($i7, $i6, 100);
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r12 := @caughtexception;
+
+     label6:
+        i8 = i8 + 1;
+
+        goto label2;
+
+     label7:
+        $i2 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        $r6 = newarray (javax.print.attribute.standard.PrinterResolution)[$i2];
+
+        $r7 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (javax.print.attribute.standard.PrinterResolution[]) $r7;
+
+        $r9 = (javax.print.attribute.standard.PrinterResolution[]) $r8;
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] printRes> = $r9;
+
+     label8:
+        $r13 = r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] printRes>;
+
+        return $r13;
+
+        catch java.lang.IllegalArgumentException from label3 to label4 with label5;
+    }
+
+    private boolean isSupportedResolution(javax.print.attribute.standard.PrinterResolution)
+    {
+        javax.print.attribute.standard.PrinterResolution[] $r1;
+        javax.print.attribute.standard.PrinterResolution r2, $r3;
+        int $i0, i1;
+        sun.print.Win32PrintService r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r2 := @parameter0: javax.print.attribute.standard.PrinterResolution;
+
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] getPrintResolutions()>();
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = $r1[i1];
+
+        $z0 = virtualinvoke r2.<javax.print.attribute.standard.PrinterResolution: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public javax.print.DocPrintJob createPrintJob()
+    {
+        sun.print.Win32PrintJob $r1;
+        sun.print.Win32PrintService r2;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: sun.print.Win32PrintService;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPrintJobAccess()>();
+
+     label1:
+        $r1 = new sun.print.Win32PrintJob;
+
+        specialinvoke $r1.<sun.print.Win32PrintJob: void <init>(sun.print.Win32PrintService)>(r2);
+
+        return $r1;
+    }
+
+    private javax.print.attribute.PrintServiceAttributeSet getDynamicAttributes()
+    {
+        javax.print.attribute.standard.QueuedJobCount $r3;
+        sun.print.Win32PrintService r1;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r2;
+        javax.print.attribute.HashPrintServiceAttributeSet $r0;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        $r0 = new javax.print.attribute.HashPrintServiceAttributeSet;
+
+        specialinvoke $r0.<javax.print.attribute.HashPrintServiceAttributeSet: void <init>()>();
+
+        $r2 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterIsAcceptingJobs getPrinterIsAcceptingJobs()>();
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r2);
+
+        $r3 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.QueuedJobCount getQueuedJobCount()>();
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r3);
+
+        return $r0;
+    }
+
+    public javax.print.attribute.PrintServiceAttributeSet getUpdatedAttributes()
+    {
+        javax.print.attribute.PrintServiceAttributeSet $r1, $r2, $r5, $r7, $r8;
+        javax.print.attribute.Attribute[] $r4;
+        int $i0, i1;
+        sun.print.Win32PrintService r0;
+        javax.print.attribute.Attribute r6;
+        javax.print.attribute.HashPrintServiceAttributeSet $r3;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttributeSet getDynamicAttributes()>();
+
+        $r2 = r0.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttributeSet lastSet>;
+
+        if $r2 != null goto label1;
+
+        r0.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttributeSet lastSet> = $r1;
+
+        $r8 = staticinvoke <javax.print.attribute.AttributeSetUtilities: javax.print.attribute.PrintServiceAttributeSet unmodifiableView(javax.print.attribute.PrintServiceAttributeSet)>($r1);
+
+        return $r8;
+
+     label1:
+        $r3 = new javax.print.attribute.HashPrintServiceAttributeSet;
+
+        specialinvoke $r3.<javax.print.attribute.HashPrintServiceAttributeSet: void <init>()>();
+
+        $r4 = interfaceinvoke $r1.<javax.print.attribute.PrintServiceAttributeSet: javax.print.attribute.Attribute[] toArray()>();
+
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof $r4;
+
+        if i1 >= $i0 goto label4;
+
+        r6 = $r4[i1];
+
+        $r7 = r0.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttributeSet lastSet>;
+
+        $z0 = interfaceinvoke $r7.<javax.print.attribute.PrintServiceAttributeSet: boolean containsValue(javax.print.attribute.Attribute)>(r6);
+
+        if $z0 != 0 goto label3;
+
+        interfaceinvoke $r3.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>(r6);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        r0.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttributeSet lastSet> = $r1;
+
+        $r5 = staticinvoke <javax.print.attribute.AttributeSetUtilities: javax.print.attribute.PrintServiceAttributeSet unmodifiableView(javax.print.attribute.PrintServiceAttributeSet)>($r3);
+
+        return $r5;
+    }
+
+    public void wakeNotifier()
+    {
+        sun.print.ServiceNotifier $r1, $r2;
+        java.lang.Throwable $r3;
+        sun.print.Win32PrintService r0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        virtualinvoke $r2.<sun.print.ServiceNotifier: void wake()>();
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void addPrintServiceAttributeListener(javax.print.event.PrintServiceAttributeListener)
+    {
+        sun.print.ServiceNotifier $r2, $r3, $r4;
+        java.lang.Throwable $r5;
+        javax.print.event.PrintServiceAttributeListener r1;
+        sun.print.Win32PrintService r0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: javax.print.event.PrintServiceAttributeListener;
+
+        entermonitor r0;
+
+     label1:
+        if r1 != null goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        if $r2 != null goto label4;
+
+        $r4 = new sun.print.ServiceNotifier;
+
+        specialinvoke $r4.<sun.print.ServiceNotifier: void <init>(javax.print.PrintService)>(r0);
+
+        r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier> = $r4;
+
+     label4:
+        $r3 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        virtualinvoke $r3.<sun.print.ServiceNotifier: void addListener(javax.print.event.PrintServiceAttributeListener)>(r1);
+
+        exitmonitor r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r5;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void removePrintServiceAttributeListener(javax.print.event.PrintServiceAttributeListener)
+    {
+        java.lang.Throwable $r6;
+        javax.print.event.PrintServiceAttributeListener r1;
+        sun.print.ServiceNotifier $r2, $r3, $r4, $r5;
+        sun.print.Win32PrintService r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: javax.print.event.PrintServiceAttributeListener;
+
+        entermonitor r0;
+
+     label1:
+        if r1 == null goto label2;
+
+        $r2 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        if $r2 != null goto label4;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        return;
+
+     label4:
+        $r3 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        virtualinvoke $r3.<sun.print.ServiceNotifier: void removeListener(javax.print.event.PrintServiceAttributeListener)>(r1);
+
+        $r4 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        $z0 = virtualinvoke $r4.<sun.print.ServiceNotifier: boolean isEmpty()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier>;
+
+        virtualinvoke $r5.<sun.print.ServiceNotifier: void stopNotifier()>();
+
+        r0.<sun.print.Win32PrintService: sun.print.ServiceNotifier notifier> = null;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)
+    {
+        javax.print.attribute.standard.QueuedJobCount $r4;
+        javax.print.attribute.standard.PrinterName $r7;
+        java.lang.IllegalArgumentException $r10;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r3;
+        java.lang.NullPointerException $r11;
+        javax.print.attribute.standard.PrinterStateReasons $r5;
+        int $i0, $i1;
+        java.lang.Class r0, $r1;
+        sun.print.Win32PrintService r2;
+        javax.print.attribute.standard.PrinterState $r6;
+        boolean $z0;
+        javax.print.attribute.standard.ColorSupported $r8, $r9;
+
+        r2 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label1;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>(java.lang.String)>("category");
+
+        throw $r11;
+
+     label1:
+        $r1 = class "Ljavax/print/attribute/PrintServiceAttribute;";
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Not a PrintServiceAttribute");
+
+        throw $r10;
+
+     label2:
+        if r0 != class "Ljavax/print/attribute/standard/ColorSupported;" goto label4;
+
+        $i0 = specialinvoke r2.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label3;
+
+        $r9 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported SUPPORTED>;
+
+        return $r9;
+
+     label3:
+        $r8 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported NOT_SUPPORTED>;
+
+        return $r8;
+
+     label4:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterName;" goto label5;
+
+        $r7 = specialinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterName getPrinterName()>();
+
+        return $r7;
+
+     label5:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterState;" goto label6;
+
+        $r6 = specialinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterState getPrinterState()>();
+
+        return $r6;
+
+     label6:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterStateReasons;" goto label7;
+
+        $r5 = specialinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterStateReasons getPrinterStateReasons()>();
+
+        return $r5;
+
+     label7:
+        if r0 != class "Ljavax/print/attribute/standard/QueuedJobCount;" goto label8;
+
+        $r4 = specialinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.QueuedJobCount getQueuedJobCount()>();
+
+        return $r4;
+
+     label8:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterIsAcceptingJobs;" goto label9;
+
+        $r3 = specialinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterIsAcceptingJobs getPrinterIsAcceptingJobs()>();
+
+        return $r3;
+
+     label9:
+        return null;
+    }
+
+    public javax.print.attribute.PrintServiceAttributeSet getAttributes()
+    {
+        javax.print.attribute.standard.QueuedJobCount $r6;
+        javax.print.attribute.standard.PrinterName $r2;
+        javax.print.attribute.PrintServiceAttributeSet $r8;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r3;
+        javax.print.attribute.standard.PrinterStateReasons $r5;
+        int $i0, $i1;
+        sun.print.Win32PrintService r1;
+        javax.print.attribute.standard.PrinterState $r4;
+        javax.print.attribute.HashPrintServiceAttributeSet $r0;
+        javax.print.attribute.standard.ColorSupported $r7, $r9;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        $r0 = new javax.print.attribute.HashPrintServiceAttributeSet;
+
+        specialinvoke $r0.<javax.print.attribute.HashPrintServiceAttributeSet: void <init>()>();
+
+        $r2 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterName getPrinterName()>();
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r2);
+
+        $r3 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterIsAcceptingJobs getPrinterIsAcceptingJobs()>();
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r3);
+
+        $r4 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterState getPrinterState()>();
+
+        if $r4 == null goto label1;
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r4);
+
+     label1:
+        $r5 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterStateReasons getPrinterStateReasons()>();
+
+        if $r5 == null goto label2;
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r5);
+
+     label2:
+        $r6 = specialinvoke r1.<sun.print.Win32PrintService: javax.print.attribute.standard.QueuedJobCount getQueuedJobCount()>();
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r6);
+
+        $i0 = specialinvoke r1.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label3;
+
+        $r9 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported SUPPORTED>;
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r9);
+
+        goto label4;
+
+     label3:
+        $r7 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported NOT_SUPPORTED>;
+
+        interfaceinvoke $r0.<javax.print.attribute.PrintServiceAttributeSet: boolean add(javax.print.attribute.Attribute)>($r7);
+
+     label4:
+        $r8 = staticinvoke <javax.print.attribute.AttributeSetUtilities: javax.print.attribute.PrintServiceAttributeSet unmodifiableView(javax.print.attribute.PrintServiceAttributeSet)>($r0);
+
+        return $r8;
+    }
+
+    public javax.print.DocFlavor[] getSupportedDocFlavors()
+    {
+        javax.print.DocFlavor$BYTE_ARRAY $r4;
+        javax.print.DocFlavor$INPUT_STREAM $r5;
+        javax.print.DocFlavor[] $r0, $r2, $r3, r7;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        sun.print.Win32PrintService r1;
+        javax.print.DocFlavor$URL $r6;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        $r0 = <sun.print.Win32PrintService: javax.print.DocFlavor[] supportedFlavors>;
+
+        i0 = lengthof $r0;
+
+        $i1 = specialinvoke r1.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i2 = $i1 & 16;
+
+        if $i2 == 0 goto label1;
+
+        $i3 = i0 + 3;
+
+        r7 = newarray (javax.print.DocFlavor)[$i3];
+
+        $r3 = <sun.print.Win32PrintService: javax.print.DocFlavor[] supportedFlavors>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r7, 0, i0);
+
+        $r4 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY POSTSCRIPT>;
+
+        r7[i0] = $r4;
+
+        $i4 = i0 + 1;
+
+        $r5 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM POSTSCRIPT>;
+
+        r7[$i4] = $r5;
+
+        $i5 = i0 + 2;
+
+        $r6 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL POSTSCRIPT>;
+
+        r7[$i5] = $r6;
+
+        goto label2;
+
+     label1:
+        r7 = newarray (javax.print.DocFlavor)[i0];
+
+        $r2 = <sun.print.Win32PrintService: javax.print.DocFlavor[] supportedFlavors>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r7, 0, i0);
+
+     label2:
+        return r7;
+    }
+
+    public boolean isDocFlavorSupported(javax.print.DocFlavor)
+    {
+        javax.print.DocFlavor[] r3;
+        int i0, $i1;
+        sun.print.Win32PrintService r0;
+        javax.print.DocFlavor r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        r1 := @parameter0: javax.print.DocFlavor;
+
+        $z0 = specialinvoke r0.<sun.print.Win32PrintService: boolean isPostScriptFlavor(javax.print.DocFlavor)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        r3 = virtualinvoke r0.<sun.print.Win32PrintService: javax.print.DocFlavor[] getSupportedDocFlavors()>();
+
+        goto label2;
+
+     label1:
+        r3 = <sun.print.Win32PrintService: javax.print.DocFlavor[] supportedFlavors>;
+
+     label2:
+        i0 = 0;
+
+     label3:
+        $i1 = lengthof r3;
+
+        if i0 >= $i1 goto label5;
+
+        $r2 = r3[i0];
+
+        $z1 = virtualinvoke r1.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label5:
+        return 0;
+    }
+
+    public java.lang.Class[] getSupportedAttributeCategories()
+    {
+        java.lang.Object[] $r9;
+        java.util.ArrayList $r12;
+        int[] $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, $i12;
+        sun.print.Win32PrintService r3;
+        java.lang.Class[] $r1, $r2, $r5, $r8, $r10, $r11;
+        javax.print.attribute.standard.PrinterResolution[] $r7;
+        java.lang.Class $r6;
+
+        r3 := @this: sun.print.Win32PrintService;
+
+        $r12 = new java.util.ArrayList;
+
+        $r1 = <sun.print.Win32PrintService: java.lang.Class[] otherAttrCats>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 + 3;
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>(int)>($i1);
+
+        i9 = 0;
+
+     label1:
+        $r2 = <sun.print.Win32PrintService: java.lang.Class[] otherAttrCats>;
+
+        $i2 = lengthof $r2;
+
+        if i9 >= $i2 goto label2;
+
+        $r5 = <sun.print.Win32PrintService: java.lang.Class[] otherAttrCats>;
+
+        $r6 = $r5[i9];
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label2:
+        $i3 = specialinvoke r3.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i4 = $i3 & 2;
+
+        if $i4 == 0 goto label3;
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>(class "Ljavax/print/attribute/standard/Sides;");
+
+     label3:
+        $i5 = $i3 & 8;
+
+        if $i5 == 0 goto label4;
+
+        $r4 = specialinvoke r3.<sun.print.Win32PrintService: int[] getDefaultPrinterSettings()>();
+
+        $i7 = $r4[3];
+
+        $i12 = (int) -4;
+
+        if $i7 < $i12 goto label4;
+
+        $i8 = $r4[3];
+
+        if $i8 >= 0 goto label4;
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>(class "Ljavax/print/attribute/standard/PrintQuality;");
+
+     label4:
+        $r7 = specialinvoke r3.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] getPrintResolutions()>();
+
+        if $r7 == null goto label5;
+
+        $i6 = lengthof $r7;
+
+        if $i6 <= 0 goto label5;
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>(class "Ljavax/print/attribute/standard/PrinterResolution;");
+
+     label5:
+        $i10 = virtualinvoke $r12.<java.util.ArrayList: int size()>();
+
+        $r8 = newarray (java.lang.Class)[$i10];
+
+        $r9 = virtualinvoke $r12.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r8);
+
+        $r10 = (java.lang.Class[]) $r9;
+
+        $r11 = (java.lang.Class[]) $r10;
+
+        return $r11;
+    }
+
+    public boolean isAttributeCategorySupported(java.lang.Class)
+    {
+        java.lang.Class[] $r3;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.NullPointerException $r10;
+        int $i0, i1;
+        java.lang.Class r0, $r1, $r4;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        sun.print.Win32PrintService r2;
+        java.lang.String $r9;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label1;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("null category");
+
+        throw $r10;
+
+     label1:
+        $r1 = class "Ljavax/print/attribute/Attribute;";
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not an Attribute");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label2:
+        $r3 = virtualinvoke r2.<sun.print.Win32PrintService: java.lang.Class[] getSupportedAttributeCategories()>();
+
+        i1 = 0;
+
+     label3:
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label5;
+
+        $r4 = $r3[i1];
+
+        $z1 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label5:
+        return 0;
+    }
+
+    public java.lang.Object getDefaultAttributeValue(java.lang.Class)
+    {
+        javax.print.attribute.standard.Chromaticity $r45, $r46;
+        javax.print.attribute.standard.PrinterResolution $r80, $r81;
+        java.lang.Integer $r33;
+        javax.print.attribute.standard.PrintQuality $r8, $r9, $r10;
+        javax.print.attribute.standard.Destination $r77, $r79;
+        javax.print.attribute.standard.SheetCollate $r5, $r6;
+        javax.print.attribute.standard.RequestingUserName $r82;
+        java.lang.StringBuilder $r51, $r52, $r69;
+        javax.print.attribute.standard.Copies $r71, $r72;
+        float[] $r65;
+        java.util.ArrayList $r29, $r31, $r34;
+        java.lang.String $r53, $r64, r67;
+        javax.print.attribute.standard.ColorSupported $r11, $r12;
+        javax.print.attribute.standard.OrientationRequested $r42, $r43;
+        javax.print.attribute.standard.MediaPrintableArea r66, $r75;
+        java.io.File $r76;
+        javax.print.attribute.standard.MediaSizeName[] $r23, $r24, $r27, $r28, $r39, $r40, $r62;
+        java.net.URISyntaxException $r56;
+        java.lang.NullPointerException $r68;
+        int[] $r3;
+        java.lang.SecurityException $r55, $r57;
+        java.net.URI $r20, $r78;
+        boolean $z0, $z1, $z2, $z3;
+        javax.print.attribute.standard.Fidelity $r4;
+        javax.print.attribute.standard.MediaSize $r37;
+        javax.print.attribute.standard.JobName $r73;
+        float $f0, $f1, $f2, $f3;
+        javax.print.attribute.standard.MediaSizeName $r21, $r25, $r26, $r38, r61, $r63;
+        javax.print.attribute.standard.MediaSize[] $r30, $r32, $r35, $r36;
+        javax.print.attribute.standard.PageRanges $r74;
+        javax.print.attribute.standard.Sides $r15, $r16, $r17;
+        int i0, i1, i2, i3, i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i17;
+        sun.print.Win32PrintService r2;
+        java.lang.IllegalArgumentException $r60, $r70;
+        java.lang.Class r0, $r1;
+
+        r2 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label01;
+
+        $r68 = new java.lang.NullPointerException;
+
+        specialinvoke $r68.<java.lang.NullPointerException: void <init>(java.lang.String)>("null category");
+
+        throw $r68;
+
+     label01:
+        $r1 = class "Ljavax/print/attribute/Attribute;";
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z0 != 0 goto label02;
+
+        $r70 = new java.lang.IllegalArgumentException;
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not an Attribute");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r70.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r53);
+
+        throw $r70;
+
+     label02:
+        $z1 = virtualinvoke r2.<sun.print.Win32PrintService: boolean isAttributeCategorySupported(java.lang.Class)>(r0);
+
+        if $z1 != 0 goto label03;
+
+        return null;
+
+     label03:
+        $r3 = specialinvoke r2.<sun.print.Win32PrintService: int[] getDefaultPrinterSettings()>();
+
+        i14 = $r3[0];
+
+        i0 = $r3[2];
+
+        i1 = $r3[3];
+
+        i2 = $r3[4];
+
+        i3 = $r3[5];
+
+        i4 = $r3[6];
+
+        i5 = $r3[7];
+
+        i6 = $r3[8];
+
+        if r0 != class "Ljavax/print/attribute/standard/Copies;" goto label05;
+
+        if i2 <= 0 goto label04;
+
+        $r71 = new javax.print.attribute.standard.Copies;
+
+        specialinvoke $r71.<javax.print.attribute.standard.Copies: void <init>(int)>(i2);
+
+        return $r71;
+
+     label04:
+        $r72 = new javax.print.attribute.standard.Copies;
+
+        specialinvoke $r72.<javax.print.attribute.standard.Copies: void <init>(int)>(1);
+
+        return $r72;
+
+     label05:
+        if r0 != class "Ljavax/print/attribute/standard/Chromaticity;" goto label07;
+
+        if i6 != 2 goto label06;
+
+        $r46 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity COLOR>;
+
+        return $r46;
+
+     label06:
+        $r45 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity MONOCHROME>;
+
+        return $r45;
+
+     label07:
+        if r0 != class "Ljavax/print/attribute/standard/JobName;" goto label08;
+
+        $r73 = new javax.print.attribute.standard.JobName;
+
+        specialinvoke $r73.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>("Java Printing", null);
+
+        return $r73;
+
+     label08:
+        if r0 != class "Ljavax/print/attribute/standard/OrientationRequested;" goto label10;
+
+        if i3 != 2 goto label09;
+
+        $r43 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        return $r43;
+
+     label09:
+        $r42 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested PORTRAIT>;
+
+        return $r42;
+
+     label10:
+        if r0 != class "Ljavax/print/attribute/standard/PageRanges;" goto label11;
+
+        $r74 = new javax.print.attribute.standard.PageRanges;
+
+        specialinvoke $r74.<javax.print.attribute.standard.PageRanges: void <init>(int,int)>(1, 2147483647);
+
+        return $r74;
+
+     label11:
+        if r0 != class "Ljavax/print/attribute/standard/Media;" goto label16;
+
+        $r26 = virtualinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName findWin32Media(int)>(i14);
+
+        r61 = $r26;
+
+        if $r26 == null goto label13;
+
+        $z3 = specialinvoke r2.<sun.print.Win32PrintService: boolean isSupportedMedia(javax.print.attribute.standard.MediaSizeName)>($r26);
+
+        if $z3 != 0 goto label12;
+
+        $r39 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r39 == null goto label12;
+
+        $r40 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        r61 = $r40[0];
+
+        virtualinvoke r2.<sun.print.Win32PrintService: int findPaperID(javax.print.attribute.standard.MediaSizeName)>(r61);
+
+     label12:
+        return r61;
+
+     label13:
+        specialinvoke r2.<sun.print.Win32PrintService: void initMedia()>();
+
+        $r27 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r27 == null goto label15;
+
+        $r28 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $i9 = lengthof $r28;
+
+        if $i9 <= 0 goto label15;
+
+        $r29 = r2.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        if $r29 == null goto label14;
+
+        $r30 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        if $r30 == null goto label14;
+
+        $r31 = r2.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i10 = virtualinvoke $r31.<java.util.ArrayList: int size()>();
+
+        $r32 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i11 = lengthof $r32;
+
+        if $i10 != $i11 goto label14;
+
+        $r33 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i14);
+
+        $r34 = r2.<sun.print.Win32PrintService: java.util.ArrayList idList>;
+
+        $i12 = virtualinvoke $r34.<java.util.ArrayList: int indexOf(java.lang.Object)>($r33);
+
+        if $i12 < 0 goto label14;
+
+        $r35 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $i13 = lengthof $r35;
+
+        if $i12 >= $i13 goto label14;
+
+        $r36 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] mediaSizes>;
+
+        $r37 = $r36[$i12];
+
+        $r38 = virtualinvoke $r37.<javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSizeName getMediaSizeName()>();
+
+        return $r38;
+
+     label14:
+        $r62 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $r63 = $r62[0];
+
+        return $r63;
+
+     label15:
+        goto label56;
+
+     label16:
+        if r0 != class "Ljavax/print/attribute/standard/MediaPrintableArea;" goto label23;
+
+        $r21 = virtualinvoke r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName findWin32Media(int)>(i14);
+
+        if $r21 == null goto label17;
+
+        $z2 = specialinvoke r2.<sun.print.Win32PrintService: boolean isSupportedMedia(javax.print.attribute.standard.MediaSizeName)>($r21);
+
+        if $z2 != 0 goto label17;
+
+        $r23 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r23 == null goto label17;
+
+        $r24 = r2.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $r25 = $r24[0];
+
+        i14 = virtualinvoke r2.<sun.print.Win32PrintService: int findPaperID(javax.print.attribute.standard.MediaSizeName)>($r25);
+
+     label17:
+        $r64 = r2.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r65 = specialinvoke r2.<sun.print.Win32PrintService: float[] getMediaPrintableArea(java.lang.String,int)>($r64, i14);
+
+        if $r65 == null goto label22;
+
+        r66 = null;
+
+     label18:
+        $r75 = new javax.print.attribute.standard.MediaPrintableArea;
+
+        $f3 = $r65[0];
+
+        $f2 = $r65[1];
+
+        $f1 = $r65[2];
+
+        $f0 = $r65[3];
+
+        specialinvoke $r75.<javax.print.attribute.standard.MediaPrintableArea: void <init>(float,float,float,float,int)>($f3, $f2, $f1, $f0, 25400);
+
+        r66 = $r75;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r60 := @caughtexception;
+
+     label21:
+        return r66;
+
+     label22:
+        return null;
+
+     label23:
+        if r0 != class "Lsun/print/SunAlternateMedia;" goto label24;
+
+        return null;
+
+     label24:
+        if r0 != class "Ljavax/print/attribute/standard/Destination;" goto label31;
+
+     label25:
+        $r77 = new javax.print.attribute.standard.Destination;
+
+        $r76 = new java.io.File;
+
+        specialinvoke $r76.<java.io.File: void <init>(java.lang.String)>("out.prn");
+
+        $r20 = virtualinvoke $r76.<java.io.File: java.net.URI toURI()>();
+
+        specialinvoke $r77.<javax.print.attribute.standard.Destination: void <init>(java.net.URI)>($r20);
+
+     label26:
+        return $r77;
+
+     label27:
+        $r57 := @caughtexception;
+
+     label28:
+        $r79 = new javax.print.attribute.standard.Destination;
+
+        $r78 = new java.net.URI;
+
+        specialinvoke $r78.<java.net.URI: void <init>(java.lang.String)>("file:out.prn");
+
+        specialinvoke $r79.<javax.print.attribute.standard.Destination: void <init>(java.net.URI)>($r78);
+
+     label29:
+        return $r79;
+
+     label30:
+        $r56 := @caughtexception;
+
+        return null;
+
+     label31:
+        if r0 != class "Ljavax/print/attribute/standard/Sides;" goto label35;
+
+        lookupswitch(i4)
+        {
+            case 2: goto label32;
+            case 3: goto label33;
+            default: goto label34;
+        };
+
+     label32:
+        $r16 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_LONG_EDGE>;
+
+        return $r16;
+
+     label33:
+        $r15 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_SHORT_EDGE>;
+
+        return $r15;
+
+     label34:
+        $r17 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides ONE_SIDED>;
+
+        return $r17;
+
+     label35:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterResolution;" goto label42;
+
+        if i1 < 0 goto label36;
+
+        if i0 >= 0 goto label40;
+
+     label36:
+        if i0 <= i1 goto label37;
+
+        $i15 = i0;
+
+        goto label38;
+
+     label37:
+        $i15 = i1;
+
+     label38:
+        if $i15 <= 0 goto label39;
+
+        $r80 = new javax.print.attribute.standard.PrinterResolution;
+
+        specialinvoke $r80.<javax.print.attribute.standard.PrinterResolution: void <init>(int,int,int)>($i15, $i15, 100);
+
+        return $r80;
+
+     label39:
+        goto label41;
+
+     label40:
+        $r81 = new javax.print.attribute.standard.PrinterResolution;
+
+        specialinvoke $r81.<javax.print.attribute.standard.PrinterResolution: void <init>(int,int,int)>(i1, i0, 100);
+
+        return $r81;
+
+     label41:
+        goto label56;
+
+     label42:
+        if r0 != class "Ljavax/print/attribute/standard/ColorSupported;" goto label44;
+
+        $i7 = specialinvoke r2.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i8 = $i7 & 1;
+
+        if $i8 == 0 goto label43;
+
+        $r12 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported SUPPORTED>;
+
+        return $r12;
+
+     label43:
+        $r11 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported NOT_SUPPORTED>;
+
+        return $r11;
+
+     label44:
+        if r0 != class "Ljavax/print/attribute/standard/PrintQuality;" goto label48;
+
+        if i1 >= 0 goto label56;
+
+        $i17 = (int) -4;
+
+        if i1 < $i17 goto label56;
+
+        lookupswitch(i1)
+        {
+            case -4: goto label45;
+            case -3: goto label46;
+            default: goto label47;
+        };
+
+     label45:
+        $r9 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality HIGH>;
+
+        return $r9;
+
+     label46:
+        $r8 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality NORMAL>;
+
+        return $r8;
+
+     label47:
+        $r10 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality DRAFT>;
+
+        return $r10;
+
+     label48:
+        if r0 != class "Ljavax/print/attribute/standard/RequestingUserName;" goto label53;
+
+        r67 = "";
+
+     label49:
+        r67 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("user.name", "");
+
+     label50:
+        goto label52;
+
+     label51:
+        $r55 := @caughtexception;
+
+     label52:
+        $r82 = new javax.print.attribute.standard.RequestingUserName;
+
+        specialinvoke $r82.<javax.print.attribute.standard.RequestingUserName: void <init>(java.lang.String,java.util.Locale)>(r67, null);
+
+        return $r82;
+
+     label53:
+        if r0 != class "Ljavax/print/attribute/standard/SheetCollate;" goto label55;
+
+        if i5 != 1 goto label54;
+
+        $r6 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate COLLATED>;
+
+        return $r6;
+
+     label54:
+        $r5 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate UNCOLLATED>;
+
+        return $r5;
+
+     label55:
+        if r0 != class "Ljavax/print/attribute/standard/Fidelity;" goto label56;
+
+        $r4 = <javax.print.attribute.standard.Fidelity: javax.print.attribute.standard.Fidelity FIDELITY_FALSE>;
+
+        return $r4;
+
+     label56:
+        return null;
+
+        catch java.lang.IllegalArgumentException from label18 to label19 with label20;
+        catch java.lang.SecurityException from label25 to label26 with label27;
+        catch java.net.URISyntaxException from label28 to label29 with label30;
+        catch java.lang.SecurityException from label49 to label50 with label51;
+    }
+
+    private boolean isPostScriptFlavor(javax.print.DocFlavor)
+    {
+        javax.print.DocFlavor$BYTE_ARRAY $r1;
+        javax.print.DocFlavor$INPUT_STREAM $r2;
+        sun.print.Win32PrintService r4;
+        javax.print.DocFlavor r0;
+        javax.print.DocFlavor$URL $r3;
+        boolean $z0, $z1, $z2;
+
+        r4 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.DocFlavor;
+
+        $r1 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY POSTSCRIPT>;
+
+        $z0 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM POSTSCRIPT>;
+
+        $z1 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label1;
+
+        $r3 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL POSTSCRIPT>;
+
+        $z2 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean isPSDocAttr(java.lang.Class)
+    {
+        java.lang.Class r0;
+        sun.print.Win32PrintService r1;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 == class "Ljavax/print/attribute/standard/OrientationRequested;" goto label1;
+
+        if r0 != class "Ljavax/print/attribute/standard/Copies;" goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean isAutoSense(javax.print.DocFlavor)
+    {
+        javax.print.DocFlavor$BYTE_ARRAY $r1;
+        javax.print.DocFlavor$INPUT_STREAM $r2;
+        sun.print.Win32PrintService r4;
+        javax.print.DocFlavor r0;
+        javax.print.DocFlavor$URL $r3;
+        boolean $z0, $z1, $z2;
+
+        r4 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.DocFlavor;
+
+        $r1 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY AUTOSENSE>;
+
+        $z0 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM AUTOSENSE>;
+
+        $z1 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label1;
+
+        $r3 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL AUTOSENSE>;
+
+        $z2 = virtualinvoke r0.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public java.lang.Object getSupportedAttributeValues(java.lang.Class, javax.print.DocFlavor, javax.print.attribute.AttributeSet)
+    {
+        javax.print.attribute.standard.Media $r21, $r24, r88;
+        javax.print.DocFlavor r2;
+        javax.print.attribute.standard.Destination $r43, $r78;
+        java.lang.StringBuilder $r65, $r66, $r67, $r70, $r71, $r72;
+        javax.print.attribute.standard.ColorSupported $r60, $r61;
+        javax.print.attribute.standard.Sides[] $r95;
+        javax.print.attribute.standard.MediaSizeName[] $r25, $r26, $r28, $r29, $r30;
+        java.net.URISyntaxException $r76;
+        javax.print.DocFlavor$INPUT_STREAM $r34, $r35, $r36, $r52, $r55, $r58;
+        javax.print.attribute.standard.Fidelity[] r103;
+        java.lang.SecurityException $r77, $r80;
+        javax.print.attribute.standard.Fidelity $r7, $r8;
+        javax.print.attribute.standard.MediaSizeName $r89;
+        javax.print.attribute.standard.Sides $r96, $r97, $r98;
+        javax.print.attribute.standard.OrientationRequested[] $r84;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        sun.print.Win32PrintService r3;
+        javax.print.DocFlavor$URL $r40, $r41, $r42, $r53, $r56, $r59;
+        javax.print.attribute.standard.Media[] $r31;
+        javax.print.attribute.standard.PrintQuality[] r99;
+        javax.print.attribute.standard.MediaTray[] $r27;
+        java.lang.Class r0, $r1;
+        java.lang.Object $r20;
+        javax.print.attribute.standard.MediaPrintableArea[] $r90, r91;
+        javax.print.attribute.standard.Chromaticity $r46, $r47, $r48;
+        javax.print.attribute.AttributeSet r22;
+        javax.print.attribute.standard.CopiesSupported $r4;
+        javax.print.attribute.standard.Chromaticity[] r82, r83;
+        javax.print.attribute.standard.PrintQuality $r11, $r12, $r13;
+        javax.print.attribute.standard.SheetCollate[] $r100;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r9, $r10, $r14, $r15, $r17, $r18, $r32, $r33, $r49, $r50;
+        javax.print.attribute.standard.SheetCollate $r101, $r102;
+        javax.print.attribute.standard.PrinterResolution[] $r16, r94;
+        javax.print.attribute.standard.RequestingUserName $r62;
+        java.lang.Throwable $r75;
+        java.lang.String $r5, $r6, $r68, $r73, r81;
+        javax.print.attribute.standard.OrientationRequested $r85, $r86, $r87;
+        java.io.File $r44;
+        java.lang.NullPointerException $r74;
+        java.net.URI $r45, $r79;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, $z32, $z33, $z34, $z35;
+        sun.print.SunAlternateMedia $r19;
+        javax.print.DocFlavor$BYTE_ARRAY $r37, $r38, $r39, $r51, $r54, $r57;
+        javax.print.attribute.standard.JobName $r63;
+        javax.print.attribute.standard.PageRanges[] $r92;
+        javax.print.attribute.standard.PageRanges $r93;
+        java.lang.IllegalArgumentException $r64, $r69;
+        javax.print.attribute.Attribute $r23;
+
+        r3 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: javax.print.DocFlavor;
+
+        r22 := @parameter2: javax.print.attribute.AttributeSet;
+
+        if r0 != null goto label01;
+
+        $r74 = new java.lang.NullPointerException;
+
+        specialinvoke $r74.<java.lang.NullPointerException: void <init>(java.lang.String)>("null category");
+
+        throw $r74;
+
+     label01:
+        $r1 = class "Ljavax/print/attribute/Attribute;";
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z0 != 0 goto label02;
+
+        $r69 = new java.lang.IllegalArgumentException;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not implement Attribute");
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r69.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r73);
+
+        throw $r69;
+
+     label02:
+        if r2 == null goto label05;
+
+        $z31 = virtualinvoke r3.<sun.print.Win32PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>(r2);
+
+        if $z31 != 0 goto label03;
+
+        $r64 = new java.lang.IllegalArgumentException;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is an unsupported flavor");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r64.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r68);
+
+        throw $r64;
+
+     label03:
+        $z32 = specialinvoke r3.<sun.print.Win32PrintService: boolean isAutoSense(javax.print.DocFlavor)>(r2);
+
+        if $z32 != 0 goto label04;
+
+        $z33 = specialinvoke r3.<sun.print.Win32PrintService: boolean isPostScriptFlavor(javax.print.DocFlavor)>(r2);
+
+        if $z33 == 0 goto label05;
+
+        $z34 = specialinvoke r3.<sun.print.Win32PrintService: boolean isPSDocAttr(java.lang.Class)>(r0);
+
+        if $z34 == 0 goto label05;
+
+     label04:
+        return null;
+
+     label05:
+        $z35 = virtualinvoke r3.<sun.print.Win32PrintService: boolean isAttributeCategorySupported(java.lang.Class)>(r0);
+
+        if $z35 != 0 goto label06;
+
+        return null;
+
+     label06:
+        if r0 != class "Ljavax/print/attribute/standard/JobName;" goto label07;
+
+        $r63 = new javax.print.attribute.standard.JobName;
+
+        specialinvoke $r63.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>("Java Printing", null);
+
+        return $r63;
+
+     label07:
+        if r0 != class "Ljavax/print/attribute/standard/RequestingUserName;" goto label12;
+
+        r81 = "";
+
+     label08:
+        r81 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("user.name", "");
+
+     label09:
+        goto label11;
+
+     label10:
+        $r80 := @caughtexception;
+
+     label11:
+        $r62 = new javax.print.attribute.standard.RequestingUserName;
+
+        specialinvoke $r62.<javax.print.attribute.standard.RequestingUserName: void <init>(java.lang.String,java.util.Locale)>(r81, null);
+
+        return $r62;
+
+     label12:
+        if r0 != class "Ljavax/print/attribute/standard/ColorSupported;" goto label14;
+
+        $i12 = specialinvoke r3.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i13 = $i12 & 1;
+
+        if $i13 == 0 goto label13;
+
+        $r61 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported SUPPORTED>;
+
+        return $r61;
+
+     label13:
+        $r60 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported NOT_SUPPORTED>;
+
+        return $r60;
+
+     label14:
+        if r0 != class "Ljavax/print/attribute/standard/Chromaticity;" goto label18;
+
+        if r2 == null goto label15;
+
+        $r49 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z20 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r49);
+
+        if $z20 != 0 goto label15;
+
+        $r50 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z21 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r50);
+
+        if $z21 != 0 goto label15;
+
+        $r51 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $z22 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r51);
+
+        if $z22 != 0 goto label15;
+
+        $r52 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $z23 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r52);
+
+        if $z23 != 0 goto label15;
+
+        $r53 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $z24 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r53);
+
+        if $z24 != 0 goto label15;
+
+        $r54 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $z25 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r54);
+
+        if $z25 != 0 goto label15;
+
+        $r55 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $z26 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r55);
+
+        if $z26 != 0 goto label15;
+
+        $r56 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $z27 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r56);
+
+        if $z27 != 0 goto label15;
+
+        $r57 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $z28 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r57);
+
+        if $z28 != 0 goto label15;
+
+        $r58 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $z29 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r58);
+
+        if $z29 != 0 goto label15;
+
+        $r59 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $z30 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r59);
+
+        if $z30 == 0 goto label17;
+
+     label15:
+        $i14 = specialinvoke r3.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i15 = $i14 & 1;
+
+        if $i15 != 0 goto label16;
+
+        r82 = newarray (javax.print.attribute.standard.Chromaticity)[1];
+
+        $r48 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity MONOCHROME>;
+
+        r82[0] = $r48;
+
+        return r82;
+
+     label16:
+        r83 = newarray (javax.print.attribute.standard.Chromaticity)[2];
+
+        $r46 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity MONOCHROME>;
+
+        r83[0] = $r46;
+
+        $r47 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity COLOR>;
+
+        r83[1] = $r47;
+
+        return r83;
+
+     label17:
+        return null;
+
+     label18:
+        if r0 != class "Ljavax/print/attribute/standard/Destination;" goto label25;
+
+     label19:
+        $r43 = new javax.print.attribute.standard.Destination;
+
+        $r44 = new java.io.File;
+
+        specialinvoke $r44.<java.io.File: void <init>(java.lang.String)>("out.prn");
+
+        $r45 = virtualinvoke $r44.<java.io.File: java.net.URI toURI()>();
+
+        specialinvoke $r43.<javax.print.attribute.standard.Destination: void <init>(java.net.URI)>($r45);
+
+     label20:
+        return $r43;
+
+     label21:
+        $r77 := @caughtexception;
+
+     label22:
+        $r78 = new javax.print.attribute.standard.Destination;
+
+        $r79 = new java.net.URI;
+
+        specialinvoke $r79.<java.net.URI: void <init>(java.lang.String)>("file:out.prn");
+
+        specialinvoke $r78.<javax.print.attribute.standard.Destination: void <init>(java.net.URI)>($r79);
+
+     label23:
+        return $r78;
+
+     label24:
+        $r76 := @caughtexception;
+
+        return null;
+
+     label25:
+        if r0 != class "Ljavax/print/attribute/standard/OrientationRequested;" goto label28;
+
+        if r2 == null goto label26;
+
+        $r32 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z9 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r32);
+
+        if $z9 != 0 goto label26;
+
+        $r33 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z10 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r33);
+
+        if $z10 != 0 goto label26;
+
+        $r34 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $z11 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r34);
+
+        if $z11 != 0 goto label26;
+
+        $r35 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $z12 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r35);
+
+        if $z12 != 0 goto label26;
+
+        $r36 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $z13 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r36);
+
+        if $z13 != 0 goto label26;
+
+        $r37 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $z14 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r37);
+
+        if $z14 != 0 goto label26;
+
+        $r38 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $z15 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r38);
+
+        if $z15 != 0 goto label26;
+
+        $r39 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $z16 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r39);
+
+        if $z16 != 0 goto label26;
+
+        $r40 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $z17 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r40);
+
+        if $z17 != 0 goto label26;
+
+        $r41 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $z18 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r41);
+
+        if $z18 != 0 goto label26;
+
+        $r42 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $z19 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r42);
+
+        if $z19 == 0 goto label27;
+
+     label26:
+        $r84 = newarray (javax.print.attribute.standard.OrientationRequested)[3];
+
+        $r85 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested PORTRAIT>;
+
+        $r84[0] = $r85;
+
+        $r86 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        $r84[1] = $r86;
+
+        $r87 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        $r84[2] = $r87;
+
+        return $r84;
+
+     label27:
+        return null;
+
+     label28:
+        if r0 == class "Ljavax/print/attribute/standard/Copies;" goto label29;
+
+        if r0 != class "Ljavax/print/attribute/standard/CopiesSupported;" goto label36;
+
+     label29:
+        entermonitor r3;
+
+     label30:
+        $z1 = r3.<sun.print.Win32PrintService: boolean gotCopies>;
+
+        if $z1 != 0 goto label31;
+
+        $r5 = r3.<sun.print.Win32PrintService: java.lang.String printer>;
+
+        $r6 = specialinvoke r3.<sun.print.Win32PrintService: java.lang.String getPort()>();
+
+        $i1 = specialinvoke r3.<sun.print.Win32PrintService: int getCopiesSupported(java.lang.String,java.lang.String)>($r5, $r6);
+
+        r3.<sun.print.Win32PrintService: int nCopies> = $i1;
+
+        r3.<sun.print.Win32PrintService: boolean gotCopies> = 1;
+
+     label31:
+        exitmonitor r3;
+
+     label32:
+        goto label35;
+
+     label33:
+        $r75 := @caughtexception;
+
+        exitmonitor r3;
+
+     label34:
+        throw $r75;
+
+     label35:
+        $r4 = new javax.print.attribute.standard.CopiesSupported;
+
+        $i0 = r3.<sun.print.Win32PrintService: int nCopies>;
+
+        specialinvoke $r4.<javax.print.attribute.standard.CopiesSupported: void <init>(int,int)>(1, $i0);
+
+        return $r4;
+
+     label36:
+        if r0 != class "Ljavax/print/attribute/standard/Media;" goto label43;
+
+        specialinvoke r3.<sun.print.Win32PrintService: void initMedia()>();
+
+        $r25 = r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r25 != null goto label37;
+
+        $i16 = 0;
+
+        goto label38;
+
+     label37:
+        $r26 = r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $i16 = lengthof $r26;
+
+     label38:
+        $r27 = specialinvoke r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] getMediaTrays()>();
+
+        $i10 = $i16;
+
+        if $r27 != null goto label39;
+
+        $i17 = 0;
+
+        goto label40;
+
+     label39:
+        $i17 = lengthof $r27;
+
+     label40:
+        $i11 = $i10 + $i17;
+
+        $r31 = newarray (javax.print.attribute.standard.Media)[$i11];
+
+        $r28 = r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        if $r28 == null goto label41;
+
+        $r30 = r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $r29 = r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] mediaSizeNames>;
+
+        $i9 = lengthof $r29;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r30, 0, $r31, 0, $i9);
+
+     label41:
+        if $r27 == null goto label42;
+
+        $i6 = lengthof $r27;
+
+        $i8 = $i11 - $i6;
+
+        $i7 = lengthof $r27;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r27, 0, $r31, $i8, $i7);
+
+     label42:
+        return $r31;
+
+     label43:
+        if r0 != class "Ljavax/print/attribute/standard/MediaPrintableArea;" goto label46;
+
+        r88 = null;
+
+        if r22 == null goto label44;
+
+        $r23 = interfaceinvoke r22.<javax.print.attribute.AttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r24 = (javax.print.attribute.standard.Media) $r23;
+
+        r88 = $r24;
+
+        if $r24 == null goto label44;
+
+        $z8 = $r24 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z8 != 0 goto label44;
+
+        r88 = null;
+
+     label44:
+        $r89 = (javax.print.attribute.standard.MediaSizeName) r88;
+
+        $r90 = specialinvoke r3.<sun.print.Win32PrintService: javax.print.attribute.standard.MediaPrintableArea[] getMediaPrintables(javax.print.attribute.standard.MediaSizeName)>($r89);
+
+        if $r90 == null goto label45;
+
+        $i4 = lengthof $r90;
+
+        r91 = newarray (javax.print.attribute.standard.MediaPrintableArea)[$i4];
+
+        $i5 = lengthof $r90;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r90, 0, r91, 0, $i5);
+
+        return r91;
+
+     label45:
+        return null;
+
+     label46:
+        if r0 != class "Lsun/print/SunAlternateMedia;" goto label47;
+
+        $r19 = new sun.print.SunAlternateMedia;
+
+        $r20 = virtualinvoke r3.<sun.print.Win32PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $r21 = (javax.print.attribute.standard.Media) $r20;
+
+        specialinvoke $r19.<sun.print.SunAlternateMedia: void <init>(javax.print.attribute.standard.Media)>($r21);
+
+        return $r19;
+
+     label47:
+        if r0 != class "Ljavax/print/attribute/standard/PageRanges;" goto label50;
+
+        if r2 == null goto label48;
+
+        $r17 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z6 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r17);
+
+        if $z6 != 0 goto label48;
+
+        $r18 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z7 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r18);
+
+        if $z7 == 0 goto label49;
+
+     label48:
+        $r92 = newarray (javax.print.attribute.standard.PageRanges)[1];
+
+        $r93 = new javax.print.attribute.standard.PageRanges;
+
+        specialinvoke $r93.<javax.print.attribute.standard.PageRanges: void <init>(int,int)>(1, 2147483647);
+
+        $r92[0] = $r93;
+
+        return $r92;
+
+     label49:
+        return null;
+
+     label50:
+        if r0 != class "Ljavax/print/attribute/standard/PrinterResolution;" goto label52;
+
+        $r16 = specialinvoke r3.<sun.print.Win32PrintService: javax.print.attribute.standard.PrinterResolution[] getPrintResolutions()>();
+
+        if $r16 != null goto label51;
+
+        return null;
+
+     label51:
+        $i2 = lengthof $r16;
+
+        r94 = newarray (javax.print.attribute.standard.PrinterResolution)[$i2];
+
+        $i3 = lengthof $r16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r16, 0, r94, 0, $i3);
+
+        return r94;
+
+     label52:
+        if r0 != class "Ljavax/print/attribute/standard/Sides;" goto label55;
+
+        if r2 == null goto label53;
+
+        $r14 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z4 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r14);
+
+        if $z4 != 0 goto label53;
+
+        $r15 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z5 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r15);
+
+        if $z5 == 0 goto label54;
+
+     label53:
+        $r95 = newarray (javax.print.attribute.standard.Sides)[3];
+
+        $r96 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides ONE_SIDED>;
+
+        $r95[0] = $r96;
+
+        $r97 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_LONG_EDGE>;
+
+        $r95[1] = $r97;
+
+        $r98 = <javax.print.attribute.standard.Sides: javax.print.attribute.standard.Sides TWO_SIDED_SHORT_EDGE>;
+
+        $r95[2] = $r98;
+
+        return $r95;
+
+     label54:
+        return null;
+
+     label55:
+        if r0 != class "Ljavax/print/attribute/standard/PrintQuality;" goto label56;
+
+        r99 = newarray (javax.print.attribute.standard.PrintQuality)[3];
+
+        $r11 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality DRAFT>;
+
+        r99[0] = $r11;
+
+        $r12 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality HIGH>;
+
+        r99[1] = $r12;
+
+        $r13 = <javax.print.attribute.standard.PrintQuality: javax.print.attribute.standard.PrintQuality NORMAL>;
+
+        r99[2] = $r13;
+
+        return r99;
+
+     label56:
+        if r0 != class "Ljavax/print/attribute/standard/SheetCollate;" goto label59;
+
+        if r2 == null goto label57;
+
+        $r9 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z2 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r9);
+
+        if $z2 != 0 goto label57;
+
+        $r10 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z3 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r10);
+
+        if $z3 == 0 goto label58;
+
+     label57:
+        $r100 = newarray (javax.print.attribute.standard.SheetCollate)[2];
+
+        $r101 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate COLLATED>;
+
+        $r100[0] = $r101;
+
+        $r102 = <javax.print.attribute.standard.SheetCollate: javax.print.attribute.standard.SheetCollate UNCOLLATED>;
+
+        $r100[1] = $r102;
+
+        return $r100;
+
+     label58:
+        return null;
+
+     label59:
+        if r0 != class "Ljavax/print/attribute/standard/Fidelity;" goto label60;
+
+        r103 = newarray (javax.print.attribute.standard.Fidelity)[2];
+
+        $r7 = <javax.print.attribute.standard.Fidelity: javax.print.attribute.standard.Fidelity FIDELITY_FALSE>;
+
+        r103[0] = $r7;
+
+        $r8 = <javax.print.attribute.standard.Fidelity: javax.print.attribute.standard.Fidelity FIDELITY_TRUE>;
+
+        r103[1] = $r8;
+
+        return r103;
+
+     label60:
+        return null;
+
+        catch java.lang.SecurityException from label08 to label09 with label10;
+        catch java.lang.SecurityException from label19 to label20 with label21;
+        catch java.net.URISyntaxException from label22 to label23 with label24;
+        catch java.lang.Throwable from label30 to label32 with label33;
+        catch java.lang.Throwable from label33 to label34 with label33;
+    }
+
+    public boolean isAttributeValueSupported(javax.print.attribute.Attribute, javax.print.DocFlavor, javax.print.attribute.AttributeSet)
+    {
+        javax.print.attribute.standard.Chromaticity $r33;
+        javax.print.attribute.standard.PrinterResolution $r20;
+        javax.print.attribute.AttributeSet r23;
+        javax.print.attribute.standard.Media $r22;
+        javax.print.DocFlavor r2;
+        javax.print.attribute.standard.Destination $r27;
+        javax.print.DocFlavor$SERVICE_FORMATTED $r4, $r5, $r9, $r10, $r34, $r35;
+        java.lang.StringBuilder $r46, $r47, $r48;
+        javax.print.attribute.standard.Copies $r32;
+        java.lang.String $r29, $r30, $r31, $r49;
+        javax.print.attribute.standard.ColorSupported $r6, $r7;
+        javax.print.attribute.standard.OrientationRequested $r8;
+        javax.print.attribute.standard.MediaTray $r25;
+        javax.print.attribute.standard.MediaPrintableArea $r24;
+        java.lang.NullPointerException $r50;
+        javax.print.DocFlavor$INPUT_STREAM $r11, $r12, $r13, $r37, $r40, $r43;
+        java.net.URI $r28;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, $z32, $z33, $z34, $z35, $z36, $z37, $z38, $z39, $z40, $z41, $z43, $z44;
+        javax.print.DocFlavor$BYTE_ARRAY $r14, $r15, $r16, $r36, $r39, $r42;
+        sun.print.SunAlternateMedia $r21;
+        javax.print.attribute.standard.MediaSizeName $r26;
+        int $i0, $i1, $i2, $i3;
+        sun.print.Win32PrintService r3;
+        javax.print.DocFlavor$URL $r17, $r18, $r19, $r38, $r41, $r44;
+        java.lang.IllegalArgumentException $r45;
+        java.lang.Class $r1;
+        javax.print.attribute.Attribute r0;
+
+        r3 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.attribute.Attribute;
+
+        r2 := @parameter1: javax.print.DocFlavor;
+
+        r23 := @parameter2: javax.print.attribute.AttributeSet;
+
+        if r0 != null goto label01;
+
+        $r50 = new java.lang.NullPointerException;
+
+        specialinvoke $r50.<java.lang.NullPointerException: void <init>(java.lang.String)>("null attribute");
+
+        throw $r50;
+
+     label01:
+        $r1 = interfaceinvoke r0.<javax.print.attribute.Attribute: java.lang.Class getCategory()>();
+
+        if r2 == null goto label04;
+
+        $z36 = virtualinvoke r3.<sun.print.Win32PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>(r2);
+
+        if $z36 != 0 goto label02;
+
+        $r45 = new java.lang.IllegalArgumentException;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is an unsupported flavor");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r49);
+
+        throw $r45;
+
+     label02:
+        $z37 = specialinvoke r3.<sun.print.Win32PrintService: boolean isAutoSense(javax.print.DocFlavor)>(r2);
+
+        if $z37 != 0 goto label03;
+
+        $z38 = specialinvoke r3.<sun.print.Win32PrintService: boolean isPostScriptFlavor(javax.print.DocFlavor)>(r2);
+
+        if $z38 == 0 goto label04;
+
+        $z39 = specialinvoke r3.<sun.print.Win32PrintService: boolean isPSDocAttr(java.lang.Class)>($r1);
+
+        if $z39 == 0 goto label04;
+
+     label03:
+        return 0;
+
+     label04:
+        $z40 = virtualinvoke r3.<sun.print.Win32PrintService: boolean isAttributeCategorySupported(java.lang.Class)>($r1);
+
+        if $z40 != 0 goto label05;
+
+        return 0;
+
+     label05:
+        if $r1 != class "Ljavax/print/attribute/standard/Chromaticity;" goto label11;
+
+        if r2 == null goto label06;
+
+        $r34 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z25 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r34);
+
+        if $z25 != 0 goto label06;
+
+        $r35 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z26 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r35);
+
+        if $z26 != 0 goto label06;
+
+        $r36 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $z27 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r36);
+
+        if $z27 != 0 goto label06;
+
+        $r37 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $z28 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r37);
+
+        if $z28 != 0 goto label06;
+
+        $r38 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $z29 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r38);
+
+        if $z29 != 0 goto label06;
+
+        $r39 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $z30 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r39);
+
+        if $z30 != 0 goto label06;
+
+        $r40 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $z31 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r40);
+
+        if $z31 != 0 goto label06;
+
+        $r41 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $z32 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r41);
+
+        if $z32 != 0 goto label06;
+
+        $r42 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $z33 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r42);
+
+        if $z33 != 0 goto label06;
+
+        $r43 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $z34 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r43);
+
+        if $z34 != 0 goto label06;
+
+        $r44 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $z35 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r44);
+
+        if $z35 == 0 goto label10;
+
+     label06:
+        $i2 = specialinvoke r3.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i3 = $i2 & 1;
+
+        if $i3 == 0 goto label07;
+
+        return 1;
+
+     label07:
+        $r33 = <javax.print.attribute.standard.Chromaticity: javax.print.attribute.standard.Chromaticity MONOCHROME>;
+
+        if r0 != $r33 goto label08;
+
+        $z41 = 1;
+
+        goto label09;
+
+     label08:
+        $z41 = 0;
+
+     label09:
+        return $z41;
+
+     label10:
+        return 0;
+
+     label11:
+        if $r1 != class "Ljavax/print/attribute/standard/Copies;" goto label12;
+
+        $r32 = (javax.print.attribute.standard.Copies) r0;
+
+        $z24 = specialinvoke r3.<sun.print.Win32PrintService: boolean isSupportedCopies(javax.print.attribute.standard.Copies)>($r32);
+
+        return $z24;
+
+     label12:
+        if $r1 != class "Ljavax/print/attribute/standard/Destination;" goto label14;
+
+        $r27 = (javax.print.attribute.standard.Destination) r0;
+
+        $r28 = virtualinvoke $r27.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        $r29 = "file";
+
+        $r30 = virtualinvoke $r28.<java.net.URI: java.lang.String getScheme()>();
+
+        $z22 = virtualinvoke $r29.<java.lang.String: boolean equals(java.lang.Object)>($r30);
+
+        if $z22 == 0 goto label13;
+
+        $r31 = virtualinvoke $r28.<java.net.URI: java.lang.String getSchemeSpecificPart()>();
+
+        $z23 = virtualinvoke $r31.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z23 != 0 goto label13;
+
+        return 1;
+
+     label13:
+        return 0;
+
+     label14:
+        if $r1 != class "Ljavax/print/attribute/standard/Media;" goto label16;
+
+        $z18 = r0 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z18 == 0 goto label15;
+
+        $r26 = (javax.print.attribute.standard.MediaSizeName) r0;
+
+        $z21 = specialinvoke r3.<sun.print.Win32PrintService: boolean isSupportedMedia(javax.print.attribute.standard.MediaSizeName)>($r26);
+
+        return $z21;
+
+     label15:
+        $z19 = r0 instanceof javax.print.attribute.standard.MediaTray;
+
+        if $z19 == 0 goto label28;
+
+        $r25 = (javax.print.attribute.standard.MediaTray) r0;
+
+        $z20 = specialinvoke r3.<sun.print.Win32PrintService: boolean isSupportedMediaTray(javax.print.attribute.standard.MediaTray)>($r25);
+
+        return $z20;
+
+     label16:
+        if $r1 != class "Ljavax/print/attribute/standard/MediaPrintableArea;" goto label17;
+
+        $r24 = (javax.print.attribute.standard.MediaPrintableArea) r0;
+
+        $z17 = specialinvoke r3.<sun.print.Win32PrintService: boolean isSupportedMediaPrintableArea(javax.print.attribute.standard.MediaPrintableArea)>($r24);
+
+        return $z17;
+
+     label17:
+        if $r1 != class "Lsun/print/SunAlternateMedia;" goto label18;
+
+        $r21 = (sun.print.SunAlternateMedia) r0;
+
+        $r22 = virtualinvoke $r21.<sun.print.SunAlternateMedia: javax.print.attribute.standard.Media getMedia()>();
+
+        $z16 = virtualinvoke r3.<sun.print.Win32PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>($r22, r2, r23);
+
+        return $z16;
+
+     label18:
+        if $r1 == class "Ljavax/print/attribute/standard/PageRanges;" goto label19;
+
+        if $r1 == class "Ljavax/print/attribute/standard/SheetCollate;" goto label19;
+
+        if $r1 != class "Ljavax/print/attribute/standard/Sides;" goto label20;
+
+     label19:
+        if r2 == null goto label28;
+
+        $r4 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z0 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label28;
+
+        $r5 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z1 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 != 0 goto label28;
+
+        return 0;
+
+     label20:
+        if $r1 != class "Ljavax/print/attribute/standard/PrinterResolution;" goto label21;
+
+        $z14 = r0 instanceof javax.print.attribute.standard.PrinterResolution;
+
+        if $z14 == 0 goto label28;
+
+        $r20 = (javax.print.attribute.standard.PrinterResolution) r0;
+
+        $z15 = specialinvoke r3.<sun.print.Win32PrintService: boolean isSupportedResolution(javax.print.attribute.standard.PrinterResolution)>($r20);
+
+        return $z15;
+
+     label21:
+        if $r1 != class "Ljavax/print/attribute/standard/OrientationRequested;" goto label23;
+
+        $r8 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_PORTRAIT>;
+
+        if r0 == $r8 goto label22;
+
+        if r2 == null goto label28;
+
+        $r9 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $z3 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r9);
+
+        if $z3 != 0 goto label28;
+
+        $r10 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $z4 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r10);
+
+        if $z4 != 0 goto label28;
+
+        $r11 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $z5 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r11);
+
+        if $z5 != 0 goto label28;
+
+        $r12 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $z6 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r12);
+
+        if $z6 != 0 goto label28;
+
+        $r13 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $z7 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r13);
+
+        if $z7 != 0 goto label28;
+
+        $r14 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $z8 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r14);
+
+        if $z8 != 0 goto label28;
+
+        $r15 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $z9 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r15);
+
+        if $z9 != 0 goto label28;
+
+        $r16 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $z10 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r16);
+
+        if $z10 != 0 goto label28;
+
+        $r17 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $z11 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r17);
+
+        if $z11 != 0 goto label28;
+
+        $r18 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $z12 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r18);
+
+        if $z12 != 0 goto label28;
+
+        $r19 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $z13 = virtualinvoke r2.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r19);
+
+        if $z13 != 0 goto label28;
+
+     label22:
+        return 0;
+
+     label23:
+        if $r1 != class "Ljavax/print/attribute/standard/ColorSupported;" goto label28;
+
+        $i0 = specialinvoke r3.<sun.print.Win32PrintService: int getPrinterCapabilities()>();
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label24;
+
+        $z44 = 1;
+
+        $z43 = 1;
+
+        goto label25;
+
+     label24:
+        $z44 = 0;
+
+        $z43 = 0;
+
+     label25:
+        z2 = $z43;
+
+        if $z44 != 0 goto label26;
+
+        $r7 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported SUPPORTED>;
+
+        if r0 == $r7 goto label27;
+
+     label26:
+        if z2 == 0 goto label28;
+
+        $r6 = <javax.print.attribute.standard.ColorSupported: javax.print.attribute.standard.ColorSupported NOT_SUPPORTED>;
+
+        if r0 != $r6 goto label28;
+
+     label27:
+        return 0;
+
+     label28:
+        return 1;
+    }
+
+    public javax.print.attribute.AttributeSet getUnsupportedAttributes(javax.print.DocFlavor, javax.print.attribute.AttributeSet)
+    {
+        javax.print.attribute.AttributeSet r1;
+        javax.print.attribute.Attribute[] $r3;
+        java.lang.ClassCastException $r13;
+        int $i0, i1;
+        sun.print.Win32PrintService r5;
+        java.lang.String $r12;
+        javax.print.DocFlavor r0;
+        boolean $z0, $z1, $z2, $z3;
+        javax.print.attribute.HashAttributeSet $r2;
+        java.lang.IllegalArgumentException $r7;
+        java.lang.Class $r6;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11;
+        javax.print.attribute.Attribute r4;
+
+        r5 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: javax.print.DocFlavor;
+
+        r1 := @parameter1: javax.print.attribute.AttributeSet;
+
+        if r0 == null goto label01;
+
+        $z3 = virtualinvoke r5.<sun.print.Win32PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>(r0);
+
+        if $z3 != 0 goto label01;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("flavor ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("is not supported");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r12);
+
+        throw $r7;
+
+     label01:
+        if r1 != null goto label02;
+
+        return null;
+
+     label02:
+        $r2 = new javax.print.attribute.HashAttributeSet;
+
+        specialinvoke $r2.<javax.print.attribute.HashAttributeSet: void <init>()>();
+
+        $r3 = interfaceinvoke r1.<javax.print.attribute.AttributeSet: javax.print.attribute.Attribute[] toArray()>();
+
+        i1 = 0;
+
+     label03:
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label09;
+
+     label04:
+        r4 = $r3[i1];
+
+        $r6 = interfaceinvoke r4.<javax.print.attribute.Attribute: java.lang.Class getCategory()>();
+
+        $z1 = virtualinvoke r5.<sun.print.Win32PrintService: boolean isAttributeCategorySupported(java.lang.Class)>($r6);
+
+        if $z1 != 0 goto label05;
+
+        interfaceinvoke $r2.<javax.print.attribute.AttributeSet: boolean add(javax.print.attribute.Attribute)>(r4);
+
+        goto label06;
+
+     label05:
+        $z2 = virtualinvoke r5.<sun.print.Win32PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(r4, r0, r1);
+
+        if $z2 != 0 goto label06;
+
+        interfaceinvoke $r2.<javax.print.attribute.AttributeSet: boolean add(javax.print.attribute.Attribute)>(r4);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r13 := @caughtexception;
+
+     label08:
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label09:
+        $z0 = interfaceinvoke $r2.<javax.print.attribute.AttributeSet: boolean isEmpty()>();
+
+        if $z0 == 0 goto label10;
+
+        return null;
+
+     label10:
+        return $r2;
+
+        catch java.lang.ClassCastException from label04 to label06 with label07;
+    }
+
+    private synchronized sun.print.DocumentPropertiesUI getDocumentPropertiesUI()
+    {
+        sun.print.Win32PrintService r1;
+        sun.print.Win32PrintService$Win32DocumentPropertiesUI $r0;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        $r0 = new sun.print.Win32PrintService$Win32DocumentPropertiesUI;
+
+        specialinvoke $r0.<sun.print.Win32PrintService$Win32DocumentPropertiesUI: void <init>(sun.print.Win32PrintService,sun.print.Win32PrintService$1)>(r1, null);
+
+        return $r0;
+    }
+
+    public synchronized javax.print.ServiceUIFactory getServiceUIFactory()
+    {
+        sun.print.Win32PrintService$Win32ServiceUIFactory $r1, $r2, $r3;
+        sun.print.Win32PrintService r0;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = r0.<sun.print.Win32PrintService: sun.print.Win32PrintService$Win32ServiceUIFactory uiFactory>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.print.Win32PrintService$Win32ServiceUIFactory;
+
+        specialinvoke $r3.<sun.print.Win32PrintService$Win32ServiceUIFactory: void <init>(sun.print.Win32PrintService)>(r0);
+
+        r0.<sun.print.Win32PrintService: sun.print.Win32PrintService$Win32ServiceUIFactory uiFactory> = $r3;
+
+     label1:
+        $r2 = r0.<sun.print.Win32PrintService: sun.print.Win32PrintService$Win32ServiceUIFactory uiFactory>;
+
+        return $r2;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.StringBuilder $r0, $r1, $r4;
+        sun.print.Win32PrintService r2;
+        java.lang.String $r3, $r5;
+
+        r2 := @this: sun.print.Win32PrintService;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Win32 Printer : ");
+
+        $r3 = virtualinvoke r2.<sun.print.Win32PrintService: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.Object r0;
+        sun.print.Win32PrintService r1, $r2;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == r1 goto label1;
+
+        $z0 = r0 instanceof sun.print.Win32PrintService;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = (sun.print.Win32PrintService) r0;
+
+        $r3 = virtualinvoke $r2.<sun.print.Win32PrintService: java.lang.String getName()>();
+
+        $r4 = virtualinvoke r1.<sun.print.Win32PrintService: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public int hashCode()
+    {
+        int $i0, $i1, $i2;
+        java.lang.Class $r1;
+        sun.print.Win32PrintService r0;
+        java.lang.String $r2;
+
+        r0 := @this: sun.print.Win32PrintService;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        $r2 = virtualinvoke r0.<sun.print.Win32PrintService: java.lang.String getName()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        $i2 = $i0 + $i1;
+
+        return $i2;
+    }
+
+    public boolean usesClass(java.lang.Class)
+    {
+        java.lang.Class r0;
+        sun.print.Win32PrintService r1;
+        boolean $z0;
+
+        r1 := @this: sun.print.Win32PrintService;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Lsun/awt/windows/WPrinterJob;" goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private native int[] getAllMediaIDs(java.lang.String, java.lang.String);
+
+    private native int[] getAllMediaSizes(java.lang.String, java.lang.String);
+
+    private native int[] getAllMediaTrays(java.lang.String, java.lang.String);
+
+    private native float[] getMediaPrintableArea(java.lang.String, int);
+
+    private native java.lang.String[] getAllMediaNames(java.lang.String, java.lang.String);
+
+    private native java.lang.String[] getAllMediaTrayNames(java.lang.String, java.lang.String);
+
+    private native int getCopiesSupported(java.lang.String, java.lang.String);
+
+    private native int[] getAllResolutions(java.lang.String, java.lang.String);
+
+    private native int getCapabilities(java.lang.String, java.lang.String);
+
+    private native int[] getDefaultSettings(java.lang.String, java.lang.String);
+
+    private native int getJobStatus(java.lang.String, int);
+
+    private native java.lang.String getPrinterPort(java.lang.String);
+
+    static sun.print.DocumentPropertiesUI access$100(sun.print.Win32PrintService)
+    {
+        sun.print.Win32PrintService r0;
+        sun.print.DocumentPropertiesUI $r1;
+
+        r0 := @parameter0: sun.print.Win32PrintService;
+
+        $r1 = specialinvoke r0.<sun.print.Win32PrintService: sun.print.DocumentPropertiesUI getDocumentPropertiesUI()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        javax.print.DocFlavor$SERVICE_FORMATTED $r11, $r12;
+        javax.print.DocFlavor[] $r1;
+        javax.print.attribute.standard.MediaTray $r64, $r65, $r66, $r67, $r68, $r74, $r75;
+        java.lang.Class[] $r16, $r17;
+        javax.print.attribute.standard.MediaSizeName[] $r18;
+        javax.print.DocFlavor$INPUT_STREAM $r3, $r6, $r9, $r15;
+        sun.print.Win32MediaTray $r69, $r70, $r71, $r72, $r73, $r76;
+        javax.print.DocFlavor$BYTE_ARRAY $r2, $r5, $r8, $r13;
+        javax.print.attribute.standard.MediaSize[] $r0;
+        javax.print.attribute.standard.MediaSizeName $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r60, $r61, $r62;
+        javax.print.DocFlavor$URL $r4, $r7, $r10, $r14;
+        javax.print.attribute.standard.MediaTray[] $r63;
+
+        <sun.print.Win32PrintService: int DEVCAP_POSTSCRIPT> = 16;
+
+        <sun.print.Win32PrintService: int DEVCAP_QUALITY> = 8;
+
+        <sun.print.Win32PrintService: int DEVCAP_COLLATE> = 4;
+
+        <sun.print.Win32PrintService: int DEVCAP_DUPLEX> = 2;
+
+        <sun.print.Win32PrintService: int DEVCAP_COLOR> = 1;
+
+        <sun.print.Win32PrintService: int DMPAPER_B6_JIS> = 88;
+
+        <sun.print.Win32PrintService: int DMPAPER_A6> = 70;
+
+        <sun.print.Win32PrintService: int DMPAPER_A2> = 66;
+
+        <sun.print.Win32PrintService: int DMCOLOR_COLOR> = 2;
+
+        <sun.print.Win32PrintService: int DMCOLOR_MONOCHROME> = 1;
+
+        <sun.print.Win32PrintService: int DMCOLLATE_TRUE> = 1;
+
+        <sun.print.Win32PrintService: int DMDUP_HORIZONTAL> = 3;
+
+        <sun.print.Win32PrintService: int DMDUP_VERTICAL> = 2;
+
+        <sun.print.Win32PrintService: int DMORIENT_LANDSCAPE> = 2;
+
+        <sun.print.Win32PrintService: int DMRES_HIGH> = -4;
+
+        <sun.print.Win32PrintService: int DMRES_MEDIUM> = -3;
+
+        $r0 = staticinvoke <sun.print.Win32MediaSize: javax.print.attribute.standard.MediaSize[] getPredefMedia()>();
+
+        <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSize[] predefMedia> = $r0;
+
+        $r1 = newarray (javax.print.DocFlavor)[14];
+
+        $r2 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $r1[0] = $r2;
+
+        $r3 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $r1[1] = $r3;
+
+        $r4 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $r1[2] = $r4;
+
+        $r5 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $r1[3] = $r5;
+
+        $r6 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $r1[4] = $r6;
+
+        $r7 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $r1[5] = $r7;
+
+        $r8 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $r1[6] = $r8;
+
+        $r9 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $r1[7] = $r9;
+
+        $r10 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $r1[8] = $r10;
+
+        $r11 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PAGEABLE>;
+
+        $r1[9] = $r11;
+
+        $r12 = <javax.print.DocFlavor$SERVICE_FORMATTED: javax.print.DocFlavor$SERVICE_FORMATTED PRINTABLE>;
+
+        $r1[10] = $r12;
+
+        $r13 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY AUTOSENSE>;
+
+        $r1[11] = $r13;
+
+        $r14 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL AUTOSENSE>;
+
+        $r1[12] = $r14;
+
+        $r15 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM AUTOSENSE>;
+
+        $r1[13] = $r15;
+
+        <sun.print.Win32PrintService: javax.print.DocFlavor[] supportedFlavors> = $r1;
+
+        $r16 = newarray (java.lang.Class)[4];
+
+        $r16[0] = class "Ljavax/print/attribute/standard/PrinterName;";
+
+        $r16[1] = class "Ljavax/print/attribute/standard/PrinterIsAcceptingJobs;";
+
+        $r16[2] = class "Ljavax/print/attribute/standard/QueuedJobCount;";
+
+        $r16[3] = class "Ljavax/print/attribute/standard/ColorSupported;";
+
+        <sun.print.Win32PrintService: java.lang.Class[] serviceAttrCats> = $r16;
+
+        $r17 = newarray (java.lang.Class)[12];
+
+        $r17[0] = class "Ljavax/print/attribute/standard/JobName;";
+
+        $r17[1] = class "Ljavax/print/attribute/standard/RequestingUserName;";
+
+        $r17[2] = class "Ljavax/print/attribute/standard/Copies;";
+
+        $r17[3] = class "Ljavax/print/attribute/standard/Destination;";
+
+        $r17[4] = class "Ljavax/print/attribute/standard/OrientationRequested;";
+
+        $r17[5] = class "Ljavax/print/attribute/standard/PageRanges;";
+
+        $r17[6] = class "Ljavax/print/attribute/standard/Media;";
+
+        $r17[7] = class "Ljavax/print/attribute/standard/MediaPrintableArea;";
+
+        $r17[8] = class "Ljavax/print/attribute/standard/Fidelity;";
+
+        $r17[9] = class "Ljavax/print/attribute/standard/SheetCollate;";
+
+        $r17[10] = class "Lsun/print/SunAlternateMedia;";
+
+        $r17[11] = class "Ljavax/print/attribute/standard/Chromaticity;";
+
+        <sun.print.Win32PrintService: java.lang.Class[] otherAttrCats> = $r17;
+
+        $r18 = newarray (javax.print.attribute.standard.MediaSizeName)[44];
+
+        $r19 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LETTER>;
+
+        $r18[0] = $r19;
+
+        $r20 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LETTER>;
+
+        $r18[1] = $r20;
+
+        $r21 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName TABLOID>;
+
+        $r18[2] = $r21;
+
+        $r22 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName LEDGER>;
+
+        $r18[3] = $r22;
+
+        $r23 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LEGAL>;
+
+        $r18[4] = $r23;
+
+        $r24 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName INVOICE>;
+
+        $r18[5] = $r24;
+
+        $r25 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName EXECUTIVE>;
+
+        $r18[6] = $r25;
+
+        $r26 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A3>;
+
+        $r18[7] = $r26;
+
+        $r27 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A4>;
+
+        $r18[8] = $r27;
+
+        $r28 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A4>;
+
+        $r18[9] = $r28;
+
+        $r29 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_A5>;
+
+        $r18[10] = $r29;
+
+        $r30 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B4>;
+
+        $r18[11] = $r30;
+
+        $r31 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JIS_B5>;
+
+        $r18[12] = $r31;
+
+        $r32 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName FOLIO>;
+
+        $r18[13] = $r32;
+
+        $r33 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName QUARTO>;
+
+        $r18[14] = $r33;
+
+        $r34 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_10X14_ENVELOPE>;
+
+        $r18[15] = $r34;
+
+        $r35 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName B>;
+
+        $r18[16] = $r35;
+
+        $r36 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_LETTER>;
+
+        $r18[17] = $r36;
+
+        $r37 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_9_ENVELOPE>;
+
+        $r18[18] = $r37;
+
+        $r38 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_10_ENVELOPE>;
+
+        $r18[19] = $r38;
+
+        $r39 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_11_ENVELOPE>;
+
+        $r18[20] = $r39;
+
+        $r40 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_12_ENVELOPE>;
+
+        $r18[21] = $r40;
+
+        $r41 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_NUMBER_14_ENVELOPE>;
+
+        $r18[22] = $r41;
+
+        $r42 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName C>;
+
+        $r18[23] = $r42;
+
+        $r43 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName D>;
+
+        $r18[24] = $r43;
+
+        $r44 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName E>;
+
+        $r18[25] = $r44;
+
+        $r45 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_DESIGNATED_LONG>;
+
+        $r18[26] = $r45;
+
+        $r46 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C5>;
+
+        $r18[27] = $r46;
+
+        $r47 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C3>;
+
+        $r18[28] = $r47;
+
+        $r48 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C4>;
+
+        $r18[29] = $r48;
+
+        $r49 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_C6>;
+
+        $r18[30] = $r49;
+
+        $r50 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ITALY_ENVELOPE>;
+
+        $r18[31] = $r50;
+
+        $r51 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B4>;
+
+        $r18[32] = $r51;
+
+        $r52 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B5>;
+
+        $r18[33] = $r52;
+
+        $r53 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B6>;
+
+        $r18[34] = $r53;
+
+        $r54 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ITALY_ENVELOPE>;
+
+        $r18[35] = $r54;
+
+        $r55 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName MONARCH_ENVELOPE>;
+
+        $r18[36] = $r55;
+
+        $r56 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName PERSONAL_ENVELOPE>;
+
+        $r18[37] = $r56;
+
+        $r57 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_10X15_ENVELOPE>;
+
+        $r18[38] = $r57;
+
+        $r58 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_9X12_ENVELOPE>;
+
+        $r18[39] = $r58;
+
+        $r59 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName FOLIO>;
+
+        $r18[40] = $r59;
+
+        $r60 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName ISO_B4>;
+
+        $r18[41] = $r60;
+
+        $r61 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName JAPANESE_POSTCARD>;
+
+        $r18[42] = $r61;
+
+        $r62 = <javax.print.attribute.standard.MediaSizeName: javax.print.attribute.standard.MediaSizeName NA_9X11_ENVELOPE>;
+
+        $r18[43] = $r62;
+
+        <sun.print.Win32PrintService: javax.print.attribute.standard.MediaSizeName[] dmPaperToPrintService> = $r18;
+
+        $r63 = newarray (javax.print.attribute.standard.MediaTray)[15];
+
+        $r64 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray TOP>;
+
+        $r63[0] = $r64;
+
+        $r65 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray BOTTOM>;
+
+        $r63[1] = $r65;
+
+        $r66 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray MIDDLE>;
+
+        $r63[2] = $r66;
+
+        $r67 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray MANUAL>;
+
+        $r63[3] = $r67;
+
+        $r68 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray ENVELOPE>;
+
+        $r63[4] = $r68;
+
+        $r69 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray ENVELOPE_MANUAL>;
+
+        $r63[5] = $r69;
+
+        $r70 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray AUTO>;
+
+        $r63[6] = $r70;
+
+        $r71 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray TRACTOR>;
+
+        $r63[7] = $r71;
+
+        $r72 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray SMALL_FORMAT>;
+
+        $r63[8] = $r72;
+
+        $r73 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray LARGE_FORMAT>;
+
+        $r63[9] = $r73;
+
+        $r74 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray LARGE_CAPACITY>;
+
+        $r63[10] = $r74;
+
+        $r63[11] = null;
+
+        $r63[12] = null;
+
+        $r75 = <javax.print.attribute.standard.MediaTray: javax.print.attribute.standard.MediaTray MAIN>;
+
+        $r63[13] = $r75;
+
+        $r76 = <sun.print.Win32MediaTray: sun.print.Win32MediaTray FORMSOURCE>;
+
+        $r63[14] = $r76;
+
+        <sun.print.Win32PrintService: javax.print.attribute.standard.MediaTray[] dmPaperBinToPrintService> = $r63;
+
+        <sun.print.Win32PrintService: int DM_PAPERSIZE> = 2;
+
+        <sun.print.Win32PrintService: int DM_PRINTQUALITY> = 1024;
+
+        <sun.print.Win32PrintService: int DM_YRESOLUTION> = 8192;
+
+        return;
+    }
+}

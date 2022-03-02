@@ -1,0 +1,4859 @@
+public class com.sun.rowset.JoinRowSetImpl extends com.sun.rowset.WebRowSetImpl implements javax.sql.rowset.JoinRowSet
+{
+    private java.util.Vector vecRowSetsInJOIN;
+    private com.sun.rowset.CachedRowSetImpl crsInternal;
+    private java.util.Vector vecJoinType;
+    private java.util.Vector vecTableNames;
+    private int iMatchKey;
+    private java.lang.String strMatchKey;
+    boolean[] supportedJOINs;
+    private javax.sql.rowset.WebRowSet wrs;
+    static final long serialVersionUID;
+
+    public void <init>() throws java.sql.SQLException
+    {
+        boolean[] $r5;
+        java.io.IOException $r7;
+        com.sun.rowset.JdbcRowSetResourceBundle $r6;
+        java.lang.RuntimeException $r13;
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Vector $r9, $r11, $r12;
+        com.sun.rowset.CachedRowSetImpl $r10;
+        int $i1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        specialinvoke r0.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        $r9 = new java.util.Vector;
+
+        specialinvoke $r9.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN> = $r9;
+
+        $r10 = new com.sun.rowset.CachedRowSetImpl;
+
+        specialinvoke $r10.<com.sun.rowset.CachedRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal> = $r10;
+
+        $r11 = new java.util.Vector;
+
+        specialinvoke $r11.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType> = $r11;
+
+        $r12 = new java.util.Vector;
+
+        specialinvoke $r12.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecTableNames> = $r12;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.rowset.JoinRowSetImpl: int iMatchKey> = $i1;
+
+        r0.<com.sun.rowset.JoinRowSetImpl: java.lang.String strMatchKey> = null;
+
+        $r5 = newarray (boolean)[5];
+
+        $r5[0] = 0;
+
+        $r5[1] = 1;
+
+        $r5[2] = 0;
+
+        $r5[3] = 0;
+
+        $r5[4] = 0;
+
+        r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs> = $r5;
+
+     label1:
+        $r6 = staticinvoke <com.sun.rowset.JdbcRowSetResourceBundle: com.sun.rowset.JdbcRowSetResourceBundle getJdbcRowSetResourceBundle()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle> = $r6;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r13 = new java.lang.RuntimeException;
+
+        specialinvoke $r13.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r13;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void addRowSet(javax.sql.rowset.Joinable) throws java.sql.SQLException
+    {
+        java.lang.Integer $r7, $r12;
+        com.sun.rowset.JdbcRowSetResourceBundle $r14, $r18, $r28, $r32;
+        java.util.ArrayList $r45;
+        java.sql.SQLException $r35, $r36, $r37, $r40, $r42, $r43, $r44;
+        javax.sql.RowSet $r22;
+        java.lang.String $r3, $r9, $r11, $r16, $r20, $r30, $r34;
+        javax.sql.rowset.Joinable r0;
+        int[] $r10, $r23, $r24, $r25, $r26, $r39;
+        boolean $z0, $z1, z2, z3, z4, z5;
+        com.sun.rowset.JoinRowSetImpl r1;
+        com.sun.rowset.CachedRowSetImpl r38, $r41;
+        java.lang.String[] $r2, $r5, $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12, $i13, i14, i15, $i16, $i18;
+        java.lang.Object $r6, $r15, $r19, $r29, $r33;
+
+        r1 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.rowset.Joinable;
+
+        z2 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        $z0 = r0 instanceof javax.sql.RowSet;
+
+        if $z0 != 0 goto label01;
+
+        $r40 = new java.sql.SQLException;
+
+        $r32 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r33 = virtualinvoke $r32.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.notinstance");
+
+        $r34 = virtualinvoke $r33.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r40.<java.sql.SQLException: void <init>(java.lang.String)>($r34);
+
+        throw $r40;
+
+     label01:
+        $z1 = r0 instanceof com.sun.rowset.JdbcRowSetImpl;
+
+        if $z1 == 0 goto label09;
+
+        $r41 = new com.sun.rowset.CachedRowSetImpl;
+
+        specialinvoke $r41.<com.sun.rowset.CachedRowSetImpl: void <init>()>();
+
+        r38 = $r41;
+
+        $r22 = (javax.sql.RowSet) r0;
+
+        virtualinvoke $r41.<com.sun.rowset.CachedRowSetImpl: void populate(java.sql.ResultSet)>($r22);
+
+        $i6 = virtualinvoke $r41.<com.sun.rowset.CachedRowSetImpl: int size()>();
+
+        if $i6 != 0 goto label02;
+
+        $r42 = new java.sql.SQLException;
+
+        $r28 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r29 = virtualinvoke $r28.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.emptyrowset");
+
+        $r30 = virtualinvoke $r29.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r42.<java.sql.SQLException: void <init>(java.lang.String)>($r30);
+
+        throw $r42;
+
+     label02:
+        i10 = 0;
+
+        i11 = 0;
+
+     label03:
+        $r23 = interfaceinvoke r0.<javax.sql.rowset.Joinable: int[] getMatchColumnIndexes()>();
+
+        $i7 = lengthof $r23;
+
+        if i11 >= $i7 goto label04;
+
+        $r25 = interfaceinvoke r0.<javax.sql.rowset.Joinable: int[] getMatchColumnIndexes()>();
+
+        $i9 = $r25[i11];
+
+        $i18 = (int) -1;
+
+        if $i9 == $i18 goto label04;
+
+        i10 = i10 + 1;
+
+        i11 = i11 + 1;
+
+        goto label03;
+
+     label04:
+        $r26 = newarray (int)[i10];
+
+        i12 = 0;
+
+     label05:
+        if i12 >= i10 goto label06;
+
+        $r24 = interfaceinvoke r0.<javax.sql.rowset.Joinable: int[] getMatchColumnIndexes()>();
+
+        $i8 = $r24[i12];
+
+        $r26[i12] = $i8;
+
+        i12 = i12 + 1;
+
+        goto label05;
+
+     label06:
+        virtualinvoke $r41.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(int[])>($r26);
+
+     label07:
+        goto label10;
+
+     label08:
+        $r37 := @caughtexception;
+
+        goto label10;
+
+     label09:
+        r38 = (com.sun.rowset.CachedRowSetImpl) r0;
+
+        $i0 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: int size()>();
+
+        if $i0 != 0 goto label10;
+
+        $r43 = new java.sql.SQLException;
+
+        $r18 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r19 = virtualinvoke $r18.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.emptyrowset");
+
+        $r20 = virtualinvoke $r19.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r43.<java.sql.SQLException: void <init>(java.lang.String)>($r20);
+
+        throw $r43;
+
+     label10:
+        $r39 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i13 = $r39[0];
+
+        r1.<com.sun.rowset.JoinRowSetImpl: int iMatchKey> = $i13;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r36 := @caughtexception;
+
+        z2 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+     label13:
+        $r2 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: java.lang.String[] getMatchColumnNames()>();
+
+        $r3 = $r2[0];
+
+        r1.<com.sun.rowset.JoinRowSetImpl: java.lang.String strMatchKey> = $r3;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r35 := @caughtexception;
+
+        z3 = 1;
+
+     label16:
+        if z4 == 0 goto label17;
+
+        if z3 == 0 goto label17;
+
+        $r44 = new java.sql.SQLException;
+
+        $r14 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r15 = virtualinvoke $r14.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.matchnotset");
+
+        $r16 = virtualinvoke $r15.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r44.<java.sql.SQLException: void <init>(java.lang.String)>($r16);
+
+        throw $r44;
+
+     label17:
+        if z5 == 0 goto label22;
+
+        $r45 = new java.util.ArrayList;
+
+        specialinvoke $r45.<java.util.ArrayList: void <init>()>();
+
+        i14 = 0;
+
+     label18:
+        $r5 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: java.lang.String[] getMatchColumnNames()>();
+
+        $i1 = lengthof $r5;
+
+        if i14 >= $i1 goto label19;
+
+        $r8 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: java.lang.String[] getMatchColumnNames()>();
+
+        $r9 = $r8[i14];
+
+        r1.<com.sun.rowset.JoinRowSetImpl: java.lang.String strMatchKey> = $r9;
+
+        if $r9 == null goto label19;
+
+        $r11 = r1.<com.sun.rowset.JoinRowSetImpl: java.lang.String strMatchKey>;
+
+        $i4 = virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: int findColumn(java.lang.String)>($r11);
+
+        r1.<com.sun.rowset.JoinRowSetImpl: int iMatchKey> = $i4;
+
+        $i5 = r1.<com.sun.rowset.JoinRowSetImpl: int iMatchKey>;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i5);
+
+        virtualinvoke $r45.<java.util.ArrayList: boolean add(java.lang.Object)>($r12);
+
+        i14 = i14 + 1;
+
+        goto label18;
+
+     label19:
+        $i2 = virtualinvoke $r45.<java.util.ArrayList: int size()>();
+
+        $r10 = newarray (int)[$i2];
+
+        i15 = 0;
+
+     label20:
+        $i16 = virtualinvoke $r45.<java.util.ArrayList: int size()>();
+
+        if i15 >= $i16 goto label21;
+
+        $r6 = virtualinvoke $r45.<java.util.ArrayList: java.lang.Object get(int)>(i15);
+
+        $r7 = (java.lang.Integer) $r6;
+
+        $i3 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        $r10[i15] = $i3;
+
+        i15 = i15 + 1;
+
+        goto label20;
+
+     label21:
+        virtualinvoke r38.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(int[])>($r10);
+
+     label22:
+        specialinvoke r1.<com.sun.rowset.JoinRowSetImpl: void initJOIN(javax.sql.rowset.CachedRowSet)>(r38);
+
+        return;
+
+        catch java.sql.SQLException from label02 to label07 with label08;
+        catch java.sql.SQLException from label10 to label11 with label12;
+        catch java.sql.SQLException from label13 to label14 with label15;
+    }
+
+    public void addRowSet(javax.sql.RowSet, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        javax.sql.RowSet r0;
+        int i0;
+        javax.sql.rowset.Joinable $r3;
+
+        r2 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.RowSet;
+
+        i0 := @parameter1: int;
+
+        $r1 = (com.sun.rowset.CachedRowSetImpl) r0;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(int)>(i0);
+
+        $r3 = (javax.sql.rowset.Joinable) r0;
+
+        virtualinvoke r2.<com.sun.rowset.JoinRowSetImpl: void addRowSet(javax.sql.rowset.Joinable)>($r3);
+
+        return;
+    }
+
+    public void addRowSet(javax.sql.RowSet, java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        javax.sql.RowSet r0;
+        javax.sql.rowset.Joinable $r4;
+        java.lang.String r1;
+
+        r3 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.RowSet;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = (com.sun.rowset.CachedRowSetImpl) r0;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(java.lang.String)>(r1);
+
+        $r4 = (javax.sql.rowset.Joinable) r0;
+
+        virtualinvoke r3.<com.sun.rowset.JoinRowSetImpl: void addRowSet(javax.sql.rowset.Joinable)>($r4);
+
+        return;
+    }
+
+    public void addRowSet(javax.sql.RowSet[], int[]) throws java.sql.SQLException
+    {
+        javax.sql.RowSet[] r0;
+        java.sql.SQLException $r7;
+        int[] r1;
+        int $i0, $i1, $i2, $i3, i4;
+        javax.sql.RowSet $r2, $r5;
+        java.lang.String $r10;
+        com.sun.rowset.JdbcRowSetResourceBundle $r8;
+        com.sun.rowset.JoinRowSetImpl r4;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        javax.sql.rowset.Joinable $r6;
+        java.lang.Object $r9;
+
+        r4 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.RowSet[];
+
+        r1 := @parameter1: int[];
+
+        $i1 = lengthof r0;
+
+        $i0 = lengthof r1;
+
+        if $i1 == $i0 goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        $r8 = r4.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r9 = virtualinvoke $r8.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.numnotequal");
+
+        $r10 = virtualinvoke $r9.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>($r10);
+
+        throw $r7;
+
+     label1:
+        i4 = 0;
+
+     label2:
+        $i2 = lengthof r0;
+
+        if i4 >= $i2 goto label3;
+
+        $r2 = r0[i4];
+
+        $r3 = (com.sun.rowset.CachedRowSetImpl) $r2;
+
+        $i3 = r1[i4];
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(int)>($i3);
+
+        $r5 = r0[i4];
+
+        $r6 = (javax.sql.rowset.Joinable) $r5;
+
+        virtualinvoke r4.<com.sun.rowset.JoinRowSetImpl: void addRowSet(javax.sql.rowset.Joinable)>($r6);
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void addRowSet(javax.sql.RowSet[], java.lang.String[]) throws java.sql.SQLException
+    {
+        javax.sql.RowSet[] r0;
+        java.lang.String[] r1;
+        java.sql.SQLException $r8;
+        int $i0, $i1, $i2, i3;
+        javax.sql.RowSet $r2, $r6;
+        java.lang.String $r3, $r11;
+        com.sun.rowset.JdbcRowSetResourceBundle $r9;
+        com.sun.rowset.JoinRowSetImpl r5;
+        com.sun.rowset.CachedRowSetImpl $r4;
+        javax.sql.rowset.Joinable $r7;
+        java.lang.Object $r10;
+
+        r5 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.RowSet[];
+
+        r1 := @parameter1: java.lang.String[];
+
+        $i1 = lengthof r0;
+
+        $i0 = lengthof r1;
+
+        if $i1 == $i0 goto label1;
+
+        $r8 = new java.sql.SQLException;
+
+        $r9 = r5.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r10 = virtualinvoke $r9.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.numnotequal");
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>($r11);
+
+        throw $r8;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $i2 = lengthof r0;
+
+        if i3 >= $i2 goto label3;
+
+        $r2 = r0[i3];
+
+        $r4 = (com.sun.rowset.CachedRowSetImpl) $r2;
+
+        $r3 = r1[i3];
+
+        virtualinvoke $r4.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(java.lang.String)>($r3);
+
+        $r6 = r0[i3];
+
+        $r7 = (javax.sql.rowset.Joinable) $r6;
+
+        virtualinvoke r5.<com.sun.rowset.JoinRowSetImpl: void addRowSet(javax.sql.rowset.Joinable)>($r7);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public java.util.Collection getRowSets() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Vector $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        return $r1;
+    }
+
+    public java.lang.String[] getRowSetNames() throws java.sql.SQLException
+    {
+        java.lang.Object[] $r2;
+        java.lang.String[] r3;
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Vector $r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecTableNames>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object[] toArray()>();
+
+        $i0 = lengthof $r2;
+
+        r3 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label2;
+
+        $r4 = $r2[i2];
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        r3[i2] = $r5;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r3;
+    }
+
+    public javax.sql.rowset.CachedRowSet toCachedRowSet() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        return $r1;
+    }
+
+    public boolean supportsCrossJoin()
+    {
+        boolean[] $r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs>;
+
+        $z0 = $r1[0];
+
+        return $z0;
+    }
+
+    public boolean supportsInnerJoin()
+    {
+        boolean[] $r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs>;
+
+        $z0 = $r1[1];
+
+        return $z0;
+    }
+
+    public boolean supportsLeftOuterJoin()
+    {
+        boolean[] $r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs>;
+
+        $z0 = $r1[2];
+
+        return $z0;
+    }
+
+    public boolean supportsRightOuterJoin()
+    {
+        boolean[] $r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs>;
+
+        $z0 = $r1[3];
+
+        return $z0;
+    }
+
+    public boolean supportsFullJoin()
+    {
+        boolean[] $r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: boolean[] supportedJOINs>;
+
+        $z0 = $r1[4];
+
+        return $z0;
+    }
+
+    public void setJoinType(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JdbcRowSetResourceBundle $r2, $r8;
+        java.lang.Integer $r5;
+        com.sun.rowset.JoinRowSetImpl r1;
+        java.sql.SQLException $r0, $r7;
+        java.util.Vector $r6;
+        int i0;
+        java.lang.Object $r3, $r9;
+        java.lang.String $r4, $r10;
+
+        r1 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label2;
+
+        if i0 > 4 goto label2;
+
+        if i0 == 1 goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        $r8 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r9 = virtualinvoke $r8.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.notsupported");
+
+        $r10 = virtualinvoke $r9.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>($r10);
+
+        throw $r7;
+
+     label1:
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r6 = r1.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        virtualinvoke $r6.<java.util.Vector: boolean add(java.lang.Object)>($r5);
+
+        goto label3;
+
+     label2:
+        $r0 = new java.sql.SQLException;
+
+        $r2 = r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.notdefined");
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.sql.SQLException: void <init>(java.lang.String)>($r4);
+
+        throw $r0;
+
+     label3:
+        return;
+    }
+
+    private boolean checkforMatchColumn(javax.sql.rowset.Joinable) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r2;
+        int[] $r1;
+        int $i0;
+        javax.sql.rowset.Joinable r0;
+
+        r2 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.rowset.Joinable;
+
+        $r1 = interfaceinvoke r0.<javax.sql.rowset.Joinable: int[] getMatchColumnIndexes()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 > 0 goto label1;
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    private void initJOIN(javax.sql.rowset.CachedRowSet) throws java.sql.SQLException
+    {
+        java.util.Vector $r4, $r5, $r6, $r7, $r8, $r10, $r12, $r23, $r159;
+        com.sun.rowset.JdbcRowSetResourceBundle $r163, $r172;
+        int[] $r25, $r54, $r144, $r147, $r149, $r151, $r153, $r180;
+        com.sun.rowset.JoinRowSetImpl r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, i68, i69, $i70, i71, i72, i73, i74, i75, i76, i77, i78, i79, $i81, $i83;
+        java.lang.Exception $r160;
+        java.sql.SQLException $r169, $r185, $r187;
+        java.lang.String $r11, $r13, $r33, $r34, $r39, $r42, $r45, $r51, $r59, $r62, $r65, $r67, $r76, $r81, $r86, $r97, $r106, $r108, $r117, $r122, $r127, $r138, $r165, $r168, $r174, $r177;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, z21, z22, z23;
+        com.sun.rowset.CachedRowSetImpl $r9, $r14, $r15, $r18, $r20, $r21, $r22, $r24, $r26, $r27, $r28, $r55, $r57, $r61, $r68, $r70, $r72, $r74, $r77, $r79, $r82, $r84, $r87, $r89, $r91, $r93, $r95, $r98, $r100, $r102, $r104, $r107, $r109, $r111, $r113, $r115, $r118, $r120, $r123, $r125, $r128, $r130, $r132, $r134, $r136, $r139, $r141, $r143, $r145, $r146, $r152, $r155, $r156, r178, $r179, $r181;
+        java.lang.StringBuilder $r63, $r64, $r66, $r166, $r167, $r175, $r176, $r183, $r184, $r186;
+        javax.sql.rowset.RowSetMetaDataImpl $r158, $r182;
+        java.sql.ResultSetMetaData $r16, $r17, $r29, $r30, $r32, $r35, $r36, $r37, $r38, $r40, $r41, $r43, $r44, $r46, $r47, $r48, $r49, $r50, $r52, $r53, $r58, $r69, $r71, $r73, $r75, $r78, $r80, $r83, $r85, $r88, $r90, $r92, $r94, $r96, $r99, $r101, $r105, $r110, $r112, $r114, $r116, $r119, $r121, $r124, $r126, $r129, $r131, $r133, $r135, $r137, $r140, $r142, $r157;
+        java.lang.Object $r31, $r56, $r103, $r148, $r150, $r164, $r173;
+        javax.sql.rowset.CachedRowSet r0, $r19, $r154;
+
+        r3 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: javax.sql.rowset.CachedRowSet;
+
+     label01:
+        r178 = (com.sun.rowset.CachedRowSetImpl) r0;
+
+        $r181 = new com.sun.rowset.CachedRowSetImpl;
+
+        specialinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void <init>()>();
+
+        $r182 = new javax.sql.rowset.RowSetMetaDataImpl;
+
+        specialinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void <init>()>();
+
+        $r4 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $z0 = virtualinvoke $r4.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+        $r154 = interfaceinvoke r0.<javax.sql.rowset.CachedRowSet: javax.sql.rowset.CachedRowSet createCopy()>();
+
+        $r155 = (com.sun.rowset.CachedRowSetImpl) $r154;
+
+        r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal> = $r155;
+
+        $r156 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r157 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r158 = (javax.sql.rowset.RowSetMetaDataImpl) $r157;
+
+        virtualinvoke $r156.<com.sun.rowset.CachedRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>($r158);
+
+        $r159 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        virtualinvoke $r159.<java.util.Vector: boolean add(java.lang.Object)>(r178);
+
+        goto label33;
+
+     label02:
+        $r5 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $i0 = virtualinvoke $r5.<java.util.Vector: int size()>();
+
+        $r6 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        $i1 = virtualinvoke $r6.<java.util.Vector: int size()>();
+
+        $i2 = $i0 - $i1;
+
+        if $i2 != 2 goto label03;
+
+        virtualinvoke r3.<com.sun.rowset.JoinRowSetImpl: void setJoinType(int)>(1);
+
+        goto label04;
+
+     label03:
+        $r7 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $i3 = virtualinvoke $r7.<java.util.Vector: int size()>();
+
+        $r8 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        $i4 = virtualinvoke $r8.<java.util.Vector: int size()>();
+
+        $i5 = $i3 - $i4;
+
+        if $i5 != 1 goto label04;
+
+     label04:
+        $r10 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecTableNames>;
+
+        $r9 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r11 = virtualinvoke $r9.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        virtualinvoke $r10.<java.util.Vector: boolean add(java.lang.Object)>($r11);
+
+        $r12 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecTableNames>;
+
+        $r13 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        virtualinvoke $r12.<java.util.Vector: boolean add(java.lang.Object)>($r13);
+
+        $i6 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: int size()>();
+
+        $r14 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i7 = virtualinvoke $r14.<com.sun.rowset.CachedRowSetImpl: int size()>();
+
+        i68 = 0;
+
+        i69 = 0;
+
+     label05:
+        $r179 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r180 = virtualinvoke $r179.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i70 = lengthof $r180;
+
+        if i69 >= $i70 goto label06;
+
+        $r152 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r153 = virtualinvoke $r152.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i67 = $r153[i69];
+
+        $i81 = (int) -1;
+
+        if $i67 == $i81 goto label06;
+
+        i68 = i68 + 1;
+
+        i69 = i69 + 1;
+
+        goto label05;
+
+     label06:
+        $r15 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r16 = virtualinvoke $r15.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i8 = interfaceinvoke $r16.<java.sql.ResultSetMetaData: int getColumnCount()>();
+
+        $r17 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i9 = interfaceinvoke $r17.<java.sql.ResultSetMetaData: int getColumnCount()>();
+
+        $i10 = $i8 + $i9;
+
+        $i11 = $i10 - i68;
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnCount(int)>($i11);
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>($r182);
+
+        $r18 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r18.<com.sun.rowset.CachedRowSetImpl: void beforeFirst()>();
+
+        virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: void beforeFirst()>();
+
+        i71 = 1;
+
+     label07:
+        if i71 > $i7 goto label30;
+
+        $r26 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z1 = virtualinvoke $r26.<com.sun.rowset.CachedRowSetImpl: boolean isAfterLast()>();
+
+        if $z1 == 0 goto label08;
+
+        goto label30;
+
+     label08:
+        $r27 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z2 = virtualinvoke $r27.<com.sun.rowset.CachedRowSetImpl: boolean next()>();
+
+        if $z2 == 0 goto label29;
+
+        virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: void beforeFirst()>();
+
+        i72 = 1;
+
+     label09:
+        if i72 > $i6 goto label29;
+
+        $z3 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: boolean isAfterLast()>();
+
+        if $z3 == 0 goto label10;
+
+        goto label29;
+
+     label10:
+        $z4 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: boolean next()>();
+
+        if $z4 == 0 goto label28;
+
+        z21 = 1;
+
+        i73 = 0;
+
+     label11:
+        if i73 >= i68 goto label13;
+
+        $r146 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r145 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r147 = virtualinvoke $r145.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i65 = $r147[i73];
+
+        $r148 = virtualinvoke $r146.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>($i65);
+
+        $r149 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i66 = $r149[i73];
+
+        $r150 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>($i66);
+
+        $z20 = virtualinvoke $r148.<java.lang.Object: boolean equals(java.lang.Object)>($r150);
+
+        if $z20 != 0 goto label12;
+
+        z21 = 0;
+
+        goto label13;
+
+     label12:
+        i73 = i73 + 1;
+
+        goto label11;
+
+     label13:
+        if z21 == 0 goto label28;
+
+        i74 = 0;
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void moveToInsertRow()>();
+
+        i75 = 1;
+
+     label14:
+        $r28 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r29 = virtualinvoke $r28.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i13 = interfaceinvoke $r29.<java.sql.ResultSetMetaData: int getColumnCount()>();
+
+        if i75 > $i13 goto label20;
+
+        z22 = 0;
+
+        i76 = 0;
+
+     label15:
+        if i76 >= i68 goto label17;
+
+        $r143 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r144 = virtualinvoke $r143.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i64 = $r144[i76];
+
+        if i75 != $i64 goto label16;
+
+        z22 = 1;
+
+        goto label17;
+
+     label16:
+        i76 = i76 + 1;
+
+        goto label15;
+
+     label17:
+        if z22 != 0 goto label18;
+
+        i74 = i74 + 1;
+
+        $r102 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r103 = virtualinvoke $r102.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>(i75);
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void updateObject(int,java.lang.Object)>(i74, $r103);
+
+        $r104 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r105 = virtualinvoke $r104.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r106 = interfaceinvoke $r105.<java.sql.ResultSetMetaData: java.lang.String getColumnName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnName(int,java.lang.String)>(i74, $r106);
+
+        $r107 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r108 = virtualinvoke $r107.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setTableName(int,java.lang.String)>(i74, $r108);
+
+        $r109 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r110 = virtualinvoke $r109.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i58 = interfaceinvoke $r110.<java.sql.ResultSetMetaData: int getColumnType(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>(i75, $i58);
+
+        $r111 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r112 = virtualinvoke $r111.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z15 = interfaceinvoke $r112.<java.sql.ResultSetMetaData: boolean isAutoIncrement(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setAutoIncrement(int,boolean)>(i75, $z15);
+
+        $r113 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r114 = virtualinvoke $r113.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z16 = interfaceinvoke $r114.<java.sql.ResultSetMetaData: boolean isCaseSensitive(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCaseSensitive(int,boolean)>(i75, $z16);
+
+        $r115 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r116 = virtualinvoke $r115.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r117 = interfaceinvoke $r116.<java.sql.ResultSetMetaData: java.lang.String getCatalogName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCatalogName(int,java.lang.String)>(i75, $r117);
+
+        $r118 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r119 = virtualinvoke $r118.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i59 = interfaceinvoke $r119.<java.sql.ResultSetMetaData: int getColumnDisplaySize(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnDisplaySize(int,int)>(i75, $i59);
+
+        $r120 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r121 = virtualinvoke $r120.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r122 = interfaceinvoke $r121.<java.sql.ResultSetMetaData: java.lang.String getColumnLabel(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnLabel(int,java.lang.String)>(i75, $r122);
+
+        $r123 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r124 = virtualinvoke $r123.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i60 = interfaceinvoke $r124.<java.sql.ResultSetMetaData: int getColumnType(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>(i75, $i60);
+
+        $r125 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r126 = virtualinvoke $r125.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r127 = interfaceinvoke $r126.<java.sql.ResultSetMetaData: java.lang.String getColumnTypeName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnTypeName(int,java.lang.String)>(i75, $r127);
+
+        $r128 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r129 = virtualinvoke $r128.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z17 = interfaceinvoke $r129.<java.sql.ResultSetMetaData: boolean isCurrency(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCurrency(int,boolean)>(i75, $z17);
+
+        $r130 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r131 = virtualinvoke $r130.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i61 = interfaceinvoke $r131.<java.sql.ResultSetMetaData: int isNullable(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setNullable(int,int)>(i75, $i61);
+
+        $r132 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r133 = virtualinvoke $r132.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i62 = interfaceinvoke $r133.<java.sql.ResultSetMetaData: int getPrecision(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setPrecision(int,int)>(i75, $i62);
+
+        $r134 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r135 = virtualinvoke $r134.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i63 = interfaceinvoke $r135.<java.sql.ResultSetMetaData: int getScale(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setScale(int,int)>(i75, $i63);
+
+        $r136 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r137 = virtualinvoke $r136.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r138 = interfaceinvoke $r137.<java.sql.ResultSetMetaData: java.lang.String getSchemaName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSchemaName(int,java.lang.String)>(i75, $r138);
+
+        $r139 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r140 = virtualinvoke $r139.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z18 = interfaceinvoke $r140.<java.sql.ResultSetMetaData: boolean isSearchable(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSearchable(int,boolean)>(i75, $z18);
+
+        $r141 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r142 = virtualinvoke $r141.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z19 = interfaceinvoke $r142.<java.sql.ResultSetMetaData: boolean isSigned(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSigned(int,boolean)>(i75, $z19);
+
+        goto label19;
+
+     label18:
+        i74 = i74 + 1;
+
+        $r55 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r56 = virtualinvoke $r55.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>(i75);
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void updateObject(int,java.lang.Object)>(i74, $r56);
+
+        $r57 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r58 = virtualinvoke $r57.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r59 = interfaceinvoke $r58.<java.sql.ResultSetMetaData: java.lang.String getColumnName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnName(int,java.lang.String)>(i74, $r59);
+
+        $r183 = new java.lang.StringBuilder;
+
+        specialinvoke $r183.<java.lang.StringBuilder: void <init>()>();
+
+        $r61 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r62 = virtualinvoke $r61.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        $r63 = virtualinvoke $r183.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r62);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("#");
+
+        $r65 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        $r66 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r65);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setTableName(int,java.lang.String)>(i74, $r67);
+
+        $r68 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r69 = virtualinvoke $r68.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i52 = interfaceinvoke $r69.<java.sql.ResultSetMetaData: int getColumnType(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>(i75, $i52);
+
+        $r70 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r71 = virtualinvoke $r70.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z10 = interfaceinvoke $r71.<java.sql.ResultSetMetaData: boolean isAutoIncrement(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setAutoIncrement(int,boolean)>(i75, $z10);
+
+        $r72 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r73 = virtualinvoke $r72.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z11 = interfaceinvoke $r73.<java.sql.ResultSetMetaData: boolean isCaseSensitive(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCaseSensitive(int,boolean)>(i75, $z11);
+
+        $r74 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r75 = virtualinvoke $r74.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r76 = interfaceinvoke $r75.<java.sql.ResultSetMetaData: java.lang.String getCatalogName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCatalogName(int,java.lang.String)>(i75, $r76);
+
+        $r77 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r78 = virtualinvoke $r77.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i53 = interfaceinvoke $r78.<java.sql.ResultSetMetaData: int getColumnDisplaySize(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnDisplaySize(int,int)>(i75, $i53);
+
+        $r79 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r80 = virtualinvoke $r79.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r81 = interfaceinvoke $r80.<java.sql.ResultSetMetaData: java.lang.String getColumnLabel(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnLabel(int,java.lang.String)>(i75, $r81);
+
+        $r82 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r83 = virtualinvoke $r82.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i54 = interfaceinvoke $r83.<java.sql.ResultSetMetaData: int getColumnType(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>(i75, $i54);
+
+        $r84 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r85 = virtualinvoke $r84.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r86 = interfaceinvoke $r85.<java.sql.ResultSetMetaData: java.lang.String getColumnTypeName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnTypeName(int,java.lang.String)>(i75, $r86);
+
+        $r87 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r88 = virtualinvoke $r87.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z12 = interfaceinvoke $r88.<java.sql.ResultSetMetaData: boolean isCurrency(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCurrency(int,boolean)>(i75, $z12);
+
+        $r89 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r90 = virtualinvoke $r89.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i55 = interfaceinvoke $r90.<java.sql.ResultSetMetaData: int isNullable(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setNullable(int,int)>(i75, $i55);
+
+        $r91 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r92 = virtualinvoke $r91.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i56 = interfaceinvoke $r92.<java.sql.ResultSetMetaData: int getPrecision(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setPrecision(int,int)>(i75, $i56);
+
+        $r93 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r94 = virtualinvoke $r93.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i57 = interfaceinvoke $r94.<java.sql.ResultSetMetaData: int getScale(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setScale(int,int)>(i75, $i57);
+
+        $r95 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r96 = virtualinvoke $r95.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r97 = interfaceinvoke $r96.<java.sql.ResultSetMetaData: java.lang.String getSchemaName(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSchemaName(int,java.lang.String)>(i75, $r97);
+
+        $r98 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r99 = virtualinvoke $r98.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z13 = interfaceinvoke $r99.<java.sql.ResultSetMetaData: boolean isSearchable(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSearchable(int,boolean)>(i75, $z13);
+
+        $r100 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r101 = virtualinvoke $r100.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z14 = interfaceinvoke $r101.<java.sql.ResultSetMetaData: boolean isSigned(int)>(i75);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSigned(int,boolean)>(i75, $z14);
+
+     label19:
+        i75 = i75 + 1;
+
+        goto label14;
+
+     label20:
+        i77 = 1;
+
+     label21:
+        $r30 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i14 = interfaceinvoke $r30.<java.sql.ResultSetMetaData: int getColumnCount()>();
+
+        if i77 > $i14 goto label27;
+
+        z23 = 0;
+
+        i78 = 0;
+
+     label22:
+        if i78 >= i68 goto label24;
+
+        $r54 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i51 = $r54[i78];
+
+        if i77 != $i51 goto label23;
+
+        z23 = 1;
+
+        goto label24;
+
+     label23:
+        i78 = i78 + 1;
+
+        goto label22;
+
+     label24:
+        if z23 != 0 goto label25;
+
+        i74 = i74 + 1;
+
+        $r31 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>(i77);
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void updateObject(int,java.lang.Object)>(i74, $r31);
+
+        $r32 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r33 = interfaceinvoke $r32.<java.sql.ResultSetMetaData: java.lang.String getColumnName(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnName(int,java.lang.String)>(i74, $r33);
+
+        $r34 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setTableName(int,java.lang.String)>(i74, $r34);
+
+        $i15 = i75 + i77;
+
+        $i16 = $i15 - 1;
+
+        $r35 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i17 = interfaceinvoke $r35.<java.sql.ResultSetMetaData: int getColumnType(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>($i16, $i17);
+
+        $i18 = i75 + i77;
+
+        $i19 = $i18 - 1;
+
+        $r36 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z5 = interfaceinvoke $r36.<java.sql.ResultSetMetaData: boolean isAutoIncrement(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setAutoIncrement(int,boolean)>($i19, $z5);
+
+        $i20 = i75 + i77;
+
+        $i21 = $i20 - 1;
+
+        $r37 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z6 = interfaceinvoke $r37.<java.sql.ResultSetMetaData: boolean isCaseSensitive(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCaseSensitive(int,boolean)>($i21, $z6);
+
+        $i22 = i75 + i77;
+
+        $i23 = $i22 - 1;
+
+        $r38 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r39 = interfaceinvoke $r38.<java.sql.ResultSetMetaData: java.lang.String getCatalogName(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCatalogName(int,java.lang.String)>($i23, $r39);
+
+        $i24 = i75 + i77;
+
+        $i25 = $i24 - 1;
+
+        $r40 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i26 = interfaceinvoke $r40.<java.sql.ResultSetMetaData: int getColumnDisplaySize(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnDisplaySize(int,int)>($i25, $i26);
+
+        $i27 = i75 + i77;
+
+        $i28 = $i27 - 1;
+
+        $r41 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r42 = interfaceinvoke $r41.<java.sql.ResultSetMetaData: java.lang.String getColumnLabel(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnLabel(int,java.lang.String)>($i28, $r42);
+
+        $i29 = i75 + i77;
+
+        $i30 = $i29 - 1;
+
+        $r43 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i31 = interfaceinvoke $r43.<java.sql.ResultSetMetaData: int getColumnType(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnType(int,int)>($i30, $i31);
+
+        $i32 = i75 + i77;
+
+        $i33 = $i32 - 1;
+
+        $r44 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r45 = interfaceinvoke $r44.<java.sql.ResultSetMetaData: java.lang.String getColumnTypeName(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setColumnTypeName(int,java.lang.String)>($i33, $r45);
+
+        $i34 = i75 + i77;
+
+        $i35 = $i34 - 1;
+
+        $r46 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z7 = interfaceinvoke $r46.<java.sql.ResultSetMetaData: boolean isCurrency(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setCurrency(int,boolean)>($i35, $z7);
+
+        $i36 = i75 + i77;
+
+        $i37 = $i36 - 1;
+
+        $r47 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i38 = interfaceinvoke $r47.<java.sql.ResultSetMetaData: int isNullable(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setNullable(int,int)>($i37, $i38);
+
+        $i39 = i75 + i77;
+
+        $i40 = $i39 - 1;
+
+        $r48 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i41 = interfaceinvoke $r48.<java.sql.ResultSetMetaData: int getPrecision(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setPrecision(int,int)>($i40, $i41);
+
+        $i42 = i75 + i77;
+
+        $i43 = $i42 - 1;
+
+        $r49 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i44 = interfaceinvoke $r49.<java.sql.ResultSetMetaData: int getScale(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setScale(int,int)>($i43, $i44);
+
+        $i45 = i75 + i77;
+
+        $i46 = $i45 - 1;
+
+        $r50 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $r51 = interfaceinvoke $r50.<java.sql.ResultSetMetaData: java.lang.String getSchemaName(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSchemaName(int,java.lang.String)>($i46, $r51);
+
+        $i47 = i75 + i77;
+
+        $i48 = $i47 - 1;
+
+        $r52 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z8 = interfaceinvoke $r52.<java.sql.ResultSetMetaData: boolean isSearchable(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSearchable(int,boolean)>($i48, $z8);
+
+        $i49 = i75 + i77;
+
+        $i50 = $i49 - 1;
+
+        $r53 = virtualinvoke r178.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $z9 = interfaceinvoke $r53.<java.sql.ResultSetMetaData: boolean isSigned(int)>(i77);
+
+        virtualinvoke $r182.<javax.sql.rowset.RowSetMetaDataImpl: void setSigned(int,boolean)>($i50, $z9);
+
+        goto label26;
+
+     label25:
+        $i83 = (int) -1;
+
+        i75 = i75 + $i83;
+
+     label26:
+        i77 = i77 + 1;
+
+        goto label21;
+
+     label27:
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void insertRow()>();
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void moveToCurrentRow()>();
+
+     label28:
+        i72 = i72 + 1;
+
+        goto label09;
+
+     label29:
+        i71 = i71 + 1;
+
+        goto label07;
+
+     label30:
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>($r182);
+
+        virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: void setOriginal()>();
+
+        $r151 = newarray (int)[i68];
+
+        i79 = 0;
+
+     label31:
+        if i79 >= i68 goto label32;
+
+        $r24 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r25 = virtualinvoke $r24.<com.sun.rowset.CachedRowSetImpl: int[] getMatchColumnIndexes()>();
+
+        $i12 = $r25[i79];
+
+        $r151[i79] = $i12;
+
+        i79 = i79 + 1;
+
+        goto label31;
+
+     label32:
+        $r19 = virtualinvoke $r181.<com.sun.rowset.CachedRowSetImpl: javax.sql.rowset.CachedRowSet createCopy()>();
+
+        $r20 = (com.sun.rowset.CachedRowSetImpl) $r19;
+
+        r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal> = $r20;
+
+        $r21 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r21.<com.sun.rowset.CachedRowSetImpl: void setMatchColumn(int[])>($r151);
+
+        $r22 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r22.<com.sun.rowset.CachedRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>($r182);
+
+        $r23 = r3.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        virtualinvoke $r23.<java.util.Vector: boolean add(java.lang.Object)>(r178);
+
+     label33:
+        goto label36;
+
+     label34:
+        $r169 := @caughtexception;
+
+        virtualinvoke $r169.<java.sql.SQLException: void printStackTrace()>();
+
+        $r185 = new java.sql.SQLException;
+
+        $r184 = new java.lang.StringBuilder;
+
+        specialinvoke $r184.<java.lang.StringBuilder: void <init>()>();
+
+        $r172 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r173 = virtualinvoke $r172.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.initerror");
+
+        $r174 = virtualinvoke $r173.<java.lang.Object: java.lang.String toString()>();
+
+        $r175 = virtualinvoke $r184.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r174);
+
+        $r176 = virtualinvoke $r175.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r169);
+
+        $r177 = virtualinvoke $r176.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r185.<java.sql.SQLException: void <init>(java.lang.String)>($r177);
+
+        throw $r185;
+
+     label35:
+        $r160 := @caughtexception;
+
+        virtualinvoke $r160.<java.lang.Exception: void printStackTrace()>();
+
+        $r187 = new java.sql.SQLException;
+
+        $r186 = new java.lang.StringBuilder;
+
+        specialinvoke $r186.<java.lang.StringBuilder: void <init>()>();
+
+        $r163 = r3.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r164 = virtualinvoke $r163.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("joinrowsetimpl.genericerr");
+
+        $r165 = virtualinvoke $r164.<java.lang.Object: java.lang.String toString()>();
+
+        $r166 = virtualinvoke $r186.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r165);
+
+        $r167 = virtualinvoke $r166.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r160);
+
+        $r168 = virtualinvoke $r167.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r187.<java.sql.SQLException: void <init>(java.lang.String)>($r168);
+
+        throw $r187;
+
+     label36:
+        return;
+
+        catch java.sql.SQLException from label01 to label33 with label34;
+        catch java.lang.Exception from label01 to label33 with label35;
+    }
+
+    public java.lang.String getWhereClause() throws java.sql.SQLException
+    {
+        java.util.Vector $r1, $r6, $r12;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r8, r14;
+        java.lang.StringBuilder $r18, $r19, $r20, $r22, $r23, $r24, $r27;
+        java.sql.ResultSetMetaData $r15, $r25;
+        java.lang.String[] $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8;
+        java.lang.String $r2, $r3, $r4, $r5, $r10, $r11, $r16, $r17, $r21, $r26, $r28, $r29, r30, r31, r32, r33, r34;
+        java.lang.Object $r7, $r13;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r30 = "Select ";
+
+        r31 = "";
+
+        r32 = "";
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label4;
+
+        $r12 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $r13 = virtualinvoke $r12.<java.util.Vector: java.lang.Object get(int)>(i6);
+
+        r14 = (com.sun.rowset.CachedRowSetImpl) $r13;
+
+        $r15 = virtualinvoke r14.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i4 = interfaceinvoke $r15.<java.sql.ResultSetMetaData: int getColumnCount()>();
+
+        $r16 = virtualinvoke r14.<com.sun.rowset.CachedRowSetImpl: java.lang.String getTableName()>();
+
+        $r17 = virtualinvoke r31.<java.lang.String: java.lang.String concat(java.lang.String)>($r16);
+
+        r31 = $r17;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r32 = virtualinvoke r32.<java.lang.String: java.lang.String concat(java.lang.String)>($r21);
+
+        i7 = 1;
+
+     label2:
+        if i7 >= $i4 goto label3;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r25 = virtualinvoke r14.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i5 = i7;
+
+        i7 = i7 + 1;
+
+        $r26 = interfaceinvoke $r25.<java.sql.ResultSetMetaData: java.lang.String getColumnName(int)>($i5);
+
+        $r27 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r29 = virtualinvoke r30.<java.lang.String: java.lang.String concat(java.lang.String)>($r28);
+
+        r30 = virtualinvoke $r29.<java.lang.String: java.lang.String concat(java.lang.String)>(", ");
+
+        goto label2;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label4:
+        $i1 = virtualinvoke r30.<java.lang.String: int lastIndexOf(java.lang.String)>(",");
+
+        $r2 = virtualinvoke r30.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String concat(java.lang.String)>(" from ");
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String concat(java.lang.String)>(r32);
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int lastIndexOf(java.lang.String)>(",");
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        r33 = virtualinvoke $r5.<java.lang.String: java.lang.String concat(java.lang.String)>(" where ");
+
+        i8 = 0;
+
+     label5:
+        if i8 >= $i0 goto label8;
+
+        $r6 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecRowSetsInJOIN>;
+
+        $r7 = virtualinvoke $r6.<java.util.Vector: java.lang.Object get(int)>(i8);
+
+        $r8 = (com.sun.rowset.CachedRowSetImpl) $r7;
+
+        $r9 = virtualinvoke $r8.<com.sun.rowset.CachedRowSetImpl: java.lang.String[] getMatchColumnNames()>();
+
+        $r10 = $r9[0];
+
+        $r11 = virtualinvoke r33.<java.lang.String: java.lang.String concat(java.lang.String)>($r10);
+
+        $i3 = i8 % 2;
+
+        if $i3 == 0 goto label6;
+
+        r34 = virtualinvoke $r11.<java.lang.String: java.lang.String concat(java.lang.String)>("=");
+
+        goto label7;
+
+     label6:
+        r34 = virtualinvoke $r11.<java.lang.String: java.lang.String concat(java.lang.String)>(" and");
+
+     label7:
+        r33 = virtualinvoke r34.<java.lang.String: java.lang.String concat(java.lang.String)>(" ");
+
+        i8 = i8 + 1;
+
+        goto label5;
+
+     label8:
+        return r33;
+    }
+
+    public boolean next() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean next()>();
+
+        return $z0;
+    }
+
+    public void close() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void close()>();
+
+        return;
+    }
+
+    public boolean wasNull() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean wasNull()>();
+
+        return $z0;
+    }
+
+    public java.lang.String getString(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.lang.String $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.lang.String getString(int)>(i0);
+
+        return $r2;
+    }
+
+    public boolean getBoolean(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean getBoolean(int)>(i0);
+
+        return $z0;
+    }
+
+    public byte getByte(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte $b1;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $b1 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: byte getByte(int)>(i0);
+
+        return $b1;
+    }
+
+    public short getShort(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        short $s1;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $s1 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: short getShort(int)>(i0);
+
+        return $s1;
+    }
+
+    public int getInt(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0, $i1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i1 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: int getInt(int)>(i0);
+
+        return $i1;
+    }
+
+    public long getLong(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        long $l1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $l1 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: long getLong(int)>(i0);
+
+        return $l1;
+    }
+
+    public float getFloat(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        float $f0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $f0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: float getFloat(int)>(i0);
+
+        return $f0;
+    }
+
+    public double getDouble(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        double $d0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $d0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: double getDouble(int)>(i0);
+
+        return $d0;
+    }
+
+    public java.math.BigDecimal getBigDecimal(int, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0, i1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.math.BigDecimal getBigDecimal(int)>(i0);
+
+        return $r2;
+    }
+
+    public byte[] getBytes(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte[] $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: byte[] getBytes(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Date getDate(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.sql.Date $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Date getDate(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Time getTime(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.Time $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Time getTime(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Timestamp getTimestamp(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.sql.Timestamp $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Timestamp getTimestamp(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.io.InputStream getAsciiStream(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getAsciiStream(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.io.InputStream getUnicodeStream(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getUnicodeStream(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.io.InputStream getBinaryStream(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getBinaryStream(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.lang.String getString(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1, $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.lang.String getString(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public boolean getBoolean(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: boolean getBoolean(java.lang.String)>(r1);
+
+        return $z0;
+    }
+
+    public byte getByte(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte $b0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $b0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: byte getByte(java.lang.String)>(r1);
+
+        return $b0;
+    }
+
+    public short getShort(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        short $s0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $s0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: short getShort(java.lang.String)>(r1);
+
+        return $s0;
+    }
+
+    public int getInt(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int $i0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: int getInt(java.lang.String)>(r1);
+
+        return $i0;
+    }
+
+    public long getLong(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        long $l0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $l0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: long getLong(java.lang.String)>(r1);
+
+        return $l0;
+    }
+
+    public float getFloat(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        float $f0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $f0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: float getFloat(java.lang.String)>(r1);
+
+        return $f0;
+    }
+
+    public double getDouble(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        double $d0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $d0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: double getDouble(java.lang.String)>(r1);
+
+        return $d0;
+    }
+
+    public java.math.BigDecimal getBigDecimal(java.lang.String, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal $r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.math.BigDecimal getBigDecimal(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public byte[] getBytes(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte[] $r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: byte[] getBytes(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Date getDate(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.sql.Date $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Date getDate(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Time getTime(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.Time $r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Time getTime(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Timestamp getTimestamp(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.sql.Timestamp $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Timestamp getTimestamp(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.io.InputStream getAsciiStream(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.io.InputStream $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getAsciiStream(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.io.InputStream getUnicodeStream(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.io.InputStream $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getUnicodeStream(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.io.InputStream getBinaryStream(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.io.InputStream $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.io.InputStream getBinaryStream(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.SQLWarning getWarnings()
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.SQLWarning $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.SQLWarning getWarnings()>();
+
+        return $r2;
+    }
+
+    public void clearWarnings()
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void clearWarnings()>();
+
+        return;
+    }
+
+    public java.lang.String getCursorName() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.lang.String $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.lang.String getCursorName()>();
+
+        return $r2;
+    }
+
+    public java.sql.ResultSetMetaData getMetaData() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.sql.ResultSetMetaData $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        return $r2;
+    }
+
+    public java.lang.Object getObject(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.lang.Object $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.lang.Object getObject(int, java.util.Map) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.util.Map r1;
+        int i0;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Map;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(int,java.util.Map)>(i0, r1);
+
+        return $r3;
+    }
+
+    public java.lang.Object getObject(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.lang.Object getObject(java.lang.String, java.util.Map) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.util.Map r2;
+        java.lang.Object $r4;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r4 = virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: java.lang.Object getObject(java.lang.String,java.util.Map)>(r1, r2);
+
+        return $r4;
+    }
+
+    public java.io.Reader getCharacterStream(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.io.Reader $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.io.Reader getCharacterStream(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.io.Reader getCharacterStream(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.io.Reader $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.io.Reader getCharacterStream(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.math.BigDecimal getBigDecimal(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.math.BigDecimal getBigDecimal(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.math.BigDecimal getBigDecimal(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal $r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.math.BigDecimal getBigDecimal(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public int size()
+    {
+        int $i0;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: int size()>();
+
+        return $i0;
+    }
+
+    public boolean isBeforeFirst() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean isBeforeFirst()>();
+
+        return $z0;
+    }
+
+    public boolean isAfterLast() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean isAfterLast()>();
+
+        return $z0;
+    }
+
+    public boolean isFirst() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean isFirst()>();
+
+        return $z0;
+    }
+
+    public boolean isLast() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean isLast()>();
+
+        return $z0;
+    }
+
+    public void beforeFirst() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void beforeFirst()>();
+
+        return;
+    }
+
+    public void afterLast() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void afterLast()>();
+
+        return;
+    }
+
+    public boolean first() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean first()>();
+
+        return $z0;
+    }
+
+    public boolean last() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean last()>();
+
+        return $z0;
+    }
+
+    public int getRow() throws java.sql.SQLException
+    {
+        int $i0;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: int getRow()>();
+
+        return $i0;
+    }
+
+    public boolean absolute(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean absolute(int)>(i0);
+
+        return $z0;
+    }
+
+    public boolean relative(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean relative(int)>(i0);
+
+        return $z0;
+    }
+
+    public boolean previous() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean previous()>();
+
+        return $z0;
+    }
+
+    public int findColumn(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int $i0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $i0 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: int findColumn(java.lang.String)>(r1);
+
+        return $i0;
+    }
+
+    public boolean rowUpdated() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean rowUpdated()>();
+
+        return $z0;
+    }
+
+    public boolean columnUpdated(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean columnUpdated(int)>(i0);
+
+        return $z0;
+    }
+
+    public boolean rowInserted() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean rowInserted()>();
+
+        return $z0;
+    }
+
+    public boolean rowDeleted() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $z0 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: boolean rowDeleted()>();
+
+        return $z0;
+    }
+
+    public void updateNull(int) throws java.sql.SQLException
+    {
+        int i0;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateNull(int)>(i0);
+
+        return;
+    }
+
+    public void updateBoolean(int, boolean) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        boolean z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateBoolean(int,boolean)>(i0, z0);
+
+        return;
+    }
+
+    public void updateByte(int, byte) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte b1;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        b1 := @parameter1: byte;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateByte(int,byte)>(i0, b1);
+
+        return;
+    }
+
+    public void updateShort(int, short) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        short s1;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        s1 := @parameter1: short;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateShort(int,short)>(i0, s1);
+
+        return;
+    }
+
+    public void updateInt(int, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0, i1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateInt(int,int)>(i0, i1);
+
+        return;
+    }
+
+    public void updateLong(int, long) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        long l1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateLong(int,long)>(i0, l1);
+
+        return;
+    }
+
+    public void updateFloat(int, float) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        float f0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateFloat(int,float)>(i0, f0);
+
+        return;
+    }
+
+    public void updateDouble(int, double) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        double d0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        d0 := @parameter1: double;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateDouble(int,double)>(i0, d0);
+
+        return;
+    }
+
+    public void updateBigDecimal(int, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.math.BigDecimal;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateBigDecimal(int,java.math.BigDecimal)>(i0, r1);
+
+        return;
+    }
+
+    public void updateString(int, java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateString(int,java.lang.String)>(i0, r1);
+
+        return;
+    }
+
+    public void updateBytes(int, byte[]) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte[] r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateBytes(int,byte[])>(i0, r1);
+
+        return;
+    }
+
+    public void updateDate(int, java.sql.Date) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Date r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Date;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateDate(int,java.sql.Date)>(i0, r1);
+
+        return;
+    }
+
+    public void updateTime(int, java.sql.Time) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.Time r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Time;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateTime(int,java.sql.Time)>(i0, r1);
+
+        return;
+    }
+
+    public void updateTimestamp(int, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.sql.Timestamp r1;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Timestamp;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateTimestamp(int,java.sql.Timestamp)>(i0, r1);
+
+        return;
+    }
+
+    public void updateAsciiStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0, i1;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateAsciiStream(int,java.io.InputStream,int)>(i0, r1, i1);
+
+        return;
+    }
+
+    public void updateBinaryStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0, i1;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateBinaryStream(int,java.io.InputStream,int)>(i0, r1, i1);
+
+        return;
+    }
+
+    public void updateCharacterStream(int, java.io.Reader, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0, i1;
+        java.io.Reader r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.Reader;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateCharacterStream(int,java.io.Reader,int)>(i0, r1, i1);
+
+        return;
+    }
+
+    public void updateObject(int, java.lang.Object, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0, i1;
+        java.lang.Object r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Object;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateObject(int,java.lang.Object,int)>(i0, r1, i1);
+
+        return;
+    }
+
+    public void updateObject(int, java.lang.Object) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.lang.Object r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateObject(int,java.lang.Object)>(i0, r1);
+
+        return;
+    }
+
+    public void updateNull(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.lang.String r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateNull(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void updateBoolean(java.lang.String, boolean) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateBoolean(java.lang.String,boolean)>(r1, z0);
+
+        return;
+    }
+
+    public void updateByte(java.lang.String, byte) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte b0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        b0 := @parameter1: byte;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateByte(java.lang.String,byte)>(r1, b0);
+
+        return;
+    }
+
+    public void updateShort(java.lang.String, short) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        short s0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        s0 := @parameter1: short;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateShort(java.lang.String,short)>(r1, s0);
+
+        return;
+    }
+
+    public void updateInt(java.lang.String, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateInt(java.lang.String,int)>(r1, i0);
+
+        return;
+    }
+
+    public void updateLong(java.lang.String, long) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        long l0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateLong(java.lang.String,long)>(r1, l0);
+
+        return;
+    }
+
+    public void updateFloat(java.lang.String, float) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        float f0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        f0 := @parameter1: float;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateFloat(java.lang.String,float)>(r1, f0);
+
+        return;
+    }
+
+    public void updateDouble(java.lang.String, double) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        double d0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        d0 := @parameter1: double;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateDouble(java.lang.String,double)>(r1, d0);
+
+        return;
+    }
+
+    public void updateBigDecimal(java.lang.String, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.math.BigDecimal r2;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.math.BigDecimal;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateBigDecimal(java.lang.String,java.math.BigDecimal)>(r1, r2);
+
+        return;
+    }
+
+    public void updateString(java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateString(java.lang.String,java.lang.String)>(r1, r2);
+
+        return;
+    }
+
+    public void updateBytes(java.lang.String, byte[]) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        byte[] r2;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateBytes(java.lang.String,byte[])>(r1, r2);
+
+        return;
+    }
+
+    public void updateDate(java.lang.String, java.sql.Date) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Date r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Date;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateDate(java.lang.String,java.sql.Date)>(r1, r2);
+
+        return;
+    }
+
+    public void updateTime(java.lang.String, java.sql.Time) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.Time r2;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Time;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateTime(java.lang.String,java.sql.Time)>(r1, r2);
+
+        return;
+    }
+
+    public void updateTimestamp(java.lang.String, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.sql.Timestamp r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Timestamp;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateTimestamp(java.lang.String,java.sql.Timestamp)>(r1, r2);
+
+        return;
+    }
+
+    public void updateAsciiStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        int i0;
+        java.lang.String r1;
+        java.io.InputStream r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        i0 := @parameter2: int;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateAsciiStream(java.lang.String,java.io.InputStream,int)>(r1, r2, i0);
+
+        return;
+    }
+
+    public void updateBinaryStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        int i0;
+        java.lang.String r1;
+        java.io.InputStream r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        i0 := @parameter2: int;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateBinaryStream(java.lang.String,java.io.InputStream,int)>(r1, r2, i0);
+
+        return;
+    }
+
+    public void updateCharacterStream(java.lang.String, java.io.Reader, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        int i0;
+        java.lang.String r1;
+        java.io.Reader r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.io.Reader;
+
+        i0 := @parameter2: int;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateCharacterStream(java.lang.String,java.io.Reader,int)>(r1, r2, i0);
+
+        return;
+    }
+
+    public void updateObject(java.lang.String, java.lang.Object, int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        int i0;
+        java.lang.Object r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateObject(java.lang.String,java.lang.Object,int)>(r1, r2, i0);
+
+        return;
+    }
+
+    public void updateObject(java.lang.String, java.lang.Object) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.Object r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateObject(java.lang.String,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    public void insertRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void insertRow()>();
+
+        return;
+    }
+
+    public void updateRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void updateRow()>();
+
+        return;
+    }
+
+    public void deleteRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void deleteRow()>();
+
+        return;
+    }
+
+    public void refreshRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void refreshRow()>();
+
+        return;
+    }
+
+    public void cancelRowUpdates() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void cancelRowUpdates()>();
+
+        return;
+    }
+
+    public void moveToInsertRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void moveToInsertRow()>();
+
+        return;
+    }
+
+    public void moveToCurrentRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void moveToCurrentRow()>();
+
+        return;
+    }
+
+    public java.sql.Statement getStatement() throws java.sql.SQLException
+    {
+        java.sql.Statement $r2;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Statement getStatement()>();
+
+        return $r2;
+    }
+
+    public java.sql.Ref getRef(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.sql.Ref $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Ref getRef(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Blob getBlob(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.sql.Blob $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Blob getBlob(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Clob getClob(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.sql.Clob $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Clob getClob(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Array getArray(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int i0;
+        java.sql.Array $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.Array getArray(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.sql.Ref getRef(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.sql.Ref $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Ref getRef(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Blob getBlob(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.sql.Blob $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Blob getBlob(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Clob getClob(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.sql.Clob $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Clob getClob(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Array getArray(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.lang.String r1;
+        java.sql.Array $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Array getArray(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.sql.Date getDate(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Date $r3;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Calendar;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Date getDate(int,java.util.Calendar)>(i0, r1);
+
+        return $r3;
+    }
+
+    public java.sql.Date getDate(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r2;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Date $r4;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Calendar;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r4 = virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: java.sql.Date getDate(java.lang.String,java.util.Calendar)>(r1, r2);
+
+        return $r4;
+    }
+
+    public java.sql.Time getTime(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r1;
+        java.sql.Time $r3;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Calendar;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Time getTime(int,java.util.Calendar)>(i0, r1);
+
+        return $r3;
+    }
+
+    public java.sql.Time getTime(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r2;
+        java.sql.Time $r4;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Calendar;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r4 = virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: java.sql.Time getTime(java.lang.String,java.util.Calendar)>(r1, r2);
+
+        return $r4;
+    }
+
+    public java.sql.Timestamp getTimestamp(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.sql.Timestamp $r3;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Calendar;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.sql.Timestamp getTimestamp(int,java.util.Calendar)>(i0, r1);
+
+        return $r3;
+    }
+
+    public java.sql.Timestamp getTimestamp(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Calendar r2;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.sql.Timestamp $r4;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Calendar;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r4 = virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: java.sql.Timestamp getTimestamp(java.lang.String,java.util.Calendar)>(r1, r2);
+
+        return $r4;
+    }
+
+    public void setMetaData(javax.sql.RowSetMetaData) throws java.sql.SQLException
+    {
+        javax.sql.RowSetMetaData r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: javax.sql.RowSetMetaData;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>(r1);
+
+        return;
+    }
+
+    public java.sql.ResultSet getOriginal() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.sql.ResultSet $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSet getOriginal()>();
+
+        return $r2;
+    }
+
+    public java.sql.ResultSet getOriginalRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.sql.ResultSet $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.sql.ResultSet getOriginalRow()>();
+
+        return $r2;
+    }
+
+    public void setOriginalRow() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void setOriginalRow()>();
+
+        return;
+    }
+
+    public int[] getKeyColumns() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        int[] $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: int[] getKeyColumns()>();
+
+        return $r2;
+    }
+
+    public void setKeyColumns(int[]) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        int[] r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: int[];
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void setKeyColumns(int[])>(r1);
+
+        return;
+    }
+
+    public void updateRef(int, java.sql.Ref) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Ref r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Ref;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateRef(int,java.sql.Ref)>(i0, r1);
+
+        return;
+    }
+
+    public void updateRef(java.lang.String, java.sql.Ref) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Ref r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Ref;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateRef(java.lang.String,java.sql.Ref)>(r1, r2);
+
+        return;
+    }
+
+    public void updateClob(int, java.sql.Clob) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Clob r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Clob;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateClob(int,java.sql.Clob)>(i0, r1);
+
+        return;
+    }
+
+    public void updateClob(java.lang.String, java.sql.Clob) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Clob r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Clob;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateClob(java.lang.String,java.sql.Clob)>(r1, r2);
+
+        return;
+    }
+
+    public void updateBlob(int, java.sql.Blob) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Blob r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Blob;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateBlob(int,java.sql.Blob)>(i0, r1);
+
+        return;
+    }
+
+    public void updateBlob(java.lang.String, java.sql.Blob) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Blob r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Blob;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateBlob(java.lang.String,java.sql.Blob)>(r1, r2);
+
+        return;
+    }
+
+    public void updateArray(int, java.sql.Array) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        int i0;
+        java.sql.Array r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.sql.Array;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void updateArray(int,java.sql.Array)>(i0, r1);
+
+        return;
+    }
+
+    public void updateArray(java.lang.String, java.sql.Array) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3;
+        java.lang.String r1;
+        java.sql.Array r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.sql.Array;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void updateArray(java.lang.String,java.sql.Array)>(r1, r2);
+
+        return;
+    }
+
+    public void execute() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void execute()>();
+
+        return;
+    }
+
+    public void execute(java.sql.Connection) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.Connection r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.sql.Connection;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void execute(java.sql.Connection)>(r1);
+
+        return;
+    }
+
+    public java.net.URL getURL(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.net.URL $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.net.URL getURL(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.net.URL getURL(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.net.URL $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.net.URL getURL(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public void writeXml(java.sql.ResultSet, java.io.Writer) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.ResultSet r2;
+        com.sun.rowset.WebRowSetImpl $r1;
+        java.io.Writer r4;
+        javax.sql.rowset.WebRowSet $r3, $r5;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.sql.ResultSet;
+
+        r4 := @parameter1: java.io.Writer;
+
+        $r1 = new com.sun.rowset.WebRowSetImpl;
+
+        specialinvoke $r1.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs> = $r1;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r3.<javax.sql.rowset.WebRowSet: void populate(java.sql.ResultSet)>(r2);
+
+        $r5 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r5.<javax.sql.rowset.WebRowSet: void writeXml(java.io.Writer)>(r4);
+
+        return;
+    }
+
+    public void writeXml(java.io.Writer) throws java.sql.SQLException
+    {
+        java.io.Writer r2;
+        com.sun.rowset.JoinRowSetImpl r0;
+        javax.sql.rowset.WebRowSet $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.io.Writer;
+
+        $r1 = specialinvoke r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet createWebRowSet()>();
+
+        interfaceinvoke $r1.<javax.sql.rowset.WebRowSet: void writeXml(java.io.Writer)>(r2);
+
+        return;
+    }
+
+    public void readXml(java.io.Reader) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r5;
+        com.sun.rowset.WebRowSetImpl $r1;
+        java.io.Reader r2;
+        javax.sql.rowset.WebRowSet $r3, $r4;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.io.Reader;
+
+        $r1 = new com.sun.rowset.WebRowSetImpl;
+
+        specialinvoke $r1.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs> = $r1;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r3.<javax.sql.rowset.WebRowSet: void readXml(java.io.Reader)>(r2);
+
+        $r4 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        $r5 = (com.sun.rowset.CachedRowSetImpl) $r4;
+
+        r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal> = $r5;
+
+        return;
+    }
+
+    public void readXml(java.io.InputStream) throws java.sql.SQLException, java.io.IOException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r5;
+        com.sun.rowset.WebRowSetImpl $r1;
+        javax.sql.rowset.WebRowSet $r3, $r4;
+        java.io.InputStream r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r1 = new com.sun.rowset.WebRowSetImpl;
+
+        specialinvoke $r1.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs> = $r1;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r3.<javax.sql.rowset.WebRowSet: void readXml(java.io.InputStream)>(r2);
+
+        $r4 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        $r5 = (com.sun.rowset.CachedRowSetImpl) $r4;
+
+        r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal> = $r5;
+
+        return;
+    }
+
+    public void writeXml(java.io.OutputStream) throws java.sql.SQLException, java.io.IOException
+    {
+        java.io.OutputStream r2;
+        com.sun.rowset.JoinRowSetImpl r0;
+        javax.sql.rowset.WebRowSet $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r1 = specialinvoke r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet createWebRowSet()>();
+
+        interfaceinvoke $r1.<javax.sql.rowset.WebRowSet: void writeXml(java.io.OutputStream)>(r2);
+
+        return;
+    }
+
+    public void writeXml(java.sql.ResultSet, java.io.OutputStream) throws java.sql.SQLException, java.io.IOException
+    {
+        java.io.OutputStream r4;
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.sql.ResultSet r2;
+        com.sun.rowset.WebRowSetImpl $r1;
+        javax.sql.rowset.WebRowSet $r3, $r5;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r2 := @parameter0: java.sql.ResultSet;
+
+        r4 := @parameter1: java.io.OutputStream;
+
+        $r1 = new com.sun.rowset.WebRowSetImpl;
+
+        specialinvoke $r1.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs> = $r1;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r3.<javax.sql.rowset.WebRowSet: void populate(java.sql.ResultSet)>(r2);
+
+        $r5 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        interfaceinvoke $r5.<javax.sql.rowset.WebRowSet: void writeXml(java.io.OutputStream)>(r4);
+
+        return;
+    }
+
+    private javax.sql.rowset.WebRowSet createWebRowSet() throws java.sql.SQLException
+    {
+        javax.sql.rowset.WebRowSet $r1, $r5, $r6, $r7;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r3, $r4;
+        com.sun.rowset.WebRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        return $r7;
+
+     label1:
+        $r2 = new com.sun.rowset.WebRowSetImpl;
+
+        specialinvoke $r2.<com.sun.rowset.WebRowSetImpl: void <init>()>();
+
+        r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs> = $r2;
+
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r3.<com.sun.rowset.CachedRowSetImpl: void beforeFirst()>();
+
+        $r5 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        $r4 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        interfaceinvoke $r5.<javax.sql.rowset.WebRowSet: void populate(java.sql.ResultSet)>($r4);
+
+        $r6 = r0.<com.sun.rowset.JoinRowSetImpl: javax.sql.rowset.WebRowSet wrs>;
+
+        return $r6;
+    }
+
+    public int getJoinType() throws java.sql.SQLException
+    {
+        java.lang.Integer $r5;
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.util.Vector $r1, $r2, $r3;
+        int $i0, $i1, $i2;
+        java.lang.Object $r4;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke r0.<com.sun.rowset.JoinRowSetImpl: void setJoinType(int)>(1);
+
+     label1:
+        $r3 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: java.util.Vector vecJoinType>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $i1 = $i0 - 1;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object get(int)>($i1);
+
+        $r5 = (java.lang.Integer) $r4;
+
+        $i2 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        return $i2;
+    }
+
+    public void addRowSetListener(javax.sql.RowSetListener)
+    {
+        javax.sql.RowSetListener r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: javax.sql.RowSetListener;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void addRowSetListener(javax.sql.RowSetListener)>(r1);
+
+        return;
+    }
+
+    public void removeRowSetListener(javax.sql.RowSetListener)
+    {
+        javax.sql.RowSetListener r1;
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: javax.sql.RowSetListener;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void removeRowSetListener(javax.sql.RowSetListener)>(r1);
+
+        return;
+    }
+
+    public java.util.Collection toCollection() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.util.Collection $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.util.Collection toCollection()>();
+
+        return $r2;
+    }
+
+    public java.util.Collection toCollection(int) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        java.util.Collection $r2;
+        int i0;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: java.util.Collection toCollection(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.util.Collection toCollection(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r2;
+        java.util.Collection $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r3 = virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: java.util.Collection toCollection(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public javax.sql.rowset.CachedRowSet createCopySchema() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+        javax.sql.rowset.CachedRowSet $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: javax.sql.rowset.CachedRowSet createCopySchema()>();
+
+        return $r2;
+    }
+
+    public void setSyncProvider(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        java.lang.String r1;
+        com.sun.rowset.CachedRowSetImpl $r2;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r2.<com.sun.rowset.CachedRowSetImpl: void setSyncProvider(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void acceptChanges() throws javax.sql.rowset.spi.SyncProviderException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: void acceptChanges()>();
+
+        return;
+    }
+
+    public javax.sql.rowset.spi.SyncProvider getSyncProvider() throws java.sql.SQLException
+    {
+        com.sun.rowset.JoinRowSetImpl r0;
+        javax.sql.rowset.spi.SyncProvider $r2;
+        com.sun.rowset.CachedRowSetImpl $r1;
+
+        r0 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        $r1 = r0.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.CachedRowSetImpl crsInternal>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.CachedRowSetImpl: javax.sql.rowset.spi.SyncProvider getSyncProvider()>();
+
+        return $r2;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        com.sun.rowset.JoinRowSetImpl r1;
+        java.io.ObjectInputStream r0;
+        java.io.IOException $r3;
+        com.sun.rowset.JdbcRowSetResourceBundle $r2;
+        java.lang.RuntimeException $r4;
+
+        r1 := @this: com.sun.rowset.JoinRowSetImpl;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+     label1:
+        $r2 = staticinvoke <com.sun.rowset.JdbcRowSetResourceBundle: com.sun.rowset.JdbcRowSetResourceBundle getJdbcRowSetResourceBundle()>();
+
+        r1.<com.sun.rowset.JoinRowSetImpl: com.sun.rowset.JdbcRowSetResourceBundle resBundle> = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.rowset.JoinRowSetImpl: long serialVersionUID> = -5590501621560008453L;
+
+        return;
+    }
+}

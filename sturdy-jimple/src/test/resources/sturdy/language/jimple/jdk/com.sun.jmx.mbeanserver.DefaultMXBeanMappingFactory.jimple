@@ -1,0 +1,1427 @@
+public class com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory extends com.sun.jmx.mbeanserver.MXBeanMappingFactory
+{
+    private static final com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings mappings;
+    private static final java.util.List permanentMappings;
+    private static final java.lang.String[] keyArray;
+    private static final java.lang.String[] keyValueArray;
+    private static final java.util.Map inProgress;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r0;
+
+        r0 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        specialinvoke r0.<com.sun.jmx.mbeanserver.MXBeanMappingFactory: void <init>()>();
+
+        return;
+    }
+
+    static boolean isIdentity(com.sun.jmx.mbeanserver.MXBeanMapping)
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping r0;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$NonNullMXBeanMapping $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: com.sun.jmx.mbeanserver.MXBeanMapping;
+
+        $z0 = r0 instanceof com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$NonNullMXBeanMapping;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$NonNullMXBeanMapping) r0;
+
+        $z1 = virtualinvoke $r1.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$NonNullMXBeanMapping: boolean isIdentity()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    private static synchronized com.sun.jmx.mbeanserver.MXBeanMapping getMapping(java.lang.reflect.Type)
+    {
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings $r1;
+        com.sun.jmx.mbeanserver.MXBeanMapping $r5;
+        java.lang.reflect.Type r0;
+        java.lang.Object $r2, $r4;
+        java.lang.ref.WeakReference r3;
+
+        r0 := @parameter0: java.lang.reflect.Type;
+
+        $r1 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings mappings>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (java.lang.ref.WeakReference) $r2;
+
+        if r3 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r4 = virtualinvoke r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r5 = (com.sun.jmx.mbeanserver.MXBeanMapping) $r4;
+
+     label2:
+        return $r5;
+    }
+
+    private static synchronized void putMapping(java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMapping)
+    {
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings $r3;
+        com.sun.jmx.mbeanserver.MXBeanMapping r1;
+        java.lang.reflect.Type r2;
+        java.lang.ref.WeakReference $r0;
+
+        r2 := @parameter0: java.lang.reflect.Type;
+
+        r1 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMapping;
+
+        $r0 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r0.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r1);
+
+        $r3 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings mappings>;
+
+        virtualinvoke $r3.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r0);
+
+        return;
+    }
+
+    private static synchronized void putPermanentMapping(java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMapping)
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping r1;
+        java.util.List $r2;
+        java.lang.reflect.Type r0;
+
+        r0 := @parameter0: java.lang.reflect.Type;
+
+        r1 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMapping;
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void putMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMapping)>(r0, r1);
+
+        $r2 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.List permanentMappings>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized com.sun.jmx.mbeanserver.MXBeanMapping mappingForType(java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        java.lang.Throwable $r14;
+        com.sun.jmx.mbeanserver.MXBeanMapping $r2, $r6;
+        javax.management.openmbean.OpenDataException $r8, $r16, $r22;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r4;
+        java.util.Map $r1, $r3, $r7, $r15;
+        java.lang.String $r11, $r13, $r19, $r21;
+        boolean $z0;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r5;
+        java.lang.reflect.Type r0;
+        java.lang.StringBuilder $r9, $r10, $r12, $r17, $r18, $r20;
+
+        r4 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r0 := @parameter0: java.lang.reflect.Type;
+
+        r5 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $r1 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.Map inProgress>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new javax.management.openmbean.OpenDataException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Recursive data structure, including ");
+
+        $r11 = staticinvoke <com.sun.jmx.mbeanserver.MXBeanIntrospector: java.lang.String typeName(java.lang.reflect.Type)>(r0);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r13);
+
+        throw $r8;
+
+     label1:
+        $r2 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping getMapping(java.lang.reflect.Type)>(r0);
+
+        if $r2 == null goto label2;
+
+        return $r2;
+
+     label2:
+        $r3 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.Map inProgress>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r0);
+
+     label3:
+        $r6 = specialinvoke r4.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r0, r5);
+
+     label4:
+        $r7 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.Map inProgress>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        goto label8;
+
+     label5:
+        $r16 := @caughtexception;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot convert type: ");
+
+        $r19 = staticinvoke <com.sun.jmx.mbeanserver.MXBeanIntrospector: java.lang.String typeName(java.lang.reflect.Type)>(r0);
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r22 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: javax.management.openmbean.OpenDataException openDataException(java.lang.String,java.lang.Throwable)>($r21, $r16);
+
+        throw $r22;
+
+     label6:
+        $r14 := @caughtexception;
+
+     label7:
+        $r15 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.Map inProgress>;
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        throw $r14;
+
+     label8:
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void putMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMapping)>(r0, $r6);
+
+        return $r6;
+
+        catch javax.management.openmbean.OpenDataException from label3 to label4 with label5;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    private com.sun.jmx.mbeanserver.MXBeanMapping makeMapping(java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        java.lang.reflect.GenericArrayType $r15;
+        com.sun.jmx.mbeanserver.MXBeanMapping $r9, $r10, $r11, $r13, $r14, $r17;
+        javax.management.openmbean.OpenDataException $r1;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r6;
+        java.lang.String $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r7;
+        java.lang.reflect.ParameterizedType $r8;
+        java.lang.reflect.Type r0, $r16;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.Class $r12, r18;
+
+        r6 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r0 := @parameter0: java.lang.reflect.Type;
+
+        r7 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $z0 = r0 instanceof java.lang.reflect.GenericArrayType;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = (java.lang.reflect.GenericArrayType) r0;
+
+        $r16 = interfaceinvoke $r15.<java.lang.reflect.GenericArrayType: java.lang.reflect.Type getGenericComponentType()>();
+
+        $r17 = specialinvoke r6.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeArrayOrCollectionMapping(java.lang.reflect.Type,java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r0, $r16, r7);
+
+        return $r17;
+
+     label1:
+        $z1 = r0 instanceof java.lang.Class;
+
+        if $z1 == 0 goto label5;
+
+        r18 = (java.lang.Class) r0;
+
+        $z3 = virtualinvoke r18.<java.lang.Class: boolean isEnum()>();
+
+        if $z3 == 0 goto label2;
+
+        $r14 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeEnumMapping(java.lang.Class,java.lang.Class)>(r18, class "Ljava/lang/annotation/ElementType;");
+
+        return $r14;
+
+     label2:
+        $z4 = virtualinvoke r18.<java.lang.Class: boolean isArray()>();
+
+        if $z4 == 0 goto label3;
+
+        $r12 = virtualinvoke r18.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $r13 = specialinvoke r6.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeArrayOrCollectionMapping(java.lang.reflect.Type,java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r18, $r12, r7);
+
+        return $r13;
+
+     label3:
+        $z5 = staticinvoke <javax.management.JMX: boolean isMXBeanInterface(java.lang.Class)>(r18);
+
+        if $z5 == 0 goto label4;
+
+        $r11 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeMXBeanRefMapping(java.lang.reflect.Type)>(r18);
+
+        return $r11;
+
+     label4:
+        $r10 = specialinvoke r6.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeCompositeMapping(java.lang.Class,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r18, r7);
+
+        return $r10;
+
+     label5:
+        $z2 = r0 instanceof java.lang.reflect.ParameterizedType;
+
+        if $z2 == 0 goto label6;
+
+        $r8 = (java.lang.reflect.ParameterizedType) r0;
+
+        $r9 = specialinvoke r6.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeParameterizedTypeMapping(java.lang.reflect.ParameterizedType,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>($r8, r7);
+
+        return $r9;
+
+     label6:
+        $r1 = new javax.management.openmbean.OpenDataException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot map type: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    private static com.sun.jmx.mbeanserver.MXBeanMapping makeEnumMapping(java.lang.Class, java.lang.Class)
+    {
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$EnumMapping $r1;
+        java.lang.Class r0, $r3, r4;
+        java.lang.Object $r2;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r4 := @parameter1: java.lang.Class;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>(r0);
+
+        $r1 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$EnumMapping;
+
+        $r2 = staticinvoke <com.sun.jmx.mbeanserver.Util: java.lang.Object cast(java.lang.Object)>(r0);
+
+        $r3 = (java.lang.Class) $r2;
+
+        specialinvoke $r1.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$EnumMapping: void <init>(java.lang.Class)>($r3);
+
+        return $r1;
+    }
+
+    private com.sun.jmx.mbeanserver.MXBeanMapping makeArrayOrCollectionMapping(java.lang.reflect.Type, java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping $r2;
+        javax.management.openmbean.OpenDataException $r21;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r22;
+        javax.management.openmbean.ArrayType $r4;
+        java.lang.String $r8, $r18, r23;
+        boolean $z0, $z1, $z2;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CollectionMapping $r15;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r0;
+        javax.management.openmbean.OpenType $r3;
+        java.lang.reflect.Type r1, r12;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping $r14;
+        java.lang.Class $r5, $r11;
+        java.lang.StringBuilder $r6, $r7, $r9, $r10, $r16, $r17, $r19;
+        java.lang.ClassNotFoundException $r20;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$ArrayMapping $r13;
+
+        r22 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r12 := @parameter0: java.lang.reflect.Type;
+
+        r1 := @parameter1: java.lang.reflect.Type;
+
+        r0 := @parameter2: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $r2 = virtualinvoke r0.<com.sun.jmx.mbeanserver.MXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping mappingForType(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r1, r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.jmx.mbeanserver.MXBeanMapping: javax.management.openmbean.OpenType getOpenType()>();
+
+        $r4 = staticinvoke <javax.management.openmbean.ArrayType: javax.management.openmbean.ArrayType getArrayType(javax.management.openmbean.OpenType)>($r3);
+
+        $r5 = virtualinvoke $r2.<com.sun.jmx.mbeanserver.MXBeanMapping: java.lang.Class getOpenClass()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r18 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        r23 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[L");
+
+        $r8 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        r23 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r11 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>(r23);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r20 := @caughtexception;
+
+        $r21 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: javax.management.openmbean.OpenDataException openDataException(java.lang.String,java.lang.Throwable)>("Cannot obtain array class", $r20);
+
+        throw $r21;
+
+     label5:
+        $z1 = r12 instanceof java.lang.reflect.ParameterizedType;
+
+        if $z1 == 0 goto label6;
+
+        $r15 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CollectionMapping;
+
+        specialinvoke $r15.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CollectionMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.ArrayType,java.lang.Class,com.sun.jmx.mbeanserver.MXBeanMapping)>(r12, $r4, $r11, $r2);
+
+        return $r15;
+
+     label6:
+        $z2 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: boolean isIdentity(com.sun.jmx.mbeanserver.MXBeanMapping)>($r2);
+
+        if $z2 == 0 goto label7;
+
+        $r14 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping;
+
+        specialinvoke $r14.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.OpenType)>(r12, $r4);
+
+        return $r14;
+
+     label7:
+        $r13 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$ArrayMapping;
+
+        specialinvoke $r13.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$ArrayMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.ArrayType,java.lang.Class,com.sun.jmx.mbeanserver.MXBeanMapping)>(r12, $r4, $r11, $r2);
+
+        return $r13;
+
+        catch java.lang.ClassNotFoundException from label2 to label3 with label4;
+    }
+
+    private com.sun.jmx.mbeanserver.MXBeanMapping makeTabularMapping(java.lang.reflect.Type, boolean, java.lang.reflect.Type, java.lang.reflect.Type, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping $r4, $r6;
+        javax.management.openmbean.OpenType[] $r10;
+        java.lang.String[] $r11, $r12, $r14;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r16;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$TabularMapping $r15;
+        java.lang.String $r1;
+        boolean z0;
+        javax.management.openmbean.CompositeType $r9;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r2;
+        javax.management.openmbean.OpenType $r7, $r8;
+        java.lang.reflect.Type r0, r3, r5;
+        javax.management.openmbean.TabularType $r13;
+
+        r16 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r0 := @parameter0: java.lang.reflect.Type;
+
+        z0 := @parameter1: boolean;
+
+        r3 := @parameter2: java.lang.reflect.Type;
+
+        r5 := @parameter3: java.lang.reflect.Type;
+
+        r2 := @parameter4: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $r1 = staticinvoke <com.sun.jmx.mbeanserver.MXBeanIntrospector: java.lang.String typeName(java.lang.reflect.Type)>(r0);
+
+        $r4 = virtualinvoke r2.<com.sun.jmx.mbeanserver.MXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping mappingForType(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r3, r2);
+
+        $r6 = virtualinvoke r2.<com.sun.jmx.mbeanserver.MXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping mappingForType(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r5, r2);
+
+        $r7 = virtualinvoke $r4.<com.sun.jmx.mbeanserver.MXBeanMapping: javax.management.openmbean.OpenType getOpenType()>();
+
+        $r8 = virtualinvoke $r6.<com.sun.jmx.mbeanserver.MXBeanMapping: javax.management.openmbean.OpenType getOpenType()>();
+
+        $r9 = new javax.management.openmbean.CompositeType;
+
+        $r12 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyValueArray>;
+
+        $r11 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyValueArray>;
+
+        $r10 = newarray (javax.management.openmbean.OpenType)[2];
+
+        $r10[0] = $r7;
+
+        $r10[1] = $r8;
+
+        specialinvoke $r9.<javax.management.openmbean.CompositeType: void <init>(java.lang.String,java.lang.String,java.lang.String[],java.lang.String[],javax.management.openmbean.OpenType[])>($r1, $r1, $r12, $r11, $r10);
+
+        $r13 = new javax.management.openmbean.TabularType;
+
+        $r14 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyArray>;
+
+        specialinvoke $r13.<javax.management.openmbean.TabularType: void <init>(java.lang.String,java.lang.String,javax.management.openmbean.CompositeType,java.lang.String[])>($r1, $r1, $r9, $r14);
+
+        $r15 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$TabularMapping;
+
+        specialinvoke $r15.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$TabularMapping: void <init>(java.lang.reflect.Type,boolean,javax.management.openmbean.TabularType,com.sun.jmx.mbeanserver.MXBeanMapping,com.sun.jmx.mbeanserver.MXBeanMapping)>(r0, z0, $r13, $r4, $r6);
+
+        return $r15;
+    }
+
+    private com.sun.jmx.mbeanserver.MXBeanMapping makeParameterizedTypeMapping(java.lang.reflect.ParameterizedType, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping $r11, $r17;
+        javax.management.openmbean.OpenDataException $r2;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r8;
+        java.lang.AssertionError $r13, $r19;
+        int $i0, $i1;
+        java.lang.String $r6;
+        boolean $z0, $z1, $z2, z4, $z5, $z6;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r9;
+        java.lang.reflect.ParameterizedType r0;
+        java.lang.reflect.Type $r1, $r10, $r12, $r15, $r16, $r18;
+        java.lang.reflect.Type[] $r14, $r20;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.Class r7;
+
+        r8 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r0 := @parameter0: java.lang.reflect.ParameterizedType;
+
+        r9 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $r1 = interfaceinvoke r0.<java.lang.reflect.ParameterizedType: java.lang.reflect.Type getRawType()>();
+
+        $z0 = $r1 instanceof java.lang.Class;
+
+        if $z0 == 0 goto label10;
+
+        r7 = (java.lang.Class) $r1;
+
+        if r7 == class "Ljava/util/List;" goto label01;
+
+        if r7 == class "Ljava/util/Set;" goto label01;
+
+        if r7 != class "Ljava/util/SortedSet;" goto label04;
+
+     label01:
+        $r20 = interfaceinvoke r0.<java.lang.reflect.ParameterizedType: java.lang.reflect.Type[] getActualTypeArguments()>();
+
+        $z2 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label02;
+
+        $i0 = lengthof $r20;
+
+        if $i0 == 1 goto label02;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label02:
+        if r7 != class "Ljava/util/SortedSet;" goto label03;
+
+        $r12 = $r20[0];
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void mustBeComparable(java.lang.Class,java.lang.reflect.Type)>(r7, $r12);
+
+     label03:
+        $r10 = $r20[0];
+
+        $r11 = specialinvoke r8.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeArrayOrCollectionMapping(java.lang.reflect.Type,java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r0, $r10, r9);
+
+        return $r11;
+
+     label04:
+        if r7 != class "Ljava/util/SortedMap;" goto label05;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label06;
+
+     label05:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label06:
+        z4 = $z5;
+
+        if r7 == class "Ljava/util/Map;" goto label07;
+
+        if $z6 == 0 goto label10;
+
+     label07:
+        $r14 = interfaceinvoke r0.<java.lang.reflect.ParameterizedType: java.lang.reflect.Type[] getActualTypeArguments()>();
+
+        $z1 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label08;
+
+        $i1 = lengthof $r14;
+
+        if $i1 == 2 goto label08;
+
+        $r19 = new java.lang.AssertionError;
+
+        specialinvoke $r19.<java.lang.AssertionError: void <init>()>();
+
+        throw $r19;
+
+     label08:
+        if z4 == 0 goto label09;
+
+        $r18 = $r14[0];
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void mustBeComparable(java.lang.Class,java.lang.reflect.Type)>(r7, $r18);
+
+     label09:
+        $r16 = $r14[0];
+
+        $r15 = $r14[1];
+
+        $r17 = specialinvoke r8.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping makeTabularMapping(java.lang.reflect.Type,boolean,java.lang.reflect.Type,java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r0, z4, $r16, $r15, r9);
+
+        return $r17;
+
+     label10:
+        $r2 = new javax.management.openmbean.OpenDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot convert type: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    private static com.sun.jmx.mbeanserver.MXBeanMapping makeMXBeanRefMapping(java.lang.reflect.Type) throws javax.management.openmbean.OpenDataException
+    {
+        java.lang.reflect.Type r1;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$MXBeanRefMapping $r0;
+
+        r1 := @parameter0: java.lang.reflect.Type;
+
+        $r0 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$MXBeanRefMapping;
+
+        specialinvoke $r0.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$MXBeanRefMapping: void <init>(java.lang.reflect.Type)>(r1);
+
+        return $r0;
+    }
+
+    private com.sun.jmx.mbeanserver.MXBeanMapping makeCompositeMapping(java.lang.Class, com.sun.jmx.mbeanserver.MXBeanMappingFactory) throws javax.management.openmbean.OpenDataException
+    {
+        com.sun.jmx.mbeanserver.MXBeanMapping $r17;
+        javax.management.openmbean.OpenType[] r52;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory r8;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CompositeMapping $r7;
+        java.lang.reflect.Method[] $r44, r50;
+        java.lang.reflect.Method r15, $r42, r49;
+        boolean $z0, z1, $z2, $z3, $z4, $z5;
+        java.util.Set $r2;
+        com.sun.jmx.mbeanserver.MXBeanMappingFactory r9;
+        java.util.List $r45, $r46;
+        java.lang.reflect.Type $r16;
+        java.lang.StringBuilder $r20, $r21, $r23, $r24, $r30, $r31, $r33, $r34, $r36, $r37, $r39;
+        java.lang.ClassLoader $r43;
+        java.util.SortedMap $r47;
+        javax.management.openmbean.OpenDataException $r19, $r41;
+        java.lang.String[] r51;
+        int $i0, i1;
+        java.lang.String $r1, $r5, $r6, $r13, $r22, $r25, $r27, $r28, $r32, $r35, $r38, $r40;
+        javax.management.openmbean.CompositeType $r4;
+        java.util.Map$Entry r11;
+        java.util.Iterator $r3, $r48;
+        javax.management.openmbean.OpenType $r18;
+        java.lang.Class r0;
+        java.lang.Object $r10, $r12, $r14, $r26, $r29;
+
+        r8 := @this: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r9 := @parameter1: com.sun.jmx.mbeanserver.MXBeanMappingFactory;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("com.sun.management.GcInfo");
+
+        if $z0 == 0 goto label01;
+
+        $r43 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r43 != null goto label01;
+
+        $z4 = 1;
+
+        goto label02;
+
+     label01:
+        $z4 = 0;
+
+     label02:
+        z1 = $z4;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>(r0);
+
+        $r44 = virtualinvoke r0.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        $r45 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r44);
+
+        $r46 = staticinvoke <com.sun.jmx.mbeanserver.MBeanAnalyzer: java.util.List eliminateCovariantMethods(java.util.List)>($r45);
+
+        $r47 = staticinvoke <com.sun.jmx.mbeanserver.Util: java.util.SortedMap newSortedMap()>();
+
+        $r48 = interfaceinvoke $r46.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z5 = interfaceinvoke $r48.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label07;
+
+        $r26 = interfaceinvoke $r48.<java.util.Iterator: java.lang.Object next()>();
+
+        r49 = (java.lang.reflect.Method) $r26;
+
+        $r27 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String propertyName(java.lang.reflect.Method)>(r49);
+
+        if $r27 != null goto label04;
+
+        goto label03;
+
+     label04:
+        if z1 == 0 goto label05;
+
+        $z3 = virtualinvoke $r27.<java.lang.String: boolean equals(java.lang.Object)>("CompositeType");
+
+        if $z3 == 0 goto label05;
+
+        goto label03;
+
+     label05:
+        $r28 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String decapitalize(java.lang.String)>($r27);
+
+        $r29 = interfaceinvoke $r47.<java.util.SortedMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r28, r49);
+
+        $r42 = (java.lang.reflect.Method) $r29;
+
+        if $r42 == null goto label06;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Class ");
+
+        $r32 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has method name clash: ");
+
+        $r35 = virtualinvoke $r42.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r38 = virtualinvoke r49.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r41 = new javax.management.openmbean.OpenDataException;
+
+        specialinvoke $r41.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r40);
+
+        throw $r41;
+
+     label06:
+        goto label03;
+
+     label07:
+        $i0 = interfaceinvoke $r47.<java.util.SortedMap: int size()>();
+
+        if $i0 != 0 goto label08;
+
+        $r19 = new javax.management.openmbean.OpenDataException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t map ");
+
+        $r22 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to an open data type");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r25);
+
+        throw $r19;
+
+     label08:
+        r50 = newarray (java.lang.reflect.Method)[$i0];
+
+        r51 = newarray (java.lang.String)[$i0];
+
+        r52 = newarray (javax.management.openmbean.OpenType)[$i0];
+
+        i1 = 0;
+
+        $r2 = interfaceinvoke $r47.<java.util.SortedMap: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        $z2 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label10;
+
+        $r10 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.util.Map$Entry) $r10;
+
+        $r12 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r13 = (java.lang.String) $r12;
+
+        r51[i1] = $r13;
+
+        $r14 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r15 = (java.lang.reflect.Method) $r14;
+
+        r50[i1] = r15;
+
+        $r16 = virtualinvoke r15.<java.lang.reflect.Method: java.lang.reflect.Type getGenericReturnType()>();
+
+        $r17 = virtualinvoke r9.<com.sun.jmx.mbeanserver.MXBeanMappingFactory: com.sun.jmx.mbeanserver.MXBeanMapping mappingForType(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMappingFactory)>($r16, r9);
+
+        $r18 = virtualinvoke $r17.<com.sun.jmx.mbeanserver.MXBeanMapping: javax.management.openmbean.OpenType getOpenType()>();
+
+        r52[i1] = $r18;
+
+        i1 = i1 + 1;
+
+        goto label09;
+
+     label10:
+        $r4 = new javax.management.openmbean.CompositeType;
+
+        $r5 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r4.<javax.management.openmbean.CompositeType: void <init>(java.lang.String,java.lang.String,java.lang.String[],java.lang.String[],javax.management.openmbean.OpenType[])>($r5, $r6, r51, r51, r52);
+
+        $r7 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CompositeMapping;
+
+        specialinvoke $r7.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CompositeMapping: void <init>(com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory,java.lang.Class,javax.management.openmbean.CompositeType,java.lang.String[],java.lang.reflect.Method[],com.sun.jmx.mbeanserver.MXBeanMappingFactory)>(r8, r0, $r4, r51, r50, r9);
+
+        return $r7;
+    }
+
+    static java.io.InvalidObjectException invalidObjectException(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2, $r3;
+        java.io.InvalidObjectException $r0, $r4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>(r1);
+
+        $r3 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r0, r2);
+
+        $r4 = (java.io.InvalidObjectException) $r3;
+
+        return $r4;
+    }
+
+    static java.io.InvalidObjectException invalidObjectException(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.io.InvalidObjectException $r2;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        $r1 = virtualinvoke r0.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r2 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.io.InvalidObjectException invalidObjectException(java.lang.String,java.lang.Throwable)>($r1, r0);
+
+        return $r2;
+    }
+
+    static javax.management.openmbean.OpenDataException openDataException(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2, $r3;
+        javax.management.openmbean.OpenDataException $r0, $r4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r0 = new javax.management.openmbean.OpenDataException;
+
+        specialinvoke $r0.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>(r1);
+
+        $r3 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r0, r2);
+
+        $r4 = (javax.management.openmbean.OpenDataException) $r3;
+
+        return $r4;
+    }
+
+    static javax.management.openmbean.OpenDataException openDataException(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        javax.management.openmbean.OpenDataException $r2;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        $r1 = virtualinvoke r0.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r2 = staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: javax.management.openmbean.OpenDataException openDataException(java.lang.String,java.lang.Throwable)>($r1, r0);
+
+        return $r2;
+    }
+
+    static void mustBeComparable(java.lang.Class, java.lang.reflect.Type) throws javax.management.openmbean.OpenDataException
+    {
+        javax.management.openmbean.OpenDataException $r13;
+        java.lang.String $r6, $r10, $r12;
+        boolean $z0, $z1;
+        java.lang.reflect.Type r0;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r7, $r8, $r11;
+        java.lang.Class r5, $r9, $r14, $r15;
+
+        r5 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.lang.reflect.Type;
+
+        $z0 = r0 instanceof java.lang.Class;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = class "Ljava/lang/Comparable;";
+
+        $r14 = (java.lang.Class) r0;
+
+        $z1 = virtualinvoke $r15.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r14);
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Parameter class ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not implement ");
+
+        $r9 = class "Ljava/lang/Comparable;";
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = new javax.management.openmbean.OpenDataException;
+
+        specialinvoke $r13.<javax.management.openmbean.OpenDataException: void <init>(java.lang.String)>($r12);
+
+        throw $r13;
+
+     label2:
+        return;
+    }
+
+    public static java.lang.String decapitalize(java.lang.String)
+    {
+        int $i0, $i1, $i2, $i3;
+        java.lang.StringBuilder $r1, $r4, $r6;
+        java.lang.String r0, $r2, $r3, $r5, $r7;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $i1 = staticinvoke <java.lang.Character: int offsetByCodePoints(java.lang.CharSequence,int,int)>(r0, 0, 1);
+
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label3;
+
+        $i3 = virtualinvoke r0.<java.lang.String: int codePointAt(int)>($i1);
+
+        $z0 = staticinvoke <java.lang.Character: boolean isUpperCase(int)>($i3);
+
+        if $z0 == 0 goto label3;
+
+        return r0;
+
+     label3:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    static java.lang.String capitalize(java.lang.String)
+    {
+        int $i0, $i1;
+        java.lang.StringBuilder $r1, $r4, $r6;
+        java.lang.String r0, $r2, $r3, $r5, $r7;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.lang.String: int offsetByCodePoints(int,int)>(0, 1);
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    public static java.lang.String propertyName(java.lang.reflect.Method)
+    {
+        java.lang.Class[] $r2;
+        int $i0, $i1;
+        java.lang.Class $r3, $r4, $r5, $r6;
+        java.lang.String $r1, r7;
+        java.lang.reflect.Method r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.lang.reflect.Method;
+
+        r7 = null;
+
+        $r1 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("get");
+
+        if $z0 == 0 goto label1;
+
+        r7 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(3);
+
+        goto label2;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("is");
+
+        if $z1 == 0 goto label2;
+
+        $r5 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r6 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if $r5 != $r6 goto label2;
+
+        r7 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(2);
+
+     label2:
+        if r7 == null goto label3;
+
+        $i0 = virtualinvoke r7.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $r2 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        $i1 = lengthof $r2;
+
+        if $i1 > 0 goto label3;
+
+        $r3 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r4 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r3 == $r4 goto label3;
+
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("getClass");
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        return null;
+
+     label4:
+        return r7;
+    }
+
+    static java.lang.String[] access$100()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyValueArray>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        javax.management.openmbean.OpenType[] $r3;
+        java.lang.NoSuchFieldException $r39;
+        javax.management.openmbean.ArrayType $r35;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalAccessException $r37;
+        java.util.IdentityHashMap $r20;
+        java.util.List $r2;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping $r26, $r31, $r36;
+        java.lang.ClassLoader $r24;
+        com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings $r1;
+        javax.management.openmbean.SimpleType $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17;
+        java.lang.Error $r41;
+        java.lang.String[] $r18, $r19;
+        java.lang.AssertionError $r38;
+        int i0, $i1;
+        java.lang.String $r22, $r27;
+        java.lang.reflect.Field $r28;
+        javax.management.openmbean.OpenType r21;
+        java.lang.Class $r0, $r23, $r25, r30, $r32, $r34;
+        java.lang.Object $r29, $r33;
+        java.lang.ClassNotFoundException $r40;
+
+        $r0 = class "Lcom/sun/jmx/mbeanserver/DefaultMXBeanMappingFactory;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label01;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+     label02:
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: boolean $assertionsDisabled> = $z3;
+
+        $r1 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings;
+
+        specialinvoke $r1.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings: void <init>(com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$1)>(null);
+
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings mappings> = $r1;
+
+        $r2 = staticinvoke <com.sun.jmx.mbeanserver.Util: java.util.List newList()>();
+
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.List permanentMappings> = $r2;
+
+        $r3 = newarray (javax.management.openmbean.OpenType)[14];
+
+        $r4 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType BIGDECIMAL>;
+
+        $r3[0] = $r4;
+
+        $r5 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType BIGINTEGER>;
+
+        $r3[1] = $r5;
+
+        $r6 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType BOOLEAN>;
+
+        $r3[2] = $r6;
+
+        $r7 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType BYTE>;
+
+        $r3[3] = $r7;
+
+        $r8 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType CHARACTER>;
+
+        $r3[4] = $r8;
+
+        $r9 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType DATE>;
+
+        $r3[5] = $r9;
+
+        $r10 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType DOUBLE>;
+
+        $r3[6] = $r10;
+
+        $r11 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType FLOAT>;
+
+        $r3[7] = $r11;
+
+        $r12 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType INTEGER>;
+
+        $r3[8] = $r12;
+
+        $r13 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType LONG>;
+
+        $r3[9] = $r13;
+
+        $r14 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType OBJECTNAME>;
+
+        $r3[10] = $r14;
+
+        $r15 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType SHORT>;
+
+        $r3[11] = $r15;
+
+        $r16 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType STRING>;
+
+        $r3[12] = $r16;
+
+        $r17 = <javax.management.openmbean.SimpleType: javax.management.openmbean.SimpleType VOID>;
+
+        $r3[13] = $r17;
+
+        i0 = 0;
+
+     label03:
+        $i1 = lengthof $r3;
+
+        if i0 >= $i1 goto label13;
+
+        r21 = $r3[i0];
+
+     label04:
+        $r22 = virtualinvoke r21.<javax.management.openmbean.OpenType: java.lang.String getClassName()>();
+
+        $r23 = class "Ljavax/management/ObjectName;";
+
+        $r24 = virtualinvoke $r23.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r25 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r22, 0, $r24);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r40 := @caughtexception;
+
+        $r41 = new java.lang.Error;
+
+        specialinvoke $r41.<java.lang.Error: void <init>(java.lang.Throwable)>($r40);
+
+        throw $r41;
+
+     label07:
+        $r26 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping;
+
+        specialinvoke $r26.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.OpenType)>($r25, r21);
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void putPermanentMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMapping)>($r25, $r26);
+
+        $r27 = virtualinvoke $r25.<java.lang.Class: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r27.<java.lang.String: boolean startsWith(java.lang.String)>("java.lang.");
+
+        if $z1 == 0 goto label12;
+
+     label08:
+        $r28 = virtualinvoke $r25.<java.lang.Class: java.lang.reflect.Field getField(java.lang.String)>("TYPE");
+
+        $r29 = virtualinvoke $r28.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(null);
+
+        r30 = (java.lang.Class) $r29;
+
+        $r31 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping;
+
+        specialinvoke $r31.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.OpenType)>(r30, r21);
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void putPermanentMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMapping)>(r30, $r31);
+
+        $r32 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if r30 == $r32 goto label09;
+
+        $r33 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>(r30, 0);
+
+        $r34 = virtualinvoke $r33.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r35 = staticinvoke <javax.management.openmbean.ArrayType: javax.management.openmbean.ArrayType getPrimitiveArrayType(java.lang.Class)>($r34);
+
+        $r36 = new com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping;
+
+        specialinvoke $r36.<com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping: void <init>(java.lang.reflect.Type,javax.management.openmbean.OpenType)>($r34, $r35);
+
+        staticinvoke <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: void putPermanentMapping(java.lang.reflect.Type,com.sun.jmx.mbeanserver.MXBeanMapping)>($r34, $r36);
+
+     label09:
+        goto label12;
+
+     label10:
+        $r39 := @caughtexception;
+
+        goto label12;
+
+     label11:
+        $r37 := @caughtexception;
+
+        $z2 = <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label12;
+
+        $r38 = new java.lang.AssertionError;
+
+        specialinvoke $r38.<java.lang.AssertionError: void <init>()>();
+
+        throw $r38;
+
+     label12:
+        i0 = i0 + 1;
+
+        goto label03;
+
+     label13:
+        $r18 = newarray (java.lang.String)[1];
+
+        $r18[0] = "key";
+
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyArray> = $r18;
+
+        $r19 = newarray (java.lang.String)[2];
+
+        $r19[0] = "key";
+
+        $r19[1] = "value";
+
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.lang.String[] keyValueArray> = $r19;
+
+        $r20 = staticinvoke <com.sun.jmx.mbeanserver.Util: java.util.IdentityHashMap newIdentityHashMap()>();
+
+        <com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory: java.util.Map inProgress> = $r20;
+
+        return;
+
+        catch java.lang.ClassNotFoundException from label04 to label05 with label06;
+        catch java.lang.NoSuchFieldException from label08 to label09 with label10;
+        catch java.lang.IllegalAccessException from label08 to label09 with label11;
+    }
+}

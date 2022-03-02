@@ -1,0 +1,1548 @@
+public class javax.swing.text.PlainView extends javax.swing.text.View implements javax.swing.text.TabExpander
+{
+    protected java.awt.FontMetrics metrics;
+    javax.swing.text.Element longLine;
+    java.awt.Font font;
+    javax.swing.text.Segment lineBuffer;
+    int tabSize;
+    int tabBase;
+    int sel0;
+    int sel1;
+    java.awt.Color unselected;
+    java.awt.Color selected;
+    int firstLineOffset;
+
+    public void <init>(javax.swing.text.Element)
+    {
+        javax.swing.text.PlainView r0;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        specialinvoke r0.<javax.swing.text.View: void <init>(javax.swing.text.Element)>(r1);
+
+        return;
+    }
+
+    protected int getTabSize()
+    {
+        int $i0;
+        java.lang.Object $r2;
+        javax.swing.text.Document $r1;
+        javax.swing.text.PlainView r0;
+        java.lang.Integer r3;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("tabSize");
+
+        r3 = (java.lang.Integer) $r2;
+
+        if r3 == null goto label1;
+
+        $i0 = virtualinvoke r3.<java.lang.Integer: int intValue()>();
+
+        goto label2;
+
+     label1:
+        $i0 = 8;
+
+     label2:
+        return $i0;
+    }
+
+    protected void drawLine(int, java.awt.Graphics, int, int)
+    {
+        javax.swing.text.StateInvariantError $r6;
+        int i0, $i1, i2, i3, i4;
+        java.lang.String $r10;
+        boolean $z0;
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.PlainView r0;
+        java.awt.Graphics r4;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        javax.swing.text.Element $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.awt.Graphics;
+
+        i3 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i0);
+
+     label1:
+        $z0 = interfaceinvoke $r2.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<javax.swing.text.PlainView: int drawElement(int,javax.swing.text.Element,java.awt.Graphics,int,int)>(i0, $r2, r4, i3, i2);
+
+        goto label4;
+
+     label2:
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Element: int getElementCount()>();
+
+        i4 = 0;
+
+     label3:
+        if i4 >= $i1 goto label4;
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i4);
+
+        i3 = specialinvoke r0.<javax.swing.text.PlainView: int drawElement(int,javax.swing.text.Element,java.awt.Graphics,int,int)>(i0, $r3, r4, i3, i2);
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.swing.text.StateInvariantError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t render line: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label4 with label5;
+    }
+
+    private int drawElement(int, javax.swing.text.Element, java.awt.Graphics, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r5, $r6, $r7;
+        javax.swing.text.AttributeSet $r3;
+        boolean $z0;
+        javax.swing.text.PlainView r1;
+        java.awt.Graphics r4;
+        javax.swing.text.Document $r2;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, i34, i35, $i36;
+        javax.swing.text.Element r0;
+
+        r1 := @this: javax.swing.text.PlainView;
+
+        i4 := @parameter0: int;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        r4 := @parameter2: java.awt.Graphics;
+
+        i34 := @parameter3: int;
+
+        i7 := @parameter4: int;
+
+        $i0 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r2 = virtualinvoke r1.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $i2 = interfaceinvoke $r2.<javax.swing.text.Document: int getLength()>();
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i1);
+
+        if i4 != 0 goto label1;
+
+        $i33 = r1.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        i34 = i34 + $i33;
+
+     label1:
+        $r3 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z0 = staticinvoke <javax.swing.text.Utilities: boolean isComposedTextAttributeDefined(javax.swing.text.AttributeSet)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r1.<javax.swing.text.PlainView: java.awt.Color unselected>;
+
+        virtualinvoke r4.<java.awt.Graphics: void setColor(java.awt.Color)>($r7);
+
+        $i29 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i30 = $i0 - $i29;
+
+        $i31 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i32 = $i3 - $i31;
+
+        i35 = staticinvoke <javax.swing.text.Utilities: int drawComposedText(javax.swing.text.View,javax.swing.text.AttributeSet,java.awt.Graphics,int,int,int,int)>(r1, $r3, r4, i34, i7, $i30, $i32);
+
+        goto label9;
+
+     label2:
+        $i6 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        $i5 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i6 == $i5 goto label3;
+
+        $r6 = r1.<javax.swing.text.PlainView: java.awt.Color selected>;
+
+        $r5 = r1.<javax.swing.text.PlainView: java.awt.Color unselected>;
+
+        if $r6 != $r5 goto label4;
+
+     label3:
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i3);
+
+        goto label9;
+
+     label4:
+        $i8 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        if $i0 < $i8 goto label5;
+
+        $i26 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i0 > $i26 goto label5;
+
+        $i27 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        if $i3 < $i27 goto label5;
+
+        $i28 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i3 > $i28 goto label5;
+
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i3);
+
+        goto label9;
+
+     label5:
+        $i36 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        if $i36 < $i0 goto label7;
+
+        $i14 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        if $i14 > $i3 goto label7;
+
+        $i15 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i15 < $i0 goto label6;
+
+        $i19 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i19 > $i3 goto label6;
+
+        $i20 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        $i21 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i20);
+
+        $i23 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        $i22 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        $i24 = virtualinvoke r1.<javax.swing.text.PlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, $i21, i7, $i23, $i22);
+
+        $i25 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, $i24, i7, $i25, $i3);
+
+        goto label9;
+
+     label6:
+        $i16 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        $i17 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i16);
+
+        $i18 = r1.<javax.swing.text.PlainView: int sel0>;
+
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, $i17, i7, $i18, $i3);
+
+        goto label9;
+
+     label7:
+        $i9 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i9 < $i0 goto label8;
+
+        $i10 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        if $i10 > $i3 goto label8;
+
+        $i11 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        $i12 = virtualinvoke r1.<javax.swing.text.PlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i11);
+
+        $i13 = r1.<javax.swing.text.PlainView: int sel1>;
+
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, $i12, i7, $i13, $i3);
+
+        goto label9;
+
+     label8:
+        i35 = virtualinvoke r1.<javax.swing.text.PlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i34, i7, $i0, $i3);
+
+     label9:
+        return i35;
+    }
+
+    protected int drawUnselectedText(java.awt.Graphics, int, int, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r2;
+        javax.swing.text.PlainView r1;
+        java.awt.Graphics r0;
+        int i0, i1, $i2, i3, i4, $i5;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Segment $r4;
+
+        r1 := @this: javax.swing.text.PlainView;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        i3 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r2 = r1.<javax.swing.text.PlainView: java.awt.Color unselected>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setColor(java.awt.Color)>($r2);
+
+        $r3 = virtualinvoke r1.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $r4 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i2 = i1 - i0;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(i0, $i2, $r4);
+
+        $i5 = staticinvoke <javax.swing.text.Utilities: int drawTabbedText(javax.swing.text.View,javax.swing.text.Segment,int,int,java.awt.Graphics,javax.swing.text.TabExpander,int)>(r1, $r4, i3, i4, r0, r1, i0);
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r4);
+
+        return $i5;
+    }
+
+    protected int drawSelectedText(java.awt.Graphics, int, int, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r2;
+        javax.swing.text.PlainView r1;
+        java.awt.Graphics r0;
+        int i0, i1, $i2, i3, i4, $i5;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Segment $r4;
+
+        r1 := @this: javax.swing.text.PlainView;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        i3 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r2 = r1.<javax.swing.text.PlainView: java.awt.Color selected>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setColor(java.awt.Color)>($r2);
+
+        $r3 = virtualinvoke r1.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $r4 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i2 = i1 - i0;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(i0, $i2, $r4);
+
+        $i5 = staticinvoke <javax.swing.text.Utilities: int drawTabbedText(javax.swing.text.View,javax.swing.text.Segment,int,int,java.awt.Graphics,javax.swing.text.TabExpander,int)>(r1, $r4, i3, i4, r0, r1, i0);
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r4);
+
+        return $i5;
+    }
+
+    protected final javax.swing.text.Segment getLineBuffer()
+    {
+        javax.swing.text.Segment $r1, $r2, $r3;
+        javax.swing.text.PlainView r0;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        $r1 = r0.<javax.swing.text.PlainView: javax.swing.text.Segment lineBuffer>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.text.Segment;
+
+        specialinvoke $r3.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.PlainView: javax.swing.text.Segment lineBuffer> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.PlainView: javax.swing.text.Segment lineBuffer>;
+
+        return $r2;
+    }
+
+    protected void updateMetrics()
+    {
+        java.awt.Font $r2, $r3;
+        javax.swing.text.PlainView r0;
+        java.awt.FontMetrics $r4;
+        int $i0, $i1, $i2;
+        java.awt.Container $r1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Container getContainer()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Font getFont()>();
+
+        $r3 = r0.<javax.swing.text.PlainView: java.awt.Font font>;
+
+        if $r3 == $r2 goto label1;
+
+        specialinvoke r0.<javax.swing.text.PlainView: void calculateLongestLine()>();
+
+        $i0 = virtualinvoke r0.<javax.swing.text.PlainView: int getTabSize()>();
+
+        $r4 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i1 = virtualinvoke $r4.<java.awt.FontMetrics: int charWidth(char)>(109);
+
+        $i2 = $i0 * $i1;
+
+        r0.<javax.swing.text.PlainView: int tabSize> = $i2;
+
+     label1:
+        return;
+    }
+
+    public float getPreferredSpan(int)
+    {
+        int i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r8;
+        javax.swing.text.PlainView r0;
+        java.lang.IllegalArgumentException $r4;
+        java.awt.FontMetrics $r2;
+        float $f0, $f1;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        javax.swing.text.Element $r1, $r3;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateMetrics()>();
+
+        lookupswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r3 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        $i4 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r3);
+
+        $f1 = (float) $i4;
+
+        return $f1;
+
+     label2:
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $i1 = interfaceinvoke $r1.<javax.swing.text.Element: int getElementCount()>();
+
+        $r2 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i2 = virtualinvoke $r2.<java.awt.FontMetrics: int getHeight()>();
+
+        $i3 = $i1 * $i2;
+
+        $f0 = (float) $i3;
+
+        return $f0;
+
+     label3:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid axis: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+    }
+
+    public void paint(java.awt.Graphics, java.awt.Shape)
+    {
+        java.awt.Color $r12, $r13;
+        boolean $z0, $z1, $z2;
+        java.awt.Shape $r1, r11;
+        java.awt.Font $r7;
+        javax.swing.text.PlainView r0;
+        javax.swing.text.Highlighter $r5;
+        java.awt.Graphics r6;
+        java.awt.Rectangle r2, $r14, $r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, i25, i26, i27, $i28, $i29, i30, i31, $i32, $i33, $i34, i35, i36, $i38;
+        java.awt.Container $r3;
+        javax.swing.text.LayeredHighlighter r9, $r19;
+        javax.swing.text.Caret $r8;
+        javax.swing.text.JTextComponent r4;
+        java.awt.FontMetrics $r15, $r17;
+        javax.swing.text.Element $r10, $r18;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r6 := @parameter0: java.awt.Graphics;
+
+        r11 := @parameter1: java.awt.Shape;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Shape adjustPaintRegion(java.awt.Shape)>(r11);
+
+        r2 = (java.awt.Rectangle) $r1;
+
+        $i0 = r2.<java.awt.Rectangle: int x>;
+
+        r0.<javax.swing.text.PlainView: int tabBase> = $i0;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Container getContainer()>();
+
+        r4 = (javax.swing.text.JTextComponent) $r3;
+
+        $r5 = virtualinvoke r4.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $r7 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Font getFont()>();
+
+        virtualinvoke r6.<java.awt.Graphics: void setFont(java.awt.Font)>($r7);
+
+        $i1 = virtualinvoke r4.<javax.swing.text.JTextComponent: int getSelectionStart()>();
+
+        r0.<javax.swing.text.PlainView: int sel0> = $i1;
+
+        $i2 = virtualinvoke r4.<javax.swing.text.JTextComponent: int getSelectionEnd()>();
+
+        r0.<javax.swing.text.PlainView: int sel1> = $i2;
+
+        $z0 = virtualinvoke r4.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z0 == 0 goto label01;
+
+        $r12 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getForeground()>();
+
+        goto label02;
+
+     label01:
+        $r12 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getDisabledTextColor()>();
+
+     label02:
+        r0.<javax.swing.text.PlainView: java.awt.Color unselected> = $r12;
+
+        $r8 = virtualinvoke r4.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        $z1 = interfaceinvoke $r8.<javax.swing.text.Caret: boolean isSelectionVisible()>();
+
+        if $z1 == 0 goto label03;
+
+        if $r5 == null goto label03;
+
+        $r13 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getSelectedTextColor()>();
+
+        goto label04;
+
+     label03:
+        $r13 = r0.<javax.swing.text.PlainView: java.awt.Color unselected>;
+
+     label04:
+        r0.<javax.swing.text.PlainView: java.awt.Color selected> = $r13;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateMetrics()>();
+
+        $r14 = virtualinvoke r6.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $r15 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i14 = virtualinvoke $r15.<java.awt.FontMetrics: int getHeight()>();
+
+        $i15 = r2.<java.awt.Rectangle: int y>;
+
+        $i16 = r2.<java.awt.Rectangle: int height>;
+
+        $i17 = $i15 + $i16;
+
+        $i18 = $r14.<java.awt.Rectangle: int y>;
+
+        $i19 = $r14.<java.awt.Rectangle: int height>;
+
+        $i20 = $i18 + $i19;
+
+        $i21 = $i17 - $i20;
+
+        $i22 = $r14.<java.awt.Rectangle: int y>;
+
+        $i23 = r2.<java.awt.Rectangle: int y>;
+
+        $i24 = $i22 - $i23;
+
+        if $i14 <= 0 goto label05;
+
+        $i9 = $i21 / $i14;
+
+        i25 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i9);
+
+        $i10 = $i24 / $i14;
+
+        i26 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i10);
+
+        $i11 = r2.<java.awt.Rectangle: int height>;
+
+        i27 = $i11 / $i14;
+
+        $i12 = r2.<java.awt.Rectangle: int height>;
+
+        $i13 = $i12 % $i14;
+
+        if $i13 == 0 goto label06;
+
+        i27 = i27 + 1;
+
+        goto label06;
+
+     label05:
+        i27 = 0;
+
+        i26 = 0;
+
+        i25 = 0;
+
+     label06:
+        $r16 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Rectangle lineToRect(java.awt.Shape,int)>($r1, i26);
+
+        $i28 = $r16.<java.awt.Rectangle: int y>;
+
+        $r17 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i29 = virtualinvoke $r17.<java.awt.FontMetrics: int getAscent()>();
+
+        i30 = $i28 + $i29;
+
+        i31 = $r16.<java.awt.Rectangle: int x>;
+
+        $r18 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $i32 = interfaceinvoke $r18.<javax.swing.text.Element: int getElementCount()>();
+
+        $i33 = i27 - i25;
+
+        $i34 = staticinvoke <java.lang.Math: int min(int,int)>($i32, $i33);
+
+        $i38 = (int) -1;
+
+        i35 = $i32 + $i38;
+
+        $z2 = $r5 instanceof javax.swing.text.LayeredHighlighter;
+
+        if $z2 == 0 goto label07;
+
+        $r19 = (javax.swing.text.LayeredHighlighter) $r5;
+
+        goto label08;
+
+     label07:
+        $r19 = null;
+
+     label08:
+        r9 = $r19;
+
+        i36 = i26;
+
+     label09:
+        if i36 >= $i34 goto label13;
+
+        if r9 == null goto label11;
+
+        $r10 = interfaceinvoke $r18.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i36);
+
+        if i36 != i35 goto label10;
+
+        $i7 = interfaceinvoke $r10.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i8 = interfaceinvoke $r10.<javax.swing.text.Element: int getEndOffset()>();
+
+        virtualinvoke r9.<javax.swing.text.LayeredHighlighter: void paintLayeredHighlights(java.awt.Graphics,int,int,java.awt.Shape,javax.swing.text.JTextComponent,javax.swing.text.View)>(r6, $i7, $i8, r11, r4, r0);
+
+        goto label11;
+
+     label10:
+        $i4 = interfaceinvoke $r10.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i5 = interfaceinvoke $r10.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i6 = $i5 - 1;
+
+        virtualinvoke r9.<javax.swing.text.LayeredHighlighter: void paintLayeredHighlights(java.awt.Graphics,int,int,java.awt.Shape,javax.swing.text.JTextComponent,javax.swing.text.View)>(r6, $i4, $i6, r11, r4, r0);
+
+     label11:
+        virtualinvoke r0.<javax.swing.text.PlainView: void drawLine(int,java.awt.Graphics,int,int)>(i36, r6, i31, i30);
+
+        i30 = i30 + $i14;
+
+        if i36 != 0 goto label12;
+
+        $i3 = r0.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        i31 = i31 - $i3;
+
+     label12:
+        i36 = i36 + 1;
+
+        goto label09;
+
+     label13:
+        return;
+    }
+
+    java.awt.Shape adjustPaintRegion(java.awt.Shape)
+    {
+        java.awt.Shape r0;
+        javax.swing.text.PlainView r1;
+
+        r1 := @this: javax.swing.text.PlainView;
+
+        r0 := @parameter0: java.awt.Shape;
+
+        return r0;
+    }
+
+    public java.awt.Shape modelToView(int, java.awt.Shape, javax.swing.text.Position$Bias) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Rectangle $r4, $r9;
+        javax.swing.text.Position$Bias r10;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.awt.Shape r3;
+        javax.swing.text.PlainView r0;
+        java.awt.FontMetrics $r7, $r8;
+        javax.swing.text.Document $r1;
+        javax.swing.text.Segment $r6;
+        javax.swing.text.Element $r2, $r5;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.awt.Shape;
+
+        r10 := @parameter2: javax.swing.text.Position$Bias;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        if $i1 >= 0 goto label1;
+
+        $r9 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Rectangle lineToRect(java.awt.Shape,int)>(r3, 0);
+
+        return $r9;
+
+     label1:
+        $r4 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Rectangle lineToRect(java.awt.Shape,int)>(r3, $i1);
+
+        $i2 = $r4.<java.awt.Rectangle: int x>;
+
+        r0.<javax.swing.text.PlainView: int tabBase> = $i2;
+
+        $r5 = interfaceinvoke $r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $i3 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        $r6 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i4 = i0 - $i3;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i3, $i4, $r6);
+
+        $r7 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i5 = r0.<javax.swing.text.PlainView: int tabBase>;
+
+        $i6 = staticinvoke <javax.swing.text.Utilities: int getTabbedTextWidth(javax.swing.text.Segment,java.awt.FontMetrics,int,javax.swing.text.TabExpander,int)>($r6, $r7, $i5, r0, $i3);
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r6);
+
+        $i7 = $r4.<java.awt.Rectangle: int x>;
+
+        $i8 = $i7 + $i6;
+
+        $r4.<java.awt.Rectangle: int x> = $i8;
+
+        $r4.<java.awt.Rectangle: int width> = 1;
+
+        $r8 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i9 = virtualinvoke $r8.<java.awt.FontMetrics: int getHeight()>();
+
+        $r4.<java.awt.Rectangle: int height> = $i9;
+
+        return $r4;
+    }
+
+    public int viewToModel(float, float, java.awt.Shape, javax.swing.text.Position$Bias[])
+    {
+        javax.swing.text.Position$Bias $r1;
+        java.awt.Shape r2;
+        javax.swing.text.BadLocationException $r11;
+        javax.swing.text.PlainView r4;
+        float f0, f1;
+        javax.swing.text.Document $r5;
+        java.awt.Rectangle $r3;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15, $i16, $i17, $i18, $i19, i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i40;
+        javax.swing.text.Position$Bias[] r0;
+        java.awt.FontMetrics $r7, $r10;
+        javax.swing.text.Segment $r9;
+        javax.swing.text.Element $r6, $r8;
+
+        r4 := @this: javax.swing.text.PlainView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        r2 := @parameter2: java.awt.Shape;
+
+        r0 := @parameter3: javax.swing.text.Position$Bias[];
+
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r0[0] = $r1;
+
+        $r3 = interfaceinvoke r2.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+        $r5 = virtualinvoke r4.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        i0 = (int) f0;
+
+        i1 = (int) f1;
+
+        $i2 = $r3.<java.awt.Rectangle: int y>;
+
+        if i1 >= $i2 goto label01;
+
+        $i37 = virtualinvoke r4.<javax.swing.text.PlainView: int getStartOffset()>();
+
+        return $i37;
+
+     label01:
+        $i4 = $r3.<java.awt.Rectangle: int y>;
+
+        $i3 = $r3.<java.awt.Rectangle: int height>;
+
+        $i5 = $i4 + $i3;
+
+        if i1 <= $i5 goto label02;
+
+        $i35 = virtualinvoke r4.<javax.swing.text.PlainView: int getEndOffset()>();
+
+        $i36 = $i35 - 1;
+
+        return $i36;
+
+     label02:
+        $r6 = interfaceinvoke $r5.<javax.swing.text.Document: javax.swing.text.Element getDefaultRootElement()>();
+
+        $r7 = r4.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i6 = virtualinvoke $r7.<java.awt.FontMetrics: int getHeight()>();
+
+        if $i6 <= 0 goto label03;
+
+        $i32 = $r3.<java.awt.Rectangle: int y>;
+
+        $i33 = i1 - $i32;
+
+        $i34 = $i33 / $i6;
+
+        $i38 = staticinvoke <java.lang.Math: int abs(int)>($i34);
+
+        goto label04;
+
+     label03:
+        $i7 = interfaceinvoke $r6.<javax.swing.text.Element: int getElementCount()>();
+
+        $i38 = $i7 - 1;
+
+     label04:
+        $i8 = interfaceinvoke $r6.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i38 < $i8 goto label05;
+
+        $i30 = virtualinvoke r4.<javax.swing.text.PlainView: int getEndOffset()>();
+
+        $i31 = $i30 - 1;
+
+        return $i31;
+
+     label05:
+        $r8 = interfaceinvoke $r6.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i38);
+
+        if $i38 != 0 goto label06;
+
+        $i25 = $r3.<java.awt.Rectangle: int x>;
+
+        $i24 = r4.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        $i26 = $i25 + $i24;
+
+        $r3.<java.awt.Rectangle: int x> = $i26;
+
+        $i28 = $r3.<java.awt.Rectangle: int width>;
+
+        $i27 = r4.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        $i29 = $i28 - $i27;
+
+        $r3.<java.awt.Rectangle: int width> = $i29;
+
+     label06:
+        $i9 = $r3.<java.awt.Rectangle: int x>;
+
+        if i0 >= $i9 goto label07;
+
+        $i23 = interfaceinvoke $r8.<javax.swing.text.Element: int getStartOffset()>();
+
+        return $i23;
+
+     label07:
+        $i11 = $r3.<java.awt.Rectangle: int x>;
+
+        $i10 = $r3.<java.awt.Rectangle: int width>;
+
+        $i12 = $i11 + $i10;
+
+        if i0 <= $i12 goto label08;
+
+        $i21 = interfaceinvoke $r8.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i22 = $i21 - 1;
+
+        return $i22;
+
+     label08:
+        $i13 = interfaceinvoke $r8.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i14 = interfaceinvoke $r8.<javax.swing.text.Element: int getEndOffset()>();
+
+        i15 = $i14 - 1;
+
+        $r9 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i16 = i15 - $i13;
+
+        interfaceinvoke $r5.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i13, $i16, $r9);
+
+        $i17 = $r3.<java.awt.Rectangle: int x>;
+
+        r4.<javax.swing.text.PlainView: int tabBase> = $i17;
+
+        $r10 = r4.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i18 = r4.<javax.swing.text.PlainView: int tabBase>;
+
+        $i19 = staticinvoke <javax.swing.text.Utilities: int getTabbedTextOffset(javax.swing.text.Segment,java.awt.FontMetrics,int,int,javax.swing.text.TabExpander,int)>($r9, $r10, $i18, i0, r4, $i13);
+
+        i20 = $i13 + $i19;
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r9);
+
+     label09:
+        return i20;
+
+     label10:
+        $r11 := @caughtexception;
+
+        $i40 = (int) -1;
+
+        return $i40;
+
+        catch javax.swing.text.BadLocationException from label08 to label09 with label10;
+    }
+
+    public void insertUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.PlainView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateDamage(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        return;
+    }
+
+    public void removeUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.PlainView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateDamage(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        return;
+    }
+
+    public void changedUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.PlainView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateDamage(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        return;
+    }
+
+    public void setSize(float, float)
+    {
+        float f0, f1;
+        javax.swing.text.PlainView r0;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        specialinvoke r0.<javax.swing.text.View: void setSize(float,float)>(f0, f1);
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateMetrics()>();
+
+        return;
+    }
+
+    public float nextTabStop(float, int)
+    {
+        javax.swing.text.PlainView r0;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, i11;
+        float f0, $f1;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        f0 := @parameter0: float;
+
+        i11 := @parameter1: int;
+
+        $i0 = r0.<javax.swing.text.PlainView: int tabSize>;
+
+        if $i0 != 0 goto label1;
+
+        return f0;
+
+     label1:
+        $i2 = (int) f0;
+
+        $i1 = r0.<javax.swing.text.PlainView: int tabBase>;
+
+        $i4 = $i2 - $i1;
+
+        $i3 = r0.<javax.swing.text.PlainView: int tabSize>;
+
+        i5 = $i4 / $i3;
+
+        $i9 = r0.<javax.swing.text.PlainView: int tabBase>;
+
+        $i7 = i5 + 1;
+
+        $i6 = r0.<javax.swing.text.PlainView: int tabSize>;
+
+        $i8 = $i7 * $i6;
+
+        $i10 = $i9 + $i8;
+
+        $f1 = (float) $i10;
+
+        return $f1;
+    }
+
+    protected void updateDamage(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        javax.swing.text.ViewFactory r23;
+        java.awt.Shape r8;
+        javax.swing.text.PlainView r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, i11;
+        java.awt.Container $r1;
+        javax.swing.event.DocumentEvent r3;
+        javax.swing.text.Element[] r5, r6, $r24, $r25;
+        javax.swing.event.DocumentEvent$ElementChange $r4;
+        javax.swing.event.DocumentEvent$EventType $r9, $r10, $r11, $r12;
+        javax.swing.text.Element $r2, $r7, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r3 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r8 := @parameter1: java.awt.Shape;
+
+        r23 := @parameter2: javax.swing.text.ViewFactory;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Container getContainer()>();
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateMetrics()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $r4 = interfaceinvoke r3.<javax.swing.event.DocumentEvent: javax.swing.event.DocumentEvent$ElementChange getChange(javax.swing.text.Element)>($r2);
+
+        if $r4 == null goto label01;
+
+        $r24 = interfaceinvoke $r4.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element[] getChildrenAdded()>();
+
+        goto label02;
+
+     label01:
+        $r24 = null;
+
+     label02:
+        r5 = $r24;
+
+        if $r4 == null goto label03;
+
+        $r25 = interfaceinvoke $r4.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element[] getChildrenRemoved()>();
+
+        goto label04;
+
+     label03:
+        $r25 = null;
+
+     label04:
+        r6 = $r25;
+
+        if r5 == null goto label05;
+
+        $i8 = lengthof r5;
+
+        if $i8 > 0 goto label06;
+
+     label05:
+        if r6 == null goto label13;
+
+        $i4 = lengthof r6;
+
+        if $i4 <= 0 goto label13;
+
+     label06:
+        if r5 == null goto label09;
+
+        $r20 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        i9 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r20);
+
+        i10 = 0;
+
+     label07:
+        $i6 = lengthof r5;
+
+        if i10 >= $i6 goto label09;
+
+        $r21 = r5[i10];
+
+        $i7 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r21);
+
+        if $i7 <= i9 goto label08;
+
+        i9 = $i7;
+
+        $r22 = r5[i10];
+
+        r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine> = $r22;
+
+     label08:
+        i10 = i10 + 1;
+
+        goto label07;
+
+     label09:
+        if r6 == null goto label12;
+
+        i11 = 0;
+
+     label10:
+        $i5 = lengthof r6;
+
+        if i11 >= $i5 goto label12;
+
+        $r19 = r6[i11];
+
+        $r18 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        if $r19 != $r18 goto label11;
+
+        specialinvoke r0.<javax.swing.text.PlainView: void calculateLongestLine()>();
+
+        goto label12;
+
+     label11:
+        i11 = i11 + 1;
+
+        goto label10;
+
+     label12:
+        virtualinvoke r0.<javax.swing.text.PlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 1);
+
+        virtualinvoke $r1.<java.awt.Component: void repaint()>();
+
+        goto label17;
+
+     label13:
+        $r7 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $i0 = interfaceinvoke r3.<javax.swing.event.DocumentEvent: int getOffset()>();
+
+        $i1 = interfaceinvoke $r7.<javax.swing.text.Element: int getElementIndex(int)>($i0);
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void damageLineRange(int,int,java.awt.Shape,java.awt.Component)>($i1, $i1, r8, $r1);
+
+        $r9 = interfaceinvoke r3.<javax.swing.event.DocumentEvent: javax.swing.event.DocumentEvent$EventType getType()>();
+
+        $r10 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r9 != $r10 goto label16;
+
+        $r15 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        $i2 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r15);
+
+        $r16 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $r17 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        if $r16 != $r17 goto label14;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 0);
+
+        goto label15;
+
+     label14:
+        $i3 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r16);
+
+        if $i3 <= $i2 goto label15;
+
+        r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine> = $r16;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 0);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r11 = interfaceinvoke r3.<javax.swing.event.DocumentEvent: javax.swing.event.DocumentEvent$EventType getType()>();
+
+        $r12 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        if $r11 != $r12 goto label17;
+
+        $r13 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $r14 = r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine>;
+
+        if $r13 != $r14 goto label17;
+
+        specialinvoke r0.<javax.swing.text.PlainView: void calculateLongestLine()>();
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 0);
+
+     label17:
+        return;
+    }
+
+    protected void damageLineRange(int, int, java.awt.Shape, java.awt.Component)
+    {
+        java.awt.Shape r0;
+        java.awt.Rectangle $r2, $r3, $r5;
+        javax.swing.text.PlainView r1;
+        java.awt.Component r4;
+        int i0, i1, $i2, $i3, $i4, $i5;
+
+        r1 := @this: javax.swing.text.PlainView;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: java.awt.Shape;
+
+        r4 := @parameter3: java.awt.Component;
+
+        if r0 == null goto label2;
+
+        $r2 = virtualinvoke r1.<javax.swing.text.PlainView: java.awt.Rectangle lineToRect(java.awt.Shape,int)>(r0, i0);
+
+        $r3 = virtualinvoke r1.<javax.swing.text.PlainView: java.awt.Rectangle lineToRect(java.awt.Shape,int)>(r0, i1);
+
+        if $r2 == null goto label1;
+
+        if $r3 == null goto label1;
+
+        $r5 = virtualinvoke $r2.<java.awt.Rectangle: java.awt.Rectangle union(java.awt.Rectangle)>($r3);
+
+        $i5 = $r5.<java.awt.Rectangle: int x>;
+
+        $i4 = $r5.<java.awt.Rectangle: int y>;
+
+        $i3 = $r5.<java.awt.Rectangle: int width>;
+
+        $i2 = $r5.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r4.<java.awt.Component: void repaint(int,int,int,int)>($i5, $i4, $i3, $i2);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r4.<java.awt.Component: void repaint()>();
+
+     label2:
+        return;
+    }
+
+    protected java.awt.Rectangle lineToRect(java.awt.Shape, int)
+    {
+        java.awt.Rectangle $r3, $r4, r7;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.awt.Shape r2;
+        javax.swing.text.PlainView r0;
+        java.awt.FontMetrics $r1, $r5, $r6;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        r2 := @parameter0: java.awt.Shape;
+
+        i0 := @parameter1: int;
+
+        r7 = null;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: void updateMetrics()>();
+
+        $r1 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        if $r1 == null goto label2;
+
+        $r3 = interfaceinvoke r2.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+        if i0 != 0 goto label1;
+
+        $i9 = $r3.<java.awt.Rectangle: int x>;
+
+        $i8 = r0.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        $i10 = $i9 + $i8;
+
+        $r3.<java.awt.Rectangle: int x> = $i10;
+
+        $i12 = $r3.<java.awt.Rectangle: int width>;
+
+        $i11 = r0.<javax.swing.text.PlainView: int firstLineOffset>;
+
+        $i13 = $i12 - $i11;
+
+        $r3.<java.awt.Rectangle: int width> = $i13;
+
+     label1:
+        $r4 = new java.awt.Rectangle;
+
+        $i1 = $r3.<java.awt.Rectangle: int x>;
+
+        $i2 = $r3.<java.awt.Rectangle: int y>;
+
+        $r5 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i3 = virtualinvoke $r5.<java.awt.FontMetrics: int getHeight()>();
+
+        $i4 = i0 * $i3;
+
+        $i5 = $i2 + $i4;
+
+        $i6 = $r3.<java.awt.Rectangle: int width>;
+
+        $r6 = r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i7 = virtualinvoke $r6.<java.awt.FontMetrics: int getHeight()>();
+
+        specialinvoke $r4.<java.awt.Rectangle: void <init>(int,int,int,int)>($i1, $i5, $i6, $i7);
+
+        r7 = $r4;
+
+     label2:
+        return r7;
+    }
+
+    private void calculateLongestLine()
+    {
+        java.awt.Font $r2, $r3;
+        javax.swing.text.PlainView r0;
+        java.awt.FontMetrics $r4;
+        int $i0, $i1, i2, i3, $i5;
+        java.awt.Container $r1;
+        javax.swing.text.Element $r5, $r6;
+
+        r0 := @this: javax.swing.text.PlainView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.PlainView: java.awt.Container getContainer()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Font getFont()>();
+
+        r0.<javax.swing.text.PlainView: java.awt.Font font> = $r2;
+
+        $r3 = r0.<javax.swing.text.PlainView: java.awt.Font font>;
+
+        $r4 = virtualinvoke $r1.<java.awt.Component: java.awt.FontMetrics getFontMetrics(java.awt.Font)>($r3);
+
+        r0.<javax.swing.text.PlainView: java.awt.FontMetrics metrics> = $r4;
+
+        virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Document getDocument()>();
+
+        $r5 = virtualinvoke r0.<javax.swing.text.PlainView: javax.swing.text.Element getElement()>();
+
+        $i0 = interfaceinvoke $r5.<javax.swing.text.Element: int getElementCount()>();
+
+        $i5 = (int) -1;
+
+        i2 = $i5;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= $i0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i3);
+
+        $i1 = specialinvoke r0.<javax.swing.text.PlainView: int getLineWidth(javax.swing.text.Element)>($r6);
+
+        if $i1 <= i2 goto label2;
+
+        i2 = $i1;
+
+        r0.<javax.swing.text.PlainView: javax.swing.text.Element longLine> = $r6;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private int getLineWidth(javax.swing.text.Element)
+    {
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.PlainView r3;
+        java.awt.FontMetrics $r4;
+        int $i0, $i1, $i2, $i3, i4;
+        javax.swing.text.Segment $r1;
+        javax.swing.text.Document $r2;
+        javax.swing.text.Element r0;
+
+        r3 := @this: javax.swing.text.PlainView;
+
+        r0 := @parameter0: javax.swing.text.Element;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r1 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+     label2:
+        $r2 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Document getDocument()>();
+
+        $i2 = $i1 - $i0;
+
+        interfaceinvoke $r2.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i0, $i2, $r1);
+
+        $r4 = r3.<javax.swing.text.PlainView: java.awt.FontMetrics metrics>;
+
+        $i3 = r3.<javax.swing.text.PlainView: int tabBase>;
+
+        i4 = staticinvoke <javax.swing.text.Utilities: int getTabbedTextWidth(javax.swing.text.Segment,java.awt.FontMetrics,int,javax.swing.text.TabExpander,int)>($r1, $r4, $i3, r3, $i0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        i4 = 0;
+
+     label5:
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r1);
+
+        return i4;
+
+        catch javax.swing.text.BadLocationException from label2 to label3 with label4;
+    }
+}

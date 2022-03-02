@@ -1,0 +1,317 @@
+final class sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer r0;
+
+        r0 := @this: sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r25;
+        sun.security.ssl.CipherSuite$MacAlg $r19;
+        java.security.SecureRandom $r29;
+        java.security.GeneralSecurityException $r50, $r52;
+        sun.security.ssl.ContentType $r2;
+        byte $b0, $b2;
+        java.util.Map $r3;
+        sun.security.ssl.SSLConfiguration $r17, $r21, $r23;
+        sun.security.ssl.InputRecord $r31;
+        sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation r12;
+        javax.net.ssl.SSLException $r7, $r43, $r46, $r48, $r51, $r53;
+        java.lang.StringBuilder $r32, $r35, $r37, $r38, $r40, $r41;
+        sun.security.ssl.CipherSuite r13, $r36;
+        javax.crypto.SecretKey $r20, $r22, $r24;
+        java.lang.Object[] $r49;
+        sun.security.ssl.ProtocolVersion $r18, $r28, $r39, $r44;
+        sun.security.ssl.CipherType $r15, $r16;
+        javax.crypto.spec.IvParameterSpec $r60;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String $r42, $r57, $r58, $r59;
+        java.lang.UnsupportedOperationException $r11;
+        sun.security.ssl.TransportContext r1, $r33;
+        sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer r54;
+        sun.security.ssl.Authenticator r56;
+        sun.security.ssl.Alert $r6, $r34, $r45, $r47;
+        sun.security.ssl.HandshakeContext r8, $r55;
+        java.nio.ByteBuffer r5;
+        java.lang.Byte $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.ssl.SSLContextImpl $r26;
+        sun.security.ssl.SSLCipher$SSLReadCipher $r30;
+        sun.security.ssl.SSLCipher $r14, $r27;
+        int $i1;
+        sun.security.ssl.SSLKeyDerivation $r9, r10;
+
+        r54 := @this: sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r5 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.TransportContext) r0;
+
+        $r3 = r1.<sun.security.ssl.TransportContext: java.util.Map consumers>;
+
+        $r2 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType CHANGE_CIPHER_SPEC>;
+
+        $b0 = $r2.<sun.security.ssl.ContentType: byte id>;
+
+        $r4 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $i1 = virtualinvoke r5.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i1 != 1 goto label01;
+
+        $b2 = virtualinvoke r5.<java.nio.ByteBuffer: byte get()>();
+
+        if $b2 == 1 goto label02;
+
+     label01:
+        $r6 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r7 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r6, "Malformed or unexpected ChangeCipherSpec message");
+
+        throw $r7;
+
+     label02:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label03;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label03;
+
+        $r49 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming ChangeCipherSpec message", $r49);
+
+     label03:
+        $r55 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r55 != null goto label04;
+
+        $r47 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r48 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r47, "Unexpected ChangeCipherSpec message");
+
+        throw $r48;
+
+     label04:
+        r8 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r9 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation>;
+
+        if $r9 != null goto label05;
+
+        $r45 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r46 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r45, "Unexpected ChangeCipherSpec message");
+
+        throw $r46;
+
+     label05:
+        r10 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation>;
+
+        $z1 = r10 instanceof sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation;
+
+        if $z1 == 0 goto label22;
+
+        r12 = (sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation) r10;
+
+        r13 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r14 = r13.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        $r16 = $r14.<sun.security.ssl.SSLCipher: sun.security.ssl.CipherType cipherType>;
+
+        $r15 = <sun.security.ssl.CipherType: sun.security.ssl.CipherType AEAD_CIPHER>;
+
+        if $r16 != $r15 goto label06;
+
+        $r44 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        r56 = staticinvoke <sun.security.ssl.Authenticator: sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion)>($r44);
+
+        goto label11;
+
+     label06:
+        $r18 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r19 = r13.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$MacAlg macAlg>;
+
+        $r17 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z2 = $r17.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z2 == 0 goto label07;
+
+        $r57 = "serverMacKey";
+
+        goto label08;
+
+     label07:
+        $r57 = "clientMacKey";
+
+     label08:
+        $r20 = virtualinvoke r12.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: javax.crypto.SecretKey getTrafficKey(java.lang.String)>($r57);
+
+        r56 = staticinvoke <sun.security.ssl.Authenticator: sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion,sun.security.ssl.CipherSuite$MacAlg,javax.crypto.SecretKey)>($r18, $r19, $r20);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r52 := @caughtexception;
+
+        $r53 = new javax.net.ssl.SSLException;
+
+        specialinvoke $r53.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>("Algorithm missing:  ", $r52);
+
+        throw $r53;
+
+     label11:
+        $r21 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z3 = $r21.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z3 == 0 goto label12;
+
+        $r58 = "serverWriteKey";
+
+        goto label13;
+
+     label12:
+        $r58 = "clientWriteKey";
+
+     label13:
+        $r22 = virtualinvoke r12.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: javax.crypto.SecretKey getTrafficKey(java.lang.String)>($r58);
+
+        $r23 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z4 = $r23.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z4 == 0 goto label14;
+
+        $r59 = "serverWriteIv";
+
+        goto label15;
+
+     label14:
+        $r59 = "clientWriteIv";
+
+     label15:
+        $r24 = virtualinvoke r12.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: javax.crypto.SecretKey getTrafficKey(java.lang.String)>($r59);
+
+        if $r24 != null goto label16;
+
+        $r60 = null;
+
+        goto label17;
+
+     label16:
+        $r60 = new javax.crypto.spec.IvParameterSpec;
+
+        $r25 = interfaceinvoke $r24.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        specialinvoke $r60.<javax.crypto.spec.IvParameterSpec: void <init>(byte[])>($r25);
+
+     label17:
+        $r27 = r13.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        $r28 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r26 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r29 = virtualinvoke $r26.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        $r30 = virtualinvoke $r27.<sun.security.ssl.SSLCipher: sun.security.ssl.SSLCipher$SSLReadCipher createReadCipher(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion,javax.crypto.SecretKey,javax.crypto.spec.IvParameterSpec,java.security.SecureRandom)>(r56, $r28, $r22, $r60, $r29);
+
+     label18:
+        goto label20;
+
+     label19:
+        $r50 := @caughtexception;
+
+        $r51 = new javax.net.ssl.SSLException;
+
+        specialinvoke $r51.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>("Algorithm missing:  ", $r50);
+
+        throw $r51;
+
+     label20:
+        if $r30 != null goto label21;
+
+        $r33 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal cipher suite (");
+
+        $r36 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r37 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r36);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") and protocol version (");
+
+        $r39 = r8.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r43 = virtualinvoke $r33.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r34, $r42);
+
+        throw $r43;
+
+     label21:
+        $r31 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.InputRecord inputRecord>;
+
+        virtualinvoke $r31.<sun.security.ssl.InputRecord: void changeReadCiphers(sun.security.ssl.SSLCipher$SSLReadCipher)>($r30);
+
+        goto label23;
+
+     label22:
+        $r11 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r11.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not supported.");
+
+        throw $r11;
+
+     label23:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label06 to label09 with label10;
+        catch java.security.InvalidKeyException from label06 to label09 with label10;
+        catch java.security.GeneralSecurityException from label17 to label18 with label19;
+    }
+
+    void <init>(sun.security.ssl.ChangeCipherSpec$1)
+    {
+        sun.security.ssl.ChangeCipherSpec$1 r1;
+        sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer r0;
+
+        r0 := @this: sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer;
+
+        r1 := @parameter0: sun.security.ssl.ChangeCipherSpec$1;
+
+        specialinvoke r0.<sun.security.ssl.ChangeCipherSpec$T10ChangeCipherSpecConsumer: void <init>()>();
+
+        return;
+    }
+}

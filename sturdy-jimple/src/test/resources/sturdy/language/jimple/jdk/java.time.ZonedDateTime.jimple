@@ -1,0 +1,2846 @@
+public final class java.time.ZonedDateTime extends java.lang.Object implements java.time.temporal.Temporal, java.time.chrono.ChronoZonedDateTime, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final java.time.LocalDateTime dateTime;
+    private final java.time.ZoneOffset offset;
+    private final java.time.ZoneId zone;
+
+    public static java.time.ZonedDateTime now()
+    {
+        java.time.Clock $r0;
+        java.time.ZonedDateTime $r1;
+
+        $r0 = staticinvoke <java.time.Clock: java.time.Clock systemDefaultZone()>();
+
+        $r1 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime now(java.time.Clock)>($r0);
+
+        return $r1;
+    }
+
+    public static java.time.ZonedDateTime now(java.time.ZoneId)
+    {
+        java.time.Clock $r1;
+        java.time.ZoneId r0;
+        java.time.ZonedDateTime $r2;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        $r1 = staticinvoke <java.time.Clock: java.time.Clock system(java.time.ZoneId)>(r0);
+
+        $r2 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime now(java.time.Clock)>($r1);
+
+        return $r2;
+    }
+
+    public static java.time.ZonedDateTime now(java.time.Clock)
+    {
+        java.time.ZonedDateTime $r3;
+        java.time.Clock r0;
+        java.time.Instant $r1;
+        java.time.ZoneId $r2;
+
+        r0 := @parameter0: java.time.Clock;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "clock");
+
+        $r1 = virtualinvoke r0.<java.time.Clock: java.time.Instant instant()>();
+
+        $r2 = virtualinvoke r0.<java.time.Clock: java.time.ZoneId getZone()>();
+
+        $r3 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofInstant(java.time.Instant,java.time.ZoneId)>($r1, $r2);
+
+        return $r3;
+    }
+
+    public static java.time.ZonedDateTime of(java.time.LocalDate, java.time.LocalTime, java.time.ZoneId)
+    {
+        java.time.LocalDate r0;
+        java.time.ZonedDateTime $r4;
+        java.time.LocalTime r1;
+        java.time.LocalDateTime $r2;
+        java.time.ZoneId r3;
+
+        r0 := @parameter0: java.time.LocalDate;
+
+        r1 := @parameter1: java.time.LocalTime;
+
+        r3 := @parameter2: java.time.ZoneId;
+
+        $r2 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>(r0, r1);
+
+        $r4 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime of(java.time.LocalDateTime,java.time.ZoneId)>($r2, r3);
+
+        return $r4;
+    }
+
+    public static java.time.ZonedDateTime of(java.time.LocalDateTime, java.time.ZoneId)
+    {
+        java.time.LocalDateTime r0;
+        java.time.ZoneId r1;
+        java.time.ZonedDateTime $r2;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        r1 := @parameter1: java.time.ZoneId;
+
+        $r2 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLocal(java.time.LocalDateTime,java.time.ZoneId,java.time.ZoneOffset)>(r0, r1, null);
+
+        return $r2;
+    }
+
+    public static java.time.ZonedDateTime of(int, int, int, int, int, int, int, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r2;
+        java.time.LocalDateTime $r0;
+        java.time.ZoneId r1;
+        int i0, i1, i2, i3, i4, i5, i6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        i6 := @parameter6: int;
+
+        r1 := @parameter7: java.time.ZoneId;
+
+        $r0 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(int,int,int,int,int,int,int)>(i0, i1, i2, i3, i4, i5, i6);
+
+        $r2 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLocal(java.time.LocalDateTime,java.time.ZoneId,java.time.ZoneOffset)>($r0, r1, null);
+
+        return $r2;
+    }
+
+    public static java.time.ZonedDateTime ofLocal(java.time.LocalDateTime, java.time.ZoneId, java.time.ZoneOffset)
+    {
+        java.time.ZonedDateTime $r9, $r13;
+        java.time.LocalDateTime r11;
+        long $l2;
+        java.time.zone.ZoneRules $r1;
+        java.time.Duration $r7;
+        int $i0, $i1;
+        java.time.ZoneOffset r3, $r10, r12;
+        boolean $z0, $z1;
+        java.time.zone.ZoneOffsetTransition $r6;
+        java.time.ZoneId r0;
+        java.util.List $r2;
+        java.lang.Object $r4, $r5, $r8;
+
+        r11 := @parameter0: java.time.LocalDateTime;
+
+        r0 := @parameter1: java.time.ZoneId;
+
+        r3 := @parameter2: java.time.ZoneOffset;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r11, "localDateTime");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $z0 = r0 instanceof java.time.ZoneOffset;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new java.time.ZonedDateTime;
+
+        $r10 = (java.time.ZoneOffset) r0;
+
+        specialinvoke $r9.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r11, $r10, r0);
+
+        return $r9;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r2 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.util.List getValidOffsets(java.time.LocalDateTime)>(r11);
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 != 1 goto label2;
+
+        $r8 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        r12 = (java.time.ZoneOffset) $r8;
+
+        goto label5;
+
+     label2:
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i1 != 0 goto label3;
+
+        $r6 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>(r11);
+
+        $r7 = virtualinvoke $r6.<java.time.zone.ZoneOffsetTransition: java.time.Duration getDuration()>();
+
+        $l2 = virtualinvoke $r7.<java.time.Duration: long getSeconds()>();
+
+        r11 = virtualinvoke r11.<java.time.LocalDateTime: java.time.LocalDateTime plusSeconds(long)>($l2);
+
+        r12 = virtualinvoke $r6.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        goto label5;
+
+     label3:
+        if r3 == null goto label4;
+
+        $z1 = interfaceinvoke $r2.<java.util.List: boolean contains(java.lang.Object)>(r3);
+
+        if $z1 == 0 goto label4;
+
+        r12 = r3;
+
+        goto label5;
+
+     label4:
+        $r4 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r5 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>($r4, "offset");
+
+        r12 = (java.time.ZoneOffset) $r5;
+
+     label5:
+        $r13 = new java.time.ZonedDateTime;
+
+        specialinvoke $r13.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r11, r12, r0);
+
+        return $r13;
+    }
+
+    public static java.time.ZonedDateTime ofInstant(java.time.Instant, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r2;
+        int $i1;
+        long $l0;
+        java.time.Instant r0;
+        java.time.ZoneId r1;
+
+        r0 := @parameter0: java.time.Instant;
+
+        r1 := @parameter1: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "instant");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "zone");
+
+        $l0 = virtualinvoke r0.<java.time.Instant: long getEpochSecond()>();
+
+        $i1 = virtualinvoke r0.<java.time.Instant: int getNano()>();
+
+        $r2 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>($l0, $i1, r1);
+
+        return $r2;
+    }
+
+    public static java.time.ZonedDateTime ofInstant(java.time.LocalDateTime, java.time.ZoneOffset, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r4, $r5;
+        java.time.LocalDateTime r0;
+        long $l0;
+        java.time.ZoneId r2;
+        java.time.zone.ZoneRules $r3;
+        int $i1;
+        java.time.ZoneOffset r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        r1 := @parameter1: java.time.ZoneOffset;
+
+        r2 := @parameter2: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "localDateTime");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "offset");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "zone");
+
+        $r3 = virtualinvoke r2.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $z0 = virtualinvoke $r3.<java.time.zone.ZoneRules: boolean isValidOffset(java.time.LocalDateTime,java.time.ZoneOffset)>(r0, r1);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.time.ZonedDateTime;
+
+        specialinvoke $r5.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r0, r1, r2);
+
+        return $r5;
+
+     label1:
+        $l0 = virtualinvoke r0.<java.time.LocalDateTime: long toEpochSecond(java.time.ZoneOffset)>(r1);
+
+        $i1 = virtualinvoke r0.<java.time.LocalDateTime: int getNano()>();
+
+        $r4 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>($l0, $i1, r2);
+
+        return $r4;
+    }
+
+    private static java.time.ZonedDateTime create(long, int, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r5;
+        java.time.LocalDateTime $r4;
+        long l0, $l2;
+        java.time.Instant $r2;
+        java.time.ZoneId r0;
+        java.time.zone.ZoneRules $r1;
+        int i1;
+        java.time.ZoneOffset $r3;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: java.time.ZoneId;
+
+        $r1 = virtualinvoke r0.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $l2 = (long) i1;
+
+        $r2 = staticinvoke <java.time.Instant: java.time.Instant ofEpochSecond(long,long)>(l0, $l2);
+
+        $r3 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>($r2);
+
+        $r4 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime ofEpochSecond(long,int,java.time.ZoneOffset)>(l0, i1, $r3);
+
+        $r5 = new java.time.ZonedDateTime;
+
+        specialinvoke $r5.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r4, $r3, r0);
+
+        return $r5;
+    }
+
+    public static java.time.ZonedDateTime ofStrict(java.time.LocalDateTime, java.time.ZoneOffset, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r4;
+        java.time.LocalDateTime r0;
+        java.time.zone.ZoneRules $r3;
+        java.time.ZoneOffset r1;
+        java.lang.String $r15, $r23;
+        java.time.DateTimeException $r6, $r16;
+        boolean $z0, $z1;
+        java.time.zone.ZoneOffsetTransition $r5;
+        java.time.ZoneId r2;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r17, $r18, $r19, $r20, $r21, $r22;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        r1 := @parameter1: java.time.ZoneOffset;
+
+        r2 := @parameter2: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "localDateTime");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "offset");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "zone");
+
+        $r3 = virtualinvoke r2.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $z0 = virtualinvoke $r3.<java.time.zone.ZoneRules: boolean isValidOffset(java.time.LocalDateTime,java.time.ZoneOffset)>(r0, r1);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = virtualinvoke $r3.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>(r0);
+
+        if $r5 == null goto label1;
+
+        $z1 = virtualinvoke $r5.<java.time.zone.ZoneOffsetTransition: boolean isGap()>();
+
+        if $z1 == 0 goto label1;
+
+        $r16 = new java.time.DateTimeException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LocalDateTime \'");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' does not exist in zone \'");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' due to a gap in the local time-line, typically caused by daylight savings");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.time.DateTimeException: void <init>(java.lang.String)>($r23);
+
+        throw $r16;
+
+     label1:
+        $r6 = new java.time.DateTimeException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ZoneOffset \'");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' is not valid for LocalDateTime \'");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' in zone \'");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.time.DateTimeException: void <init>(java.lang.String)>($r15);
+
+        throw $r6;
+
+     label2:
+        $r4 = new java.time.ZonedDateTime;
+
+        specialinvoke $r4.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r0, r1, r2);
+
+        return $r4;
+    }
+
+    private static java.time.ZonedDateTime ofLenient(java.time.LocalDateTime, java.time.ZoneOffset, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r3;
+        java.time.LocalDateTime r0;
+        java.time.ZoneOffset r1;
+        java.lang.IllegalArgumentException $r4;
+        java.time.ZoneId r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        r1 := @parameter1: java.time.ZoneOffset;
+
+        r2 := @parameter2: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "localDateTime");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "offset");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "zone");
+
+        $z0 = r2 instanceof java.time.ZoneOffset;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r1.<java.time.ZoneOffset: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ZoneId must match ZoneOffset");
+
+        throw $r4;
+
+     label1:
+        $r3 = new java.time.ZonedDateTime;
+
+        specialinvoke $r3.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r0, r1, r2);
+
+        return $r3;
+    }
+
+    public static java.time.ZonedDateTime 'from'(java.time.temporal.TemporalAccessor)
+    {
+        java.time.temporal.ChronoField $r2, $r6, $r7;
+        java.time.ZonedDateTime $r5, $r8, $r9;
+        long $l0;
+        java.time.temporal.TemporalAccessor r0;
+        java.time.LocalTime $r4;
+        int $i1;
+        java.lang.String $r17, $r19;
+        java.time.DateTimeException $r10, $r11;
+        boolean $z0, $z1;
+        java.time.ZoneId $r1;
+        java.time.LocalDate $r3;
+        java.lang.StringBuilder $r12, $r13, $r14, $r15, $r18;
+        java.lang.Class $r16;
+
+        r0 := @parameter0: java.time.temporal.TemporalAccessor;
+
+        $z0 = r0 instanceof java.time.ZonedDateTime;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (java.time.ZonedDateTime) r0;
+
+        return $r9;
+
+     label1:
+        $r1 = staticinvoke <java.time.ZoneId: java.time.ZoneId 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField INSTANT_SECONDS>;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: boolean isSupported(java.time.temporal.TemporalField)>($r2);
+
+        if $z1 == 0 goto label3;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField INSTANT_SECONDS>;
+
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_SECOND>;
+
+        $i1 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: int get(java.time.temporal.TemporalField)>($r7);
+
+        $r8 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>($l0, $i1, $r1);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r3 = staticinvoke <java.time.LocalDate: java.time.LocalDate 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r4 = staticinvoke <java.time.LocalTime: java.time.LocalTime 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r5 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime of(java.time.LocalDate,java.time.LocalTime,java.time.ZoneId)>($r3, $r4, $r1);
+
+     label4:
+        return $r5;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = new java.time.DateTimeException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to obtain ZonedDateTime from TemporalAccessor: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of type ");
+
+        $r16 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.Class: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.time.DateTimeException: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r10);
+
+        throw $r11;
+
+        catch java.time.DateTimeException from label1 to label2 with label5;
+        catch java.time.DateTimeException from label3 to label4 with label5;
+    }
+
+    public static java.time.ZonedDateTime parse(java.lang.CharSequence)
+    {
+        java.lang.CharSequence r0;
+        java.time.format.DateTimeFormatter $r1;
+        java.time.ZonedDateTime $r2;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        $r1 = <java.time.format.DateTimeFormatter: java.time.format.DateTimeFormatter ISO_ZONED_DATE_TIME>;
+
+        $r2 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime parse(java.lang.CharSequence,java.time.format.DateTimeFormatter)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static java.time.ZonedDateTime parse(java.lang.CharSequence, java.time.format.DateTimeFormatter)
+    {
+        java.lang.CharSequence r1;
+        java.time.format.DateTimeFormatter r0;
+        java.time.ZonedDateTime $r4;
+        java.time.temporal.TemporalQuery $r2;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: java.lang.CharSequence;
+
+        r0 := @parameter1: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = staticinvoke <java.time.ZonedDateTime$from__46: java.time.temporal.TemporalQuery bootstrap$()>();
+
+        $r3 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.Object parse(java.lang.CharSequence,java.time.temporal.TemporalQuery)>(r1, $r2);
+
+        $r4 = (java.time.ZonedDateTime) $r3;
+
+        return $r4;
+    }
+
+    private void <init>(java.time.LocalDateTime, java.time.ZoneOffset, java.time.ZoneId)
+    {
+        java.time.ZonedDateTime r0;
+        java.time.LocalDateTime r1;
+        java.time.ZoneOffset r2;
+        java.time.ZoneId r3;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.LocalDateTime;
+
+        r2 := @parameter1: java.time.ZoneOffset;
+
+        r3 := @parameter2: java.time.ZoneId;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime> = r1;
+
+        r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset> = r2;
+
+        r0.<java.time.ZonedDateTime: java.time.ZoneId zone> = r3;
+
+        return;
+    }
+
+    private java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)
+    {
+        java.time.ZonedDateTime r1, $r4;
+        java.time.LocalDateTime r0;
+        java.time.ZoneOffset $r2;
+        java.time.ZoneId $r3;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        $r3 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r4 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLocal(java.time.LocalDateTime,java.time.ZoneId,java.time.ZoneOffset)>(r0, $r3, $r2);
+
+        return $r4;
+    }
+
+    private java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)
+    {
+        java.time.ZonedDateTime r1, $r4;
+        java.time.LocalDateTime r0;
+        java.time.ZoneOffset $r3;
+        java.time.ZoneId $r2;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.LocalDateTime;
+
+        $r3 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r4 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofInstant(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>(r0, $r3, $r2);
+
+        return $r4;
+    }
+
+    private java.time.ZonedDateTime resolveOffset(java.time.ZoneOffset)
+    {
+        java.time.ZonedDateTime r1, $r6;
+        java.time.LocalDateTime $r5, $r8;
+        java.time.ZoneId $r3, $r7;
+        java.time.zone.ZoneRules $r4;
+        java.time.ZoneOffset r0, $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.ZoneOffset;
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $z0 = virtualinvoke r0.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r4 = virtualinvoke $r3.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r5 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $z1 = virtualinvoke $r4.<java.time.zone.ZoneRules: boolean isValidOffset(java.time.LocalDateTime,java.time.ZoneOffset)>($r5, r0);
+
+        if $z1 == 0 goto label1;
+
+        $r6 = new java.time.ZonedDateTime;
+
+        $r8 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r7 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        specialinvoke $r6.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r8, r0, $r7);
+
+        return $r6;
+
+     label1:
+        return r1;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.TemporalField r0;
+        java.time.ZonedDateTime r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 != 0 goto label1;
+
+        if r0 == null goto label2;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalField: boolean isSupportedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0;
+        java.time.temporal.TemporalUnit r1;
+        boolean $z0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $z0 = specialinvoke r0.<java.time.chrono.ChronoZonedDateTime: boolean isSupported(java.time.temporal.TemporalUnit)>(r1);
+
+        return $z0;
+    }
+
+    public java.time.temporal.ValueRange range(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r3, $r5;
+        java.time.temporal.TemporalField r0;
+        java.time.ZonedDateTime r1;
+        java.time.LocalDateTime $r6;
+        java.time.temporal.ValueRange $r2, $r4, $r7;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField INSTANT_SECONDS>;
+
+        if r0 == $r3 goto label1;
+
+        $r5 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField OFFSET_SECONDS>;
+
+        if r0 != $r5 goto label2;
+
+     label1:
+        $r4 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.ValueRange range()>();
+
+        return $r4;
+
+     label2:
+        $r6 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r7 = virtualinvoke $r6.<java.time.LocalDateTime: java.time.temporal.ValueRange range(java.time.temporal.TemporalField)>(r0);
+
+        return $r7;
+
+     label3:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.ValueRange rangeRefinedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public int get(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2;
+        java.time.temporal.TemporalField r0;
+        java.time.ZonedDateTime r1;
+        java.time.LocalDateTime $r6;
+        java.time.temporal.UnsupportedTemporalTypeException $r5;
+        int[] $r3;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.time.ZoneOffset $r4;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = <java.time.ZonedDateTime$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $r2 = (java.time.temporal.ChronoField) r0;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r3[$i1];
+
+        lookupswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r5 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r5.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Invalid field \'InstantSeconds\' for get() method, use getLong() instead");
+
+        throw $r5;
+
+     label2:
+        $r4 = virtualinvoke r1.<java.time.ZonedDateTime: java.time.ZoneOffset getOffset()>();
+
+        $i3 = virtualinvoke $r4.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        return $i3;
+
+     label3:
+        $r6 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i4 = virtualinvoke $r6.<java.time.LocalDateTime: int get(java.time.temporal.TemporalField)>(r0);
+
+        return $i4;
+
+     label4:
+        $i0 = specialinvoke r1.<java.time.chrono.ChronoZonedDateTime: int get(java.time.temporal.TemporalField)>(r0);
+
+        return $i0;
+    }
+
+    public long getLong(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2;
+        java.time.temporal.TemporalField r0;
+        java.time.ZonedDateTime r1;
+        java.time.LocalDateTime $r5;
+        long $l0, $l4, $l5, $l6;
+        int[] $r3;
+        int $i1, $i2, $i3;
+        java.time.ZoneOffset $r4;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = <java.time.ZonedDateTime$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $r2 = (java.time.temporal.ChronoField) r0;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r3[$i1];
+
+        lookupswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $l5 = virtualinvoke r1.<java.time.ZonedDateTime: long toEpochSecond()>();
+
+        return $l5;
+
+     label2:
+        $r4 = virtualinvoke r1.<java.time.ZonedDateTime: java.time.ZoneOffset getOffset()>();
+
+        $i3 = virtualinvoke $r4.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $l4 = (long) $i3;
+
+        return $l4;
+
+     label3:
+        $r5 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $l6 = virtualinvoke $r5.<java.time.LocalDateTime: long getLong(java.time.temporal.TemporalField)>(r0);
+
+        return $l6;
+
+     label4:
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalField: long getFrom(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $l0;
+    }
+
+    public java.time.ZoneOffset getOffset()
+    {
+        java.time.ZoneOffset $r1;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        return $r1;
+    }
+
+    public java.time.ZonedDateTime withEarlierOffsetAtOverlap()
+    {
+        java.time.ZonedDateTime r0, $r7;
+        java.time.LocalDateTime $r3, $r9;
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.time.ZoneId $r1, $r8;
+        java.time.zone.ZoneRules $r2;
+        java.time.ZoneOffset $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZoneId getZone()>();
+
+        $r2 = virtualinvoke $r1.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r3 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r4 = virtualinvoke $r2.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r3);
+
+        if $r4 == null goto label1;
+
+        $z0 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: boolean isOverlap()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        $r6 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $z1 = virtualinvoke $r5.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label1;
+
+        $r7 = new java.time.ZonedDateTime;
+
+        $r9 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r8 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        specialinvoke $r7.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r9, $r5, $r8);
+
+        return $r7;
+
+     label1:
+        return r0;
+    }
+
+    public java.time.ZonedDateTime withLaterOffsetAtOverlap()
+    {
+        java.time.ZonedDateTime r0, $r7;
+        java.time.LocalDateTime $r3, $r9;
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.time.ZoneId $r1, $r8;
+        java.time.zone.ZoneRules $r2;
+        java.time.ZoneOffset $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZoneId getZone()>();
+
+        $r2 = virtualinvoke $r1.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r3 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.LocalDateTime toLocalDateTime()>();
+
+        $r4 = virtualinvoke $r2.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r3);
+
+        if $r4 == null goto label1;
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        $r6 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $z0 = virtualinvoke $r5.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.time.ZonedDateTime;
+
+        $r9 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r8 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        specialinvoke $r7.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r9, $r5, $r8);
+
+        return $r7;
+
+     label1:
+        return r0;
+    }
+
+    public java.time.ZoneId getZone()
+    {
+        java.time.ZoneId $r1;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        return $r1;
+    }
+
+    public java.time.ZonedDateTime withZoneSameLocal(java.time.ZoneId)
+    {
+        java.time.ZonedDateTime r1, $r5;
+        java.time.LocalDateTime $r4;
+        java.time.ZoneOffset $r3;
+        java.time.ZoneId r0, $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $z0 = virtualinvoke $r2.<java.time.ZoneId: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r1;
+
+        goto label2;
+
+     label1:
+        $r4 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r3 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r5 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLocal(java.time.LocalDateTime,java.time.ZoneId,java.time.ZoneOffset)>($r4, r0, $r3);
+
+     label2:
+        return $r5;
+    }
+
+    public java.time.ZonedDateTime withZoneSameInstant(java.time.ZoneId)
+    {
+        java.time.ZonedDateTime r1, $r6;
+        java.time.LocalDateTime $r4, $r5;
+        long $l0;
+        java.time.ZoneId r0, $r2;
+        int $i1;
+        java.time.ZoneOffset $r3;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $z0 = virtualinvoke $r2.<java.time.ZoneId: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r1;
+
+        goto label2;
+
+     label1:
+        $r4 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r3 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $l0 = virtualinvoke $r4.<java.time.LocalDateTime: long toEpochSecond(java.time.ZoneOffset)>($r3);
+
+        $r5 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i1 = virtualinvoke $r5.<java.time.LocalDateTime: int getNano()>();
+
+        $r6 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>($l0, $i1, r0);
+
+     label2:
+        return $r6;
+    }
+
+    public java.time.ZonedDateTime withFixedOffsetZone()
+    {
+        java.time.ZonedDateTime r0, $r6;
+        java.time.LocalDateTime $r5;
+        java.time.ZoneId $r2;
+        java.time.ZoneOffset $r1, $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r2 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $z0 = virtualinvoke $r2.<java.time.ZoneId: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0;
+
+        goto label2;
+
+     label1:
+        $r6 = new java.time.ZonedDateTime;
+
+        $r5 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r4 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r3 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        specialinvoke $r6.<java.time.ZonedDateTime: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r5, $r4, $r3);
+
+     label2:
+        return $r6;
+    }
+
+    public java.time.LocalDateTime toLocalDateTime()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        return $r1;
+    }
+
+    public java.time.LocalDate toLocalDate()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.ZonedDateTime r0;
+        java.time.LocalDate $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDate toLocalDate()>();
+
+        return $r2;
+    }
+
+    public int getYear()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getYear()>();
+
+        return $i0;
+    }
+
+    public int getMonthValue()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getMonthValue()>();
+
+        return $i0;
+    }
+
+    public java.time.Month getMonth()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.Month $r2;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.Month getMonth()>();
+
+        return $r2;
+    }
+
+    public int getDayOfMonth()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getDayOfMonth()>();
+
+        return $i0;
+    }
+
+    public int getDayOfYear()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getDayOfYear()>();
+
+        return $i0;
+    }
+
+    public java.time.DayOfWeek getDayOfWeek()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.ZonedDateTime r0;
+        java.time.DayOfWeek $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.DayOfWeek getDayOfWeek()>();
+
+        return $r2;
+    }
+
+    public java.time.LocalTime toLocalTime()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.LocalTime $r2;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        return $r2;
+    }
+
+    public int getHour()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getHour()>();
+
+        return $i0;
+    }
+
+    public int getMinute()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getMinute()>();
+
+        return $i0;
+    }
+
+    public int getSecond()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getSecond()>();
+
+        return $i0;
+    }
+
+    public int getNano()
+    {
+        java.time.LocalDateTime $r1;
+        int $i0;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int getNano()>();
+
+        return $i0;
+    }
+
+    public java.time.ZonedDateTime 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.ZonedDateTime r1, $r3, $r5, $r7, $r11, $r13, $r18, $r23;
+        java.time.LocalTime $r16, $r21;
+        java.time.ZoneOffset $r4, $r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.time.Instant r25;
+        java.time.ZoneId $r6, $r9;
+        java.time.OffsetDateTime r24;
+        java.time.LocalDate $r15, $r20;
+        java.time.temporal.Temporal $r2;
+        java.time.LocalDateTime $r8, $r12, $r14, $r17, $r19, $r22;
+        long $l0;
+        int $i1;
+        java.time.temporal.TemporalAdjuster r0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label1;
+
+        $r20 = (java.time.LocalDate) r0;
+
+        $r19 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r21 = virtualinvoke $r19.<java.time.LocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        $r22 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>($r20, $r21);
+
+        $r23 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r22);
+
+        return $r23;
+
+     label1:
+        $z1 = r0 instanceof java.time.LocalTime;
+
+        if $z1 == 0 goto label2;
+
+        $r14 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r15 = virtualinvoke $r14.<java.time.LocalDateTime: java.time.LocalDate toLocalDate()>();
+
+        $r16 = (java.time.LocalTime) r0;
+
+        $r17 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>($r15, $r16);
+
+        $r18 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r17);
+
+        return $r18;
+
+     label2:
+        $z2 = r0 instanceof java.time.LocalDateTime;
+
+        if $z2 == 0 goto label3;
+
+        $r12 = (java.time.LocalDateTime) r0;
+
+        $r13 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r12);
+
+        return $r13;
+
+     label3:
+        $z3 = r0 instanceof java.time.OffsetDateTime;
+
+        if $z3 == 0 goto label4;
+
+        r24 = (java.time.OffsetDateTime) r0;
+
+        $r8 = virtualinvoke r24.<java.time.OffsetDateTime: java.time.LocalDateTime toLocalDateTime()>();
+
+        $r9 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r10 = virtualinvoke r24.<java.time.OffsetDateTime: java.time.ZoneOffset getOffset()>();
+
+        $r11 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLocal(java.time.LocalDateTime,java.time.ZoneId,java.time.ZoneOffset)>($r8, $r9, $r10);
+
+        return $r11;
+
+     label4:
+        $z4 = r0 instanceof java.time.Instant;
+
+        if $z4 == 0 goto label5;
+
+        r25 = (java.time.Instant) r0;
+
+        $l0 = virtualinvoke r25.<java.time.Instant: long getEpochSecond()>();
+
+        $i1 = virtualinvoke r25.<java.time.Instant: int getNano()>();
+
+        $r6 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r7 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>($l0, $i1, $r6);
+
+        return $r7;
+
+     label5:
+        $z5 = r0 instanceof java.time.ZoneOffset;
+
+        if $z5 == 0 goto label6;
+
+        $r4 = (java.time.ZoneOffset) r0;
+
+        $r5 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveOffset(java.time.ZoneOffset)>($r4);
+
+        return $r5;
+
+     label6:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAdjuster: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.ZonedDateTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.temporal.ChronoField r4;
+        java.time.ZonedDateTime r1, $r3, $r7, $r9, $r12;
+        java.time.LocalDateTime $r10, $r11;
+        long l0;
+        int[] $r5;
+        int $i1, $i2, $i3, $i4;
+        java.time.ZoneOffset $r6;
+        boolean $z0;
+        java.time.temporal.TemporalField r0;
+        java.time.ZoneId $r8;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label4;
+
+        r4 = (java.time.temporal.ChronoField) r0;
+
+        $r5 = <java.time.ZonedDateTime$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i1 = virtualinvoke r4.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        lookupswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $i4 = virtualinvoke r1.<java.time.ZonedDateTime: int getNano()>();
+
+        $r8 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r9 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime create(long,int,java.time.ZoneId)>(l0, $i4, $r8);
+
+        return $r9;
+
+     label2:
+        $i3 = virtualinvoke r4.<java.time.temporal.ChronoField: int checkValidIntValue(long)>(l0);
+
+        $r6 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i3);
+
+        $r7 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveOffset(java.time.ZoneOffset)>($r6);
+
+        return $r7;
+
+     label3:
+        $r10 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r11 = virtualinvoke $r10.<java.time.LocalDateTime: java.time.LocalDateTime 'with'(java.time.temporal.TemporalField,long)>(r0, l0);
+
+        $r12 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r11);
+
+        return $r12;
+
+     label4:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.ZonedDateTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withYear(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withYear(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withMonth(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withMonth(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withDayOfMonth(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withDayOfMonth(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withDayOfYear(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withDayOfYear(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withHour(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withHour(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withMinute(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withMinute(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withSecond(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withSecond(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime withNano(int)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        int i0;
+        java.time.LocalDateTime $r1, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime withNano(int)>(i0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime truncatedTo(java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0, $r4;
+        java.time.temporal.TemporalUnit r1;
+        java.time.LocalDateTime $r2, $r3;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $r2 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r3 = virtualinvoke $r2.<java.time.LocalDateTime: java.time.LocalDateTime truncatedTo(java.time.temporal.TemporalUnit)>(r1);
+
+        $r4 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r3);
+
+        return $r4;
+    }
+
+    public java.time.ZonedDateTime plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r4;
+        java.time.ZonedDateTime r1, $r3, $r7;
+        java.time.LocalDateTime $r5, $r6;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $z0 = r0 instanceof java.time.Period;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.time.Period) r0;
+
+        $r5 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r6 = virtualinvoke $r5.<java.time.LocalDateTime: java.time.LocalDateTime plus(java.time.temporal.TemporalAmount)>(r4);
+
+        $r7 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r6);
+
+        return $r7;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "amountToAdd");
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal addTo(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.ZonedDateTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        java.time.ZonedDateTime r1, $r3, $r6, $r9;
+        java.time.LocalDateTime $r4, $r5, $r7, $r8;
+        long l0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: boolean isDateBased()>();
+
+        if $z1 == 0 goto label1;
+
+        $r7 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r8 = virtualinvoke $r7.<java.time.LocalDateTime: java.time.LocalDateTime plus(long,java.time.temporal.TemporalUnit)>(l0, r0);
+
+        $r9 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r8);
+
+        return $r9;
+
+     label1:
+        $r4 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r5 = virtualinvoke $r4.<java.time.LocalDateTime: java.time.LocalDateTime plus(long,java.time.temporal.TemporalUnit)>(l0, r0);
+
+        $r6 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)>($r5);
+
+        return $r6;
+
+     label2:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.temporal.Temporal addTo(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.ZonedDateTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusYears(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusYears(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusMonths(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusMonths(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusWeeks(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusWeeks(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusDays(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusDays(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusHours(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusHours(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusMinutes(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusMinutes(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusSeconds(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusSeconds(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime plusNanos(long)
+    {
+        java.time.ZonedDateTime r0, $r3;
+        java.time.LocalDateTime $r1, $r2;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDateTime: java.time.LocalDateTime plusNanos(long)>(l0);
+
+        $r3 = specialinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveInstant(java.time.LocalDateTime)>($r2);
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r4;
+        java.time.ZonedDateTime r1, $r3, $r7;
+        java.time.LocalDateTime $r5, $r6;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $z0 = r0 instanceof java.time.Period;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.time.Period) r0;
+
+        $r5 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r6 = virtualinvoke $r5.<java.time.LocalDateTime: java.time.LocalDateTime minus(java.time.temporal.TemporalAmount)>(r4);
+
+        $r7 = specialinvoke r1.<java.time.ZonedDateTime: java.time.ZonedDateTime resolveLocal(java.time.LocalDateTime)>($r6);
+
+        return $r7;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "amountToSubtract");
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal subtractFrom(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.ZonedDateTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime minus(long, java.time.temporal.TemporalUnit)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r2, $r3;
+        java.time.temporal.TemporalUnit r1;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(long,java.time.temporal.TemporalUnit)>(9223372036854775807L, r1);
+
+        $r3 = virtualinvoke $r2.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(long,java.time.temporal.TemporalUnit)>(1L, r1);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r3 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(long,java.time.temporal.TemporalUnit)>($l2, r1);
+
+     label2:
+        return $r3;
+    }
+
+    public java.time.ZonedDateTime minusYears(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusYears(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusYears(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusYears(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusMonths(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMonths(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMonths(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMonths(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusWeeks(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusWeeks(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusWeeks(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusWeeks(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusDays(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusDays(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusDays(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusDays(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusHours(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusHours(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusHours(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusHours(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusMinutes(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMinutes(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMinutes(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusMinutes(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusSeconds(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusSeconds(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusSeconds(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusSeconds(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime minusNanos(long)
+    {
+        byte $b1;
+        java.time.ZonedDateTime r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusNanos(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime plusNanos(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plusNanos(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.Object query(java.time.temporal.TemporalQuery)
+    {
+        java.time.ZonedDateTime r2;
+        java.time.LocalDate $r4;
+        java.time.temporal.TemporalQuery r0, $r1;
+        java.lang.Object $r3;
+
+        r2 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalQuery;
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localDate()>();
+
+        if r0 != $r1 goto label1;
+
+        $r4 = virtualinvoke r2.<java.time.ZonedDateTime: java.time.LocalDate toLocalDate()>();
+
+        return $r4;
+
+     label1:
+        $r3 = specialinvoke r2.<java.time.chrono.ChronoZonedDateTime: java.lang.Object query(java.time.temporal.TemporalQuery)>(r0);
+
+        return $r3;
+    }
+
+    public long until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime $r1, r3, $r5;
+        java.time.temporal.TemporalUnit r2;
+        java.time.LocalDateTime $r8, $r9;
+        long $l0, $l1, $l2;
+        java.time.ZoneId $r4;
+        java.time.OffsetDateTime $r6, $r7;
+        java.time.temporal.Temporal r0;
+        boolean $z0, $z1;
+
+        r3 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        r2 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r1 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $z0 = r2 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r3.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r5 = virtualinvoke $r1.<java.time.ZonedDateTime: java.time.ZonedDateTime withZoneSameInstant(java.time.ZoneId)>($r4);
+
+        $z1 = interfaceinvoke r2.<java.time.temporal.TemporalUnit: boolean isDateBased()>();
+
+        if $z1 == 0 goto label1;
+
+        $r9 = r3.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r8 = $r5.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $l2 = virtualinvoke $r9.<java.time.LocalDateTime: long until(java.time.temporal.Temporal,java.time.temporal.TemporalUnit)>($r8, r2);
+
+        return $l2;
+
+     label1:
+        $r6 = virtualinvoke r3.<java.time.ZonedDateTime: java.time.OffsetDateTime toOffsetDateTime()>();
+
+        $r7 = virtualinvoke $r5.<java.time.ZonedDateTime: java.time.OffsetDateTime toOffsetDateTime()>();
+
+        $l1 = virtualinvoke $r6.<java.time.OffsetDateTime: long until(java.time.temporal.Temporal,java.time.temporal.TemporalUnit)>($r7, r2);
+
+        return $l1;
+
+     label2:
+        $l0 = interfaceinvoke r2.<java.time.temporal.TemporalUnit: long between(java.time.temporal.Temporal,java.time.temporal.Temporal)>(r3, $r1);
+
+        return $l0;
+    }
+
+    public java.lang.String format(java.time.format.DateTimeFormatter)
+    {
+        java.lang.String $r2;
+        java.time.format.DateTimeFormatter r0;
+        java.time.ZonedDateTime r1;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r0 := @parameter0: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.String format(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public java.time.OffsetDateTime toOffsetDateTime()
+    {
+        java.time.OffsetDateTime $r3;
+        java.time.ZonedDateTime r0;
+        java.time.LocalDateTime $r2;
+        java.time.ZoneOffset $r1;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r2 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r3 = staticinvoke <java.time.OffsetDateTime: java.time.OffsetDateTime of(java.time.LocalDateTime,java.time.ZoneOffset)>($r2, $r1);
+
+        return $r3;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.time.ZonedDateTime r0, r2;
+        java.time.LocalDateTime $r3, $r4;
+        java.time.ZoneId $r7, $r8;
+        java.lang.Object r1;
+        java.time.ZoneOffset $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.ZonedDateTime;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (java.time.ZonedDateTime) r1;
+
+        $r4 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r3 = r2.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $z1 = virtualinvoke $r4.<java.time.LocalDateTime: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r5 = r2.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $z2 = virtualinvoke $r6.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r5);
+
+        if $z2 == 0 goto label2;
+
+        $r8 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r7 = r2.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $z3 = virtualinvoke $r8.<java.time.ZoneId: boolean equals(java.lang.Object)>($r7);
+
+        if $z3 == 0 goto label2;
+
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.ZonedDateTime r0;
+        java.time.LocalDateTime $r1;
+        java.time.ZoneId $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.time.ZoneOffset $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDateTime: int hashCode()>();
+
+        $r2 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $i1 = virtualinvoke $r2.<java.time.ZoneOffset: int hashCode()>();
+
+        $i2 = $i0 ^ $i1;
+
+        $r3 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $i3 = virtualinvoke $r3.<java.time.ZoneId: int hashCode()>();
+
+        $i4 = staticinvoke <java.lang.Integer: int rotateLeft(int,int)>($i3, 3);
+
+        $i5 = $i2 ^ $i4;
+
+        return $i5;
+    }
+
+    public java.lang.String toString()
+    {
+        java.time.ZonedDateTime r1;
+        java.time.LocalDateTime $r2;
+        java.lang.String $r3, $r6, $r8, $r15, r18;
+        java.time.ZoneOffset $r5, $r10;
+        java.time.ZoneId $r9, $r14;
+        java.lang.StringBuilder $r0, $r4, $r7, $r11, $r12, $r13, $r16, $r17;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        $r3 = virtualinvoke $r2.<java.time.LocalDateTime: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r6 = virtualinvoke $r5.<java.time.ZoneOffset: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r18 = $r8;
+
+        $r10 = r1.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        $r9 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        if $r10 == $r9 goto label1;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        $r14 = r1.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        $r15 = virtualinvoke $r14.<java.time.ZoneId: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        return r18;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.Ser $r0;
+        java.time.ZonedDateTime r1;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        $r0 = new java.time.Ser;
+
+        specialinvoke $r0.<java.time.Ser: void <init>(byte,java.lang.Object)>(6, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.time.ZonedDateTime r1;
+
+        r1 := @this: java.time.ZonedDateTime;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r1;
+        java.time.ZonedDateTime r0;
+        java.time.LocalDateTime $r2;
+        java.time.ZoneOffset $r3;
+        java.time.ZoneId $r4;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.io.DataOutput;
+
+        $r2 = r0.<java.time.ZonedDateTime: java.time.LocalDateTime dateTime>;
+
+        virtualinvoke $r2.<java.time.LocalDateTime: void writeExternal(java.io.DataOutput)>(r1);
+
+        $r3 = r0.<java.time.ZonedDateTime: java.time.ZoneOffset offset>;
+
+        virtualinvoke $r3.<java.time.ZoneOffset: void writeExternal(java.io.DataOutput)>(r1);
+
+        $r4 = r0.<java.time.ZonedDateTime: java.time.ZoneId zone>;
+
+        virtualinvoke $r4.<java.time.ZoneId: void write(java.io.DataOutput)>(r1);
+
+        return;
+    }
+
+    static java.time.ZonedDateTime readExternal(java.io.ObjectInput) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.time.ZonedDateTime $r5;
+        java.time.LocalDateTime $r1;
+        java.io.ObjectInput r0;
+        java.lang.Object $r3;
+        java.time.ZoneOffset $r2;
+        java.time.ZoneId r4;
+
+        r0 := @parameter0: java.io.ObjectInput;
+
+        $r1 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime readExternal(java.io.DataInput)>(r0);
+
+        $r2 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset readExternal(java.io.DataInput)>(r0);
+
+        $r3 = staticinvoke <java.time.Ser: java.lang.Object read(java.io.ObjectInput)>(r0);
+
+        r4 = (java.time.ZoneId) $r3;
+
+        $r5 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime ofLenient(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneId)>($r1, $r2, r4);
+
+        return $r5;
+    }
+
+    public volatile java.time.temporal.Temporal minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalField r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.temporal.TemporalAdjuster r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.ZonedDateTime r0, $r2;
+        java.time.temporal.TemporalField r1;
+        long l0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.temporal.TemporalAdjuster r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime withZoneSameInstant(java.time.ZoneId)
+    {
+        java.time.ZoneId r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.ZoneId;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime withZoneSameInstant(java.time.ZoneId)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime withZoneSameLocal(java.time.ZoneId)
+    {
+        java.time.ZoneId r1;
+        java.time.ZonedDateTime r0, $r2;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        r1 := @parameter0: java.time.ZoneId;
+
+        $r2 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime withZoneSameLocal(java.time.ZoneId)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime withLaterOffsetAtOverlap()
+    {
+        java.time.ZonedDateTime r0, $r1;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime withLaterOffsetAtOverlap()>();
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoZonedDateTime withEarlierOffsetAtOverlap()
+    {
+        java.time.ZonedDateTime r0, $r1;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.ZonedDateTime withEarlierOffsetAtOverlap()>();
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDateTime toLocalDateTime()
+    {
+        java.time.LocalDateTime $r1;
+        java.time.ZonedDateTime r0;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.LocalDateTime toLocalDateTime()>();
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate toLocalDate()
+    {
+        java.time.ZonedDateTime r0;
+        java.time.LocalDate $r1;
+
+        r0 := @this: java.time.ZonedDateTime;
+
+        $r1 = virtualinvoke r0.<java.time.ZonedDateTime: java.time.LocalDate toLocalDate()>();
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <java.time.ZonedDateTime: long serialVersionUID> = -6260982410461394882L;
+
+        return;
+    }
+}

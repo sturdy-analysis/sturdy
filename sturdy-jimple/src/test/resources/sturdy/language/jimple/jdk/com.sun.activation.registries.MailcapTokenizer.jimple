@@ -1,0 +1,654 @@
+public class com.sun.activation.registries.MailcapTokenizer extends java.lang.Object
+{
+    public static final int UNKNOWN_TOKEN;
+    public static final int START_TOKEN;
+    public static final int STRING_TOKEN;
+    public static final int EOI_TOKEN;
+    public static final int SLASH_TOKEN;
+    public static final int SEMICOLON_TOKEN;
+    public static final int EQUALS_TOKEN;
+    private java.lang.String data;
+    private int dataIndex;
+    private int dataLength;
+    private int currentToken;
+    private java.lang.String currentTokenValue;
+    private boolean isAutoquoting;
+    private char autoquoteChar;
+
+    public void <init>(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r1;
+        com.sun.activation.registries.MailcapTokenizer r0;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data> = r1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = 0;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength> = $i0;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = "";
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: boolean isAutoquoting> = 0;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: char autoquoteChar> = 59;
+
+        return;
+    }
+
+    public void setIsAutoquoting(boolean)
+    {
+        com.sun.activation.registries.MailcapTokenizer r0;
+        boolean z0;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: boolean isAutoquoting> = z0;
+
+        return;
+    }
+
+    public int getCurrentToken()
+    {
+        int $i0;
+        com.sun.activation.registries.MailcapTokenizer r0;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        $i0 = r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken>;
+
+        return $i0;
+    }
+
+    public static java.lang.String nameForToken(int)
+    {
+        int i0;
+        java.lang.String r0;
+
+        i0 := @parameter0: int;
+
+        r0 = "really unknown";
+
+        lookupswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            case 5: goto label4;
+            case 47: goto label5;
+            case 59: goto label6;
+            case 61: goto label7;
+            default: goto label8;
+        };
+
+     label1:
+        r0 = "unknown";
+
+        goto label8;
+
+     label2:
+        r0 = "start";
+
+        goto label8;
+
+     label3:
+        r0 = "string";
+
+        goto label8;
+
+     label4:
+        r0 = "EOI";
+
+        goto label8;
+
+     label5:
+        r0 = "\'/\'";
+
+        goto label8;
+
+     label6:
+        r0 = "\';\'";
+
+        goto label8;
+
+     label7:
+        r0 = "\'=\'";
+
+     label8:
+        return r0;
+    }
+
+    public java.lang.String getCurrentTokenValue()
+    {
+        java.lang.String $r1;
+        com.sun.activation.registries.MailcapTokenizer r0;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        $r1 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue>;
+
+        return $r1;
+    }
+
+    public int nextToken()
+    {
+        java.lang.Character $r9, $r10, $r11;
+        boolean $z0, $z1, $z2;
+        com.sun.activation.registries.MailcapTokenizer r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        java.lang.String $r1, $r3, $r5, $r6, $r8;
+        char $c7, $c13;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        $i1 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i0 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength>;
+
+        if $i1 >= $i0 goto label11;
+
+     label01:
+        $i3 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i2 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength>;
+
+        if $i3 >= $i2 goto label02;
+
+        $r6 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i12 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $c13 = virtualinvoke $r6.<java.lang.String: char charAt(int)>($i12);
+
+        $z2 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isWhiteSpaceChar(char)>($c13);
+
+        if $z2 == 0 goto label02;
+
+        $i14 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i15 = $i14 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i15;
+
+        goto label01;
+
+     label02:
+        $i5 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i4 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength>;
+
+        if $i5 >= $i4 goto label10;
+
+        $r1 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i6 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $c7 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i6);
+
+        $z0 = r0.<com.sun.activation.registries.MailcapTokenizer: boolean isAutoquoting>;
+
+        if $z0 == 0 goto label05;
+
+        $i19 = (int) $c7;
+
+        if $i19 == 59 goto label03;
+
+        $i20 = (int) $c7;
+
+        if $i20 != 61 goto label04;
+
+     label03:
+        $i21 = (int) $c7;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = $i21;
+
+        $r9 = new java.lang.Character;
+
+        specialinvoke $r9.<java.lang.Character: void <init>(char)>($c7);
+
+        $r5 = virtualinvoke $r9.<java.lang.Character: java.lang.String toString()>();
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = $r5;
+
+        $i10 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i11 = $i10 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i11;
+
+        goto label09;
+
+     label04:
+        specialinvoke r0.<com.sun.activation.registries.MailcapTokenizer: void processAutoquoteToken()>();
+
+        goto label09;
+
+     label05:
+        $z1 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isStringTokenChar(char)>($c7);
+
+        if $z1 == 0 goto label06;
+
+        specialinvoke r0.<com.sun.activation.registries.MailcapTokenizer: void processStringToken()>();
+
+        goto label09;
+
+     label06:
+        $i22 = (int) $c7;
+
+        if $i22 == 47 goto label07;
+
+        $i23 = (int) $c7;
+
+        if $i23 == 59 goto label07;
+
+        $i24 = (int) $c7;
+
+        if $i24 != 61 goto label08;
+
+     label07:
+        $i25 = (int) $c7;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = $i25;
+
+        $r10 = new java.lang.Character;
+
+        specialinvoke $r10.<java.lang.Character: void <init>(char)>($c7);
+
+        $r8 = virtualinvoke $r10.<java.lang.Character: java.lang.String toString()>();
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = $r8;
+
+        $i16 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i17 = $i16 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i17;
+
+        goto label09;
+
+     label08:
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 0;
+
+        $r11 = new java.lang.Character;
+
+        specialinvoke $r11.<java.lang.Character: void <init>(char)>($c7);
+
+        $r3 = virtualinvoke $r11.<java.lang.Character: java.lang.String toString()>();
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = $r3;
+
+        $i8 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i9 = $i8 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i9;
+
+     label09:
+        goto label12;
+
+     label10:
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 5;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = null;
+
+        goto label12;
+
+     label11:
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 5;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = null;
+
+     label12:
+        $i18 = r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken>;
+
+        return $i18;
+    }
+
+    private void processStringToken()
+    {
+        com.sun.activation.registries.MailcapTokenizer r0;
+        char $c5;
+        int i0, $i1, $i2, $i3, $i4, $i6, $i7;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        i0 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+     label1:
+        $i2 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i1 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength>;
+
+        if $i2 >= $i1 goto label2;
+
+        $r3 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i4 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $c5 = virtualinvoke $r3.<java.lang.String: char charAt(int)>($i4);
+
+        $z0 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isStringTokenChar(char)>($c5);
+
+        if $z0 == 0 goto label2;
+
+        $i6 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i7 = $i6 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i7;
+
+        goto label1;
+
+     label2:
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 2;
+
+        $r1 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i3 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i3);
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = $r2;
+
+        return;
+    }
+
+    private void processAutoquoteToken()
+    {
+        com.sun.activation.registries.MailcapTokenizer r0;
+        int i0, $i1, $i2, $i3, $i4, $i7, $i8, $i9, $i10;
+        java.lang.String $r1, $r2, $r3, $r4;
+        boolean z0;
+        char $c5, $c6;
+
+        r0 := @this: com.sun.activation.registries.MailcapTokenizer;
+
+        i0 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        z0 = 0;
+
+     label1:
+        $i2 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i1 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataLength>;
+
+        if $i2 >= $i1 goto label4;
+
+        if z0 != 0 goto label4;
+
+        $r4 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i4 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $c5 = virtualinvoke $r4.<java.lang.String: char charAt(int)>($i4);
+
+        $c6 = r0.<com.sun.activation.registries.MailcapTokenizer: char autoquoteChar>;
+
+        $i9 = (int) $c5;
+
+        $i10 = (int) $c6;
+
+        if $i9 == $i10 goto label2;
+
+        $i7 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $i8 = $i7 + 1;
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex> = $i8;
+
+        goto label3;
+
+     label2:
+        z0 = 1;
+
+     label3:
+        goto label1;
+
+     label4:
+        r0.<com.sun.activation.registries.MailcapTokenizer: int currentToken> = 2;
+
+        $r1 = r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String data>;
+
+        $i3 = r0.<com.sun.activation.registries.MailcapTokenizer: int dataIndex>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i3);
+
+        $r3 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: java.lang.String fixEscapeSequences(java.lang.String)>($r2);
+
+        r0.<com.sun.activation.registries.MailcapTokenizer: java.lang.String currentTokenValue> = $r3;
+
+        return;
+    }
+
+    private static boolean isSpecialChar(char)
+    {
+        int $i1;
+        char c0;
+        boolean z0;
+
+        c0 := @parameter0: char;
+
+        z0 = 0;
+
+        $i1 = (int) c0;
+
+        tableswitch($i1)
+        {
+            case 34: goto label1;
+            case 35: goto label2;
+            case 36: goto label2;
+            case 37: goto label2;
+            case 38: goto label2;
+            case 39: goto label2;
+            case 40: goto label1;
+            case 41: goto label1;
+            case 42: goto label2;
+            case 43: goto label2;
+            case 44: goto label1;
+            case 45: goto label2;
+            case 46: goto label2;
+            case 47: goto label1;
+            case 48: goto label2;
+            case 49: goto label2;
+            case 50: goto label2;
+            case 51: goto label2;
+            case 52: goto label2;
+            case 53: goto label2;
+            case 54: goto label2;
+            case 55: goto label2;
+            case 56: goto label2;
+            case 57: goto label2;
+            case 58: goto label1;
+            case 59: goto label1;
+            case 60: goto label1;
+            case 61: goto label1;
+            case 62: goto label1;
+            case 63: goto label1;
+            case 64: goto label1;
+            case 65: goto label2;
+            case 66: goto label2;
+            case 67: goto label2;
+            case 68: goto label2;
+            case 69: goto label2;
+            case 70: goto label2;
+            case 71: goto label2;
+            case 72: goto label2;
+            case 73: goto label2;
+            case 74: goto label2;
+            case 75: goto label2;
+            case 76: goto label2;
+            case 77: goto label2;
+            case 78: goto label2;
+            case 79: goto label2;
+            case 80: goto label2;
+            case 81: goto label2;
+            case 82: goto label2;
+            case 83: goto label2;
+            case 84: goto label2;
+            case 85: goto label2;
+            case 86: goto label2;
+            case 87: goto label2;
+            case 88: goto label2;
+            case 89: goto label2;
+            case 90: goto label2;
+            case 91: goto label1;
+            case 92: goto label1;
+            case 93: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        z0 = 1;
+
+     label2:
+        return z0;
+    }
+
+    private static boolean isControlChar(char)
+    {
+        char c0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isISOControl(char)>(c0);
+
+        return $z0;
+    }
+
+    private static boolean isWhiteSpaceChar(char)
+    {
+        char c0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>(c0);
+
+        return $z0;
+    }
+
+    private static boolean isStringTokenChar(char)
+    {
+        char c0;
+        boolean $z0, $z1, $z2, $z3;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isSpecialChar(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isControlChar(char)>(c0);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = staticinvoke <com.sun.activation.registries.MailcapTokenizer: boolean isWhiteSpaceChar(char)>(c0);
+
+        if $z2 != 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        return $z3;
+    }
+
+    private static java.lang.String fixEscapeSequences(java.lang.String)
+    {
+        char $c1, $c4;
+        java.lang.StringBuffer $r3;
+        int $i0, $i2, $i3, i5, $i6;
+        java.lang.String r0, $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r3 = new java.lang.StringBuffer;
+
+        specialinvoke $r3.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r3.<java.lang.StringBuffer: void ensureCapacity(int)>($i0);
+
+        i5 = 0;
+
+     label1:
+        if i5 >= $i0 goto label5;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i5);
+
+        $i6 = (int) $c1;
+
+        if $i6 == 92 goto label2;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        goto label4;
+
+     label2:
+        $i2 = $i0 - 1;
+
+        if i5 >= $i2 goto label3;
+
+        $i3 = i5 + 1;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i3);
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        i5 = i5 + 1;
+
+        goto label4;
+
+     label3:
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+     label4:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label5:
+        $r2 = virtualinvoke $r3.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.activation.registries.MailcapTokenizer: int EQUALS_TOKEN> = 61;
+
+        <com.sun.activation.registries.MailcapTokenizer: int SEMICOLON_TOKEN> = 59;
+
+        <com.sun.activation.registries.MailcapTokenizer: int SLASH_TOKEN> = 47;
+
+        <com.sun.activation.registries.MailcapTokenizer: int EOI_TOKEN> = 5;
+
+        <com.sun.activation.registries.MailcapTokenizer: int STRING_TOKEN> = 2;
+
+        <com.sun.activation.registries.MailcapTokenizer: int START_TOKEN> = 1;
+
+        <com.sun.activation.registries.MailcapTokenizer: int UNKNOWN_TOKEN> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,1259 @@
+public class java.util.Random extends java.lang.Object implements java.io.Serializable
+{
+    static final long serialVersionUID;
+    private final java.util.concurrent.atomic.AtomicLong seed;
+    private static final long multiplier;
+    private static final long addend;
+    private static final long mask;
+    private static final double DOUBLE_UNIT;
+    static final java.lang.String BadBound;
+    static final java.lang.String BadRange;
+    static final java.lang.String BadSize;
+    private static final java.util.concurrent.atomic.AtomicLong seedUniquifier;
+    private double nextNextGaussian;
+    private boolean haveNextNextGaussian;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private static final sun.misc.Unsafe unsafe;
+    private static final long seedOffset;
+
+    public void <init>()
+    {
+        java.util.Random r0;
+        long $l0, $l1, $l2;
+
+        r0 := @this: java.util.Random;
+
+        $l0 = staticinvoke <java.util.Random: long seedUniquifier()>();
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l2 = $l0 ^ $l1;
+
+        specialinvoke r0.<java.util.Random: void <init>(long)>($l2);
+
+        return;
+    }
+
+    private static long seedUniquifier()
+    {
+        java.util.concurrent.atomic.AtomicLong $r0, $r1;
+        long $l0, $l1;
+        boolean $z0;
+
+     label1:
+        $r0 = <java.util.Random: java.util.concurrent.atomic.AtomicLong seedUniquifier>;
+
+        $l0 = virtualinvoke $r0.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        $l1 = $l0 * 181783497276652981L;
+
+        $r1 = <java.util.Random: java.util.concurrent.atomic.AtomicLong seedUniquifier>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicLong: boolean compareAndSet(long,long)>($l0, $l1);
+
+        if $z0 == 0 goto label2;
+
+        return $l1;
+
+     label2:
+        goto label1;
+    }
+
+    public void <init>(long)
+    {
+        java.util.concurrent.atomic.AtomicLong $r2, $r3;
+        java.util.Random r0;
+        java.lang.Class $r1;
+        long l0, $l1;
+
+        r0 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.Random: boolean haveNextNextGaussian> = 0;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 != class "Ljava/util/Random;" goto label1;
+
+        $r3 = new java.util.concurrent.atomic.AtomicLong;
+
+        $l1 = staticinvoke <java.util.Random: long initialScramble(long)>(l0);
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>($l1);
+
+        r0.<java.util.Random: java.util.concurrent.atomic.AtomicLong seed> = $r3;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicLong: void <init>()>();
+
+        r0.<java.util.Random: java.util.concurrent.atomic.AtomicLong seed> = $r2;
+
+        virtualinvoke r0.<java.util.Random: void setSeed(long)>(l0);
+
+     label2:
+        return;
+    }
+
+    private static long initialScramble(long)
+    {
+        long l0, $l1, $l2;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 ^ 25214903917L;
+
+        $l2 = $l1 & 281474976710655L;
+
+        return $l2;
+    }
+
+    public synchronized void setSeed(long)
+    {
+        java.util.concurrent.atomic.AtomicLong $r1;
+        java.util.Random r0;
+        long l0, $l1;
+
+        r0 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.util.Random: java.util.concurrent.atomic.AtomicLong seed>;
+
+        $l1 = staticinvoke <java.util.Random: long initialScramble(long)>(l0);
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicLong: void set(long)>($l1);
+
+        r0.<java.util.Random: boolean haveNextNextGaussian> = 0;
+
+        return;
+    }
+
+    protected int next(int)
+    {
+        java.util.Random r0;
+        long $l0, $l1, $l2, $l3, $l6;
+        java.util.concurrent.atomic.AtomicLong r1;
+        int i4, $i5, $i7;
+        boolean $z0;
+
+        r0 := @this: java.util.Random;
+
+        i4 := @parameter0: int;
+
+        r1 = r0.<java.util.Random: java.util.concurrent.atomic.AtomicLong seed>;
+
+     label1:
+        $l0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        $l1 = $l0 * 25214903917L;
+
+        $l2 = $l1 + 11L;
+
+        $l3 = $l2 & 281474976710655L;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicLong: boolean compareAndSet(long,long)>($l0, $l3);
+
+        if $z0 == 0 goto label1;
+
+        $i5 = 48 - i4;
+
+        $l6 = $l3 >>> $i5;
+
+        $i7 = (int) $l6;
+
+        return $i7;
+    }
+
+    public void nextBytes(byte[])
+    {
+        byte[] r0;
+        java.util.Random r1;
+        byte $b4;
+        int i0, $i1, $i2, $i3, i5, i6, i7, $i9;
+
+        r1 := @this: java.util.Random;
+
+        r0 := @parameter0: byte[];
+
+        i5 = 0;
+
+        i0 = lengthof r0;
+
+     label1:
+        if i5 >= i0 goto label4;
+
+        i6 = virtualinvoke r1.<java.util.Random: int nextInt()>();
+
+        $i1 = i0 - i5;
+
+        i7 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 4);
+
+     label2:
+        $i2 = i7;
+
+        $i9 = (int) -1;
+
+        i7 = i7 + $i9;
+
+        if $i2 <= 0 goto label3;
+
+        $i3 = i5;
+
+        i5 = i5 + 1;
+
+        $b4 = (byte) i6;
+
+        r0[$i3] = $b4;
+
+        i6 = i6 >> 8;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    final long internalNextLong(long, long)
+    {
+        java.util.Random r0;
+        long $l0, l1, l2, l4, l5, $l6, $l11, $l12, $l13, $l15, $l16, l17, l18;
+        byte $b3, $b7, $b8, $b9, $b10, $b14;
+        int $i19, $i20, $i21, $i22, $i23;
+
+        r0 := @this: java.util.Random;
+
+        l1 := @parameter0: long;
+
+        l2 := @parameter1: long;
+
+        $l0 = virtualinvoke r0.<java.util.Random: long nextLong()>();
+
+        l17 = $l0;
+
+        $b3 = l1 cmp l2;
+
+        $i19 = (int) $b3;
+
+        if $i19 >= 0 goto label6;
+
+        l4 = l2 - l1;
+
+        l5 = l4 - 1L;
+
+        $l6 = l4 & l5;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 != 0 goto label1;
+
+        $l16 = $l0 & l5;
+
+        l17 = $l16 + l1;
+
+        goto label6;
+
+     label1:
+        $b8 = l4 cmp 0L;
+
+        $i20 = (int) $b8;
+
+        if $i20 <= 0 goto label4;
+
+        l18 = $l0 >>> 1;
+
+     label2:
+        $l12 = l18 + l5;
+
+        $l11 = l18 % l4;
+
+        $l13 = $l12 - $l11;
+
+        $b14 = $l13 cmp 0L;
+
+        $i21 = (int) $b14;
+
+        if $i21 >= 0 goto label3;
+
+        $l15 = virtualinvoke r0.<java.util.Random: long nextLong()>();
+
+        l18 = $l15 >>> 1;
+
+        goto label2;
+
+     label3:
+        l17 = $l11 + l1;
+
+        goto label6;
+
+     label4:
+        $b9 = l17 cmp l1;
+
+        $i22 = (int) $b9;
+
+        if $i22 < 0 goto label5;
+
+        $b10 = l17 cmp l2;
+
+        $i23 = (int) $b10;
+
+        if $i23 < 0 goto label6;
+
+     label5:
+        l17 = virtualinvoke r0.<java.util.Random: long nextLong()>();
+
+        goto label4;
+
+     label6:
+        return l17;
+    }
+
+    final int internalNextInt(int, int)
+    {
+        java.util.Random r0;
+        int i0, i1, $i2, i3, $i4, $i5, $i6;
+
+        r0 := @this: java.util.Random;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 >= i1 goto label2;
+
+        i3 = i1 - i0;
+
+        if i3 <= 0 goto label1;
+
+        $i4 = virtualinvoke r0.<java.util.Random: int nextInt(int)>(i3);
+
+        $i5 = $i4 + i0;
+
+        return $i5;
+
+     label1:
+        $i6 = virtualinvoke r0.<java.util.Random: int nextInt()>();
+
+        if $i6 < i0 goto label1;
+
+        if $i6 >= i1 goto label1;
+
+        return $i6;
+
+     label2:
+        $i2 = virtualinvoke r0.<java.util.Random: int nextInt()>();
+
+        return $i2;
+    }
+
+    final double internalNextDouble(double, double)
+    {
+        java.util.Random r0;
+        long $l2, $l3;
+        byte $b0, $b1;
+        int $i4, $i5;
+        double $d0, d1, d2, $d3, $d4, d5;
+
+        r0 := @this: java.util.Random;
+
+        d1 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        $d0 = virtualinvoke r0.<java.util.Random: double nextDouble()>();
+
+        d5 = $d0;
+
+        $b0 = d1 cmpg d2;
+
+        $i4 = (int) $b0;
+
+        if $i4 >= 0 goto label1;
+
+        $d3 = d2 - d1;
+
+        $d4 = $d0 * $d3;
+
+        d5 = $d4 + d1;
+
+        $b1 = d5 cmpl d2;
+
+        $i5 = (int) $b1;
+
+        if $i5 < 0 goto label1;
+
+        $l2 = staticinvoke <java.lang.Double: long doubleToLongBits(double)>(d2);
+
+        $l3 = $l2 - 1L;
+
+        d5 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l3);
+
+     label1:
+        return d5;
+    }
+
+    public int nextInt()
+    {
+        int $i0;
+        java.util.Random r0;
+
+        r0 := @this: java.util.Random;
+
+        $i0 = virtualinvoke r0.<java.util.Random: int next(int)>(32);
+
+        return $i0;
+    }
+
+    public int nextInt(int)
+    {
+        java.util.Random r0;
+        long $l7, $l8, $l9, $l10;
+        java.lang.IllegalArgumentException $r1;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, i11, i12;
+
+        r0 := @this: java.util.Random;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be positive");
+
+        throw $r1;
+
+     label1:
+        $i1 = virtualinvoke r0.<java.util.Random: int next(int)>(31);
+
+        i2 = i0 - 1;
+
+        $i3 = i0 & i2;
+
+        if $i3 != 0 goto label2;
+
+        $l8 = (long) i0;
+
+        $l7 = (long) $i1;
+
+        $l9 = $l8 * $l7;
+
+        $l10 = $l9 >> 31;
+
+        i11 = (int) $l10;
+
+        goto label4;
+
+     label2:
+        i12 = $i1;
+
+     label3:
+        $i4 = i12 % i0;
+
+        i11 = $i4;
+
+        $i5 = i12 - $i4;
+
+        $i6 = $i5 + i2;
+
+        if $i6 >= 0 goto label4;
+
+        i12 = virtualinvoke r0.<java.util.Random: int next(int)>(31);
+
+        goto label3;
+
+     label4:
+        return i11;
+    }
+
+    public long nextLong()
+    {
+        int $i0, $i3;
+        java.util.Random r0;
+        long $l1, $l2, $l4, $l5;
+
+        r0 := @this: java.util.Random;
+
+        $i0 = virtualinvoke r0.<java.util.Random: int next(int)>(32);
+
+        $l1 = (long) $i0;
+
+        $l2 = $l1 << 32;
+
+        $i3 = virtualinvoke r0.<java.util.Random: int next(int)>(32);
+
+        $l4 = (long) $i3;
+
+        $l5 = $l2 + $l4;
+
+        return $l5;
+    }
+
+    public boolean nextBoolean()
+    {
+        int $i0;
+        java.util.Random r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Random;
+
+        $i0 = virtualinvoke r0.<java.util.Random: int next(int)>(1);
+
+        if $i0 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public float nextFloat()
+    {
+        int $i0;
+        float $f0, $f1;
+        java.util.Random r0;
+
+        r0 := @this: java.util.Random;
+
+        $i0 = virtualinvoke r0.<java.util.Random: int next(int)>(24);
+
+        $f0 = (float) $i0;
+
+        $f1 = $f0 / 1.6777216E7F;
+
+        return $f1;
+    }
+
+    public double nextDouble()
+    {
+        java.util.Random r0;
+        long $l1, $l2, $l4, $l5;
+        int $i0, $i3;
+        double $d0, $d1;
+
+        r0 := @this: java.util.Random;
+
+        $i0 = virtualinvoke r0.<java.util.Random: int next(int)>(26);
+
+        $l1 = (long) $i0;
+
+        $l2 = $l1 << 27;
+
+        $i3 = virtualinvoke r0.<java.util.Random: int next(int)>(27);
+
+        $l4 = (long) $i3;
+
+        $l5 = $l2 + $l4;
+
+        $d0 = (double) $l5;
+
+        $d1 = $d0 * 1.1102230246251565E-16;
+
+        return $d1;
+    }
+
+    public synchronized double nextGaussian()
+    {
+        java.util.Random r0;
+        byte $b0, $b1;
+        int $i2;
+        boolean $z0;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15;
+
+        r0 := @this: java.util.Random;
+
+        $z0 = r0.<java.util.Random: boolean haveNextNextGaussian>;
+
+        if $z0 == 0 goto label1;
+
+        r0.<java.util.Random: boolean haveNextNextGaussian> = 0;
+
+        $d6 = r0.<java.util.Random: double nextNextGaussian>;
+
+        return $d6;
+
+     label1:
+        $d7 = virtualinvoke r0.<java.util.Random: double nextDouble()>();
+
+        $d8 = 2.0 * $d7;
+
+        $d9 = $d8 - 1.0;
+
+        $d10 = virtualinvoke r0.<java.util.Random: double nextDouble()>();
+
+        $d11 = 2.0 * $d10;
+
+        $d12 = $d11 - 1.0;
+
+        $d13 = $d9 * $d9;
+
+        $d14 = $d12 * $d12;
+
+        $d15 = $d13 + $d14;
+
+        $b1 = $d15 cmpl 1.0;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $b0 = $d15 cmpl 0.0;
+
+        if $b0 == 0 goto label1;
+
+        $d0 = staticinvoke <java.lang.StrictMath: double log(double)>($d15);
+
+        $d1 = -2.0 * $d0;
+
+        $d2 = $d1 / $d15;
+
+        $d3 = staticinvoke <java.lang.StrictMath: double sqrt(double)>($d2);
+
+        $d4 = $d12 * $d3;
+
+        r0.<java.util.Random: double nextNextGaussian> = $d4;
+
+        r0.<java.util.Random: boolean haveNextNextGaussian> = 1;
+
+        $d5 = $d9 * $d3;
+
+        return $d5;
+    }
+
+    public java.util.stream.IntStream ints(long)
+    {
+        java.util.stream.IntStream $r2;
+        byte $b1;
+        java.util.Random$RandomIntsSpliterator $r5;
+        int $i2;
+        long l0;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r4;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r4;
+
+     label1:
+        $r5 = new java.util.Random$RandomIntsSpliterator;
+
+        specialinvoke $r5.<java.util.Random$RandomIntsSpliterator: void <init>(java.util.Random,long,long,int,int)>(r1, 0L, l0, 2147483647, 0);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.IntStream intStream(java.util.Spliterator$OfInt,boolean)>($r5, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.IntStream ints()
+    {
+        java.util.stream.IntStream $r2;
+        java.util.Random r1;
+        java.util.Random$RandomIntsSpliterator $r0;
+
+        r1 := @this: java.util.Random;
+
+        $r0 = new java.util.Random$RandomIntsSpliterator;
+
+        specialinvoke $r0.<java.util.Random$RandomIntsSpliterator: void <init>(java.util.Random,long,long,int,int)>(r1, 0L, 9223372036854775807L, 2147483647, 0);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.IntStream intStream(java.util.Spliterator$OfInt,boolean)>($r0, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.IntStream ints(long, int, int)
+    {
+        java.util.stream.IntStream $r2;
+        long l0;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r5, $r6;
+        byte $b1;
+        java.util.Random$RandomIntsSpliterator $r7;
+        int i2, i3, $i4;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $b1 = l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r5;
+
+     label1:
+        if i2 < i3 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r6;
+
+     label2:
+        $r7 = new java.util.Random$RandomIntsSpliterator;
+
+        specialinvoke $r7.<java.util.Random$RandomIntsSpliterator: void <init>(java.util.Random,long,long,int,int)>(r1, 0L, l0, i2, i3);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.IntStream intStream(java.util.Spliterator$OfInt,boolean)>($r7, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.IntStream ints(int, int)
+    {
+        java.util.stream.IntStream $r2;
+        java.util.Random$RandomIntsSpliterator $r0;
+        int i0, i1;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r3;
+
+        r1 := @this: java.util.Random;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 < i1 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r3;
+
+     label1:
+        $r0 = new java.util.Random$RandomIntsSpliterator;
+
+        specialinvoke $r0.<java.util.Random$RandomIntsSpliterator: void <init>(java.util.Random,long,long,int,int)>(r1, 0L, 9223372036854775807L, i0, i1);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.IntStream intStream(java.util.Spliterator$OfInt,boolean)>($r0, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.LongStream longs(long)
+    {
+        java.util.stream.LongStream $r2;
+        byte $b1;
+        int $i2;
+        long l0;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r4;
+        java.util.Random$RandomLongsSpliterator $r5;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r4;
+
+     label1:
+        $r5 = new java.util.Random$RandomLongsSpliterator;
+
+        specialinvoke $r5.<java.util.Random$RandomLongsSpliterator: void <init>(java.util.Random,long,long,long,long)>(r1, 0L, l0, 9223372036854775807L, 0L);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.LongStream longStream(java.util.Spliterator$OfLong,boolean)>($r5, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.LongStream longs()
+    {
+        java.util.Random r1;
+        java.util.stream.LongStream $r2;
+        java.util.Random$RandomLongsSpliterator $r0;
+
+        r1 := @this: java.util.Random;
+
+        $r0 = new java.util.Random$RandomLongsSpliterator;
+
+        specialinvoke $r0.<java.util.Random$RandomLongsSpliterator: void <init>(java.util.Random,long,long,long,long)>(r1, 0L, 9223372036854775807L, 9223372036854775807L, 0L);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.LongStream longStream(java.util.Spliterator$OfLong,boolean)>($r0, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.LongStream longs(long, long, long)
+    {
+        java.util.stream.LongStream $r2;
+        long l0, l2, l3;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r5, $r6;
+        byte $b1, $b4;
+        int $i5, $i6;
+        java.util.Random$RandomLongsSpliterator $r7;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        l2 := @parameter1: long;
+
+        l3 := @parameter2: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i5 = (int) $b1;
+
+        if $i5 >= 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r5;
+
+     label1:
+        $b4 = l2 cmp l3;
+
+        $i6 = (int) $b4;
+
+        if $i6 < 0 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r6;
+
+     label2:
+        $r7 = new java.util.Random$RandomLongsSpliterator;
+
+        specialinvoke $r7.<java.util.Random$RandomLongsSpliterator: void <init>(java.util.Random,long,long,long,long)>(r1, 0L, l0, l2, l3);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.LongStream longStream(java.util.Spliterator$OfLong,boolean)>($r7, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.LongStream longs(long, long)
+    {
+        java.util.stream.LongStream $r2;
+        long l0, l1;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r4;
+        byte $b2;
+        int $i3;
+        java.util.Random$RandomLongsSpliterator $r5;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $b2 = l0 cmp l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 < 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r4;
+
+     label1:
+        $r5 = new java.util.Random$RandomLongsSpliterator;
+
+        specialinvoke $r5.<java.util.Random$RandomLongsSpliterator: void <init>(java.util.Random,long,long,long,long)>(r1, 0L, 9223372036854775807L, l0, l1);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.LongStream longStream(java.util.Spliterator$OfLong,boolean)>($r5, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.DoubleStream doubles(long)
+    {
+        byte $b1;
+        int $i2;
+        long l0;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r4;
+        java.util.stream.DoubleStream $r2;
+        java.util.Random$RandomDoublesSpliterator $r5;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r4;
+
+     label1:
+        $r5 = new java.util.Random$RandomDoublesSpliterator;
+
+        specialinvoke $r5.<java.util.Random$RandomDoublesSpliterator: void <init>(java.util.Random,long,long,double,double)>(r1, 0L, l0, 1.7976931348623157E308, 0.0);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.DoubleStream doubleStream(java.util.Spliterator$OfDouble,boolean)>($r5, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.DoubleStream doubles()
+    {
+        java.util.Random r1;
+        java.util.Random$RandomDoublesSpliterator $r0;
+        java.util.stream.DoubleStream $r2;
+
+        r1 := @this: java.util.Random;
+
+        $r0 = new java.util.Random$RandomDoublesSpliterator;
+
+        specialinvoke $r0.<java.util.Random$RandomDoublesSpliterator: void <init>(java.util.Random,long,long,double,double)>(r1, 0L, 9223372036854775807L, 1.7976931348623157E308, 0.0);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.DoubleStream doubleStream(java.util.Spliterator$OfDouble,boolean)>($r0, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.DoubleStream doubles(long, double, double)
+    {
+        long l0;
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r5, $r6;
+        java.util.stream.DoubleStream $r2;
+        java.util.Random$RandomDoublesSpliterator $r7;
+        byte $b1, $b2;
+        int $i3, $i4;
+        double d0, d1;
+
+        r1 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        d0 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        $b1 = l0 cmp 0L;
+
+        $i3 = (int) $b1;
+
+        if $i3 >= 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("size must be non-negative");
+
+        throw $r5;
+
+     label1:
+        $b2 = d0 cmpg d1;
+
+        $i4 = (int) $b2;
+
+        if $i4 < 0 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r6;
+
+     label2:
+        $r7 = new java.util.Random$RandomDoublesSpliterator;
+
+        specialinvoke $r7.<java.util.Random$RandomDoublesSpliterator: void <init>(java.util.Random,long,long,double,double)>(r1, 0L, l0, d0, d1);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.DoubleStream doubleStream(java.util.Spliterator$OfDouble,boolean)>($r7, 0);
+
+        return $r2;
+    }
+
+    public java.util.stream.DoubleStream doubles(double, double)
+    {
+        java.util.Random r1;
+        java.lang.IllegalArgumentException $r4;
+        java.util.stream.DoubleStream $r2;
+        java.util.Random$RandomDoublesSpliterator $r5;
+        byte $b0;
+        int $i1;
+        double d0, d1;
+
+        r1 := @this: java.util.Random;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $b0 = d0 cmpg d1;
+
+        $i1 = (int) $b0;
+
+        if $i1 < 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bound must be greater than origin");
+
+        throw $r4;
+
+     label1:
+        $r5 = new java.util.Random$RandomDoublesSpliterator;
+
+        specialinvoke $r5.<java.util.Random$RandomDoublesSpliterator: void <init>(java.util.Random,long,long,double,double)>(r1, 0L, 9223372036854775807L, d0, d1);
+
+        $r2 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.DoubleStream doubleStream(java.util.Spliterator$OfDouble,boolean)>($r5, 0);
+
+        return $r2;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.StreamCorruptedException $r4;
+        java.io.ObjectInputStream r0;
+        long $l0;
+        java.util.Random r2;
+        byte $b1;
+        java.io.ObjectInputStream$GetField $r1;
+        int $i2;
+        double $d0;
+        boolean $z0;
+
+        r2 := @this: java.util.Random;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$GetField readFields()>();
+
+        $l0 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: long get(java.lang.String,long)>("seed", -1L);
+
+        $b1 = $l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $r4 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r4.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("Random: invalid seed");
+
+        throw $r4;
+
+     label1:
+        specialinvoke r2.<java.util.Random: void resetSeed(long)>($l0);
+
+        $d0 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: double get(java.lang.String,double)>("nextNextGaussian", 0.0);
+
+        r2.<java.util.Random: double nextNextGaussian> = $d0;
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("haveNextNextGaussian", 0);
+
+        r2.<java.util.Random: boolean haveNextNextGaussian> = $z0;
+
+        return;
+    }
+
+    private synchronized void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.util.concurrent.atomic.AtomicLong $r3;
+        java.io.ObjectOutputStream$PutField $r1;
+        java.io.ObjectOutputStream r0;
+        java.util.Random r2;
+        long $l0;
+        double $d0;
+        boolean $z0;
+
+        r2 := @this: java.util.Random;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutField putFields()>();
+
+        $r3 = r2.<java.util.Random: java.util.concurrent.atomic.AtomicLong seed>;
+
+        $l0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,long)>("seed", $l0);
+
+        $d0 = r2.<java.util.Random: double nextNextGaussian>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,double)>("nextNextGaussian", $d0);
+
+        $z0 = r2.<java.util.Random: boolean haveNextNextGaussian>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,boolean)>("haveNextNextGaussian", $z0);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeFields()>();
+
+        return;
+    }
+
+    private void resetSeed(long)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.atomic.AtomicLong $r1;
+        java.util.Random r0;
+        long l0, $l1;
+
+        r0 := @this: java.util.Random;
+
+        l0 := @parameter0: long;
+
+        $r2 = <java.util.Random: sun.misc.Unsafe unsafe>;
+
+        $l1 = <java.util.Random: long seedOffset>;
+
+        $r1 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(l0);
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putObjectVolatile(java.lang.Object,long,java.lang.Object)>(r0, $l1, $r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r8, $r10;
+        java.lang.Error $r13;
+        long $l0;
+        java.lang.reflect.Field $r11;
+        java.io.ObjectStreamField[] $r1;
+        java.lang.Exception $r12;
+        java.util.concurrent.atomic.AtomicLong $r0;
+        java.lang.Class $r3, $r5, $r7, $r9;
+        java.io.ObjectStreamField $r2, $r4, $r6;
+
+        <java.util.Random: java.lang.String BadSize> = "size must be non-negative";
+
+        <java.util.Random: java.lang.String BadRange> = "bound must be greater than origin";
+
+        <java.util.Random: java.lang.String BadBound> = "bound must be positive";
+
+        <java.util.Random: double DOUBLE_UNIT> = 1.1102230246251565E-16;
+
+        <java.util.Random: long mask> = 281474976710655L;
+
+        <java.util.Random: long addend> = 11L;
+
+        <java.util.Random: long multiplier> = 25214903917L;
+
+        <java.util.Random: long serialVersionUID> = 3905348978240129619L;
+
+        $r0 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(8682522807148012L);
+
+        <java.util.Random: java.util.concurrent.atomic.AtomicLong seedUniquifier> = $r0;
+
+        $r1 = newarray (java.io.ObjectStreamField)[3];
+
+        $r2 = new java.io.ObjectStreamField;
+
+        $r3 = <java.lang.Long: java.lang.Class TYPE>;
+
+        specialinvoke $r2.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("seed", $r3);
+
+        $r1[0] = $r2;
+
+        $r4 = new java.io.ObjectStreamField;
+
+        $r5 = <java.lang.Double: java.lang.Class TYPE>;
+
+        specialinvoke $r4.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("nextNextGaussian", $r5);
+
+        $r1[1] = $r4;
+
+        $r6 = new java.io.ObjectStreamField;
+
+        $r7 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        specialinvoke $r6.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("haveNextNextGaussian", $r7);
+
+        $r1[2] = $r6;
+
+        <java.util.Random: java.io.ObjectStreamField[] serialPersistentFields> = $r1;
+
+        $r8 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.Random: sun.misc.Unsafe unsafe> = $r8;
+
+     label1:
+        $r10 = <java.util.Random: sun.misc.Unsafe unsafe>;
+
+        $r9 = class "Ljava/util/Random;";
+
+        $r11 = virtualinvoke $r9.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("seed");
+
+        $l0 = virtualinvoke $r10.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r11);
+
+        <java.util.Random: long seedOffset> = $l0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.Error;
+
+        specialinvoke $r13.<java.lang.Error: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

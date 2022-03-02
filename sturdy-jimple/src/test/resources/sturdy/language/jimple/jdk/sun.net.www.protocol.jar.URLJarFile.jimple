@@ -1,0 +1,518 @@
+public class sun.net.www.protocol.jar.URLJarFile extends java.util.jar.JarFile
+{
+    private static sun.net.www.protocol.jar.URLJarFileCallBack callback;
+    private sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController;
+    private static int BUF_SIZE;
+    private java.util.jar.Manifest superMan;
+    private java.util.jar.Attributes superAttr;
+    private java.util.Map superEntries;
+
+    static java.util.jar.JarFile getJarFile(java.net.URL) throws java.io.IOException
+    {
+        java.util.jar.JarFile $r1;
+        java.net.URL r0;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile getJarFile(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>(r0, null);
+
+        return $r1;
+    }
+
+    static java.util.jar.JarFile getJarFile(java.net.URL, sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController) throws java.io.IOException
+    {
+        java.net.URL r0;
+        java.util.jar.JarFile $r2;
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController r1;
+        sun.net.www.protocol.jar.URLJarFile $r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController;
+
+        $z0 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: boolean isFileURL(java.net.URL)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.net.www.protocol.jar.URLJarFile;
+
+        specialinvoke $r3.<sun.net.www.protocol.jar.URLJarFile: void <init>(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>(r0, r1);
+
+        return $r3;
+
+     label1:
+        $r2 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile retrieve(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>(r0, r1);
+
+        return $r2;
+    }
+
+    public void <init>(java.io.File) throws java.io.IOException
+    {
+        sun.net.www.protocol.jar.URLJarFile r0;
+        java.io.File r1;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        r1 := @parameter0: java.io.File;
+
+        specialinvoke r0.<sun.net.www.protocol.jar.URLJarFile: void <init>(java.io.File,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>(r1, null);
+
+        return;
+    }
+
+    public void <init>(java.io.File, sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController) throws java.io.IOException
+    {
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController r2;
+        sun.net.www.protocol.jar.URLJarFile r0;
+        java.io.File r1;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        r1 := @parameter0: java.io.File;
+
+        r2 := @parameter1: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController;
+
+        specialinvoke r0.<java.util.jar.JarFile: void <init>(java.io.File,boolean,int)>(r1, 1, 5);
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController> = null;
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController> = r2;
+
+        return;
+    }
+
+    private void <init>(java.net.URL, sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController) throws java.io.IOException
+    {
+        java.net.URL r1;
+        java.lang.String $r2, $r3;
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController r4;
+        sun.net.www.protocol.jar.URLJarFile r0;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        r1 := @parameter0: java.net.URL;
+
+        r4 := @parameter1: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController;
+
+        $r2 = virtualinvoke r1.<java.net.URL: java.lang.String getFile()>();
+
+        $r3 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r2);
+
+        specialinvoke r0.<java.util.jar.JarFile: void <init>(java.lang.String)>($r3);
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController> = null;
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController> = r4;
+
+        return;
+    }
+
+    static boolean isFileURL(java.net.URL)
+    {
+        java.net.URL r0;
+        java.lang.String $r1, $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("file");
+
+        if $z0 == 0 goto label2;
+
+        $r2 = virtualinvoke r0.<java.net.URL: java.lang.String getHost()>();
+
+        if $r2 == null goto label1;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("~");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("localhost");
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    protected void finalize() throws java.io.IOException
+    {
+        sun.net.www.protocol.jar.URLJarFile r0;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        virtualinvoke r0.<sun.net.www.protocol.jar.URLJarFile: void close()>();
+
+        return;
+    }
+
+    public java.util.zip.ZipEntry getEntry(java.lang.String)
+    {
+        java.util.jar.JarEntry $r12;
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileEntry $r11;
+        java.lang.InternalError $r3;
+        java.lang.StringBuilder $r4, $r6, $r7, $r9;
+        java.lang.Class $r5, $r8;
+        java.lang.String r1, $r10;
+        sun.net.www.protocol.jar.URLJarFile r0;
+        java.util.zip.ZipEntry $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<java.util.jar.JarFile: java.util.zip.ZipEntry getEntry(java.lang.String)>(r1);
+
+        if $r2 == null goto label2;
+
+        $z0 = $r2 instanceof java.util.jar.JarEntry;
+
+        if $z0 == 0 goto label1;
+
+        $r11 = new sun.net.www.protocol.jar.URLJarFile$URLJarFileEntry;
+
+        $r12 = (java.util.jar.JarEntry) $r2;
+
+        specialinvoke $r11.<sun.net.www.protocol.jar.URLJarFile$URLJarFileEntry: void <init>(sun.net.www.protocol.jar.URLJarFile,java.util.jar.JarEntry)>(r0, $r12);
+
+        return $r11;
+
+     label1:
+        $r3 = new java.lang.InternalError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = specialinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" returned unexpected entry type ");
+
+        $r8 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>(java.lang.String)>($r10);
+
+        throw $r3;
+
+     label2:
+        return null;
+    }
+
+    public java.util.jar.Manifest getManifest() throws java.io.IOException
+    {
+        java.util.jar.Manifest $r1;
+        java.util.Map $r5, $r6, $r7, $r8, $r13;
+        java.lang.String r12;
+        sun.net.www.protocol.jar.URLJarFile r0;
+        boolean $z0, $z1;
+        java.util.Iterator $r10;
+        java.util.Set $r9;
+        java.util.jar.Attributes $r2, $r3, r15, $r17;
+        java.lang.Object $r4, $r11, $r14, $r16;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        $z0 = specialinvoke r0.<sun.net.www.protocol.jar.URLJarFile: boolean isSuperMan()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new java.util.jar.Manifest;
+
+        specialinvoke $r1.<java.util.jar.Manifest: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        $r3 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Attributes superAttr>;
+
+        $r4 = virtualinvoke $r3.<java.util.jar.Attributes: java.lang.Object clone()>();
+
+        $r5 = (java.util.Map) $r4;
+
+        virtualinvoke $r2.<java.util.jar.Attributes: void putAll(java.util.Map)>($r5);
+
+        $r6 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.Map superEntries>;
+
+        if $r6 == null goto label3;
+
+        $r7 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.Map getEntries()>();
+
+        $r8 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.Map superEntries>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.util.Set keySet()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.lang.String) $r11;
+
+        $r13 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.Map superEntries>;
+
+        $r14 = interfaceinvoke $r13.<java.util.Map: java.lang.Object get(java.lang.Object)>(r12);
+
+        r15 = (java.util.jar.Attributes) $r14;
+
+        $r16 = virtualinvoke r15.<java.util.jar.Attributes: java.lang.Object clone()>();
+
+        $r17 = (java.util.jar.Attributes) $r16;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r12, $r17);
+
+        goto label2;
+
+     label3:
+        return $r1;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController $r1, $r2;
+        sun.net.www.protocol.jar.URLJarFile r0;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        $r1 = r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController closeController>;
+
+        interfaceinvoke $r2.<sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController: void close(java.util.jar.JarFile)>(r0);
+
+     label1:
+        specialinvoke r0.<java.util.jar.JarFile: void close()>();
+
+        return;
+    }
+
+    private synchronized boolean isSuperMan() throws java.io.IOException
+    {
+        java.util.jar.Manifest $r1, $r2, $r3, $r5, $r7;
+        java.util.jar.Attributes $r4;
+        java.util.Map $r6;
+        sun.net.www.protocol.jar.URLJarFile r0;
+
+        r0 := @this: sun.net.www.protocol.jar.URLJarFile;
+
+        $r1 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Manifest superMan>;
+
+        if $r1 != null goto label1;
+
+        $r7 = specialinvoke r0.<java.util.jar.JarFile: java.util.jar.Manifest getManifest()>();
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Manifest superMan> = $r7;
+
+     label1:
+        $r2 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Manifest superMan>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Manifest superMan>;
+
+        $r4 = virtualinvoke $r3.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Attributes superAttr> = $r4;
+
+        $r5 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.jar.Manifest superMan>;
+
+        $r6 = virtualinvoke $r5.<java.util.jar.Manifest: java.util.Map getEntries()>();
+
+        r0.<sun.net.www.protocol.jar.URLJarFile: java.util.Map superEntries> = $r6;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static java.util.jar.JarFile retrieve(java.net.URL) throws java.io.IOException
+    {
+        java.util.jar.JarFile $r1;
+        java.net.URL r0;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile retrieve(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>(r0, null);
+
+        return $r1;
+    }
+
+    private static java.util.jar.JarFile retrieve(java.net.URL, sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController) throws java.io.IOException
+    {
+        java.lang.Throwable $r12, $r13, $r14, r16;
+        java.net.URL r1;
+        sun.net.www.protocol.jar.URLJarFileCallBack $r0, $r7;
+        java.util.jar.JarFile $r8, r17;
+        java.net.URLConnection $r2;
+        sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController r5;
+        java.security.PrivilegedActionException $r9;
+        java.io.IOException $r11;
+        sun.net.www.protocol.jar.URLJarFile$1 $r4;
+        java.lang.Exception $r10;
+        java.lang.Object $r6;
+        java.io.InputStream $r3;
+
+        r1 := @parameter0: java.net.URL;
+
+        r5 := @parameter1: sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController;
+
+        $r0 = <sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFileCallBack callback>;
+
+        if $r0 == null goto label01;
+
+        $r7 = <sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFileCallBack callback>;
+
+        $r8 = interfaceinvoke $r7.<sun.net.www.protocol.jar.URLJarFileCallBack: java.util.jar.JarFile retrieve(java.net.URL)>(r1);
+
+        return $r8;
+
+     label01:
+        $r2 = virtualinvoke r1.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        r16 = null;
+
+     label02:
+        $r4 = new sun.net.www.protocol.jar.URLJarFile$1;
+
+        specialinvoke $r4.<sun.net.www.protocol.jar.URLJarFile$1: void <init>(java.io.InputStream,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>($r3, r5);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r4);
+
+        r17 = (java.util.jar.JarFile) $r6;
+
+     label03:
+        if $r3 == null goto label13;
+
+        goto label04;
+
+     label04:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+        goto label13;
+
+     label05:
+        $r14 := @caughtexception;
+
+        r16 = $r14;
+
+        throw $r14;
+
+     label06:
+        $r13 := @caughtexception;
+
+     label07:
+        if $r3 == null goto label12;
+
+        if r16 == null goto label11;
+
+     label08:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        virtualinvoke r16.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r12);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label12:
+        throw $r13;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r9 := @caughtexception;
+
+        $r10 = virtualinvoke $r9.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r11 = (java.io.IOException) $r10;
+
+        throw $r11;
+
+     label15:
+        return r17;
+
+        catch java.lang.Throwable from label02 to label03 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.security.PrivilegedActionException from label01 to label13 with label14;
+    }
+
+    public static void setCallBack(sun.net.www.protocol.jar.URLJarFileCallBack)
+    {
+        sun.net.www.protocol.jar.URLJarFileCallBack r0;
+
+        r0 := @parameter0: sun.net.www.protocol.jar.URLJarFileCallBack;
+
+        <sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFileCallBack callback> = r0;
+
+        return;
+    }
+
+    static boolean access$000(sun.net.www.protocol.jar.URLJarFile) throws java.io.IOException
+    {
+        sun.net.www.protocol.jar.URLJarFile r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.net.www.protocol.jar.URLJarFile;
+
+        $z0 = specialinvoke r0.<sun.net.www.protocol.jar.URLJarFile: boolean isSuperMan()>();
+
+        return $z0;
+    }
+
+    static java.util.Map access$100(sun.net.www.protocol.jar.URLJarFile)
+    {
+        sun.net.www.protocol.jar.URLJarFile r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.net.www.protocol.jar.URLJarFile;
+
+        $r1 = r0.<sun.net.www.protocol.jar.URLJarFile: java.util.Map superEntries>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <sun.net.www.protocol.jar.URLJarFile: sun.net.www.protocol.jar.URLJarFileCallBack callback> = null;
+
+        <sun.net.www.protocol.jar.URLJarFile: int BUF_SIZE> = 2048;
+
+        return;
+    }
+}

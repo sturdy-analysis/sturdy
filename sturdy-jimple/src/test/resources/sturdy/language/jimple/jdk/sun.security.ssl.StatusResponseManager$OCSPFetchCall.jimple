@@ -1,0 +1,449 @@
+class sun.security.ssl.StatusResponseManager$OCSPFetchCall extends java.lang.Object implements java.util.concurrent.Callable
+{
+    sun.security.ssl.StatusResponseManager$StatusInfo statInfo;
+    sun.security.ssl.CertStatusExtension$OCSPStatusRequest ocspRequest;
+    java.util.List extensions;
+    java.util.List responderIds;
+    final sun.security.ssl.StatusResponseManager this$0;
+
+    public void <init>(sun.security.ssl.StatusResponseManager, sun.security.ssl.StatusResponseManager$StatusInfo, sun.security.ssl.CertStatusExtension$OCSPStatusRequest)
+    {
+        sun.security.ssl.StatusResponseManager$StatusInfo r2, $r4;
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall r0;
+        sun.security.ssl.StatusResponseManager r1;
+        java.util.List $r9, $r11;
+        java.lang.Object $r3, $r6;
+        sun.security.ssl.CertStatusExtension$OCSPStatusRequest r5, $r7, $r8, $r10;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        r1 := @parameter0: sun.security.ssl.StatusResponseManager;
+
+        r2 := @parameter1: sun.security.ssl.StatusResponseManager$StatusInfo;
+
+        r5 := @parameter2: sun.security.ssl.CertStatusExtension$OCSPStatusRequest;
+
+        r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "Null StatusInfo not allowed");
+
+        $r4 = (sun.security.ssl.StatusResponseManager$StatusInfo) $r3;
+
+        r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo> = $r4;
+
+        $r6 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r5, "Null OCSPStatusRequest not allowed");
+
+        $r7 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) $r6;
+
+        r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.CertStatusExtension$OCSPStatusRequest ocspRequest> = $r7;
+
+        $r8 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.CertStatusExtension$OCSPStatusRequest ocspRequest>;
+
+        $r9 = $r8.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List extensions>;
+
+        r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: java.util.List extensions> = $r9;
+
+        $r10 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.CertStatusExtension$OCSPStatusRequest ocspRequest>;
+
+        $r11 = $r10.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List responderIds>;
+
+        r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: java.util.List responderIds> = $r11;
+
+        return;
+    }
+
+    public sun.security.ssl.StatusResponseManager$StatusInfo call()
+    {
+        byte[] $r6;
+        java.math.BigInteger $r37;
+        java.lang.StringBuilder $r15, $r16, $r18, $r19, $r20, $r21, $r25, $r26, $r29, $r33, $r34, $r38;
+        java.lang.Object[] $r7, $r23, $r31, $r32, $r40, $r42;
+        sun.security.ssl.StatusResponseManager$ResponseCacheEntry $r8;
+        java.lang.String $r22, $r30, $r39;
+        java.io.IOException $r41;
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall r0;
+        sun.security.provider.certpath.CertId $r2, $r10, $r14, $r36;
+        java.net.URI $r5, $r28, $r44;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13;
+        sun.security.ssl.StatusResponseManager$StatusInfo $r1, $r4, $r9, $r12, $r13, $r27, $r35, $r43, $r45, $r50;
+        java.util.List $r3, $r24, $r47;
+        sun.security.provider.certpath.OCSPResponse$ResponseStatus $r17, $r48, $r49;
+        sun.security.ssl.StatusResponseManager $r11, $r46;
+        int $i0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $z10 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z10 == 0 goto label01;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Starting fetch for SN ");
+
+        $r35 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r36 = $r35.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.provider.certpath.CertId cid>;
+
+        $r37 = virtualinvoke $r36.<sun.security.provider.certpath.CertId: java.math.BigInteger getSerialNumber()>();
+
+        $r38 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r37);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r40 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r39, $r40);
+
+     label01:
+        $r43 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r44 = $r43.<sun.security.ssl.StatusResponseManager$StatusInfo: java.net.URI responder>;
+
+        if $r44 != null goto label04;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label02;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z9 == 0 goto label02;
+
+        $r32 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Null URI detected, OCSP fetch aborted", $r32);
+
+     label02:
+        $r45 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+     label03:
+        return $r45;
+
+     label04:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label05;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z7 == 0 goto label05;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempting fetch from ");
+
+        $r27 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r28 = $r27.<sun.security.ssl.StatusResponseManager$StatusInfo: java.net.URI responder>;
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r31 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r30, $r31);
+
+     label05:
+        $r46 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0>;
+
+        $z13 = staticinvoke <sun.security.ssl.StatusResponseManager: boolean access$000(sun.security.ssl.StatusResponseManager)>($r46);
+
+        if $z13 != 0 goto label06;
+
+        $r24 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: java.util.List responderIds>;
+
+        $z6 = interfaceinvoke $r24.<java.util.List: boolean isEmpty()>();
+
+        if $z6 != 0 goto label07;
+
+     label06:
+        $r47 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        goto label08;
+
+     label07:
+        $r47 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: java.util.List extensions>;
+
+     label08:
+        $r1 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r2 = $r1.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.provider.certpath.CertId cid>;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r2);
+
+        $r4 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r5 = $r4.<sun.security.ssl.StatusResponseManager$StatusInfo: java.net.URI responder>;
+
+        $r6 = staticinvoke <sun.security.provider.certpath.OCSP: byte[] getOCSPBytes(java.util.List,java.net.URI,java.util.List)>($r3, $r5, $r47);
+
+        if $r6 == null goto label10;
+
+        $r8 = new sun.security.ssl.StatusResponseManager$ResponseCacheEntry;
+
+        $r11 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0>;
+
+        $r9 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r10 = $r9.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.provider.certpath.CertId cid>;
+
+        specialinvoke $r8.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: void <init>(sun.security.ssl.StatusResponseManager,byte[],sun.security.provider.certpath.CertId)>($r11, $r6, $r10);
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label09;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z5 == 0 goto label09;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("OCSP Status: ");
+
+        $r17 = $r8.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: sun.security.provider.certpath.OCSPResponse$ResponseStatus status>;
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $i0 = lengthof $r6;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes)");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r22, $r23);
+
+     label09:
+        $r48 = $r8.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: sun.security.provider.certpath.OCSPResponse$ResponseStatus status>;
+
+        $r49 = <sun.security.provider.certpath.OCSPResponse$ResponseStatus: sun.security.provider.certpath.OCSPResponse$ResponseStatus SUCCESSFUL>;
+
+        if $r48 != $r49 goto label11;
+
+        $r12 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r12.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.ssl.StatusResponseManager$ResponseCacheEntry responseData> = $r8;
+
+        $r13 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        $r14 = $r13.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.provider.certpath.CertId cid>;
+
+        specialinvoke r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: void addToCache(sun.security.provider.certpath.CertId,sun.security.ssl.StatusResponseManager$ResponseCacheEntry)>($r14, $r8);
+
+        goto label11;
+
+     label10:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label11;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z3 == 0 goto label11;
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No data returned from OCSP Responder", $r7);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r41 := @caughtexception;
+
+        $z11 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z11 == 0 goto label13;
+
+        $z12 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z12 == 0 goto label13;
+
+        $r42 = newarray (java.lang.Object)[1];
+
+        $r42[0] = $r41;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Caught exception: ", $r42);
+
+     label13:
+        $r50 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo statInfo>;
+
+        return $r50;
+
+        catch java.io.IOException from label01 to label03 with label12;
+        catch java.io.IOException from label04 to label11 with label12;
+    }
+
+    private void addToCache(sun.security.provider.certpath.CertId, sun.security.ssl.StatusResponseManager$ResponseCacheEntry)
+    {
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall r2;
+        java.lang.Object[] $r12, $r14;
+        sun.security.provider.certpath.CertId r5;
+        java.util.Date $r1;
+        sun.security.ssl.StatusResponseManager $r3, $r13;
+        int $i0;
+        sun.security.ssl.StatusResponseManager$ResponseCacheEntry r0;
+        java.math.BigInteger $r8;
+        java.lang.String $r11;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.util.Cache $r4;
+        java.lang.StringBuilder $r6, $r7, $r9, $r10;
+
+        r2 := @this: sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        r5 := @parameter0: sun.security.provider.certpath.CertId;
+
+        r0 := @parameter1: sun.security.ssl.StatusResponseManager$ResponseCacheEntry;
+
+        $r1 = r0.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: java.util.Date nextUpdate>;
+
+        if $r1 != null goto label1;
+
+        $r13 = r2.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0>;
+
+        $i0 = staticinvoke <sun.security.ssl.StatusResponseManager: int access$100(sun.security.ssl.StatusResponseManager)>($r13);
+
+        if $i0 != 0 goto label1;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label2;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z3 == 0 goto label2;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Not caching this OCSP response", $r14);
+
+        goto label2;
+
+     label1:
+        $r3 = r2.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0>;
+
+        $r4 = staticinvoke <sun.security.ssl.StatusResponseManager: sun.security.util.Cache access$200(sun.security.ssl.StatusResponseManager)>($r3);
+
+        virtualinvoke $r4.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>(r5, r0);
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Added response for SN ");
+
+        $r8 = virtualinvoke r5.<sun.security.provider.certpath.CertId: java.math.BigInteger getSerialNumber()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to cache");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r11, $r12);
+
+     label2:
+        return;
+    }
+
+    private long getNextTaskDelay(java.util.Date)
+    {
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall r0;
+        java.util.Date r2;
+        long $l1, $l2, $l3, l4, $l5, $l6, l7, $l8;
+        sun.security.ssl.StatusResponseManager $r1;
+        int $i0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        r2 := @parameter0: java.util.Date;
+
+        $r1 = r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager this$0>;
+
+        $i0 = virtualinvoke $r1.<sun.security.ssl.StatusResponseManager: int getCacheLifetime()>();
+
+        if r2 == null goto label3;
+
+        $l1 = virtualinvoke r2.<java.util.Date: long getTime()>();
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = $l1 - $l2;
+
+        l4 = $l3 / 1000L;
+
+        if $i0 <= 0 goto label1;
+
+        $l5 = (long) $i0;
+
+        $l6 = staticinvoke <java.lang.Long: long min(long,long)>(l4, $l5);
+
+        goto label2;
+
+     label1:
+        $l6 = l4;
+
+     label2:
+        l7 = $l6;
+
+        goto label6;
+
+     label3:
+        if $i0 <= 0 goto label4;
+
+        $l8 = (long) $i0;
+
+        goto label5;
+
+     label4:
+        $l8 = -1L;
+
+     label5:
+        l7 = $l8;
+
+     label6:
+        return l7;
+    }
+
+    public volatile java.lang.Object call() throws java.lang.Exception
+    {
+        sun.security.ssl.StatusResponseManager$StatusInfo $r1;
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall r0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: sun.security.ssl.StatusResponseManager$StatusInfo call()>();
+
+        return $r1;
+    }
+}

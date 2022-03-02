@@ -1,0 +1,756 @@
+abstract class sun.security.ssl.InputRecord extends java.lang.Object implements sun.security.ssl.Record, java.io.Closeable
+{
+    sun.security.ssl.SSLCipher$SSLReadCipher readCipher;
+    sun.security.ssl.TransportContext tc;
+    final sun.security.ssl.HandshakeHash handshakeHash;
+    boolean isClosed;
+    sun.security.ssl.ProtocolVersion helloVersion;
+    int fragmentSize;
+
+    void <init>(sun.security.ssl.HandshakeHash, sun.security.ssl.SSLCipher$SSLReadCipher)
+    {
+        sun.security.ssl.HandshakeHash r3;
+        sun.security.ssl.InputRecord r0;
+        sun.security.ssl.ProtocolVersion $r2;
+        sun.security.ssl.SSLCipher$SSLReadCipher r1;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        r3 := @parameter0: sun.security.ssl.HandshakeHash;
+
+        r1 := @parameter1: sun.security.ssl.SSLCipher$SSLReadCipher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.InputRecord: sun.security.ssl.SSLCipher$SSLReadCipher readCipher> = r1;
+
+        $r2 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion TLS10>;
+
+        r0.<sun.security.ssl.InputRecord: sun.security.ssl.ProtocolVersion helloVersion> = $r2;
+
+        r0.<sun.security.ssl.InputRecord: sun.security.ssl.HandshakeHash handshakeHash> = r3;
+
+        r0.<sun.security.ssl.InputRecord: boolean isClosed> = 0;
+
+        r0.<sun.security.ssl.InputRecord: int fragmentSize> = 16384;
+
+        return;
+    }
+
+    void setHelloVersion(sun.security.ssl.ProtocolVersion)
+    {
+        sun.security.ssl.InputRecord r0;
+        sun.security.ssl.ProtocolVersion r1;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        r1 := @parameter0: sun.security.ssl.ProtocolVersion;
+
+        r0.<sun.security.ssl.InputRecord: sun.security.ssl.ProtocolVersion helloVersion> = r1;
+
+        return;
+    }
+
+    boolean seqNumIsHuge()
+    {
+        sun.security.ssl.Authenticator $r2, $r4;
+        sun.security.ssl.InputRecord r0;
+        sun.security.ssl.SSLCipher$SSLReadCipher $r1, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        $r1 = r0.<sun.security.ssl.InputRecord: sun.security.ssl.SSLCipher$SSLReadCipher readCipher>;
+
+        $r2 = $r1.<sun.security.ssl.SSLCipher$SSLReadCipher: sun.security.ssl.Authenticator authenticator>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.security.ssl.InputRecord: sun.security.ssl.SSLCipher$SSLReadCipher readCipher>;
+
+        $r4 = $r3.<sun.security.ssl.SSLCipher$SSLReadCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $z0 = virtualinvoke $r4.<sun.security.ssl.Authenticator: boolean seqNumIsHuge()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    boolean isEmpty()
+    {
+        sun.security.ssl.InputRecord r0;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        return 0;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        sun.security.ssl.InputRecord r0;
+        sun.security.ssl.SSLCipher$SSLReadCipher $r1;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        $z0 = r0.<sun.security.ssl.InputRecord: boolean isClosed>;
+
+        if $z0 != 0 goto label1;
+
+        r0.<sun.security.ssl.InputRecord: boolean isClosed> = 1;
+
+        $r1 = r0.<sun.security.ssl.InputRecord: sun.security.ssl.SSLCipher$SSLReadCipher readCipher>;
+
+        virtualinvoke $r1.<sun.security.ssl.SSLCipher$SSLReadCipher: void dispose()>();
+
+     label1:
+        return;
+    }
+
+    synchronized boolean isClosed()
+    {
+        sun.security.ssl.InputRecord r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        $z0 = r0.<sun.security.ssl.InputRecord: boolean isClosed>;
+
+        return $z0;
+    }
+
+    void changeReadCiphers(sun.security.ssl.SSLCipher$SSLReadCipher)
+    {
+        sun.security.ssl.InputRecord r1;
+        sun.security.ssl.SSLCipher$SSLReadCipher r0;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        r0 := @parameter0: sun.security.ssl.SSLCipher$SSLReadCipher;
+
+        virtualinvoke r0.<sun.security.ssl.SSLCipher$SSLReadCipher: void dispose()>();
+
+        r1.<sun.security.ssl.InputRecord: sun.security.ssl.SSLCipher$SSLReadCipher readCipher> = r0;
+
+        return;
+    }
+
+    void changeFragmentSize(int)
+    {
+        int i0;
+        sun.security.ssl.InputRecord r0;
+
+        r0 := @this: sun.security.ssl.InputRecord;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.security.ssl.InputRecord: int fragmentSize> = i0;
+
+        return;
+    }
+
+    int bytesInCompletePacket(java.nio.ByteBuffer[], int, int) throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        java.nio.ByteBuffer[] r2;
+        int i0, i1;
+        sun.security.ssl.InputRecord r1;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        r2 := @parameter0: java.nio.ByteBuffer[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not supported yet.");
+
+        throw $r0;
+    }
+
+    int bytesInCompletePacket() throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.ssl.InputRecord r1;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    void setReceiverStream(java.io.InputStream)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.ssl.InputRecord r1;
+        java.io.InputStream r2;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    abstract sun.security.ssl.Plaintext[] decode(java.nio.ByteBuffer[], int, int) throws java.io.IOException, javax.crypto.BadPaddingException;
+
+    void setDeliverStream(java.io.OutputStream)
+    {
+        java.io.OutputStream r2;
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.ssl.InputRecord r1;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    int estimateFragmentSize(int)
+    {
+        int i0;
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.ssl.InputRecord r1;
+
+        r1 := @this: sun.security.ssl.InputRecord;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    static java.nio.ByteBuffer convertToClientHello(java.nio.ByteBuffer)
+    {
+        byte[] r1;
+        byte $b1, $b2, $b3, $b9, $b10, $b11, $b14, $b17, $b20, $b23, $b26, $b33, $b39, $b43, $b45, $b48, $b50, $b53, $b56, $b58, $b61, $b62, $b63;
+        sun.security.ssl.ContentType $r2;
+        short $s4, $s12, $s15, $s18, $s21, $s24, $s27, $s85, $s87, $s89, $s91, $s93, $s95, $s97;
+        java.nio.ByteBuffer r0, $r3;
+        int $i0, $i5, $i6, i7, $i8, $i13, i16, $i19, i22, $i25, i28, $i29, $i30, $i31, i32, $i34, $i35, $i36, $i37, $i38, $i40, $i41, $i42, $i44, $i46, $i47, $i49, $i51, $i52, $i54, $i55, $i57, $i59, $i60, $i64, $i65, $i66, $i67, i68, i69, i70, i71, i72, i73, i74, i75, i76, i77, i78, i79, i80, i81, i82, i83, $i84, $i86, $i88, $i90, $i92, $i94, $i96, $i98;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $b1 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b2 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b3 = $b1 & 127;
+
+        $i84 = (int) $b3;
+
+        $i5 = $i84 << 8;
+
+        $s85 = (short) $b2;
+
+        $s4 = $s85 & 255;
+
+        $i86 = (int) $s4;
+
+        $i6 = $i5 | $i86;
+
+        i7 = $i6 + 2;
+
+        $i8 = $i0 + 3;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i8);
+
+        $b9 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b10 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b11 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s87 = (short) $b11;
+
+        $s12 = $s87 & 255;
+
+        $i88 = (int) $s12;
+
+        $i13 = $i88 << 8;
+
+        $b14 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s89 = (short) $b14;
+
+        $s15 = $s89 & 255;
+
+        $i90 = (int) $s15;
+
+        i16 = $i13 + $i90;
+
+        $b17 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s91 = (short) $b17;
+
+        $s18 = $s91 & 255;
+
+        $i92 = (int) $s18;
+
+        $i19 = $i92 << 8;
+
+        $b20 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s93 = (short) $b20;
+
+        $s21 = $s93 & 255;
+
+        $i94 = (int) $s21;
+
+        i22 = $i19 + $i94;
+
+        $b23 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s95 = (short) $b23;
+
+        $s24 = $s95 & 255;
+
+        $i96 = (int) $s24;
+
+        $i25 = $i96 << 8;
+
+        $b26 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s97 = (short) $b26;
+
+        $s27 = $s97 & 255;
+
+        $i98 = (int) $s27;
+
+        i28 = $i25 + $i98;
+
+        $i31 = 48 + i22;
+
+        $i29 = i16 * 2;
+
+        $i30 = $i29 / 3;
+
+        i32 = $i31 + $i30;
+
+        r1 = newarray (byte)[i32];
+
+        $r2 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType HANDSHAKE>;
+
+        $b33 = $r2.<sun.security.ssl.ContentType: byte id>;
+
+        r1[0] = $b33;
+
+        r1[1] = $b9;
+
+        r1[2] = $b10;
+
+        r1[5] = 1;
+
+        r1[9] = $b9;
+
+        r1[10] = $b10;
+
+        i68 = 11;
+
+        $i34 = $i0 + 11;
+
+        $i35 = $i34 + i16;
+
+        i69 = $i35 + i22;
+
+        if i28 >= 32 goto label3;
+
+        i70 = 0;
+
+     label1:
+        $i64 = 32 - i28;
+
+        if i70 >= $i64 goto label2;
+
+        $i67 = i68;
+
+        i68 = i68 + 1;
+
+        r1[$i67] = 0;
+
+        i70 = i70 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i69);
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r1, i68, i28);
+
+        i71 = i68 + i28;
+
+        goto label4;
+
+     label3:
+        $i36 = i69 + i28;
+
+        $i37 = $i36 - 32;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i37);
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r1, 11, 32);
+
+        i71 = 43;
+
+     label4:
+        $i65 = i69 - i22;
+
+        i72 = i71 + 1;
+
+        $i38 = i22 & 255;
+
+        $b39 = (byte) $i38;
+
+        r1[i71] = $b39;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i65);
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r1, i72, i22);
+
+        $i66 = $i65 - i16;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i66);
+
+        i73 = i72 + 2;
+
+        i74 = 0;
+
+     label5:
+        if i74 >= i16 goto label8;
+
+        $b61 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        if $b61 == 0 goto label6;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        goto label7;
+
+     label6:
+        i75 = i73 + 1;
+
+        $b62 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        r1[i73] = $b62;
+
+        i73 = i75 + 1;
+
+        $b63 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        r1[i75] = $b63;
+
+     label7:
+        i74 = i74 + 3;
+
+        goto label5;
+
+     label8:
+        $i40 = i72 + 2;
+
+        i76 = i73 - $i40;
+
+        i77 = i72 + 1;
+
+        $i41 = i76 >>> 8;
+
+        $i42 = $i41 & 255;
+
+        $b43 = (byte) $i42;
+
+        r1[i72] = $b43;
+
+        i78 = i77 + 1;
+
+        $i44 = i76 & 255;
+
+        $b45 = (byte) $i44;
+
+        r1[i77] = $b45;
+
+        i79 = i78 + i76;
+
+        i80 = i79 + 1;
+
+        r1[i79] = 1;
+
+        i81 = i80 + 1;
+
+        r1[i80] = 0;
+
+        i82 = i81 - 5;
+
+        $i46 = i82 >>> 8;
+
+        $i47 = $i46 & 255;
+
+        $b48 = (byte) $i47;
+
+        r1[3] = $b48;
+
+        $i49 = i82 & 255;
+
+        $b50 = (byte) $i49;
+
+        r1[4] = $b50;
+
+        i83 = i81 - 9;
+
+        $i51 = i83 >>> 16;
+
+        $i52 = $i51 & 255;
+
+        $b53 = (byte) $i52;
+
+        r1[6] = $b53;
+
+        $i54 = i83 >>> 8;
+
+        $i55 = $i54 & 255;
+
+        $b56 = (byte) $i55;
+
+        r1[7] = $b56;
+
+        $i57 = i83 & 255;
+
+        $b58 = (byte) $i57;
+
+        r1[8] = $b58;
+
+        $i59 = $i0 + i7;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i59);
+
+        $i60 = i81 - 5;
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r1, 5, $i60);
+
+        return $r3;
+    }
+
+    static java.nio.ByteBuffer extract(java.nio.ByteBuffer[], int, int, int)
+    {
+        byte[] r11;
+        java.nio.ByteBuffer $r0, $r2, $r3, $r4, $r6, $r8, $r9, $r10;
+        byte $b12;
+        boolean $z0, z1;
+        java.nio.ByteBuffer[] r1;
+        short $s15, $s16, $s29, $s31;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, $i14, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, $i28, $i30, $i32;
+        java.nio.BufferUnderflowException $r12, $r13;
+
+        r1 := @parameter0: java.nio.ByteBuffer[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        z1 = 0;
+
+        $i28 = (int) -1;
+
+        i17 = $i28;
+
+        i18 = i0;
+
+        i19 = 0;
+
+     label01:
+        $i2 = i0 + i1;
+
+        if i18 >= $i2 goto label06;
+
+        if i19 >= i3 goto label06;
+
+        $r8 = r1[i18];
+
+        $i9 = virtualinvoke $r8.<java.nio.ByteBuffer: int remaining()>();
+
+        $r9 = r1[i18];
+
+        $i10 = virtualinvoke $r9.<java.nio.ByteBuffer: int position()>();
+
+        i20 = 0;
+
+     label02:
+        if i20 >= $i9 goto label05;
+
+        if i19 >= i3 goto label05;
+
+        $r10 = r1[i18];
+
+        $i11 = $i10 + i20;
+
+        $b12 = virtualinvoke $r10.<java.nio.ByteBuffer: byte get(int)>($i11);
+
+        $i13 = i3 - 2;
+
+        if i19 != $i13 goto label03;
+
+        $s29 = (short) $b12;
+
+        $s16 = $s29 & 255;
+
+        $i30 = (int) $s16;
+
+        i17 = $i30 << 8;
+
+        goto label04;
+
+     label03:
+        $i14 = i3 - 1;
+
+        if i19 != $i14 goto label04;
+
+        $s31 = (short) $b12;
+
+        $s15 = $s31 & 255;
+
+        $i32 = (int) $s15;
+
+        i17 = i17 | $i32;
+
+        z1 = 1;
+
+        goto label05;
+
+     label04:
+        i19 = i19 + 1;
+
+        i20 = i20 + 1;
+
+        goto label02;
+
+     label05:
+        i18 = i18 + 1;
+
+        goto label01;
+
+     label06:
+        if z1 != 0 goto label07;
+
+        $r12 = new java.nio.BufferUnderflowException;
+
+        specialinvoke $r12.<java.nio.BufferUnderflowException: void <init>()>();
+
+        throw $r12;
+
+     label07:
+        i21 = i3 + i17;
+
+        i22 = 0;
+
+        i23 = i0;
+
+     label08:
+        $i4 = i0 + i1;
+
+        if i23 >= $i4 goto label10;
+
+        $r6 = r1[i23];
+
+        $i8 = virtualinvoke $r6.<java.nio.ByteBuffer: int remaining()>();
+
+        i22 = i22 + $i8;
+
+        if i22 < i21 goto label09;
+
+        goto label10;
+
+     label09:
+        i23 = i23 + 1;
+
+        goto label08;
+
+     label10:
+        if i22 >= i21 goto label11;
+
+        $r13 = new java.nio.BufferUnderflowException;
+
+        specialinvoke $r13.<java.nio.BufferUnderflowException: void <init>()>();
+
+        throw $r13;
+
+     label11:
+        r11 = newarray (byte)[i21];
+
+        i24 = 0;
+
+        i25 = i21;
+
+        i26 = i0;
+
+     label12:
+        $i5 = i0 + i1;
+
+        if i26 >= $i5 goto label15;
+
+        $r2 = r1[i26];
+
+        $z0 = virtualinvoke $r2.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z0 == 0 goto label13;
+
+        $r3 = r1[i26];
+
+        $i6 = virtualinvoke $r3.<java.nio.ByteBuffer: int remaining()>();
+
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>(i25, $i6);
+
+        $r4 = r1[i26];
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r11, i24, $i7);
+
+        i24 = i24 + $i7;
+
+        i25 = i25 - $i7;
+
+     label13:
+        if i25 > 0 goto label14;
+
+        goto label15;
+
+     label14:
+        i26 = i26 + 1;
+
+        goto label12;
+
+     label15:
+        $r0 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r11);
+
+        return $r0;
+    }
+}

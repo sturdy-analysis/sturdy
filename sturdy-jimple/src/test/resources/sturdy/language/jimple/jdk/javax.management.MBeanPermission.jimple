@@ -1,0 +1,3755 @@
+public class javax.management.MBeanPermission extends java.security.Permission
+{
+    private static final long serialVersionUID;
+    private static final int AddNotificationListener;
+    private static final int GetAttribute;
+    private static final int GetClassLoader;
+    private static final int GetClassLoaderFor;
+    private static final int GetClassLoaderRepository;
+    private static final int GetDomains;
+    private static final int GetMBeanInfo;
+    private static final int GetObjectInstance;
+    private static final int Instantiate;
+    private static final int Invoke;
+    private static final int IsInstanceOf;
+    private static final int QueryMBeans;
+    private static final int QueryNames;
+    private static final int RegisterMBean;
+    private static final int RemoveNotificationListener;
+    private static final int SetAttribute;
+    private static final int UnregisterMBean;
+    private static final int NONE;
+    private static final int ALL;
+    private java.lang.String actions;
+    private transient int mask;
+    private transient java.lang.String classNamePrefix;
+    private transient boolean classNameExactMatch;
+    private transient java.lang.String member;
+    private transient javax.management.ObjectName objectName;
+
+    private void parseActions()
+    {
+        javax.management.MBeanPermission r0;
+        java.lang.IllegalArgumentException $r4, $r5, $r6, $r7;
+        int $i0, $i1;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        $r1 = r0.<javax.management.MBeanPermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanPermission: actions can\'t be null");
+
+        throw $r7;
+
+     label1:
+        $r2 = r0.<javax.management.MBeanPermission: java.lang.String actions>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanPermission: actions can\'t be empty");
+
+        throw $r6;
+
+     label2:
+        $r3 = r0.<javax.management.MBeanPermission: java.lang.String actions>;
+
+        $i0 = staticinvoke <javax.management.MBeanPermission: int getMask(java.lang.String)>($r3);
+
+        $i1 = $i0 & 131071;
+
+        if $i1 == $i0 goto label3;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid actions mask");
+
+        throw $r5;
+
+     label3:
+        if $i0 != 0 goto label4;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid actions mask");
+
+        throw $r4;
+
+     label4:
+        r0.<javax.management.MBeanPermission: int mask> = $i0;
+
+        return;
+    }
+
+    private void parseName()
+    {
+        javax.management.MBeanPermission r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i9;
+        java.lang.String $r1, $r2, $r4, r12;
+        boolean $z0, $z1, $z2, $z3;
+        javax.management.ObjectName $r5, $r7, $r16;
+        java.lang.IllegalArgumentException $r13, $r14, $r15, $r17;
+        javax.management.MalformedObjectNameException $r10;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        $r1 = virtualinvoke r0.<javax.management.MBeanPermission: java.lang.String getName()>();
+
+        r12 = $r1;
+
+        if $r1 != null goto label01;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanPermission name cannot be null");
+
+        throw $r13;
+
+     label01:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label02;
+
+        $r14 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanPermission name cannot be empty");
+
+        throw $r14;
+
+     label02:
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("[");
+
+        $i7 = (int) -1;
+
+        if $i0 != $i7 goto label03;
+
+        $r7 = <javax.management.ObjectName: javax.management.ObjectName WILDCARD>;
+
+        r0.<javax.management.MBeanPermission: javax.management.ObjectName objectName> = $r7;
+
+        goto label10;
+
+     label03:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("]");
+
+        if $z1 != 0 goto label04;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanPermission: The ObjectName in the target name must be included in square brackets");
+
+        throw $r15;
+
+     label04:
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i3 = $i2 - 1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i1, $i3);
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 == 0 goto label05;
+
+        $r5 = <javax.management.ObjectName: javax.management.ObjectName WILDCARD>;
+
+        r0.<javax.management.MBeanPermission: javax.management.ObjectName objectName> = $r5;
+
+        goto label07;
+
+     label05:
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-");
+
+        if $z3 == 0 goto label06;
+
+        r0.<javax.management.MBeanPermission: javax.management.ObjectName objectName> = null;
+
+        goto label07;
+
+     label06:
+        $r16 = new javax.management.ObjectName;
+
+        specialinvoke $r16.<javax.management.ObjectName: void <init>(java.lang.String)>($r2);
+
+        r0.<javax.management.MBeanPermission: javax.management.ObjectName objectName> = $r16;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r10 := @caughtexception;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>("MBeanPermission: The target name does not specify a valid ObjectName", $r10);
+
+        throw $r17;
+
+     label09:
+        r12 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label10:
+        $i4 = virtualinvoke r12.<java.lang.String: int indexOf(java.lang.String)>("#");
+
+        $i9 = (int) -1;
+
+        if $i4 != $i9 goto label11;
+
+        specialinvoke r0.<javax.management.MBeanPermission: void setMember(java.lang.String)>("*");
+
+        goto label12;
+
+     label11:
+        $i5 = $i4 + 1;
+
+        $r4 = virtualinvoke r12.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        specialinvoke r0.<javax.management.MBeanPermission: void setMember(java.lang.String)>($r4);
+
+        r12 = virtualinvoke r12.<java.lang.String: java.lang.String substring(int,int)>(0, $i4);
+
+     label12:
+        specialinvoke r0.<javax.management.MBeanPermission: void setClassName(java.lang.String)>(r12);
+
+        return;
+
+        catch javax.management.MalformedObjectNameException from label04 to label07 with label08;
+    }
+
+    private void initName(java.lang.String, java.lang.String, javax.management.ObjectName)
+    {
+        javax.management.MBeanPermission r0;
+        java.lang.String r1, r2;
+        javax.management.ObjectName r3;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: javax.management.ObjectName;
+
+        specialinvoke r0.<javax.management.MBeanPermission: void setClassName(java.lang.String)>(r1);
+
+        specialinvoke r0.<javax.management.MBeanPermission: void setMember(java.lang.String)>(r2);
+
+        r0.<javax.management.MBeanPermission: javax.management.ObjectName objectName> = r3;
+
+        return;
+    }
+
+    private void setClassName(java.lang.String)
+    {
+        javax.management.MBeanPermission r1;
+        int $i0, $i1;
+        java.lang.String r0, $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: javax.management.MBeanPermission;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("-");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix> = null;
+
+        r1.<javax.management.MBeanPermission: boolean classNameExactMatch> = 0;
+
+        goto label6;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix> = "";
+
+        r1.<javax.management.MBeanPermission: boolean classNameExactMatch> = 0;
+
+        goto label6;
+
+     label4:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>(".*");
+
+        if $z3 == 0 goto label5;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix> = $r2;
+
+        r1.<javax.management.MBeanPermission: boolean classNameExactMatch> = 0;
+
+        goto label6;
+
+     label5:
+        r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix> = r0;
+
+        r1.<javax.management.MBeanPermission: boolean classNameExactMatch> = 1;
+
+     label6:
+        return;
+    }
+
+    private void setMember(java.lang.String)
+    {
+        javax.management.MBeanPermission r1;
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.management.MBeanPermission;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("-");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r1.<javax.management.MBeanPermission: java.lang.String member> = null;
+
+        goto label4;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 == 0 goto label3;
+
+        r1.<javax.management.MBeanPermission: java.lang.String member> = "*";
+
+        goto label4;
+
+     label3:
+        r1.<javax.management.MBeanPermission: java.lang.String member> = r0;
+
+     label4:
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        javax.management.MBeanPermission r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>(r1);
+
+        specialinvoke r0.<javax.management.MBeanPermission: void parseName()>();
+
+        r0.<javax.management.MBeanPermission: java.lang.String actions> = r2;
+
+        specialinvoke r0.<javax.management.MBeanPermission: void parseActions()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String, javax.management.ObjectName, java.lang.String)
+    {
+        javax.management.MBeanPermission r0;
+        java.lang.String r1, r2, $r4, r5;
+        javax.management.ObjectName r3;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: javax.management.ObjectName;
+
+        r5 := @parameter3: java.lang.String;
+
+        $r4 = staticinvoke <javax.management.MBeanPermission: java.lang.String makeName(java.lang.String,java.lang.String,javax.management.ObjectName)>(r1, r2, r3);
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>($r4);
+
+        specialinvoke r0.<javax.management.MBeanPermission: void initName(java.lang.String,java.lang.String,javax.management.ObjectName)>(r1, r2, r3);
+
+        r0.<javax.management.MBeanPermission: java.lang.String actions> = r5;
+
+        specialinvoke r0.<javax.management.MBeanPermission: void parseActions()>();
+
+        return;
+    }
+
+    private static java.lang.String makeName(java.lang.String, java.lang.String, javax.management.ObjectName)
+    {
+        javax.management.ObjectName r5;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r2, $r3, $r6, $r8;
+        java.lang.String $r4, $r7, $r9, r10, r11;
+
+        r10 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: javax.management.ObjectName;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        if r10 != null goto label1;
+
+        r10 = "-";
+
+     label1:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r10);
+
+        if r11 != null goto label2;
+
+        r11 = "-";
+
+     label2:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("#");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        if r5 != null goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[-]");
+
+        goto label4;
+
+     label3:
+        $r6 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r7 = virtualinvoke r5.<javax.management.ObjectName: java.lang.String getCanonicalName()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+     label4:
+        $i0 = virtualinvoke $r0.<java.lang.StringBuilder: int length()>();
+
+        if $i0 != 0 goto label5;
+
+        return "*";
+
+     label5:
+        $r9 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    public java.lang.String getActions()
+    {
+        int $i0;
+        javax.management.MBeanPermission r0;
+        java.lang.String $r1, $r2, $r3;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        $r1 = r0.<javax.management.MBeanPermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<javax.management.MBeanPermission: int mask>;
+
+        $r3 = staticinvoke <javax.management.MBeanPermission: java.lang.String getActions(int)>($i0);
+
+        r0.<javax.management.MBeanPermission: java.lang.String actions> = $r3;
+
+     label1:
+        $r2 = r0.<javax.management.MBeanPermission: java.lang.String actions>;
+
+        return $r2;
+    }
+
+    private static java.lang.String getActions(int)
+    {
+        boolean z0, z1, z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13, z14, z15, z16;
+        java.lang.StringBuilder $r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i19, $i21;
+        java.lang.String $r1;
+
+        i0 := @parameter0: int;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        z0 = 0;
+
+        z16 = 0;
+
+        z15 = 0;
+
+        z14 = 0;
+
+        z13 = 0;
+
+        z12 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $i1 = i0 & 1;
+
+        if $i1 != 1 goto label01;
+
+        z0 = 1;
+
+        z16 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z12 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("addNotificationListener");
+
+     label01:
+        $i2 = i0 & 2;
+
+        if $i2 != 2 goto label04;
+
+        if z9 == 0 goto label02;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label03;
+
+     label02:
+        z0 = 1;
+
+        z16 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z12 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label03:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getAttribute");
+
+     label04:
+        $i3 = i0 & 4;
+
+        if $i3 != 4 goto label07;
+
+        if z7 == 0 goto label05;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label06;
+
+     label05:
+        z0 = 1;
+
+        z16 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z12 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z8 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label06:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getClassLoader");
+
+     label07:
+        $i4 = i0 & 8;
+
+        if $i4 != 8 goto label10;
+
+        if z16 == 0 goto label08;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label09;
+
+     label08:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z12 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z8 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label09:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getClassLoaderFor");
+
+     label10:
+        $i5 = i0 & 16;
+
+        if $i5 != 16 goto label13;
+
+        if z12 == 0 goto label11;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label12;
+
+     label11:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z8 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label12:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getClassLoaderRepository");
+
+     label13:
+        $i6 = i0 & 32;
+
+        if $i6 != 32 goto label16;
+
+        if z1 == 0 goto label14;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label15;
+
+     label14:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z8 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label15:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getDomains");
+
+     label16:
+        $i7 = i0 & 64;
+
+        if $i7 != 64 goto label19;
+
+        if z10 == 0 goto label17;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label18;
+
+     label17:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z11 = 1;
+
+        z8 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label18:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getMBeanInfo");
+
+     label19:
+        $i8 = i0 & 128;
+
+        if $i8 != 128 goto label22;
+
+        if z6 == 0 goto label20;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label21;
+
+     label20:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z11 = 1;
+
+        z8 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label21:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getObjectInstance");
+
+     label22:
+        $i9 = i0 & 256;
+
+        if $i9 != 256 goto label25;
+
+        if z11 == 0 goto label23;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label24;
+
+     label23:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        z8 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label24:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("instantiate");
+
+     label25:
+        $i10 = i0 & 512;
+
+        if $i10 != 512 goto label28;
+
+        if z13 == 0 goto label26;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label27;
+
+     label26:
+        z0 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+        z8 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label27:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invoke");
+
+     label28:
+        $i11 = i0 & 1024;
+
+        if $i11 != 1024 goto label31;
+
+        if z15 == 0 goto label29;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label30;
+
+     label29:
+        z0 = 1;
+
+        z14 = 1;
+
+        z8 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label30:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("isInstanceOf");
+
+     label31:
+        $i12 = i0 & 2048;
+
+        if $i12 != 2048 goto label34;
+
+        if z2 == 0 goto label32;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label33;
+
+     label32:
+        z0 = 1;
+
+        z14 = 1;
+
+        z8 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label33:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("queryMBeans");
+
+     label34:
+        $i13 = i0 & 4096;
+
+        if $i13 != 4096 goto label37;
+
+        if z5 == 0 goto label35;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label36;
+
+     label35:
+        z0 = 1;
+
+        z14 = 1;
+
+        z8 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label36:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("queryNames");
+
+     label37:
+        $i14 = i0 & 8192;
+
+        if $i14 != 8192 goto label40;
+
+        if z8 == 0 goto label38;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label39;
+
+     label38:
+        z0 = 1;
+
+        z14 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label39:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("registerMBean");
+
+     label40:
+        $i15 = i0 & 16384;
+
+        if $i15 != 16384 goto label43;
+
+        if z3 == 0 goto label41;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label42;
+
+     label41:
+        z0 = 1;
+
+        z14 = 1;
+
+        z4 = 1;
+
+     label42:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeNotificationListener");
+
+     label43:
+        $i19 = (int) 32768;
+
+        $i16 = i0 & $i19;
+
+        $i21 = (int) 32768;
+
+        if $i16 != $i21 goto label46;
+
+        if z14 == 0 goto label44;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label45;
+
+     label44:
+        z0 = 1;
+
+        z4 = 1;
+
+     label45:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setAttribute");
+
+     label46:
+        $i17 = i0 & 65536;
+
+        if $i17 != 65536 goto label48;
+
+        if z4 == 0 goto label47;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label47;
+
+     label47:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unregisterMBean");
+
+     label48:
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public int hashCode()
+    {
+        int $i0, $i1, $i2;
+        javax.management.MBeanPermission r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: javax.management.MBeanPermission;
+
+        $r1 = virtualinvoke r0.<javax.management.MBeanPermission: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $r2 = virtualinvoke r0.<javax.management.MBeanPermission: java.lang.String getActions()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        $i2 = $i0 + $i1;
+
+        return $i2;
+    }
+
+    private static int getMask(java.lang.String)
+    {
+        java.lang.String r0, $r6, $r11;
+        char[] $r1;
+        boolean $z0, z1;
+        byte b479, b480, b481, b482;
+        java.lang.IllegalArgumentException $r13, $r15;
+        int $i0, $i1, $i3, $i5, $i7, $i9, $i12, $i14, $i16, $i18, $i20, $i22, $i24, $i26, $i28, $i30, $i33, $i35, $i37, $i39, $i41, $i43, $i45, $i47, $i49, $i52, $i54, $i56, $i58, $i60, $i62, $i64, $i66, $i68, $i70, $i73, $i75, $i77, $i79, $i81, $i83, $i85, $i87, $i89, $i91, $i94, $i96, $i98, $i100, $i102, $i104, $i106, $i108, $i110, $i112, $i114, $i117, $i119, $i121, $i123, $i125, $i127, $i129, $i131, $i133, $i135, $i137, $i140, $i142, $i144, $i146, $i148, $i150, $i152, $i154, $i156, $i158, $i160, $i163, $i165, $i167, $i169, $i171, $i173, $i175, $i177, $i179, $i181, $i183, $i186, $i188, $i190, $i192, $i194, $i196, $i198, $i200, $i202, $i204, $i206, $i208, $i211, $i213, $i215, $i217, $i219, $i221, $i223, $i225, $i227, $i229, $i231, $i233, $i235, $i238, $i240, $i242, $i244, $i246, $i248, $i250, $i252, $i254, $i256, $i258, $i260, $i262, $i264, $i267, $i269, $i271, $i273, $i275, $i277, $i279, $i281, $i283, $i285, $i287, $i289, $i291, $i293, $i295, $i297, $i300, $i302, $i304, $i306, $i308, $i310, $i312, $i314, $i316, $i318, $i320, $i322, $i324, $i326, $i328, $i330, $i333, $i335, $i337, $i339, $i341, $i343, $i345, $i347, $i349, $i351, $i353, $i355, $i357, $i359, $i361, $i363, $i365, $i367, $i369, $i371, $i373, $i375, $i378, $i380, $i382, $i384, $i386, $i388, $i390, $i392, $i394, $i396, $i398, $i400, $i402, $i404, $i406, $i408, $i410, $i412, $i414, $i416, $i418, $i420, $i422, $i425, $i427, $i429, $i431, $i433, $i435, $i437, $i439, $i441, $i443, $i445, $i447, $i449, $i451, $i453, $i455, $i457, $i459, $i461, $i463, $i465, $i467, $i469, $i471, $i473, i477, i478, $i484, $i486, $i487, $i488, $i489, $i490, $i491, $i493, $i494, $i495, $i496, $i497, $i498, $i499, $i500, $i501, $i502, $i503, $i504, $i505, $i506, $i507, $i508, $i509, $i510, $i511, $i512, $i513, $i514, $i515, $i516, $i517, $i518, $i519, $i520, $i521, $i522, $i523, $i524, $i525, $i526, $i527, $i528, $i529, $i530, $i531, $i532, $i533, $i534, $i535, $i536, $i537, $i538, $i539, $i540, $i541, $i542, $i543, $i544, $i545, $i546, $i547, $i548, $i549, $i550, $i551, $i552, $i553, $i554, $i555, $i556, $i557, $i558, $i559, $i560, $i561, $i562, $i563, $i564, $i565, $i566, $i567, $i568, $i569, $i570, $i571, $i572, $i573, $i574, $i575, $i576, $i577, $i578, $i579, $i580, $i581, $i582, $i583, $i584, $i585, $i586, $i587, $i588, $i589, $i590, $i591, $i592, $i593, $i594, $i595, $i596, $i597, $i598, $i599, $i600, $i601, $i602, $i603, $i604, $i605, $i606, $i607, $i608, $i609, $i610, $i611, $i612, $i613, $i614, $i615, $i616, $i617, $i618, $i619, $i620, $i621, $i622, $i623, $i624, $i625, $i626, $i627, $i628, $i629, $i630, $i631, $i632, $i633, $i634, $i635, $i636, $i637, $i638, $i639, $i640, $i641, $i642, $i643, $i644, $i645, $i646, $i647, $i648, $i649, $i650, $i651, $i652, $i653, $i654, $i655, $i656, $i657, $i658, $i659, $i660, $i661, $i662, $i663, $i664, $i665, $i666, $i667, $i668, $i669, $i670, $i671, $i672, $i673, $i674, $i675, $i676, $i677, $i678, $i679, $i680, $i681, $i682, $i683, $i684, $i685, $i686, $i687, $i688, $i689, $i690, $i692, $i693, $i694, $i695, $i696, $i697, $i698, $i699, $i700, $i701, $i702, $i703, $i704, $i705, $i706, $i707, $i708, $i709, $i710, $i711, $i712, $i713, $i714, $i715, $i716, $i717, $i718, $i719, $i720, $i721, $i722, $i723, $i724, $i725, $i726, $i727, $i728, $i729, $i730, $i731, $i732, $i733, $i734, $i735, $i736, $i737, $i738, $i739, $i740, $i741, $i743;
+        java.lang.StringBuilder $r4, $r5, $r9, $r10, $r12, $r14;
+        char $c2, $c4, $c6, $c8, $c10, $c11, $c13, $c15, $c17, $c19, $c21, $c23, $c25, $c27, $c29, $c31, $c32, $c34, $c36, $c38, $c40, $c42, $c44, $c46, $c48, $c50, $c51, $c53, $c55, $c57, $c59, $c61, $c63, $c65, $c67, $c69, $c71, $c72, $c74, $c76, $c78, $c80, $c82, $c84, $c86, $c88, $c90, $c92, $c93, $c95, $c97, $c99, $c101, $c103, $c105, $c107, $c109, $c111, $c113, $c115, $c116, $c118, $c120, $c122, $c124, $c126, $c128, $c130, $c132, $c134, $c136, $c138, $c139, $c141, $c143, $c145, $c147, $c149, $c151, $c153, $c155, $c157, $c159, $c161, $c162, $c164, $c166, $c168, $c170, $c172, $c174, $c176, $c178, $c180, $c182, $c184, $c185, $c187, $c189, $c191, $c193, $c195, $c197, $c199, $c201, $c203, $c205, $c207, $c209, $c210, $c212, $c214, $c216, $c218, $c220, $c222, $c224, $c226, $c228, $c230, $c232, $c234, $c236, $c237, $c239, $c241, $c243, $c245, $c247, $c249, $c251, $c253, $c255, $c257, $c259, $c261, $c263, $c265, $c266, $c268, $c270, $c272, $c274, $c276, $c278, $c280, $c282, $c284, $c286, $c288, $c290, $c292, $c294, $c296, $c298, $c299, $c301, $c303, $c305, $c307, $c309, $c311, $c313, $c315, $c317, $c319, $c321, $c323, $c325, $c327, $c329, $c331, $c332, $c334, $c336, $c338, $c340, $c342, $c344, $c346, $c348, $c350, $c352, $c354, $c356, $c358, $c360, $c362, $c364, $c366, $c368, $c370, $c372, $c374, $c376, $c377, $c379, $c381, $c383, $c385, $c387, $c389, $c391, $c393, $c395, $c397, $c399, $c401, $c403, $c405, $c407, $c409, $c411, $c413, $c415, $c417, $c419, $c421, $c423, $c424, $c426, $c428, $c430, $c432, $c434, $c436, $c438, $c440, $c442, $c444, $c446, $c448, $c450, $c452, $c454, $c456, $c458, $c460, $c462, $c464, $c466, $c468, $c470, $c472, $c474, $c475, $c476;
+
+        r0 := @parameter0: java.lang.String;
+
+        i477 = 0;
+
+        if r0 != null goto label01;
+
+        return 0;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z0 == 0 goto label02;
+
+        return 131071;
+
+     label02:
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        i478 = $i0 - 1;
+
+        if i478 >= 0 goto label03;
+
+        return 0;
+
+     label03:
+        $i484 = (int) -1;
+
+        if i478 == $i484 goto label31;
+
+     label04:
+        $i486 = (int) -1;
+
+        if i478 == $i486 goto label06;
+
+        $c476 = $r1[i478];
+
+        $i487 = (int) $c476;
+
+        if $i487 == 32 goto label05;
+
+        $i488 = (int) $c476;
+
+        if $i488 == 13 goto label05;
+
+        $i489 = (int) $c476;
+
+        if $i489 == 10 goto label05;
+
+        $i490 = (int) $c476;
+
+        if $i490 == 12 goto label05;
+
+        $i491 = (int) $c476;
+
+        if $i491 != 9 goto label06;
+
+     label05:
+        $i493 = (int) -1;
+
+        i478 = i478 + $i493;
+
+        goto label04;
+
+     label06:
+        if i478 < 25 goto label07;
+
+        $i425 = i478 - 25;
+
+        $c426 = $r1[$i425];
+
+        $i494 = (int) $c426;
+
+        if $i494 != 114 goto label07;
+
+        $i427 = i478 - 24;
+
+        $c428 = $r1[$i427];
+
+        $i495 = (int) $c428;
+
+        if $i495 != 101 goto label07;
+
+        $i429 = i478 - 23;
+
+        $c430 = $r1[$i429];
+
+        $i496 = (int) $c430;
+
+        if $i496 != 109 goto label07;
+
+        $i431 = i478 - 22;
+
+        $c432 = $r1[$i431];
+
+        $i497 = (int) $c432;
+
+        if $i497 != 111 goto label07;
+
+        $i433 = i478 - 21;
+
+        $c434 = $r1[$i433];
+
+        $i498 = (int) $c434;
+
+        if $i498 != 118 goto label07;
+
+        $i435 = i478 - 20;
+
+        $c436 = $r1[$i435];
+
+        $i499 = (int) $c436;
+
+        if $i499 != 101 goto label07;
+
+        $i437 = i478 - 19;
+
+        $c438 = $r1[$i437];
+
+        $i500 = (int) $c438;
+
+        if $i500 != 78 goto label07;
+
+        $i439 = i478 - 18;
+
+        $c440 = $r1[$i439];
+
+        $i501 = (int) $c440;
+
+        if $i501 != 111 goto label07;
+
+        $i441 = i478 - 17;
+
+        $c442 = $r1[$i441];
+
+        $i502 = (int) $c442;
+
+        if $i502 != 116 goto label07;
+
+        $i443 = i478 - 16;
+
+        $c444 = $r1[$i443];
+
+        $i503 = (int) $c444;
+
+        if $i503 != 105 goto label07;
+
+        $i445 = i478 - 15;
+
+        $c446 = $r1[$i445];
+
+        $i504 = (int) $c446;
+
+        if $i504 != 102 goto label07;
+
+        $i447 = i478 - 14;
+
+        $c448 = $r1[$i447];
+
+        $i505 = (int) $c448;
+
+        if $i505 != 105 goto label07;
+
+        $i449 = i478 - 13;
+
+        $c450 = $r1[$i449];
+
+        $i506 = (int) $c450;
+
+        if $i506 != 99 goto label07;
+
+        $i451 = i478 - 12;
+
+        $c452 = $r1[$i451];
+
+        $i507 = (int) $c452;
+
+        if $i507 != 97 goto label07;
+
+        $i453 = i478 - 11;
+
+        $c454 = $r1[$i453];
+
+        $i508 = (int) $c454;
+
+        if $i508 != 116 goto label07;
+
+        $i455 = i478 - 10;
+
+        $c456 = $r1[$i455];
+
+        $i509 = (int) $c456;
+
+        if $i509 != 105 goto label07;
+
+        $i457 = i478 - 9;
+
+        $c458 = $r1[$i457];
+
+        $i510 = (int) $c458;
+
+        if $i510 != 111 goto label07;
+
+        $i459 = i478 - 8;
+
+        $c460 = $r1[$i459];
+
+        $i511 = (int) $c460;
+
+        if $i511 != 110 goto label07;
+
+        $i461 = i478 - 7;
+
+        $c462 = $r1[$i461];
+
+        $i512 = (int) $c462;
+
+        if $i512 != 76 goto label07;
+
+        $i463 = i478 - 6;
+
+        $c464 = $r1[$i463];
+
+        $i513 = (int) $c464;
+
+        if $i513 != 105 goto label07;
+
+        $i465 = i478 - 5;
+
+        $c466 = $r1[$i465];
+
+        $i514 = (int) $c466;
+
+        if $i514 != 115 goto label07;
+
+        $i467 = i478 - 4;
+
+        $c468 = $r1[$i467];
+
+        $i515 = (int) $c468;
+
+        if $i515 != 116 goto label07;
+
+        $i469 = i478 - 3;
+
+        $c470 = $r1[$i469];
+
+        $i516 = (int) $c470;
+
+        if $i516 != 101 goto label07;
+
+        $i471 = i478 - 2;
+
+        $c472 = $r1[$i471];
+
+        $i517 = (int) $c472;
+
+        if $i517 != 110 goto label07;
+
+        $i473 = i478 - 1;
+
+        $c474 = $r1[$i473];
+
+        $i518 = (int) $c474;
+
+        if $i518 != 101 goto label07;
+
+        $c475 = $r1[i478];
+
+        $i519 = (int) $c475;
+
+        if $i519 != 114 goto label07;
+
+        b479 = 26;
+
+        b482 = 26;
+
+        b481 = 26;
+
+        b480 = 26;
+
+        i477 = i477 | 16384;
+
+        goto label24;
+
+     label07:
+        if i478 < 23 goto label08;
+
+        $i378 = i478 - 23;
+
+        $c379 = $r1[$i378];
+
+        $i520 = (int) $c379;
+
+        if $i520 != 103 goto label08;
+
+        $i380 = i478 - 22;
+
+        $c381 = $r1[$i380];
+
+        $i521 = (int) $c381;
+
+        if $i521 != 101 goto label08;
+
+        $i382 = i478 - 21;
+
+        $c383 = $r1[$i382];
+
+        $i522 = (int) $c383;
+
+        if $i522 != 116 goto label08;
+
+        $i384 = i478 - 20;
+
+        $c385 = $r1[$i384];
+
+        $i523 = (int) $c385;
+
+        if $i523 != 67 goto label08;
+
+        $i386 = i478 - 19;
+
+        $c387 = $r1[$i386];
+
+        $i524 = (int) $c387;
+
+        if $i524 != 108 goto label08;
+
+        $i388 = i478 - 18;
+
+        $c389 = $r1[$i388];
+
+        $i525 = (int) $c389;
+
+        if $i525 != 97 goto label08;
+
+        $i390 = i478 - 17;
+
+        $c391 = $r1[$i390];
+
+        $i526 = (int) $c391;
+
+        if $i526 != 115 goto label08;
+
+        $i392 = i478 - 16;
+
+        $c393 = $r1[$i392];
+
+        $i527 = (int) $c393;
+
+        if $i527 != 115 goto label08;
+
+        $i394 = i478 - 15;
+
+        $c395 = $r1[$i394];
+
+        $i528 = (int) $c395;
+
+        if $i528 != 76 goto label08;
+
+        $i396 = i478 - 14;
+
+        $c397 = $r1[$i396];
+
+        $i529 = (int) $c397;
+
+        if $i529 != 111 goto label08;
+
+        $i398 = i478 - 13;
+
+        $c399 = $r1[$i398];
+
+        $i530 = (int) $c399;
+
+        if $i530 != 97 goto label08;
+
+        $i400 = i478 - 12;
+
+        $c401 = $r1[$i400];
+
+        $i531 = (int) $c401;
+
+        if $i531 != 100 goto label08;
+
+        $i402 = i478 - 11;
+
+        $c403 = $r1[$i402];
+
+        $i532 = (int) $c403;
+
+        if $i532 != 101 goto label08;
+
+        $i404 = i478 - 10;
+
+        $c405 = $r1[$i404];
+
+        $i533 = (int) $c405;
+
+        if $i533 != 114 goto label08;
+
+        $i406 = i478 - 9;
+
+        $c407 = $r1[$i406];
+
+        $i534 = (int) $c407;
+
+        if $i534 != 82 goto label08;
+
+        $i408 = i478 - 8;
+
+        $c409 = $r1[$i408];
+
+        $i535 = (int) $c409;
+
+        if $i535 != 101 goto label08;
+
+        $i410 = i478 - 7;
+
+        $c411 = $r1[$i410];
+
+        $i536 = (int) $c411;
+
+        if $i536 != 112 goto label08;
+
+        $i412 = i478 - 6;
+
+        $c413 = $r1[$i412];
+
+        $i537 = (int) $c413;
+
+        if $i537 != 111 goto label08;
+
+        $i414 = i478 - 5;
+
+        $c415 = $r1[$i414];
+
+        $i538 = (int) $c415;
+
+        if $i538 != 115 goto label08;
+
+        $i416 = i478 - 4;
+
+        $c417 = $r1[$i416];
+
+        $i539 = (int) $c417;
+
+        if $i539 != 105 goto label08;
+
+        $i418 = i478 - 3;
+
+        $c419 = $r1[$i418];
+
+        $i540 = (int) $c419;
+
+        if $i540 != 116 goto label08;
+
+        $i420 = i478 - 2;
+
+        $c421 = $r1[$i420];
+
+        $i541 = (int) $c421;
+
+        if $i541 != 111 goto label08;
+
+        $i422 = i478 - 1;
+
+        $c423 = $r1[$i422];
+
+        $i542 = (int) $c423;
+
+        if $i542 != 114 goto label08;
+
+        $c424 = $r1[i478];
+
+        $i543 = (int) $c424;
+
+        if $i543 != 121 goto label08;
+
+        b479 = 24;
+
+        b482 = 24;
+
+        b481 = 24;
+
+        b480 = 24;
+
+        i477 = i477 | 16;
+
+        goto label24;
+
+     label08:
+        if i478 < 22 goto label09;
+
+        $i333 = i478 - 22;
+
+        $c334 = $r1[$i333];
+
+        $i544 = (int) $c334;
+
+        if $i544 != 97 goto label09;
+
+        $i335 = i478 - 21;
+
+        $c336 = $r1[$i335];
+
+        $i545 = (int) $c336;
+
+        if $i545 != 100 goto label09;
+
+        $i337 = i478 - 20;
+
+        $c338 = $r1[$i337];
+
+        $i546 = (int) $c338;
+
+        if $i546 != 100 goto label09;
+
+        $i339 = i478 - 19;
+
+        $c340 = $r1[$i339];
+
+        $i547 = (int) $c340;
+
+        if $i547 != 78 goto label09;
+
+        $i341 = i478 - 18;
+
+        $c342 = $r1[$i341];
+
+        $i548 = (int) $c342;
+
+        if $i548 != 111 goto label09;
+
+        $i343 = i478 - 17;
+
+        $c344 = $r1[$i343];
+
+        $i549 = (int) $c344;
+
+        if $i549 != 116 goto label09;
+
+        $i345 = i478 - 16;
+
+        $c346 = $r1[$i345];
+
+        $i550 = (int) $c346;
+
+        if $i550 != 105 goto label09;
+
+        $i347 = i478 - 15;
+
+        $c348 = $r1[$i347];
+
+        $i551 = (int) $c348;
+
+        if $i551 != 102 goto label09;
+
+        $i349 = i478 - 14;
+
+        $c350 = $r1[$i349];
+
+        $i552 = (int) $c350;
+
+        if $i552 != 105 goto label09;
+
+        $i351 = i478 - 13;
+
+        $c352 = $r1[$i351];
+
+        $i553 = (int) $c352;
+
+        if $i553 != 99 goto label09;
+
+        $i353 = i478 - 12;
+
+        $c354 = $r1[$i353];
+
+        $i554 = (int) $c354;
+
+        if $i554 != 97 goto label09;
+
+        $i355 = i478 - 11;
+
+        $c356 = $r1[$i355];
+
+        $i555 = (int) $c356;
+
+        if $i555 != 116 goto label09;
+
+        $i357 = i478 - 10;
+
+        $c358 = $r1[$i357];
+
+        $i556 = (int) $c358;
+
+        if $i556 != 105 goto label09;
+
+        $i359 = i478 - 9;
+
+        $c360 = $r1[$i359];
+
+        $i557 = (int) $c360;
+
+        if $i557 != 111 goto label09;
+
+        $i361 = i478 - 8;
+
+        $c362 = $r1[$i361];
+
+        $i558 = (int) $c362;
+
+        if $i558 != 110 goto label09;
+
+        $i363 = i478 - 7;
+
+        $c364 = $r1[$i363];
+
+        $i559 = (int) $c364;
+
+        if $i559 != 76 goto label09;
+
+        $i365 = i478 - 6;
+
+        $c366 = $r1[$i365];
+
+        $i560 = (int) $c366;
+
+        if $i560 != 105 goto label09;
+
+        $i367 = i478 - 5;
+
+        $c368 = $r1[$i367];
+
+        $i561 = (int) $c368;
+
+        if $i561 != 115 goto label09;
+
+        $i369 = i478 - 4;
+
+        $c370 = $r1[$i369];
+
+        $i562 = (int) $c370;
+
+        if $i562 != 116 goto label09;
+
+        $i371 = i478 - 3;
+
+        $c372 = $r1[$i371];
+
+        $i563 = (int) $c372;
+
+        if $i563 != 101 goto label09;
+
+        $i373 = i478 - 2;
+
+        $c374 = $r1[$i373];
+
+        $i564 = (int) $c374;
+
+        if $i564 != 110 goto label09;
+
+        $i375 = i478 - 1;
+
+        $c376 = $r1[$i375];
+
+        $i565 = (int) $c376;
+
+        if $i565 != 101 goto label09;
+
+        $c377 = $r1[i478];
+
+        $i566 = (int) $c377;
+
+        if $i566 != 114 goto label09;
+
+        b479 = 23;
+
+        b482 = 23;
+
+        b481 = 23;
+
+        b480 = 23;
+
+        i477 = i477 | 1;
+
+        goto label24;
+
+     label09:
+        if i478 < 16 goto label10;
+
+        $i300 = i478 - 16;
+
+        $c301 = $r1[$i300];
+
+        $i567 = (int) $c301;
+
+        if $i567 != 103 goto label10;
+
+        $i302 = i478 - 15;
+
+        $c303 = $r1[$i302];
+
+        $i568 = (int) $c303;
+
+        if $i568 != 101 goto label10;
+
+        $i304 = i478 - 14;
+
+        $c305 = $r1[$i304];
+
+        $i569 = (int) $c305;
+
+        if $i569 != 116 goto label10;
+
+        $i306 = i478 - 13;
+
+        $c307 = $r1[$i306];
+
+        $i570 = (int) $c307;
+
+        if $i570 != 67 goto label10;
+
+        $i308 = i478 - 12;
+
+        $c309 = $r1[$i308];
+
+        $i571 = (int) $c309;
+
+        if $i571 != 108 goto label10;
+
+        $i310 = i478 - 11;
+
+        $c311 = $r1[$i310];
+
+        $i572 = (int) $c311;
+
+        if $i572 != 97 goto label10;
+
+        $i312 = i478 - 10;
+
+        $c313 = $r1[$i312];
+
+        $i573 = (int) $c313;
+
+        if $i573 != 115 goto label10;
+
+        $i314 = i478 - 9;
+
+        $c315 = $r1[$i314];
+
+        $i574 = (int) $c315;
+
+        if $i574 != 115 goto label10;
+
+        $i316 = i478 - 8;
+
+        $c317 = $r1[$i316];
+
+        $i575 = (int) $c317;
+
+        if $i575 != 76 goto label10;
+
+        $i318 = i478 - 7;
+
+        $c319 = $r1[$i318];
+
+        $i576 = (int) $c319;
+
+        if $i576 != 111 goto label10;
+
+        $i320 = i478 - 6;
+
+        $c321 = $r1[$i320];
+
+        $i577 = (int) $c321;
+
+        if $i577 != 97 goto label10;
+
+        $i322 = i478 - 5;
+
+        $c323 = $r1[$i322];
+
+        $i578 = (int) $c323;
+
+        if $i578 != 100 goto label10;
+
+        $i324 = i478 - 4;
+
+        $c325 = $r1[$i324];
+
+        $i579 = (int) $c325;
+
+        if $i579 != 101 goto label10;
+
+        $i326 = i478 - 3;
+
+        $c327 = $r1[$i326];
+
+        $i580 = (int) $c327;
+
+        if $i580 != 114 goto label10;
+
+        $i328 = i478 - 2;
+
+        $c329 = $r1[$i328];
+
+        $i581 = (int) $c329;
+
+        if $i581 != 70 goto label10;
+
+        $i330 = i478 - 1;
+
+        $c331 = $r1[$i330];
+
+        $i582 = (int) $c331;
+
+        if $i582 != 111 goto label10;
+
+        $c332 = $r1[i478];
+
+        $i583 = (int) $c332;
+
+        if $i583 != 114 goto label10;
+
+        b479 = 17;
+
+        b482 = 17;
+
+        b481 = 17;
+
+        b480 = 17;
+
+        i477 = i477 | 8;
+
+        goto label24;
+
+     label10:
+        if i478 < 16 goto label11;
+
+        $i267 = i478 - 16;
+
+        $c268 = $r1[$i267];
+
+        $i584 = (int) $c268;
+
+        if $i584 != 103 goto label11;
+
+        $i269 = i478 - 15;
+
+        $c270 = $r1[$i269];
+
+        $i585 = (int) $c270;
+
+        if $i585 != 101 goto label11;
+
+        $i271 = i478 - 14;
+
+        $c272 = $r1[$i271];
+
+        $i586 = (int) $c272;
+
+        if $i586 != 116 goto label11;
+
+        $i273 = i478 - 13;
+
+        $c274 = $r1[$i273];
+
+        $i587 = (int) $c274;
+
+        if $i587 != 79 goto label11;
+
+        $i275 = i478 - 12;
+
+        $c276 = $r1[$i275];
+
+        $i588 = (int) $c276;
+
+        if $i588 != 98 goto label11;
+
+        $i277 = i478 - 11;
+
+        $c278 = $r1[$i277];
+
+        $i589 = (int) $c278;
+
+        if $i589 != 106 goto label11;
+
+        $i279 = i478 - 10;
+
+        $c280 = $r1[$i279];
+
+        $i590 = (int) $c280;
+
+        if $i590 != 101 goto label11;
+
+        $i281 = i478 - 9;
+
+        $c282 = $r1[$i281];
+
+        $i591 = (int) $c282;
+
+        if $i591 != 99 goto label11;
+
+        $i283 = i478 - 8;
+
+        $c284 = $r1[$i283];
+
+        $i592 = (int) $c284;
+
+        if $i592 != 116 goto label11;
+
+        $i285 = i478 - 7;
+
+        $c286 = $r1[$i285];
+
+        $i593 = (int) $c286;
+
+        if $i593 != 73 goto label11;
+
+        $i287 = i478 - 6;
+
+        $c288 = $r1[$i287];
+
+        $i594 = (int) $c288;
+
+        if $i594 != 110 goto label11;
+
+        $i289 = i478 - 5;
+
+        $c290 = $r1[$i289];
+
+        $i595 = (int) $c290;
+
+        if $i595 != 115 goto label11;
+
+        $i291 = i478 - 4;
+
+        $c292 = $r1[$i291];
+
+        $i596 = (int) $c292;
+
+        if $i596 != 116 goto label11;
+
+        $i293 = i478 - 3;
+
+        $c294 = $r1[$i293];
+
+        $i597 = (int) $c294;
+
+        if $i597 != 97 goto label11;
+
+        $i295 = i478 - 2;
+
+        $c296 = $r1[$i295];
+
+        $i598 = (int) $c296;
+
+        if $i598 != 110 goto label11;
+
+        $i297 = i478 - 1;
+
+        $c298 = $r1[$i297];
+
+        $i599 = (int) $c298;
+
+        if $i599 != 99 goto label11;
+
+        $c299 = $r1[i478];
+
+        $i600 = (int) $c299;
+
+        if $i600 != 101 goto label11;
+
+        b479 = 17;
+
+        b482 = 17;
+
+        b481 = 17;
+
+        b480 = 17;
+
+        i477 = i477 | 128;
+
+        goto label24;
+
+     label11:
+        if i478 < 14 goto label12;
+
+        $i238 = i478 - 14;
+
+        $c239 = $r1[$i238];
+
+        $i601 = (int) $c239;
+
+        if $i601 != 117 goto label12;
+
+        $i240 = i478 - 13;
+
+        $c241 = $r1[$i240];
+
+        $i602 = (int) $c241;
+
+        if $i602 != 110 goto label12;
+
+        $i242 = i478 - 12;
+
+        $c243 = $r1[$i242];
+
+        $i603 = (int) $c243;
+
+        if $i603 != 114 goto label12;
+
+        $i244 = i478 - 11;
+
+        $c245 = $r1[$i244];
+
+        $i604 = (int) $c245;
+
+        if $i604 != 101 goto label12;
+
+        $i246 = i478 - 10;
+
+        $c247 = $r1[$i246];
+
+        $i605 = (int) $c247;
+
+        if $i605 != 103 goto label12;
+
+        $i248 = i478 - 9;
+
+        $c249 = $r1[$i248];
+
+        $i606 = (int) $c249;
+
+        if $i606 != 105 goto label12;
+
+        $i250 = i478 - 8;
+
+        $c251 = $r1[$i250];
+
+        $i607 = (int) $c251;
+
+        if $i607 != 115 goto label12;
+
+        $i252 = i478 - 7;
+
+        $c253 = $r1[$i252];
+
+        $i608 = (int) $c253;
+
+        if $i608 != 116 goto label12;
+
+        $i254 = i478 - 6;
+
+        $c255 = $r1[$i254];
+
+        $i609 = (int) $c255;
+
+        if $i609 != 101 goto label12;
+
+        $i256 = i478 - 5;
+
+        $c257 = $r1[$i256];
+
+        $i610 = (int) $c257;
+
+        if $i610 != 114 goto label12;
+
+        $i258 = i478 - 4;
+
+        $c259 = $r1[$i258];
+
+        $i611 = (int) $c259;
+
+        if $i611 != 77 goto label12;
+
+        $i260 = i478 - 3;
+
+        $c261 = $r1[$i260];
+
+        $i612 = (int) $c261;
+
+        if $i612 != 66 goto label12;
+
+        $i262 = i478 - 2;
+
+        $c263 = $r1[$i262];
+
+        $i613 = (int) $c263;
+
+        if $i613 != 101 goto label12;
+
+        $i264 = i478 - 1;
+
+        $c265 = $r1[$i264];
+
+        $i614 = (int) $c265;
+
+        if $i614 != 97 goto label12;
+
+        $c266 = $r1[i478];
+
+        $i615 = (int) $c266;
+
+        if $i615 != 110 goto label12;
+
+        b479 = 15;
+
+        b482 = 15;
+
+        b481 = 15;
+
+        b480 = 15;
+
+        i477 = i477 | 65536;
+
+        goto label24;
+
+     label12:
+        if i478 < 13 goto label13;
+
+        $i211 = i478 - 13;
+
+        $c212 = $r1[$i211];
+
+        $i616 = (int) $c212;
+
+        if $i616 != 103 goto label13;
+
+        $i213 = i478 - 12;
+
+        $c214 = $r1[$i213];
+
+        $i617 = (int) $c214;
+
+        if $i617 != 101 goto label13;
+
+        $i215 = i478 - 11;
+
+        $c216 = $r1[$i215];
+
+        $i618 = (int) $c216;
+
+        if $i618 != 116 goto label13;
+
+        $i217 = i478 - 10;
+
+        $c218 = $r1[$i217];
+
+        $i619 = (int) $c218;
+
+        if $i619 != 67 goto label13;
+
+        $i219 = i478 - 9;
+
+        $c220 = $r1[$i219];
+
+        $i620 = (int) $c220;
+
+        if $i620 != 108 goto label13;
+
+        $i221 = i478 - 8;
+
+        $c222 = $r1[$i221];
+
+        $i621 = (int) $c222;
+
+        if $i621 != 97 goto label13;
+
+        $i223 = i478 - 7;
+
+        $c224 = $r1[$i223];
+
+        $i622 = (int) $c224;
+
+        if $i622 != 115 goto label13;
+
+        $i225 = i478 - 6;
+
+        $c226 = $r1[$i225];
+
+        $i623 = (int) $c226;
+
+        if $i623 != 115 goto label13;
+
+        $i227 = i478 - 5;
+
+        $c228 = $r1[$i227];
+
+        $i624 = (int) $c228;
+
+        if $i624 != 76 goto label13;
+
+        $i229 = i478 - 4;
+
+        $c230 = $r1[$i229];
+
+        $i625 = (int) $c230;
+
+        if $i625 != 111 goto label13;
+
+        $i231 = i478 - 3;
+
+        $c232 = $r1[$i231];
+
+        $i626 = (int) $c232;
+
+        if $i626 != 97 goto label13;
+
+        $i233 = i478 - 2;
+
+        $c234 = $r1[$i233];
+
+        $i627 = (int) $c234;
+
+        if $i627 != 100 goto label13;
+
+        $i235 = i478 - 1;
+
+        $c236 = $r1[$i235];
+
+        $i628 = (int) $c236;
+
+        if $i628 != 101 goto label13;
+
+        $c237 = $r1[i478];
+
+        $i629 = (int) $c237;
+
+        if $i629 != 114 goto label13;
+
+        b479 = 14;
+
+        b482 = 14;
+
+        b481 = 14;
+
+        b480 = 14;
+
+        i477 = i477 | 4;
+
+        goto label24;
+
+     label13:
+        if i478 < 12 goto label14;
+
+        $i186 = i478 - 12;
+
+        $c187 = $r1[$i186];
+
+        $i630 = (int) $c187;
+
+        if $i630 != 114 goto label14;
+
+        $i188 = i478 - 11;
+
+        $c189 = $r1[$i188];
+
+        $i631 = (int) $c189;
+
+        if $i631 != 101 goto label14;
+
+        $i190 = i478 - 10;
+
+        $c191 = $r1[$i190];
+
+        $i632 = (int) $c191;
+
+        if $i632 != 103 goto label14;
+
+        $i192 = i478 - 9;
+
+        $c193 = $r1[$i192];
+
+        $i633 = (int) $c193;
+
+        if $i633 != 105 goto label14;
+
+        $i194 = i478 - 8;
+
+        $c195 = $r1[$i194];
+
+        $i634 = (int) $c195;
+
+        if $i634 != 115 goto label14;
+
+        $i196 = i478 - 7;
+
+        $c197 = $r1[$i196];
+
+        $i635 = (int) $c197;
+
+        if $i635 != 116 goto label14;
+
+        $i198 = i478 - 6;
+
+        $c199 = $r1[$i198];
+
+        $i636 = (int) $c199;
+
+        if $i636 != 101 goto label14;
+
+        $i200 = i478 - 5;
+
+        $c201 = $r1[$i200];
+
+        $i637 = (int) $c201;
+
+        if $i637 != 114 goto label14;
+
+        $i202 = i478 - 4;
+
+        $c203 = $r1[$i202];
+
+        $i638 = (int) $c203;
+
+        if $i638 != 77 goto label14;
+
+        $i204 = i478 - 3;
+
+        $c205 = $r1[$i204];
+
+        $i639 = (int) $c205;
+
+        if $i639 != 66 goto label14;
+
+        $i206 = i478 - 2;
+
+        $c207 = $r1[$i206];
+
+        $i640 = (int) $c207;
+
+        if $i640 != 101 goto label14;
+
+        $i208 = i478 - 1;
+
+        $c209 = $r1[$i208];
+
+        $i641 = (int) $c209;
+
+        if $i641 != 97 goto label14;
+
+        $c210 = $r1[i478];
+
+        $i642 = (int) $c210;
+
+        if $i642 != 110 goto label14;
+
+        b479 = 13;
+
+        b482 = 13;
+
+        b481 = 13;
+
+        b480 = 13;
+
+        i477 = i477 | 8192;
+
+        goto label24;
+
+     label14:
+        if i478 < 11 goto label15;
+
+        $i163 = i478 - 11;
+
+        $c164 = $r1[$i163];
+
+        $i643 = (int) $c164;
+
+        if $i643 != 103 goto label15;
+
+        $i165 = i478 - 10;
+
+        $c166 = $r1[$i165];
+
+        $i644 = (int) $c166;
+
+        if $i644 != 101 goto label15;
+
+        $i167 = i478 - 9;
+
+        $c168 = $r1[$i167];
+
+        $i645 = (int) $c168;
+
+        if $i645 != 116 goto label15;
+
+        $i169 = i478 - 8;
+
+        $c170 = $r1[$i169];
+
+        $i646 = (int) $c170;
+
+        if $i646 != 65 goto label15;
+
+        $i171 = i478 - 7;
+
+        $c172 = $r1[$i171];
+
+        $i647 = (int) $c172;
+
+        if $i647 != 116 goto label15;
+
+        $i173 = i478 - 6;
+
+        $c174 = $r1[$i173];
+
+        $i648 = (int) $c174;
+
+        if $i648 != 116 goto label15;
+
+        $i175 = i478 - 5;
+
+        $c176 = $r1[$i175];
+
+        $i649 = (int) $c176;
+
+        if $i649 != 114 goto label15;
+
+        $i177 = i478 - 4;
+
+        $c178 = $r1[$i177];
+
+        $i650 = (int) $c178;
+
+        if $i650 != 105 goto label15;
+
+        $i179 = i478 - 3;
+
+        $c180 = $r1[$i179];
+
+        $i651 = (int) $c180;
+
+        if $i651 != 98 goto label15;
+
+        $i181 = i478 - 2;
+
+        $c182 = $r1[$i181];
+
+        $i652 = (int) $c182;
+
+        if $i652 != 117 goto label15;
+
+        $i183 = i478 - 1;
+
+        $c184 = $r1[$i183];
+
+        $i653 = (int) $c184;
+
+        if $i653 != 116 goto label15;
+
+        $c185 = $r1[i478];
+
+        $i654 = (int) $c185;
+
+        if $i654 != 101 goto label15;
+
+        b479 = 12;
+
+        b482 = 12;
+
+        b481 = 12;
+
+        b480 = 12;
+
+        i477 = i477 | 2;
+
+        goto label24;
+
+     label15:
+        if i478 < 11 goto label16;
+
+        $i140 = i478 - 11;
+
+        $c141 = $r1[$i140];
+
+        $i655 = (int) $c141;
+
+        if $i655 != 103 goto label16;
+
+        $i142 = i478 - 10;
+
+        $c143 = $r1[$i142];
+
+        $i656 = (int) $c143;
+
+        if $i656 != 101 goto label16;
+
+        $i144 = i478 - 9;
+
+        $c145 = $r1[$i144];
+
+        $i657 = (int) $c145;
+
+        if $i657 != 116 goto label16;
+
+        $i146 = i478 - 8;
+
+        $c147 = $r1[$i146];
+
+        $i658 = (int) $c147;
+
+        if $i658 != 77 goto label16;
+
+        $i148 = i478 - 7;
+
+        $c149 = $r1[$i148];
+
+        $i659 = (int) $c149;
+
+        if $i659 != 66 goto label16;
+
+        $i150 = i478 - 6;
+
+        $c151 = $r1[$i150];
+
+        $i660 = (int) $c151;
+
+        if $i660 != 101 goto label16;
+
+        $i152 = i478 - 5;
+
+        $c153 = $r1[$i152];
+
+        $i661 = (int) $c153;
+
+        if $i661 != 97 goto label16;
+
+        $i154 = i478 - 4;
+
+        $c155 = $r1[$i154];
+
+        $i662 = (int) $c155;
+
+        if $i662 != 110 goto label16;
+
+        $i156 = i478 - 3;
+
+        $c157 = $r1[$i156];
+
+        $i663 = (int) $c157;
+
+        if $i663 != 73 goto label16;
+
+        $i158 = i478 - 2;
+
+        $c159 = $r1[$i158];
+
+        $i664 = (int) $c159;
+
+        if $i664 != 110 goto label16;
+
+        $i160 = i478 - 1;
+
+        $c161 = $r1[$i160];
+
+        $i665 = (int) $c161;
+
+        if $i665 != 102 goto label16;
+
+        $c162 = $r1[i478];
+
+        $i666 = (int) $c162;
+
+        if $i666 != 111 goto label16;
+
+        b479 = 12;
+
+        b482 = 12;
+
+        b481 = 12;
+
+        b480 = 12;
+
+        i477 = i477 | 64;
+
+        goto label24;
+
+     label16:
+        if i478 < 11 goto label17;
+
+        $i117 = i478 - 11;
+
+        $c118 = $r1[$i117];
+
+        $i667 = (int) $c118;
+
+        if $i667 != 105 goto label17;
+
+        $i119 = i478 - 10;
+
+        $c120 = $r1[$i119];
+
+        $i668 = (int) $c120;
+
+        if $i668 != 115 goto label17;
+
+        $i121 = i478 - 9;
+
+        $c122 = $r1[$i121];
+
+        $i669 = (int) $c122;
+
+        if $i669 != 73 goto label17;
+
+        $i123 = i478 - 8;
+
+        $c124 = $r1[$i123];
+
+        $i670 = (int) $c124;
+
+        if $i670 != 110 goto label17;
+
+        $i125 = i478 - 7;
+
+        $c126 = $r1[$i125];
+
+        $i671 = (int) $c126;
+
+        if $i671 != 115 goto label17;
+
+        $i127 = i478 - 6;
+
+        $c128 = $r1[$i127];
+
+        $i672 = (int) $c128;
+
+        if $i672 != 116 goto label17;
+
+        $i129 = i478 - 5;
+
+        $c130 = $r1[$i129];
+
+        $i673 = (int) $c130;
+
+        if $i673 != 97 goto label17;
+
+        $i131 = i478 - 4;
+
+        $c132 = $r1[$i131];
+
+        $i674 = (int) $c132;
+
+        if $i674 != 110 goto label17;
+
+        $i133 = i478 - 3;
+
+        $c134 = $r1[$i133];
+
+        $i675 = (int) $c134;
+
+        if $i675 != 99 goto label17;
+
+        $i135 = i478 - 2;
+
+        $c136 = $r1[$i135];
+
+        $i676 = (int) $c136;
+
+        if $i676 != 101 goto label17;
+
+        $i137 = i478 - 1;
+
+        $c138 = $r1[$i137];
+
+        $i677 = (int) $c138;
+
+        if $i677 != 79 goto label17;
+
+        $c139 = $r1[i478];
+
+        $i678 = (int) $c139;
+
+        if $i678 != 102 goto label17;
+
+        b479 = 12;
+
+        b482 = 12;
+
+        b481 = 12;
+
+        b480 = 12;
+
+        i477 = i477 | 1024;
+
+        goto label24;
+
+     label17:
+        if i478 < 11 goto label18;
+
+        $i94 = i478 - 11;
+
+        $c95 = $r1[$i94];
+
+        $i679 = (int) $c95;
+
+        if $i679 != 115 goto label18;
+
+        $i96 = i478 - 10;
+
+        $c97 = $r1[$i96];
+
+        $i680 = (int) $c97;
+
+        if $i680 != 101 goto label18;
+
+        $i98 = i478 - 9;
+
+        $c99 = $r1[$i98];
+
+        $i681 = (int) $c99;
+
+        if $i681 != 116 goto label18;
+
+        $i100 = i478 - 8;
+
+        $c101 = $r1[$i100];
+
+        $i682 = (int) $c101;
+
+        if $i682 != 65 goto label18;
+
+        $i102 = i478 - 7;
+
+        $c103 = $r1[$i102];
+
+        $i683 = (int) $c103;
+
+        if $i683 != 116 goto label18;
+
+        $i104 = i478 - 6;
+
+        $c105 = $r1[$i104];
+
+        $i684 = (int) $c105;
+
+        if $i684 != 116 goto label18;
+
+        $i106 = i478 - 5;
+
+        $c107 = $r1[$i106];
+
+        $i685 = (int) $c107;
+
+        if $i685 != 114 goto label18;
+
+        $i108 = i478 - 4;
+
+        $c109 = $r1[$i108];
+
+        $i686 = (int) $c109;
+
+        if $i686 != 105 goto label18;
+
+        $i110 = i478 - 3;
+
+        $c111 = $r1[$i110];
+
+        $i687 = (int) $c111;
+
+        if $i687 != 98 goto label18;
+
+        $i112 = i478 - 2;
+
+        $c113 = $r1[$i112];
+
+        $i688 = (int) $c113;
+
+        if $i688 != 117 goto label18;
+
+        $i114 = i478 - 1;
+
+        $c115 = $r1[$i114];
+
+        $i689 = (int) $c115;
+
+        if $i689 != 116 goto label18;
+
+        $c116 = $r1[i478];
+
+        $i690 = (int) $c116;
+
+        if $i690 != 101 goto label18;
+
+        b479 = 12;
+
+        b482 = 12;
+
+        b481 = 12;
+
+        b480 = 12;
+
+        $i692 = (int) 32768;
+
+        i477 = i477 | $i692;
+
+        goto label24;
+
+     label18:
+        if i478 < 10 goto label19;
+
+        $i73 = i478 - 10;
+
+        $c74 = $r1[$i73];
+
+        $i693 = (int) $c74;
+
+        if $i693 != 105 goto label19;
+
+        $i75 = i478 - 9;
+
+        $c76 = $r1[$i75];
+
+        $i694 = (int) $c76;
+
+        if $i694 != 110 goto label19;
+
+        $i77 = i478 - 8;
+
+        $c78 = $r1[$i77];
+
+        $i695 = (int) $c78;
+
+        if $i695 != 115 goto label19;
+
+        $i79 = i478 - 7;
+
+        $c80 = $r1[$i79];
+
+        $i696 = (int) $c80;
+
+        if $i696 != 116 goto label19;
+
+        $i81 = i478 - 6;
+
+        $c82 = $r1[$i81];
+
+        $i697 = (int) $c82;
+
+        if $i697 != 97 goto label19;
+
+        $i83 = i478 - 5;
+
+        $c84 = $r1[$i83];
+
+        $i698 = (int) $c84;
+
+        if $i698 != 110 goto label19;
+
+        $i85 = i478 - 4;
+
+        $c86 = $r1[$i85];
+
+        $i699 = (int) $c86;
+
+        if $i699 != 116 goto label19;
+
+        $i87 = i478 - 3;
+
+        $c88 = $r1[$i87];
+
+        $i700 = (int) $c88;
+
+        if $i700 != 105 goto label19;
+
+        $i89 = i478 - 2;
+
+        $c90 = $r1[$i89];
+
+        $i701 = (int) $c90;
+
+        if $i701 != 97 goto label19;
+
+        $i91 = i478 - 1;
+
+        $c92 = $r1[$i91];
+
+        $i702 = (int) $c92;
+
+        if $i702 != 116 goto label19;
+
+        $c93 = $r1[i478];
+
+        $i703 = (int) $c93;
+
+        if $i703 != 101 goto label19;
+
+        b479 = 11;
+
+        b482 = 11;
+
+        b481 = 11;
+
+        b480 = 11;
+
+        i477 = i477 | 256;
+
+        goto label24;
+
+     label19:
+        if i478 < 10 goto label20;
+
+        $i52 = i478 - 10;
+
+        $c53 = $r1[$i52];
+
+        $i704 = (int) $c53;
+
+        if $i704 != 113 goto label20;
+
+        $i54 = i478 - 9;
+
+        $c55 = $r1[$i54];
+
+        $i705 = (int) $c55;
+
+        if $i705 != 117 goto label20;
+
+        $i56 = i478 - 8;
+
+        $c57 = $r1[$i56];
+
+        $i706 = (int) $c57;
+
+        if $i706 != 101 goto label20;
+
+        $i58 = i478 - 7;
+
+        $c59 = $r1[$i58];
+
+        $i707 = (int) $c59;
+
+        if $i707 != 114 goto label20;
+
+        $i60 = i478 - 6;
+
+        $c61 = $r1[$i60];
+
+        $i708 = (int) $c61;
+
+        if $i708 != 121 goto label20;
+
+        $i62 = i478 - 5;
+
+        $c63 = $r1[$i62];
+
+        $i709 = (int) $c63;
+
+        if $i709 != 77 goto label20;
+
+        $i64 = i478 - 4;
+
+        $c65 = $r1[$i64];
+
+        $i710 = (int) $c65;
+
+        if $i710 != 66 goto label20;
+
+        $i66 = i478 - 3;
+
+        $c67 = $r1[$i66];
+
+        $i711 = (int) $c67;
+
+        if $i711 != 101 goto label20;
+
+        $i68 = i478 - 2;
+
+        $c69 = $r1[$i68];
+
+        $i712 = (int) $c69;
+
+        if $i712 != 97 goto label20;
+
+        $i70 = i478 - 1;
+
+        $c71 = $r1[$i70];
+
+        $i713 = (int) $c71;
+
+        if $i713 != 110 goto label20;
+
+        $c72 = $r1[i478];
+
+        $i714 = (int) $c72;
+
+        if $i714 != 115 goto label20;
+
+        b479 = 11;
+
+        b482 = 11;
+
+        b481 = 11;
+
+        b480 = 11;
+
+        i477 = i477 | 2048;
+
+        goto label24;
+
+     label20:
+        if i478 < 9 goto label21;
+
+        $i33 = i478 - 9;
+
+        $c34 = $r1[$i33];
+
+        $i715 = (int) $c34;
+
+        if $i715 != 103 goto label21;
+
+        $i35 = i478 - 8;
+
+        $c36 = $r1[$i35];
+
+        $i716 = (int) $c36;
+
+        if $i716 != 101 goto label21;
+
+        $i37 = i478 - 7;
+
+        $c38 = $r1[$i37];
+
+        $i717 = (int) $c38;
+
+        if $i717 != 116 goto label21;
+
+        $i39 = i478 - 6;
+
+        $c40 = $r1[$i39];
+
+        $i718 = (int) $c40;
+
+        if $i718 != 68 goto label21;
+
+        $i41 = i478 - 5;
+
+        $c42 = $r1[$i41];
+
+        $i719 = (int) $c42;
+
+        if $i719 != 111 goto label21;
+
+        $i43 = i478 - 4;
+
+        $c44 = $r1[$i43];
+
+        $i720 = (int) $c44;
+
+        if $i720 != 109 goto label21;
+
+        $i45 = i478 - 3;
+
+        $c46 = $r1[$i45];
+
+        $i721 = (int) $c46;
+
+        if $i721 != 97 goto label21;
+
+        $i47 = i478 - 2;
+
+        $c48 = $r1[$i47];
+
+        $i722 = (int) $c48;
+
+        if $i722 != 105 goto label21;
+
+        $i49 = i478 - 1;
+
+        $c50 = $r1[$i49];
+
+        $i723 = (int) $c50;
+
+        if $i723 != 110 goto label21;
+
+        $c51 = $r1[i478];
+
+        $i724 = (int) $c51;
+
+        if $i724 != 115 goto label21;
+
+        b479 = 10;
+
+        b482 = 10;
+
+        b481 = 10;
+
+        b480 = 10;
+
+        i477 = i477 | 32;
+
+        goto label24;
+
+     label21:
+        if i478 < 9 goto label22;
+
+        $i14 = i478 - 9;
+
+        $c15 = $r1[$i14];
+
+        $i725 = (int) $c15;
+
+        if $i725 != 113 goto label22;
+
+        $i16 = i478 - 8;
+
+        $c17 = $r1[$i16];
+
+        $i726 = (int) $c17;
+
+        if $i726 != 117 goto label22;
+
+        $i18 = i478 - 7;
+
+        $c19 = $r1[$i18];
+
+        $i727 = (int) $c19;
+
+        if $i727 != 101 goto label22;
+
+        $i20 = i478 - 6;
+
+        $c21 = $r1[$i20];
+
+        $i728 = (int) $c21;
+
+        if $i728 != 114 goto label22;
+
+        $i22 = i478 - 5;
+
+        $c23 = $r1[$i22];
+
+        $i729 = (int) $c23;
+
+        if $i729 != 121 goto label22;
+
+        $i24 = i478 - 4;
+
+        $c25 = $r1[$i24];
+
+        $i730 = (int) $c25;
+
+        if $i730 != 78 goto label22;
+
+        $i26 = i478 - 3;
+
+        $c27 = $r1[$i26];
+
+        $i731 = (int) $c27;
+
+        if $i731 != 97 goto label22;
+
+        $i28 = i478 - 2;
+
+        $c29 = $r1[$i28];
+
+        $i732 = (int) $c29;
+
+        if $i732 != 109 goto label22;
+
+        $i30 = i478 - 1;
+
+        $c31 = $r1[$i30];
+
+        $i733 = (int) $c31;
+
+        if $i733 != 101 goto label22;
+
+        $c32 = $r1[i478];
+
+        $i734 = (int) $c32;
+
+        if $i734 != 115 goto label22;
+
+        b479 = 10;
+
+        b482 = 10;
+
+        b481 = 10;
+
+        b480 = 10;
+
+        i477 = i477 | 4096;
+
+        goto label24;
+
+     label22:
+        if i478 < 5 goto label23;
+
+        $i1 = i478 - 5;
+
+        $c2 = $r1[$i1];
+
+        $i735 = (int) $c2;
+
+        if $i735 != 105 goto label23;
+
+        $i3 = i478 - 4;
+
+        $c4 = $r1[$i3];
+
+        $i736 = (int) $c4;
+
+        if $i736 != 110 goto label23;
+
+        $i5 = i478 - 3;
+
+        $c6 = $r1[$i5];
+
+        $i737 = (int) $c6;
+
+        if $i737 != 118 goto label23;
+
+        $i7 = i478 - 2;
+
+        $c8 = $r1[$i7];
+
+        $i738 = (int) $c8;
+
+        if $i738 != 111 goto label23;
+
+        $i9 = i478 - 1;
+
+        $c10 = $r1[$i9];
+
+        $i739 = (int) $c10;
+
+        if $i739 != 107 goto label23;
+
+        $c11 = $r1[i478];
+
+        $i740 = (int) $c11;
+
+        if $i740 != 101 goto label23;
+
+        b479 = 6;
+
+        b482 = 6;
+
+        b481 = 6;
+
+        b480 = 6;
+
+        i477 = i477 | 512;
+
+        goto label24;
+
+     label23:
+        $r13 = new java.lang.IllegalArgumentException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid permission: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r13;
+
+     label24:
+        z1 = 0;
+
+     label25:
+        if i478 < b481 goto label30;
+
+        if z1 != 0 goto label30;
+
+        $i12 = i478 - b482;
+
+        $c13 = $r1[$i12];
+
+        $i741 = (int) $c13;
+
+        lookupswitch($i741)
+        {
+            case 9: goto label27;
+            case 10: goto label27;
+            case 12: goto label27;
+            case 13: goto label27;
+            case 32: goto label27;
+            case 44: goto label26;
+            default: goto label28;
+        };
+
+     label26:
+        z1 = 1;
+
+        goto label29;
+
+     label27:
+        goto label29;
+
+     label28:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid permission: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r15;
+
+     label29:
+        $i743 = (int) -1;
+
+        i478 = i478 + $i743;
+
+        goto label25;
+
+     label30:
+        i478 = i478 - b480;
+
+        goto label03;
+
+     label31:
+        return i477;
+    }
+
+    public boolean implies(java.security.Permission)
+    {
+        javax.management.MBeanPermission r1, r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        javax.management.ObjectName $r11, $r12, $r13, $r14, $r15, $r19;
+        java.security.Permission r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r16, $r17, $r18;
+
+        r2 := @this: javax.management.MBeanPermission;
+
+        r0 := @parameter0: java.security.Permission;
+
+        $z0 = r0 instanceof javax.management.MBeanPermission;
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        r1 = (javax.management.MBeanPermission) r0;
+
+        $i0 = r2.<javax.management.MBeanPermission: int mask>;
+
+        $i1 = $i0 & 2048;
+
+        if $i1 != 2048 goto label02;
+
+        $i6 = r2.<javax.management.MBeanPermission: int mask>;
+
+        $i8 = $i6 | 4096;
+
+        $i7 = r1.<javax.management.MBeanPermission: int mask>;
+
+        $i10 = $i8 & $i7;
+
+        $i9 = r1.<javax.management.MBeanPermission: int mask>;
+
+        if $i10 == $i9 goto label03;
+
+        return 0;
+
+     label02:
+        $i3 = r2.<javax.management.MBeanPermission: int mask>;
+
+        $i2 = r1.<javax.management.MBeanPermission: int mask>;
+
+        $i5 = $i3 & $i2;
+
+        $i4 = r1.<javax.management.MBeanPermission: int mask>;
+
+        if $i5 == $i4 goto label03;
+
+        return 0;
+
+     label03:
+        $r3 = r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        if $r3 != null goto label04;
+
+        goto label08;
+
+     label04:
+        $r4 = r2.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        if $r4 != null goto label05;
+
+        return 0;
+
+     label05:
+        $z1 = r2.<javax.management.MBeanPermission: boolean classNameExactMatch>;
+
+        if $z1 == 0 goto label07;
+
+        $z7 = r1.<javax.management.MBeanPermission: boolean classNameExactMatch>;
+
+        if $z7 != 0 goto label06;
+
+        return 0;
+
+     label06:
+        $r17 = r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        $r16 = r2.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        $z8 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r16);
+
+        if $z8 != 0 goto label08;
+
+        return 0;
+
+     label07:
+        $r6 = r1.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        $r5 = r2.<javax.management.MBeanPermission: java.lang.String classNamePrefix>;
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>($r5);
+
+        if $z2 != 0 goto label08;
+
+        return 0;
+
+     label08:
+        $r18 = r1.<javax.management.MBeanPermission: java.lang.String member>;
+
+        if $r18 != null goto label09;
+
+        goto label12;
+
+     label09:
+        $r7 = r2.<javax.management.MBeanPermission: java.lang.String member>;
+
+        if $r7 != null goto label10;
+
+        return 0;
+
+     label10:
+        $r8 = r2.<javax.management.MBeanPermission: java.lang.String member>;
+
+        $z3 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z3 == 0 goto label11;
+
+        goto label12;
+
+     label11:
+        $r10 = r2.<javax.management.MBeanPermission: java.lang.String member>;
+
+        $r9 = r1.<javax.management.MBeanPermission: java.lang.String member>;
+
+        $z4 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z4 != 0 goto label12;
+
+        return 0;
+
+     label12:
+        $r19 = r1.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        if $r19 != null goto label13;
+
+        goto label15;
+
+     label13:
+        $r11 = r2.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        if $r11 != null goto label14;
+
+        return 0;
+
+     label14:
+        $r13 = r2.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        $r12 = r1.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        $z5 = virtualinvoke $r13.<javax.management.ObjectName: boolean apply(javax.management.ObjectName)>($r12);
+
+        if $z5 != 0 goto label15;
+
+        $r15 = r2.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        $r14 = r1.<javax.management.MBeanPermission: javax.management.ObjectName objectName>;
+
+        $z6 = virtualinvoke $r15.<javax.management.ObjectName: boolean equals(java.lang.Object)>($r14);
+
+        if $z6 != 0 goto label15;
+
+        return 0;
+
+     label15:
+        return 1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        javax.management.MBeanPermission r1, r2;
+        int $i0, $i1;
+        java.lang.Object r0;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: javax.management.MBeanPermission;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r0 instanceof javax.management.MBeanPermission;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (javax.management.MBeanPermission) r0;
+
+        $i1 = r1.<javax.management.MBeanPermission: int mask>;
+
+        $i0 = r2.<javax.management.MBeanPermission: int mask>;
+
+        if $i1 != $i0 goto label3;
+
+        $r3 = virtualinvoke r1.<javax.management.MBeanPermission: java.lang.String getName()>();
+
+        $r4 = virtualinvoke r2.<javax.management.MBeanPermission: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        javax.management.MBeanPermission r1;
+
+        r1 := @this: javax.management.MBeanPermission;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        specialinvoke r1.<javax.management.MBeanPermission: void parseName()>();
+
+        specialinvoke r1.<javax.management.MBeanPermission: void parseActions()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.management.MBeanPermission: int ALL> = 131071;
+
+        <javax.management.MBeanPermission: int NONE> = 0;
+
+        <javax.management.MBeanPermission: int UnregisterMBean> = 65536;
+
+        <javax.management.MBeanPermission: int SetAttribute> = 32768;
+
+        <javax.management.MBeanPermission: int RemoveNotificationListener> = 16384;
+
+        <javax.management.MBeanPermission: int RegisterMBean> = 8192;
+
+        <javax.management.MBeanPermission: int QueryNames> = 4096;
+
+        <javax.management.MBeanPermission: int QueryMBeans> = 2048;
+
+        <javax.management.MBeanPermission: int IsInstanceOf> = 1024;
+
+        <javax.management.MBeanPermission: int Invoke> = 512;
+
+        <javax.management.MBeanPermission: int Instantiate> = 256;
+
+        <javax.management.MBeanPermission: int GetObjectInstance> = 128;
+
+        <javax.management.MBeanPermission: int GetMBeanInfo> = 64;
+
+        <javax.management.MBeanPermission: int GetDomains> = 32;
+
+        <javax.management.MBeanPermission: int GetClassLoaderRepository> = 16;
+
+        <javax.management.MBeanPermission: int GetClassLoaderFor> = 8;
+
+        <javax.management.MBeanPermission: int GetClassLoader> = 4;
+
+        <javax.management.MBeanPermission: int GetAttribute> = 2;
+
+        <javax.management.MBeanPermission: int AddNotificationListener> = 1;
+
+        <javax.management.MBeanPermission: long serialVersionUID> = -2416928705275160661L;
+
+        return;
+    }
+}

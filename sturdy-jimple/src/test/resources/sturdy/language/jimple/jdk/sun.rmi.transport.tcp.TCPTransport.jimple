@@ -1,0 +1,1269 @@
+public class sun.rmi.transport.tcp.TCPTransport extends sun.rmi.transport.Transport
+{
+    static final sun.rmi.runtime.Log tcpLog;
+    private static final int maxConnectionThreads;
+    private static final long threadKeepAliveTime;
+    private static final java.util.concurrent.ExecutorService connectionThreadPool;
+    private static final boolean disableIncomingHttp;
+    private static final java.util.concurrent.atomic.AtomicInteger connectionCount;
+    private static final java.lang.ThreadLocal threadConnectionHandler;
+    private static final java.security.AccessControlContext NOPERMS_ACC;
+    private final java.util.LinkedList epList;
+    private int exportCount;
+    private java.net.ServerSocket server;
+    private final java.util.Map channelTable;
+    static final java.rmi.server.RMISocketFactory defaultSocketFactory;
+    private static final int connectionReadTimeout;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.util.LinkedList)
+    {
+        java.util.logging.Level $r3, $r7;
+        sun.rmi.runtime.Log $r4, $r6;
+        sun.rmi.transport.tcp.TCPEndpoint $r9;
+        java.lang.StringBuilder $r5, $r8, $r10;
+        java.lang.String $r11;
+        java.util.LinkedList r2;
+        java.util.WeakHashMap $r1;
+        sun.rmi.transport.tcp.TCPTransport r0;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r2 := @parameter0: java.util.LinkedList;
+
+        specialinvoke r0.<sun.rmi.transport.Transport: void <init>()>();
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount> = 0;
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server> = null;
+
+        $r1 = new java.util.WeakHashMap;
+
+        specialinvoke $r1.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable> = $r1;
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: java.util.LinkedList epList> = r2;
+
+        $r4 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r3 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r4.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Version = 2, ep = ");
+
+        $r9 = specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPEndpoint getEndpoint()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r7, $r11);
+
+     label1:
+        return;
+    }
+
+    public void shedConnectionCaches()
+    {
+        java.lang.Throwable $r14;
+        java.util.ArrayList $r2;
+        sun.rmi.transport.tcp.TCPChannel r13, r15;
+        java.util.Map $r1, $r3, $r5;
+        int $i0;
+        boolean $z0, $z1;
+        java.util.Iterator $r7, $r8;
+        java.util.Collection $r4, $r6;
+        java.lang.ref.Reference r11;
+        java.lang.Object $r9, $r10, $r12;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        $i0 = interfaceinvoke $r4.<java.util.Collection: int size()>();
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r5 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Collection values()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r10 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.lang.ref.Reference) $r10;
+
+        $r12 = virtualinvoke r11.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r13 = (sun.rmi.transport.tcp.TCPChannel) $r12;
+
+        if r13 == null goto label03;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r13);
+
+     label03:
+        goto label02;
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r14;
+
+     label08:
+        $r8 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (sun.rmi.transport.tcp.TCPChannel) $r9;
+
+        virtualinvoke r15.<sun.rmi.transport.tcp.TCPChannel: void shedCache()>();
+
+        goto label09;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    public sun.rmi.transport.tcp.TCPChannel getChannel(sun.rmi.transport.Endpoint)
+    {
+        java.lang.Throwable $r11;
+        java.lang.ref.Reference r5;
+        sun.rmi.transport.Endpoint r0;
+        sun.rmi.transport.tcp.TCPChannel $r7, r12;
+        java.util.Map $r2, $r3, $r9;
+        sun.rmi.transport.tcp.TCPEndpoint r6;
+        java.lang.Object $r4, $r10;
+        java.lang.ref.WeakReference $r8;
+        boolean $z0;
+        sun.rmi.transport.tcp.TCPTransport r1;
+
+        r1 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r0 := @parameter0: sun.rmi.transport.Endpoint;
+
+        r12 = null;
+
+        $z0 = r0 instanceof sun.rmi.transport.tcp.TCPEndpoint;
+
+        if $z0 == 0 goto label7;
+
+        $r2 = r1.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r1.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r5 = (java.lang.ref.Reference) $r4;
+
+        if r5 == null goto label2;
+
+        $r10 = virtualinvoke r5.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r12 = (sun.rmi.transport.tcp.TCPChannel) $r10;
+
+     label2:
+        if r12 != null goto label3;
+
+        r6 = (sun.rmi.transport.tcp.TCPEndpoint) r0;
+
+        $r7 = new sun.rmi.transport.tcp.TCPChannel;
+
+        specialinvoke $r7.<sun.rmi.transport.tcp.TCPChannel: void <init>(sun.rmi.transport.tcp.TCPTransport,sun.rmi.transport.tcp.TCPEndpoint)>(r1, r6);
+
+        r12 = $r7;
+
+        $r9 = r1.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        $r8 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r8.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r7);
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r6, $r8);
+
+     label3:
+        exitmonitor $r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r11;
+
+     label7:
+        return r12;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void free(sun.rmi.transport.Endpoint)
+    {
+        java.lang.Throwable $r8;
+        java.lang.ref.Reference r5;
+        sun.rmi.transport.Endpoint r0;
+        sun.rmi.transport.tcp.TCPChannel r7;
+        java.util.Map $r2, $r3;
+        java.lang.Object $r4, $r6;
+        boolean $z0;
+        sun.rmi.transport.tcp.TCPTransport r1;
+
+        r1 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r0 := @parameter0: sun.rmi.transport.Endpoint;
+
+        $z0 = r0 instanceof sun.rmi.transport.tcp.TCPEndpoint;
+
+        if $z0 == 0 goto label6;
+
+        $r2 = r1.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r1.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        r5 = (java.lang.ref.Reference) $r4;
+
+        if r5 == null goto label2;
+
+        $r6 = virtualinvoke r5.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r7 = (sun.rmi.transport.tcp.TCPChannel) $r6;
+
+        if r7 == null goto label2;
+
+        virtualinvoke r7.<sun.rmi.transport.tcp.TCPChannel: void shedCache()>();
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r8;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void exportObject(sun.rmi.transport.Target) throws java.rmi.RemoteException
+    {
+        java.lang.Throwable $r2, $r3, $r5;
+        int $i0, $i1;
+        sun.rmi.transport.Target r1;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r1 := @parameter0: sun.rmi.transport.Target;
+
+        entermonitor r0;
+
+     label01:
+        specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: void listen()>();
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount> = $i1;
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r5;
+
+     label05:
+        specialinvoke r0.<sun.rmi.transport.Transport: void exportObject(sun.rmi.transport.Target)>(r1);
+
+     label06:
+        goto label14;
+
+     label07:
+        $r3 := @caughtexception;
+
+     label08:
+        entermonitor r0;
+
+     label09:
+        specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: void decrementExportCount()>();
+
+        exitmonitor r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r2;
+
+     label13:
+        throw $r3;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    protected synchronized void targetUnexported()
+    {
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: void decrementExportCount()>();
+
+        return;
+    }
+
+    private void decrementExportCount()
+    {
+        java.io.IOException $r4;
+        java.lang.AssertionError $r3;
+        java.net.ServerSocket r2;
+        int $i0, $i1, $i2, $i3;
+        sun.rmi.transport.tcp.TCPEndpoint $r1;
+        boolean $z0, $z1;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        $z0 = <sun.rmi.transport.tcp.TCPTransport: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $i0 = r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount> = $i1;
+
+        $i2 = r0.<sun.rmi.transport.tcp.TCPTransport: int exportCount>;
+
+        if $i2 != 0 goto label5;
+
+        $r1 = specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPEndpoint getEndpoint()>();
+
+        $i3 = virtualinvoke $r1.<sun.rmi.transport.tcp.TCPEndpoint: int getListenPort()>();
+
+        if $i3 == 0 goto label5;
+
+        r2 = r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server>;
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server> = null;
+
+     label2:
+        virtualinvoke r2.<java.net.ServerSocket: void close()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    protected void checkAcceptPermission(java.security.AccessControlContext)
+    {
+        java.security.AccessControlContext r4;
+        java.lang.ThreadLocal $r1;
+        sun.rmi.transport.tcp.TCPTransport$ConnectionHandler r3;
+        java.lang.Error $r5;
+        java.lang.Object $r2;
+        java.lang.SecurityManager $r0;
+        sun.rmi.transport.tcp.TCPTransport r6;
+
+        r6 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r4 := @parameter0: java.security.AccessControlContext;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = <sun.rmi.transport.tcp.TCPTransport: java.lang.ThreadLocal threadConnectionHandler>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r3 = (sun.rmi.transport.tcp.TCPTransport$ConnectionHandler) $r2;
+
+        if r3 != null goto label2;
+
+        $r5 = new java.lang.Error;
+
+        specialinvoke $r5.<java.lang.Error: void <init>(java.lang.String)>("checkAcceptPermission not in ConnectionHandler thread");
+
+        throw $r5;
+
+     label2:
+        virtualinvoke r3.<sun.rmi.transport.tcp.TCPTransport$ConnectionHandler: void checkAcceptPermission(java.lang.SecurityManager,java.security.AccessControlContext)>($r0, r4);
+
+        return;
+    }
+
+    private sun.rmi.transport.tcp.TCPEndpoint getEndpoint()
+    {
+        java.lang.Throwable $r5;
+        sun.rmi.transport.tcp.TCPEndpoint $r4;
+        java.lang.Object $r3;
+        java.util.LinkedList $r1, $r2;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.LinkedList epList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.LinkedList epList>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object getLast()>();
+
+        $r4 = (sun.rmi.transport.tcp.TCPEndpoint) $r3;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void listen() throws java.rmi.RemoteException
+    {
+        sun.rmi.transport.tcp.TCPTransport$AcceptLoop $r8;
+        java.net.ServerSocket $r2, $r6, $r9;
+        java.lang.Thread $r22;
+        boolean $z0, $z1, $z2;
+        sun.rmi.runtime.Log $r5, $r16;
+        java.lang.StringBuilder $r10, $r11, $r12, $r15, $r18, $r19, $r20, $r26, $r27, $r28, $r32, $r33, $r34;
+        sun.rmi.transport.tcp.TCPTransport r0;
+        java.lang.AssertionError $r23;
+        java.net.BindException $r30;
+        java.rmi.server.ExportException $r25, $r31;
+        java.util.logging.Level $r4, $r17;
+        sun.rmi.transport.tcp.TCPEndpoint $r1;
+        int $i0;
+        java.lang.String $r13, $r21, $r29, $r35;
+        java.io.IOException $r24;
+        java.lang.SecurityManager $r3;
+        java.lang.Object $r14;
+        sun.rmi.runtime.NewThreadAction $r7;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        $z0 = <sun.rmi.transport.tcp.TCPTransport: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        $r23 = new java.lang.AssertionError;
+
+        specialinvoke $r23.<java.lang.AssertionError: void <init>()>();
+
+        throw $r23;
+
+     label1:
+        $r1 = specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPEndpoint getEndpoint()>();
+
+        $i0 = virtualinvoke $r1.<sun.rmi.transport.tcp.TCPEndpoint: int getPort()>();
+
+        $r2 = r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server>;
+
+        if $r2 != null goto label6;
+
+        $r5 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r4 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z1 = virtualinvoke $r5.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r4);
+
+        if $z1 == 0 goto label2;
+
+        $r16 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r17 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(port ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") create server socket");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r17, $r21);
+
+     label2:
+        $r6 = virtualinvoke $r1.<sun.rmi.transport.tcp.TCPEndpoint: java.net.ServerSocket newServerSocket()>();
+
+        r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server> = $r6;
+
+        $r7 = new sun.rmi.runtime.NewThreadAction;
+
+        $r8 = new sun.rmi.transport.tcp.TCPTransport$AcceptLoop;
+
+        $r9 = r0.<sun.rmi.transport.tcp.TCPTransport: java.net.ServerSocket server>;
+
+        specialinvoke $r8.<sun.rmi.transport.tcp.TCPTransport$AcceptLoop: void <init>(sun.rmi.transport.tcp.TCPTransport,java.net.ServerSocket)>(r0, $r9);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TCP Accept-");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<sun.rmi.runtime.NewThreadAction: void <init>(java.lang.Runnable,java.lang.String,boolean)>($r8, $r13, 1);
+
+        $r14 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r22 = (java.lang.Thread) $r14;
+
+        virtualinvoke $r22.<java.lang.Thread: void start()>();
+
+     label3:
+        goto label7;
+
+     label4:
+        $r30 := @caughtexception;
+
+        $r31 = new java.rmi.server.ExportException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Port already in use: ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.rmi.server.ExportException: void <init>(java.lang.String,java.lang.Exception)>($r35, $r30);
+
+        throw $r31;
+
+     label5:
+        $r24 := @caughtexception;
+
+        $r25 = new java.rmi.server.ExportException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Listen failed on port: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.rmi.server.ExportException: void <init>(java.lang.String,java.lang.Exception)>($r29, $r24);
+
+        throw $r25;
+
+     label6:
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label7;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkListen(int)>($i0);
+
+     label7:
+        return;
+
+        catch java.net.BindException from label2 to label3 with label4;
+        catch java.io.IOException from label2 to label3 with label5;
+    }
+
+    private static void closeSocket(java.net.Socket)
+    {
+        java.net.Socket r0;
+        java.io.IOException $r1;
+
+        r0 := @parameter0: java.net.Socket;
+
+     label1:
+        virtualinvoke r0.<java.net.Socket: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void handleMessages(sun.rmi.transport.Connection, boolean)
+    {
+        sun.rmi.transport.StreamRemoteCall $r51;
+        java.io.DataOutputStream $r52;
+        boolean $z0, z1, $z2, $z3, $z4;
+        sun.rmi.runtime.Log $r6, $r17, $r25, $r27, $r38, $r40;
+        java.lang.StringBuilder $r13, $r14, $r19, $r20, $r21, $r22, $r29, $r30, $r31, $r42, $r43, $r44, $r49, $r50, $r53, $r55;
+        sun.rmi.transport.tcp.TCPTransport r0;
+        java.lang.Throwable $r34;
+        java.io.DataInputStream $r48;
+        java.util.logging.Level $r5, $r18, $r24, $r28, $r37, $r41;
+        sun.rmi.transport.tcp.TCPEndpoint $r1;
+        int $i0, $i1, $i3;
+        java.lang.String $r15, $r23, $r32, $r45;
+        java.rmi.server.UID $r7;
+        java.io.OutputStream $r9;
+        java.io.IOException $r33, $r35, $r36, $r46, $r47, $r54;
+        sun.rmi.transport.Connection r3;
+        java.io.InputStream $r4;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r3 := @parameter0: sun.rmi.transport.Connection;
+
+        z1 := @parameter1: boolean;
+
+        $r1 = specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPEndpoint getEndpoint()>();
+
+        $i0 = virtualinvoke $r1.<sun.rmi.transport.tcp.TCPEndpoint: int getPort()>();
+
+     label01:
+        $r48 = new java.io.DataInputStream;
+
+        $r4 = interfaceinvoke r3.<sun.rmi.transport.Connection: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r48.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r4);
+
+     label02:
+        $i1 = virtualinvoke $r48.<java.io.DataInputStream: int read()>();
+
+        $i3 = (int) -1;
+
+        if $i1 != $i3 goto label03;
+
+        $r25 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r24 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z3 = virtualinvoke $r25.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r24);
+
+        if $z3 == 0 goto label14;
+
+        $r27 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r28 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(port ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") connection closed");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r28, $r32);
+
+        goto label14;
+
+     label03:
+        $r6 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r5 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r6.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z0 == 0 goto label04;
+
+        $r17 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r18 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(port ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") op = ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r18, $r23);
+
+     label04:
+        tableswitch($i1)
+        {
+            case 80: goto label05;
+            case 81: goto label12;
+            case 82: goto label10;
+            case 83: goto label12;
+            case 84: goto label11;
+            default: goto label12;
+        };
+
+     label05:
+        $r51 = new sun.rmi.transport.StreamRemoteCall;
+
+        specialinvoke $r51.<sun.rmi.transport.StreamRemoteCall: void <init>(sun.rmi.transport.Connection)>(r3);
+
+        $z2 = virtualinvoke r0.<sun.rmi.transport.tcp.TCPTransport: boolean serviceCall(java.rmi.server.RemoteCall)>($r51);
+
+        if $z2 != 0 goto label13;
+
+     label06:
+        interfaceinvoke r3.<sun.rmi.transport.Connection: void close()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r47 := @caughtexception;
+
+     label09:
+        return;
+
+     label10:
+        $r52 = new java.io.DataOutputStream;
+
+        $r9 = interfaceinvoke r3.<sun.rmi.transport.Connection: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r52.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r9);
+
+        virtualinvoke $r52.<java.io.DataOutputStream: void writeByte(int)>(83);
+
+        interfaceinvoke r3.<sun.rmi.transport.Connection: void releaseOutputStream()>();
+
+        goto label13;
+
+     label11:
+        $r7 = staticinvoke <java.rmi.server.UID: java.rmi.server.UID read(java.io.DataInput)>($r48);
+
+        staticinvoke <sun.rmi.transport.DGCAckHandler: void received(java.rmi.server.UID)>($r7);
+
+        goto label13;
+
+     label12:
+        $r54 = new java.io.IOException;
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown transport op ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r54.<java.io.IOException: void <init>(java.lang.String)>($r15);
+
+        throw $r54;
+
+     label13:
+        if z1 != 0 goto label02;
+
+     label14:
+        interfaceinvoke r3.<sun.rmi.transport.Connection: void close()>();
+
+     label15:
+        goto label26;
+
+     label16:
+        $r46 := @caughtexception;
+
+        goto label26;
+
+     label17:
+        $r36 := @caughtexception;
+
+        $r38 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r37 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z4 = virtualinvoke $r38.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r37);
+
+        if $z4 == 0 goto label18;
+
+        $r40 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r41 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(port ");
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") exception: ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r40.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r41, $r45, $r36);
+
+     label18:
+        interfaceinvoke r3.<sun.rmi.transport.Connection: void close()>();
+
+     label19:
+        goto label26;
+
+     label20:
+        $r35 := @caughtexception;
+
+        goto label26;
+
+     label21:
+        $r34 := @caughtexception;
+
+     label22:
+        interfaceinvoke r3.<sun.rmi.transport.Connection: void close()>();
+
+     label23:
+        goto label25;
+
+     label24:
+        $r33 := @caughtexception;
+
+     label25:
+        throw $r34;
+
+     label26:
+        return;
+
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.io.IOException from label14 to label15 with label16;
+        catch java.io.IOException from label01 to label06 with label17;
+        catch java.io.IOException from label10 to label14 with label17;
+        catch java.io.IOException from label18 to label19 with label20;
+        catch java.lang.Throwable from label01 to label06 with label21;
+        catch java.lang.Throwable from label10 to label14 with label21;
+        catch java.lang.Throwable from label17 to label18 with label21;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    public static java.lang.String getClientHost() throws java.rmi.server.ServerNotActiveException
+    {
+        java.lang.ThreadLocal $r0;
+        sun.rmi.transport.tcp.TCPTransport$ConnectionHandler r2;
+        java.lang.Object $r1;
+        java.lang.String $r4;
+        java.rmi.server.ServerNotActiveException $r3;
+
+        $r0 = <sun.rmi.transport.tcp.TCPTransport: java.lang.ThreadLocal threadConnectionHandler>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r2 = (sun.rmi.transport.tcp.TCPTransport$ConnectionHandler) $r1;
+
+        if r2 == null goto label1;
+
+        $r4 = virtualinvoke r2.<sun.rmi.transport.tcp.TCPTransport$ConnectionHandler: java.lang.String getClientHost()>();
+
+        return $r4;
+
+     label1:
+        $r3 = new java.rmi.server.ServerNotActiveException;
+
+        specialinvoke $r3.<java.rmi.server.ServerNotActiveException: void <init>(java.lang.String)>("not in a remote call");
+
+        throw $r3;
+    }
+
+    public volatile sun.rmi.transport.Channel getChannel(sun.rmi.transport.Endpoint)
+    {
+        sun.rmi.transport.Endpoint r1;
+        sun.rmi.transport.tcp.TCPChannel $r2;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPTransport;
+
+        r1 := @parameter0: sun.rmi.transport.Endpoint;
+
+        $r2 = virtualinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPChannel getChannel(sun.rmi.transport.Endpoint)>(r1);
+
+        return $r2;
+    }
+
+    static sun.rmi.transport.tcp.TCPEndpoint access$000(sun.rmi.transport.tcp.TCPTransport)
+    {
+        sun.rmi.transport.tcp.TCPEndpoint $r1;
+        sun.rmi.transport.tcp.TCPTransport r0;
+
+        r0 := @parameter0: sun.rmi.transport.tcp.TCPTransport;
+
+        $r1 = specialinvoke r0.<sun.rmi.transport.tcp.TCPTransport: sun.rmi.transport.tcp.TCPEndpoint getEndpoint()>();
+
+        return $r1;
+    }
+
+    static java.util.concurrent.ExecutorService access$100()
+    {
+        java.util.concurrent.ExecutorService $r0;
+
+        $r0 = <sun.rmi.transport.tcp.TCPTransport: java.util.concurrent.ExecutorService connectionThreadPool>;
+
+        return $r0;
+    }
+
+    static void access$200(java.net.Socket)
+    {
+        java.net.Socket r0;
+
+        r0 := @parameter0: java.net.Socket;
+
+        staticinvoke <sun.rmi.transport.tcp.TCPTransport: void closeSocket(java.net.Socket)>(r0);
+
+        return;
+    }
+
+    static java.util.concurrent.atomic.AtomicInteger access$300()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = <sun.rmi.transport.tcp.TCPTransport: java.util.concurrent.atomic.AtomicInteger connectionCount>;
+
+        return $r0;
+    }
+
+    static java.security.AccessControlContext access$400()
+    {
+        java.security.AccessControlContext $r0;
+
+        $r0 = <sun.rmi.transport.tcp.TCPTransport: java.security.AccessControlContext NOPERMS_ACC>;
+
+        return $r0;
+    }
+
+    static java.lang.ThreadLocal access$500()
+    {
+        java.lang.ThreadLocal $r0;
+
+        $r0 = <sun.rmi.transport.tcp.TCPTransport: java.lang.ThreadLocal threadConnectionHandler>;
+
+        return $r0;
+    }
+
+    static int access$600()
+    {
+        int $i0;
+
+        $i0 = <sun.rmi.transport.tcp.TCPTransport: int connectionReadTimeout>;
+
+        return $i0;
+    }
+
+    static boolean access$700()
+    {
+        boolean $z0;
+
+        $z0 = <sun.rmi.transport.tcp.TCPTransport: boolean disableIncomingHttp>;
+
+        return $z0;
+    }
+
+    static java.util.Map access$800(sun.rmi.transport.tcp.TCPTransport)
+    {
+        sun.rmi.transport.tcp.TCPTransport r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.rmi.transport.tcp.TCPTransport;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPTransport: java.util.Map channelTable>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.security.AccessControlContext $r23;
+        sun.security.action.GetLongAction $r8;
+        java.lang.Integer $r7, $r27;
+        sun.security.action.GetPropertyAction $r1, $r15;
+        java.lang.Long $r10;
+        java.util.concurrent.atomic.AtomicInteger $r18;
+        boolean $z0, $z1, $z2;
+        java.lang.ThreadLocal $r19;
+        sun.rmi.transport.tcp.TCPTransport$1 $r14;
+        java.util.concurrent.SynchronousQueue $r12;
+        sun.rmi.runtime.Log $r4;
+        sun.security.action.GetIntegerAction $r5, $r25;
+        java.util.concurrent.ThreadPoolExecutor $r11;
+        long $l2, $l4;
+        int $i0, $i1, $i3, $i5;
+        java.lang.String $r3, $r17;
+        java.security.Permissions $r20;
+        java.util.concurrent.TimeUnit $r13;
+        java.security.ProtectionDomain[] $r21;
+        java.security.ProtectionDomain $r22;
+        java.rmi.server.RMISocketFactory $r24;
+        java.lang.Class $r0;
+        java.lang.Object $r2, $r6, $r9, $r16, $r26;
+
+        $r0 = class "Lsun/rmi/transport/tcp/TCPTransport;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <sun.rmi.transport.tcp.TCPTransport: boolean $assertionsDisabled> = $z2;
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.transport.tcp.logLevel");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r3);
+
+        $r4 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.transport.tcp", "tcp", $i0);
+
+        <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog> = $r4;
+
+        $r5 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r5.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("sun.rmi.transport.tcp.maxConnectionThreads", 2147483647);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        $r7 = (java.lang.Integer) $r6;
+
+        $i1 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        <sun.rmi.transport.tcp.TCPTransport: int maxConnectionThreads> = $i1;
+
+        $r8 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r8.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.transport.tcp.threadKeepAliveTime", 60000L);
+
+        $r9 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r8);
+
+        $r10 = (java.lang.Long) $r9;
+
+        $l2 = virtualinvoke $r10.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.tcp.TCPTransport: long threadKeepAliveTime> = $l2;
+
+        $r11 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $i3 = <sun.rmi.transport.tcp.TCPTransport: int maxConnectionThreads>;
+
+        $l4 = <sun.rmi.transport.tcp.TCPTransport: long threadKeepAliveTime>;
+
+        $r13 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r12 = new java.util.concurrent.SynchronousQueue;
+
+        specialinvoke $r12.<java.util.concurrent.SynchronousQueue: void <init>()>();
+
+        $r14 = new sun.rmi.transport.tcp.TCPTransport$1;
+
+        specialinvoke $r14.<sun.rmi.transport.tcp.TCPTransport$1: void <init>()>();
+
+        specialinvoke $r11.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, $i3, $l4, $r13, $r12, $r14);
+
+        <sun.rmi.transport.tcp.TCPTransport: java.util.concurrent.ExecutorService connectionThreadPool> = $r11;
+
+        $r15 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r15.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.rmi.server.disableIncomingHttp", "true");
+
+        $r16 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r15);
+
+        $r17 = (java.lang.String) $r16;
+
+        $z1 = virtualinvoke $r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        <sun.rmi.transport.tcp.TCPTransport: boolean disableIncomingHttp> = $z1;
+
+        $r18 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r18.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(0);
+
+        <sun.rmi.transport.tcp.TCPTransport: java.util.concurrent.atomic.AtomicInteger connectionCount> = $r18;
+
+        $r19 = new java.lang.ThreadLocal;
+
+        specialinvoke $r19.<java.lang.ThreadLocal: void <init>()>();
+
+        <sun.rmi.transport.tcp.TCPTransport: java.lang.ThreadLocal threadConnectionHandler> = $r19;
+
+        $r20 = new java.security.Permissions;
+
+        specialinvoke $r20.<java.security.Permissions: void <init>()>();
+
+        $r21 = newarray (java.security.ProtectionDomain)[1];
+
+        $r22 = new java.security.ProtectionDomain;
+
+        specialinvoke $r22.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>(null, $r20);
+
+        $r21[0] = $r22;
+
+        $r23 = new java.security.AccessControlContext;
+
+        specialinvoke $r23.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r21);
+
+        <sun.rmi.transport.tcp.TCPTransport: java.security.AccessControlContext NOPERMS_ACC> = $r23;
+
+        $r24 = staticinvoke <java.rmi.server.RMISocketFactory: java.rmi.server.RMISocketFactory getDefaultSocketFactory()>();
+
+        <sun.rmi.transport.tcp.TCPTransport: java.rmi.server.RMISocketFactory defaultSocketFactory> = $r24;
+
+        $r25 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r25.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("sun.rmi.transport.tcp.readTimeout", 7200000);
+
+        $r26 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r25);
+
+        $r27 = (java.lang.Integer) $r26;
+
+        $i5 = virtualinvoke $r27.<java.lang.Integer: int intValue()>();
+
+        <sun.rmi.transport.tcp.TCPTransport: int connectionReadTimeout> = $i5;
+
+        return;
+    }
+}

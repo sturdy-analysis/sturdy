@@ -1,0 +1,838 @@
+public class javax.activation.MimetypesFileTypeMap extends javax.activation.FileTypeMap
+{
+    private com.sun.activation.registries.MimeTypeFile[] DB;
+    private static final int PROG;
+    private static java.lang.String defaultType;
+
+    public void <init>()
+    {
+        javax.activation.MimetypesFileTypeMap r0;
+        java.util.Vector $r1;
+        int $i0;
+        java.lang.SecurityException $r24, $r25;
+        java.lang.String $r2, $r4, $r6, $r9, $r12, $r19, $r22;
+        com.sun.activation.registries.MimeTypeFile $r13, $r14, $r23;
+        com.sun.activation.registries.MimeTypeFile[] $r15, $r16;
+        java.lang.StringBuilder $r3, $r5, $r7, $r8, $r10, $r11, $r17, $r18, $r20, $r21;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        specialinvoke r0.<javax.activation.FileTypeMap: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>(int)>(5);
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>(null);
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: load HOME");
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        if $r2 == null goto label2;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r19 = <java.io.File: java.lang.String separator>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".mime.types");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = specialinvoke r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile loadFile(java.lang.String)>($r22);
+
+        if $r23 == null goto label2;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r23);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r25 := @caughtexception;
+
+     label4:
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: load SYS");
+
+     label5:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = <java.io.File: java.lang.String separator>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r9 = <java.io.File: java.lang.String separator>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("mime.types");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = specialinvoke r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile loadFile(java.lang.String)>($r12);
+
+        if $r13 == null goto label6;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r13);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r24 := @caughtexception;
+
+     label8:
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: load JAR");
+
+        specialinvoke r0.<javax.activation.MimetypesFileTypeMap: void loadAllResources(java.util.Vector,java.lang.String)>($r1, "META-INF/mime.types");
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: load DEF");
+
+        $r14 = specialinvoke r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile loadResource(java.lang.String)>("/META-INF/mimetypes.default");
+
+        if $r14 == null goto label9;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+     label9:
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $r15 = newarray (com.sun.activation.registries.MimeTypeFile)[$i0];
+
+        r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB> = $r15;
+
+        $r16 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        virtualinvoke $r1.<java.util.Vector: void copyInto(java.lang.Object[])>($r16);
+
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+        catch java.lang.SecurityException from label5 to label6 with label7;
+    }
+
+    private com.sun.activation.registries.MimeTypeFile loadResource(java.lang.String)
+    {
+        java.lang.SecurityException $r16;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.activation.registries.MimeTypeFile $r8;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9, $r10, $r11, $r17, $r18, $r19, $r23, $r24, $r25;
+        java.lang.Throwable $r14;
+        javax.activation.MimetypesFileTypeMap r0;
+        java.lang.String r2, $r7, $r12, $r20, $r26;
+        java.io.IOException $r13, $r15, $r21, $r22, $r27, $r28;
+        java.lang.Class $r1;
+        java.io.InputStream $r3, r29;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r2 := @parameter0: java.lang.String;
+
+        r29 = null;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = staticinvoke <javax.activation.SecuritySupport: java.io.InputStream getResourceAsStream(java.lang.Class,java.lang.String)>($r1, r2);
+
+        r29 = $r3;
+
+        if $r3 == null goto label06;
+
+        $r8 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r8.<com.sun.activation.registries.MimeTypeFile: void <init>(java.io.InputStream)>($r3);
+
+        $z1 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z1 == 0 goto label02;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: successfully loaded mime types file: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>($r12);
+
+     label02:
+        if $r3 == null goto label03;
+
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r28 := @caughtexception;
+
+     label05:
+        return $r8;
+
+     label06:
+        $z0 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z0 == 0 goto label07;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: not loading mime types file: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>($r7);
+
+     label07:
+        if $r3 == null goto label08;
+
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label08:
+        goto label23;
+
+     label09:
+        $r27 := @caughtexception;
+
+        goto label23;
+
+     label10:
+        $r22 := @caughtexception;
+
+        $z3 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z3 == 0 goto label11;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: can\'t load ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String,java.lang.Throwable)>($r26, $r22);
+
+     label11:
+        if r29 == null goto label12;
+
+        virtualinvoke r29.<java.io.InputStream: void close()>();
+
+     label12:
+        goto label23;
+
+     label13:
+        $r21 := @caughtexception;
+
+        goto label23;
+
+     label14:
+        $r16 := @caughtexception;
+
+        $z2 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z2 == 0 goto label15;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: can\'t load ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String,java.lang.Throwable)>($r20, $r16);
+
+     label15:
+        if r29 == null goto label16;
+
+        virtualinvoke r29.<java.io.InputStream: void close()>();
+
+     label16:
+        goto label23;
+
+     label17:
+        $r15 := @caughtexception;
+
+        goto label23;
+
+     label18:
+        $r14 := @caughtexception;
+
+     label19:
+        if r29 == null goto label20;
+
+        virtualinvoke r29.<java.io.InputStream: void close()>();
+
+     label20:
+        goto label22;
+
+     label21:
+        $r13 := @caughtexception;
+
+     label22:
+        throw $r14;
+
+     label23:
+        return null;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.IOException from label01 to label02 with label10;
+        catch java.io.IOException from label06 to label07 with label10;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.lang.SecurityException from label01 to label02 with label14;
+        catch java.lang.SecurityException from label06 to label07 with label14;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.lang.Throwable from label01 to label02 with label18;
+        catch java.lang.Throwable from label06 to label07 with label18;
+        catch java.lang.Throwable from label10 to label11 with label18;
+        catch java.lang.Throwable from label14 to label15 with label18;
+        catch java.io.IOException from label19 to label20 with label21;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    private void loadAllResources(java.util.Vector, java.lang.String)
+    {
+        java.net.URL r9;
+        java.net.URL[] r46;
+        java.util.Vector r8;
+        java.lang.SecurityException $r33;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7;
+        com.sun.activation.registries.MimeTypeFile $r7, $r15;
+        java.lang.Exception $r25;
+        java.lang.StringBuilder $r3, $r4, $r5, $r11, $r12, $r13, $r16, $r17, $r18, $r20, $r21, $r22, $r26, $r27, $r28, $r34, $r35, $r36, $r40, $r41, $r42;
+        java.lang.ClassLoader $r0, r45;
+        java.lang.Throwable $r31;
+        javax.activation.MimetypesFileTypeMap r2;
+        int i0, $i1;
+        java.lang.String r1, $r6, $r14, $r19, $r23, $r29, $r37, $r43;
+        java.io.IOException $r30, $r32, $r38, $r39, $r44;
+        java.lang.Class $r24;
+        java.io.InputStream $r10, r47;
+
+        r2 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r8 := @parameter0: java.util.Vector;
+
+        r1 := @parameter1: java.lang.String;
+
+        z7 = 0;
+
+     label01:
+        $r0 = staticinvoke <javax.activation.SecuritySupport: java.lang.ClassLoader getContextClassLoader()>();
+
+        r45 = $r0;
+
+        if $r0 != null goto label02;
+
+        $r24 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        r45 = virtualinvoke $r24.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+     label02:
+        if r45 == null goto label03;
+
+        r46 = staticinvoke <javax.activation.SecuritySupport: java.net.URL[] getResources(java.lang.ClassLoader,java.lang.String)>(r45, r1);
+
+        goto label04;
+
+     label03:
+        r46 = staticinvoke <javax.activation.SecuritySupport: java.net.URL[] getSystemResources(java.lang.String)>(r1);
+
+     label04:
+        if r46 == null goto label26;
+
+        $z0 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z0 == 0 goto label05;
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: getResources");
+
+     label05:
+        i0 = 0;
+
+     label06:
+        $i1 = lengthof r46;
+
+        if i0 >= $i1 goto label26;
+
+        r9 = r46[i0];
+
+        r47 = null;
+
+        $z1 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z1 == 0 goto label07;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: URL ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>($r23);
+
+     label07:
+        $r10 = staticinvoke <javax.activation.SecuritySupport: java.io.InputStream openStream(java.net.URL)>(r9);
+
+        r47 = $r10;
+
+        if $r10 == null goto label08;
+
+        $r15 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r15.<com.sun.activation.registries.MimeTypeFile: void <init>(java.io.InputStream)>($r10);
+
+        virtualinvoke r8.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+        z7 = 1;
+
+        $z3 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z3 == 0 goto label09;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: successfully loaded mime types from URL: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>($r19);
+
+        goto label09;
+
+     label08:
+        $z2 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z2 == 0 goto label09;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: not loading mime types from URL: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>($r14);
+
+     label09:
+        if $r10 == null goto label10;
+
+        virtualinvoke $r10.<java.io.InputStream: void close()>();
+
+     label10:
+        goto label25;
+
+     label11:
+        $r44 := @caughtexception;
+
+        goto label25;
+
+     label12:
+        $r39 := @caughtexception;
+
+        $z6 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z6 == 0 goto label13;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: can\'t load ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String,java.lang.Throwable)>($r43, $r39);
+
+     label13:
+        if r47 == null goto label14;
+
+        virtualinvoke r47.<java.io.InputStream: void close()>();
+
+     label14:
+        goto label25;
+
+     label15:
+        $r38 := @caughtexception;
+
+        goto label25;
+
+     label16:
+        $r33 := @caughtexception;
+
+        $z5 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z5 == 0 goto label17;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: can\'t load ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String,java.lang.Throwable)>($r37, $r33);
+
+     label17:
+        if r47 == null goto label18;
+
+        virtualinvoke r47.<java.io.InputStream: void close()>();
+
+     label18:
+        goto label25;
+
+     label19:
+        $r32 := @caughtexception;
+
+        goto label25;
+
+     label20:
+        $r31 := @caughtexception;
+
+     label21:
+        if r47 == null goto label22;
+
+        virtualinvoke r47.<java.io.InputStream: void close()>();
+
+     label22:
+        goto label24;
+
+     label23:
+        $r30 := @caughtexception;
+
+     label24:
+        throw $r31;
+
+     label25:
+        i0 = i0 + 1;
+
+        goto label06;
+
+     label26:
+        goto label28;
+
+     label27:
+        $r25 := @caughtexception;
+
+        $z4 = staticinvoke <com.sun.activation.registries.LogSupport: boolean isLoggable()>();
+
+        if $z4 == 0 goto label28;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MimetypesFileTypeMap: can\'t load ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String,java.lang.Throwable)>($r29, $r25);
+
+     label28:
+        if z7 != 0 goto label29;
+
+        staticinvoke <com.sun.activation.registries.LogSupport: void log(java.lang.String)>("MimetypesFileTypeMap: !anyLoaded");
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = specialinvoke r2.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile loadResource(java.lang.String)>($r6);
+
+        if $r7 == null goto label29;
+
+        virtualinvoke r8.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+     label29:
+        return;
+
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.io.IOException from label07 to label09 with label12;
+        catch java.io.IOException from label13 to label14 with label15;
+        catch java.lang.SecurityException from label07 to label09 with label16;
+        catch java.io.IOException from label17 to label18 with label19;
+        catch java.lang.Throwable from label07 to label09 with label20;
+        catch java.lang.Throwable from label12 to label13 with label20;
+        catch java.lang.Throwable from label16 to label17 with label20;
+        catch java.io.IOException from label21 to label22 with label23;
+        catch java.lang.Throwable from label20 to label21 with label20;
+        catch java.lang.Exception from label01 to label26 with label27;
+    }
+
+    private com.sun.activation.registries.MimeTypeFile loadFile(java.lang.String)
+    {
+        java.io.IOException $r2;
+        java.lang.String r1;
+        com.sun.activation.registries.MimeTypeFile $r0, r4;
+        javax.activation.MimetypesFileTypeMap r3;
+
+        r3 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 = null;
+
+     label1:
+        $r0 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r0.<com.sun.activation.registries.MimeTypeFile: void <init>(java.lang.String)>(r1);
+
+        r4 = $r0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return r4;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void <init>(java.lang.String) throws java.io.IOException
+    {
+        com.sun.activation.registries.MimeTypeFile[] $r3;
+        java.lang.String r2;
+        javax.activation.MimetypesFileTypeMap r0;
+        com.sun.activation.registries.MimeTypeFile $r1;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<javax.activation.MimetypesFileTypeMap: void <init>()>();
+
+        $r3 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r1 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r1.<com.sun.activation.registries.MimeTypeFile: void <init>(java.lang.String)>(r2);
+
+        $r3[0] = $r1;
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream)
+    {
+        com.sun.activation.registries.MimeTypeFile[] $r3;
+        java.io.IOException $r4;
+        javax.activation.MimetypesFileTypeMap r0;
+        com.sun.activation.registries.MimeTypeFile $r1;
+        java.io.InputStream r2;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<javax.activation.MimetypesFileTypeMap: void <init>()>();
+
+     label1:
+        $r3 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r1 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r1.<com.sun.activation.registries.MimeTypeFile: void <init>(java.io.InputStream)>(r2);
+
+        $r3[0] = $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public synchronized void addMimeTypes(java.lang.String)
+    {
+        javax.activation.MimetypesFileTypeMap r0;
+        com.sun.activation.registries.MimeTypeFile $r2, $r5, $r6;
+        com.sun.activation.registries.MimeTypeFile[] $r1, $r3, $r7;
+        java.lang.String r4;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r1 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r2 = $r1[0];
+
+        if $r2 != null goto label1;
+
+        $r7 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r6 = new com.sun.activation.registries.MimeTypeFile;
+
+        specialinvoke $r6.<com.sun.activation.registries.MimeTypeFile: void <init>()>();
+
+        $r7[0] = $r6;
+
+     label1:
+        $r3 = r0.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r5 = $r3[0];
+
+        virtualinvoke $r5.<com.sun.activation.registries.MimeTypeFile: void appendToRegistry(java.lang.String)>(r4);
+
+        return;
+    }
+
+    public java.lang.String getContentType(java.io.File)
+    {
+        java.lang.String $r2, $r3;
+        javax.activation.MimetypesFileTypeMap r0;
+        java.io.File r1;
+
+        r0 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r1 := @parameter0: java.io.File;
+
+        $r2 = virtualinvoke r1.<java.io.File: java.lang.String getName()>();
+
+        $r3 = virtualinvoke r0.<javax.activation.MimetypesFileTypeMap: java.lang.String getContentType(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    public synchronized java.lang.String getContentType(java.lang.String)
+    {
+        javax.activation.MimetypesFileTypeMap r2;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String r0, $r1, $r4, $r9, $r10, $r11;
+        com.sun.activation.registries.MimeTypeFile $r6, $r8;
+        com.sun.activation.registries.MimeTypeFile[] $r3, $r5, $r7;
+
+        r2 := @this: javax.activation.MimetypesFileTypeMap;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        if $i0 >= 0 goto label1;
+
+        $r11 = <javax.activation.MimetypesFileTypeMap: java.lang.String defaultType>;
+
+        return $r11;
+
+     label1:
+        $i1 = $i0 + 1;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i2 != 0 goto label2;
+
+        $r10 = <javax.activation.MimetypesFileTypeMap: java.lang.String defaultType>;
+
+        return $r10;
+
+     label2:
+        i4 = 0;
+
+     label3:
+        $r3 = r2.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $i3 = lengthof $r3;
+
+        if i4 >= $i3 goto label6;
+
+        $r5 = r2.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r6 = $r5[i4];
+
+        if $r6 != null goto label4;
+
+        goto label5;
+
+     label4:
+        $r7 = r2.<javax.activation.MimetypesFileTypeMap: com.sun.activation.registries.MimeTypeFile[] DB>;
+
+        $r8 = $r7[i4];
+
+        $r9 = virtualinvoke $r8.<com.sun.activation.registries.MimeTypeFile: java.lang.String getMIMETypeString(java.lang.String)>($r1);
+
+        if $r9 == null goto label5;
+
+        return $r9;
+
+     label5:
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label6:
+        $r4 = <javax.activation.MimetypesFileTypeMap: java.lang.String defaultType>;
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        <javax.activation.MimetypesFileTypeMap: int PROG> = 0;
+
+        <javax.activation.MimetypesFileTypeMap: java.lang.String defaultType> = "application/octet-stream";
+
+        return;
+    }
+}

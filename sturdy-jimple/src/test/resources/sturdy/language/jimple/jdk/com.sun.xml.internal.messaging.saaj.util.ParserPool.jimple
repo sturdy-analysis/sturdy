@@ -1,0 +1,211 @@
+public class com.sun.xml.internal.messaging.saaj.util.ParserPool extends java.lang.Object
+{
+    private final java.util.concurrent.BlockingQueue queue;
+    private javax.xml.parsers.SAXParserFactory factory;
+    private int capacity;
+
+    public void <init>(int)
+    {
+        com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $r2;
+        javax.xml.parsers.SAXParserFactory $r3, $r4;
+        java.lang.Thread $r12;
+        int i0, i1;
+        javax.xml.parsers.SAXParser $r6;
+        java.util.concurrent.BlockingQueue $r5;
+        java.lang.RuntimeException $r8, $r10, $r13;
+        java.util.concurrent.ArrayBlockingQueue $r1;
+        javax.xml.parsers.ParserConfigurationException $r9;
+        java.lang.InterruptedException $r11;
+        org.xml.sax.SAXException $r7;
+        com.sun.xml.internal.messaging.saaj.util.ParserPool r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.util.ParserPool;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: int capacity> = i0;
+
+        $r1 = new java.util.concurrent.ArrayBlockingQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ArrayBlockingQueue: void <init>(int)>(i0);
+
+        r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: java.util.concurrent.BlockingQueue queue> = $r1;
+
+        $r2 = new com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: javax.xml.parsers.SAXParserFactory factory> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: javax.xml.parsers.SAXParserFactory factory>;
+
+        virtualinvoke $r3.<javax.xml.parsers.SAXParserFactory: void setNamespaceAware(boolean)>(1);
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label8;
+
+     label2:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: java.util.concurrent.BlockingQueue queue>;
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: javax.xml.parsers.SAXParserFactory factory>;
+
+        $r6 = virtualinvoke $r4.<javax.xml.parsers.SAXParserFactory: javax.xml.parsers.SAXParser newSAXParser()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.BlockingQueue: void put(java.lang.Object)>($r6);
+
+     label3:
+        goto label7;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r12.<java.lang.Thread: void interrupt()>();
+
+        $r13 = new java.lang.RuntimeException;
+
+        specialinvoke $r13.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r13;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label7:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label8:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+        catch javax.xml.parsers.ParserConfigurationException from label2 to label3 with label5;
+        catch org.xml.sax.SAXException from label2 to label3 with label6;
+    }
+
+    public javax.xml.parsers.SAXParser get() throws javax.xml.parsers.ParserConfigurationException, org.xml.sax.SAXException
+    {
+        java.lang.InterruptedException $r4;
+        org.xml.sax.SAXException $r5;
+        javax.xml.parsers.SAXParser $r3;
+        java.util.concurrent.BlockingQueue $r1;
+        java.lang.Object $r2;
+        com.sun.xml.internal.messaging.saaj.util.ParserPool r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.util.ParserPool;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: java.util.concurrent.BlockingQueue queue>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: java.lang.Object take()>();
+
+        $r3 = (javax.xml.parsers.SAXParser) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new org.xml.sax.SAXException;
+
+        specialinvoke $r5.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    public void put(javax.xml.parsers.SAXParser)
+    {
+        javax.xml.parsers.SAXParser r1;
+        java.util.concurrent.BlockingQueue $r2;
+        com.sun.xml.internal.messaging.saaj.util.ParserPool r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.util.ParserPool;
+
+        r1 := @parameter0: javax.xml.parsers.SAXParser;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.util.ParserPool: java.util.concurrent.BlockingQueue queue>;
+
+        interfaceinvoke $r2.<java.util.concurrent.BlockingQueue: boolean offer(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public void returnParser(javax.xml.parsers.SAXParser)
+    {
+        javax.xml.parsers.SAXParser r0;
+        com.sun.xml.internal.messaging.saaj.util.ParserPool r1;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.util.ParserPool;
+
+        r0 := @parameter0: javax.xml.parsers.SAXParser;
+
+        virtualinvoke r0.<javax.xml.parsers.SAXParser: void reset()>();
+
+        specialinvoke r1.<com.sun.xml.internal.messaging.saaj.util.ParserPool: void resetSaxParser(javax.xml.parsers.SAXParser)>(r0);
+
+        virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.util.ParserPool: void put(javax.xml.parsers.SAXParser)>(r0);
+
+        return;
+    }
+
+    private void resetSaxParser(javax.xml.parsers.SAXParser)
+    {
+        org.xml.sax.SAXNotRecognizedException $r3;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r0;
+        org.xml.sax.SAXNotSupportedException $r2;
+        javax.xml.parsers.SAXParser r1;
+        com.sun.xml.internal.messaging.saaj.util.ParserPool r4;
+
+        r4 := @this: com.sun.xml.internal.messaging.saaj.util.ParserPool;
+
+        r1 := @parameter0: javax.xml.parsers.SAXParser;
+
+     label1:
+        $r0 = new com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.util.SymbolTable: void <init>()>();
+
+        virtualinvoke r1.<javax.xml.parsers.SAXParser: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/symbol-table", $r0);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXNotRecognizedException from label1 to label2 with label3;
+        catch org.xml.sax.SAXNotSupportedException from label1 to label2 with label4;
+    }
+}

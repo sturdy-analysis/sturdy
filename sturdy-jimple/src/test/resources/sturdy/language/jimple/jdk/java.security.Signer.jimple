@@ -1,0 +1,196 @@
+public abstract class java.security.Signer extends java.security.Identity
+{
+    private static final long serialVersionUID;
+    private java.security.PrivateKey privateKey;
+
+    protected void <init>()
+    {
+        java.security.Signer r0;
+
+        r0 := @this: java.security.Signer;
+
+        specialinvoke r0.<java.security.Identity: void <init>()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.String r1;
+        java.security.Signer r0;
+
+        r0 := @this: java.security.Signer;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.security.Identity: void <init>(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.security.IdentityScope) throws java.security.KeyManagementException
+    {
+        java.security.IdentityScope r2;
+        java.lang.String r1;
+        java.security.Signer r0;
+
+        r0 := @this: java.security.Signer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.IdentityScope;
+
+        specialinvoke r0.<java.security.Identity: void <init>(java.lang.String,java.security.IdentityScope)>(r1, r2);
+
+        return;
+    }
+
+    public java.security.PrivateKey getPrivateKey()
+    {
+        java.security.Signer r0;
+        java.security.PrivateKey $r1;
+
+        r0 := @this: java.security.Signer;
+
+        staticinvoke <java.security.Signer: void check(java.lang.String)>("getSignerPrivateKey");
+
+        $r1 = r0.<java.security.Signer: java.security.PrivateKey privateKey>;
+
+        return $r1;
+    }
+
+    public final void setKeyPair(java.security.KeyPair) throws java.security.InvalidParameterException, java.security.KeyException
+    {
+        java.security.KeyPair r0;
+        java.security.PrivilegedActionException $r6;
+        java.security.PublicKey $r1;
+        java.security.KeyManagementException $r8;
+        java.lang.Exception $r7;
+        java.security.InvalidParameterException $r3;
+        java.security.PrivateKey $r2;
+        java.security.Signer$1 $r4;
+        java.security.Signer r5;
+
+        r5 := @this: java.security.Signer;
+
+        r0 := @parameter0: java.security.KeyPair;
+
+        staticinvoke <java.security.Signer: void check(java.lang.String)>("setSignerKeyPair");
+
+        $r1 = virtualinvoke r0.<java.security.KeyPair: java.security.PublicKey getPublic()>();
+
+        $r2 = virtualinvoke r0.<java.security.KeyPair: java.security.PrivateKey getPrivate()>();
+
+        if $r1 == null goto label1;
+
+        if $r2 != null goto label2;
+
+     label1:
+        $r3 = new java.security.InvalidParameterException;
+
+        specialinvoke $r3.<java.security.InvalidParameterException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r4 = new java.security.Signer$1;
+
+        specialinvoke $r4.<java.security.Signer$1: void <init>(java.security.Signer,java.security.PublicKey)>(r5, $r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r4);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = virtualinvoke $r6.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r8 = (java.security.KeyManagementException) $r7;
+
+        throw $r8;
+
+     label5:
+        r5.<java.security.Signer: java.security.PrivateKey privateKey> = $r2;
+
+        return;
+
+        catch java.security.PrivilegedActionException from label2 to label3 with label4;
+    }
+
+    java.lang.String printKeys()
+    {
+        java.security.PrivateKey $r2;
+        java.security.PublicKey $r1;
+        java.lang.String r3;
+        java.security.Signer r0;
+
+        r0 := @this: java.security.Signer;
+
+        $r1 = virtualinvoke r0.<java.security.Signer: java.security.PublicKey getPublicKey()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.security.Signer: java.security.PrivateKey privateKey>;
+
+        if $r2 == null goto label1;
+
+        r3 = "\tpublic and private keys initialized";
+
+        goto label2;
+
+     label1:
+        r3 = "\tno keys";
+
+     label2:
+        return r3;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.StringBuilder $r0, $r1, $r4;
+        java.lang.String $r3, $r5;
+        java.security.Signer r2;
+
+        r2 := @this: java.security.Signer;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Signer]");
+
+        $r3 = specialinvoke r2.<java.security.Identity: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private static void check(java.lang.String)
+    {
+        java.lang.String r1;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkSecurityAccess(java.lang.String)>(r1);
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.security.Signer: long serialVersionUID> = -1763464102261361480L;
+
+        return;
+    }
+}

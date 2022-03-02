@@ -1,0 +1,2253 @@
+public class java.util.logging.LogManager extends java.lang.Object
+{
+    private static final java.util.logging.LogManager manager;
+    private volatile java.util.Properties props;
+    private static final java.util.logging.Level defaultLevel;
+    private final java.util.Map listenerMap;
+    private final java.util.logging.LogManager$LoggerContext systemContext;
+    private final java.util.logging.LogManager$LoggerContext userContext;
+    private volatile java.util.logging.Logger rootLogger;
+    private volatile boolean readPrimordialConfiguration;
+    private boolean initializedGlobalHandlers;
+    private boolean deathImminent;
+    private boolean initializedCalled;
+    private volatile boolean initializationDone;
+    private java.util.WeakHashMap contextsMap;
+    private final java.lang.ref.ReferenceQueue loggerRefQueue;
+    private static final int MAX_ITERATIONS;
+    private final java.security.Permission controlPermission;
+    private static java.util.logging.LoggingMXBean loggingMXBean;
+    public static final java.lang.String LOGGING_MXBEAN_NAME;
+    static final boolean $assertionsDisabled;
+
+    protected void <init>()
+    {
+        java.lang.Void $r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $r1 = staticinvoke <java.util.logging.LogManager: java.lang.Void checkSubclassPermissions()>();
+
+        specialinvoke r0.<java.util.logging.LogManager: void <init>(java.lang.Void)>($r1);
+
+        return;
+    }
+
+    private void <init>(java.lang.Void)
+    {
+        java.util.logging.LogManager$SystemLoggerContext $r3;
+        java.lang.IllegalStateException $r9;
+        java.lang.Void r10;
+        java.util.Properties $r1;
+        java.util.logging.LogManager$LoggerContext $r4;
+        java.util.logging.LogManager r0;
+        java.lang.Runtime $r7;
+        java.util.HashMap $r2;
+        java.lang.ref.ReferenceQueue $r5;
+        java.util.logging.LoggingPermission $r6;
+        java.util.logging.LogManager$Cleaner $r8;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r10 := @parameter0: java.lang.Void;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        r0.<java.util.logging.LogManager: java.util.Properties props> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<java.util.logging.LogManager: java.util.Map listenerMap> = $r2;
+
+        $r3 = new java.util.logging.LogManager$SystemLoggerContext;
+
+        specialinvoke $r3.<java.util.logging.LogManager$SystemLoggerContext: void <init>(java.util.logging.LogManager)>(r0);
+
+        r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext systemContext> = $r3;
+
+        $r4 = new java.util.logging.LogManager$LoggerContext;
+
+        specialinvoke $r4.<java.util.logging.LogManager$LoggerContext: void <init>(java.util.logging.LogManager,java.util.logging.LogManager$1)>(r0, null);
+
+        r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext userContext> = $r4;
+
+        r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers> = 1;
+
+        r0.<java.util.logging.LogManager: boolean initializedCalled> = 0;
+
+        r0.<java.util.logging.LogManager: boolean initializationDone> = 0;
+
+        r0.<java.util.logging.LogManager: java.util.WeakHashMap contextsMap> = null;
+
+        $r5 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r5.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        r0.<java.util.logging.LogManager: java.lang.ref.ReferenceQueue loggerRefQueue> = $r5;
+
+        $r6 = new java.util.logging.LoggingPermission;
+
+        specialinvoke $r6.<java.util.logging.LoggingPermission: void <init>(java.lang.String,java.lang.String)>("control", null);
+
+        r0.<java.util.logging.LogManager: java.security.Permission controlPermission> = $r6;
+
+     label1:
+        $r7 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $r8 = new java.util.logging.LogManager$Cleaner;
+
+        specialinvoke $r8.<java.util.logging.LogManager$Cleaner: void <init>(java.util.logging.LogManager,java.util.logging.LogManager$1)>(r0, null);
+
+        virtualinvoke $r7.<java.lang.Runtime: void addShutdownHook(java.lang.Thread)>($r8);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.IllegalStateException from label1 to label2 with label3;
+    }
+
+    private static java.lang.Void checkSubclassPermissions()
+    {
+        java.lang.RuntimePermission $r1, $r2;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>("shutdownHooks");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("setContextClassLoader");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        return null;
+    }
+
+    final void ensureLogManagerInitialized()
+    {
+        java.util.logging.LogManager$2 $r2;
+        java.lang.Throwable $r4, $r5;
+        java.util.logging.LogManager r0, $r1;
+        java.lang.AssertionError $r3;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $z0 = r0.<java.util.logging.LogManager: boolean initializationDone>;
+
+        if $z0 != 0 goto label01;
+
+        $r1 = <java.util.logging.LogManager: java.util.logging.LogManager manager>;
+
+        if r0 == $r1 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        $z1 = r0.<java.util.logging.LogManager: boolean initializedCalled>;
+
+        if $z1 != 1 goto label04;
+
+        $z7 = 1;
+
+        goto label05;
+
+     label04:
+        $z7 = 0;
+
+     label05:
+        z2 = $z7;
+
+        $z3 = <java.util.logging.LogManager: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label06;
+
+        $z5 = r0.<java.util.logging.LogManager: boolean initializedCalled>;
+
+        if $z5 != 0 goto label06;
+
+        $z6 = r0.<java.util.logging.LogManager: boolean initializationDone>;
+
+        if $z6 == 0 goto label06;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Initialization can\'t be done if initialized has not been called!");
+
+        throw $r3;
+
+     label06:
+        if z2 != 0 goto label07;
+
+        $z4 = r0.<java.util.logging.LogManager: boolean initializationDone>;
+
+        if $z4 == 0 goto label09;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        return;
+
+     label09:
+        r0.<java.util.logging.LogManager: boolean initializedCalled> = 1;
+
+     label10:
+        $r2 = new java.util.logging.LogManager$2;
+
+        specialinvoke $r2.<java.util.logging.LogManager$2: void <init>(java.util.logging.LogManager,java.util.logging.LogManager)>(r0, r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+     label11:
+        r0.<java.util.logging.LogManager: boolean initializationDone> = 1;
+
+        goto label14;
+
+     label12:
+        $r5 := @caughtexception;
+
+     label13:
+        r0.<java.util.logging.LogManager: boolean initializationDone> = 1;
+
+        throw $r5;
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label17:
+        throw $r4;
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch java.lang.Throwable from label03 to label08 with label16;
+        catch java.lang.Throwable from label09 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public static java.util.logging.LogManager getLogManager()
+    {
+        java.util.logging.LogManager $r0, $r1, $r2;
+
+        $r0 = <java.util.logging.LogManager: java.util.logging.LogManager manager>;
+
+        if $r0 == null goto label1;
+
+        $r2 = <java.util.logging.LogManager: java.util.logging.LogManager manager>;
+
+        virtualinvoke $r2.<java.util.logging.LogManager: void ensureLogManagerInitialized()>();
+
+     label1:
+        $r1 = <java.util.logging.LogManager: java.util.logging.LogManager manager>;
+
+        return $r1;
+    }
+
+    private void readPrimordialConfiguration()
+    {
+        java.io.PrintStream $r1;
+        java.lang.Throwable $r3;
+        java.util.logging.LogManager$3 $r2;
+        java.util.logging.LogManager r0;
+        java.lang.AssertionError $r5;
+        java.lang.Exception $r4;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $z0 = r0.<java.util.logging.LogManager: boolean readPrimordialConfiguration>;
+
+        if $z0 != 0 goto label11;
+
+        entermonitor r0;
+
+     label01:
+        $z1 = r0.<java.util.logging.LogManager: boolean readPrimordialConfiguration>;
+
+        if $z1 != 0 goto label07;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        if $r1 != null goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        r0.<java.util.logging.LogManager: boolean readPrimordialConfiguration> = 1;
+
+     label04:
+        $r2 = new java.util.logging.LogManager$3;
+
+        specialinvoke $r2.<java.util.logging.LogManager$3: void <init>(java.util.logging.LogManager)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r2);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r4 := @caughtexception;
+
+        $z2 = <java.util.logging.LogManager: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label07;
+
+        $r5 = new java.lang.AssertionError;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception raised while reading logging configuration: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>(java.lang.Object)>($r9);
+
+        throw $r5;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r3;
+
+     label11:
+        return;
+
+        catch java.lang.Exception from label04 to label05 with label06;
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void addPropertyChangeListener(java.beans.PropertyChangeListener) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r9;
+        java.util.logging.LogManager r3;
+        java.lang.Integer $r7, r10;
+        java.beans.PropertyChangeListener r0, r2;
+        java.util.Map $r4, $r5, $r8;
+        int $i0, $i1;
+        java.lang.Object $r1, $r6;
+
+        r3 := @this: java.util.logging.LogManager;
+
+        r0 := @parameter0: java.beans.PropertyChangeListener;
+
+        $r1 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = (java.beans.PropertyChangeListener) $r1;
+
+        virtualinvoke r3.<java.util.logging.LogManager: void checkPermission()>();
+
+        $r4 = r3.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        entermonitor $r4;
+
+     label1:
+        $r5 = r3.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r10 = (java.lang.Integer) $r6;
+
+        if r10 != null goto label2;
+
+        $i1 = 1;
+
+        goto label3;
+
+     label2:
+        $i0 = virtualinvoke r10.<java.lang.Integer: int intValue()>();
+
+        $i1 = $i0 + 1;
+
+     label3:
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r8 = r3.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r7);
+
+        exitmonitor $r4;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r9 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label6:
+        throw $r9;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void removePropertyChangeListener(java.beans.PropertyChangeListener) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r10;
+        java.util.logging.LogManager r0;
+        java.lang.AssertionError $r8;
+        java.lang.Integer r5, $r7;
+        java.beans.PropertyChangeListener r1;
+        java.util.Map $r2, $r3, $r6, $r9;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.beans.PropertyChangeListener;
+
+        virtualinvoke r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        if r1 == null goto label8;
+
+        $r2 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r5 = (java.lang.Integer) $r4;
+
+        if r5 == null goto label4;
+
+        $i0 = virtualinvoke r5.<java.lang.Integer: int intValue()>();
+
+        if $i0 != 1 goto label2;
+
+        $r9 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r1);
+
+        goto label4;
+
+     label2:
+        $z0 = <java.util.logging.LogManager: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        if $i0 > 1 goto label3;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        $r6 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        $i1 = $i0 - 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r7);
+
+     label4:
+        exitmonitor $r2;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r10;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private java.util.logging.LogManager$LoggerContext getUserContext()
+    {
+        java.lang.Throwable $r11;
+        java.util.logging.LogManager$LoggerContext $r7, $r10, r12, $r13;
+        java.util.logging.LogManager r2;
+        java.lang.SecurityManager $r0;
+        sun.misc.JavaAWTAccess $r1;
+        java.lang.Object $r3, $r6;
+        java.util.WeakHashMap $r4, $r5, $r8, $r9;
+
+        r2 := @this: java.util.logging.LogManager;
+
+        r12 = null;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        $r1 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaAWTAccess getJavaAWTAccess()>();
+
+        if $r0 == null goto label7;
+
+        if $r1 == null goto label7;
+
+        $r3 = interfaceinvoke $r1.<sun.misc.JavaAWTAccess: java.lang.Object getAppletContext()>();
+
+        if $r3 == null goto label7;
+
+        entermonitor $r1;
+
+     label1:
+        $r4 = r2.<java.util.logging.LogManager: java.util.WeakHashMap contextsMap>;
+
+        if $r4 != null goto label2;
+
+        $r9 = new java.util.WeakHashMap;
+
+        specialinvoke $r9.<java.util.WeakHashMap: void <init>()>();
+
+        r2.<java.util.logging.LogManager: java.util.WeakHashMap contextsMap> = $r9;
+
+     label2:
+        $r5 = r2.<java.util.logging.LogManager: java.util.WeakHashMap contextsMap>;
+
+        $r6 = virtualinvoke $r5.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r10 = (java.util.logging.LogManager$LoggerContext) $r6;
+
+        r12 = $r10;
+
+        if $r10 != null goto label3;
+
+        $r7 = new java.util.logging.LogManager$LoggerContext;
+
+        specialinvoke $r7.<java.util.logging.LogManager$LoggerContext: void <init>(java.util.logging.LogManager,java.util.logging.LogManager$1)>(r2, null);
+
+        r12 = $r7;
+
+        $r8 = r2.<java.util.logging.LogManager: java.util.WeakHashMap contextsMap>;
+
+        virtualinvoke $r8.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r7);
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r11;
+
+     label7:
+        if r12 == null goto label8;
+
+        $r13 = r12;
+
+        goto label9;
+
+     label8:
+        $r13 = r2.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext userContext>;
+
+     label9:
+        return $r13;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    final java.util.logging.LogManager$LoggerContext getSystemContext()
+    {
+        java.util.logging.LogManager$LoggerContext $r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $r1 = r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext systemContext>;
+
+        return $r1;
+    }
+
+    private java.util.List contexts()
+    {
+        java.util.logging.LogManager$LoggerContext $r2, $r3;
+        java.util.logging.LogManager r1;
+        java.util.ArrayList $r0;
+
+        r1 := @this: java.util.logging.LogManager;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getSystemContext()>();
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        $r3 = specialinvoke r1.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getUserContext()>();
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        return $r0;
+    }
+
+    java.util.logging.Logger demandLogger(java.lang.String, java.lang.String, java.lang.Class)
+    {
+        java.util.logging.LogManager r0;
+        java.util.logging.Logger $r2, $r3, $r6, r7;
+        java.lang.Class r5;
+        java.lang.String r1, r4;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.Class;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.util.logging.Logger getLogger(java.lang.String)>(r1);
+
+        r7 = $r2;
+
+        if $r2 != null goto label3;
+
+        $r3 = new java.util.logging.Logger;
+
+        specialinvoke $r3.<java.util.logging.Logger: void <init>(java.lang.String,java.lang.String,java.lang.Class,java.util.logging.LogManager,boolean)>(r1, r4, r5, r0, 0);
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.logging.LogManager: boolean addLogger(java.util.logging.Logger)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        return $r3;
+
+     label2:
+        $r6 = virtualinvoke r0.<java.util.logging.LogManager: java.util.logging.Logger getLogger(java.lang.String)>(r1);
+
+        r7 = $r6;
+
+        if $r6 == null goto label1;
+
+     label3:
+        return r7;
+    }
+
+    java.util.logging.Logger demandSystemLogger(java.lang.String, java.lang.String)
+    {
+        java.util.logging.LogManager$LoggerContext $r1;
+        java.util.logging.LogManager r0;
+        java.util.logging.Handler[] $r5;
+        java.util.logging.Logger $r4, r7;
+        java.util.logging.LogManager$4 $r6;
+        int $i0;
+        java.lang.String r2, r3;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getSystemContext()>();
+
+        $r4 = virtualinvoke $r1.<java.util.logging.LogManager$LoggerContext: java.util.logging.Logger demandLogger(java.lang.String,java.lang.String)>(r2, r3);
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.logging.LogManager: boolean addLogger(java.util.logging.Logger)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        r7 = $r4;
+
+        goto label3;
+
+     label2:
+        r7 = virtualinvoke r0.<java.util.logging.LogManager: java.util.logging.Logger getLogger(java.lang.String)>(r2);
+
+     label3:
+        if r7 == null goto label1;
+
+        if r7 == $r4 goto label4;
+
+        $r5 = virtualinvoke $r4.<java.util.logging.Logger: java.util.logging.Handler[] accessCheckedHandlers()>();
+
+        $i0 = lengthof $r5;
+
+        if $i0 != 0 goto label4;
+
+        $r6 = new java.util.logging.LogManager$4;
+
+        specialinvoke $r6.<java.util.logging.LogManager$4: void <init>(java.util.logging.LogManager,java.util.logging.Logger,java.util.logging.Logger)>(r0, r7, $r4);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+     label4:
+        return $r4;
+    }
+
+    private void loadLoggerHandlers(java.util.logging.Logger, java.lang.String, java.lang.String)
+    {
+        java.util.logging.LogManager r1;
+        java.lang.String r2, r4;
+        java.util.logging.Logger r3;
+        java.util.logging.LogManager$5 $r0;
+
+        r1 := @this: java.util.logging.LogManager;
+
+        r3 := @parameter0: java.util.logging.Logger;
+
+        r4 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        $r0 = new java.util.logging.LogManager$5;
+
+        specialinvoke $r0.<java.util.logging.LogManager$5: void <init>(java.util.logging.LogManager,java.lang.String,java.util.logging.Logger)>(r1, r2, r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    final void drainLoggerRefQueueBounded()
+    {
+        java.lang.ref.Reference $r3;
+        java.util.logging.LogManager r0;
+        int i0;
+        java.lang.ref.ReferenceQueue $r1, $r2;
+        java.util.logging.LogManager$LoggerWeakRef r4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        i0 = 0;
+
+     label1:
+        if i0 >= 400 goto label4;
+
+        $r1 = r0.<java.util.logging.LogManager: java.lang.ref.ReferenceQueue loggerRefQueue>;
+
+        if $r1 != null goto label2;
+
+        goto label4;
+
+     label2:
+        $r2 = r0.<java.util.logging.LogManager: java.lang.ref.ReferenceQueue loggerRefQueue>;
+
+        $r3 = virtualinvoke $r2.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        r4 = (java.util.logging.LogManager$LoggerWeakRef) $r3;
+
+        if r4 != null goto label3;
+
+        goto label4;
+
+     label3:
+        virtualinvoke r4.<java.util.logging.LogManager$LoggerWeakRef: void dispose()>();
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public boolean addLogger(java.util.logging.Logger)
+    {
+        java.util.logging.LogManager$LoggerContext $r3;
+        java.util.logging.LogManager r2;
+        java.util.logging.Logger r0;
+        java.lang.NullPointerException $r8;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String $r1, $r7;
+        boolean $z0;
+
+        r2 := @this: java.util.logging.LogManager;
+
+        r0 := @parameter0: java.util.logging.Logger;
+
+        $r1 = virtualinvoke r0.<java.util.logging.Logger: java.lang.String getName()>();
+
+        if $r1 != null goto label1;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label1:
+        virtualinvoke r2.<java.util.logging.LogManager: void drainLoggerRefQueueBounded()>();
+
+        $r3 = specialinvoke r2.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getUserContext()>();
+
+        $z0 = virtualinvoke $r3.<java.util.logging.LogManager$LoggerContext: boolean addLocalLogger(java.util.logging.Logger)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handlers");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r2.<java.util.logging.LogManager: void loadLoggerHandlers(java.util.logging.Logger,java.lang.String,java.lang.String)>(r0, $r1, $r7);
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static void doSetLevel(java.util.logging.Logger, java.util.logging.Level)
+    {
+        java.util.logging.LogManager$6 $r1;
+        java.util.logging.Logger r2;
+        java.lang.SecurityManager $r0;
+        java.util.logging.Level r3;
+
+        r2 := @parameter0: java.util.logging.Logger;
+
+        r3 := @parameter1: java.util.logging.Level;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        virtualinvoke r2.<java.util.logging.Logger: void setLevel(java.util.logging.Level)>(r3);
+
+        return;
+
+     label1:
+        $r1 = new java.util.logging.LogManager$6;
+
+        specialinvoke $r1.<java.util.logging.LogManager$6: void <init>(java.util.logging.Logger,java.util.logging.Level)>(r2, r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+
+    private static void doSetParent(java.util.logging.Logger, java.util.logging.Logger)
+    {
+        java.util.logging.Logger r2, r3;
+        java.util.logging.LogManager$7 $r1;
+        java.lang.SecurityManager $r0;
+
+        r2 := @parameter0: java.util.logging.Logger;
+
+        r3 := @parameter1: java.util.logging.Logger;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        virtualinvoke r2.<java.util.logging.Logger: void setParent(java.util.logging.Logger)>(r3);
+
+        return;
+
+     label1:
+        $r1 = new java.util.logging.LogManager$7;
+
+        specialinvoke $r1.<java.util.logging.LogManager$7: void <init>(java.util.logging.Logger,java.util.logging.Logger)>(r2, r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+
+    public java.util.logging.Logger getLogger(java.lang.String)
+    {
+        java.util.logging.LogManager$LoggerContext $r1;
+        java.util.logging.LogManager r0;
+        java.lang.String r2;
+        java.util.logging.Logger $r3;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getUserContext()>();
+
+        $r3 = virtualinvoke $r1.<java.util.logging.LogManager$LoggerContext: java.util.logging.Logger findLogger(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    public java.util.Enumeration getLoggerNames()
+    {
+        java.util.logging.LogManager$LoggerContext $r1;
+        java.util.Enumeration $r2;
+        java.util.logging.LogManager r0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $r1 = specialinvoke r0.<java.util.logging.LogManager: java.util.logging.LogManager$LoggerContext getUserContext()>();
+
+        $r2 = virtualinvoke $r1.<java.util.logging.LogManager$LoggerContext: java.util.Enumeration getLoggerNames()>();
+
+        return $r2;
+    }
+
+    public void readConfiguration() throws java.io.IOException, java.lang.SecurityException
+    {
+        java.io.BufferedInputStream $r4;
+        java.util.logging.LogManager r0;
+        java.lang.Thread $r28;
+        java.lang.Exception $r15;
+        java.lang.StringBuilder $r16, $r18, $r19, $r20, $r22, $r24, $r25;
+        java.lang.ClassLoader $r9, $r29;
+        java.lang.Throwable $r11, $r12, $r13, r32;
+        java.lang.Error $r8;
+        java.lang.String $r1, $r2, $r5, $r21, $r26, r31;
+        java.io.PrintStream $r17, $r23;
+        java.io.FileInputStream $r3;
+        java.io.File $r6, $r7;
+        java.lang.Class $r10, $r30;
+        java.lang.ClassNotFoundException $r27;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        virtualinvoke r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.util.logging.config.class");
+
+        if $r1 == null goto label06;
+
+     label01:
+        $r9 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r1);
+
+        virtualinvoke $r10.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label02:
+        return;
+
+     label03:
+        $r27 := @caughtexception;
+
+        $r28 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r1);
+
+        virtualinvoke $r30.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label04:
+        return;
+
+     label05:
+        $r15 := @caughtexception;
+
+        $r17 = <java.lang.System: java.io.PrintStream err>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Logging configuration class \"");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" failed");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<java.io.PrintStream: void println(java.lang.String)>($r21);
+
+        $r23 = <java.lang.System: java.io.PrintStream err>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<java.io.PrintStream: void println(java.lang.String)>($r26);
+
+     label06:
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.util.logging.config.file");
+
+        r31 = $r2;
+
+        if $r2 != null goto label08;
+
+        $r5 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        if $r5 != null goto label07;
+
+        $r8 = new java.lang.Error;
+
+        specialinvoke $r8.<java.lang.Error: void <init>(java.lang.String)>("Can\'t find java.home ??");
+
+        throw $r8;
+
+     label07:
+        $r6 = new java.io.File;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r5, "lib");
+
+        $r7 = new java.io.File;
+
+        specialinvoke $r7.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "logging.properties");
+
+        r31 = virtualinvoke $r7.<java.io.File: java.lang.String getCanonicalPath()>();
+
+     label08:
+        $r3 = new java.io.FileInputStream;
+
+        specialinvoke $r3.<java.io.FileInputStream: void <init>(java.lang.String)>(r31);
+
+        r32 = null;
+
+     label09:
+        $r4 = new java.io.BufferedInputStream;
+
+        specialinvoke $r4.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r3);
+
+        virtualinvoke r0.<java.util.logging.LogManager: void readConfiguration(java.io.InputStream)>($r4);
+
+     label10:
+        if $r3 == null goto label20;
+
+        goto label11;
+
+     label11:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+        goto label20;
+
+     label12:
+        $r13 := @caughtexception;
+
+        r32 = $r13;
+
+        throw $r13;
+
+     label13:
+        $r12 := @caughtexception;
+
+     label14:
+        if $r3 == null goto label19;
+
+        if r32 == null goto label18;
+
+     label15:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label16:
+        goto label19;
+
+     label17:
+        $r11 := @caughtexception;
+
+        virtualinvoke r32.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r11);
+
+        goto label19;
+
+     label18:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label19:
+        throw $r12;
+
+     label20:
+        return;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label03;
+        catch java.lang.Exception from label01 to label02 with label05;
+        catch java.lang.Exception from label03 to label04 with label05;
+        catch java.lang.Throwable from label09 to label10 with label12;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label12 to label14 with label13;
+    }
+
+    public void reset() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r9;
+        java.util.Properties $r1;
+        java.util.logging.LogManager$LoggerContext r10;
+        java.util.Iterator $r3;
+        java.util.Enumeration $r5;
+        java.util.logging.LogManager r0;
+        java.util.logging.Logger $r8;
+        java.util.List $r2;
+        java.lang.Object $r4, $r6;
+        java.lang.String r7;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        virtualinvoke r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        entermonitor r0;
+
+     label01:
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        r0.<java.util.logging.LogManager: java.util.Properties props> = $r1;
+
+        r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers> = 1;
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r9;
+
+     label05:
+        $r2 = specialinvoke r0.<java.util.logging.LogManager: java.util.List contexts()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.util.logging.LogManager$LoggerContext) $r4;
+
+        $r5 = virtualinvoke r10.<java.util.logging.LogManager$LoggerContext: java.util.Enumeration getLoggerNames()>();
+
+     label07:
+        $z1 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label09;
+
+        $r6 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r7 = (java.lang.String) $r6;
+
+        $r8 = virtualinvoke r10.<java.util.logging.LogManager$LoggerContext: java.util.logging.Logger findLogger(java.lang.String)>(r7);
+
+        if $r8 == null goto label08;
+
+        specialinvoke r0.<java.util.logging.LogManager: void resetLogger(java.util.logging.Logger)>($r8);
+
+     label08:
+        goto label07;
+
+     label09:
+        goto label06;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+    }
+
+    private void resetLogger(java.util.logging.Logger)
+    {
+        java.util.logging.LogManager r6;
+        java.util.logging.Handler[] $r1;
+        java.util.logging.Logger r0;
+        java.lang.Exception $r5;
+        java.util.logging.Level $r3;
+        int $i0, i1;
+        java.lang.String $r2;
+        java.util.logging.Handler r4;
+        boolean $z0;
+
+        r6 := @this: java.util.logging.LogManager;
+
+        r0 := @parameter0: java.util.logging.Logger;
+
+        $r1 = virtualinvoke r0.<java.util.logging.Logger: java.util.logging.Handler[] getHandlers()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label6;
+
+        r4 = $r1[i1];
+
+        virtualinvoke r0.<java.util.logging.Logger: void removeHandler(java.util.logging.Handler)>(r4);
+
+     label2:
+        virtualinvoke r4.<java.util.logging.Handler: void close()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        $r2 = virtualinvoke r0.<java.util.logging.Logger: java.lang.String getName()>();
+
+        if $r2 == null goto label7;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label7;
+
+        $r3 = <java.util.logging.LogManager: java.util.logging.Level defaultLevel>;
+
+        virtualinvoke r0.<java.util.logging.Logger: void setLevel(java.util.logging.Level)>($r3);
+
+        goto label8;
+
+     label7:
+        virtualinvoke r0.<java.util.logging.Logger: void setLevel(java.util.logging.Level)>(null);
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    private java.lang.String[] parseClassNames(java.lang.String)
+    {
+        java.lang.Object[] $r6;
+        java.util.logging.LogManager r0;
+        java.lang.String[] $r5, $r7, $r8;
+        java.util.ArrayList $r11;
+        int $i0, $i1, i4, $i5, i6, $i7, $i8;
+        java.lang.String r1, $r2, $r3, $r9, $r10;
+        boolean $z0;
+        char $c2, $c3;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r8 = newarray (java.lang.String)[0];
+
+        return $r8;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        i4 = 0;
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>()>();
+
+     label2:
+        $i5 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i4 >= $i5 goto label8;
+
+        i6 = i4;
+
+     label3:
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i6 >= $i1 goto label6;
+
+        $c2 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(i6);
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c2);
+
+        if $z0 == 0 goto label4;
+
+        goto label6;
+
+     label4:
+        $c3 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(i6);
+
+        $i8 = (int) $c3;
+
+        if $i8 != 44 goto label5;
+
+        goto label6;
+
+     label5:
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label6:
+        $r9 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(i4, i6);
+
+        i4 = i6 + 1;
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String trim()>();
+
+        $i7 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i7 != 0 goto label7;
+
+        goto label2;
+
+     label7:
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        goto label2;
+
+     label8:
+        $i0 = interfaceinvoke $r11.<java.util.List: int size()>();
+
+        $r5 = newarray (java.lang.String)[$i0];
+
+        $r6 = interfaceinvoke $r11.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (java.lang.String[]) $r6;
+
+        return $r7;
+    }
+
+    public void readConfiguration(java.io.InputStream) throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.LogManager r0;
+        java.lang.Integer $r12;
+        java.util.Map $r4, $r5, $r15;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Set $r7;
+        java.lang.Exception $r20;
+        java.lang.StringBuilder $r21, $r23, $r24, $r25, $r27, $r29, $r30;
+        java.lang.ClassLoader $r16;
+        java.lang.Throwable $r18, $r19;
+        java.lang.String[] $r3;
+        java.util.HashMap $r14, r33;
+        java.lang.AssertionError $r13;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r26, $r31, r32;
+        java.io.PrintStream $r22, $r28;
+        java.util.Map$Entry r34;
+        java.util.Properties $r2;
+        java.util.Iterator $r8;
+        java.lang.Object $r6, $r9, $r10, $r11;
+        java.lang.Class $r17;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        virtualinvoke r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        virtualinvoke r0.<java.util.logging.LogManager: void reset()>();
+
+        $r2 = r0.<java.util.logging.LogManager: java.util.Properties props>;
+
+        virtualinvoke $r2.<java.util.Properties: void load(java.io.InputStream)>(r1);
+
+        $r3 = specialinvoke r0.<java.util.logging.LogManager: java.lang.String[] parseClassNames(java.lang.String)>("config");
+
+        i2 = 0;
+
+     label01:
+        $i0 = lengthof $r3;
+
+        if i2 >= $i0 goto label06;
+
+        r32 = $r3[i2];
+
+     label02:
+        $r16 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r32);
+
+        virtualinvoke $r17.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r20 := @caughtexception;
+
+        $r22 = <java.lang.System: java.io.PrintStream err>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t load config class \"");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<java.io.PrintStream: void println(java.lang.String)>($r26);
+
+        $r28 = <java.lang.System: java.io.PrintStream err>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r20);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>($r31);
+
+     label05:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label06:
+        specialinvoke r0.<java.util.logging.LogManager: void setLevelsOnExistingLoggers()>();
+
+        r33 = null;
+
+        $r4 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        entermonitor $r4;
+
+     label07:
+        $r5 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        $z0 = interfaceinvoke $r5.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 != 0 goto label08;
+
+        $r14 = new java.util.HashMap;
+
+        $r15 = r0.<java.util.logging.LogManager: java.util.Map listenerMap>;
+
+        specialinvoke $r14.<java.util.HashMap: void <init>(java.util.Map)>($r15);
+
+        r33 = $r14;
+
+     label08:
+        exitmonitor $r4;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r19 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r19;
+
+     label12:
+        if r33 == null goto label17;
+
+        $z1 = <java.util.logging.LogManager: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label13;
+
+        $z2 = staticinvoke <java.util.logging.LogManager$Beans: boolean isBeansPresent()>();
+
+        if $z2 != 0 goto label13;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label13:
+        $r6 = staticinvoke <java.util.logging.LogManager$Beans: java.lang.Object newPropertyChangeEvent(java.lang.Object,java.lang.String,java.lang.Object,java.lang.Object)>(class "Ljava/util/logging/LogManager;", null, null, null);
+
+        $r7 = interfaceinvoke r33.<java.util.Map: java.util.Set entrySet()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Set: java.util.Iterator iterator()>();
+
+     label14:
+        $z3 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label17;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r34 = (java.util.Map$Entry) $r9;
+
+        $r10 = interfaceinvoke r34.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r11 = interfaceinvoke r34.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r12 = (java.lang.Integer) $r11;
+
+        $i1 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        i3 = 0;
+
+     label15:
+        if i3 >= $i1 goto label16;
+
+        staticinvoke <java.util.logging.LogManager$Beans: void invokePropertyChange(java.lang.Object,java.lang.Object)>($r10, $r6);
+
+        i3 = i3 + 1;
+
+        goto label15;
+
+     label16:
+        goto label14;
+
+     label17:
+        entermonitor r0;
+
+     label18:
+        r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers> = 0;
+
+        exitmonitor r0;
+
+     label19:
+        goto label22;
+
+     label20:
+        $r18 := @caughtexception;
+
+        exitmonitor r0;
+
+     label21:
+        throw $r18;
+
+     label22:
+        return;
+
+        catch java.lang.Exception from label02 to label03 with label04;
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    public java.lang.String getProperty(java.lang.String)
+    {
+        java.util.Properties $r2;
+        java.util.logging.LogManager r0;
+        java.lang.String r1, $r3;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.logging.LogManager: java.util.Properties props>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    java.lang.String getStringProperty(java.lang.String, java.lang.String)
+    {
+        java.util.logging.LogManager r0;
+        java.lang.String r1, $r2, $r3, r4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        return r4;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        return $r3;
+    }
+
+    int getIntProperty(java.lang.String, int)
+    {
+        java.util.logging.LogManager r0;
+        int $i0, i1;
+        java.lang.String r1, $r2, $r3;
+        java.lang.Exception $r4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        return i1;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return i1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    boolean getBooleanProperty(java.lang.String, boolean)
+    {
+        java.util.logging.LogManager r0;
+        java.lang.String r1, $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, z4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        z4 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        return z4;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("1");
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("false");
+
+        if $z2 != 0 goto label4;
+
+        $z3 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("0");
+
+        if $z3 == 0 goto label5;
+
+     label4:
+        return 0;
+
+     label5:
+        return z4;
+    }
+
+    java.util.logging.Level getLevelProperty(java.lang.String, java.util.logging.Level)
+    {
+        java.util.logging.LogManager r0;
+        java.lang.String r1, $r2, $r3;
+        java.util.logging.Level $r4, r5, $r6;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.util.logging.Level;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        return r5;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $r4 = staticinvoke <java.util.logging.Level: java.util.logging.Level findLevel(java.lang.String)>($r3);
+
+        if $r4 == null goto label2;
+
+        $r6 = $r4;
+
+        goto label3;
+
+     label2:
+        $r6 = r5;
+
+     label3:
+        return $r6;
+    }
+
+    java.util.logging.Filter getFilterProperty(java.lang.String, java.util.logging.Filter)
+    {
+        java.util.logging.Filter r3, $r7;
+        java.util.logging.LogManager r0;
+        java.lang.Exception $r8;
+        java.lang.Class $r5;
+        java.lang.Object $r6;
+        java.lang.String r1, $r2;
+        java.lang.ClassLoader $r4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.util.logging.Filter;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+     label1:
+        if $r2 == null goto label3;
+
+        $r4 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r7 = (java.util.logging.Filter) $r6;
+
+     label2:
+        return $r7;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+     label5:
+        return r3;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    java.util.logging.Formatter getFormatterProperty(java.lang.String, java.util.logging.Formatter)
+    {
+        java.util.logging.LogManager r0;
+        java.util.logging.Formatter r3, $r7;
+        java.lang.Exception $r8;
+        java.lang.Class $r5;
+        java.lang.Object $r6;
+        java.lang.String r1, $r2;
+        java.lang.ClassLoader $r4;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.util.logging.Formatter;
+
+        $r2 = virtualinvoke r0.<java.util.logging.LogManager: java.lang.String getProperty(java.lang.String)>(r1);
+
+     label1:
+        if $r2 == null goto label3;
+
+        $r4 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r7 = (java.util.logging.Formatter) $r6;
+
+     label2:
+        return $r7;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+     label5:
+        return r3;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    private synchronized void initializeGlobalHandlers()
+    {
+        java.util.logging.LogManager r0;
+        java.util.logging.Logger $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $z0 = r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers> = 1;
+
+        $z1 = r0.<java.util.logging.LogManager: boolean deathImminent>;
+
+        if $z1 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = r0.<java.util.logging.LogManager: java.util.logging.Logger rootLogger>;
+
+        specialinvoke r0.<java.util.logging.LogManager: void loadLoggerHandlers(java.util.logging.Logger,java.lang.String,java.lang.String)>($r1, null, "handlers");
+
+        return;
+    }
+
+    void checkPermission()
+    {
+        java.security.Permission $r2;
+        java.lang.SecurityManager $r0;
+        java.util.logging.LogManager r1;
+
+        r1 := @this: java.util.logging.LogManager;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = r1.<java.util.logging.LogManager: java.security.Permission controlPermission>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        return;
+    }
+
+    public void checkAccess() throws java.lang.SecurityException
+    {
+        java.util.logging.LogManager r0;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        virtualinvoke r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        return;
+    }
+
+    private synchronized void setLevelsOnExistingLoggers()
+    {
+        java.util.logging.LogManager$LoggerContext r10;
+        java.util.Enumeration $r2;
+        java.util.logging.LogManager r0;
+        java.util.logging.Level $r6;
+        int $i0, i1;
+        java.lang.String r4, $r5, $r16;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r13;
+        java.util.Properties $r1;
+        java.util.Iterator $r8;
+        java.util.logging.Logger $r11;
+        java.util.List $r7;
+        java.lang.Object $r3, $r9;
+        java.lang.StringBuilder $r12, $r14, $r15;
+
+        r0 := @this: java.util.logging.LogManager;
+
+        $r1 = r0.<java.util.logging.LogManager: java.util.Properties props>;
+
+        $r2 = virtualinvoke $r1.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label1:
+        $z1 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $z0 = virtualinvoke r4.<java.lang.String: boolean endsWith(java.lang.String)>(".level");
+
+        if $z0 != 0 goto label2;
+
+        goto label1;
+
+     label2:
+        $i0 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        i1 = $i0 - 6;
+
+        $r5 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int,int)>(0, i1);
+
+        $r6 = virtualinvoke r0.<java.util.logging.LogManager: java.util.logging.Level getLevelProperty(java.lang.String,java.util.logging.Level)>(r4, null);
+
+        if $r6 != null goto label3;
+
+        $r13 = <java.lang.System: java.io.PrintStream err>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad level value for property: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>($r16);
+
+        goto label1;
+
+     label3:
+        $r7 = specialinvoke r0.<java.util.logging.LogManager: java.util.List contexts()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.util.logging.LogManager$LoggerContext) $r9;
+
+        $r11 = virtualinvoke r10.<java.util.logging.LogManager$LoggerContext: java.util.logging.Logger findLogger(java.lang.String)>($r5);
+
+        if $r11 != null goto label5;
+
+        goto label4;
+
+     label5:
+        virtualinvoke $r11.<java.util.logging.Logger: void setLevel(java.util.logging.Level)>($r6);
+
+        goto label4;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    public static synchronized java.util.logging.LoggingMXBean getLoggingMXBean()
+    {
+        java.util.logging.LoggingMXBean $r0, $r1;
+        java.util.logging.Logging $r2;
+
+        $r0 = <java.util.logging.LogManager: java.util.logging.LoggingMXBean loggingMXBean>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.util.logging.Logging;
+
+        specialinvoke $r2.<java.util.logging.Logging: void <init>()>();
+
+        <java.util.logging.LogManager: java.util.logging.LoggingMXBean loggingMXBean> = $r2;
+
+     label1:
+        $r1 = <java.util.logging.LogManager: java.util.logging.LoggingMXBean loggingMXBean>;
+
+        return $r1;
+    }
+
+    static java.util.logging.LogManager access$100()
+    {
+        java.util.logging.LogManager $r0;
+
+        $r0 = <java.util.logging.LogManager: java.util.logging.LogManager manager>;
+
+        return $r0;
+    }
+
+    static boolean access$202(java.util.logging.LogManager, boolean)
+    {
+        java.util.logging.LogManager r0;
+        boolean z0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        z0 := @parameter1: boolean;
+
+        r0.<java.util.logging.LogManager: boolean deathImminent> = z0;
+
+        return z0;
+    }
+
+    static boolean access$302(java.util.logging.LogManager, boolean)
+    {
+        java.util.logging.LogManager r0;
+        boolean z0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        z0 := @parameter1: boolean;
+
+        r0.<java.util.logging.LogManager: boolean initializedGlobalHandlers> = z0;
+
+        return z0;
+    }
+
+    static java.util.logging.Logger access$500(java.util.logging.LogManager)
+    {
+        java.util.logging.Logger $r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        $r1 = r0.<java.util.logging.LogManager: java.util.logging.Logger rootLogger>;
+
+        return $r1;
+    }
+
+    static boolean access$600(java.util.logging.LogManager)
+    {
+        java.util.logging.LogManager r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        $z0 = r0.<java.util.logging.LogManager: boolean initializedCalled>;
+
+        return $z0;
+    }
+
+    static boolean access$700(java.util.logging.LogManager)
+    {
+        java.util.logging.LogManager r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        $z0 = r0.<java.util.logging.LogManager: boolean initializationDone>;
+
+        return $z0;
+    }
+
+    static void access$800(java.util.logging.LogManager)
+    {
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        specialinvoke r0.<java.util.logging.LogManager: void readPrimordialConfiguration()>();
+
+        return;
+    }
+
+    static java.util.logging.Logger access$502(java.util.logging.LogManager, java.util.logging.Logger)
+    {
+        java.util.logging.Logger r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        r1 := @parameter1: java.util.logging.Logger;
+
+        r0.<java.util.logging.LogManager: java.util.logging.Logger rootLogger> = r1;
+
+        return r1;
+    }
+
+    static java.util.logging.Level access$1000()
+    {
+        java.util.logging.Level $r0;
+
+        $r0 = <java.util.logging.LogManager: java.util.logging.Level defaultLevel>;
+
+        return $r0;
+    }
+
+    static void access$1100(java.util.logging.Logger, java.util.logging.Level)
+    {
+        java.util.logging.Logger r0;
+        java.util.logging.Level r1;
+
+        r0 := @parameter0: java.util.logging.Logger;
+
+        r1 := @parameter1: java.util.logging.Level;
+
+        staticinvoke <java.util.logging.LogManager: void doSetLevel(java.util.logging.Logger,java.util.logging.Level)>(r0, r1);
+
+        return;
+    }
+
+    static void access$1200(java.util.logging.Logger, java.util.logging.Logger)
+    {
+        java.util.logging.Logger r0, r1;
+
+        r0 := @parameter0: java.util.logging.Logger;
+
+        r1 := @parameter1: java.util.logging.Logger;
+
+        staticinvoke <java.util.logging.LogManager: void doSetParent(java.util.logging.Logger,java.util.logging.Logger)>(r0, r1);
+
+        return;
+    }
+
+    static java.lang.String[] access$1300(java.util.logging.LogManager, java.lang.String)
+    {
+        java.lang.String[] $r2;
+        java.lang.String r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<java.util.logging.LogManager: java.lang.String[] parseClassNames(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static java.lang.ref.ReferenceQueue access$1400(java.util.logging.LogManager)
+    {
+        java.lang.ref.ReferenceQueue $r1;
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        $r1 = r0.<java.util.logging.LogManager: java.lang.ref.ReferenceQueue loggerRefQueue>;
+
+        return $r1;
+    }
+
+    static void access$1500(java.util.logging.LogManager)
+    {
+        java.util.logging.LogManager r0;
+
+        r0 := @parameter0: java.util.logging.LogManager;
+
+        specialinvoke r0.<java.util.logging.LogManager: void initializeGlobalHandlers()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.logging.LogManager$1 $r2;
+        java.util.logging.LogManager $r4;
+        java.lang.Class $r0;
+        java.lang.Object $r3;
+        boolean $z0, $z1;
+        java.util.logging.Level $r1;
+
+        <java.util.logging.LogManager: java.lang.String LOGGING_MXBEAN_NAME> = "java.util.logging:type=Logging";
+
+        <java.util.logging.LogManager: int MAX_ITERATIONS> = 400;
+
+        $r0 = class "Ljava/util/logging/LogManager;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.util.logging.LogManager: boolean $assertionsDisabled> = $z1;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        <java.util.logging.LogManager: java.util.logging.Level defaultLevel> = $r1;
+
+        $r2 = new java.util.logging.LogManager$1;
+
+        specialinvoke $r2.<java.util.logging.LogManager$1: void <init>()>();
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.util.logging.LogManager) $r3;
+
+        <java.util.logging.LogManager: java.util.logging.LogManager manager> = $r4;
+
+        <java.util.logging.LogManager: java.util.logging.LoggingMXBean loggingMXBean> = null;
+
+        return;
+    }
+}

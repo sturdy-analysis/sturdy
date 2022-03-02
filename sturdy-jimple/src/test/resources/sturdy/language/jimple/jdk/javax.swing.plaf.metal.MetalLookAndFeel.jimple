@@ -1,0 +1,5259 @@
+public class javax.swing.plaf.metal.MetalLookAndFeel extends javax.swing.plaf.basic.BasicLookAndFeel
+{
+    private static boolean METAL_LOOK_AND_FEEL_INITED;
+    private static boolean checkedWindows;
+    private static boolean isWindows;
+    private static boolean checkedSystemFontSettings;
+    private static boolean useSystemFonts;
+    static java.lang.ref.ReferenceQueue queue;
+
+    public void <init>()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void <init>()>();
+
+        return;
+    }
+
+    static boolean isWindows()
+    {
+        java.security.PrivilegedAction $r0;
+        sun.security.action.GetPropertyAction $r4;
+        sun.awt.OSInfo$OSType r2, $r3;
+        java.lang.Boolean $r7;
+        java.lang.Object $r1, $r5;
+        java.lang.String r6;
+        boolean $z0, $z1, $z2, $z3;
+
+        $z0 = <javax.swing.plaf.metal.MetalLookAndFeel: boolean checkedWindows>;
+
+        if $z0 != 0 goto label4;
+
+        $r0 = staticinvoke <sun.awt.OSInfo: java.security.PrivilegedAction getOSTypeAction()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (sun.awt.OSInfo$OSType) $r1;
+
+        $r3 = <sun.awt.OSInfo$OSType: sun.awt.OSInfo$OSType WINDOWS>;
+
+        if r2 != $r3 goto label3;
+
+        <javax.swing.plaf.metal.MetalLookAndFeel: boolean isWindows> = 1;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("swing.useSystemFontSettings");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r6 = (java.lang.String) $r5;
+
+        if r6 == null goto label1;
+
+        $r7 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>(r6);
+
+        $z1 = virtualinvoke $r7.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <javax.swing.plaf.metal.MetalLookAndFeel: boolean useSystemFonts> = $z2;
+
+     label3:
+        <javax.swing.plaf.metal.MetalLookAndFeel: boolean checkedWindows> = 1;
+
+     label4:
+        $z3 = <javax.swing.plaf.metal.MetalLookAndFeel: boolean isWindows>;
+
+        return $z3;
+    }
+
+    static boolean useSystemFonts()
+    {
+        java.lang.Boolean $r1;
+        java.lang.Object $r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        $z0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean isWindows()>();
+
+        if $z0 == 0 goto label5;
+
+        $z1 = <javax.swing.plaf.metal.MetalLookAndFeel: boolean useSystemFonts>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = <javax.swing.plaf.metal.MetalLookAndFeel: boolean METAL_LOOK_AND_FEEL_INITED>;
+
+        if $z2 == 0 goto label4;
+
+        $r0 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>("Application.useSystemFontSettings");
+
+        if $r0 == null goto label1;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z3 = virtualinvoke $r1.<java.lang.Boolean: boolean equals(java.lang.Object)>($r0);
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    private static boolean useHighContrastTheme()
+    {
+        java.lang.Boolean r2;
+        java.lang.Object $r1;
+        boolean $z0, $z1, $z2;
+        java.awt.Toolkit $r0;
+
+        $z0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean isWindows()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean useSystemFonts()>();
+
+        if $z1 == 0 goto label3;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>("win.highContrast.on");
+
+        r2 = (java.lang.Boolean) $r1;
+
+        if r2 != null goto label1;
+
+        $z2 = 0;
+
+        goto label2;
+
+     label1:
+        $z2 = virtualinvoke r2.<java.lang.Boolean: boolean booleanValue()>();
+
+     label2:
+        return $z2;
+
+     label3:
+        return 0;
+    }
+
+    static boolean usingOcean()
+    {
+        javax.swing.plaf.metal.MetalTheme $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $z0 = $r0 instanceof javax.swing.plaf.metal.OceanTheme;
+
+        return $z0;
+    }
+
+    public java.lang.String getName()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return "Metal";
+    }
+
+    public java.lang.String getID()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return "Metal";
+    }
+
+    public java.lang.String getDescription()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return "The Java(tm) Look and Feel";
+    }
+
+    public boolean isNativeLookAndFeel()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return 0;
+    }
+
+    public boolean isSupportedLookAndFeel()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return 1;
+    }
+
+    public boolean getSupportsWindowDecorations()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        return 1;
+    }
+
+    protected void initClassDefaults(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        java.lang.Object[] $r2;
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void initClassDefaults(javax.swing.UIDefaults)>(r1);
+
+        $r2 = newarray (java.lang.Object)[44];
+
+        $r2[0] = "ButtonUI";
+
+        $r2[1] = "javax.swing.plaf.metal.MetalButtonUI";
+
+        $r2[2] = "CheckBoxUI";
+
+        $r2[3] = "javax.swing.plaf.metal.MetalCheckBoxUI";
+
+        $r2[4] = "ComboBoxUI";
+
+        $r2[5] = "javax.swing.plaf.metal.MetalComboBoxUI";
+
+        $r2[6] = "DesktopIconUI";
+
+        $r2[7] = "javax.swing.plaf.metal.MetalDesktopIconUI";
+
+        $r2[8] = "FileChooserUI";
+
+        $r2[9] = "javax.swing.plaf.metal.MetalFileChooserUI";
+
+        $r2[10] = "InternalFrameUI";
+
+        $r2[11] = "javax.swing.plaf.metal.MetalInternalFrameUI";
+
+        $r2[12] = "LabelUI";
+
+        $r2[13] = "javax.swing.plaf.metal.MetalLabelUI";
+
+        $r2[14] = "PopupMenuSeparatorUI";
+
+        $r2[15] = "javax.swing.plaf.metal.MetalPopupMenuSeparatorUI";
+
+        $r2[16] = "ProgressBarUI";
+
+        $r2[17] = "javax.swing.plaf.metal.MetalProgressBarUI";
+
+        $r2[18] = "RadioButtonUI";
+
+        $r2[19] = "javax.swing.plaf.metal.MetalRadioButtonUI";
+
+        $r2[20] = "ScrollBarUI";
+
+        $r2[21] = "javax.swing.plaf.metal.MetalScrollBarUI";
+
+        $r2[22] = "ScrollPaneUI";
+
+        $r2[23] = "javax.swing.plaf.metal.MetalScrollPaneUI";
+
+        $r2[24] = "SeparatorUI";
+
+        $r2[25] = "javax.swing.plaf.metal.MetalSeparatorUI";
+
+        $r2[26] = "SliderUI";
+
+        $r2[27] = "javax.swing.plaf.metal.MetalSliderUI";
+
+        $r2[28] = "SplitPaneUI";
+
+        $r2[29] = "javax.swing.plaf.metal.MetalSplitPaneUI";
+
+        $r2[30] = "TabbedPaneUI";
+
+        $r2[31] = "javax.swing.plaf.metal.MetalTabbedPaneUI";
+
+        $r2[32] = "TextFieldUI";
+
+        $r2[33] = "javax.swing.plaf.metal.MetalTextFieldUI";
+
+        $r2[34] = "ToggleButtonUI";
+
+        $r2[35] = "javax.swing.plaf.metal.MetalToggleButtonUI";
+
+        $r2[36] = "ToolBarUI";
+
+        $r2[37] = "javax.swing.plaf.metal.MetalToolBarUI";
+
+        $r2[38] = "ToolTipUI";
+
+        $r2[39] = "javax.swing.plaf.metal.MetalToolTipUI";
+
+        $r2[40] = "TreeUI";
+
+        $r2[41] = "javax.swing.plaf.metal.MetalTreeUI";
+
+        $r2[42] = "RootPaneUI";
+
+        $r2[43] = "javax.swing.plaf.metal.MetalRootPaneUI";
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r2);
+
+        return;
+    }
+
+    protected void initSystemColorDefaults(javax.swing.UIDefaults)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.plaf.metal.MetalLookAndFeel r27;
+        javax.swing.UIDefaults r26;
+        javax.swing.plaf.ColorUIResource $r1, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        r27 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r26 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControl()>();
+
+        $r2 = newarray (java.lang.Object)[52];
+
+        $r2[0] = "desktop";
+
+        $r3 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getDesktopColor()>();
+
+        $r2[1] = $r3;
+
+        $r2[2] = "activeCaption";
+
+        $r4 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleBackground()>();
+
+        $r2[3] = $r4;
+
+        $r2[4] = "activeCaptionText";
+
+        $r5 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleForeground()>();
+
+        $r2[5] = $r5;
+
+        $r2[6] = "activeCaptionBorder";
+
+        $r6 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlShadow()>();
+
+        $r2[7] = $r6;
+
+        $r2[8] = "inactiveCaption";
+
+        $r7 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleInactiveBackground()>();
+
+        $r2[9] = $r7;
+
+        $r2[10] = "inactiveCaptionText";
+
+        $r8 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleInactiveForeground()>();
+
+        $r2[11] = $r8;
+
+        $r2[12] = "inactiveCaptionBorder";
+
+        $r9 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlShadow()>();
+
+        $r2[13] = $r9;
+
+        $r2[14] = "window";
+
+        $r10 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowBackground()>();
+
+        $r2[15] = $r10;
+
+        $r2[16] = "windowBorder";
+
+        $r2[17] = $r1;
+
+        $r2[18] = "windowText";
+
+        $r11 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getUserTextColor()>();
+
+        $r2[19] = $r11;
+
+        $r2[20] = "menu";
+
+        $r12 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuBackground()>();
+
+        $r2[21] = $r12;
+
+        $r2[22] = "menuText";
+
+        $r13 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuForeground()>();
+
+        $r2[23] = $r13;
+
+        $r2[24] = "text";
+
+        $r14 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowBackground()>();
+
+        $r2[25] = $r14;
+
+        $r2[26] = "textText";
+
+        $r15 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getUserTextColor()>();
+
+        $r2[27] = $r15;
+
+        $r2[28] = "textHighlight";
+
+        $r16 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getTextHighlightColor()>();
+
+        $r2[29] = $r16;
+
+        $r2[30] = "textHighlightText";
+
+        $r17 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getHighlightedTextColor()>();
+
+        $r2[31] = $r17;
+
+        $r2[32] = "textInactiveText";
+
+        $r18 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getInactiveSystemTextColor()>();
+
+        $r2[33] = $r18;
+
+        $r2[34] = "control";
+
+        $r2[35] = $r1;
+
+        $r2[36] = "controlText";
+
+        $r19 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlTextColor()>();
+
+        $r2[37] = $r19;
+
+        $r2[38] = "controlHighlight";
+
+        $r20 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlHighlight()>();
+
+        $r2[39] = $r20;
+
+        $r2[40] = "controlLtHighlight";
+
+        $r21 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlHighlight()>();
+
+        $r2[41] = $r21;
+
+        $r2[42] = "controlShadow";
+
+        $r22 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlShadow()>();
+
+        $r2[43] = $r22;
+
+        $r2[44] = "controlDkShadow";
+
+        $r23 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlDarkShadow()>();
+
+        $r2[45] = $r23;
+
+        $r2[46] = "scrollbar";
+
+        $r2[47] = $r1;
+
+        $r2[48] = "info";
+
+        $r24 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControl()>();
+
+        $r2[49] = $r24;
+
+        $r2[50] = "infoText";
+
+        $r25 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlInfo()>();
+
+        $r2[51] = $r25;
+
+        virtualinvoke r26.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r2);
+
+        return;
+    }
+
+    private void initResourceBundle(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r0;
+        javax.swing.plaf.metal.MetalLookAndFeel r1;
+
+        r1 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r0 := @parameter0: javax.swing.UIDefaults;
+
+        virtualinvoke r0.<javax.swing.UIDefaults: void addResourceBundle(java.lang.String)>("com.sun.swing.internal.plaf.metal.resources.metal");
+
+        return;
+    }
+
+    protected void initComponentDefaults(javax.swing.UIDefaults)
+    {
+        java.lang.Integer $r20, $r100, $r113, $r214, $r221, $r248, $r249, $r258, $r266, $r273, $r274, $r296;
+        javax.swing.plaf.metal.MetalFontDesktopProperty $r306;
+        java.lang.Object[] $r25, $r27, $r29, $r34, $r41, $r44, $r46, $r48, r51, $r53, $r61, $r66, $r69, $r72, $r76, $r79, $r92, $r99, $r102, $r115, $r118, $r122, $r124, $r126, $r128, $r130, $r136, $r145, $r167, $r170, $r177, $r180, $r183, $r185, $r190, $r194, $r196;
+        javax.swing.UIDefaults$LazyValue $r22, $r23, $r187, $r188, $r191, $r192, $r193;
+        javax.swing.plaf.metal.MetalLookAndFeel$AATextListener $r307;
+        java.awt.Insets $r232, $r235;
+        int $i1, $i3;
+        java.lang.Boolean $r67, $r90, $r93, $r120, $r137, $r142, $r160, $r163, $r171, $r178, $r181;
+        javax.swing.UIDefaults$LazyInputMap $r202, $r203, $r204, $r228, $r229, $r231, $r234, $r236, $r247, $r252, $r253, $r264, $r265, $r267, $r268, $r269, $r270, $r271, $r295, $r297, $r303, $r304, $r305;
+        java.lang.Object $r63, $r64, $r132, $r134, $r198;
+        java.lang.Class $r131, $r133;
+        java.lang.Character $r62;
+        sun.swing.SwingLazyValue $r201, $r205, $r206, $r207, $r208, $r209, $r210, $r211, $r212, $r213, $r215, $r216, $r217, $r218, $r230, $r233, $r237, $r238, $r239, $r240, $r241, $r242, $r243, $r244, $r245, $r246, $r250, $r251, $r254, $r255, $r256, $r257, $r259, $r260, $r261, $r262, $r263, $r272, $r275, $r276, $r277, $r278, $r291, $r292, $r293, $r294, $r298, $r299, $r300, $r301, $r302;
+        javax.swing.plaf.ColorUIResource $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r116, $r158, $r159, $r172, $r186, $r279, $r280, $r281, $r282, $r283, $r284, $r285, $r286, $r287, $r288, $r289, $r290;
+        sun.swing.SwingUtilities2$AATextInfo $r197;
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.metal.MetalTheme $r54;
+        javax.swing.plaf.InsetsUIResource $r200, $r219, $r220;
+        javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue $r222, $r223, $r224, $r225, $r226, $r227;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void initComponentDefaults(javax.swing.UIDefaults)>(r1);
+
+        specialinvoke r0.<javax.swing.plaf.metal.MetalLookAndFeel: void initResourceBundle(javax.swing.UIDefaults)>(r1);
+
+        $r2 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getAcceleratorForeground()>();
+
+        $r3 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getAcceleratorSelectedForeground()>();
+
+        $r4 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getControl()>();
+
+        $r5 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getControlHighlight()>();
+
+        $r6 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getControlShadow()>();
+
+        $r7 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getControlDarkShadow()>();
+
+        $r8 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getControlTextColor()>();
+
+        $r9 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getFocusColor()>();
+
+        $r10 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getInactiveControlTextColor()>();
+
+        $r11 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getMenuBackground()>();
+
+        $r12 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getMenuSelectedBackground()>();
+
+        $r13 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getMenuDisabledForeground()>();
+
+        $r14 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getMenuSelectedForeground()>();
+
+        $r15 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getPrimaryControl()>();
+
+        $r16 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getPrimaryControlDarkShadow()>();
+
+        $r17 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getPrimaryControlShadow()>();
+
+        $r18 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getSystemTextColor()>();
+
+        $r200 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r200.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r201 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r201.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalBorders", "getTextFieldBorder");
+
+        $r22 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_0__463: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r23 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_1__464: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r202 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r25 = newarray (java.lang.Object)[78];
+
+        $r25[0] = "ctrl C";
+
+        $r25[1] = "copy-to-clipboard";
+
+        $r25[2] = "ctrl V";
+
+        $r25[3] = "paste-from-clipboard";
+
+        $r25[4] = "ctrl X";
+
+        $r25[5] = "cut-to-clipboard";
+
+        $r25[6] = "COPY";
+
+        $r25[7] = "copy-to-clipboard";
+
+        $r25[8] = "PASTE";
+
+        $r25[9] = "paste-from-clipboard";
+
+        $r25[10] = "CUT";
+
+        $r25[11] = "cut-to-clipboard";
+
+        $r25[12] = "control INSERT";
+
+        $r25[13] = "copy-to-clipboard";
+
+        $r25[14] = "shift INSERT";
+
+        $r25[15] = "paste-from-clipboard";
+
+        $r25[16] = "shift DELETE";
+
+        $r25[17] = "cut-to-clipboard";
+
+        $r25[18] = "shift LEFT";
+
+        $r25[19] = "selection-backward";
+
+        $r25[20] = "shift KP_LEFT";
+
+        $r25[21] = "selection-backward";
+
+        $r25[22] = "shift RIGHT";
+
+        $r25[23] = "selection-forward";
+
+        $r25[24] = "shift KP_RIGHT";
+
+        $r25[25] = "selection-forward";
+
+        $r25[26] = "ctrl LEFT";
+
+        $r25[27] = "caret-previous-word";
+
+        $r25[28] = "ctrl KP_LEFT";
+
+        $r25[29] = "caret-previous-word";
+
+        $r25[30] = "ctrl RIGHT";
+
+        $r25[31] = "caret-next-word";
+
+        $r25[32] = "ctrl KP_RIGHT";
+
+        $r25[33] = "caret-next-word";
+
+        $r25[34] = "ctrl shift LEFT";
+
+        $r25[35] = "selection-previous-word";
+
+        $r25[36] = "ctrl shift KP_LEFT";
+
+        $r25[37] = "selection-previous-word";
+
+        $r25[38] = "ctrl shift RIGHT";
+
+        $r25[39] = "selection-next-word";
+
+        $r25[40] = "ctrl shift KP_RIGHT";
+
+        $r25[41] = "selection-next-word";
+
+        $r25[42] = "ctrl A";
+
+        $r25[43] = "select-all";
+
+        $r25[44] = "HOME";
+
+        $r25[45] = "caret-begin-line";
+
+        $r25[46] = "END";
+
+        $r25[47] = "caret-end-line";
+
+        $r25[48] = "shift HOME";
+
+        $r25[49] = "selection-begin-line";
+
+        $r25[50] = "shift END";
+
+        $r25[51] = "selection-end-line";
+
+        $r25[52] = "BACK_SPACE";
+
+        $r25[53] = "delete-previous";
+
+        $r25[54] = "shift BACK_SPACE";
+
+        $r25[55] = "delete-previous";
+
+        $r25[56] = "ctrl H";
+
+        $r25[57] = "delete-previous";
+
+        $r25[58] = "DELETE";
+
+        $r25[59] = "delete-next";
+
+        $r25[60] = "ctrl DELETE";
+
+        $r25[61] = "delete-next-word";
+
+        $r25[62] = "ctrl BACK_SPACE";
+
+        $r25[63] = "delete-previous-word";
+
+        $r25[64] = "RIGHT";
+
+        $r25[65] = "caret-forward";
+
+        $r25[66] = "LEFT";
+
+        $r25[67] = "caret-backward";
+
+        $r25[68] = "KP_RIGHT";
+
+        $r25[69] = "caret-forward";
+
+        $r25[70] = "KP_LEFT";
+
+        $r25[71] = "caret-backward";
+
+        $r25[72] = "ENTER";
+
+        $r25[73] = "notify-field-accept";
+
+        $r25[74] = "ctrl BACK_SLASH";
+
+        $r25[75] = "unselect";
+
+        $r25[76] = "control shift O";
+
+        $r25[77] = "toggle-componentOrientation";
+
+        specialinvoke $r202.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r25);
+
+        $r203 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r27 = newarray (java.lang.Object)[74];
+
+        $r27[0] = "ctrl C";
+
+        $r27[1] = "copy-to-clipboard";
+
+        $r27[2] = "ctrl V";
+
+        $r27[3] = "paste-from-clipboard";
+
+        $r27[4] = "ctrl X";
+
+        $r27[5] = "cut-to-clipboard";
+
+        $r27[6] = "COPY";
+
+        $r27[7] = "copy-to-clipboard";
+
+        $r27[8] = "PASTE";
+
+        $r27[9] = "paste-from-clipboard";
+
+        $r27[10] = "CUT";
+
+        $r27[11] = "cut-to-clipboard";
+
+        $r27[12] = "control INSERT";
+
+        $r27[13] = "copy-to-clipboard";
+
+        $r27[14] = "shift INSERT";
+
+        $r27[15] = "paste-from-clipboard";
+
+        $r27[16] = "shift DELETE";
+
+        $r27[17] = "cut-to-clipboard";
+
+        $r27[18] = "shift LEFT";
+
+        $r27[19] = "selection-backward";
+
+        $r27[20] = "shift KP_LEFT";
+
+        $r27[21] = "selection-backward";
+
+        $r27[22] = "shift RIGHT";
+
+        $r27[23] = "selection-forward";
+
+        $r27[24] = "shift KP_RIGHT";
+
+        $r27[25] = "selection-forward";
+
+        $r27[26] = "ctrl LEFT";
+
+        $r27[27] = "caret-begin-line";
+
+        $r27[28] = "ctrl KP_LEFT";
+
+        $r27[29] = "caret-begin-line";
+
+        $r27[30] = "ctrl RIGHT";
+
+        $r27[31] = "caret-end-line";
+
+        $r27[32] = "ctrl KP_RIGHT";
+
+        $r27[33] = "caret-end-line";
+
+        $r27[34] = "ctrl shift LEFT";
+
+        $r27[35] = "selection-begin-line";
+
+        $r27[36] = "ctrl shift KP_LEFT";
+
+        $r27[37] = "selection-begin-line";
+
+        $r27[38] = "ctrl shift RIGHT";
+
+        $r27[39] = "selection-end-line";
+
+        $r27[40] = "ctrl shift KP_RIGHT";
+
+        $r27[41] = "selection-end-line";
+
+        $r27[42] = "ctrl A";
+
+        $r27[43] = "select-all";
+
+        $r27[44] = "HOME";
+
+        $r27[45] = "caret-begin-line";
+
+        $r27[46] = "END";
+
+        $r27[47] = "caret-end-line";
+
+        $r27[48] = "shift HOME";
+
+        $r27[49] = "selection-begin-line";
+
+        $r27[50] = "shift END";
+
+        $r27[51] = "selection-end-line";
+
+        $r27[52] = "BACK_SPACE";
+
+        $r27[53] = "delete-previous";
+
+        $r27[54] = "shift BACK_SPACE";
+
+        $r27[55] = "delete-previous";
+
+        $r27[56] = "ctrl H";
+
+        $r27[57] = "delete-previous";
+
+        $r27[58] = "DELETE";
+
+        $r27[59] = "delete-next";
+
+        $r27[60] = "RIGHT";
+
+        $r27[61] = "caret-forward";
+
+        $r27[62] = "LEFT";
+
+        $r27[63] = "caret-backward";
+
+        $r27[64] = "KP_RIGHT";
+
+        $r27[65] = "caret-forward";
+
+        $r27[66] = "KP_LEFT";
+
+        $r27[67] = "caret-backward";
+
+        $r27[68] = "ENTER";
+
+        $r27[69] = "notify-field-accept";
+
+        $r27[70] = "ctrl BACK_SLASH";
+
+        $r27[71] = "unselect";
+
+        $r27[72] = "control shift O";
+
+        $r27[73] = "toggle-componentOrientation";
+
+        specialinvoke $r203.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r27);
+
+        $r204 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r29 = newarray (java.lang.Object)[122];
+
+        $r29[0] = "ctrl C";
+
+        $r29[1] = "copy-to-clipboard";
+
+        $r29[2] = "ctrl V";
+
+        $r29[3] = "paste-from-clipboard";
+
+        $r29[4] = "ctrl X";
+
+        $r29[5] = "cut-to-clipboard";
+
+        $r29[6] = "COPY";
+
+        $r29[7] = "copy-to-clipboard";
+
+        $r29[8] = "PASTE";
+
+        $r29[9] = "paste-from-clipboard";
+
+        $r29[10] = "CUT";
+
+        $r29[11] = "cut-to-clipboard";
+
+        $r29[12] = "control INSERT";
+
+        $r29[13] = "copy-to-clipboard";
+
+        $r29[14] = "shift INSERT";
+
+        $r29[15] = "paste-from-clipboard";
+
+        $r29[16] = "shift DELETE";
+
+        $r29[17] = "cut-to-clipboard";
+
+        $r29[18] = "shift LEFT";
+
+        $r29[19] = "selection-backward";
+
+        $r29[20] = "shift KP_LEFT";
+
+        $r29[21] = "selection-backward";
+
+        $r29[22] = "shift RIGHT";
+
+        $r29[23] = "selection-forward";
+
+        $r29[24] = "shift KP_RIGHT";
+
+        $r29[25] = "selection-forward";
+
+        $r29[26] = "ctrl LEFT";
+
+        $r29[27] = "caret-previous-word";
+
+        $r29[28] = "ctrl KP_LEFT";
+
+        $r29[29] = "caret-previous-word";
+
+        $r29[30] = "ctrl RIGHT";
+
+        $r29[31] = "caret-next-word";
+
+        $r29[32] = "ctrl KP_RIGHT";
+
+        $r29[33] = "caret-next-word";
+
+        $r29[34] = "ctrl shift LEFT";
+
+        $r29[35] = "selection-previous-word";
+
+        $r29[36] = "ctrl shift KP_LEFT";
+
+        $r29[37] = "selection-previous-word";
+
+        $r29[38] = "ctrl shift RIGHT";
+
+        $r29[39] = "selection-next-word";
+
+        $r29[40] = "ctrl shift KP_RIGHT";
+
+        $r29[41] = "selection-next-word";
+
+        $r29[42] = "ctrl A";
+
+        $r29[43] = "select-all";
+
+        $r29[44] = "HOME";
+
+        $r29[45] = "caret-begin-line";
+
+        $r29[46] = "END";
+
+        $r29[47] = "caret-end-line";
+
+        $r29[48] = "shift HOME";
+
+        $r29[49] = "selection-begin-line";
+
+        $r29[50] = "shift END";
+
+        $r29[51] = "selection-end-line";
+
+        $r29[52] = "UP";
+
+        $r29[53] = "caret-up";
+
+        $r29[54] = "KP_UP";
+
+        $r29[55] = "caret-up";
+
+        $r29[56] = "DOWN";
+
+        $r29[57] = "caret-down";
+
+        $r29[58] = "KP_DOWN";
+
+        $r29[59] = "caret-down";
+
+        $r29[60] = "PAGE_UP";
+
+        $r29[61] = "page-up";
+
+        $r29[62] = "PAGE_DOWN";
+
+        $r29[63] = "page-down";
+
+        $r29[64] = "shift PAGE_UP";
+
+        $r29[65] = "selection-page-up";
+
+        $r29[66] = "shift PAGE_DOWN";
+
+        $r29[67] = "selection-page-down";
+
+        $r29[68] = "ctrl shift PAGE_UP";
+
+        $r29[69] = "selection-page-left";
+
+        $r29[70] = "ctrl shift PAGE_DOWN";
+
+        $r29[71] = "selection-page-right";
+
+        $r29[72] = "shift UP";
+
+        $r29[73] = "selection-up";
+
+        $r29[74] = "shift KP_UP";
+
+        $r29[75] = "selection-up";
+
+        $r29[76] = "shift DOWN";
+
+        $r29[77] = "selection-down";
+
+        $r29[78] = "shift KP_DOWN";
+
+        $r29[79] = "selection-down";
+
+        $r29[80] = "ENTER";
+
+        $r29[81] = "insert-break";
+
+        $r29[82] = "BACK_SPACE";
+
+        $r29[83] = "delete-previous";
+
+        $r29[84] = "shift BACK_SPACE";
+
+        $r29[85] = "delete-previous";
+
+        $r29[86] = "ctrl H";
+
+        $r29[87] = "delete-previous";
+
+        $r29[88] = "DELETE";
+
+        $r29[89] = "delete-next";
+
+        $r29[90] = "ctrl DELETE";
+
+        $r29[91] = "delete-next-word";
+
+        $r29[92] = "ctrl BACK_SPACE";
+
+        $r29[93] = "delete-previous-word";
+
+        $r29[94] = "RIGHT";
+
+        $r29[95] = "caret-forward";
+
+        $r29[96] = "LEFT";
+
+        $r29[97] = "caret-backward";
+
+        $r29[98] = "KP_RIGHT";
+
+        $r29[99] = "caret-forward";
+
+        $r29[100] = "KP_LEFT";
+
+        $r29[101] = "caret-backward";
+
+        $r29[102] = "TAB";
+
+        $r29[103] = "insert-tab";
+
+        $r29[104] = "ctrl BACK_SLASH";
+
+        $r29[105] = "unselect";
+
+        $r29[106] = "ctrl HOME";
+
+        $r29[107] = "caret-begin";
+
+        $r29[108] = "ctrl END";
+
+        $r29[109] = "caret-end";
+
+        $r29[110] = "ctrl shift HOME";
+
+        $r29[111] = "selection-begin";
+
+        $r29[112] = "ctrl shift END";
+
+        $r29[113] = "selection-end";
+
+        $r29[114] = "ctrl T";
+
+        $r29[115] = "next-link-action";
+
+        $r29[116] = "ctrl shift T";
+
+        $r29[117] = "previous-link-action";
+
+        $r29[118] = "ctrl SPACE";
+
+        $r29[119] = "activate-link-action";
+
+        $r29[120] = "control shift O";
+
+        $r29[121] = "toggle-componentOrientation";
+
+        specialinvoke $r204.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r29);
+
+        $r205 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r205.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$ScrollPaneBorder");
+
+        $r206 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r206.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalBorders", "getButtonBorder");
+
+        $r207 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r207.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalBorders", "getToggleButtonBorder");
+
+        $r208 = new sun.swing.SwingLazyValue;
+
+        $r34 = newarray (java.lang.Object)[1];
+
+        $r34[0] = $r6;
+
+        specialinvoke $r208.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("javax.swing.plaf.BorderUIResource$LineBorderUIResource", $r34);
+
+        $r209 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r209.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalBorders", "getDesktopIconBorder");
+
+        $r210 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r210.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$MenuBarBorder");
+
+        $r211 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r211.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$PopupMenuBorder");
+
+        $r212 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r212.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$MenuItemBorder");
+
+        $r213 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r213.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$ToolBarBorder");
+
+        $r215 = new sun.swing.SwingLazyValue;
+
+        $r41 = newarray (java.lang.Object)[2];
+
+        $r41[0] = $r7;
+
+        $r214 = new java.lang.Integer;
+
+        specialinvoke $r214.<java.lang.Integer: void <init>(int)>(1);
+
+        $r41[1] = $r214;
+
+        specialinvoke $r215.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("javax.swing.plaf.BorderUIResource$LineBorderUIResource", $r41);
+
+        $r216 = new sun.swing.SwingLazyValue;
+
+        $r44 = newarray (java.lang.Object)[1];
+
+        $r44[0] = $r16;
+
+        specialinvoke $r216.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("javax.swing.plaf.BorderUIResource$LineBorderUIResource", $r44);
+
+        $r217 = new sun.swing.SwingLazyValue;
+
+        $r46 = newarray (java.lang.Object)[1];
+
+        $r46[0] = $r7;
+
+        specialinvoke $r217.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("javax.swing.plaf.BorderUIResource$LineBorderUIResource", $r46);
+
+        $r218 = new sun.swing.SwingLazyValue;
+
+        $r48 = newarray (java.lang.Object)[1];
+
+        $r48[0] = $r9;
+
+        specialinvoke $r218.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("javax.swing.plaf.BorderUIResource$LineBorderUIResource", $r48);
+
+        $r219 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r219.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(4, 2, 0, 6);
+
+        $r220 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r220.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(0, 9, 1, 9);
+
+        r51 = newarray (java.lang.Object)[1];
+
+        $r221 = new java.lang.Integer;
+
+        specialinvoke $r221.<java.lang.Integer: void <init>(int)>(16);
+
+        r51[0] = $r221;
+
+        $r53 = newarray (java.lang.Object)[4];
+
+        $r53[0] = "OptionPane.errorSound";
+
+        $r53[1] = "OptionPane.informationSound";
+
+        $r53[2] = "OptionPane.questionSound";
+
+        $r53[3] = "OptionPane.warningSound";
+
+        $r54 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r222 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r222.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 3);
+
+        $r223 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r223.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 0);
+
+        $r224 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r224.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 2);
+
+        $r225 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r225.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 4);
+
+        $r226 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r226.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 5);
+
+        $r227 = new javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue;
+
+        specialinvoke $r227.<javax.swing.plaf.metal.MetalLookAndFeel$FontActiveValue: void <init>(javax.swing.plaf.metal.MetalTheme,int)>($r54, 1);
+
+        $r61 = newarray (java.lang.Object)[546];
+
+        $r61[0] = "AuditoryCues.defaultCueList";
+
+        $r61[1] = $r53;
+
+        $r61[2] = "AuditoryCues.playList";
+
+        $r61[3] = null;
+
+        $r61[4] = "TextField.border";
+
+        $r61[5] = $r201;
+
+        $r61[6] = "TextField.font";
+
+        $r61[7] = $r224;
+
+        $r61[8] = "PasswordField.border";
+
+        $r61[9] = $r201;
+
+        $r61[10] = "PasswordField.font";
+
+        $r61[11] = $r224;
+
+        $r61[12] = "PasswordField.echoChar";
+
+        $r62 = staticinvoke <java.lang.Character: java.lang.Character valueOf(char)>(8226);
+
+        $r61[13] = $r62;
+
+        $r61[14] = "TextArea.font";
+
+        $r61[15] = $r224;
+
+        $r61[16] = "TextPane.background";
+
+        $r63 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("window");
+
+        $r61[17] = $r63;
+
+        $r61[18] = "TextPane.font";
+
+        $r61[19] = $r224;
+
+        $r61[20] = "EditorPane.background";
+
+        $r64 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("window");
+
+        $r61[21] = $r64;
+
+        $r61[22] = "EditorPane.font";
+
+        $r61[23] = $r224;
+
+        $r61[24] = "TextField.focusInputMap";
+
+        $r61[25] = $r202;
+
+        $r61[26] = "PasswordField.focusInputMap";
+
+        $r61[27] = $r203;
+
+        $r61[28] = "TextArea.focusInputMap";
+
+        $r61[29] = $r204;
+
+        $r61[30] = "TextPane.focusInputMap";
+
+        $r61[31] = $r204;
+
+        $r61[32] = "EditorPane.focusInputMap";
+
+        $r61[33] = $r204;
+
+        $r61[34] = "FormattedTextField.border";
+
+        $r61[35] = $r201;
+
+        $r61[36] = "FormattedTextField.font";
+
+        $r61[37] = $r224;
+
+        $r61[38] = "FormattedTextField.focusInputMap";
+
+        $r228 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r66 = newarray (java.lang.Object)[88];
+
+        $r66[0] = "ctrl C";
+
+        $r66[1] = "copy-to-clipboard";
+
+        $r66[2] = "ctrl V";
+
+        $r66[3] = "paste-from-clipboard";
+
+        $r66[4] = "ctrl X";
+
+        $r66[5] = "cut-to-clipboard";
+
+        $r66[6] = "COPY";
+
+        $r66[7] = "copy-to-clipboard";
+
+        $r66[8] = "PASTE";
+
+        $r66[9] = "paste-from-clipboard";
+
+        $r66[10] = "CUT";
+
+        $r66[11] = "cut-to-clipboard";
+
+        $r66[12] = "control INSERT";
+
+        $r66[13] = "copy-to-clipboard";
+
+        $r66[14] = "shift INSERT";
+
+        $r66[15] = "paste-from-clipboard";
+
+        $r66[16] = "shift DELETE";
+
+        $r66[17] = "cut-to-clipboard";
+
+        $r66[18] = "shift LEFT";
+
+        $r66[19] = "selection-backward";
+
+        $r66[20] = "shift KP_LEFT";
+
+        $r66[21] = "selection-backward";
+
+        $r66[22] = "shift RIGHT";
+
+        $r66[23] = "selection-forward";
+
+        $r66[24] = "shift KP_RIGHT";
+
+        $r66[25] = "selection-forward";
+
+        $r66[26] = "ctrl LEFT";
+
+        $r66[27] = "caret-previous-word";
+
+        $r66[28] = "ctrl KP_LEFT";
+
+        $r66[29] = "caret-previous-word";
+
+        $r66[30] = "ctrl RIGHT";
+
+        $r66[31] = "caret-next-word";
+
+        $r66[32] = "ctrl KP_RIGHT";
+
+        $r66[33] = "caret-next-word";
+
+        $r66[34] = "ctrl shift LEFT";
+
+        $r66[35] = "selection-previous-word";
+
+        $r66[36] = "ctrl shift KP_LEFT";
+
+        $r66[37] = "selection-previous-word";
+
+        $r66[38] = "ctrl shift RIGHT";
+
+        $r66[39] = "selection-next-word";
+
+        $r66[40] = "ctrl shift KP_RIGHT";
+
+        $r66[41] = "selection-next-word";
+
+        $r66[42] = "ctrl A";
+
+        $r66[43] = "select-all";
+
+        $r66[44] = "HOME";
+
+        $r66[45] = "caret-begin-line";
+
+        $r66[46] = "END";
+
+        $r66[47] = "caret-end-line";
+
+        $r66[48] = "shift HOME";
+
+        $r66[49] = "selection-begin-line";
+
+        $r66[50] = "shift END";
+
+        $r66[51] = "selection-end-line";
+
+        $r66[52] = "BACK_SPACE";
+
+        $r66[53] = "delete-previous";
+
+        $r66[54] = "shift BACK_SPACE";
+
+        $r66[55] = "delete-previous";
+
+        $r66[56] = "ctrl H";
+
+        $r66[57] = "delete-previous";
+
+        $r66[58] = "DELETE";
+
+        $r66[59] = "delete-next";
+
+        $r66[60] = "ctrl DELETE";
+
+        $r66[61] = "delete-next-word";
+
+        $r66[62] = "ctrl BACK_SPACE";
+
+        $r66[63] = "delete-previous-word";
+
+        $r66[64] = "RIGHT";
+
+        $r66[65] = "caret-forward";
+
+        $r66[66] = "LEFT";
+
+        $r66[67] = "caret-backward";
+
+        $r66[68] = "KP_RIGHT";
+
+        $r66[69] = "caret-forward";
+
+        $r66[70] = "KP_LEFT";
+
+        $r66[71] = "caret-backward";
+
+        $r66[72] = "ENTER";
+
+        $r66[73] = "notify-field-accept";
+
+        $r66[74] = "ctrl BACK_SLASH";
+
+        $r66[75] = "unselect";
+
+        $r66[76] = "control shift O";
+
+        $r66[77] = "toggle-componentOrientation";
+
+        $r66[78] = "ESCAPE";
+
+        $r66[79] = "reset-field-edit";
+
+        $r66[80] = "UP";
+
+        $r66[81] = "increment";
+
+        $r66[82] = "KP_UP";
+
+        $r66[83] = "increment";
+
+        $r66[84] = "DOWN";
+
+        $r66[85] = "decrement";
+
+        $r66[86] = "KP_DOWN";
+
+        $r66[87] = "decrement";
+
+        specialinvoke $r228.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r66);
+
+        $r61[39] = $r228;
+
+        $r61[40] = "Button.defaultButtonFollowsFocus";
+
+        $r67 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r61[41] = $r67;
+
+        $r61[42] = "Button.disabledText";
+
+        $r61[43] = $r10;
+
+        $r61[44] = "Button.select";
+
+        $r61[45] = $r6;
+
+        $r61[46] = "Button.border";
+
+        $r61[47] = $r206;
+
+        $r61[48] = "Button.font";
+
+        $r61[49] = $r223;
+
+        $r61[50] = "Button.focus";
+
+        $r61[51] = $r9;
+
+        $r61[52] = "Button.focusInputMap";
+
+        $r229 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r69 = newarray (java.lang.Object)[4];
+
+        $r69[0] = "SPACE";
+
+        $r69[1] = "pressed";
+
+        $r69[2] = "released SPACE";
+
+        $r69[3] = "released";
+
+        specialinvoke $r229.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r69);
+
+        $r61[53] = $r229;
+
+        $r61[54] = "CheckBox.disabledText";
+
+        $r61[55] = $r10;
+
+        $r61[56] = "Checkbox.select";
+
+        $r61[57] = $r6;
+
+        $r61[58] = "CheckBox.font";
+
+        $r61[59] = $r223;
+
+        $r61[60] = "CheckBox.focus";
+
+        $r61[61] = $r9;
+
+        $r61[62] = "CheckBox.icon";
+
+        $r230 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r230.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getCheckBoxIcon");
+
+        $r61[63] = $r230;
+
+        $r61[64] = "CheckBox.focusInputMap";
+
+        $r231 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r72 = newarray (java.lang.Object)[4];
+
+        $r72[0] = "SPACE";
+
+        $r72[1] = "pressed";
+
+        $r72[2] = "released SPACE";
+
+        $r72[3] = "released";
+
+        specialinvoke $r231.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r72);
+
+        $r61[65] = $r231;
+
+        $r61[66] = "CheckBox.totalInsets";
+
+        $r232 = new java.awt.Insets;
+
+        specialinvoke $r232.<java.awt.Insets: void <init>(int,int,int,int)>(4, 4, 4, 4);
+
+        $r61[67] = $r232;
+
+        $r61[68] = "RadioButton.disabledText";
+
+        $r61[69] = $r10;
+
+        $r61[70] = "RadioButton.select";
+
+        $r61[71] = $r6;
+
+        $r61[72] = "RadioButton.icon";
+
+        $r233 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r233.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getRadioButtonIcon");
+
+        $r61[73] = $r233;
+
+        $r61[74] = "RadioButton.font";
+
+        $r61[75] = $r223;
+
+        $r61[76] = "RadioButton.focus";
+
+        $r61[77] = $r9;
+
+        $r61[78] = "RadioButton.focusInputMap";
+
+        $r234 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r76 = newarray (java.lang.Object)[4];
+
+        $r76[0] = "SPACE";
+
+        $r76[1] = "pressed";
+
+        $r76[2] = "released SPACE";
+
+        $r76[3] = "released";
+
+        specialinvoke $r234.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r76);
+
+        $r61[79] = $r234;
+
+        $r61[80] = "RadioButton.totalInsets";
+
+        $r235 = new java.awt.Insets;
+
+        specialinvoke $r235.<java.awt.Insets: void <init>(int,int,int,int)>(4, 4, 4, 4);
+
+        $r61[81] = $r235;
+
+        $r61[82] = "ToggleButton.select";
+
+        $r61[83] = $r6;
+
+        $r61[84] = "ToggleButton.disabledText";
+
+        $r61[85] = $r10;
+
+        $r61[86] = "ToggleButton.focus";
+
+        $r61[87] = $r9;
+
+        $r61[88] = "ToggleButton.border";
+
+        $r61[89] = $r207;
+
+        $r61[90] = "ToggleButton.font";
+
+        $r61[91] = $r223;
+
+        $r61[92] = "ToggleButton.focusInputMap";
+
+        $r236 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r79 = newarray (java.lang.Object)[4];
+
+        $r79[0] = "SPACE";
+
+        $r79[1] = "pressed";
+
+        $r79[2] = "released SPACE";
+
+        $r79[3] = "released";
+
+        specialinvoke $r236.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r79);
+
+        $r61[93] = $r236;
+
+        $r61[94] = "FileView.directoryIcon";
+
+        $r237 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r237.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeFolderIcon");
+
+        $r61[95] = $r237;
+
+        $r61[96] = "FileView.fileIcon";
+
+        $r238 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r238.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeLeafIcon");
+
+        $r61[97] = $r238;
+
+        $r61[98] = "FileView.computerIcon";
+
+        $r239 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r239.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeComputerIcon");
+
+        $r61[99] = $r239;
+
+        $r61[100] = "FileView.hardDriveIcon";
+
+        $r240 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r240.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeHardDriveIcon");
+
+        $r61[101] = $r240;
+
+        $r61[102] = "FileView.floppyDriveIcon";
+
+        $r241 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r241.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeFloppyDriveIcon");
+
+        $r61[103] = $r241;
+
+        $r61[104] = "FileChooser.detailsViewIcon";
+
+        $r242 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r242.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getFileChooserDetailViewIcon");
+
+        $r61[105] = $r242;
+
+        $r61[106] = "FileChooser.homeFolderIcon";
+
+        $r243 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r243.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getFileChooserHomeFolderIcon");
+
+        $r61[107] = $r243;
+
+        $r61[108] = "FileChooser.listViewIcon";
+
+        $r244 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r244.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getFileChooserListViewIcon");
+
+        $r61[109] = $r244;
+
+        $r61[110] = "FileChooser.newFolderIcon";
+
+        $r245 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r245.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getFileChooserNewFolderIcon");
+
+        $r61[111] = $r245;
+
+        $r61[112] = "FileChooser.upFolderIcon";
+
+        $r246 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r246.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getFileChooserUpFolderIcon");
+
+        $r61[113] = $r246;
+
+        $r61[114] = "FileChooser.usesSingleFilePane";
+
+        $r90 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[115] = $r90;
+
+        $r61[116] = "FileChooser.ancestorInputMap";
+
+        $r247 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r92 = newarray (java.lang.Object)[8];
+
+        $r92[0] = "ESCAPE";
+
+        $r92[1] = "cancelSelection";
+
+        $r92[2] = "F2";
+
+        $r92[3] = "editFileName";
+
+        $r92[4] = "F5";
+
+        $r92[5] = "refresh";
+
+        $r92[6] = "BACK_SPACE";
+
+        $r92[7] = "Go Up";
+
+        specialinvoke $r247.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r92);
+
+        $r61[117] = $r247;
+
+        $r61[118] = "ToolTip.font";
+
+        $r61[119] = $r227;
+
+        $r61[120] = "ToolTip.border";
+
+        $r61[121] = $r216;
+
+        $r61[122] = "ToolTip.borderInactive";
+
+        $r61[123] = $r217;
+
+        $r61[124] = "ToolTip.backgroundInactive";
+
+        $r61[125] = $r4;
+
+        $r61[126] = "ToolTip.foregroundInactive";
+
+        $r61[127] = $r7;
+
+        $r61[128] = "ToolTip.hideAccelerator";
+
+        $r93 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r61[129] = $r93;
+
+        $r61[130] = "ToolTipManager.enableToolTipMode";
+
+        $r61[131] = "activeApplication";
+
+        $r61[132] = "Slider.font";
+
+        $r61[133] = $r223;
+
+        $r61[134] = "Slider.border";
+
+        $r61[135] = null;
+
+        $r61[136] = "Slider.foreground";
+
+        $r61[137] = $r17;
+
+        $r61[138] = "Slider.focus";
+
+        $r61[139] = $r9;
+
+        $r61[140] = "Slider.focusInsets";
+
+        $r61[141] = $r200;
+
+        $r61[142] = "Slider.trackWidth";
+
+        $r248 = new java.lang.Integer;
+
+        specialinvoke $r248.<java.lang.Integer: void <init>(int)>(7);
+
+        $r61[143] = $r248;
+
+        $r61[144] = "Slider.majorTickLength";
+
+        $r249 = new java.lang.Integer;
+
+        specialinvoke $r249.<java.lang.Integer: void <init>(int)>(6);
+
+        $r61[145] = $r249;
+
+        $r61[146] = "Slider.horizontalThumbIcon";
+
+        $r250 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r250.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getHorizontalSliderThumbIcon");
+
+        $r61[147] = $r250;
+
+        $r61[148] = "Slider.verticalThumbIcon";
+
+        $r251 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r251.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getVerticalSliderThumbIcon");
+
+        $r61[149] = $r251;
+
+        $r61[150] = "Slider.focusInputMap";
+
+        $r252 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r99 = newarray (java.lang.Object)[28];
+
+        $r99[0] = "RIGHT";
+
+        $r99[1] = "positiveUnitIncrement";
+
+        $r99[2] = "KP_RIGHT";
+
+        $r99[3] = "positiveUnitIncrement";
+
+        $r99[4] = "DOWN";
+
+        $r99[5] = "negativeUnitIncrement";
+
+        $r99[6] = "KP_DOWN";
+
+        $r99[7] = "negativeUnitIncrement";
+
+        $r99[8] = "PAGE_DOWN";
+
+        $r99[9] = "negativeBlockIncrement";
+
+        $r99[10] = "ctrl PAGE_DOWN";
+
+        $r99[11] = "negativeBlockIncrement";
+
+        $r99[12] = "LEFT";
+
+        $r99[13] = "negativeUnitIncrement";
+
+        $r99[14] = "KP_LEFT";
+
+        $r99[15] = "negativeUnitIncrement";
+
+        $r99[16] = "UP";
+
+        $r99[17] = "positiveUnitIncrement";
+
+        $r99[18] = "KP_UP";
+
+        $r99[19] = "positiveUnitIncrement";
+
+        $r99[20] = "PAGE_UP";
+
+        $r99[21] = "positiveBlockIncrement";
+
+        $r99[22] = "ctrl PAGE_UP";
+
+        $r99[23] = "positiveBlockIncrement";
+
+        $r99[24] = "HOME";
+
+        $r99[25] = "minScroll";
+
+        $r99[26] = "END";
+
+        $r99[27] = "maxScroll";
+
+        specialinvoke $r252.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r99);
+
+        $r61[151] = $r252;
+
+        $r61[152] = "ProgressBar.font";
+
+        $r61[153] = $r223;
+
+        $r61[154] = "ProgressBar.foreground";
+
+        $r61[155] = $r17;
+
+        $r61[156] = "ProgressBar.selectionBackground";
+
+        $r61[157] = $r16;
+
+        $r61[158] = "ProgressBar.border";
+
+        $r61[159] = $r215;
+
+        $r61[160] = "ProgressBar.cellSpacing";
+
+        $r61[161] = $r20;
+
+        $r61[162] = "ProgressBar.cellLength";
+
+        $r100 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r61[163] = $r100;
+
+        $r61[164] = "ComboBox.background";
+
+        $r61[165] = $r4;
+
+        $r61[166] = "ComboBox.foreground";
+
+        $r61[167] = $r8;
+
+        $r61[168] = "ComboBox.selectionBackground";
+
+        $r61[169] = $r17;
+
+        $r61[170] = "ComboBox.selectionForeground";
+
+        $r61[171] = $r8;
+
+        $r61[172] = "ComboBox.font";
+
+        $r61[173] = $r223;
+
+        $r61[174] = "ComboBox.ancestorInputMap";
+
+        $r253 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r102 = newarray (java.lang.Object)[30];
+
+        $r102[0] = "ESCAPE";
+
+        $r102[1] = "hidePopup";
+
+        $r102[2] = "PAGE_UP";
+
+        $r102[3] = "pageUpPassThrough";
+
+        $r102[4] = "PAGE_DOWN";
+
+        $r102[5] = "pageDownPassThrough";
+
+        $r102[6] = "HOME";
+
+        $r102[7] = "homePassThrough";
+
+        $r102[8] = "END";
+
+        $r102[9] = "endPassThrough";
+
+        $r102[10] = "DOWN";
+
+        $r102[11] = "selectNext";
+
+        $r102[12] = "KP_DOWN";
+
+        $r102[13] = "selectNext";
+
+        $r102[14] = "alt DOWN";
+
+        $r102[15] = "togglePopup";
+
+        $r102[16] = "alt KP_DOWN";
+
+        $r102[17] = "togglePopup";
+
+        $r102[18] = "alt UP";
+
+        $r102[19] = "togglePopup";
+
+        $r102[20] = "alt KP_UP";
+
+        $r102[21] = "togglePopup";
+
+        $r102[22] = "SPACE";
+
+        $r102[23] = "spacePopup";
+
+        $r102[24] = "ENTER";
+
+        $r102[25] = "enterPressed";
+
+        $r102[26] = "UP";
+
+        $r102[27] = "selectPrevious";
+
+        $r102[28] = "KP_UP";
+
+        $r102[29] = "selectPrevious";
+
+        specialinvoke $r253.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r102);
+
+        $r61[175] = $r253;
+
+        $r61[176] = "InternalFrame.icon";
+
+        $r254 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r254.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getInternalFrameDefaultMenuIcon");
+
+        $r61[177] = $r254;
+
+        $r61[178] = "InternalFrame.border";
+
+        $r255 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r255.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$InternalFrameBorder");
+
+        $r61[179] = $r255;
+
+        $r61[180] = "InternalFrame.optionDialogBorder";
+
+        $r256 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r256.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$OptionDialogBorder");
+
+        $r61[181] = $r256;
+
+        $r61[182] = "InternalFrame.paletteBorder";
+
+        $r257 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r257.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$PaletteBorder");
+
+        $r61[183] = $r257;
+
+        $r61[184] = "InternalFrame.paletteTitleHeight";
+
+        $r258 = new java.lang.Integer;
+
+        specialinvoke $r258.<java.lang.Integer: void <init>(int)>(11);
+
+        $r61[185] = $r258;
+
+        $r61[186] = "InternalFrame.paletteCloseIcon";
+
+        $r259 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r259.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory$PaletteCloseIcon");
+
+        $r61[187] = $r259;
+
+        $r61[188] = "InternalFrame.closeIcon";
+
+        $r260 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r260.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getInternalFrameCloseIcon", r51);
+
+        $r61[189] = $r260;
+
+        $r61[190] = "InternalFrame.maximizeIcon";
+
+        $r261 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r261.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getInternalFrameMaximizeIcon", r51);
+
+        $r61[191] = $r261;
+
+        $r61[192] = "InternalFrame.iconifyIcon";
+
+        $r262 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r262.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getInternalFrameMinimizeIcon", r51);
+
+        $r61[193] = $r262;
+
+        $r61[194] = "InternalFrame.minimizeIcon";
+
+        $r263 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r263.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getInternalFrameAltMaximizeIcon", r51);
+
+        $r61[195] = $r263;
+
+        $r61[196] = "InternalFrame.titleFont";
+
+        $r61[197] = $r225;
+
+        $r61[198] = "InternalFrame.windowBindings";
+
+        $r61[199] = null;
+
+        $r61[200] = "InternalFrame.closeSound";
+
+        $r61[201] = "sounds/FrameClose.wav";
+
+        $r61[202] = "InternalFrame.maximizeSound";
+
+        $r61[203] = "sounds/FrameMaximize.wav";
+
+        $r61[204] = "InternalFrame.minimizeSound";
+
+        $r61[205] = "sounds/FrameMinimize.wav";
+
+        $r61[206] = "InternalFrame.restoreDownSound";
+
+        $r61[207] = "sounds/FrameRestoreDown.wav";
+
+        $r61[208] = "InternalFrame.restoreUpSound";
+
+        $r61[209] = "sounds/FrameRestoreUp.wav";
+
+        $r61[210] = "DesktopIcon.border";
+
+        $r61[211] = $r209;
+
+        $r61[212] = "DesktopIcon.font";
+
+        $r61[213] = $r223;
+
+        $r61[214] = "DesktopIcon.foreground";
+
+        $r61[215] = $r8;
+
+        $r61[216] = "DesktopIcon.background";
+
+        $r61[217] = $r4;
+
+        $r61[218] = "DesktopIcon.width";
+
+        $r113 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(160);
+
+        $r61[219] = $r113;
+
+        $r61[220] = "Desktop.ancestorInputMap";
+
+        $r264 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r115 = newarray (java.lang.Object)[58];
+
+        $r115[0] = "ctrl F5";
+
+        $r115[1] = "restore";
+
+        $r115[2] = "ctrl F4";
+
+        $r115[3] = "close";
+
+        $r115[4] = "ctrl F7";
+
+        $r115[5] = "move";
+
+        $r115[6] = "ctrl F8";
+
+        $r115[7] = "resize";
+
+        $r115[8] = "RIGHT";
+
+        $r115[9] = "right";
+
+        $r115[10] = "KP_RIGHT";
+
+        $r115[11] = "right";
+
+        $r115[12] = "shift RIGHT";
+
+        $r115[13] = "shrinkRight";
+
+        $r115[14] = "shift KP_RIGHT";
+
+        $r115[15] = "shrinkRight";
+
+        $r115[16] = "LEFT";
+
+        $r115[17] = "left";
+
+        $r115[18] = "KP_LEFT";
+
+        $r115[19] = "left";
+
+        $r115[20] = "shift LEFT";
+
+        $r115[21] = "shrinkLeft";
+
+        $r115[22] = "shift KP_LEFT";
+
+        $r115[23] = "shrinkLeft";
+
+        $r115[24] = "UP";
+
+        $r115[25] = "up";
+
+        $r115[26] = "KP_UP";
+
+        $r115[27] = "up";
+
+        $r115[28] = "shift UP";
+
+        $r115[29] = "shrinkUp";
+
+        $r115[30] = "shift KP_UP";
+
+        $r115[31] = "shrinkUp";
+
+        $r115[32] = "DOWN";
+
+        $r115[33] = "down";
+
+        $r115[34] = "KP_DOWN";
+
+        $r115[35] = "down";
+
+        $r115[36] = "shift DOWN";
+
+        $r115[37] = "shrinkDown";
+
+        $r115[38] = "shift KP_DOWN";
+
+        $r115[39] = "shrinkDown";
+
+        $r115[40] = "ESCAPE";
+
+        $r115[41] = "escape";
+
+        $r115[42] = "ctrl F9";
+
+        $r115[43] = "minimize";
+
+        $r115[44] = "ctrl F10";
+
+        $r115[45] = "maximize";
+
+        $r115[46] = "ctrl F6";
+
+        $r115[47] = "selectNextFrame";
+
+        $r115[48] = "ctrl TAB";
+
+        $r115[49] = "selectNextFrame";
+
+        $r115[50] = "ctrl alt F6";
+
+        $r115[51] = "selectNextFrame";
+
+        $r115[52] = "shift ctrl alt F6";
+
+        $r115[53] = "selectPreviousFrame";
+
+        $r115[54] = "ctrl F12";
+
+        $r115[55] = "navigateNext";
+
+        $r115[56] = "shift ctrl F12";
+
+        $r115[57] = "navigatePrevious";
+
+        specialinvoke $r264.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r115);
+
+        $r61[221] = $r264;
+
+        $r61[222] = "TitledBorder.font";
+
+        $r61[223] = $r223;
+
+        $r61[224] = "TitledBorder.titleColor";
+
+        $r61[225] = $r18;
+
+        $r61[226] = "TitledBorder.border";
+
+        $r61[227] = $r208;
+
+        $r61[228] = "Label.font";
+
+        $r61[229] = $r223;
+
+        $r61[230] = "Label.foreground";
+
+        $r61[231] = $r18;
+
+        $r61[232] = "Label.disabledForeground";
+
+        $r116 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getInactiveSystemTextColor()>();
+
+        $r61[233] = $r116;
+
+        $r61[234] = "List.font";
+
+        $r61[235] = $r223;
+
+        $r61[236] = "List.focusCellHighlightBorder";
+
+        $r61[237] = $r218;
+
+        $r61[238] = "List.focusInputMap";
+
+        $r265 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r118 = newarray (java.lang.Object)[128];
+
+        $r118[0] = "ctrl C";
+
+        $r118[1] = "copy";
+
+        $r118[2] = "ctrl V";
+
+        $r118[3] = "paste";
+
+        $r118[4] = "ctrl X";
+
+        $r118[5] = "cut";
+
+        $r118[6] = "COPY";
+
+        $r118[7] = "copy";
+
+        $r118[8] = "PASTE";
+
+        $r118[9] = "paste";
+
+        $r118[10] = "CUT";
+
+        $r118[11] = "cut";
+
+        $r118[12] = "control INSERT";
+
+        $r118[13] = "copy";
+
+        $r118[14] = "shift INSERT";
+
+        $r118[15] = "paste";
+
+        $r118[16] = "shift DELETE";
+
+        $r118[17] = "cut";
+
+        $r118[18] = "UP";
+
+        $r118[19] = "selectPreviousRow";
+
+        $r118[20] = "KP_UP";
+
+        $r118[21] = "selectPreviousRow";
+
+        $r118[22] = "shift UP";
+
+        $r118[23] = "selectPreviousRowExtendSelection";
+
+        $r118[24] = "shift KP_UP";
+
+        $r118[25] = "selectPreviousRowExtendSelection";
+
+        $r118[26] = "ctrl shift UP";
+
+        $r118[27] = "selectPreviousRowExtendSelection";
+
+        $r118[28] = "ctrl shift KP_UP";
+
+        $r118[29] = "selectPreviousRowExtendSelection";
+
+        $r118[30] = "ctrl UP";
+
+        $r118[31] = "selectPreviousRowChangeLead";
+
+        $r118[32] = "ctrl KP_UP";
+
+        $r118[33] = "selectPreviousRowChangeLead";
+
+        $r118[34] = "DOWN";
+
+        $r118[35] = "selectNextRow";
+
+        $r118[36] = "KP_DOWN";
+
+        $r118[37] = "selectNextRow";
+
+        $r118[38] = "shift DOWN";
+
+        $r118[39] = "selectNextRowExtendSelection";
+
+        $r118[40] = "shift KP_DOWN";
+
+        $r118[41] = "selectNextRowExtendSelection";
+
+        $r118[42] = "ctrl shift DOWN";
+
+        $r118[43] = "selectNextRowExtendSelection";
+
+        $r118[44] = "ctrl shift KP_DOWN";
+
+        $r118[45] = "selectNextRowExtendSelection";
+
+        $r118[46] = "ctrl DOWN";
+
+        $r118[47] = "selectNextRowChangeLead";
+
+        $r118[48] = "ctrl KP_DOWN";
+
+        $r118[49] = "selectNextRowChangeLead";
+
+        $r118[50] = "LEFT";
+
+        $r118[51] = "selectPreviousColumn";
+
+        $r118[52] = "KP_LEFT";
+
+        $r118[53] = "selectPreviousColumn";
+
+        $r118[54] = "shift LEFT";
+
+        $r118[55] = "selectPreviousColumnExtendSelection";
+
+        $r118[56] = "shift KP_LEFT";
+
+        $r118[57] = "selectPreviousColumnExtendSelection";
+
+        $r118[58] = "ctrl shift LEFT";
+
+        $r118[59] = "selectPreviousColumnExtendSelection";
+
+        $r118[60] = "ctrl shift KP_LEFT";
+
+        $r118[61] = "selectPreviousColumnExtendSelection";
+
+        $r118[62] = "ctrl LEFT";
+
+        $r118[63] = "selectPreviousColumnChangeLead";
+
+        $r118[64] = "ctrl KP_LEFT";
+
+        $r118[65] = "selectPreviousColumnChangeLead";
+
+        $r118[66] = "RIGHT";
+
+        $r118[67] = "selectNextColumn";
+
+        $r118[68] = "KP_RIGHT";
+
+        $r118[69] = "selectNextColumn";
+
+        $r118[70] = "shift RIGHT";
+
+        $r118[71] = "selectNextColumnExtendSelection";
+
+        $r118[72] = "shift KP_RIGHT";
+
+        $r118[73] = "selectNextColumnExtendSelection";
+
+        $r118[74] = "ctrl shift RIGHT";
+
+        $r118[75] = "selectNextColumnExtendSelection";
+
+        $r118[76] = "ctrl shift KP_RIGHT";
+
+        $r118[77] = "selectNextColumnExtendSelection";
+
+        $r118[78] = "ctrl RIGHT";
+
+        $r118[79] = "selectNextColumnChangeLead";
+
+        $r118[80] = "ctrl KP_RIGHT";
+
+        $r118[81] = "selectNextColumnChangeLead";
+
+        $r118[82] = "HOME";
+
+        $r118[83] = "selectFirstRow";
+
+        $r118[84] = "shift HOME";
+
+        $r118[85] = "selectFirstRowExtendSelection";
+
+        $r118[86] = "ctrl shift HOME";
+
+        $r118[87] = "selectFirstRowExtendSelection";
+
+        $r118[88] = "ctrl HOME";
+
+        $r118[89] = "selectFirstRowChangeLead";
+
+        $r118[90] = "END";
+
+        $r118[91] = "selectLastRow";
+
+        $r118[92] = "shift END";
+
+        $r118[93] = "selectLastRowExtendSelection";
+
+        $r118[94] = "ctrl shift END";
+
+        $r118[95] = "selectLastRowExtendSelection";
+
+        $r118[96] = "ctrl END";
+
+        $r118[97] = "selectLastRowChangeLead";
+
+        $r118[98] = "PAGE_UP";
+
+        $r118[99] = "scrollUp";
+
+        $r118[100] = "shift PAGE_UP";
+
+        $r118[101] = "scrollUpExtendSelection";
+
+        $r118[102] = "ctrl shift PAGE_UP";
+
+        $r118[103] = "scrollUpExtendSelection";
+
+        $r118[104] = "ctrl PAGE_UP";
+
+        $r118[105] = "scrollUpChangeLead";
+
+        $r118[106] = "PAGE_DOWN";
+
+        $r118[107] = "scrollDown";
+
+        $r118[108] = "shift PAGE_DOWN";
+
+        $r118[109] = "scrollDownExtendSelection";
+
+        $r118[110] = "ctrl shift PAGE_DOWN";
+
+        $r118[111] = "scrollDownExtendSelection";
+
+        $r118[112] = "ctrl PAGE_DOWN";
+
+        $r118[113] = "scrollDownChangeLead";
+
+        $r118[114] = "ctrl A";
+
+        $r118[115] = "selectAll";
+
+        $r118[116] = "ctrl SLASH";
+
+        $r118[117] = "selectAll";
+
+        $r118[118] = "ctrl BACK_SLASH";
+
+        $r118[119] = "clearSelection";
+
+        $r118[120] = "SPACE";
+
+        $r118[121] = "addToSelection";
+
+        $r118[122] = "ctrl SPACE";
+
+        $r118[123] = "toggleAndAnchor";
+
+        $r118[124] = "shift SPACE";
+
+        $r118[125] = "extendTo";
+
+        $r118[126] = "ctrl shift SPACE";
+
+        $r118[127] = "moveSelectionTo";
+
+        specialinvoke $r265.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r118);
+
+        $r61[239] = $r265;
+
+        $r61[240] = "ScrollBar.background";
+
+        $r61[241] = $r4;
+
+        $r61[242] = "ScrollBar.highlight";
+
+        $r61[243] = $r5;
+
+        $r61[244] = "ScrollBar.shadow";
+
+        $r61[245] = $r6;
+
+        $r61[246] = "ScrollBar.darkShadow";
+
+        $r61[247] = $r7;
+
+        $r61[248] = "ScrollBar.thumb";
+
+        $r61[249] = $r17;
+
+        $r61[250] = "ScrollBar.thumbShadow";
+
+        $r61[251] = $r16;
+
+        $r61[252] = "ScrollBar.thumbHighlight";
+
+        $r61[253] = $r15;
+
+        $r61[254] = "ScrollBar.width";
+
+        $r266 = new java.lang.Integer;
+
+        specialinvoke $r266.<java.lang.Integer: void <init>(int)>(17);
+
+        $r61[255] = $r266;
+
+        $r61[256] = "ScrollBar.allowsAbsolutePositioning";
+
+        $r120 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[257] = $r120;
+
+        $r61[258] = "ScrollBar.ancestorInputMap";
+
+        $r267 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r122 = newarray (java.lang.Object)[24];
+
+        $r122[0] = "RIGHT";
+
+        $r122[1] = "positiveUnitIncrement";
+
+        $r122[2] = "KP_RIGHT";
+
+        $r122[3] = "positiveUnitIncrement";
+
+        $r122[4] = "DOWN";
+
+        $r122[5] = "positiveUnitIncrement";
+
+        $r122[6] = "KP_DOWN";
+
+        $r122[7] = "positiveUnitIncrement";
+
+        $r122[8] = "PAGE_DOWN";
+
+        $r122[9] = "positiveBlockIncrement";
+
+        $r122[10] = "LEFT";
+
+        $r122[11] = "negativeUnitIncrement";
+
+        $r122[12] = "KP_LEFT";
+
+        $r122[13] = "negativeUnitIncrement";
+
+        $r122[14] = "UP";
+
+        $r122[15] = "negativeUnitIncrement";
+
+        $r122[16] = "KP_UP";
+
+        $r122[17] = "negativeUnitIncrement";
+
+        $r122[18] = "PAGE_UP";
+
+        $r122[19] = "negativeBlockIncrement";
+
+        $r122[20] = "HOME";
+
+        $r122[21] = "minScroll";
+
+        $r122[22] = "END";
+
+        $r122[23] = "maxScroll";
+
+        specialinvoke $r267.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r122);
+
+        $r61[259] = $r267;
+
+        $r61[260] = "ScrollPane.border";
+
+        $r61[261] = $r205;
+
+        $r61[262] = "ScrollPane.ancestorInputMap";
+
+        $r268 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r124 = newarray (java.lang.Object)[28];
+
+        $r124[0] = "RIGHT";
+
+        $r124[1] = "unitScrollRight";
+
+        $r124[2] = "KP_RIGHT";
+
+        $r124[3] = "unitScrollRight";
+
+        $r124[4] = "DOWN";
+
+        $r124[5] = "unitScrollDown";
+
+        $r124[6] = "KP_DOWN";
+
+        $r124[7] = "unitScrollDown";
+
+        $r124[8] = "LEFT";
+
+        $r124[9] = "unitScrollLeft";
+
+        $r124[10] = "KP_LEFT";
+
+        $r124[11] = "unitScrollLeft";
+
+        $r124[12] = "UP";
+
+        $r124[13] = "unitScrollUp";
+
+        $r124[14] = "KP_UP";
+
+        $r124[15] = "unitScrollUp";
+
+        $r124[16] = "PAGE_UP";
+
+        $r124[17] = "scrollUp";
+
+        $r124[18] = "PAGE_DOWN";
+
+        $r124[19] = "scrollDown";
+
+        $r124[20] = "ctrl PAGE_UP";
+
+        $r124[21] = "scrollLeft";
+
+        $r124[22] = "ctrl PAGE_DOWN";
+
+        $r124[23] = "scrollRight";
+
+        $r124[24] = "ctrl HOME";
+
+        $r124[25] = "scrollHome";
+
+        $r124[26] = "ctrl END";
+
+        $r124[27] = "scrollEnd";
+
+        specialinvoke $r268.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r124);
+
+        $r61[263] = $r268;
+
+        $r61[264] = "TabbedPane.font";
+
+        $r61[265] = $r223;
+
+        $r61[266] = "TabbedPane.tabAreaBackground";
+
+        $r61[267] = $r4;
+
+        $r61[268] = "TabbedPane.background";
+
+        $r61[269] = $r6;
+
+        $r61[270] = "TabbedPane.light";
+
+        $r61[271] = $r4;
+
+        $r61[272] = "TabbedPane.focus";
+
+        $r61[273] = $r16;
+
+        $r61[274] = "TabbedPane.selected";
+
+        $r61[275] = $r4;
+
+        $r61[276] = "TabbedPane.selectHighlight";
+
+        $r61[277] = $r5;
+
+        $r61[278] = "TabbedPane.tabAreaInsets";
+
+        $r61[279] = $r219;
+
+        $r61[280] = "TabbedPane.tabInsets";
+
+        $r61[281] = $r220;
+
+        $r61[282] = "TabbedPane.focusInputMap";
+
+        $r269 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r126 = newarray (java.lang.Object)[20];
+
+        $r126[0] = "RIGHT";
+
+        $r126[1] = "navigateRight";
+
+        $r126[2] = "KP_RIGHT";
+
+        $r126[3] = "navigateRight";
+
+        $r126[4] = "LEFT";
+
+        $r126[5] = "navigateLeft";
+
+        $r126[6] = "KP_LEFT";
+
+        $r126[7] = "navigateLeft";
+
+        $r126[8] = "UP";
+
+        $r126[9] = "navigateUp";
+
+        $r126[10] = "KP_UP";
+
+        $r126[11] = "navigateUp";
+
+        $r126[12] = "DOWN";
+
+        $r126[13] = "navigateDown";
+
+        $r126[14] = "KP_DOWN";
+
+        $r126[15] = "navigateDown";
+
+        $r126[16] = "ctrl DOWN";
+
+        $r126[17] = "requestFocusForVisibleComponent";
+
+        $r126[18] = "ctrl KP_DOWN";
+
+        $r126[19] = "requestFocusForVisibleComponent";
+
+        specialinvoke $r269.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r126);
+
+        $r61[283] = $r269;
+
+        $r61[284] = "TabbedPane.ancestorInputMap";
+
+        $r270 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r128 = newarray (java.lang.Object)[8];
+
+        $r128[0] = "ctrl PAGE_DOWN";
+
+        $r128[1] = "navigatePageDown";
+
+        $r128[2] = "ctrl PAGE_UP";
+
+        $r128[3] = "navigatePageUp";
+
+        $r128[4] = "ctrl UP";
+
+        $r128[5] = "requestFocus";
+
+        $r128[6] = "ctrl KP_UP";
+
+        $r128[7] = "requestFocus";
+
+        specialinvoke $r270.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r128);
+
+        $r61[285] = $r270;
+
+        $r61[286] = "Table.font";
+
+        $r61[287] = $r224;
+
+        $r61[288] = "Table.focusCellHighlightBorder";
+
+        $r61[289] = $r218;
+
+        $r61[290] = "Table.scrollPaneBorder";
+
+        $r61[291] = $r205;
+
+        $r61[292] = "Table.dropLineColor";
+
+        $r61[293] = $r9;
+
+        $r61[294] = "Table.dropLineShortColor";
+
+        $r61[295] = $r16;
+
+        $r61[296] = "Table.gridColor";
+
+        $r61[297] = $r6;
+
+        $r61[298] = "Table.ancestorInputMap";
+
+        $r271 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r130 = newarray (java.lang.Object)[142];
+
+        $r130[0] = "ctrl C";
+
+        $r130[1] = "copy";
+
+        $r130[2] = "ctrl V";
+
+        $r130[3] = "paste";
+
+        $r130[4] = "ctrl X";
+
+        $r130[5] = "cut";
+
+        $r130[6] = "COPY";
+
+        $r130[7] = "copy";
+
+        $r130[8] = "PASTE";
+
+        $r130[9] = "paste";
+
+        $r130[10] = "CUT";
+
+        $r130[11] = "cut";
+
+        $r130[12] = "control INSERT";
+
+        $r130[13] = "copy";
+
+        $r130[14] = "shift INSERT";
+
+        $r130[15] = "paste";
+
+        $r130[16] = "shift DELETE";
+
+        $r130[17] = "cut";
+
+        $r130[18] = "RIGHT";
+
+        $r130[19] = "selectNextColumn";
+
+        $r130[20] = "KP_RIGHT";
+
+        $r130[21] = "selectNextColumn";
+
+        $r130[22] = "shift RIGHT";
+
+        $r130[23] = "selectNextColumnExtendSelection";
+
+        $r130[24] = "shift KP_RIGHT";
+
+        $r130[25] = "selectNextColumnExtendSelection";
+
+        $r130[26] = "ctrl shift RIGHT";
+
+        $r130[27] = "selectNextColumnExtendSelection";
+
+        $r130[28] = "ctrl shift KP_RIGHT";
+
+        $r130[29] = "selectNextColumnExtendSelection";
+
+        $r130[30] = "ctrl RIGHT";
+
+        $r130[31] = "selectNextColumnChangeLead";
+
+        $r130[32] = "ctrl KP_RIGHT";
+
+        $r130[33] = "selectNextColumnChangeLead";
+
+        $r130[34] = "LEFT";
+
+        $r130[35] = "selectPreviousColumn";
+
+        $r130[36] = "KP_LEFT";
+
+        $r130[37] = "selectPreviousColumn";
+
+        $r130[38] = "shift LEFT";
+
+        $r130[39] = "selectPreviousColumnExtendSelection";
+
+        $r130[40] = "shift KP_LEFT";
+
+        $r130[41] = "selectPreviousColumnExtendSelection";
+
+        $r130[42] = "ctrl shift LEFT";
+
+        $r130[43] = "selectPreviousColumnExtendSelection";
+
+        $r130[44] = "ctrl shift KP_LEFT";
+
+        $r130[45] = "selectPreviousColumnExtendSelection";
+
+        $r130[46] = "ctrl LEFT";
+
+        $r130[47] = "selectPreviousColumnChangeLead";
+
+        $r130[48] = "ctrl KP_LEFT";
+
+        $r130[49] = "selectPreviousColumnChangeLead";
+
+        $r130[50] = "DOWN";
+
+        $r130[51] = "selectNextRow";
+
+        $r130[52] = "KP_DOWN";
+
+        $r130[53] = "selectNextRow";
+
+        $r130[54] = "shift DOWN";
+
+        $r130[55] = "selectNextRowExtendSelection";
+
+        $r130[56] = "shift KP_DOWN";
+
+        $r130[57] = "selectNextRowExtendSelection";
+
+        $r130[58] = "ctrl shift DOWN";
+
+        $r130[59] = "selectNextRowExtendSelection";
+
+        $r130[60] = "ctrl shift KP_DOWN";
+
+        $r130[61] = "selectNextRowExtendSelection";
+
+        $r130[62] = "ctrl DOWN";
+
+        $r130[63] = "selectNextRowChangeLead";
+
+        $r130[64] = "ctrl KP_DOWN";
+
+        $r130[65] = "selectNextRowChangeLead";
+
+        $r130[66] = "UP";
+
+        $r130[67] = "selectPreviousRow";
+
+        $r130[68] = "KP_UP";
+
+        $r130[69] = "selectPreviousRow";
+
+        $r130[70] = "shift UP";
+
+        $r130[71] = "selectPreviousRowExtendSelection";
+
+        $r130[72] = "shift KP_UP";
+
+        $r130[73] = "selectPreviousRowExtendSelection";
+
+        $r130[74] = "ctrl shift UP";
+
+        $r130[75] = "selectPreviousRowExtendSelection";
+
+        $r130[76] = "ctrl shift KP_UP";
+
+        $r130[77] = "selectPreviousRowExtendSelection";
+
+        $r130[78] = "ctrl UP";
+
+        $r130[79] = "selectPreviousRowChangeLead";
+
+        $r130[80] = "ctrl KP_UP";
+
+        $r130[81] = "selectPreviousRowChangeLead";
+
+        $r130[82] = "HOME";
+
+        $r130[83] = "selectFirstColumn";
+
+        $r130[84] = "shift HOME";
+
+        $r130[85] = "selectFirstColumnExtendSelection";
+
+        $r130[86] = "ctrl shift HOME";
+
+        $r130[87] = "selectFirstRowExtendSelection";
+
+        $r130[88] = "ctrl HOME";
+
+        $r130[89] = "selectFirstRow";
+
+        $r130[90] = "END";
+
+        $r130[91] = "selectLastColumn";
+
+        $r130[92] = "shift END";
+
+        $r130[93] = "selectLastColumnExtendSelection";
+
+        $r130[94] = "ctrl shift END";
+
+        $r130[95] = "selectLastRowExtendSelection";
+
+        $r130[96] = "ctrl END";
+
+        $r130[97] = "selectLastRow";
+
+        $r130[98] = "PAGE_UP";
+
+        $r130[99] = "scrollUpChangeSelection";
+
+        $r130[100] = "shift PAGE_UP";
+
+        $r130[101] = "scrollUpExtendSelection";
+
+        $r130[102] = "ctrl shift PAGE_UP";
+
+        $r130[103] = "scrollLeftExtendSelection";
+
+        $r130[104] = "ctrl PAGE_UP";
+
+        $r130[105] = "scrollLeftChangeSelection";
+
+        $r130[106] = "PAGE_DOWN";
+
+        $r130[107] = "scrollDownChangeSelection";
+
+        $r130[108] = "shift PAGE_DOWN";
+
+        $r130[109] = "scrollDownExtendSelection";
+
+        $r130[110] = "ctrl shift PAGE_DOWN";
+
+        $r130[111] = "scrollRightExtendSelection";
+
+        $r130[112] = "ctrl PAGE_DOWN";
+
+        $r130[113] = "scrollRightChangeSelection";
+
+        $r130[114] = "TAB";
+
+        $r130[115] = "selectNextColumnCell";
+
+        $r130[116] = "shift TAB";
+
+        $r130[117] = "selectPreviousColumnCell";
+
+        $r130[118] = "ENTER";
+
+        $r130[119] = "selectNextRowCell";
+
+        $r130[120] = "shift ENTER";
+
+        $r130[121] = "selectPreviousRowCell";
+
+        $r130[122] = "ctrl A";
+
+        $r130[123] = "selectAll";
+
+        $r130[124] = "ctrl SLASH";
+
+        $r130[125] = "selectAll";
+
+        $r130[126] = "ctrl BACK_SLASH";
+
+        $r130[127] = "clearSelection";
+
+        $r130[128] = "ESCAPE";
+
+        $r130[129] = "cancel";
+
+        $r130[130] = "F2";
+
+        $r130[131] = "startEditing";
+
+        $r130[132] = "SPACE";
+
+        $r130[133] = "addToSelection";
+
+        $r130[134] = "ctrl SPACE";
+
+        $r130[135] = "toggleAndAnchor";
+
+        $r130[136] = "shift SPACE";
+
+        $r130[137] = "extendTo";
+
+        $r130[138] = "ctrl shift SPACE";
+
+        $r130[139] = "moveSelectionTo";
+
+        $r130[140] = "F8";
+
+        $r130[141] = "focusHeader";
+
+        specialinvoke $r271.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r130);
+
+        $r61[299] = $r271;
+
+        $r61[300] = "Table.ascendingSortIcon";
+
+        $r131 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r132 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r131, class "Ljavax/swing/plaf/metal/MetalLookAndFeel;", "icons/sortUp.png");
+
+        $r61[301] = $r132;
+
+        $r61[302] = "Table.descendingSortIcon";
+
+        $r133 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r134 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r133, class "Ljavax/swing/plaf/metal/MetalLookAndFeel;", "icons/sortDown.png");
+
+        $r61[303] = $r134;
+
+        $r61[304] = "TableHeader.font";
+
+        $r61[305] = $r224;
+
+        $r61[306] = "TableHeader.cellBorder";
+
+        $r272 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r272.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.metal.MetalBorders$TableHeaderBorder");
+
+        $r61[307] = $r272;
+
+        $r61[308] = "MenuBar.border";
+
+        $r61[309] = $r210;
+
+        $r61[310] = "MenuBar.font";
+
+        $r61[311] = $r222;
+
+        $r61[312] = "MenuBar.windowBindings";
+
+        $r136 = newarray (java.lang.Object)[2];
+
+        $r136[0] = "F10";
+
+        $r136[1] = "takeFocus";
+
+        $r61[313] = $r136;
+
+        $r61[314] = "Menu.border";
+
+        $r61[315] = $r212;
+
+        $r61[316] = "Menu.borderPainted";
+
+        $r137 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[317] = $r137;
+
+        $r61[318] = "Menu.menuPopupOffsetX";
+
+        $r61[319] = $r20;
+
+        $r61[320] = "Menu.menuPopupOffsetY";
+
+        $r61[321] = $r20;
+
+        $r61[322] = "Menu.submenuPopupOffsetX";
+
+        $r273 = new java.lang.Integer;
+
+        $i1 = (int) -4;
+
+        specialinvoke $r273.<java.lang.Integer: void <init>(int)>($i1);
+
+        $r61[323] = $r273;
+
+        $r61[324] = "Menu.submenuPopupOffsetY";
+
+        $r274 = new java.lang.Integer;
+
+        $i3 = (int) -3;
+
+        specialinvoke $r274.<java.lang.Integer: void <init>(int)>($i3);
+
+        $r61[325] = $r274;
+
+        $r61[326] = "Menu.font";
+
+        $r61[327] = $r222;
+
+        $r61[328] = "Menu.selectionForeground";
+
+        $r61[329] = $r14;
+
+        $r61[330] = "Menu.selectionBackground";
+
+        $r61[331] = $r12;
+
+        $r61[332] = "Menu.disabledForeground";
+
+        $r61[333] = $r13;
+
+        $r61[334] = "Menu.acceleratorFont";
+
+        $r61[335] = $r226;
+
+        $r61[336] = "Menu.acceleratorForeground";
+
+        $r61[337] = $r2;
+
+        $r61[338] = "Menu.acceleratorSelectionForeground";
+
+        $r61[339] = $r3;
+
+        $r61[340] = "Menu.checkIcon";
+
+        $r275 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r275.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuItemCheckIcon");
+
+        $r61[341] = $r275;
+
+        $r61[342] = "Menu.arrowIcon";
+
+        $r276 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r276.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuArrowIcon");
+
+        $r61[343] = $r276;
+
+        $r61[344] = "MenuItem.border";
+
+        $r61[345] = $r212;
+
+        $r61[346] = "MenuItem.borderPainted";
+
+        $r142 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[347] = $r142;
+
+        $r61[348] = "MenuItem.font";
+
+        $r61[349] = $r222;
+
+        $r61[350] = "MenuItem.selectionForeground";
+
+        $r61[351] = $r14;
+
+        $r61[352] = "MenuItem.selectionBackground";
+
+        $r61[353] = $r12;
+
+        $r61[354] = "MenuItem.disabledForeground";
+
+        $r61[355] = $r13;
+
+        $r61[356] = "MenuItem.acceleratorFont";
+
+        $r61[357] = $r226;
+
+        $r61[358] = "MenuItem.acceleratorForeground";
+
+        $r61[359] = $r2;
+
+        $r61[360] = "MenuItem.acceleratorSelectionForeground";
+
+        $r61[361] = $r3;
+
+        $r61[362] = "MenuItem.acceleratorDelimiter";
+
+        $r61[363] = "-";
+
+        $r61[364] = "MenuItem.checkIcon";
+
+        $r277 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r277.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuItemCheckIcon");
+
+        $r61[365] = $r277;
+
+        $r61[366] = "MenuItem.arrowIcon";
+
+        $r278 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r278.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuItemArrowIcon");
+
+        $r61[367] = $r278;
+
+        $r61[368] = "MenuItem.commandSound";
+
+        $r61[369] = "sounds/MenuItemCommand.wav";
+
+        $r61[370] = "OptionPane.windowBindings";
+
+        $r145 = newarray (java.lang.Object)[2];
+
+        $r145[0] = "ESCAPE";
+
+        $r145[1] = "close";
+
+        $r61[371] = $r145;
+
+        $r61[372] = "OptionPane.informationSound";
+
+        $r61[373] = "sounds/OptionPaneInformation.wav";
+
+        $r61[374] = "OptionPane.warningSound";
+
+        $r61[375] = "sounds/OptionPaneWarning.wav";
+
+        $r61[376] = "OptionPane.errorSound";
+
+        $r61[377] = "sounds/OptionPaneError.wav";
+
+        $r61[378] = "OptionPane.questionSound";
+
+        $r61[379] = "sounds/OptionPaneQuestion.wav";
+
+        $r61[380] = "OptionPane.errorDialog.border.background";
+
+        $r279 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r279.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(153, 51, 51);
+
+        $r61[381] = $r279;
+
+        $r61[382] = "OptionPane.errorDialog.titlePane.foreground";
+
+        $r280 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r280.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(51, 0, 0);
+
+        $r61[383] = $r280;
+
+        $r61[384] = "OptionPane.errorDialog.titlePane.background";
+
+        $r281 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r281.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(255, 153, 153);
+
+        $r61[385] = $r281;
+
+        $r61[386] = "OptionPane.errorDialog.titlePane.shadow";
+
+        $r282 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r282.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(204, 102, 102);
+
+        $r61[387] = $r282;
+
+        $r61[388] = "OptionPane.questionDialog.border.background";
+
+        $r283 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r283.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(51, 102, 51);
+
+        $r61[389] = $r283;
+
+        $r61[390] = "OptionPane.questionDialog.titlePane.foreground";
+
+        $r284 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r284.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(0, 51, 0);
+
+        $r61[391] = $r284;
+
+        $r61[392] = "OptionPane.questionDialog.titlePane.background";
+
+        $r285 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r285.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(153, 204, 153);
+
+        $r61[393] = $r285;
+
+        $r61[394] = "OptionPane.questionDialog.titlePane.shadow";
+
+        $r286 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r286.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(102, 153, 102);
+
+        $r61[395] = $r286;
+
+        $r61[396] = "OptionPane.warningDialog.border.background";
+
+        $r287 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r287.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(153, 102, 51);
+
+        $r61[397] = $r287;
+
+        $r61[398] = "OptionPane.warningDialog.titlePane.foreground";
+
+        $r288 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r288.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(102, 51, 0);
+
+        $r61[399] = $r288;
+
+        $r61[400] = "OptionPane.warningDialog.titlePane.background";
+
+        $r289 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r289.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(255, 204, 153);
+
+        $r61[401] = $r289;
+
+        $r61[402] = "OptionPane.warningDialog.titlePane.shadow";
+
+        $r290 = new javax.swing.plaf.ColorUIResource;
+
+        specialinvoke $r290.<javax.swing.plaf.ColorUIResource: void <init>(int,int,int)>(204, 153, 102);
+
+        $r61[403] = $r290;
+
+        $r61[404] = "Separator.background";
+
+        $r158 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getSeparatorBackground()>();
+
+        $r61[405] = $r158;
+
+        $r61[406] = "Separator.foreground";
+
+        $r159 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getSeparatorForeground()>();
+
+        $r61[407] = $r159;
+
+        $r61[408] = "PopupMenu.border";
+
+        $r61[409] = $r211;
+
+        $r61[410] = "PopupMenu.popupSound";
+
+        $r61[411] = "sounds/PopupMenuPopup.wav";
+
+        $r61[412] = "PopupMenu.font";
+
+        $r61[413] = $r222;
+
+        $r61[414] = "CheckBoxMenuItem.border";
+
+        $r61[415] = $r212;
+
+        $r61[416] = "CheckBoxMenuItem.borderPainted";
+
+        $r160 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[417] = $r160;
+
+        $r61[418] = "CheckBoxMenuItem.font";
+
+        $r61[419] = $r222;
+
+        $r61[420] = "CheckBoxMenuItem.selectionForeground";
+
+        $r61[421] = $r14;
+
+        $r61[422] = "CheckBoxMenuItem.selectionBackground";
+
+        $r61[423] = $r12;
+
+        $r61[424] = "CheckBoxMenuItem.disabledForeground";
+
+        $r61[425] = $r13;
+
+        $r61[426] = "CheckBoxMenuItem.acceleratorFont";
+
+        $r61[427] = $r226;
+
+        $r61[428] = "CheckBoxMenuItem.acceleratorForeground";
+
+        $r61[429] = $r2;
+
+        $r61[430] = "CheckBoxMenuItem.acceleratorSelectionForeground";
+
+        $r61[431] = $r3;
+
+        $r61[432] = "CheckBoxMenuItem.checkIcon";
+
+        $r291 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r291.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getCheckBoxMenuItemIcon");
+
+        $r61[433] = $r291;
+
+        $r61[434] = "CheckBoxMenuItem.arrowIcon";
+
+        $r292 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r292.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuItemArrowIcon");
+
+        $r61[435] = $r292;
+
+        $r61[436] = "CheckBoxMenuItem.commandSound";
+
+        $r61[437] = "sounds/MenuItemCommand.wav";
+
+        $r61[438] = "RadioButtonMenuItem.border";
+
+        $r61[439] = $r212;
+
+        $r61[440] = "RadioButtonMenuItem.borderPainted";
+
+        $r163 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r61[441] = $r163;
+
+        $r61[442] = "RadioButtonMenuItem.font";
+
+        $r61[443] = $r222;
+
+        $r61[444] = "RadioButtonMenuItem.selectionForeground";
+
+        $r61[445] = $r14;
+
+        $r61[446] = "RadioButtonMenuItem.selectionBackground";
+
+        $r61[447] = $r12;
+
+        $r61[448] = "RadioButtonMenuItem.disabledForeground";
+
+        $r61[449] = $r13;
+
+        $r61[450] = "RadioButtonMenuItem.acceleratorFont";
+
+        $r61[451] = $r226;
+
+        $r61[452] = "RadioButtonMenuItem.acceleratorForeground";
+
+        $r61[453] = $r2;
+
+        $r61[454] = "RadioButtonMenuItem.acceleratorSelectionForeground";
+
+        $r61[455] = $r3;
+
+        $r61[456] = "RadioButtonMenuItem.checkIcon";
+
+        $r293 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r293.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getRadioButtonMenuItemIcon");
+
+        $r61[457] = $r293;
+
+        $r61[458] = "RadioButtonMenuItem.arrowIcon";
+
+        $r294 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r294.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getMenuItemArrowIcon");
+
+        $r61[459] = $r294;
+
+        $r61[460] = "RadioButtonMenuItem.commandSound";
+
+        $r61[461] = "sounds/MenuItemCommand.wav";
+
+        $r61[462] = "Spinner.ancestorInputMap";
+
+        $r295 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r167 = newarray (java.lang.Object)[8];
+
+        $r167[0] = "UP";
+
+        $r167[1] = "increment";
+
+        $r167[2] = "KP_UP";
+
+        $r167[3] = "increment";
+
+        $r167[4] = "DOWN";
+
+        $r167[5] = "decrement";
+
+        $r167[6] = "KP_DOWN";
+
+        $r167[7] = "decrement";
+
+        specialinvoke $r295.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r167);
+
+        $r61[463] = $r295;
+
+        $r61[464] = "Spinner.arrowButtonInsets";
+
+        $r61[465] = $r200;
+
+        $r61[466] = "Spinner.border";
+
+        $r61[467] = $r201;
+
+        $r61[468] = "Spinner.arrowButtonBorder";
+
+        $r61[469] = $r206;
+
+        $r61[470] = "Spinner.font";
+
+        $r61[471] = $r223;
+
+        $r61[472] = "SplitPane.dividerSize";
+
+        $r296 = new java.lang.Integer;
+
+        specialinvoke $r296.<java.lang.Integer: void <init>(int)>(10);
+
+        $r61[473] = $r296;
+
+        $r61[474] = "SplitPane.ancestorInputMap";
+
+        $r297 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r170 = newarray (java.lang.Object)[28];
+
+        $r170[0] = "UP";
+
+        $r170[1] = "negativeIncrement";
+
+        $r170[2] = "DOWN";
+
+        $r170[3] = "positiveIncrement";
+
+        $r170[4] = "LEFT";
+
+        $r170[5] = "negativeIncrement";
+
+        $r170[6] = "RIGHT";
+
+        $r170[7] = "positiveIncrement";
+
+        $r170[8] = "KP_UP";
+
+        $r170[9] = "negativeIncrement";
+
+        $r170[10] = "KP_DOWN";
+
+        $r170[11] = "positiveIncrement";
+
+        $r170[12] = "KP_LEFT";
+
+        $r170[13] = "negativeIncrement";
+
+        $r170[14] = "KP_RIGHT";
+
+        $r170[15] = "positiveIncrement";
+
+        $r170[16] = "HOME";
+
+        $r170[17] = "selectMin";
+
+        $r170[18] = "END";
+
+        $r170[19] = "selectMax";
+
+        $r170[20] = "F8";
+
+        $r170[21] = "startResize";
+
+        $r170[22] = "F6";
+
+        $r170[23] = "toggleFocus";
+
+        $r170[24] = "ctrl TAB";
+
+        $r170[25] = "focusOutForward";
+
+        $r170[26] = "ctrl shift TAB";
+
+        $r170[27] = "focusOutBackward";
+
+        specialinvoke $r297.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r170);
+
+        $r61[475] = $r297;
+
+        $r61[476] = "SplitPane.centerOneTouchButtons";
+
+        $r171 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r61[477] = $r171;
+
+        $r61[478] = "SplitPane.dividerFocusColor";
+
+        $r61[479] = $r15;
+
+        $r61[480] = "Tree.font";
+
+        $r61[481] = $r224;
+
+        $r61[482] = "Tree.textBackground";
+
+        $r172 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getWindowBackground()>();
+
+        $r61[483] = $r172;
+
+        $r61[484] = "Tree.selectionBorderColor";
+
+        $r61[485] = $r9;
+
+        $r61[486] = "Tree.openIcon";
+
+        $r298 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r298.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeFolderIcon");
+
+        $r61[487] = $r298;
+
+        $r61[488] = "Tree.closedIcon";
+
+        $r299 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r299.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeFolderIcon");
+
+        $r61[489] = $r299;
+
+        $r61[490] = "Tree.leafIcon";
+
+        $r300 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r300.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.metal.MetalIconFactory", "getTreeLeafIcon");
+
+        $r61[491] = $r300;
+
+        $r61[492] = "Tree.expandedIcon";
+
+        $r301 = new sun.swing.SwingLazyValue;
+
+        $r177 = newarray (java.lang.Object)[1];
+
+        $r178 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        $r177[0] = $r178;
+
+        specialinvoke $r301.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getTreeControlIcon", $r177);
+
+        $r61[493] = $r301;
+
+        $r61[494] = "Tree.collapsedIcon";
+
+        $r302 = new sun.swing.SwingLazyValue;
+
+        $r180 = newarray (java.lang.Object)[1];
+
+        $r181 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        $r180[0] = $r181;
+
+        specialinvoke $r302.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.metal.MetalIconFactory", "getTreeControlIcon", $r180);
+
+        $r61[495] = $r302;
+
+        $r61[496] = "Tree.line";
+
+        $r61[497] = $r15;
+
+        $r61[498] = "Tree.hash";
+
+        $r61[499] = $r15;
+
+        $r61[500] = "Tree.rowHeight";
+
+        $r61[501] = $r20;
+
+        $r61[502] = "Tree.focusInputMap";
+
+        $r303 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r183 = newarray (java.lang.Object)[118];
+
+        $r183[0] = "ADD";
+
+        $r183[1] = "expand";
+
+        $r183[2] = "SUBTRACT";
+
+        $r183[3] = "collapse";
+
+        $r183[4] = "ctrl C";
+
+        $r183[5] = "copy";
+
+        $r183[6] = "ctrl V";
+
+        $r183[7] = "paste";
+
+        $r183[8] = "ctrl X";
+
+        $r183[9] = "cut";
+
+        $r183[10] = "COPY";
+
+        $r183[11] = "copy";
+
+        $r183[12] = "PASTE";
+
+        $r183[13] = "paste";
+
+        $r183[14] = "CUT";
+
+        $r183[15] = "cut";
+
+        $r183[16] = "control INSERT";
+
+        $r183[17] = "copy";
+
+        $r183[18] = "shift INSERT";
+
+        $r183[19] = "paste";
+
+        $r183[20] = "shift DELETE";
+
+        $r183[21] = "cut";
+
+        $r183[22] = "UP";
+
+        $r183[23] = "selectPrevious";
+
+        $r183[24] = "KP_UP";
+
+        $r183[25] = "selectPrevious";
+
+        $r183[26] = "shift UP";
+
+        $r183[27] = "selectPreviousExtendSelection";
+
+        $r183[28] = "shift KP_UP";
+
+        $r183[29] = "selectPreviousExtendSelection";
+
+        $r183[30] = "ctrl shift UP";
+
+        $r183[31] = "selectPreviousExtendSelection";
+
+        $r183[32] = "ctrl shift KP_UP";
+
+        $r183[33] = "selectPreviousExtendSelection";
+
+        $r183[34] = "ctrl UP";
+
+        $r183[35] = "selectPreviousChangeLead";
+
+        $r183[36] = "ctrl KP_UP";
+
+        $r183[37] = "selectPreviousChangeLead";
+
+        $r183[38] = "DOWN";
+
+        $r183[39] = "selectNext";
+
+        $r183[40] = "KP_DOWN";
+
+        $r183[41] = "selectNext";
+
+        $r183[42] = "shift DOWN";
+
+        $r183[43] = "selectNextExtendSelection";
+
+        $r183[44] = "shift KP_DOWN";
+
+        $r183[45] = "selectNextExtendSelection";
+
+        $r183[46] = "ctrl shift DOWN";
+
+        $r183[47] = "selectNextExtendSelection";
+
+        $r183[48] = "ctrl shift KP_DOWN";
+
+        $r183[49] = "selectNextExtendSelection";
+
+        $r183[50] = "ctrl DOWN";
+
+        $r183[51] = "selectNextChangeLead";
+
+        $r183[52] = "ctrl KP_DOWN";
+
+        $r183[53] = "selectNextChangeLead";
+
+        $r183[54] = "RIGHT";
+
+        $r183[55] = "selectChild";
+
+        $r183[56] = "KP_RIGHT";
+
+        $r183[57] = "selectChild";
+
+        $r183[58] = "LEFT";
+
+        $r183[59] = "selectParent";
+
+        $r183[60] = "KP_LEFT";
+
+        $r183[61] = "selectParent";
+
+        $r183[62] = "PAGE_UP";
+
+        $r183[63] = "scrollUpChangeSelection";
+
+        $r183[64] = "shift PAGE_UP";
+
+        $r183[65] = "scrollUpExtendSelection";
+
+        $r183[66] = "ctrl shift PAGE_UP";
+
+        $r183[67] = "scrollUpExtendSelection";
+
+        $r183[68] = "ctrl PAGE_UP";
+
+        $r183[69] = "scrollUpChangeLead";
+
+        $r183[70] = "PAGE_DOWN";
+
+        $r183[71] = "scrollDownChangeSelection";
+
+        $r183[72] = "shift PAGE_DOWN";
+
+        $r183[73] = "scrollDownExtendSelection";
+
+        $r183[74] = "ctrl shift PAGE_DOWN";
+
+        $r183[75] = "scrollDownExtendSelection";
+
+        $r183[76] = "ctrl PAGE_DOWN";
+
+        $r183[77] = "scrollDownChangeLead";
+
+        $r183[78] = "HOME";
+
+        $r183[79] = "selectFirst";
+
+        $r183[80] = "shift HOME";
+
+        $r183[81] = "selectFirstExtendSelection";
+
+        $r183[82] = "ctrl shift HOME";
+
+        $r183[83] = "selectFirstExtendSelection";
+
+        $r183[84] = "ctrl HOME";
+
+        $r183[85] = "selectFirstChangeLead";
+
+        $r183[86] = "END";
+
+        $r183[87] = "selectLast";
+
+        $r183[88] = "shift END";
+
+        $r183[89] = "selectLastExtendSelection";
+
+        $r183[90] = "ctrl shift END";
+
+        $r183[91] = "selectLastExtendSelection";
+
+        $r183[92] = "ctrl END";
+
+        $r183[93] = "selectLastChangeLead";
+
+        $r183[94] = "F2";
+
+        $r183[95] = "startEditing";
+
+        $r183[96] = "ctrl A";
+
+        $r183[97] = "selectAll";
+
+        $r183[98] = "ctrl SLASH";
+
+        $r183[99] = "selectAll";
+
+        $r183[100] = "ctrl BACK_SLASH";
+
+        $r183[101] = "clearSelection";
+
+        $r183[102] = "ctrl LEFT";
+
+        $r183[103] = "scrollLeft";
+
+        $r183[104] = "ctrl KP_LEFT";
+
+        $r183[105] = "scrollLeft";
+
+        $r183[106] = "ctrl RIGHT";
+
+        $r183[107] = "scrollRight";
+
+        $r183[108] = "ctrl KP_RIGHT";
+
+        $r183[109] = "scrollRight";
+
+        $r183[110] = "SPACE";
+
+        $r183[111] = "addToSelection";
+
+        $r183[112] = "ctrl SPACE";
+
+        $r183[113] = "toggleAndAnchor";
+
+        $r183[114] = "shift SPACE";
+
+        $r183[115] = "extendTo";
+
+        $r183[116] = "ctrl shift SPACE";
+
+        $r183[117] = "moveSelectionTo";
+
+        specialinvoke $r303.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r183);
+
+        $r61[503] = $r303;
+
+        $r61[504] = "Tree.ancestorInputMap";
+
+        $r304 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r185 = newarray (java.lang.Object)[2];
+
+        $r185[0] = "ESCAPE";
+
+        $r185[1] = "cancel";
+
+        specialinvoke $r304.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r185);
+
+        $r61[505] = $r304;
+
+        $r61[506] = "ToolBar.border";
+
+        $r61[507] = $r213;
+
+        $r61[508] = "ToolBar.background";
+
+        $r61[509] = $r11;
+
+        $r61[510] = "ToolBar.foreground";
+
+        $r186 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.ColorUIResource getMenuForeground()>();
+
+        $r61[511] = $r186;
+
+        $r61[512] = "ToolBar.font";
+
+        $r61[513] = $r222;
+
+        $r61[514] = "ToolBar.dockingBackground";
+
+        $r61[515] = $r11;
+
+        $r61[516] = "ToolBar.floatingBackground";
+
+        $r61[517] = $r11;
+
+        $r61[518] = "ToolBar.dockingForeground";
+
+        $r61[519] = $r16;
+
+        $r61[520] = "ToolBar.floatingForeground";
+
+        $r61[521] = $r15;
+
+        $r61[522] = "ToolBar.rolloverBorder";
+
+        $r187 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_2__465: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r61[523] = $r187;
+
+        $r61[524] = "ToolBar.nonrolloverBorder";
+
+        $r188 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_3__466: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r61[525] = $r188;
+
+        $r61[526] = "ToolBar.ancestorInputMap";
+
+        $r305 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r190 = newarray (java.lang.Object)[16];
+
+        $r190[0] = "UP";
+
+        $r190[1] = "navigateUp";
+
+        $r190[2] = "KP_UP";
+
+        $r190[3] = "navigateUp";
+
+        $r190[4] = "DOWN";
+
+        $r190[5] = "navigateDown";
+
+        $r190[6] = "KP_DOWN";
+
+        $r190[7] = "navigateDown";
+
+        $r190[8] = "LEFT";
+
+        $r190[9] = "navigateLeft";
+
+        $r190[10] = "KP_LEFT";
+
+        $r190[11] = "navigateLeft";
+
+        $r190[12] = "RIGHT";
+
+        $r190[13] = "navigateRight";
+
+        $r190[14] = "KP_RIGHT";
+
+        $r190[15] = "navigateRight";
+
+        specialinvoke $r305.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r190);
+
+        $r61[527] = $r305;
+
+        $r61[528] = "RootPane.frameBorder";
+
+        $r191 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_4__467: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r61[529] = $r191;
+
+        $r61[530] = "RootPane.plainDialogBorder";
+
+        $r61[531] = $r22;
+
+        $r61[532] = "RootPane.informationDialogBorder";
+
+        $r61[533] = $r22;
+
+        $r61[534] = "RootPane.errorDialogBorder";
+
+        $r192 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_5__468: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r61[535] = $r192;
+
+        $r61[536] = "RootPane.colorChooserDialogBorder";
+
+        $r61[537] = $r23;
+
+        $r61[538] = "RootPane.fileChooserDialogBorder";
+
+        $r61[539] = $r23;
+
+        $r61[540] = "RootPane.questionDialogBorder";
+
+        $r61[541] = $r23;
+
+        $r61[542] = "RootPane.warningDialogBorder";
+
+        $r193 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$lambda_initComponentDefaults_6__469: javax.swing.UIDefaults$LazyValue bootstrap$()>();
+
+        $r61[543] = $r193;
+
+        $r61[544] = "RootPane.defaultButtonWindowKeyBindings";
+
+        $r194 = newarray (java.lang.Object)[8];
+
+        $r194[0] = "ENTER";
+
+        $r194[1] = "press";
+
+        $r194[2] = "released ENTER";
+
+        $r194[3] = "release";
+
+        $r194[4] = "ctrl ENTER";
+
+        $r194[5] = "press";
+
+        $r194[6] = "ctrl released ENTER";
+
+        $r194[7] = "release";
+
+        $r61[545] = $r194;
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r61);
+
+        $z0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean isWindows()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean useSystemFonts()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = virtualinvoke $r54.<javax.swing.plaf.metal.MetalTheme: boolean isSystemTheme()>();
+
+        if $z2 == 0 goto label1;
+
+        $r306 = new javax.swing.plaf.metal.MetalFontDesktopProperty;
+
+        specialinvoke $r306.<javax.swing.plaf.metal.MetalFontDesktopProperty: void <init>(java.lang.String,int)>("win.messagebox.font.height", 0);
+
+        $r196 = newarray (java.lang.Object)[4];
+
+        $r196[0] = "OptionPane.messageFont";
+
+        $r196[1] = $r306;
+
+        $r196[2] = "OptionPane.buttonFont";
+
+        $r196[3] = $r306;
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r196);
+
+     label1:
+        staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: void flushUnreferenced()>();
+
+        $z3 = staticinvoke <sun.swing.SwingUtilities2: boolean isLocalDisplay()>();
+
+        $r197 = staticinvoke <sun.swing.SwingUtilities2$AATextInfo: sun.swing.SwingUtilities2$AATextInfo getAATextInfo(boolean)>($z3);
+
+        $r198 = <sun.swing.SwingUtilities2: java.lang.Object AA_TEXT_PROPERTY_KEY>;
+
+        virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>($r198, $r197);
+
+        $r307 = new javax.swing.plaf.metal.MetalLookAndFeel$AATextListener;
+
+        specialinvoke $r307.<javax.swing.plaf.metal.MetalLookAndFeel$AATextListener: void <init>(javax.swing.LookAndFeel)>(r0);
+
+        return;
+    }
+
+    protected void createDefaultTheme()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        return;
+    }
+
+    public javax.swing.UIDefaults getDefaults()
+    {
+        javax.swing.UIDefaults $r1;
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+        javax.swing.plaf.metal.MetalTheme $r2;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        <javax.swing.plaf.metal.MetalLookAndFeel: boolean METAL_LOOK_AND_FEEL_INITED> = 1;
+
+        virtualinvoke r0.<javax.swing.plaf.metal.MetalLookAndFeel: void createDefaultTheme()>();
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: javax.swing.UIDefaults getDefaults()>();
+
+        $r2 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        virtualinvoke $r2.<javax.swing.plaf.metal.MetalTheme: void addCustomEntriesToTable(javax.swing.UIDefaults)>($r1);
+
+        virtualinvoke $r2.<javax.swing.plaf.metal.MetalTheme: void install()>();
+
+        return $r1;
+    }
+
+    public void provideErrorFeedback(java.awt.Component)
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r1 := @parameter0: java.awt.Component;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void provideErrorFeedback(java.awt.Component)>(r1);
+
+        return;
+    }
+
+    public static void setCurrentTheme(javax.swing.plaf.metal.MetalTheme)
+    {
+        javax.swing.plaf.metal.MetalTheme r0;
+        java.lang.NullPointerException $r2;
+        sun.awt.AppContext $r1;
+
+        r0 := @parameter0: javax.swing.plaf.metal.MetalTheme;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("Can\'t have null theme");
+
+        throw $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>("currentMetalTheme", r0);
+
+        return;
+    }
+
+    public static javax.swing.plaf.metal.MetalTheme getCurrentTheme()
+    {
+        javax.swing.plaf.metal.OceanTheme $r6;
+        sun.security.action.GetPropertyAction $r2;
+        javax.swing.plaf.metal.DefaultMetalTheme $r7;
+        javax.swing.plaf.metal.MetalHighContrastTheme $r8;
+        javax.swing.plaf.metal.MetalTheme r9;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r3;
+        java.lang.String r4, $r5;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>("currentMetalTheme");
+
+        r9 = (javax.swing.plaf.metal.MetalTheme) $r1;
+
+        if r9 != null goto label4;
+
+        $z0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean useHighContrastTheme()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new javax.swing.plaf.metal.MetalHighContrastTheme;
+
+        specialinvoke $r8.<javax.swing.plaf.metal.MetalHighContrastTheme: void <init>()>();
+
+        r9 = $r8;
+
+        goto label3;
+
+     label1:
+        $r2 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r2.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("swing.metalTheme");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        r4 = (java.lang.String) $r3;
+
+        $r5 = "steel";
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = new javax.swing.plaf.metal.DefaultMetalTheme;
+
+        specialinvoke $r7.<javax.swing.plaf.metal.DefaultMetalTheme: void <init>()>();
+
+        r9 = $r7;
+
+        goto label3;
+
+     label2:
+        $r6 = new javax.swing.plaf.metal.OceanTheme;
+
+        specialinvoke $r6.<javax.swing.plaf.metal.OceanTheme: void <init>()>();
+
+        r9 = $r6;
+
+     label3:
+        staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: void setCurrentTheme(javax.swing.plaf.metal.MetalTheme)>(r9);
+
+     label4:
+        return r9;
+    }
+
+    public javax.swing.Icon getDisabledIcon(javax.swing.JComponent, javax.swing.Icon)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Image $r5;
+        javax.swing.Icon r0, $r3, $r6;
+        javax.swing.ImageIcon $r4;
+        javax.swing.plaf.metal.MetalLookAndFeel r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r0 := @parameter1: javax.swing.Icon;
+
+        $z0 = r0 instanceof javax.swing.ImageIcon;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean usingOcean()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = (javax.swing.ImageIcon) r0;
+
+        $r5 = virtualinvoke $r4.<javax.swing.ImageIcon: java.awt.Image getImage()>();
+
+        $r6 = staticinvoke <javax.swing.plaf.metal.MetalUtils: javax.swing.Icon getOceanDisabledButtonIcon(java.awt.Image)>($r5);
+
+        return $r6;
+
+     label1:
+        $r3 = specialinvoke r1.<javax.swing.plaf.basic.BasicLookAndFeel: javax.swing.Icon getDisabledIcon(javax.swing.JComponent,javax.swing.Icon)>(r2, r0);
+
+        return $r3;
+    }
+
+    public javax.swing.Icon getDisabledSelectedIcon(javax.swing.JComponent, javax.swing.Icon)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Image $r5;
+        javax.swing.Icon r0, $r3, $r6;
+        javax.swing.ImageIcon $r4;
+        javax.swing.plaf.metal.MetalLookAndFeel r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r0 := @parameter1: javax.swing.Icon;
+
+        $z0 = r0 instanceof javax.swing.ImageIcon;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: boolean usingOcean()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = (javax.swing.ImageIcon) r0;
+
+        $r5 = virtualinvoke $r4.<javax.swing.ImageIcon: java.awt.Image getImage()>();
+
+        $r6 = staticinvoke <javax.swing.plaf.metal.MetalUtils: javax.swing.Icon getOceanDisabledButtonIcon(java.awt.Image)>($r5);
+
+        return $r6;
+
+     label1:
+        $r3 = specialinvoke r1.<javax.swing.plaf.basic.BasicLookAndFeel: javax.swing.Icon getDisabledSelectedIcon(javax.swing.JComponent,javax.swing.Icon)>(r2, r0);
+
+        return $r3;
+    }
+
+    public static javax.swing.plaf.FontUIResource getControlTextFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getControlTextFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.FontUIResource getSystemTextFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getSystemTextFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.FontUIResource getUserTextFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getUserTextFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.FontUIResource getMenuTextFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getMenuTextFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.FontUIResource getWindowTitleFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getWindowTitleFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.FontUIResource getSubTextFont()
+    {
+        javax.swing.plaf.FontUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.FontUIResource getSubTextFont()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getDesktopColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getDesktopColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getFocusColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getFocusColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWhite()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWhite()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getBlack()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getBlack()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControl()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControl()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlShadow()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlShadow()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlDarkShadow()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlDarkShadow()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlInfo()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlInfo()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlHighlight()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlHighlight()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlDisabled()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlDisabled()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getPrimaryControl()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControl()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getPrimaryControlShadow()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlShadow()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getPrimaryControlDarkShadow()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlDarkShadow()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getPrimaryControlInfo()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlInfo()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getPrimaryControlHighlight()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getPrimaryControlHighlight()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getSystemTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getSystemTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getControlTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getControlTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getInactiveControlTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getInactiveControlTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getInactiveSystemTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getInactiveSystemTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getUserTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getUserTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getTextHighlightColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getTextHighlightColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getHighlightedTextColor()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getHighlightedTextColor()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWindowBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWindowTitleBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWindowTitleForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWindowTitleInactiveBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleInactiveBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getWindowTitleInactiveForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getWindowTitleInactiveForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getMenuBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getMenuForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getMenuSelectedBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuSelectedBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getMenuSelectedForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuSelectedForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getMenuDisabledForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getMenuDisabledForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getSeparatorBackground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getSeparatorBackground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getSeparatorForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getSeparatorForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getAcceleratorForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getAcceleratorForeground()>();
+
+        return $r1;
+    }
+
+    public static javax.swing.plaf.ColorUIResource getAcceleratorSelectedForeground()
+    {
+        javax.swing.plaf.ColorUIResource $r1;
+        javax.swing.plaf.metal.MetalTheme $r0;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel: javax.swing.plaf.metal.MetalTheme getCurrentTheme()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.plaf.metal.MetalTheme: javax.swing.plaf.ColorUIResource getAcceleratorSelectedForeground()>();
+
+        return $r1;
+    }
+
+    public javax.swing.LayoutStyle getLayoutStyle()
+    {
+        javax.swing.plaf.metal.MetalLookAndFeel r1;
+        javax.swing.plaf.metal.MetalLookAndFeel$MetalLayoutStyle $r0;
+
+        r1 := @this: javax.swing.plaf.metal.MetalLookAndFeel;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalLookAndFeel$MetalLayoutStyle: javax.swing.plaf.metal.MetalLookAndFeel$MetalLayoutStyle access$000()>();
+
+        return $r0;
+    }
+
+    static void flushUnreferenced()
+    {
+        java.lang.ref.Reference $r1;
+        javax.swing.plaf.metal.MetalLookAndFeel$AATextListener $r2;
+        java.lang.ref.ReferenceQueue $r0;
+
+     label1:
+        $r0 = <javax.swing.plaf.metal.MetalLookAndFeel: java.lang.ref.ReferenceQueue queue>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r2 = (javax.swing.plaf.metal.MetalLookAndFeel$AATextListener) $r1;
+
+        if $r2 == null goto label2;
+
+        virtualinvoke $r2.<javax.swing.plaf.metal.MetalLookAndFeel$AATextListener: void dispose()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$6(javax.swing.UIDefaults)
+    {
+        javax.swing.plaf.metal.MetalBorders$WarningDialogBorder $r0;
+        javax.swing.UIDefaults r1;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = new javax.swing.plaf.metal.MetalBorders$WarningDialogBorder;
+
+        specialinvoke $r0.<javax.swing.plaf.metal.MetalBorders$WarningDialogBorder: void <init>()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$5(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.metal.MetalBorders$ErrorDialogBorder $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = new javax.swing.plaf.metal.MetalBorders$ErrorDialogBorder;
+
+        specialinvoke $r0.<javax.swing.plaf.metal.MetalBorders$ErrorDialogBorder: void <init>()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$4(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.metal.MetalBorders$FrameBorder $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = new javax.swing.plaf.metal.MetalBorders$FrameBorder;
+
+        specialinvoke $r0.<javax.swing.plaf.metal.MetalBorders$FrameBorder: void <init>()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$3(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.border.Border $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalBorders: javax.swing.border.Border getToolBarNonrolloverBorder()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$2(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.border.Border $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = staticinvoke <javax.swing.plaf.metal.MetalBorders: javax.swing.border.Border getToolBarRolloverBorder()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$1(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.metal.MetalBorders$QuestionDialogBorder $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = new javax.swing.plaf.metal.MetalBorders$QuestionDialogBorder;
+
+        specialinvoke $r0.<javax.swing.plaf.metal.MetalBorders$QuestionDialogBorder: void <init>()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Object lambda$initComponentDefaults$0(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.metal.MetalBorders$DialogBorder $r0;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = new javax.swing.plaf.metal.MetalBorders$DialogBorder;
+
+        specialinvoke $r0.<javax.swing.plaf.metal.MetalBorders$DialogBorder: void <init>()>();
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ref.ReferenceQueue $r0;
+
+        <javax.swing.plaf.metal.MetalLookAndFeel: boolean METAL_LOOK_AND_FEEL_INITED> = 0;
+
+        $r0 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r0.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <javax.swing.plaf.metal.MetalLookAndFeel: java.lang.ref.ReferenceQueue queue> = $r0;
+
+        return;
+    }
+}

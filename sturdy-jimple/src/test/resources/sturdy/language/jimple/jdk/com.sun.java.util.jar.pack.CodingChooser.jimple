@@ -1,0 +1,5445 @@
+class com.sun.java.util.jar.pack.CodingChooser extends java.lang.Object
+{
+    int verbose;
+    int effort;
+    boolean optUseHistogram;
+    boolean optUsePopulationCoding;
+    boolean optUseAdaptiveCoding;
+    boolean disablePopCoding;
+    boolean disableRunCoding;
+    boolean topLevel;
+    double fuzz;
+    com.sun.java.util.jar.pack.Coding[] allCodingChoices;
+    com.sun.java.util.jar.pack.CodingChooser$Choice[] choices;
+    java.io.ByteArrayOutputStream context;
+    com.sun.java.util.jar.pack.CodingChooser popHelper;
+    com.sun.java.util.jar.pack.CodingChooser runHelper;
+    java.util.Random stress;
+    private int[] values;
+    private int start;
+    private int end;
+    private int[] deltas;
+    private int min;
+    private int max;
+    private com.sun.java.util.jar.pack.Histogram vHist;
+    private com.sun.java.util.jar.pack.Histogram dHist;
+    private int searchOrder;
+    private com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice;
+    private com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice;
+    private com.sun.java.util.jar.pack.CodingMethod bestMethod;
+    private int bestByteSize;
+    private int bestZipSize;
+    private int targetSize;
+    public static final int MIN_EFFORT;
+    public static final int MID_EFFORT;
+    public static final int MAX_EFFORT;
+    public static final int POP_EFFORT;
+    public static final int RUN_EFFORT;
+    public static final int BYTE_SIZE;
+    public static final int ZIP_SIZE;
+    private com.sun.java.util.jar.pack.CodingChooser$Sizer zipSizer;
+    private java.util.zip.Deflater zipDef;
+    private java.util.zip.DeflaterOutputStream zipOut;
+    private com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer;
+    private com.sun.java.util.jar.pack.CodingChooser$Sizer byteOnlySizer;
+    static final boolean $assertionsDisabled;
+
+    void <init>(int, com.sun.java.util.jar.pack.Coding[])
+    {
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r11, $r12, $r13, $r15, $r18, $r21, $r28, $r31;
+        long $l12;
+        java.lang.AssertionError $r24, $r25, $r26;
+        java.util.zip.DeflaterOutputStream $r3, $r7;
+        com.sun.java.util.jar.pack.Coding[] r10;
+        java.util.Random $r33;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] $r20, $r23, r34;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.zip.Deflater $r2, $r4;
+        com.sun.java.util.jar.pack.PropMap $r9;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r1, $r5, $r6, $r8;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, i14, i15, $i16, i17, i18, i19, i20;
+        com.sun.java.util.jar.pack.Coding r17, $r27, $r30, $r32, r35;
+        double $d0, $d1, $d2;
+        com.sun.java.util.jar.pack.CodingChooser$Choice $r14, $r16, $r19, $r22, $r29;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        i0 := @parameter0: int;
+
+        r10 := @parameter1: com.sun.java.util.jar.pack.Coding[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseHistogram> = 1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUsePopulationCoding> = 1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseAdaptiveCoding> = 1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean topLevel> = 1;
+
+        $r1 = new com.sun.java.util.jar.pack.CodingChooser$Sizer;
+
+        specialinvoke $r1.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer zipSizer> = $r1;
+
+        $r2 = new java.util.zip.Deflater;
+
+        specialinvoke $r2.<java.util.zip.Deflater: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.Deflater zipDef> = $r2;
+
+        $r3 = new java.util.zip.DeflaterOutputStream;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer zipSizer>;
+
+        $r4 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.Deflater zipDef>;
+
+        specialinvoke $r3.<java.util.zip.DeflaterOutputStream: void <init>(java.io.OutputStream,java.util.zip.Deflater)>($r5, $r4);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.DeflaterOutputStream zipOut> = $r3;
+
+        $r6 = new com.sun.java.util.jar.pack.CodingChooser$Sizer;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.DeflaterOutputStream zipOut>;
+
+        specialinvoke $r6.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void <init>(java.io.OutputStream)>($r7);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer> = $r6;
+
+        $r8 = new com.sun.java.util.jar.pack.CodingChooser$Sizer;
+
+        specialinvoke $r8.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteOnlySizer> = $r8;
+
+        $r9 = staticinvoke <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.PropMap currentPropMap()>();
+
+        if $r9 == null goto label07;
+
+        $i8 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.verbose");
+
+        $i9 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.verbose.coding");
+
+        $i10 = staticinvoke <java.lang.Math: int max(int,int)>($i8, $i9);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose> = $i10;
+
+        $z3 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.no.histogram");
+
+        if $z3 != 0 goto label01;
+
+        $z6 = 1;
+
+        goto label02;
+
+     label01:
+        $z6 = 0;
+
+     label02:
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseHistogram> = $z6;
+
+        $z4 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.no.population.coding");
+
+        if $z4 != 0 goto label03;
+
+        $z7 = 1;
+
+        goto label04;
+
+     label03:
+        $z7 = 0;
+
+     label04:
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUsePopulationCoding> = $z7;
+
+        $z5 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.no.adaptive.coding");
+
+        if $z5 != 0 goto label05;
+
+        $z8 = 1;
+
+        goto label06;
+
+     label05:
+        $z8 = 0;
+
+     label06:
+        r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseAdaptiveCoding> = $z8;
+
+        $i11 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.stress.coding");
+
+        if $i11 == 0 goto label07;
+
+        $r33 = new java.util.Random;
+
+        $l12 = (long) $i11;
+
+        specialinvoke $r33.<java.util.Random: void <init>(long)>($l12);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress> = $r33;
+
+     label07:
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int effort> = i0;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Coding[] allCodingChoices> = r10;
+
+        $i13 = i0 - 5;
+
+        $d0 = (double) $i13;
+
+        $d1 = 0.0025 * $d0;
+
+        $d2 = 1.0 + $d1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: double fuzz> = $d2;
+
+        i14 = 0;
+
+        i15 = 0;
+
+     label08:
+        $i16 = lengthof r10;
+
+        if i15 >= $i16 goto label11;
+
+        $r32 = r10[i15];
+
+        if $r32 != null goto label09;
+
+        goto label10;
+
+     label09:
+        i14 = i14 + 1;
+
+     label10:
+        i15 = i15 + 1;
+
+        goto label08;
+
+     label11:
+        $r11 = newarray (com.sun.java.util.jar.pack.CodingChooser$Choice)[i14];
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices> = $r11;
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label12:
+        $i1 = lengthof r10;
+
+        if i18 >= $i1 goto label15;
+
+        $r27 = r10[i18];
+
+        if $r27 != null goto label13;
+
+        goto label14;
+
+     label13:
+        $r28 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i6 = lengthof $r28;
+
+        r34 = newarray (int)[$i6];
+
+        $r31 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i7 = i17;
+
+        i17 = i17 + 1;
+
+        $r29 = new com.sun.java.util.jar.pack.CodingChooser$Choice;
+
+        $r30 = r10[i18];
+
+        specialinvoke $r29.<com.sun.java.util.jar.pack.CodingChooser$Choice: void <init>(com.sun.java.util.jar.pack.Coding,int,int[])>($r30, i18, r34);
+
+        $r31[$i7] = $r29;
+
+     label14:
+        i18 = i18 + 1;
+
+        goto label12;
+
+     label15:
+        i19 = 0;
+
+     label16:
+        $r12 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i2 = lengthof $r12;
+
+        if i19 >= $i2 goto label22;
+
+        $r13 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $r14 = $r13[i19];
+
+        r35 = $r14.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label17;
+
+        $i5 = virtualinvoke r35.<com.sun.java.util.jar.pack.Coding: int distanceFrom(com.sun.java.util.jar.pack.Coding)>(r35);
+
+        if $i5 == 0 goto label17;
+
+        $r26 = new java.lang.AssertionError;
+
+        specialinvoke $r26.<java.lang.AssertionError: void <init>()>();
+
+        throw $r26;
+
+     label17:
+        i20 = 0;
+
+     label18:
+        if i20 >= i19 goto label21;
+
+        $r15 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $r16 = $r15[i20];
+
+        r17 = $r16.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $i3 = virtualinvoke r35.<com.sun.java.util.jar.pack.Coding: int distanceFrom(com.sun.java.util.jar.pack.Coding)>(r17);
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label19;
+
+        if $i3 > 0 goto label19;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label19:
+        $z2 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label20;
+
+        $i4 = virtualinvoke r17.<com.sun.java.util.jar.pack.Coding: int distanceFrom(com.sun.java.util.jar.pack.Coding)>(r35);
+
+        if $i3 == $i4 goto label20;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label20:
+        $r18 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $r19 = $r18[i19];
+
+        $r20 = $r19.<com.sun.java.util.jar.pack.CodingChooser$Choice: int[] distance>;
+
+        $r20[i20] = $i3;
+
+        $r21 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $r22 = $r21[i20];
+
+        $r23 = $r22.<com.sun.java.util.jar.pack.CodingChooser$Choice: int[] distance>;
+
+        $r23[i19] = $i3;
+
+        i20 = i20 + 1;
+
+        goto label18;
+
+     label21:
+        i19 = i19 + 1;
+
+        goto label16;
+
+     label22:
+        return;
+    }
+
+    com.sun.java.util.jar.pack.CodingChooser$Choice makeExtraChoice(com.sun.java.util.jar.pack.Coding)
+    {
+        java.lang.AssertionError $r10, $r11;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] r2;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        com.sun.java.util.jar.pack.Coding r4, r7;
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r1, $r5;
+        boolean $z0, $z1;
+        com.sun.java.util.jar.pack.CodingChooser$Choice $r6, $r12;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r4 := @parameter0: com.sun.java.util.jar.pack.Coding;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (int)[$i0];
+
+        i4 = 0;
+
+     label1:
+        $i1 = lengthof r2;
+
+        if i4 >= $i1 goto label4;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $r6 = $r5[i4];
+
+        r7 = $r6.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $i2 = virtualinvoke r4.<com.sun.java.util.jar.pack.Coding: int distanceFrom(com.sun.java.util.jar.pack.Coding)>(r7);
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        if $i2 > 0 goto label2;
+
+        $r10 = new java.lang.AssertionError;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>()>();
+
+        throw $r10;
+
+     label2:
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label3;
+
+        $i3 = virtualinvoke r7.<com.sun.java.util.jar.pack.Coding: int distanceFrom(com.sun.java.util.jar.pack.Coding)>(r4);
+
+        if $i2 == $i3 goto label3;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label3:
+        r2[i4] = $i2;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        $r12 = new com.sun.java.util.jar.pack.CodingChooser$Choice;
+
+        $i6 = (int) -1;
+
+        specialinvoke $r12.<com.sun.java.util.jar.pack.CodingChooser$Choice: void <init>(com.sun.java.util.jar.pack.Coding,int,int[])>(r4, $i6, r2);
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.CodingChooser$Choice: void reset()>();
+
+        return $r12;
+    }
+
+    java.io.ByteArrayOutputStream getContext()
+    {
+        java.io.ByteArrayOutputStream $r1, $r2, $r3;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.io.ByteArrayOutputStream context>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>(int)>(65536);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: java.io.ByteArrayOutputStream context> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.io.ByteArrayOutputStream context>;
+
+        return $r2;
+    }
+
+    private void reset(int[], int, int)
+    {
+        int[] r1;
+        int i0, i1;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values> = r1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int start> = i0;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int end> = i1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int[] deltas> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int min> = 2147483647;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int max> = -2147483648;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder> = 0;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod> = null;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize> = 2147483647;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize> = 2147483647;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int targetSize> = 2147483647;
+
+        return;
+    }
+
+    com.sun.java.util.jar.pack.CodingMethod choose(int[], int, int, com.sun.java.util.jar.pack.Coding, int[])
+    {
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r58, $r59;
+        java.lang.StringBuilder $r14, $r16, $r17, $r18, $r19, $r20, $r21, $r23, $r30, $r32, $r33, $r35, $r36, $r38, $r39, $r40, $r49, $r50, $r64, $r66, $r67;
+        java.util.Random $r5, $r57;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r13, $r29, $r48;
+        int[] r1, r2, $r4;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, i47, i48, i49, i50, i51, i52, i53, i54, $i55, $i57;
+        java.lang.AssertionError $r63, $r65;
+        java.lang.String $r22, $r24, $r41, $r51;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15;
+        com.sun.java.util.jar.pack.CodingMethod $r15, $r25, $r26, $r27, $r42, r60;
+        com.sun.java.util.jar.pack.Coding r3, $r10, $r52, r62;
+        double $d0, $d1, $d2, $d3, $d4, d5;
+        com.sun.java.util.jar.pack.CodingChooser$Choice $r6, $r7, $r8, $r9, $r11, $r31, $r34, $r37, $r44, $r45, $r46, $r54, $r55, $r56, r61;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r3 := @parameter3: com.sun.java.util.jar.pack.Coding;
+
+        r2 := @parameter4: int[];
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void reset(int[],int,int)>(r1, i0, i1);
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i2 <= 1 goto label01;
+
+        if i0 < i1 goto label03;
+
+     label01:
+        if r2 == null goto label02;
+
+        $r4 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] computeSizePrivate(com.sun.java.util.jar.pack.CodingMethod)>(r3);
+
+        $i3 = $r4[0];
+
+        r2[0] = $i3;
+
+        $i4 = $r4[1];
+
+        r2[1] = $i4;
+
+     label02:
+        return r3;
+
+     label03:
+        $z0 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseHistogram>;
+
+        if $z0 == 0 goto label04;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getValueHistogram()>();
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getDeltaHistogram()>();
+
+     label04:
+        i47 = i0;
+
+     label05:
+        if i47 >= i1 goto label08;
+
+        i48 = r1[i47];
+
+        $i45 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        if $i45 <= i48 goto label06;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int min> = i48;
+
+     label06:
+        $i46 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        if $i46 >= i48 goto label07;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int max> = i48;
+
+     label07:
+        i47 = i47 + 1;
+
+        goto label05;
+
+     label08:
+        $i5 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int markUsableChoices(com.sun.java.util.jar.pack.Coding)>(r3);
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r5 == null goto label16;
+
+        $r57 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i35 = $i5 * 2;
+
+        $i36 = $i35 + 4;
+
+        i49 = virtualinvoke $r57.<java.util.Random: int nextInt(int)>($i36);
+
+        r60 = null;
+
+        i50 = 0;
+
+     label09:
+        $r58 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i37 = lengthof $r58;
+
+        if i50 >= $i37 goto label11;
+
+        $r59 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r61 = $r59[i50];
+
+        $i43 = r61.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        if $i43 < 0 goto label10;
+
+        $i44 = i49;
+
+        $i57 = (int) -1;
+
+        i49 = i49 + $i57;
+
+        if $i44 != 0 goto label10;
+
+        r60 = r61.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        goto label11;
+
+     label10:
+        i50 = i50 + 1;
+
+        goto label09;
+
+     label11:
+        if r60 != null goto label13;
+
+        $i40 = i49 & 7;
+
+        if $i40 == 0 goto label12;
+
+        r60 = r3;
+
+        goto label13;
+
+     label12:
+        $i42 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $i41 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        r60 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Coding stressCoding(int,int)>($i42, $i41);
+
+     label13:
+        $z13 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding>;
+
+        if $z13 != 0 goto label14;
+
+        $z12 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUsePopulationCoding>;
+
+        if $z12 == 0 goto label14;
+
+        $i39 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i39 < 4 goto label14;
+
+        r60 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod stressPopCoding(com.sun.java.util.jar.pack.CodingMethod)>(r60);
+
+     label14:
+        $z14 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding>;
+
+        if $z14 != 0 goto label15;
+
+        $z11 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseAdaptiveCoding>;
+
+        if $z11 == 0 goto label15;
+
+        $i38 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i38 < 3 goto label15;
+
+        r60 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod stressAdaptiveCoding(com.sun.java.util.jar.pack.CodingMethod)>(r60);
+
+     label15:
+        return r60;
+
+     label16:
+        d5 = 1.0;
+
+        i51 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+     label17:
+        if i51 >= 9 goto label18;
+
+        d5 = d5 / 1.414;
+
+        i51 = i51 + 1;
+
+        goto label17;
+
+     label18:
+        $d0 = (double) $i5;
+
+        $d1 = $d0 * d5;
+
+        $d2 = staticinvoke <java.lang.Math: double ceil(double)>($d1);
+
+        i52 = (int) $d2;
+
+        $r6 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice> = $r6;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void evaluate(com.sun.java.util.jar.pack.CodingChooser$Choice)>($r7);
+
+        $r8 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        i53 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int updateDistances(com.sun.java.util.jar.pack.CodingChooser$Choice)>($r8);
+
+        i6 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $r9 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $r10 = $r9.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        if $r10 != r3 goto label19;
+
+        $z9 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean topLevel>;
+
+        if $z9 == 0 goto label19;
+
+        $i29 = staticinvoke <com.sun.java.util.jar.pack.BandStructure: int encodeEscapeValue(int,com.sun.java.util.jar.pack.Coding)>(115, r3);
+
+        $z10 = virtualinvoke r3.<com.sun.java.util.jar.pack.Coding: boolean canRepresentSigned(int)>($i29);
+
+        if $z10 == 0 goto label19;
+
+        $i30 = virtualinvoke r3.<com.sun.java.util.jar.pack.Coding: int getLength(int)>($i29);
+
+        $r54 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $i31 = $r54.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize>;
+
+        $i32 = $i31 - $i30;
+
+        $r54.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize> = $i32;
+
+        $r55 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $i33 = $r55.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize>;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize> = $i33;
+
+        $r56 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $i34 = $r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize>;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize> = $i34;
+
+     label19:
+        i54 = 1;
+
+     label20:
+        $i55 = r0.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder>;
+
+        if $i55 >= i52 goto label25;
+
+        if i54 <= i53 goto label21;
+
+        i54 = 1;
+
+     label21:
+        $i27 = i53 / i54;
+
+        $i21 = i54 * 2;
+
+        i54 = $i21;
+
+        $i22 = i53 / $i21;
+
+        $i28 = $i22 + 1;
+
+        $r44 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        $r45 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice findChoiceNear(com.sun.java.util.jar.pack.CodingChooser$Choice,int,int)>($r44, $i27, $i28);
+
+        if $r45 != null goto label22;
+
+        goto label20;
+
+     label22:
+        $z7 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z7 != 0 goto label23;
+
+        $r52 = $r45.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $i26 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $i25 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $z8 = virtualinvoke $r52.<com.sun.java.util.jar.pack.Coding: boolean canRepresent(int,int)>($i26, $i25);
+
+        if $z8 != 0 goto label23;
+
+        $r63 = new java.lang.AssertionError;
+
+        specialinvoke $r63.<java.lang.AssertionError: void <init>()>();
+
+        throw $r63;
+
+     label23:
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void evaluate(com.sun.java.util.jar.pack.CodingChooser$Choice)>($r45);
+
+        $i23 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int updateDistances(com.sun.java.util.jar.pack.CodingChooser$Choice)>($r45);
+
+        $r46 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        if $r45 != $r46 goto label24;
+
+        i53 = $i23;
+
+        $i24 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i24 <= 5 goto label24;
+
+        $r48 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("maxd = ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r48.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r51);
+
+     label24:
+        goto label20;
+
+     label25:
+        $r11 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        r62 = $r11.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label26;
+
+        $r42 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        if r62 == $r42 goto label26;
+
+        $r65 = new java.lang.AssertionError;
+
+        specialinvoke $r65.<java.lang.AssertionError: void <init>()>();
+
+        throw $r65;
+
+     label26:
+        $i7 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i7 <= 2 goto label27;
+
+        $r29 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("chooser: plain result=");
+
+        $r31 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" after ");
+
+        $r34 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        $i17 = $r34.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" rounds, ");
+
+        $r37 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $i19 = $r37.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize>;
+
+        $i18 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i20 = $i19 - $i18;
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i20);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fewer bytes than regular ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r29.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r41);
+
+     label27:
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice> = null;
+
+        $z2 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding>;
+
+        if $z2 != 0 goto label28;
+
+        $z5 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUsePopulationCoding>;
+
+        if $z5 == 0 goto label28;
+
+        $i16 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i16 < 4 goto label28;
+
+        $r27 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        $z6 = $r27 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z6 == 0 goto label28;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void tryPopulationCoding(com.sun.java.util.jar.pack.Coding)>(r62);
+
+     label28:
+        $z15 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding>;
+
+        if $z15 != 0 goto label29;
+
+        $z3 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseAdaptiveCoding>;
+
+        if $z3 == 0 goto label29;
+
+        $i15 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i15 < 3 goto label29;
+
+        $r26 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        $z4 = $r26 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z4 == 0 goto label29;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void tryAdaptiveCoding(com.sun.java.util.jar.pack.Coding)>(r62);
+
+     label29:
+        if r2 == null goto label30;
+
+        $i13 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        r2[0] = $i13;
+
+        $i14 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        r2[1] = $i14;
+
+     label30:
+        $i8 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i8 <= 1 goto label31;
+
+        $r13 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("chooser: result=");
+
+        $r15 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i9 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i10 = i6 - $i9;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fewer bytes than regular ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; win=");
+
+        $i11 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i12 = i6 - $i11;
+
+        $d4 = (double) $i12;
+
+        $d3 = (double) i6;
+
+        $r22 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d4, $d3);
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r24);
+
+     label31:
+        $r25 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void reset(int[],int,int)>(null, 0, 0);
+
+        return $r25;
+    }
+
+    com.sun.java.util.jar.pack.CodingMethod choose(int[], int, int, com.sun.java.util.jar.pack.Coding)
+    {
+        com.sun.java.util.jar.pack.CodingMethod $r3;
+        int[] r1;
+        int i0, i1;
+        com.sun.java.util.jar.pack.Coding r2;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: com.sun.java.util.jar.pack.Coding;
+
+        $r3 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding,int[])>(r1, i0, i1, r2, null);
+
+        return $r3;
+    }
+
+    com.sun.java.util.jar.pack.CodingMethod choose(int[], com.sun.java.util.jar.pack.Coding, int[])
+    {
+        com.sun.java.util.jar.pack.CodingMethod $r4;
+        int[] r1, r3;
+        com.sun.java.util.jar.pack.Coding r2;
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: int[];
+
+        r2 := @parameter1: com.sun.java.util.jar.pack.Coding;
+
+        r3 := @parameter2: int[];
+
+        $i0 = lengthof r1;
+
+        $r4 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding,int[])>(r1, 0, $i0, r2, r3);
+
+        return $r4;
+    }
+
+    com.sun.java.util.jar.pack.CodingMethod choose(int[], com.sun.java.util.jar.pack.Coding)
+    {
+        com.sun.java.util.jar.pack.CodingMethod $r3;
+        int[] r1;
+        com.sun.java.util.jar.pack.Coding r2;
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: int[];
+
+        r2 := @parameter1: com.sun.java.util.jar.pack.Coding;
+
+        $i0 = lengthof r1;
+
+        $r3 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding,int[])>(r1, 0, $i0, r2, null);
+
+        return $r3;
+    }
+
+    private int markUsableChoices(com.sun.java.util.jar.pack.Coding)
+    {
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r1, $r13, $r14, $r20, $r34, $r43;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r17, $r18, $r23, $r25, $r29, $r32, $r38, $r41, $r49, $r50, $r51, $r52, $r53, $r54, $r60, $r61, $r62, $r63, $r64, $r65;
+        java.lang.String $r12, $r19, $r26, $r33, $r42, $r55;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r4, $r16, $r22, $r28, $r37, $r48;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, i19, $i20, i21, $i23, $i25;
+        com.sun.java.util.jar.pack.Coding r24, $r31, $r40, $r44, $r45, $r46;
+        com.sun.java.util.jar.pack.CodingChooser$Choice $r2, $r30, $r35, $r39, r56, $r57, r58, r59;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r24 := @parameter0: com.sun.java.util.jar.pack.Coding;
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label01:
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i0 = lengthof $r1;
+
+        if i18 >= $i0 goto label05;
+
+        $r43 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r56 = $r43[i18];
+
+        virtualinvoke r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: void reset()>();
+
+        $r44 = r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $i13 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $i12 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $z1 = virtualinvoke $r44.<com.sun.java.util.jar.pack.Coding: boolean canRepresent(int,int)>($i13, $i12);
+
+        if $z1 != 0 goto label02;
+
+        $i23 = (int) -1;
+
+        r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder> = $i23;
+
+        $i14 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i14 <= 1 goto label04;
+
+        $r46 = r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        if $r46 != r24 goto label04;
+
+        $r48 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r60 = new java.lang.StringBuilder;
+
+        specialinvoke $r60.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("regular coding cannot represent [");
+
+        $i15 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("..");
+
+        $i16 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i16);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]: ");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r24);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r48.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r55);
+
+        goto label04;
+
+     label02:
+        $r45 = r56.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        if $r45 != r24 goto label03;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice> = r56;
+
+     label03:
+        i17 = i17 + 1;
+
+     label04:
+        i18 = i18 + 1;
+
+        goto label01;
+
+     label05:
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        if $r2 != null goto label06;
+
+        $i10 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $i9 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $z0 = virtualinvoke r24.<com.sun.java.util.jar.pack.Coding: boolean canRepresent(int,int)>($i10, $i9);
+
+        if $z0 == 0 goto label06;
+
+        $r35 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice makeExtraChoice(com.sun.java.util.jar.pack.Coding)>(r24);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice> = $r35;
+
+        $i11 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i11 <= 1 goto label06;
+
+        $r37 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*** regular choice is extra: ");
+
+        $r39 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $r40 = $r39.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $r41 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r37.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r42);
+
+     label06:
+        $r57 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        if $r57 != null goto label10;
+
+        i19 = 0;
+
+     label07:
+        $r20 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i6 = lengthof $r20;
+
+        if i19 >= $i6 goto label09;
+
+        $r34 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r58 = $r34[i19];
+
+        $i8 = r58.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        $i25 = (int) -1;
+
+        if $i8 == $i25 goto label08;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice> = r58;
+
+        goto label09;
+
+     label08:
+        i19 = i19 + 1;
+
+        goto label07;
+
+     label09:
+        $i7 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i7 <= 1 goto label10;
+
+        $r22 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*** regular choice does not apply ");
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r26);
+
+        $r28 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r63 = new java.lang.StringBuilder;
+
+        specialinvoke $r63.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    using instead ");
+
+        $r30 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice regularChoice>;
+
+        $r31 = $r30.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $r32 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r33);
+
+     label10:
+        $i20 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i20 <= 2 goto label13;
+
+        $r4 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("chooser: #choices=");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i17);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" [");
+
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("..");
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r12);
+
+        $i3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i3 <= 4 goto label13;
+
+        i21 = 0;
+
+     label11:
+        $r13 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i4 = lengthof $r13;
+
+        if i21 >= $i4 goto label13;
+
+        $r14 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r59 = $r14[i21];
+
+        $i5 = r59.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        if $i5 < 0 goto label12;
+
+        $r16 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r59);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r19);
+
+     label12:
+        i21 = i21 + 1;
+
+        goto label11;
+
+     label13:
+        return i17;
+    }
+
+    private com.sun.java.util.jar.pack.CodingChooser$Choice findChoiceNear(com.sun.java.util.jar.pack.CodingChooser$Choice, int, int)
+    {
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r3, $r10, $r15;
+        int[] $r23;
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r7, $r25;
+        java.lang.StringBuilder $r2, $r4, $r5, $r9, $r11, $r12, $r14, $r16, $r17, $r18, $r19, $r20, $r21;
+        int $i0, $i1, $i2, $i3, i4, $i5, i6, $i7, $i8, $i9, $i10, i11, $i12;
+        java.lang.String $r6, $r13, $r22;
+        com.sun.java.util.jar.pack.CodingChooser$Choice r1, r8, r24;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.CodingChooser$Choice;
+
+        i6 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i0 <= 5 goto label1;
+
+        $r15 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("findChoice ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("..");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" near: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r22);
+
+     label1:
+        $r23 = r1.<com.sun.java.util.jar.pack.CodingChooser$Choice: int[] distance>;
+
+        r24 = null;
+
+        i11 = 0;
+
+     label2:
+        $r25 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i12 = lengthof $r25;
+
+        if i11 >= $i12 goto label7;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r8 = $r7[i11];
+
+        $i3 = r8.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder>;
+
+        if $i3 >= $i2 goto label3;
+
+        goto label6;
+
+     label3:
+        $i5 = $r23[i11];
+
+        if $i5 < i4 goto label6;
+
+        $i7 = $r23[i11];
+
+        if $i7 > i6 goto label6;
+
+        $i8 = r8.<com.sun.java.util.jar.pack.CodingChooser$Choice: int minDistance>;
+
+        if $i8 < i4 goto label5;
+
+        $i9 = r8.<com.sun.java.util.jar.pack.CodingChooser$Choice: int minDistance>;
+
+        if $i9 > i6 goto label5;
+
+        $i10 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i10 <= 5 goto label4;
+
+        $r10 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("findChoice => good ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r13);
+
+     label4:
+        return r8;
+
+     label5:
+        r24 = r8;
+
+     label6:
+        i11 = i11 + 1;
+
+        goto label2;
+
+     label7:
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i1 <= 5 goto label8;
+
+        $r3 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("findChoice => found ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r24);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r6);
+
+     label8:
+        return r24;
+    }
+
+    private void evaluate(com.sun.java.util.jar.pack.CodingChooser$Choice)
+    {
+        com.sun.java.util.jar.pack.CodingChooser r1;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r4;
+        int[] $r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, $z7;
+        java.lang.StringBuilder $r3, $r5, $r6;
+        java.lang.AssertionError $r8, $r15;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        com.sun.java.util.jar.pack.Coding $r9, $r11, $r12, $r14;
+        java.lang.String $r7;
+        double $d0, $d1, $d2;
+        com.sun.java.util.jar.pack.Histogram $r13;
+        com.sun.java.util.jar.pack.CodingChooser$Choice r0, $r2;
+
+        r1 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.CodingChooser$Choice;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $i12 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        if $i12 == 2147483647 goto label01;
+
+        $r15 = new java.lang.AssertionError;
+
+        specialinvoke $r15.<java.lang.AssertionError: void <init>()>();
+
+        throw $r15;
+
+     label01:
+        $i0 = r1.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder>;
+
+        $i1 = $i0 + 1;
+
+        r1.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder> = $i1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder> = $i0;
+
+        $r2 = r1.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice>;
+
+        if r0 == $r2 goto label02;
+
+        $z3 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: boolean isExtra()>();
+
+        if $z3 == 0 goto label03;
+
+     label02:
+        z6 = 1;
+
+        goto label07;
+
+     label03:
+        $z4 = r1.<com.sun.java.util.jar.pack.CodingChooser: boolean optUseHistogram>;
+
+        if $z4 == 0 goto label06;
+
+        $r12 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $z5 = virtualinvoke $r12.<com.sun.java.util.jar.pack.Coding: boolean isDelta()>();
+
+        $r13 = virtualinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getHistogram(boolean)>($z5);
+
+        $r14 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $d0 = virtualinvoke $r13.<com.sun.java.util.jar.pack.Histogram: double getBitLength(com.sun.java.util.jar.pack.Histogram$BitMetric)>($r14);
+
+        $d1 = $d0 / 8.0;
+
+        $d2 = staticinvoke <java.lang.Math: double ceil(double)>($d1);
+
+        $i8 = (int) $d2;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int histSize> = $i8;
+
+        $i9 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int histSize>;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize> = $i9;
+
+        $i11 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize>;
+
+        $i10 = r1.<com.sun.java.util.jar.pack.CodingChooser: int targetSize>;
+
+        if $i11 > $i10 goto label04;
+
+        $z7 = 1;
+
+        goto label05;
+
+     label04:
+        $z7 = 0;
+
+     label05:
+        z6 = $z7;
+
+        goto label07;
+
+     label06:
+        z6 = 1;
+
+     label07:
+        if z6 == 0 goto label08;
+
+        $r9 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $r10 = specialinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: int[] computeSizePrivate(com.sun.java.util.jar.pack.CodingMethod)>($r9);
+
+        $i4 = $r10[0];
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize> = $i4;
+
+        $i5 = $r10[1];
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize> = $i5;
+
+        $r11 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: com.sun.java.util.jar.pack.Coding coding>;
+
+        $i7 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize>;
+
+        $i6 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int zipSize>;
+
+        $z2 = specialinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: boolean noteSizes(com.sun.java.util.jar.pack.CodingMethod,int,int)>($r11, $i7, $i6);
+
+        if $z2 == 0 goto label08;
+
+        r1.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice bestChoice> = r0;
+
+     label08:
+        $i13 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int histSize>;
+
+        if $i13 < 0 goto label09;
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label09;
+
+        $i3 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int byteSize>;
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int histSize>;
+
+        if $i3 == $i2 goto label09;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label09:
+        $i14 = r1.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i14 <= 4 goto label10;
+
+        $r4 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("evaluated ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r7);
+
+     label10:
+        return;
+    }
+
+    private boolean noteSizes(com.sun.java.util.jar.pack.CodingMethod, int, int)
+    {
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r14;
+        boolean $z0, z1, $z3, $z4;
+        com.sun.java.util.jar.pack.CodingMethod r1, $r8;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6, $r7, $r9, $r10, $r12, $r15, $r17;
+        java.lang.AssertionError $r13;
+        int i0, $i1, $i2, i3, $i4, $i5, $i6;
+        java.lang.String $r11, $r16, $r18;
+        double $d0, $d1, $d2, $d3, $d4;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        if i0 <= 0 goto label1;
+
+        if i3 > 0 goto label2;
+
+     label1:
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label2:
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        if i0 >= $i1 goto label3;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label4:
+        z1 = $z4;
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i2 <= 3 goto label7;
+
+        $r14 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("computed size ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/zs=");
+
+        $r15 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        if $z3 == 0 goto label5;
+
+        $r8 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod>;
+
+        if $r8 == null goto label5;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" better by ");
+
+        $i5 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i6 = $i5 - i0;
+
+        $d4 = (double) $i6;
+
+        $d3 = (double) i0;
+
+        $r11 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d4, $d3);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r16 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label6;
+
+     label5:
+        $r16 = "";
+
+     label6:
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r18);
+
+     label7:
+        if z1 == 0 goto label8;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod bestMethod> = r1;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize> = i0;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize> = i3;
+
+        $d1 = (double) i3;
+
+        $d0 = r0.<com.sun.java.util.jar.pack.CodingChooser: double fuzz>;
+
+        $d2 = $d1 * $d0;
+
+        $i4 = (int) $d2;
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int targetSize> = $i4;
+
+        return 1;
+
+     label8:
+        return 0;
+    }
+
+    private int updateDistances(com.sun.java.util.jar.pack.CodingChooser$Choice)
+    {
+        com.sun.java.util.jar.pack.CodingChooser r2;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r5, $r12;
+        int[] r1;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, i8;
+        java.lang.String $r8, $r17;
+        com.sun.java.util.jar.pack.CodingChooser$Choice[] $r3, $r9;
+        com.sun.java.util.jar.pack.CodingChooser$Choice r0, r10;
+        java.lang.StringBuilder $r4, $r6, $r7, $r11, $r13, $r14, $r15, $r16;
+
+        r2 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.CodingChooser$Choice;
+
+        r1 = r0.<com.sun.java.util.jar.pack.CodingChooser$Choice: int[] distance>;
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label1:
+        $r3 = r2.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        $i0 = lengthof $r3;
+
+        if i8 >= $i0 goto label6;
+
+        $r9 = r2.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Choice[] choices>;
+
+        r10 = $r9[i8];
+
+        $i3 = r10.<com.sun.java.util.jar.pack.CodingChooser$Choice: int searchOrder>;
+
+        $i2 = r2.<com.sun.java.util.jar.pack.CodingChooser: int searchOrder>;
+
+        if $i3 >= $i2 goto label2;
+
+        goto label5;
+
+     label2:
+        i4 = r1[i8];
+
+        $i5 = r2.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i5 <= 5 goto label3;
+
+        $r12 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("evaluate dist ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r17);
+
+     label3:
+        $i6 = r10.<com.sun.java.util.jar.pack.CodingChooser$Choice: int minDistance>;
+
+        if $i6 <= i4 goto label4;
+
+        r10.<com.sun.java.util.jar.pack.CodingChooser$Choice: int minDistance> = i4;
+
+     label4:
+        if i7 >= i4 goto label5;
+
+        i7 = i4;
+
+     label5:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label6:
+        $i1 = r2.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i1 <= 5 goto label7;
+
+        $r5 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("evaluate maxd => ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i7);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r8);
+
+     label7:
+        return i7;
+    }
+
+    public void computeSize(com.sun.java.util.jar.pack.CodingMethod, int[], int, int, int[])
+    {
+        com.sun.java.util.jar.pack.CodingMethod r1;
+        java.io.IOException $r5;
+        java.lang.RuntimeException $r6;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] r2, r4;
+        int i0, i1, $i2, $i3;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r3;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r2 := @parameter1: int[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r4 := @parameter4: int[];
+
+        if i0 > i1 goto label1;
+
+        r4[1] = 0;
+
+        r4[0] = 0;
+
+        return;
+
+     label1:
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void resetData()>();
+
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer>;
+
+        interfaceinvoke r1.<com.sun.java.util.jar.pack.CodingMethod: void writeArrayTo(java.io.OutputStream,int[],int,int)>($r3, r2, i1, i0);
+
+        $i2 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int getByteSize()>();
+
+        r4[0] = $i2;
+
+        $i3 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int getZipSize()>();
+
+        r4[1] = $i3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.RuntimeException;
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void computeSize(com.sun.java.util.jar.pack.CodingMethod, int[], int[])
+    {
+        com.sun.java.util.jar.pack.CodingMethod r1;
+        int[] r2, r3;
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r2 := @parameter1: int[];
+
+        r3 := @parameter2: int[];
+
+        $i0 = lengthof r2;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void computeSize(com.sun.java.util.jar.pack.CodingMethod,int[],int,int,int[])>(r1, r2, 0, $i0, r3);
+
+        return;
+    }
+
+    public int[] computeSize(com.sun.java.util.jar.pack.CodingMethod, int[], int, int)
+    {
+        com.sun.java.util.jar.pack.CodingMethod r2;
+        int[] $r0, r3;
+        int i0, i1;
+        com.sun.java.util.jar.pack.CodingChooser r1;
+
+        r1 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r3 := @parameter1: int[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = newarray (int)[2];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        virtualinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: void computeSize(com.sun.java.util.jar.pack.CodingMethod,int[],int,int,int[])>(r2, r3, i0, i1, $r0);
+
+        return $r0;
+    }
+
+    public int[] computeSize(com.sun.java.util.jar.pack.CodingMethod, int[])
+    {
+        com.sun.java.util.jar.pack.CodingMethod r1;
+        int[] r2, $r3;
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r2 := @parameter1: int[];
+
+        $i0 = lengthof r2;
+
+        $r3 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] computeSize(com.sun.java.util.jar.pack.CodingMethod,int[],int,int)>(r1, r2, 0, $i0);
+
+        return $r3;
+    }
+
+    private int[] computeSizePrivate(com.sun.java.util.jar.pack.CodingMethod)
+    {
+        com.sun.java.util.jar.pack.CodingMethod r2;
+        int[] $r0, $r3;
+        int $i0, $i1;
+        com.sun.java.util.jar.pack.CodingChooser r1;
+
+        r1 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        $r0 = newarray (int)[2];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r3 = r1.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i1 = r1.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i0 = r1.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        virtualinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: void computeSize(com.sun.java.util.jar.pack.CodingMethod,int[],int,int,int[])>(r2, $r3, $i1, $i0, $r0);
+
+        return $r0;
+    }
+
+    public int computeByteSize(com.sun.java.util.jar.pack.CodingMethod, int[], int, int)
+    {
+        java.lang.AssertionError $r4;
+        com.sun.java.util.jar.pack.CodingChooser r1;
+        int[] r2;
+        int i0, i1, i2, $i3, $i4, $i5;
+        com.sun.java.util.jar.pack.Coding r3;
+        java.lang.String $r11;
+        boolean $z0, $z1;
+        com.sun.java.util.jar.pack.CodingMethod r0;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9, $r10;
+
+        r1 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r2 := @parameter1: int[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i2 = i0 - i1;
+
+        if i2 >= 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = r0 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z0 == 0 goto label3;
+
+        r3 = (com.sun.java.util.jar.pack.Coding) r0;
+
+        $i4 = virtualinvoke r3.<com.sun.java.util.jar.pack.Coding: int getLength(int[],int,int)>(r2, i1, i0);
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $i5 = specialinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: int countBytesToSizer(com.sun.java.util.jar.pack.CodingMethod,int[],int,int)>(r0, r2, i1, i0);
+
+        if $i4 == $i5 goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" : ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r4;
+
+     label2:
+        return $i4;
+
+     label3:
+        $i3 = specialinvoke r1.<com.sun.java.util.jar.pack.CodingChooser: int countBytesToSizer(com.sun.java.util.jar.pack.CodingMethod,int[],int,int)>(r0, r2, i1, i0);
+
+        return $i3;
+    }
+
+    private int countBytesToSizer(com.sun.java.util.jar.pack.CodingMethod, int[], int, int)
+    {
+        com.sun.java.util.jar.pack.CodingMethod r2;
+        java.io.IOException $r6;
+        java.lang.RuntimeException $r7;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] r3;
+        int i0, i1, $i2;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r1, $r4, $r5;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        r3 := @parameter1: int[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+     label1:
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteOnlySizer>;
+
+        virtualinvoke $r1.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void reset()>();
+
+        $r4 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteOnlySizer>;
+
+        interfaceinvoke r2.<com.sun.java.util.jar.pack.CodingMethod: void writeArrayTo(java.io.OutputStream,int[],int,int)>($r4, r3, i0, i1);
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteOnlySizer>;
+
+        $i2 = virtualinvoke $r5.<com.sun.java.util.jar.pack.CodingChooser$Sizer: int getSize()>();
+
+     label2:
+        return $i2;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    int[] getDeltas(int, int)
+    {
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] $r1, $r2, $r3, $r4, $r5, $r6;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i2 = i0 | i1;
+
+        if $i2 == 0 goto label1;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i6 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i5 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $r6 = staticinvoke <com.sun.java.util.jar.pack.Coding: int[] makeDeltas(int[],int,int,int,int)>($r5, $i6, $i5, i0, i1);
+
+        return $r6;
+
+     label1:
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] deltas>;
+
+        if $r1 != null goto label2;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i4 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $r4 = staticinvoke <com.sun.java.util.jar.pack.Coding: int[] makeDeltas(int[],int,int,int,int)>($r3, $i4, $i3, 0, 0);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: int[] deltas> = $r4;
+
+     label2:
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] deltas>;
+
+        return $r2;
+    }
+
+    com.sun.java.util.jar.pack.Histogram getValueHistogram()
+    {
+        java.io.PrintStream $r4, $r6;
+        com.sun.java.util.jar.pack.Histogram $r1, $r2, $r5, $r7, $r8;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] $r3;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist>;
+
+        if $r1 != null goto label2;
+
+        $r2 = new com.sun.java.util.jar.pack.Histogram;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        specialinvoke $r2.<com.sun.java.util.jar.pack.Histogram: void <init>(int[],int,int)>($r3, $i1, $i0);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist> = $r2;
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i2 <= 3 goto label1;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist>;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<com.sun.java.util.jar.pack.Histogram: void print(java.lang.String,java.io.PrintStream)>("vHist", $r6);
+
+        goto label2;
+
+     label1:
+        $i3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i3 <= 1 goto label2;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist>;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.Histogram: void print(java.lang.String,java.lang.String[],java.io.PrintStream)>("vHist", null, $r4);
+
+     label2:
+        $r8 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram vHist>;
+
+        return $r8;
+    }
+
+    com.sun.java.util.jar.pack.Histogram getDeltaHistogram()
+    {
+        java.io.PrintStream $r4, $r6;
+        com.sun.java.util.jar.pack.Histogram $r1, $r2, $r5, $r7, $r8;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int[] $r3;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist>;
+
+        if $r1 != null goto label2;
+
+        $r2 = new com.sun.java.util.jar.pack.Histogram;
+
+        $r3 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] getDeltas(int,int)>(0, 0);
+
+        specialinvoke $r2.<com.sun.java.util.jar.pack.Histogram: void <init>(int[])>($r3);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist> = $r2;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i0 <= 3 goto label1;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist>;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<com.sun.java.util.jar.pack.Histogram: void print(java.lang.String,java.io.PrintStream)>("dHist", $r6);
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i1 <= 1 goto label2;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist>;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.Histogram: void print(java.lang.String,java.lang.String[],java.io.PrintStream)>("dHist", null, $r4);
+
+     label2:
+        $r8 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram dHist>;
+
+        return $r8;
+    }
+
+    com.sun.java.util.jar.pack.Histogram getHistogram(boolean)
+    {
+        com.sun.java.util.jar.pack.Histogram $r1;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        boolean z0;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getDeltaHistogram()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getValueHistogram()>();
+
+     label2:
+        return $r1;
+    }
+
+    private void tryPopulationCoding(com.sun.java.util.jar.pack.Coding)
+    {
+        java.lang.StringBuilder $r23, $r24, $r25, $r26, $r27, $r29, $r33, $r34, $r45, $r46, $r51, $r52, $r65, $r66, $r67, $r68, $r69, $r70, $r71, $r73, $r78, $r79, $r80, $r81, $r82, $r84, $r89, $r90, $r91, $r93, $r101, $r102, $r103, $r108, $r109, $r114, $r115;
+        com.sun.java.util.jar.pack.Histogram $r1;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r22, $r32, $r44, $r50, $r64, $r77, $r88;
+        int[] r7, $r37, $r75, $r86, $r95, $r96;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, i68, i69, i70, i71, i72, i73, i74, i75, i76, i77, i78, i79, i80, i81, i82, $i83, i84, i85, i86, $i87, $i88, i89, $i90, $i92, $i94, $i96, $i98, $i100, $i102;
+        java.lang.Object $r17, $r18, $r19, $r36, $r54;
+        java.lang.AssertionError $r110, $r111, $r113;
+        java.util.ArrayList $r104, $r105, $r106, $r107;
+        java.lang.String $r28, $r30, $r35, $r47, $r53, $r72, $r74, $r83, $r85, $r92, $r94;
+        int[][] $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, z10, $z11, $z12, $z13, z14, $z15, $z16, $z17;
+        com.sun.java.util.jar.pack.CodingMethod $r38;
+        java.util.List $r48;
+        com.sun.java.util.jar.pack.Coding r2, $r3, $r4, $r5, $r6, $r40, $r55, $r56, $r57, $r58, $r59, $r60, $r61, $r62, r97, r98, r99;
+        com.sun.java.util.jar.pack.PopulationCoding $r112;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10;
+        java.util.Iterator $r12, $r14, $r15, $r16, $r20;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.Coding;
+
+        $r1 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getValueHistogram()>();
+
+        $r3 = virtualinvoke r2.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding getValueCoding()>();
+
+        $r4 = <com.sun.java.util.jar.pack.BandStructure: com.sun.java.util.jar.pack.Coding UNSIGNED5>;
+
+        $r5 = virtualinvoke $r4.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setL(int)>(64);
+
+        $r6 = virtualinvoke r2.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding getValueCoding()>();
+
+        $i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int min>;
+
+        $i1 = virtualinvoke $r3.<com.sun.java.util.jar.pack.Coding: int getLength(int)>($i0);
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int max>;
+
+        $i3 = virtualinvoke $r3.<com.sun.java.util.jar.pack.Coding: int getLength(int)>($i2);
+
+        $i4 = staticinvoke <java.lang.Math: int max(int,int)>($i1, $i3);
+
+        i68 = 4 + $i4;
+
+        $i5 = virtualinvoke $r5.<com.sun.java.util.jar.pack.Coding: int getLength(int)>(0);
+
+        $i7 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $i6 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i8 = $i7 - $i6;
+
+        i69 = $i5 * $i8;
+
+        $d0 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Histogram: double getBitLength(com.sun.java.util.jar.pack.Histogram$BitMetric)>($r6);
+
+        $d1 = $d0 / 8.0;
+
+        $d2 = staticinvoke <java.lang.Math: double ceil(double)>($d1);
+
+        i70 = (int) $d2;
+
+        $i9 = i68 + i69;
+
+        i71 = $i9 + i70;
+
+        i72 = 0;
+
+        $i10 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Histogram: int getTotalLength()>();
+
+        $i11 = 1 + $i10;
+
+        r7 = newarray (int)[$i11];
+
+        $i92 = (int) -1;
+
+        i73 = $i92;
+
+        $i94 = (int) -1;
+
+        i74 = $i94;
+
+        $r8 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Histogram: int[][] getMatrix()>();
+
+        $i96 = (int) -1;
+
+        i75 = $i96;
+
+        i76 = 1;
+
+        i77 = 0;
+
+        i78 = 1;
+
+     label01:
+        $i12 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Histogram: int getTotalLength()>();
+
+        if i78 > $i12 goto label06;
+
+        if i76 != 1 goto label02;
+
+        i75 = i75 + 1;
+
+        $r95 = $r8[i75];
+
+        i77 = $r95[0];
+
+        $r96 = $r8[i75];
+
+        i76 = lengthof $r96;
+
+     label02:
+        $r86 = $r8[i75];
+
+        $i98 = (int) -1;
+
+        i76 = i76 + $i98;
+
+        $i63 = $r86[i76];
+
+        r7[i78] = $i63;
+
+        $i54 = virtualinvoke $r3.<com.sun.java.util.jar.pack.Coding: int getLength(int)>($i63);
+
+        $i64 = i68 + $i54;
+
+        i68 = $i64;
+
+        $i55 = virtualinvoke $r5.<com.sun.java.util.jar.pack.Coding: int getLength(int)>(i78);
+
+        $i56 = $i55 - $i5;
+
+        $i57 = $i56 * i77;
+
+        $i65 = i69 + $i57;
+
+        i69 = $i65;
+
+        $i58 = $i54 * i77;
+
+        $i66 = i70 - $i58;
+
+        i70 = $i66;
+
+        $i59 = $i64 + $i65;
+
+        $i67 = $i59 + $i66;
+
+        if i71 <= $i67 goto label05;
+
+        $i60 = r0.<com.sun.java.util.jar.pack.CodingChooser: int targetSize>;
+
+        if $i67 > $i60 goto label04;
+
+        i74 = i78;
+
+        if i73 >= 0 goto label03;
+
+        i73 = i78;
+
+     label03:
+        $i61 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i61 <= 4 goto label04;
+
+        $r88 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r101 = new java.lang.StringBuilder;
+
+        specialinvoke $r101.<java.lang.StringBuilder: void <init>()>();
+
+        $r89 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("better pop-size at fvc=");
+
+        $r90 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i78);
+
+        $r91 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" by ");
+
+        $i62 = i71 - $i67;
+
+        $d10 = (double) $i62;
+
+        $d9 = (double) i71;
+
+        $r92 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d10, $d9);
+
+        $r93 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r92);
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r88.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r94);
+
+     label04:
+        i71 = $i67;
+
+        i72 = i78;
+
+     label05:
+        i78 = i78 + 1;
+
+        goto label01;
+
+     label06:
+        if i73 >= 0 goto label08;
+
+        $i49 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i49 <= 1 goto label07;
+
+        $i50 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i50 <= 1 goto label07;
+
+        $r77 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r102 = new java.lang.StringBuilder;
+
+        specialinvoke $r102.<java.lang.StringBuilder: void <init>()>();
+
+        $r78 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no good pop-size; best was ");
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i71);
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at ");
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i72);
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" worse by ");
+
+        $i51 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        $i52 = i71 - $i51;
+
+        $d8 = (double) $i52;
+
+        $i53 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        $d7 = (double) $i53;
+
+        $r83 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d8, $d7);
+
+        $r84 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r83);
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r77.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r85);
+
+     label07:
+        return;
+
+     label08:
+        $i13 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i13 <= 1 goto label09;
+
+        $r64 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r103 = new java.lang.StringBuilder;
+
+        specialinvoke $r103.<java.lang.StringBuilder: void <init>()>();
+
+        $r65 = virtualinvoke $r103.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("initial best pop-size at fvc=");
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i72);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in [");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i73);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("..");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i74);
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] by ");
+
+        $i45 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        $i46 = $i45 - i71;
+
+        $d6 = (double) $i46;
+
+        $i47 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        $d5 = (double) $i47;
+
+        $r72 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d6, $d5);
+
+        $r73 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r72);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r64.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r74);
+
+     label09:
+        $i48 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $r75 = <com.sun.java.util.jar.pack.PopulationCoding: int[] LValuesCoded>;
+
+        $r104 = new java.util.ArrayList;
+
+        specialinvoke $r104.<java.util.ArrayList: void <init>()>();
+
+        $r105 = new java.util.ArrayList;
+
+        specialinvoke $r105.<java.util.ArrayList: void <init>()>();
+
+        $r106 = new java.util.ArrayList;
+
+        specialinvoke $r106.<java.util.ArrayList: void <init>()>();
+
+        if i72 > 255 goto label10;
+
+        $r62 = <com.sun.java.util.jar.pack.BandStructure: com.sun.java.util.jar.pack.Coding BYTE1>;
+
+        interfaceinvoke $r104.<java.util.List: boolean add(java.lang.Object)>($r62);
+
+        goto label26;
+
+     label10:
+        i79 = 5;
+
+        $i14 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i14 <= 4 goto label11;
+
+        $z17 = 1;
+
+        $z16 = 1;
+
+        goto label12;
+
+     label11:
+        $z17 = 0;
+
+        $z16 = 0;
+
+     label12:
+        z10 = $z16;
+
+        if $z17 == 0 goto label13;
+
+        $r60 = <com.sun.java.util.jar.pack.BandStructure: com.sun.java.util.jar.pack.Coding BYTE1>;
+
+        $r61 = virtualinvoke $r60.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setS(int)>(1);
+
+        interfaceinvoke $r105.<java.util.List: boolean add(java.lang.Object)>($r61);
+
+     label13:
+        $i15 = lengthof $r75;
+
+        i80 = $i15 - 1;
+
+     label14:
+        if i80 < 1 goto label23;
+
+        i81 = $r75[i80];
+
+        $r55 = staticinvoke <com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.Coding fitTokenCoding(int,int)>(i73, i81);
+
+        $r56 = staticinvoke <com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.Coding fitTokenCoding(int,int)>(i72, i81);
+
+        $r57 = staticinvoke <com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.Coding fitTokenCoding(int,int)>(i74, i81);
+
+        r97 = $r57;
+
+        if $r56 == null goto label16;
+
+        $z8 = interfaceinvoke $r104.<java.util.List: boolean contains(java.lang.Object)>($r56);
+
+        if $z8 != 0 goto label15;
+
+        interfaceinvoke $r104.<java.util.List: boolean add(java.lang.Object)>($r56);
+
+     label15:
+        $i44 = virtualinvoke $r56.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if i79 <= $i44 goto label16;
+
+        i79 = virtualinvoke $r56.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+     label16:
+        if z10 == 0 goto label22;
+
+        if $r57 != null goto label17;
+
+        r97 = $r56;
+
+     label17:
+        i82 = virtualinvoke $r55.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+     label18:
+        $i83 = virtualinvoke r97.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if i82 > $i83 goto label22;
+
+        $i43 = virtualinvoke $r56.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if i82 != $i43 goto label19;
+
+        goto label21;
+
+     label19:
+        if i82 != 1 goto label20;
+
+        goto label21;
+
+     label20:
+        $r58 = virtualinvoke r97.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setB(int)>(i82);
+
+        $r59 = virtualinvoke $r58.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setS(int)>(1);
+
+        $z7 = interfaceinvoke $r105.<java.util.List: boolean contains(java.lang.Object)>($r59);
+
+        if $z7 != 0 goto label21;
+
+        interfaceinvoke $r105.<java.util.List: boolean add(java.lang.Object)>($r59);
+
+     label21:
+        i82 = i82 + 1;
+
+        goto label18;
+
+     label22:
+        $i100 = (int) -1;
+
+        i80 = i80 + $i100;
+
+        goto label14;
+
+     label23:
+        $r12 = interfaceinvoke $r104.<java.util.List: java.util.Iterator iterator()>();
+
+     label24:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label26;
+
+        $r54 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r98 = (com.sun.java.util.jar.pack.Coding) $r54;
+
+        $i42 = virtualinvoke r98.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if $i42 <= i79 goto label25;
+
+        interfaceinvoke $r12.<java.util.Iterator: void remove()>();
+
+        interfaceinvoke $r106.<java.util.List: void add(int,java.lang.Object)>(0, r98);
+
+     label25:
+        goto label24;
+
+     label26:
+        $r107 = new java.util.ArrayList;
+
+        specialinvoke $r107.<java.util.ArrayList: void <init>()>();
+
+        $r14 = interfaceinvoke $r104.<java.util.List: java.util.Iterator iterator()>();
+
+        $r15 = interfaceinvoke $r105.<java.util.List: java.util.Iterator iterator()>();
+
+        $r16 = interfaceinvoke $r106.<java.util.List: java.util.Iterator iterator()>();
+
+     label27:
+        $z11 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z11 != 0 goto label28;
+
+        $z3 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 != 0 goto label28;
+
+        $z4 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label31;
+
+     label28:
+        $z12 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label29;
+
+        $r19 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        interfaceinvoke $r107.<java.util.List: boolean add(java.lang.Object)>($r19);
+
+     label29:
+        $z1 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label30;
+
+        $r18 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        interfaceinvoke $r107.<java.util.List: boolean add(java.lang.Object)>($r18);
+
+     label30:
+        $z2 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label27;
+
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        interfaceinvoke $r107.<java.util.List: boolean add(java.lang.Object)>($r17);
+
+        goto label27;
+
+     label31:
+        interfaceinvoke $r104.<java.util.List: void clear()>();
+
+        interfaceinvoke $r105.<java.util.List: void clear()>();
+
+        interfaceinvoke $r106.<java.util.List: void clear()>();
+
+        $i16 = interfaceinvoke $r107.<java.util.List: int size()>();
+
+        i84 = $i16;
+
+        $i17 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i17 != 4 goto label32;
+
+        i84 = 2;
+
+        goto label33;
+
+     label32:
+        if $i16 <= 4 goto label33;
+
+        $i102 = (int) -4;
+
+        i85 = $i16 + $i102;
+
+        $i39 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        $i40 = $i39 - 4;
+
+        $i41 = i85 * $i40;
+
+        i86 = $i41 / 5;
+
+        i84 = i86 + 4;
+
+     label33:
+        $i87 = interfaceinvoke $r107.<java.util.List: int size()>();
+
+        if $i87 <= i84 goto label35;
+
+        $i37 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i37 <= 4 goto label34;
+
+        $r50 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r108 = new java.lang.StringBuilder;
+
+        specialinvoke $r108.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("allFits before clip: ");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r107);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r50.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r53);
+
+     label34:
+        $i38 = interfaceinvoke $r107.<java.util.List: int size()>();
+
+        $r48 = interfaceinvoke $r107.<java.util.List: java.util.List subList(int,int)>(i84, $i38);
+
+        interfaceinvoke $r48.<java.util.List: void clear()>();
+
+     label35:
+        $i88 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i88 <= 3 goto label36;
+
+        $r44 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r109 = new java.lang.StringBuilder;
+
+        specialinvoke $r109.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("allFits: ");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r107);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r44.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r47);
+
+     label36:
+        $r20 = interfaceinvoke $r107.<java.util.List: java.util.Iterator iterator()>();
+
+     label37:
+        $z13 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+        if $z13 == 0 goto label44;
+
+        $r36 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+        r99 = (com.sun.java.util.jar.pack.Coding) $r36;
+
+        z14 = 0;
+
+        $i26 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int S()>();
+
+        if $i26 != 1 goto label38;
+
+        z14 = 1;
+
+        r99 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setS(int)>(0);
+
+     label38:
+        if z14 != 0 goto label40;
+
+        i89 = i72;
+
+        $z5 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label39;
+
+        $i36 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int umax()>();
+
+        if $i36 >= i72 goto label39;
+
+        $r110 = new java.lang.AssertionError;
+
+        specialinvoke $r110.<java.lang.AssertionError: void <init>()>();
+
+        throw $r110;
+
+     label39:
+        $z6 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z6 != 0 goto label42;
+
+        $i32 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if $i32 == 1 goto label42;
+
+        $i33 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        $i34 = $i33 - 1;
+
+        $r40 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setB(int)>($i34);
+
+        $i35 = virtualinvoke $r40.<com.sun.java.util.jar.pack.Coding: int umax()>();
+
+        if $i35 < i89 goto label42;
+
+        $r111 = new java.lang.AssertionError;
+
+        specialinvoke $r111.<java.lang.AssertionError: void <init>()>();
+
+        throw $r111;
+
+     label40:
+        $i27 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int umax()>();
+
+        $i28 = staticinvoke <java.lang.Math: int min(int,int)>($i27, i74);
+
+        i89 = $i28;
+
+        if $i28 >= i73 goto label41;
+
+        goto label37;
+
+     label41:
+        if $i28 != i72 goto label42;
+
+        goto label37;
+
+     label42:
+        $r112 = new com.sun.java.util.jar.pack.PopulationCoding;
+
+        specialinvoke $r112.<com.sun.java.util.jar.pack.PopulationCoding: void <init>()>();
+
+        virtualinvoke $r112.<com.sun.java.util.jar.pack.PopulationCoding: void setHistogram(com.sun.java.util.jar.pack.Histogram)>($r1);
+
+        $i90 = virtualinvoke r99.<com.sun.java.util.jar.pack.Coding: int L()>();
+
+        virtualinvoke $r112.<com.sun.java.util.jar.pack.PopulationCoding: void setL(int)>($i90);
+
+        virtualinvoke $r112.<com.sun.java.util.jar.pack.PopulationCoding: void setFavoredValues(int[],int)>(r7, i89);
+
+        $z15 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z15 != 0 goto label43;
+
+        $r38 = $r112.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        if $r38 == r99 goto label43;
+
+        $r113 = new java.lang.AssertionError;
+
+        specialinvoke $r113.<java.lang.AssertionError: void <init>()>();
+
+        throw $r113;
+
+     label43:
+        virtualinvoke $r112.<com.sun.java.util.jar.pack.PopulationCoding: void resortFavoredValues()>();
+
+        $r37 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] computePopSizePrivate(com.sun.java.util.jar.pack.PopulationCoding,com.sun.java.util.jar.pack.Coding,com.sun.java.util.jar.pack.Coding)>($r112, $r3, $r6);
+
+        $i31 = $r37[0];
+
+        $i29 = $r37[1];
+
+        $i30 = 4 + $i29;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: boolean noteSizes(com.sun.java.util.jar.pack.CodingMethod,int,int)>($r112, $i31, $i30);
+
+        goto label37;
+
+     label44:
+        $i18 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i18 <= 3 goto label45;
+
+        $r22 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r114 = new java.lang.StringBuilder;
+
+        specialinvoke $r114.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r114.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("measured best pop, size=");
+
+        $i19 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestByteSize>;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i19);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/zs=");
+
+        $i20 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i20);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" better by ");
+
+        $i21 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i22 = $i48 - $i21;
+
+        $d4 = (double) $i22;
+
+        $d3 = (double) $i48;
+
+        $r28 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d4, $d3);
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r30);
+
+        $i23 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        if $i23 >= $i48 goto label45;
+
+        $r32 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r115 = new java.lang.StringBuilder;
+
+        specialinvoke $r115.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r115.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> POP WINS BY ");
+
+        $i24 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i25 = $i48 - $i24;
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i25);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r35);
+
+     label45:
+        return;
+    }
+
+    private int[] computePopSizePrivate(com.sun.java.util.jar.pack.PopulationCoding, com.sun.java.util.jar.pack.Coding, com.sun.java.util.jar.pack.Coding)
+    {
+        java.lang.StringBuilder $r16, $r17, $r18, $r19, $r24, $r26, $r27, $r28, $r30, $r31, $r33, $r34, $r36, $r38, $r41, $r42, $r44, $r45, $r46, $r48, $r56, $r58, $r59, $r61, $r63, $r64, $r65, $r67, $r70, $r72, $r73, $r74, $r75, $r77, $r79, $r80, $r81, $r83;
+        java.io.IOException $r99;
+        com.sun.java.util.jar.pack.Coding[] $r90;
+        java.util.Random $r12, $r50, $r69, $r91, $r97;
+        com.sun.java.util.jar.pack.CodingChooser r0, $r1, $r6, $r10, $r53, $r89, $r92, $r93, $r94, $r95, $r96, $r98;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r23, $r25, $r39, $r43, $r57, $r62, $r71, $r78, $r85;
+        int[] $r3, $r14, $r21, $r86, $r87, $r88, r101;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r13;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, i27;
+        java.lang.AssertionError $r15, $r22;
+        java.lang.String $r20, $r37, $r40, $r49, $r60, $r68, $r76, $r84;
+        java.lang.RuntimeException $r100;
+        int[][] $r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.java.util.jar.pack.CodingMethod $r7, $r8, $r11, $r29, $r32, $r35, $r47, $r51, $r54, $r55, $r66, $r82;
+        com.sun.java.util.jar.pack.Coding r5, r9, $r52;
+        com.sun.java.util.jar.pack.PopulationCoding r2;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.PopulationCoding;
+
+        r5 := @parameter1: com.sun.java.util.jar.pack.Coding;
+
+        r9 := @parameter2: com.sun.java.util.jar.pack.Coding;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        if $r1 != null goto label02;
+
+        $r89 = new com.sun.java.util.jar.pack.CodingChooser;
+
+        $i18 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        $r90 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Coding[] allCodingChoices>;
+
+        specialinvoke $r89.<com.sun.java.util.jar.pack.CodingChooser: void <init>(int,com.sun.java.util.jar.pack.Coding[])>($i18, $r90);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper> = $r89;
+
+        $r91 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r91 == null goto label01;
+
+        $r98 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r97 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i22 = virtualinvoke $r97.<java.util.Random: int nextInt()>();
+
+        virtualinvoke $r98.<com.sun.java.util.jar.pack.CodingChooser: void addStressSeed(int)>($i22);
+
+     label01:
+        $r92 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r92.<com.sun.java.util.jar.pack.CodingChooser: boolean topLevel> = 0;
+
+        $r93 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $i19 = $r93.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        $i20 = $i19 - 1;
+
+        $r93.<com.sun.java.util.jar.pack.CodingChooser: int verbose> = $i20;
+
+        $r94 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r94.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding> = 1;
+
+        $r95 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $z4 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding>;
+
+        $r95.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = $z4;
+
+        $i21 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i21 >= 5 goto label02;
+
+        $r96 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r96.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = 1;
+
+     label02:
+        $i23 = r2.<com.sun.java.util.jar.pack.PopulationCoding: int fVlen>;
+
+        $i24 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i24 <= 2 goto label03;
+
+        $r78 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r77 = new java.lang.StringBuilder;
+
+        specialinvoke $r77.<java.lang.StringBuilder: void <init>()>();
+
+        $r79 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("computePopSizePrivate fvlen=");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" tc=");
+
+        $r82 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        $r83 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r82);
+
+        $r84 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r78.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r84);
+
+        $r85 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r85.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>("{ //BEGIN");
+
+     label03:
+        $r86 = r2.<com.sun.java.util.jar.pack.PopulationCoding: int[] fValues>;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i1 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $r4 = virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: int[][] encodeValues(int[],int,int)>($r3, $i1, $i0);
+
+        $r87 = $r4[0];
+
+        $r88 = $r4[1];
+
+        $i2 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i2 <= 2 goto label04;
+
+        $r71 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r72 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-- refine on fv[");
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] fc=");
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r71.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r76);
+
+     label04:
+        $r6 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $i3 = 1 + $i23;
+
+        $r7 = virtualinvoke $r6.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding)>($r86, 1, $i3, r5);
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: void setFavoredCoding(com.sun.java.util.jar.pack.CodingMethod)>($r7);
+
+        $r8 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        $z0 = $r8 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z0 == 0 goto label08;
+
+        $r50 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r50 == null goto label05;
+
+        $r69 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $z3 = virtualinvoke $r69.<java.util.Random: boolean nextBoolean()>();
+
+        if $z3 == 0 goto label08;
+
+     label05:
+        $i15 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i15 <= 2 goto label06;
+
+        $r62 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-- refine on tv[");
+
+        $i17 = lengthof $r87;
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] tc=");
+
+        $r66 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        $r67 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r66);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r62.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r68);
+
+     label06:
+        $r53 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r51 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        $r52 = (com.sun.java.util.jar.pack.Coding) $r51;
+
+        $r54 = virtualinvoke $r53.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],com.sun.java.util.jar.pack.Coding)>($r87, $r52);
+
+        $r55 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        if $r54 == $r55 goto label08;
+
+        $i16 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i16 <= 2 goto label07;
+
+        $r57 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r58 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> refined tc=");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r54);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r57.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r60);
+
+     label07:
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: void setTokenCoding(com.sun.java.util.jar.pack.CodingMethod)>($r54);
+
+     label08:
+        $i25 = lengthof $r88;
+
+        if $i25 != 0 goto label09;
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: void setUnfavoredCoding(com.sun.java.util.jar.pack.CodingMethod)>(null);
+
+        goto label11;
+
+     label09:
+        $i4 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i4 <= 2 goto label10;
+
+        $r43 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-- refine on uv[");
+
+        $i14 = lengthof $r88;
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] uc=");
+
+        $r47 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod unfavoredCoding>;
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r47);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r49);
+
+     label10:
+        $r10 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser popHelper>;
+
+        $r11 = virtualinvoke $r10.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],com.sun.java.util.jar.pack.Coding)>($r88, r9);
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: void setUnfavoredCoding(com.sun.java.util.jar.pack.CodingMethod)>($r11);
+
+     label11:
+        $i26 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i26 <= 3 goto label15;
+
+        $r25 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("finish computePopSizePrivate fvlen=");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fc=");
+
+        $r29 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod favoredCoding>;
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" tc=");
+
+        $r32 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" uc=");
+
+        $r35 = r2.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod unfavoredCoding>;
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r37);
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("fv = {");
+
+        i27 = 1;
+
+     label12:
+        if i27 > $i23 goto label14;
+
+        $i12 = i27 % 10;
+
+        if $i12 != 0 goto label13;
+
+        virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(10);
+
+     label13:
+        $r41 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i13 = $r86[i27];
+
+        virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        i27 = i27 + 1;
+
+        goto label12;
+
+     label14:
+        virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(10);
+
+        virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r39 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r39.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r40);
+
+     label15:
+        $i5 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i5 <= 2 goto label16;
+
+        $r23 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r23.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>("} //END");
+
+     label16:
+        $r12 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r12 == null goto label17;
+
+        return null;
+
+     label17:
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void resetData()>();
+
+        $r13 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer>;
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PopulationCoding: void writeSequencesTo(java.io.OutputStream,int[],int[])>($r13, $r87, $r88);
+
+        $r14 = newarray (int)[2];
+
+        $i6 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int getByteSize()>();
+
+        $r14[0] = $i6;
+
+        $i7 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int getZipSize()>();
+
+        $r14[1] = $i7;
+
+     label18:
+        goto label20;
+
+     label19:
+        $r99 := @caughtexception;
+
+        $r100 = new java.lang.RuntimeException;
+
+        specialinvoke $r100.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r99);
+
+        throw $r100;
+
+     label20:
+        r101 = null;
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label21;
+
+        $r21 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] computeSizePrivate(com.sun.java.util.jar.pack.CodingMethod)>(r2);
+
+        r101 = $r21;
+
+        if $r21 != null goto label21;
+
+        $r22 = new java.lang.AssertionError;
+
+        specialinvoke $r22.<java.lang.AssertionError: void <init>()>();
+
+        throw $r22;
+
+     label21:
+        $z2 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label22;
+
+        $i9 = r101[0];
+
+        $i8 = $r14[0];
+
+        if $i9 == $i8 goto label22;
+
+        $r15 = new java.lang.AssertionError;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $i10 = r101[0];
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $i11 = $r14[0];
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.AssertionError: void <init>(java.lang.Object)>($r20);
+
+        throw $r15;
+
+     label22:
+        return $r14;
+
+        catch java.io.IOException from label17 to label18 with label19;
+    }
+
+    private void tryAdaptiveCoding(com.sun.java.util.jar.pack.Coding)
+    {
+        byte $b102;
+        java.lang.StringBuilder $r7, $r8, $r23, $r24, $r25, $r26, $r27, $r29, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r55, $r56, $r57, $r58, $r59, $r74, $r75, $r77, $r80;
+        long $l56;
+        com.sun.java.util.jar.pack.Coding[] $r33;
+        com.sun.java.util.jar.pack.AdaptiveCoding $r78, $r79;
+        java.util.Random $r34, $r40;
+        com.sun.java.util.jar.pack.CodingChooser r0, $r4, $r11, $r14, $r16, $r35, $r36, $r37, $r38, $r39, $r41, $r76;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r6, $r20, $r22, $r31, $r52;
+        int[] $r2, $r10, $r13, $r15, $r18, $r63, $r64, r65, r67, r68;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, $i19, $i20, $i21, $i22, i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, i67, $i68, $i69, i70, i71, i72, i73, i74, i75, $i76, $i77, $i78, i79, $i80, i81, i82, i83, i84, i85, $i86, $i87, i88, i89, i90, i91, i92, i93, i94, i95, i96, i97, $i98, $i99, $i100, $i101, i103, $i104, i105, $i106, $i108;
+        java.io.PrintStream $r43, $r54;
+        double[] r3, $r66;
+        java.lang.AssertionError $r72, $r73;
+        java.lang.String $r9, $r28, $r30, $r51, $r60;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.java.util.jar.pack.CodingMethod $r12, r69, r70, r71;
+        com.sun.java.util.jar.pack.Coding r1;
+        double $d0, $d1, $d2, d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, d17, $d18, $d19, $d20, $d21, $d22, $d23, d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, d33, d34;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.Coding;
+
+        i0 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        i70 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        i71 = r0.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        r65 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        i1 = i71 - i70;
+
+        $z0 = virtualinvoke r1.<com.sun.java.util.jar.pack.Coding: boolean isDelta()>();
+
+        if $z0 == 0 goto label01;
+
+        $r63 = virtualinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] getDeltas(int,int)>(0, 0);
+
+        r65 = $r63;
+
+        i70 = 0;
+
+        i71 = lengthof $r63;
+
+     label01:
+        $i2 = i1 + 1;
+
+        $r64 = newarray (int)[$i2];
+
+        i72 = 0;
+
+        i73 = 0;
+
+        i74 = i70;
+
+     label02:
+        if i74 >= i71 goto label04;
+
+        i67 = r65[i74];
+
+        $i68 = i72;
+
+        i72 = i72 + 1;
+
+        $r64[$i68] = i73;
+
+        $i69 = virtualinvoke r1.<com.sun.java.util.jar.pack.Coding: int getLength(int)>(i67);
+
+        $z4 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label03;
+
+        if $i69 < 2147483647 goto label03;
+
+        $r72 = new java.lang.AssertionError;
+
+        specialinvoke $r72.<java.lang.AssertionError: void <init>()>();
+
+        throw $r72;
+
+     label03:
+        i73 = i73 + $i69;
+
+        i74 = i74 + 1;
+
+        goto label02;
+
+     label04:
+        i75 = i72 + 1;
+
+        $r64[i72] = i73;
+
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label05;
+
+        $i66 = lengthof $r64;
+
+        if i75 == $i66 goto label05;
+
+        $r73 = new java.lang.AssertionError;
+
+        specialinvoke $r73.<java.lang.AssertionError: void <init>()>();
+
+        throw $r73;
+
+     label05:
+        $d1 = (double) i73;
+
+        $d0 = (double) i1;
+
+        $d16 = $d1 / $d0;
+
+        $i3 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i3 < 5 goto label07;
+
+        $i65 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i65 <= 6 goto label06;
+
+        d17 = 1.001;
+
+        d34 = 1.001;
+
+        d33 = 1.001;
+
+        goto label09;
+
+     label06:
+        d17 = 1.003;
+
+        d34 = 1.003;
+
+        d33 = 1.003;
+
+        goto label09;
+
+     label07:
+        $i4 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i4 <= 3 goto label08;
+
+        d17 = 1.01;
+
+        d34 = 1.01;
+
+        d33 = 1.01;
+
+        goto label09;
+
+     label08:
+        d17 = 1.03;
+
+        d34 = 1.03;
+
+        d33 = 1.03;
+
+     label09:
+        $d18 = d33 * d33;
+
+        $d19 = $d18 * $d18;
+
+        $d20 = $d18 * $d18;
+
+        $d21 = $d20 * $d18;
+
+        $i76 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        $i77 = $i76 - 3;
+
+        $i78 = 1 + $i77;
+
+        $r66 = newarray (double)[$i78];
+
+        $d22 = (double) i1;
+
+        $d23 = staticinvoke <java.lang.Math: double log(double)>($d22);
+
+        i79 = 0;
+
+     label10:
+        $i80 = lengthof $r66;
+
+        if i79 >= $i80 goto label11;
+
+        $i62 = i79 + 1;
+
+        $d11 = (double) $i62;
+
+        $d13 = $d23 * $d11;
+
+        $i63 = lengthof $r66;
+
+        $i64 = $i63 + 1;
+
+        $d12 = (double) $i64;
+
+        $d14 = $d13 / $d12;
+
+        $d15 = staticinvoke <java.lang.Math: double exp(double)>($d14);
+
+        $r66[i79] = $d15;
+
+        i79 = i79 + 1;
+
+        goto label10;
+
+     label11:
+        $i5 = lengthof $r66;
+
+        r67 = newarray (int)[$i5];
+
+        i81 = 0;
+
+        i82 = 0;
+
+     label12:
+        $i6 = lengthof $r66;
+
+        if i82 >= $i6 goto label16;
+
+        $d10 = $r66[i82];
+
+        $l56 = staticinvoke <java.lang.Math: long round(double)>($d10);
+
+        i83 = (int) $l56;
+
+        $i57 = i83 - 1;
+
+        $i58 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: int getNextK(int)>($i57);
+
+        if $i58 <= 0 goto label15;
+
+        if $i58 < i1 goto label13;
+
+        goto label15;
+
+     label13:
+        if i81 <= 0 goto label14;
+
+        $i60 = i81 - 1;
+
+        $i61 = r67[$i60];
+
+        if $i58 != $i61 goto label14;
+
+        goto label15;
+
+     label14:
+        $i59 = i81;
+
+        i81 = i81 + 1;
+
+        r67[$i59] = $i58;
+
+     label15:
+        i82 = i82 + 1;
+
+        goto label12;
+
+     label16:
+        $r2 = staticinvoke <com.sun.java.util.jar.pack.BandStructure: int[] realloc(int[],int)>(r67, i81);
+
+        $i7 = lengthof $r2;
+
+        r68 = newarray (int)[$i7];
+
+        $i8 = lengthof $r2;
+
+        r3 = newarray (double)[$i8];
+
+        i84 = 0;
+
+     label17:
+        $i9 = lengthof $r2;
+
+        if i84 >= $i9 goto label21;
+
+        i85 = $r2[i84];
+
+        if i85 >= 10 goto label18;
+
+        d24 = $d21;
+
+        goto label20;
+
+     label18:
+        if i85 >= 100 goto label19;
+
+        d24 = $d19;
+
+        goto label20;
+
+     label19:
+        d24 = $d18;
+
+     label20:
+        r3[i84] = d24;
+
+        $d25 = (double) i85;
+
+        $d26 = $d25 * $d16;
+
+        $d27 = $d26 * d24;
+
+        $d28 = staticinvoke <java.lang.Math: double ceil(double)>($d27);
+
+        $i86 = (int) $d28;
+
+        $i87 = 4 + $i86;
+
+        r68[i84] = $i87;
+
+        i84 = i84 + 1;
+
+        goto label17;
+
+     label21:
+        $i10 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i10 <= 1 goto label24;
+
+        $r43 = <java.lang.System: java.io.PrintStream out>;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("tryAdaptiveCoding [");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] avgS=");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d16);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fuzz=");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d18);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" meshes: {");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<java.io.PrintStream: void print(java.lang.String)>($r51);
+
+        i88 = 0;
+
+     label22:
+        $i53 = lengthof $r2;
+
+        if i88 >= $i53 goto label23;
+
+        $r54 = <java.lang.System: java.io.PrintStream out>;
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i54 = $r2[i88];
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i54);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $i55 = r68[i88];
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i55);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r54.<java.io.PrintStream: void print(java.lang.String)>($r60);
+
+        i88 = i88 + 1;
+
+        goto label22;
+
+     label23:
+        $r52 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r52.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>(" }");
+
+     label24:
+        $r4 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        if $r4 != null goto label26;
+
+        $r76 = new com.sun.java.util.jar.pack.CodingChooser;
+
+        $i48 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        $r33 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Coding[] allCodingChoices>;
+
+        specialinvoke $r76.<com.sun.java.util.jar.pack.CodingChooser: void <init>(int,com.sun.java.util.jar.pack.Coding[])>($i48, $r33);
+
+        r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper> = $r76;
+
+        $r34 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r34 == null goto label25;
+
+        $r41 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r40 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i52 = virtualinvoke $r40.<java.util.Random: int nextInt()>();
+
+        virtualinvoke $r41.<com.sun.java.util.jar.pack.CodingChooser: void addStressSeed(int)>($i52);
+
+     label25:
+        $r35 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r35.<com.sun.java.util.jar.pack.CodingChooser: boolean topLevel> = 0;
+
+        $r36 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $i49 = $r36.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        $i50 = $i49 - 1;
+
+        $r36.<com.sun.java.util.jar.pack.CodingChooser: int verbose> = $i50;
+
+        $r37 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r37.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = 1;
+
+        $r38 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $z3 = r0.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding>;
+
+        $r38.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding> = $z3;
+
+        $i51 = r0.<com.sun.java.util.jar.pack.CodingChooser: int effort>;
+
+        if $i51 >= 5 goto label26;
+
+        $r39 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r39.<com.sun.java.util.jar.pack.CodingChooser: boolean disablePopCoding> = 1;
+
+     label26:
+        i89 = 0;
+
+     label27:
+        if i89 >= i1 goto label49;
+
+        $i15 = i89 - 1;
+
+        $i16 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: int getNextK(int)>($i15);
+
+        i90 = $i16;
+
+        if $i16 <= i1 goto label28;
+
+        i90 = i1;
+
+     label28:
+        $i17 = lengthof $r2;
+
+        i91 = $i17 - 1;
+
+     label29:
+        if i91 < 0 goto label48;
+
+        i92 = $r2[i91];
+
+        i18 = r68[i91];
+
+        $i19 = i90 + i92;
+
+        if $i19 <= i1 goto label30;
+
+        goto label47;
+
+     label30:
+        $i20 = i90 + i92;
+
+        $i22 = $r64[$i20];
+
+        $i21 = $r64[i90];
+
+        i23 = $i22 - $i21;
+
+        if i23 < i18 goto label47;
+
+        i93 = i90 + i92;
+
+        i94 = i23;
+
+        $d2 = r3[i91];
+
+        d3 = $d16 * $d2;
+
+     label31:
+        if i93 >= i1 goto label35;
+
+        $i44 = i93 - i90;
+
+        $i43 = i1 / 2;
+
+        if $i44 > $i43 goto label35;
+
+        i95 = i93;
+
+        i96 = i94;
+
+        i97 = i93 + i92;
+
+        $i45 = i97 - i90;
+
+        $i46 = $i45 - 1;
+
+        $i47 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: int getNextK(int)>($i46);
+
+        i93 = i90 + $i47;
+
+        if i93 < 0 goto label32;
+
+        if i93 <= i1 goto label33;
+
+     label32:
+        i93 = i1;
+
+     label33:
+        $i98 = $r64[i93];
+
+        $i99 = $r64[i90];
+
+        $i100 = $i98 - $i99;
+
+        i94 = $i100;
+
+        $d29 = (double) $i100;
+
+        $i101 = i93 - i90;
+
+        $d30 = (double) $i101;
+
+        $d31 = $d30 * d3;
+
+        $d32 = 4.0 + $d31;
+
+        $b102 = $d29 cmpg $d32;
+
+        $i106 = (int) $b102;
+
+        if $i106 >= 0 goto label34;
+
+        i94 = i96;
+
+        i93 = i95;
+
+        goto label35;
+
+     label34:
+        goto label31;
+
+     label35:
+        i103 = i93;
+
+        $i104 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i104 <= 2 goto label36;
+
+        $r22 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r77 = new java.lang.StringBuilder;
+
+        specialinvoke $r77.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bulge at ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i90);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $i40 = i93 - i90;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i40);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] of ");
+
+        $d6 = (double) i94;
+
+        $i41 = i93 - i90;
+
+        $d4 = (double) $i41;
+
+        $d5 = $d16 * $d4;
+
+        $d9 = $d6 - $d5;
+
+        $i42 = i93 - i90;
+
+        $d7 = (double) $i42;
+
+        $d8 = $d16 * $d7;
+
+        $r28 = staticinvoke <com.sun.java.util.jar.pack.CodingChooser: java.lang.String pct(double,double)>($d9, $d8);
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r30);
+
+        $r31 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r31.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>("{ //BEGIN");
+
+     label36:
+        $r11 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r10 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i24 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i27 = $i24 + i90;
+
+        $i25 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i26 = $i25 + i93;
+
+        $r12 = virtualinvoke $r11.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding)>($r10, $i27, $i26, r1);
+
+        if $r12 != r1 goto label37;
+
+        r69 = r1;
+
+        r70 = r1;
+
+        goto label38;
+
+     label37:
+        $r14 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r13 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i30 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i28 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i29 = $i28 + i90;
+
+        r69 = virtualinvoke $r14.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding)>($r13, $i30, $i29, r1);
+
+        $r16 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser runHelper>;
+
+        $r15 = r0.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i31 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i34 = $i31 + i93;
+
+        $i32 = r0.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        $i33 = $i32 + i1;
+
+        r70 = virtualinvoke $r16.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding)>($r15, $i34, $i33, r1);
+
+     label38:
+        $i35 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i35 <= 2 goto label39;
+
+        $r20 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r20.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>("} //END");
+
+     label39:
+        if r69 != $r12 goto label40;
+
+        if i90 <= 0 goto label40;
+
+        $z2 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: boolean isCodableLength(int)>(i93);
+
+        if $z2 == 0 goto label40;
+
+        i90 = 0;
+
+     label40:
+        if $r12 != r70 goto label41;
+
+        if i93 >= i1 goto label41;
+
+        i93 = i1;
+
+     label41:
+        if r69 != r1 goto label42;
+
+        if $r12 != r1 goto label42;
+
+        if r70 == r1 goto label46;
+
+     label42:
+        i105 = 0;
+
+        if i93 != i1 goto label43;
+
+        r71 = $r12;
+
+        goto label44;
+
+     label43:
+        $r78 = new com.sun.java.util.jar.pack.AdaptiveCoding;
+
+        $i36 = i93 - i90;
+
+        specialinvoke $r78.<com.sun.java.util.jar.pack.AdaptiveCoding: void <init>(int,com.sun.java.util.jar.pack.CodingMethod,com.sun.java.util.jar.pack.CodingMethod)>($i36, $r12, r70);
+
+        r71 = $r78;
+
+        i105 = 4;
+
+     label44:
+        if i90 <= 0 goto label45;
+
+        $r79 = new com.sun.java.util.jar.pack.AdaptiveCoding;
+
+        specialinvoke $r79.<com.sun.java.util.jar.pack.AdaptiveCoding: void <init>(int,com.sun.java.util.jar.pack.CodingMethod,com.sun.java.util.jar.pack.CodingMethod)>(i90, r69, r71);
+
+        r71 = $r79;
+
+        i105 = i105 + 4;
+
+     label45:
+        $r18 = specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: int[] computeSizePrivate(com.sun.java.util.jar.pack.CodingMethod)>(r71);
+
+        $i39 = $r18[0];
+
+        $i37 = $r18[1];
+
+        $i38 = $i37 + i105;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: boolean noteSizes(com.sun.java.util.jar.pack.CodingMethod,int,int)>(r71, $i39, $i38);
+
+     label46:
+        i90 = i103;
+
+        goto label48;
+
+     label47:
+        $i108 = (int) -1;
+
+        i91 = i91 + $i108;
+
+        goto label29;
+
+     label48:
+        i89 = i90 + 1;
+
+        goto label27;
+
+     label49:
+        $i11 = r0.<com.sun.java.util.jar.pack.CodingChooser: int verbose>;
+
+        if $i11 <= 3 goto label50;
+
+        $i12 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        if $i12 >= i0 goto label50;
+
+        $r6 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r80 = new java.lang.StringBuilder;
+
+        specialinvoke $r80.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> RUN WINS BY ");
+
+        $i13 = r0.<com.sun.java.util.jar.pack.CodingChooser: int bestZipSize>;
+
+        $i14 = i0 - $i13;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r9);
+
+     label50:
+        return;
+    }
+
+    private static java.lang.String pct(double, double)
+    {
+        long $l0;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+        double d0, d1, $d2, $d3, $d4, $d5;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $d2 = d0 / d1;
+
+        $d3 = $d2 * 10000.0;
+
+        $l0 = staticinvoke <java.lang.Math: long round(double)>($d3);
+
+        $d4 = (double) $l0;
+
+        $d5 = $d4 / 100.0;
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d5);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("%");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private void resetData()
+    {
+        java.io.ByteArrayOutputStream $r2, $r6;
+        java.io.IOException $r7;
+        java.util.zip.Deflater $r1;
+        java.lang.RuntimeException $r8;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r3, $r4, $r5;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void flushData()>();
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.Deflater zipDef>;
+
+        virtualinvoke $r1.<java.util.zip.Deflater: void reset()>();
+
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.io.ByteArrayOutputStream context>;
+
+        if $r2 == null goto label4;
+
+     label1:
+        $r6 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.io.ByteArrayOutputStream context>;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer>;
+
+        virtualinvoke $r6.<java.io.ByteArrayOutputStream: void writeTo(java.io.OutputStream)>($r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label4:
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer zipSizer>;
+
+        virtualinvoke $r3.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void reset()>();
+
+        $r4 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer>;
+
+        virtualinvoke $r4.<com.sun.java.util.jar.pack.CodingChooser$Sizer: void reset()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void flushData()
+    {
+        java.io.IOException $r2;
+        java.lang.RuntimeException $r3;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        java.util.zip.DeflaterOutputStream $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+     label1:
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.zip.DeflaterOutputStream zipOut>;
+
+        virtualinvoke $r1.<java.util.zip.DeflaterOutputStream: void finish()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private int getByteSize()
+    {
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer byteSizer>;
+
+        $i0 = virtualinvoke $r1.<com.sun.java.util.jar.pack.CodingChooser$Sizer: int getSize()>();
+
+        return $i0;
+    }
+
+    private int getZipSize()
+    {
+        int $i0;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        com.sun.java.util.jar.pack.CodingChooser$Sizer $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.CodingChooser: void flushData()>();
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingChooser$Sizer zipSizer>;
+
+        $i0 = virtualinvoke $r1.<com.sun.java.util.jar.pack.CodingChooser$Sizer: int getSize()>();
+
+        return $i0;
+    }
+
+    void addStressSeed(int)
+    {
+        java.util.Random $r1, $r2, $r3;
+        long $l1, $l3, $l4, $l5;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int i0, $i2;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $l1 = (long) i0;
+
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i2 = virtualinvoke $r2.<java.util.Random: int nextInt()>();
+
+        $l3 = (long) $i2;
+
+        $l4 = $l3 << 32;
+
+        $l5 = $l1 + $l4;
+
+        virtualinvoke $r3.<java.util.Random: void setSeed(long)>($l5);
+
+        return;
+    }
+
+    private com.sun.java.util.jar.pack.CodingMethod stressPopCoding(com.sun.java.util.jar.pack.CodingMethod)
+    {
+        java.lang.Integer $r15, $r19, $r22, $r24;
+        java.lang.AssertionError $r26;
+        java.util.ArrayList $r5;
+        com.sun.java.util.jar.pack.Histogram $r4;
+        int[][] $r7;
+        java.util.Random $r6, $r8, $r12, $r18, $r25;
+        com.sun.java.util.jar.pack.CodingChooser r3;
+        int[] $r21, $r23, r27, $r28, r29;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.java.util.jar.pack.CodingMethod r0, $r10;
+        java.util.List $r16, $r17;
+        java.util.HashSet $r20;
+        com.sun.java.util.jar.pack.Coding $r1, $r2, $r11, $r13;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, i30, i31, i32, i33, $i34, $i35, $i36, i37, i38, i39, i40, i41, i42;
+        com.sun.java.util.jar.pack.PopulationCoding $r9;
+        java.lang.Object $r14;
+
+        r3 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $r25 = r3.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r25 != null goto label01;
+
+        $r26 = new java.lang.AssertionError;
+
+        specialinvoke $r26.<java.lang.AssertionError: void <init>()>();
+
+        throw $r26;
+
+     label01:
+        $z1 = r0 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z1 != 0 goto label02;
+
+        return r0;
+
+     label02:
+        $r1 = (com.sun.java.util.jar.pack.Coding) r0;
+
+        $r2 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding getValueCoding()>();
+
+        $r4 = virtualinvoke r3.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Histogram getValueHistogram()>();
+
+        $i0 = virtualinvoke $r4.<com.sun.java.util.jar.pack.Histogram: int getTotalLength()>();
+
+        $i1 = specialinvoke r3.<com.sun.java.util.jar.pack.CodingChooser: int stressLen(int)>($i0);
+
+        if $i1 != 0 goto label03;
+
+        return r0;
+
+     label03:
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = r3.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $z2 = virtualinvoke $r6.<java.util.Random: boolean nextBoolean()>();
+
+        if $z2 == 0 goto label07;
+
+        $r20 = new java.util.HashSet;
+
+        specialinvoke $r20.<java.util.HashSet: void <init>()>();
+
+        i30 = r3.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+     label04:
+        $i27 = r3.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        if i30 >= $i27 goto label06;
+
+        $r21 = r3.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i28 = $r21[i30];
+
+        $r22 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i28);
+
+        $z3 = interfaceinvoke $r20.<java.util.Set: boolean add(java.lang.Object)>($r22);
+
+        if $z3 == 0 goto label05;
+
+        $r23 = r3.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $i29 = $r23[i30];
+
+        $r24 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i29);
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r24);
+
+     label05:
+        i30 = i30 + 1;
+
+        goto label04;
+
+     label06:
+        goto label11;
+
+     label07:
+        $r7 = virtualinvoke $r4.<com.sun.java.util.jar.pack.Histogram: int[][] getMatrix()>();
+
+        i31 = 0;
+
+     label08:
+        $i2 = lengthof $r7;
+
+        if i31 >= $i2 goto label11;
+
+        r27 = $r7[i31];
+
+        i32 = 1;
+
+     label09:
+        $i25 = lengthof r27;
+
+        if i32 >= $i25 goto label10;
+
+        $i26 = r27[i32];
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i26);
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r19);
+
+        i32 = i32 + 1;
+
+        goto label09;
+
+     label10:
+        i31 = i31 + 1;
+
+        goto label08;
+
+     label11:
+        $r8 = r3.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i3 = virtualinvoke $r8.<java.util.Random: int nextInt()>();
+
+        i33 = $i3;
+
+        $i4 = $i3 & 7;
+
+        if $i4 > 2 goto label12;
+
+        $r18 = r3.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        staticinvoke <java.util.Collections: void shuffle(java.util.List,java.util.Random)>($r5, $r18);
+
+        goto label15;
+
+     label12:
+        $i5 = $i3 >>> 3;
+
+        $i6 = $i5 & 7;
+
+        if $i6 > 2 goto label13;
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r5);
+
+     label13:
+        $i7 = $i5 >>> 3;
+
+        $i8 = $i7 & 7;
+
+        if $i8 > 2 goto label14;
+
+        staticinvoke <java.util.Collections: void reverse(java.util.List)>($r5);
+
+     label14:
+        $i9 = $i7 >>> 3;
+
+        i33 = $i9;
+
+        $i10 = $i9 & 7;
+
+        if $i10 > 2 goto label15;
+
+        $i23 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i24 = specialinvoke r3.<com.sun.java.util.jar.pack.CodingChooser: int stressLen(int)>($i23);
+
+        staticinvoke <java.util.Collections: void rotate(java.util.List,int)>($r5, $i24);
+
+     label15:
+        $i34 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        if $i34 <= $i1 goto label17;
+
+        $i18 = i33 >>> 3;
+
+        $i19 = $i18 & 7;
+
+        if $i19 > 2 goto label16;
+
+        $i22 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $r17 = interfaceinvoke $r5.<java.util.List: java.util.List subList(int,int)>($i1, $i22);
+
+        interfaceinvoke $r17.<java.util.List: void clear()>();
+
+        goto label17;
+
+     label16:
+        $i20 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i21 = $i20 - $i1;
+
+        $r16 = interfaceinvoke $r5.<java.util.List: java.util.List subList(int,int)>(0, $i21);
+
+        interfaceinvoke $r16.<java.util.List: void clear()>();
+
+     label17:
+        $i35 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i36 = 1 + $i35;
+
+        $r28 = newarray (int)[$i36];
+
+        i37 = 0;
+
+     label18:
+        if i37 >= $i35 goto label19;
+
+        $i16 = 1 + i37;
+
+        $r14 = interfaceinvoke $r5.<java.util.List: java.lang.Object get(int)>(i37);
+
+        $r15 = (java.lang.Integer) $r14;
+
+        $i17 = virtualinvoke $r15.<java.lang.Integer: int intValue()>();
+
+        $r28[$i16] = $i17;
+
+        i37 = i37 + 1;
+
+        goto label18;
+
+     label19:
+        $r9 = new com.sun.java.util.jar.pack.PopulationCoding;
+
+        specialinvoke $r9.<com.sun.java.util.jar.pack.PopulationCoding: void <init>()>();
+
+        virtualinvoke $r9.<com.sun.java.util.jar.pack.PopulationCoding: void setFavoredValues(int[],int)>($r28, $i35);
+
+        r29 = <com.sun.java.util.jar.pack.PopulationCoding: int[] LValuesCoded>;
+
+        i38 = 0;
+
+     label20:
+        $i11 = lengthof r29;
+
+        $i12 = $i11 / 2;
+
+        if i38 >= $i12 goto label23;
+
+        $r12 = r3.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i14 = lengthof r29;
+
+        $i15 = virtualinvoke $r12.<java.util.Random: int nextInt(int)>($i14);
+
+        i39 = r29[$i15];
+
+        if i39 >= 0 goto label21;
+
+        goto label22;
+
+     label21:
+        $r13 = staticinvoke <com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.Coding fitTokenCoding(int,int)>($i35, i39);
+
+        if $r13 == null goto label22;
+
+        virtualinvoke $r9.<com.sun.java.util.jar.pack.PopulationCoding: void setL(int)>(i39);
+
+        goto label23;
+
+     label22:
+        i38 = i38 + 1;
+
+        goto label20;
+
+     label23:
+        $r10 = $r9.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding>;
+
+        if $r10 != null goto label28;
+
+        i40 = $r28[1];
+
+        i41 = i40;
+
+        i42 = 2;
+
+     label24:
+        if i42 > $i35 goto label27;
+
+        i13 = $r28[i42];
+
+        if i40 <= i13 goto label25;
+
+        i40 = i13;
+
+     label25:
+        if i41 >= i13 goto label26;
+
+        i41 = i13;
+
+     label26:
+        i42 = i42 + 1;
+
+        goto label24;
+
+     label27:
+        $r11 = specialinvoke r3.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.Coding stressCoding(int,int)>(i40, i41);
+
+        $r9.<com.sun.java.util.jar.pack.PopulationCoding: com.sun.java.util.jar.pack.CodingMethod tokenCoding> = $r11;
+
+     label28:
+        specialinvoke r3.<com.sun.java.util.jar.pack.CodingChooser: int[] computePopSizePrivate(com.sun.java.util.jar.pack.PopulationCoding,com.sun.java.util.jar.pack.Coding,com.sun.java.util.jar.pack.Coding)>($r9, $r2, $r2);
+
+        return $r9;
+    }
+
+    private com.sun.java.util.jar.pack.CodingMethod stressAdaptiveCoding(com.sun.java.util.jar.pack.CodingMethod)
+    {
+        com.sun.java.util.jar.pack.AdaptiveCoding $r22;
+        java.util.Random $r5, $r13;
+        com.sun.java.util.jar.pack.CodingChooser r2;
+        int[] $r3, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.java.util.jar.pack.CodingMethod r0, $r6, r16;
+        java.lang.Throwable $r15;
+        java.lang.AssertionError $r17, $r18, $r19, $r20, $r21;
+        com.sun.java.util.jar.pack.Coding r1;
+        int $i0, $i1, i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i16, i17, i18, i19, $i20, $i21, $i22, i23, $i25, $i27, $i29;
+        java.lang.Object $r4;
+
+        r2 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.CodingMethod;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $r13 = r2.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r13 != null goto label01;
+
+        $r17 = new java.lang.AssertionError;
+
+        specialinvoke $r17.<java.lang.AssertionError: void <init>()>();
+
+        throw $r17;
+
+     label01:
+        $z1 = r0 instanceof com.sun.java.util.jar.pack.Coding;
+
+        if $z1 != 0 goto label02;
+
+        return r0;
+
+     label02:
+        r1 = (com.sun.java.util.jar.pack.Coding) r0;
+
+        $i1 = r2.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $i0 = r2.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+        i2 = $i1 - $i0;
+
+        if i2 >= 2 goto label03;
+
+        return r0;
+
+     label03:
+        $i3 = i2 - 1;
+
+        $i4 = specialinvoke r2.<com.sun.java.util.jar.pack.CodingChooser: int stressLen(int)>($i3);
+
+        i5 = $i4 + 1;
+
+        if i5 != i2 goto label04;
+
+        return r0;
+
+     label04:
+        $z2 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label05;
+
+        $z7 = r2.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding>;
+
+        if $z7 == 0 goto label05;
+
+        $r18 = new java.lang.AssertionError;
+
+        specialinvoke $r18.<java.lang.AssertionError: void <init>()>();
+
+        throw $r18;
+
+     label05:
+        r2.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = 1;
+
+        $r3 = r2.<com.sun.java.util.jar.pack.CodingChooser: int[] values>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r11 = (int[]) $r4;
+
+        r16 = null;
+
+        i14 = r2.<com.sun.java.util.jar.pack.CodingChooser: int end>;
+
+        $i13 = r2.<com.sun.java.util.jar.pack.CodingChooser: int start>;
+
+     label06:
+        if i14 <= $i13 goto label23;
+
+        $i6 = i14 - $i13;
+
+        if $i6 >= 100 goto label07;
+
+        $i25 = (int) -1;
+
+        $i15 = $i25;
+
+        goto label08;
+
+     label07:
+        $r5 = r2.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i15 = virtualinvoke $r5.<java.util.Random: int nextInt()>();
+
+     label08:
+        $i7 = $i15 & 7;
+
+        if $i7 == 0 goto label11;
+
+        if i5 != 1 goto label09;
+
+        $i16 = i5;
+
+        goto label10;
+
+     label09:
+        $i11 = i5 - 1;
+
+        $i12 = specialinvoke r2.<com.sun.java.util.jar.pack.CodingChooser: int stressLen(int)>($i11);
+
+        $i16 = $i12 + 1;
+
+     label10:
+        i17 = $i16;
+
+        goto label16;
+
+     label11:
+        $i8 = $i15 >>> 3;
+
+        i18 = $i8 & 3;
+
+        $i9 = $i8 >>> 3;
+
+        i19 = $i9 & 255;
+
+     label12:
+        $i20 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: int decodeK(int,int)>(i18, i19);
+
+        i17 = $i20;
+
+        $i21 = i14 - $i13;
+
+        if $i20 > $i21 goto label13;
+
+        goto label15;
+
+     label13:
+        if i19 == 3 goto label14;
+
+        i19 = 3;
+
+        goto label12;
+
+     label14:
+        $i27 = (int) -1;
+
+        i18 = i18 + $i27;
+
+        goto label12;
+
+     label15:
+        $z3 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label16;
+
+        $z6 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: boolean isCodableLength(int)>($i20);
+
+        if $z6 != 0 goto label16;
+
+        $r19 = new java.lang.AssertionError;
+
+        specialinvoke $r19.<java.lang.AssertionError: void <init>()>();
+
+        throw $r19;
+
+     label16:
+        $i22 = i14 - $i13;
+
+        if i17 <= $i22 goto label17;
+
+        i17 = i14 - $i13;
+
+     label17:
+        $z8 = staticinvoke <com.sun.java.util.jar.pack.AdaptiveCoding: boolean isCodableLength(int)>(i17);
+
+        if $z8 != 0 goto label18;
+
+        $i29 = (int) -1;
+
+        i17 = i17 + $i29;
+
+        goto label17;
+
+     label18:
+        i23 = i14 - i17;
+
+        $z4 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label19;
+
+        if i23 < i14 goto label19;
+
+        $r20 = new java.lang.AssertionError;
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>()>();
+
+        throw $r20;
+
+     label19:
+        $z5 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label20;
+
+        if i23 >= $i13 goto label20;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label20:
+        $r6 = virtualinvoke r2.<com.sun.java.util.jar.pack.CodingChooser: com.sun.java.util.jar.pack.CodingMethod choose(int[],int,int,com.sun.java.util.jar.pack.Coding)>($r11, i23, i14, r1);
+
+        if r16 != null goto label21;
+
+        r16 = $r6;
+
+        goto label22;
+
+     label21:
+        $r22 = new com.sun.java.util.jar.pack.AdaptiveCoding;
+
+        $i10 = i14 - i23;
+
+        specialinvoke $r22.<com.sun.java.util.jar.pack.AdaptiveCoding: void <init>(int,com.sun.java.util.jar.pack.CodingMethod,com.sun.java.util.jar.pack.CodingMethod)>($i10, $r6, r16);
+
+        r16 = $r22;
+
+     label22:
+        i14 = i23;
+
+        goto label06;
+
+     label23:
+        r2.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = 0;
+
+        return r16;
+
+     label24:
+        $r15 := @caughtexception;
+
+     label25:
+        r2.<com.sun.java.util.jar.pack.CodingChooser: boolean disableRunCoding> = 0;
+
+        throw $r15;
+
+        catch java.lang.Throwable from label04 to label23 with label24;
+        catch java.lang.Throwable from label24 to label25 with label24;
+    }
+
+    private com.sun.java.util.jar.pack.Coding stressCoding(int, int)
+    {
+        java.util.Random $r2, $r3, $r4, $r7, $r10;
+        java.lang.AssertionError $r8;
+        com.sun.java.util.jar.pack.CodingChooser r1;
+        com.sun.java.util.jar.pack.Coding $r0, $r5, $r6, r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i9, i10;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        i7 := @parameter0: int;
+
+        i8 := @parameter1: int;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r1.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r7 != null goto label1;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label1:
+        i10 = 0;
+
+     label2:
+        if i10 >= 100 goto label7;
+
+        $r2 = r1.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i0 = virtualinvoke $r2.<java.util.Random: int nextInt(int)>(5);
+
+        $i1 = $i0 + 1;
+
+        $r3 = r1.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i2 = virtualinvoke $r3.<java.util.Random: int nextInt(int)>(256);
+
+        $i3 = $i2 + 1;
+
+        $r4 = r1.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i4 = virtualinvoke $r4.<java.util.Random: int nextInt(int)>(3);
+
+        $r5 = staticinvoke <com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding of(int,int,int)>($i1, $i3, $i4);
+
+        r9 = $r5;
+
+        $i5 = virtualinvoke $r5.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if $i5 != 1 goto label3;
+
+        r9 = virtualinvoke $r5.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setH(int)>(256);
+
+     label3:
+        $i6 = virtualinvoke r9.<com.sun.java.util.jar.pack.Coding: int H()>();
+
+        if $i6 != 256 goto label4;
+
+        $i9 = virtualinvoke r9.<com.sun.java.util.jar.pack.Coding: int B()>();
+
+        if $i9 < 5 goto label4;
+
+        r9 = virtualinvoke r9.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setB(int)>(4);
+
+     label4:
+        $r10 = r1.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $z3 = virtualinvoke $r10.<java.util.Random: boolean nextBoolean()>();
+
+        if $z3 == 0 goto label5;
+
+        $r6 = virtualinvoke r9.<com.sun.java.util.jar.pack.Coding: com.sun.java.util.jar.pack.Coding setD(int)>(1);
+
+        $z2 = virtualinvoke $r6.<com.sun.java.util.jar.pack.Coding: boolean canRepresent(int,int)>(i7, i8);
+
+        if $z2 == 0 goto label5;
+
+        return $r6;
+
+     label5:
+        $z1 = virtualinvoke r9.<com.sun.java.util.jar.pack.Coding: boolean canRepresent(int,int)>(i7, i8);
+
+        if $z1 == 0 goto label6;
+
+        return r9;
+
+     label6:
+        i10 = i10 + 1;
+
+        goto label2;
+
+     label7:
+        $r0 = <com.sun.java.util.jar.pack.BandStructure: com.sun.java.util.jar.pack.Coding UNSIGNED5>;
+
+        return $r0;
+    }
+
+    private int stressLen(int)
+    {
+        java.util.Random $r1, $r2, $r4;
+        java.lang.AssertionError $r3, $r5;
+        com.sun.java.util.jar.pack.CodingChooser r0;
+        int $i0, i1, $i2, $i3, $i4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.java.util.jar.pack.CodingChooser;
+
+        i1 := @parameter0: int;
+
+        $z0 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        if $r4 != null goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $z1 = <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if i1 >= 0 goto label2;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r1 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i0 = virtualinvoke $r1.<java.util.Random: int nextInt(int)>(100);
+
+        if $i0 >= 20 goto label3;
+
+        $i3 = i1 / 5;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i0);
+
+        return $i4;
+
+     label3:
+        if $i0 >= 40 goto label4;
+
+        return i1;
+
+     label4:
+        $r2 = r0.<com.sun.java.util.jar.pack.CodingChooser: java.util.Random stress>;
+
+        $i2 = virtualinvoke $r2.<java.util.Random: int nextInt(int)>(i1);
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int ZIP_SIZE> = 1;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int BYTE_SIZE> = 0;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int RUN_EFFORT> = 3;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int POP_EFFORT> = 4;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int MAX_EFFORT> = 9;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int MID_EFFORT> = 5;
+
+        <com.sun.java.util.jar.pack.CodingChooser: int MIN_EFFORT> = 1;
+
+        $r0 = class "Lcom/sun/java/util/jar/pack/CodingChooser;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.java.util.jar.pack.CodingChooser: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

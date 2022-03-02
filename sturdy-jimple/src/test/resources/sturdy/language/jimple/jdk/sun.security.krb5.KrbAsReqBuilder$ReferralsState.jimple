@@ -1,0 +1,329 @@
+final class sun.security.krb5.KrbAsReqBuilder$ReferralsState extends java.lang.Object
+{
+    private static boolean canonicalizeConfig;
+    private boolean enabled;
+    private boolean sendCanonicalize;
+    private boolean isEnterpriseCname;
+    private int count;
+    private boolean refreshComm;
+    private sun.security.krb5.KrbAsReqBuilder reqBuilder;
+
+    static void initStatic()
+    {
+        java.lang.String[] $r1;
+        sun.security.krb5.KrbException $r4;
+        java.lang.Boolean $r2, $r3, $r8;
+        java.lang.String $r11, $r13;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r6;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r12;
+        sun.security.krb5.Config $r0;
+
+        <sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean canonicalizeConfig> = 0;
+
+     label1:
+        $r0 = staticinvoke <sun.security.krb5.Config: sun.security.krb5.Config getInstance()>();
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r1[0] = "libdefaults";
+
+        $r1[1] = "canonicalize";
+
+        $r2 = virtualinvoke $r0.<sun.security.krb5.Config: java.lang.Boolean getBooleanObject(java.lang.String[])>($r1);
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r2 != $r3 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        <sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean canonicalizeConfig> = $z2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z0 == 0 goto label6;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception in getting canonicalize, using default value ");
+
+        $z1 = <sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean canonicalizeConfig>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r11 = virtualinvoke $r4.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label6:
+        return;
+
+        catch sun.security.krb5.KrbException from label1 to label4 with label5;
+    }
+
+    void <init>(sun.security.krb5.KrbAsReqBuilder) throws sun.security.krb5.KrbException
+    {
+        sun.security.krb5.PrincipalName $r2;
+        sun.security.krb5.KrbAsReqBuilder r1;
+        sun.security.krb5.KrbException $r3;
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        r1 := @parameter0: sun.security.krb5.KrbAsReqBuilder;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: sun.security.krb5.KrbAsReqBuilder reqBuilder> = r1;
+
+        $z0 = <sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean canonicalizeConfig>;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize> = $z0;
+
+        $r2 = staticinvoke <sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName access$000(sun.security.krb5.KrbAsReqBuilder)>(r1);
+
+        $i0 = virtualinvoke $r2.<sun.security.krb5.PrincipalName: int getNameType()>();
+
+        if $i0 != 10 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean isEnterpriseCname> = $z3;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: void updateStatus()>();
+
+        $z1 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean enabled>;
+
+        if $z1 != 0 goto label3;
+
+        $z2 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean isEnterpriseCname>;
+
+        if $z2 == 0 goto label3;
+
+        $r3 = new sun.security.krb5.KrbException;
+
+        specialinvoke $r3.<sun.security.krb5.KrbException: void <init>(java.lang.String)>("NT-ENTERPRISE principals only allowed when referrals are enabled.");
+
+        throw $r3;
+
+     label3:
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean refreshComm> = 1;
+
+        return;
+    }
+
+    private void updateStatus()
+    {
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        $z0 = <sun.security.krb5.Config: boolean DISABLE_REFERRALS>;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean isEnterpriseCname>;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize>;
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean enabled> = $z3;
+
+        return;
+    }
+
+    boolean handleError(sun.security.krb5.KrbException) throws sun.security.krb5.RealmException
+    {
+        sun.security.krb5.PrincipalName $r6, $r9, $r11;
+        java.lang.String[] $r12;
+        sun.security.krb5.KrbException r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r5;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.PrintStream $r2;
+        sun.security.krb5.internal.KRBError $r3;
+        sun.security.krb5.KrbAsReqBuilder $r7, $r8, $r10;
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        sun.security.krb5.Realm $r4;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        r1 := @parameter0: sun.security.krb5.KrbException;
+
+        $z0 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean enabled>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = virtualinvoke r1.<sun.security.krb5.KrbException: int returnCode()>();
+
+        if $i0 != 68 goto label1;
+
+        $r3 = virtualinvoke r1.<sun.security.krb5.KrbException: sun.security.krb5.internal.KRBError getError()>();
+
+        $r4 = virtualinvoke $r3.<sun.security.krb5.internal.KRBError: sun.security.krb5.Realm getClientRealm()>();
+
+        if $r4 == null goto label1;
+
+        $r5 = virtualinvoke $r4.<sun.security.krb5.Realm: java.lang.String toString()>();
+
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $i2 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: int count>;
+
+        $i1 = <sun.security.krb5.Config: int MAX_REFERRALS>;
+
+        if $i2 >= $i1 goto label1;
+
+        $r8 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: sun.security.krb5.KrbAsReqBuilder reqBuilder>;
+
+        $r6 = new sun.security.krb5.PrincipalName;
+
+        $r7 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: sun.security.krb5.KrbAsReqBuilder reqBuilder>;
+
+        $r9 = staticinvoke <sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName access$000(sun.security.krb5.KrbAsReqBuilder)>($r7);
+
+        $i3 = virtualinvoke $r9.<sun.security.krb5.PrincipalName: int getNameType()>();
+
+        $r10 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: sun.security.krb5.KrbAsReqBuilder reqBuilder>;
+
+        $r11 = staticinvoke <sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName access$000(sun.security.krb5.KrbAsReqBuilder)>($r10);
+
+        $r12 = virtualinvoke $r11.<sun.security.krb5.PrincipalName: java.lang.String[] getNameStrings()>();
+
+        specialinvoke $r6.<sun.security.krb5.PrincipalName: void <init>(int,java.lang.String[],sun.security.krb5.Realm)>($i3, $r12, $r4);
+
+        staticinvoke <sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName access$002(sun.security.krb5.KrbAsReqBuilder,sun.security.krb5.PrincipalName)>($r8, $r6);
+
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean refreshComm> = 1;
+
+        $i4 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: int count>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: int count> = $i5;
+
+        return 1;
+
+     label1:
+        $i6 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: int count>;
+
+        $i7 = <sun.security.krb5.Config: int MAX_REFERRALS>;
+
+        if $i6 >= $i7 goto label3;
+
+        $z1 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z2 == 0 goto label2;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("KrbAsReqBuilder: AS-REQ failed. Retrying with CANONICALIZE false.");
+
+     label2:
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize> = 0;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: void updateStatus()>();
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    boolean refreshComm()
+    {
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        boolean z0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        z0 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean refreshComm>;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean refreshComm> = 0;
+
+        return z0;
+    }
+
+    boolean isEnabled()
+    {
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        $z0 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean enabled>;
+
+        return $z0;
+    }
+
+    boolean sendCanonicalize()
+    {
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        $z0 = r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        staticinvoke <sun.security.krb5.KrbAsReqBuilder$ReferralsState: void initStatic()>();
+
+        return;
+    }
+}

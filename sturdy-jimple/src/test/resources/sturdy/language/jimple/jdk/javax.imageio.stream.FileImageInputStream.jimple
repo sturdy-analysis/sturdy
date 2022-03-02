@@ -1,0 +1,265 @@
+public class javax.imageio.stream.FileImageInputStream extends javax.imageio.stream.ImageInputStreamImpl
+{
+    private java.io.RandomAccessFile raf;
+    private final java.lang.Object disposerReferent;
+    private final com.sun.imageio.stream.CloseableDisposerRecord disposerRecord;
+
+    public void <init>(java.io.File) throws java.io.FileNotFoundException, java.io.IOException
+    {
+        java.io.RandomAccessFile $r2;
+        javax.imageio.stream.FileImageInputStream r0;
+        java.io.File r1;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        r1 := @parameter0: java.io.File;
+
+        if r1 != null goto label1;
+
+        $r2 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.io.RandomAccessFile;
+
+        specialinvoke $r2.<java.io.RandomAccessFile: void <init>(java.io.File,java.lang.String)>(r1, "r");
+
+     label2:
+        specialinvoke r0.<javax.imageio.stream.FileImageInputStream: void <init>(java.io.RandomAccessFile)>($r2);
+
+        return;
+    }
+
+    public void <init>(java.io.RandomAccessFile)
+    {
+        java.io.RandomAccessFile r1;
+        com.sun.imageio.stream.CloseableDisposerRecord $r2, $r6;
+        java.lang.IllegalArgumentException $r8;
+        javax.imageio.stream.FileImageInputStream r0;
+        com.sun.imageio.stream.StreamFinalizer $r4;
+        java.lang.Class $r3;
+        java.lang.Object $r5, $r7;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        r1 := @parameter0: java.io.RandomAccessFile;
+
+        specialinvoke r0.<javax.imageio.stream.ImageInputStreamImpl: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("raf == null!");
+
+        throw $r8;
+
+     label1:
+        r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf> = r1;
+
+        $r2 = new com.sun.imageio.stream.CloseableDisposerRecord;
+
+        specialinvoke $r2.<com.sun.imageio.stream.CloseableDisposerRecord: void <init>(java.io.Closeable)>(r1);
+
+        r0.<javax.imageio.stream.FileImageInputStream: com.sun.imageio.stream.CloseableDisposerRecord disposerRecord> = $r2;
+
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r3 != class "Ljavax/imageio/stream/FileImageInputStream;" goto label2;
+
+        $r5 = new java.lang.Object;
+
+        specialinvoke $r5.<java.lang.Object: void <init>()>();
+
+        r0.<javax.imageio.stream.FileImageInputStream: java.lang.Object disposerReferent> = $r5;
+
+        $r7 = r0.<javax.imageio.stream.FileImageInputStream: java.lang.Object disposerReferent>;
+
+        $r6 = r0.<javax.imageio.stream.FileImageInputStream: com.sun.imageio.stream.CloseableDisposerRecord disposerRecord>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r7, $r6);
+
+        goto label3;
+
+     label2:
+        $r4 = new com.sun.imageio.stream.StreamFinalizer;
+
+        specialinvoke $r4.<com.sun.imageio.stream.StreamFinalizer: void <init>(javax.imageio.stream.ImageInputStream)>(r0);
+
+        r0.<javax.imageio.stream.FileImageInputStream: java.lang.Object disposerReferent> = $r4;
+
+     label3:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r1;
+        int $i0, $i4;
+        long $l1, $l2;
+        javax.imageio.stream.FileImageInputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        virtualinvoke r0.<javax.imageio.stream.FileImageInputStream: void checkClosed()>();
+
+        r0.<javax.imageio.stream.FileImageInputStream: int bitOffset> = 0;
+
+        $r1 = r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf>;
+
+        $i0 = virtualinvoke $r1.<java.io.RandomAccessFile: int read()>();
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label1;
+
+        $l1 = r0.<javax.imageio.stream.FileImageInputStream: long streamPos>;
+
+        $l2 = $l1 + 1L;
+
+        r0.<javax.imageio.stream.FileImageInputStream: long streamPos> = $l2;
+
+     label1:
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.RandomAccessFile $r2;
+        long $l3, $l4, $l5;
+        javax.imageio.stream.FileImageInputStream r0;
+        int i0, i1, $i2, $i7;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.imageio.stream.FileImageInputStream: void checkClosed()>();
+
+        r0.<javax.imageio.stream.FileImageInputStream: int bitOffset> = 0;
+
+        $r2 = r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf>;
+
+        $i2 = virtualinvoke $r2.<java.io.RandomAccessFile: int read(byte[],int,int)>(r1, i0, i1);
+
+        $i7 = (int) -1;
+
+        if $i2 == $i7 goto label1;
+
+        $l4 = r0.<javax.imageio.stream.FileImageInputStream: long streamPos>;
+
+        $l3 = (long) $i2;
+
+        $l5 = $l4 + $l3;
+
+        r0.<javax.imageio.stream.FileImageInputStream: long streamPos> = $l5;
+
+     label1:
+        return $i2;
+    }
+
+    public long length()
+    {
+        java.io.RandomAccessFile $r1;
+        long $l0;
+        java.io.IOException $r2;
+        javax.imageio.stream.FileImageInputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+     label1:
+        virtualinvoke r0.<javax.imageio.stream.FileImageInputStream: void checkClosed()>();
+
+        $r1 = r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf>;
+
+        $l0 = virtualinvoke $r1.<java.io.RandomAccessFile: long length()>();
+
+     label2:
+        return $l0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return -1L;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void seek(long) throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r1, $r2;
+        java.lang.IndexOutOfBoundsException $r4;
+        long l0, $l1, $l3;
+        javax.imageio.stream.FileImageInputStream r0;
+        byte $b2;
+        int $i4;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        l0 := @parameter0: long;
+
+        virtualinvoke r0.<javax.imageio.stream.FileImageInputStream: void checkClosed()>();
+
+        $l1 = r0.<javax.imageio.stream.FileImageInputStream: long flushedPos>;
+
+        $b2 = l0 cmp $l1;
+
+        $i4 = (int) $b2;
+
+        if $i4 >= 0 goto label1;
+
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("pos < flushedPos!");
+
+        throw $r4;
+
+     label1:
+        r0.<javax.imageio.stream.FileImageInputStream: int bitOffset> = 0;
+
+        $r1 = r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf>;
+
+        virtualinvoke $r1.<java.io.RandomAccessFile: void seek(long)>(l0);
+
+        $r2 = r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf>;
+
+        $l3 = virtualinvoke $r2.<java.io.RandomAccessFile: long getFilePointer()>();
+
+        r0.<javax.imageio.stream.FileImageInputStream: long streamPos> = $l3;
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        com.sun.imageio.stream.CloseableDisposerRecord $r1;
+        javax.imageio.stream.FileImageInputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        specialinvoke r0.<javax.imageio.stream.ImageInputStreamImpl: void close()>();
+
+        $r1 = r0.<javax.imageio.stream.FileImageInputStream: com.sun.imageio.stream.CloseableDisposerRecord disposerRecord>;
+
+        virtualinvoke $r1.<com.sun.imageio.stream.CloseableDisposerRecord: void dispose()>();
+
+        r0.<javax.imageio.stream.FileImageInputStream: java.io.RandomAccessFile raf> = null;
+
+        return;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        javax.imageio.stream.FileImageInputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileImageInputStream;
+
+        return;
+    }
+}

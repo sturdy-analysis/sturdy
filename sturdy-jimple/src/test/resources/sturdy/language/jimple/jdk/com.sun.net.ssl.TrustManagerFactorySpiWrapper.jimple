@@ -1,0 +1,131 @@
+final class com.sun.net.ssl.TrustManagerFactorySpiWrapper extends com.sun.net.ssl.TrustManagerFactorySpi
+{
+    private javax.net.ssl.TrustManagerFactory theTrustManagerFactory;
+
+    void <init>(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        javax.net.ssl.TrustManagerFactory $r3;
+        com.sun.net.ssl.TrustManagerFactorySpiWrapper r0;
+        java.lang.String r1;
+        java.security.Provider r2;
+
+        r0 := @this: com.sun.net.ssl.TrustManagerFactorySpiWrapper;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.Provider;
+
+        specialinvoke r0.<com.sun.net.ssl.TrustManagerFactorySpi: void <init>()>();
+
+        $r3 = staticinvoke <javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManagerFactory getInstance(java.lang.String,java.security.Provider)>(r1, r2);
+
+        r0.<com.sun.net.ssl.TrustManagerFactorySpiWrapper: javax.net.ssl.TrustManagerFactory theTrustManagerFactory> = $r3;
+
+        return;
+    }
+
+    protected void engineInit(java.security.KeyStore) throws java.security.KeyStoreException
+    {
+        com.sun.net.ssl.TrustManagerFactorySpiWrapper r0;
+        java.security.KeyStore r1;
+        javax.net.ssl.TrustManagerFactory $r2;
+
+        r0 := @this: com.sun.net.ssl.TrustManagerFactorySpiWrapper;
+
+        r1 := @parameter0: java.security.KeyStore;
+
+        $r2 = r0.<com.sun.net.ssl.TrustManagerFactorySpiWrapper: javax.net.ssl.TrustManagerFactory theTrustManagerFactory>;
+
+        virtualinvoke $r2.<javax.net.ssl.TrustManagerFactory: void init(java.security.KeyStore)>(r1);
+
+        return;
+    }
+
+    protected com.sun.net.ssl.TrustManager[] engineGetTrustManagers()
+    {
+        java.lang.Object[] $r4;
+        com.sun.net.ssl.TrustManager $r8;
+        javax.net.ssl.TrustManager $r6, $r7, $r9, $r11;
+        com.sun.net.ssl.TrustManagerFactorySpiWrapper r0;
+        int $i0, $i1, i2, i3;
+        com.sun.net.ssl.TrustManager[] $r3, $r5, r13;
+        boolean $z0, $z1;
+        javax.net.ssl.TrustManagerFactory $r1;
+        javax.net.ssl.TrustManager[] $r2;
+        com.sun.net.ssl.X509TrustManagerComSunWrapper $r10;
+        javax.net.ssl.X509TrustManager $r12;
+
+        r0 := @this: com.sun.net.ssl.TrustManagerFactorySpiWrapper;
+
+        $r1 = r0.<com.sun.net.ssl.TrustManagerFactorySpiWrapper: javax.net.ssl.TrustManagerFactory theTrustManagerFactory>;
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManager[] getTrustManagers()>();
+
+        $i0 = lengthof $r2;
+
+        r13 = newarray (com.sun.net.ssl.TrustManager)[$i0];
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label4;
+
+        $r6 = $r2[i2];
+
+        $z0 = $r6 instanceof com.sun.net.ssl.TrustManager;
+
+        if $z0 != 0 goto label2;
+
+        $r9 = $r2[i2];
+
+        $z1 = $r9 instanceof javax.net.ssl.X509TrustManager;
+
+        if $z1 == 0 goto label3;
+
+        $r10 = new com.sun.net.ssl.X509TrustManagerComSunWrapper;
+
+        $r11 = $r2[i2];
+
+        $r12 = (javax.net.ssl.X509TrustManager) $r11;
+
+        specialinvoke $r10.<com.sun.net.ssl.X509TrustManagerComSunWrapper: void <init>(javax.net.ssl.X509TrustManager)>($r12);
+
+        r13[i3] = $r10;
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label2:
+        $r7 = $r2[i2];
+
+        $r8 = (com.sun.net.ssl.TrustManager) $r7;
+
+        r13[i3] = $r8;
+
+        i3 = i3 + 1;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label4:
+        if i3 == i2 goto label5;
+
+        $r3 = newarray (com.sun.net.ssl.TrustManager)[i3];
+
+        $r4 = staticinvoke <com.sun.net.ssl.SSLSecurity: java.lang.Object[] truncateArray(java.lang.Object[],java.lang.Object[])>(r13, $r3);
+
+        $r5 = (com.sun.net.ssl.TrustManager[]) $r4;
+
+        r13 = (com.sun.net.ssl.TrustManager[]) $r5;
+
+     label5:
+        return r13;
+    }
+}

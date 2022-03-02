@@ -1,0 +1,541 @@
+public class sun.security.krb5.internal.tools.Kinit extends java.lang.Object
+{
+    private sun.security.krb5.internal.tools.KinitOptions options;
+    private static final boolean DEBUG;
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] r1;
+        sun.security.krb5.internal.tools.Kinit $r22;
+        sun.security.krb5.KrbException $r14, $r18;
+        int $i1;
+        java.lang.String $r7, $r12, $r15, $r19, r21;
+        boolean $z0;
+        java.io.PrintStream $r4, $r9;
+        java.lang.Exception $r2;
+        java.lang.StringBuilder $r5, $r6, $r10, $r11, $r16, $r17, $r20, $r23, $r24, $r25;
+
+        r1 := @parameter0: java.lang.String[];
+
+     label1:
+        $r22 = new sun.security.krb5.internal.tools.Kinit;
+
+        specialinvoke $r22.<sun.security.krb5.internal.tools.Kinit: void <init>(java.lang.String[])>(r1);
+
+     label2:
+        goto label8;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $z0 = $r2 instanceof sun.security.krb5.KrbException;
+
+        if $z0 == 0 goto label4;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = (sun.security.krb5.KrbException) $r2;
+
+        $r15 = virtualinvoke $r14.<sun.security.krb5.KrbException: java.lang.String krbErrorMessage()>();
+
+        $r16 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r18 = (sun.security.krb5.KrbException) $r2;
+
+        $r19 = virtualinvoke $r18.<sun.security.krb5.KrbException: java.lang.String returnCodeMessage()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label5;
+
+     label4:
+        r21 = virtualinvoke $r2.<java.lang.Exception: java.lang.String getMessage()>();
+
+     label5:
+        if r21 == null goto label6;
+
+        $r9 = <java.lang.System: java.io.PrintStream err>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r21);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r12);
+
+        goto label7;
+
+     label6:
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+     label7:
+        virtualinvoke $r2.<java.lang.Exception: void printStackTrace()>();
+
+        $i1 = (int) -1;
+
+        staticinvoke <java.lang.System: void exit(int)>($i1);
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void <init>(java.lang.String[]) throws java.io.IOException, sun.security.krb5.RealmException, sun.security.krb5.KrbException
+    {
+        sun.security.krb5.internal.tools.Kinit r0;
+        java.lang.StringBuilder $r23, $r26, $r30, $r33, $r39, $r40, $r45, $r46, $r52, $r53, $r54, $r61, $r63, $r68, $r69, $r86, $r88, $r89, $r93, $r97, $r98, $r100;
+        short $s1, $s2;
+        java.lang.String $r8, $r15, $r25, $r27, $r32, $r34, $r41, $r47, $r55, $r64, $r70, r73, $r82, r83, $r90;
+        java.io.IOException $r99;
+        java.io.File $r94;
+        sun.security.krb5.internal.tools.KinitOptions $r3, $r5, $r6, $r7, $r12, $r14, $r17, $r19, $r24, $r31, $r79, $r80, $r81, $r84, $r85;
+        char[] $r18, $r20, $r58, $r71, r74;
+        sun.security.krb5.Config $r42;
+        sun.security.krb5.internal.ccache.CredentialsCache $r16;
+        sun.security.krb5.internal.ccache.Credentials $r13;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.krb5.PrincipalName $r4, $r11;
+        java.lang.String[] r1;
+        sun.security.krb5.internal.HostAddresses $r35;
+        sun.security.krb5.internal.KDCOptions $r96;
+        int $i0, $i3, $i4;
+        java.io.PrintStream $r22, $r36, $r38, $r44, $r49, $r51, $r56, $r60, $r67;
+        java.lang.IllegalArgumentException $r87, $r92;
+        sun.security.krb5.KrbAsReqBuilder r76, $r91, $r95;
+        javax.security.auth.kerberos.KeyTab $r77;
+        java.io.InputStream $r57;
+
+        r0 := @this: sun.security.krb5.internal.tools.Kinit;
+
+        r1 := @parameter0: java.lang.String[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 == null goto label01;
+
+        $i0 = lengthof r1;
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        $r84 = new sun.security.krb5.internal.tools.KinitOptions;
+
+        specialinvoke $r84.<sun.security.krb5.internal.tools.KinitOptions: void <init>()>();
+
+        r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options> = $r84;
+
+        goto label03;
+
+     label02:
+        $r85 = new sun.security.krb5.internal.tools.KinitOptions;
+
+        specialinvoke $r85.<sun.security.krb5.internal.tools.KinitOptions: void <init>(java.lang.String[])>(r1);
+
+        r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options> = $r85;
+
+     label03:
+        r73 = null;
+
+        $r3 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r4 = virtualinvoke $r3.<sun.security.krb5.internal.tools.KinitOptions: sun.security.krb5.PrincipalName getPrincipal()>();
+
+        if $r4 == null goto label04;
+
+        r73 = virtualinvoke $r4.<sun.security.krb5.PrincipalName: java.lang.String toString()>();
+
+     label04:
+        $z0 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z0 == 0 goto label05;
+
+        $r67 = <java.lang.System: java.io.PrintStream out>;
+
+        $r86 = new java.lang.StringBuilder;
+
+        specialinvoke $r86.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Principal is ");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r67.<java.io.PrintStream: void println(java.lang.String)>($r70);
+
+     label05:
+        $r5 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r71 = $r5.<sun.security.krb5.internal.tools.KinitOptions: char[] password>;
+
+        r74 = $r71;
+
+        $r6 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $z1 = virtualinvoke $r6.<sun.security.krb5.internal.tools.KinitOptions: boolean useKeytabFile()>();
+
+        if $z1 != 0 goto label08;
+
+        if r73 != null goto label06;
+
+        $r87 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r87.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>(" Can not obtain principal name");
+
+        throw $r87;
+
+     label06:
+        if $r71 != null goto label07;
+
+        $r51 = <java.lang.System: java.io.PrintStream out>;
+
+        $r88 = new java.lang.StringBuilder;
+
+        specialinvoke $r88.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Password for ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r73);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r51.<java.io.PrintStream: void print(java.lang.String)>($r55);
+
+        $r56 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r56.<java.io.PrintStream: void flush()>();
+
+        $r57 = <java.lang.System: java.io.InputStream in>;
+
+        $r58 = staticinvoke <sun.security.util.Password: char[] readPassword(java.io.InputStream)>($r57);
+
+        r74 = $r58;
+
+        $z7 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z7 == 0 goto label07;
+
+        $r60 = <java.lang.System: java.io.PrintStream out>;
+
+        $r89 = new java.lang.StringBuilder;
+
+        specialinvoke $r89.<java.lang.StringBuilder: void <init>()>();
+
+        $r61 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Kinit console input ");
+
+        $r90 = new java.lang.String;
+
+        specialinvoke $r90.<java.lang.String: void <init>(char[])>($r58);
+
+        $r63 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r90);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r60.<java.io.PrintStream: void println(java.lang.String)>($r64);
+
+     label07:
+        $r91 = new sun.security.krb5.KrbAsReqBuilder;
+
+        specialinvoke $r91.<sun.security.krb5.KrbAsReqBuilder: void <init>(sun.security.krb5.PrincipalName,char[])>($r4, r74);
+
+        r76 = $r91;
+
+        goto label14;
+
+     label08:
+        $z2 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z2 == 0 goto label09;
+
+        $r49 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r49.<java.io.PrintStream: void println(java.lang.String)>(">>> Kinit using keytab");
+
+     label09:
+        if r73 != null goto label10;
+
+        $r92 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r92.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Principal name must be specified.");
+
+        throw $r92;
+
+     label10:
+        $r7 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r8 = virtualinvoke $r7.<sun.security.krb5.internal.tools.KinitOptions: java.lang.String keytabFileName()>();
+
+        if $r8 == null goto label11;
+
+        $z6 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z6 == 0 goto label11;
+
+        $r44 = <java.lang.System: java.io.PrintStream out>;
+
+        $r93 = new java.lang.StringBuilder;
+
+        specialinvoke $r93.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Kinit keytab file name: ");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r44.<java.io.PrintStream: void println(java.lang.String)>($r47);
+
+     label11:
+        $r95 = new sun.security.krb5.KrbAsReqBuilder;
+
+        if $r8 != null goto label12;
+
+        $r77 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getInstance()>();
+
+        goto label13;
+
+     label12:
+        $r94 = new java.io.File;
+
+        specialinvoke $r94.<java.io.File: void <init>(java.lang.String)>($r8);
+
+        $r77 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getInstance(java.io.File)>($r94);
+
+     label13:
+        specialinvoke $r95.<sun.security.krb5.KrbAsReqBuilder: void <init>(sun.security.krb5.PrincipalName,javax.security.auth.kerberos.KeyTab)>($r4, $r77);
+
+        r76 = $r95;
+
+     label14:
+        $r96 = new sun.security.krb5.internal.KDCOptions;
+
+        specialinvoke $r96.<sun.security.krb5.internal.KDCOptions: void <init>()>();
+
+        $r79 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $s1 = $r79.<sun.security.krb5.internal.tools.KinitOptions: short forwardable>;
+
+        $i3 = (int) $s1;
+
+        staticinvoke <sun.security.krb5.internal.tools.Kinit: void setOptions(int,int,sun.security.krb5.internal.KDCOptions)>(1, $i3, $r96);
+
+        $r80 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $s2 = $r80.<sun.security.krb5.internal.tools.KinitOptions: short proxiable>;
+
+        $i4 = (int) $s2;
+
+        staticinvoke <sun.security.krb5.internal.tools.Kinit: void setOptions(int,int,sun.security.krb5.internal.KDCOptions)>(3, $i4, $r96);
+
+        virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: void setOptions(sun.security.krb5.internal.KDCOptions)>($r96);
+
+        $r81 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r82 = virtualinvoke $r81.<sun.security.krb5.internal.tools.KinitOptions: java.lang.String getKDCRealm()>();
+
+        r83 = $r82;
+
+        if $r82 != null goto label15;
+
+        $r42 = staticinvoke <sun.security.krb5.Config: sun.security.krb5.Config getInstance()>();
+
+        r83 = virtualinvoke $r42.<sun.security.krb5.Config: java.lang.String getDefaultRealm()>();
+
+     label15:
+        $z3 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z3 == 0 goto label16;
+
+        $r38 = <java.lang.System: java.io.PrintStream out>;
+
+        $r97 = new java.lang.StringBuilder;
+
+        specialinvoke $r97.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Kinit realm name is ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r83);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r38.<java.io.PrintStream: void println(java.lang.String)>($r41);
+
+     label16:
+        $r11 = staticinvoke <sun.security.krb5.PrincipalName: sun.security.krb5.PrincipalName tgsService(java.lang.String,java.lang.String)>(r83, r83);
+
+        virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: void setTarget(sun.security.krb5.PrincipalName)>($r11);
+
+        $z4 = <sun.security.krb5.internal.tools.Kinit: boolean DEBUG>;
+
+        if $z4 == 0 goto label17;
+
+        $r36 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r36.<java.io.PrintStream: void println(java.lang.String)>(">>> Creating KrbAsReq");
+
+     label17:
+        $r12 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $z5 = virtualinvoke $r12.<sun.security.krb5.internal.tools.KinitOptions: boolean getAddressOption()>();
+
+        if $z5 == 0 goto label18;
+
+        $r35 = staticinvoke <sun.security.krb5.internal.HostAddresses: sun.security.krb5.internal.HostAddresses getLocalAddresses()>();
+
+        virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: void setAddresses(sun.security.krb5.internal.HostAddresses)>($r35);
+
+     label18:
+        virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder action()>();
+
+        $r13 = virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.ccache.Credentials getCCreds()>();
+
+        virtualinvoke r76.<sun.security.krb5.KrbAsReqBuilder: void destroy()>();
+
+        $r14 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r15 = $r14.<sun.security.krb5.internal.tools.KinitOptions: java.lang.String cachename>;
+
+        $r16 = staticinvoke <sun.security.krb5.internal.ccache.CredentialsCache: sun.security.krb5.internal.ccache.CredentialsCache create(sun.security.krb5.PrincipalName,java.lang.String)>($r4, $r15);
+
+        if $r16 != null goto label19;
+
+        $r99 = new java.io.IOException;
+
+        $r98 = new java.lang.StringBuilder;
+
+        specialinvoke $r98.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r98.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to create the cache file ");
+
+        $r31 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r32 = $r31.<sun.security.krb5.internal.tools.KinitOptions: java.lang.String cachename>;
+
+        $r33 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r99.<java.io.IOException: void <init>(java.lang.String)>($r34);
+
+        throw $r99;
+
+     label19:
+        virtualinvoke $r16.<sun.security.krb5.internal.ccache.CredentialsCache: void update(sun.security.krb5.internal.ccache.Credentials)>($r13);
+
+        virtualinvoke $r16.<sun.security.krb5.internal.ccache.CredentialsCache: void save()>();
+
+        $r17 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r18 = $r17.<sun.security.krb5.internal.tools.KinitOptions: char[] password>;
+
+        if $r18 != null goto label20;
+
+        $r22 = <java.lang.System: java.io.PrintStream out>;
+
+        $r100 = new java.lang.StringBuilder;
+
+        specialinvoke $r100.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("New ticket is stored in cache file ");
+
+        $r24 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r25 = $r24.<sun.security.krb5.internal.tools.KinitOptions: java.lang.String cachename>;
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<java.io.PrintStream: void println(java.lang.String)>($r27);
+
+        goto label21;
+
+     label20:
+        $r19 = r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options>;
+
+        $r20 = $r19.<sun.security.krb5.internal.tools.KinitOptions: char[] password>;
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>($r20, 48);
+
+     label21:
+        if r74 == null goto label22;
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>(r74, 48);
+
+     label22:
+        r0.<sun.security.krb5.internal.tools.Kinit: sun.security.krb5.internal.tools.KinitOptions options> = null;
+
+        return;
+    }
+
+    private static void setOptions(int, int, sun.security.krb5.internal.KDCOptions)
+    {
+        int i0, i1;
+        sun.security.krb5.internal.KDCOptions r0;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r0 := @parameter2: sun.security.krb5.internal.KDCOptions;
+
+        tableswitch(i0)
+        {
+            case -1: goto label2;
+            case 0: goto label1;
+            case 1: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        goto label4;
+
+     label2:
+        virtualinvoke r0.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(i1, 0);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(i1, 1);
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.internal.tools.Kinit: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

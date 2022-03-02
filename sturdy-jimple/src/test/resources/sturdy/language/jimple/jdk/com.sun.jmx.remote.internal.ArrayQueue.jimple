@@ -1,0 +1,294 @@
+public class com.sun.jmx.remote.internal.ArrayQueue extends java.util.AbstractList
+{
+    private int capacity;
+    private java.lang.Object[] queue;
+    private int head;
+    private int tail;
+
+    public void <init>(int)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        java.lang.Object[] $r1;
+        int i0, $i1, $i2;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.AbstractList: void <init>()>();
+
+        $i1 = i0 + 1;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity> = $i1;
+
+        $i2 = i0 + 1;
+
+        $r1 = specialinvoke r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] newArray(int)>($i2);
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue> = $r1;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int head> = 0;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail> = 0;
+
+        return;
+    }
+
+    public void resize(int)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        java.lang.IndexOutOfBoundsException $r3;
+        java.lang.Object[] $r1;
+        int $i0, $i1, i2, i3, i4;
+        java.lang.Object $r2;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        i2 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<com.sun.jmx.remote.internal.ArrayQueue: int size()>();
+
+        if i2 >= $i0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Resizing would lose data");
+
+        throw $r3;
+
+     label1:
+        i3 = i2 + 1;
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity>;
+
+        if i3 != $i1 goto label2;
+
+        return;
+
+     label2:
+        $r1 = specialinvoke r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] newArray(int)>(i3);
+
+        i4 = 0;
+
+     label3:
+        if i4 >= $i0 goto label4;
+
+        $r2 = virtualinvoke r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object get(int)>(i4);
+
+        $r1[i4] = $r2;
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity> = i3;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue> = $r1;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int head> = 0;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail> = $i0;
+
+        return;
+    }
+
+    private java.lang.Object[] newArray(int)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r2;
+        java.lang.Object[] $r0, $r1;
+        int i0;
+
+        r2 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        i0 := @parameter0: int;
+
+        $r0 = newarray (java.lang.Object)[i0];
+
+        $r1 = (java.lang.Object[]) $r0;
+
+        return $r1;
+    }
+
+    public boolean add(java.lang.Object)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        java.lang.IndexOutOfBoundsException $r3;
+        java.lang.Object[] $r2;
+        int $i0, $i1, $i2, $i3, i4, $i5;
+        java.lang.Object r1;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue>;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail>;
+
+        $r2[$i0] = r1;
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail>;
+
+        $i3 = $i1 + 1;
+
+        $i2 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity>;
+
+        i4 = $i3 % $i2;
+
+        $i5 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        if i4 != $i5 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Queue full");
+
+        throw $r3;
+
+     label1:
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail> = i4;
+
+        return 1;
+    }
+
+    public java.lang.Object remove(int)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        java.lang.IndexOutOfBoundsException $r4;
+        java.lang.Object[] $r1, $r3;
+        java.lang.IllegalArgumentException $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.Object r2;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Can only remove head of queue");
+
+        throw $r5;
+
+     label1:
+        $i2 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail>;
+
+        if $i2 != $i1 goto label2;
+
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Queue empty");
+
+        throw $r4;
+
+     label2:
+        $r1 = r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue>;
+
+        $i3 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        r2 = $r1[$i3];
+
+        $r3 = r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue>;
+
+        $i4 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        $r3[$i4] = null;
+
+        $i5 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        $i7 = $i5 + 1;
+
+        $i6 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity>;
+
+        $i8 = $i7 % $i6;
+
+        r0.<com.sun.jmx.remote.internal.ArrayQueue: int head> = $i8;
+
+        return r2;
+    }
+
+    public java.lang.Object get(int)
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        java.lang.IndexOutOfBoundsException $r7;
+        java.lang.Object[] $r8;
+        int $i0, i1, $i2, $i3, $i4, i5;
+        java.lang.String $r6;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5;
+        java.lang.Object $r9;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<com.sun.jmx.remote.internal.ArrayQueue: int size()>();
+
+        if i1 < 0 goto label1;
+
+        if i1 < $i0 goto label2;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Index ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", queue size ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r7.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r6);
+
+        throw $r7;
+
+     label2:
+        $i2 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        $i4 = $i2 + i1;
+
+        $i3 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity>;
+
+        i5 = $i4 % $i3;
+
+        $r8 = r0.<com.sun.jmx.remote.internal.ArrayQueue: java.lang.Object[] queue>;
+
+        $r9 = $r8[i5];
+
+        return $r9;
+    }
+
+    public int size()
+    {
+        com.sun.jmx.remote.internal.ArrayQueue r0;
+        int $i0, $i1, $i2, i3;
+
+        r0 := @this: com.sun.jmx.remote.internal.ArrayQueue;
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int tail>;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int head>;
+
+        i3 = $i1 - $i0;
+
+        if i3 >= 0 goto label1;
+
+        $i2 = r0.<com.sun.jmx.remote.internal.ArrayQueue: int capacity>;
+
+        i3 = i3 + $i2;
+
+     label1:
+        return i3;
+    }
+}

@@ -1,0 +1,418 @@
+public class jdk.management.resource.ThrottledMeter extends jdk.management.resource.NotifyingMeter
+{
+    private volatile long ratePerSec;
+    private final java.lang.Object mutex;
+    private long availableBytes;
+    private long availableTimestamp;
+
+    public static jdk.management.resource.ThrottledMeter create(jdk.management.resource.ResourceType, long, jdk.management.resource.ResourceApprover)
+    {
+        jdk.management.resource.ResourceType r1;
+        long l0;
+        jdk.management.resource.ResourceApprover r2;
+        jdk.management.resource.ThrottledMeter $r0;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: jdk.management.resource.ResourceApprover;
+
+        $r0 = new jdk.management.resource.ThrottledMeter;
+
+        specialinvoke $r0.<jdk.management.resource.ThrottledMeter: void <init>(jdk.management.resource.ResourceType,long,jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceApprover)>(r1, l0, null, r2);
+
+        return $r0;
+    }
+
+    public static jdk.management.resource.ThrottledMeter create(jdk.management.resource.ResourceType, jdk.management.resource.ResourceRequest, jdk.management.resource.ResourceApprover)
+    {
+        jdk.management.resource.ResourceRequest r2;
+        jdk.management.resource.ResourceType r1;
+        jdk.management.resource.ResourceApprover r3;
+        jdk.management.resource.ThrottledMeter $r0;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        r2 := @parameter1: jdk.management.resource.ResourceRequest;
+
+        r3 := @parameter2: jdk.management.resource.ResourceApprover;
+
+        $r0 = new jdk.management.resource.ThrottledMeter;
+
+        specialinvoke $r0.<jdk.management.resource.ThrottledMeter: void <init>(jdk.management.resource.ResourceType,long,jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceApprover)>(r1, 9223372036854775807L, r2, r3);
+
+        return $r0;
+    }
+
+    public static jdk.management.resource.ThrottledMeter create(jdk.management.resource.ResourceType, long, jdk.management.resource.ResourceRequest, jdk.management.resource.ResourceApprover)
+    {
+        jdk.management.resource.ResourceRequest r2;
+        jdk.management.resource.ResourceType r1;
+        long l0;
+        jdk.management.resource.ResourceApprover r3;
+        jdk.management.resource.ThrottledMeter $r0;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: jdk.management.resource.ResourceRequest;
+
+        r3 := @parameter3: jdk.management.resource.ResourceApprover;
+
+        $r0 = new jdk.management.resource.ThrottledMeter;
+
+        specialinvoke $r0.<jdk.management.resource.ThrottledMeter: void <init>(jdk.management.resource.ResourceType,long,jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceApprover)>(r1, l0, r2, r3);
+
+        return $r0;
+    }
+
+    void <init>(jdk.management.resource.ResourceType, long, jdk.management.resource.ResourceRequest, jdk.management.resource.ResourceApprover)
+    {
+        jdk.management.resource.ResourceType r1;
+        long l0;
+        jdk.management.resource.ResourceApprover r3;
+        java.lang.IllegalArgumentException $r6;
+        jdk.management.resource.ThrottledMeter r0;
+        byte $b1;
+        jdk.management.resource.ResourceRequest r2;
+        int $i2;
+        java.lang.Object $r7;
+
+        r0 := @this: jdk.management.resource.ThrottledMeter;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: jdk.management.resource.ResourceRequest;
+
+        r3 := @parameter3: jdk.management.resource.ResourceApprover;
+
+        specialinvoke r0.<jdk.management.resource.NotifyingMeter: void <init>(jdk.management.resource.ResourceType,jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceApprover)>(r1, r2, r3);
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 > 0 goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ratePerSec must be greater than zero");
+
+        throw $r6;
+
+     label1:
+        r0.<jdk.management.resource.ThrottledMeter: long ratePerSec> = l0;
+
+        $r7 = new java.lang.Object;
+
+        specialinvoke $r7.<java.lang.Object: void <init>()>();
+
+        r0.<jdk.management.resource.ThrottledMeter: java.lang.Object mutex> = $r7;
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableBytes> = 0L;
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableTimestamp> = 0L;
+
+        return;
+    }
+
+    public long validate(long, long, jdk.management.resource.ResourceId)
+    {
+        byte $b3, $b6, $b20, $b21, $b27;
+        jdk.management.resource.ThrottledMeter r0;
+        java.lang.Throwable $r4;
+        long l0, l1, $l2, $l4, $l5, l7, l8, $l9, $l10, $l11, $l12, $l13, l14, $l15, $l16, $l17, $l18, $l19, $l22, $l23, $l24, $l25, $l26, $l28, $l29, $l30;
+        int $i31, $i32, $i33, $i34, $i35;
+        jdk.management.resource.ResourceId r1;
+        java.lang.InterruptedException $r5;
+        java.lang.Object $r2, $r3;
+
+        r0 := @this: jdk.management.resource.ThrottledMeter;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        r1 := @parameter2: jdk.management.resource.ResourceId;
+
+        $l2 = specialinvoke r0.<jdk.management.resource.NotifyingMeter: long validate(long,long,jdk.management.resource.ResourceId)>(l0, l1, r1);
+
+        $b3 = $l2 cmp 0L;
+
+        $i31 = (int) $b3;
+
+        if $i31 > 0 goto label01;
+
+        return $l2;
+
+     label01:
+        $r2 = r0.<jdk.management.resource.ThrottledMeter: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label02:
+        $l4 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l5 = $l4 - l1;
+
+        $b6 = $l5 cmp 0L;
+
+        $i32 = (int) $b6;
+
+        if $i32 >= 0 goto label10;
+
+        l7 = r0.<jdk.management.resource.ThrottledMeter: long ratePerSec>;
+
+        l8 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l9 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l10 = r0.<jdk.management.resource.ThrottledMeter: long availableTimestamp>;
+
+        $l11 = $l9 - $l10;
+
+        $l12 = staticinvoke <java.lang.Math: long max(long,long)>($l11, 0L);
+
+        $l13 = l7 * $l12;
+
+        l14 = $l13 / 1000L;
+
+        $l15 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l16 = $l15 + l14;
+
+        $l17 = staticinvoke <java.lang.Math: long min(long,long)>($l16, l7);
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableBytes> = $l17;
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableTimestamp> = $l9;
+
+        $l18 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l19 = $l18 - l1;
+
+        $b20 = $l19 cmp 0L;
+
+        $i33 = (int) $b20;
+
+        if $i33 < 0 goto label03;
+
+        goto label10;
+
+     label03:
+        $b21 = l1 cmp l7;
+
+        $i34 = (int) $b21;
+
+        if $i34 <= 0 goto label04;
+
+        $b27 = l8 cmp 0L;
+
+        $i35 = (int) $b27;
+
+        if $i35 <= 0 goto label04;
+
+        goto label10;
+
+     label04:
+        $l22 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l23 = l1 - $l22;
+
+        $l24 = staticinvoke <java.lang.Math: long min(long,long)>($l23, l7);
+
+        $l25 = $l24 * 1000L;
+
+        $l28 = $l25 / l7;
+
+     label05:
+        $r3 = r0.<jdk.management.resource.ThrottledMeter: java.lang.Object mutex>;
+
+        $l26 = staticinvoke <java.lang.Math: long max(long,long)>($l28, 10L);
+
+        virtualinvoke $r3.<java.lang.Object: void wait(long)>($l26);
+
+     label06:
+        goto label09;
+
+     label07:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label08:
+        return 0L;
+
+     label09:
+        goto label02;
+
+     label10:
+        $l29 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l30 = $l29 - l1;
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableBytes> = $l30;
+
+        exitmonitor $r2;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label13:
+        throw $r4;
+
+     label14:
+        return l1;
+
+        catch java.lang.InterruptedException from label05 to label06 with label07;
+        catch java.lang.Throwable from label02 to label08 with label12;
+        catch java.lang.Throwable from label09 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public final long getCurrentRate()
+    {
+        java.lang.Throwable $r2;
+        long l0, $l1, $l2, l3, $l4, l5, $l6, $l7, $l8, $l9, l10;
+        jdk.management.resource.ThrottledMeter r0;
+        java.lang.Object $r1;
+
+        r0 := @this: jdk.management.resource.ThrottledMeter;
+
+        $r1 = r0.<jdk.management.resource.ThrottledMeter: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        l0 = r0.<jdk.management.resource.ThrottledMeter: long ratePerSec>;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = r0.<jdk.management.resource.ThrottledMeter: long availableTimestamp>;
+
+        l3 = $l1 - $l2;
+
+        $l4 = l0 * l3;
+
+        l5 = $l4 / 1000L;
+
+        $l6 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        $l7 = $l6 + l5;
+
+        $l8 = staticinvoke <java.lang.Math: long min(long,long)>($l7, l0);
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableBytes> = $l8;
+
+        r0.<jdk.management.resource.ThrottledMeter: long availableTimestamp> = $l1;
+
+        $l9 = r0.<jdk.management.resource.ThrottledMeter: long availableBytes>;
+
+        l10 = l0 - $l9;
+
+        exitmonitor $r1;
+
+     label2:
+        return l10;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final synchronized long getRatePerSec()
+    {
+        long $l0;
+        jdk.management.resource.ThrottledMeter r0;
+
+        r0 := @this: jdk.management.resource.ThrottledMeter;
+
+        $l0 = r0.<jdk.management.resource.ThrottledMeter: long ratePerSec>;
+
+        return $l0;
+    }
+
+    public final synchronized long setRatePerSec(long)
+    {
+        byte $b1;
+        int $i2;
+        long l0;
+        java.lang.IllegalArgumentException $r2;
+        jdk.management.resource.ThrottledMeter r0;
+
+        r0 := @this: jdk.management.resource.ThrottledMeter;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 > 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ratePerSec must be greater than zero");
+
+        throw $r2;
+
+     label1:
+        r0.<jdk.management.resource.ThrottledMeter: long ratePerSec> = l0;
+
+        return l0;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0, $l1;
+        jdk.management.resource.ThrottledMeter r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r7, $r9;
+        java.lang.String $r2, $r5, $r8, $r10;
+
+        r1 := @this: jdk.management.resource.ThrottledMeter;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<jdk.management.resource.NotifyingMeter: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; ratePerSec: ");
+
+        $l0 = r1.<jdk.management.resource.ThrottledMeter: long ratePerSec>;
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; currentRate: ");
+
+        $l1 = virtualinvoke r1.<jdk.management.resource.ThrottledMeter: long getCurrentRate()>();
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l1);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+}

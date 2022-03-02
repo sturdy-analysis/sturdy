@@ -1,0 +1,3531 @@
+public class sun.awt.image.PNGImageDecoder extends sun.awt.image.ImageDecoder
+{
+    private static final int GRAY;
+    private static final int PALETTE;
+    private static final int COLOR;
+    private static final int ALPHA;
+    private static final int bKGDChunk;
+    private static final int cHRMChunk;
+    private static final int gAMAChunk;
+    private static final int hISTChunk;
+    private static final int IDATChunk;
+    private static final int IENDChunk;
+    private static final int IHDRChunk;
+    private static final int PLTEChunk;
+    private static final int pHYsChunk;
+    private static final int sBITChunk;
+    private static final int tEXtChunk;
+    private static final int tIMEChunk;
+    private static final int tRNSChunk;
+    private static final int zTXtChunk;
+    private int width;
+    private int height;
+    private int bitDepth;
+    private int colorType;
+    private int compressionMethod;
+    private int filterMethod;
+    private int interlaceMethod;
+    private int gamma;
+    private java.util.Hashtable properties;
+    private java.awt.image.ColorModel cm;
+    private byte[] red_map;
+    private byte[] green_map;
+    private byte[] blue_map;
+    private byte[] alpha_map;
+    private int transparentPixel;
+    private byte[] transparentPixel_16;
+    private static java.awt.image.ColorModel[] greyModels;
+    private static final byte[] startingRow;
+    private static final byte[] startingCol;
+    private static final byte[] rowIncrement;
+    private static final byte[] colIncrement;
+    private static final byte[] blockHeight;
+    private static final byte[] blockWidth;
+    int pos;
+    int limit;
+    int chunkStart;
+    int chunkKey;
+    int chunkLength;
+    int chunkCRC;
+    boolean seenEOF;
+    private static final byte[] signature;
+    sun.awt.image.PNGFilterInputStream inputStream;
+    java.io.InputStream underlyingInputStream;
+    byte[] inbuf;
+    private static boolean checkCRC;
+    private static final int[] crc_table;
+
+    private void property(java.lang.String, java.lang.Object)
+    {
+        sun.awt.image.PNGImageDecoder r1;
+        java.lang.Object r0;
+        java.lang.String r3;
+        java.util.Hashtable $r2, $r4, $r5;
+
+        r1 := @this: sun.awt.image.PNGImageDecoder;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<sun.awt.image.PNGImageDecoder: java.util.Hashtable properties>;
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.util.Hashtable;
+
+        specialinvoke $r5.<java.util.Hashtable: void <init>()>();
+
+        r1.<sun.awt.image.PNGImageDecoder: java.util.Hashtable properties> = $r5;
+
+     label2:
+        $r4 = r1.<sun.awt.image.PNGImageDecoder: java.util.Hashtable properties>;
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, r0);
+
+        return;
+    }
+
+    private void property(java.lang.String, float)
+    {
+        java.lang.Float $r2;
+        sun.awt.image.PNGImageDecoder r0;
+        float f0;
+        java.lang.String r1;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        r1 := @parameter0: java.lang.String;
+
+        f0 := @parameter1: float;
+
+        $r2 = new java.lang.Float;
+
+        specialinvoke $r2.<java.lang.Float: void <init>(float)>(f0);
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>(r1, $r2);
+
+        return;
+    }
+
+    private final void pngassert(boolean) throws java.io.IOException
+    {
+        sun.awt.image.PNGImageDecoder r1;
+        sun.awt.image.PNGImageDecoder$PNGException $r0;
+        boolean z0;
+
+        r1 := @this: sun.awt.image.PNGImageDecoder;
+
+        z0 := @parameter0: boolean;
+
+        if z0 != 0 goto label1;
+
+        $r0 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r0.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r1, "Broken file");
+
+        virtualinvoke $r0.<sun.awt.image.PNGImageDecoder$PNGException: void printStackTrace()>();
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    protected boolean handleChunk(int, byte[], int, int) throws java.io.IOException
+    {
+        java.awt.Color r25, $r31, $r32, $r33;
+        byte[] $r1, $r2, r3, $r4, $r5, $r6, $r7, $r8, $r15, $r16, $r19, $r20, $r21, $r22, $r23, $r24, $r27, $r28, $r29;
+        byte $b20, $b46, $b66, $b69, $b71, $b73, $b77, $b79, $b81, $b83, $b97, $b99, $b101;
+        java.util.GregorianCalendar $r39;
+        short $s68, $s74, $s75, $s76, $s78, $s98, $s100, $s102, $s111, $s112, $s113, $s117, $s120, $s122, $s124, $s128;
+        java.util.Date $r10;
+        int i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i67, $i70, $i72, $i80, $i82, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, i103, i104, i105, i106, i107, $i108, i109, $i110, $i114, $i115, $i116, $i118, $i119, $i121, $i123, $i125, $i126, $i127, $i129, $i130, $i131, $i133;
+        sun.awt.image.PNGImageDecoder$PNGException $r35, $r36;
+        java.lang.String $r37, $r38;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.awt.image.PNGImageDecoder r0;
+        float $f0, $f1;
+        sun.awt.image.PNGImageDecoder$Chromaticities $r34;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: byte[];
+
+        i3 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        lookupswitch(i0)
+        {
+            case 1229209940: goto label18;
+            case 1229278788: goto label19;
+            case 1229472850: goto label20;
+            case 1347179589: goto label23;
+            case 1649100612: goto label01;
+            case 1665684045: goto label14;
+            case 1732332865: goto label15;
+            case 1749635924: goto label17;
+            case 1883789683: goto label26;
+            case 1933723988: goto label27;
+            case 1950701684: goto label28;
+            case 1950960965: goto label31;
+            case 1951551059: goto label32;
+            case 2052348020: goto label50;
+            default: goto label50;
+        };
+
+     label01:
+        r25 = null;
+
+        $i65 = r0.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        tableswitch($i65)
+        {
+            case 0: goto label10;
+            case 1: goto label13;
+            case 2: goto label02;
+            case 3: goto label05;
+            case 4: goto label10;
+            case 5: goto label13;
+            case 6: goto label02;
+            case 7: goto label05;
+            default: goto label13;
+        };
+
+     label02:
+        if i2 != 6 goto label03;
+
+        $z0 = 1;
+
+        goto label04;
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z0);
+
+        $r31 = new java.awt.Color;
+
+        $b69 = r3[i3];
+
+        $s111 = (short) $b69;
+
+        $s76 = $s111 & 255;
+
+        $i70 = i3 + 2;
+
+        $b71 = r3[$i70];
+
+        $s112 = (short) $b71;
+
+        $s75 = $s112 & 255;
+
+        $i72 = i3 + 4;
+
+        $b73 = r3[$i72];
+
+        $s113 = (short) $b73;
+
+        $s74 = $s113 & 255;
+
+        $i114 = (int) $s76;
+
+        $i115 = (int) $s75;
+
+        $i116 = (int) $s74;
+
+        specialinvoke $r31.<java.awt.Color: void <init>(int,int,int)>($i114, $i115, $i116);
+
+        r25 = $r31;
+
+        goto label13;
+
+     label05:
+        if i2 != 1 goto label06;
+
+        $z1 = 1;
+
+        goto label07;
+
+     label06:
+        $z1 = 0;
+
+     label07:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z1);
+
+        $b66 = r3[i3];
+
+        $s117 = (short) $b66;
+
+        $s68 = $s117 & 255;
+
+        $r15 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        if $r15 == null goto label08;
+
+        $r16 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $i67 = lengthof $r16;
+
+        $i118 = (int) $s68;
+
+        if $i118 >= $i67 goto label08;
+
+        $z2 = 1;
+
+        goto label09;
+
+     label08:
+        $z2 = 0;
+
+     label09:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z2);
+
+        $r32 = new java.awt.Color;
+
+        $r27 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $i119 = (int) $s68;
+
+        $b97 = $r27[$i119];
+
+        $s120 = (short) $b97;
+
+        $s98 = $s120 & 255;
+
+        $r28 = r0.<sun.awt.image.PNGImageDecoder: byte[] green_map>;
+
+        $i121 = (int) $s68;
+
+        $b99 = $r28[$i121];
+
+        $s122 = (short) $b99;
+
+        $s100 = $s122 & 255;
+
+        $r29 = r0.<sun.awt.image.PNGImageDecoder: byte[] blue_map>;
+
+        $i123 = (int) $s68;
+
+        $b101 = $r29[$i123];
+
+        $s124 = (short) $b101;
+
+        $s102 = $s124 & 255;
+
+        $i125 = (int) $s98;
+
+        $i126 = (int) $s100;
+
+        $i127 = (int) $s102;
+
+        specialinvoke $r32.<java.awt.Color: void <init>(int,int,int)>($i125, $i126, $i127);
+
+        r25 = $r32;
+
+        goto label13;
+
+     label10:
+        if i2 != 2 goto label11;
+
+        $z3 = 1;
+
+        goto label12;
+
+     label11:
+        $z3 = 0;
+
+     label12:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z3);
+
+        $b77 = r3[i3];
+
+        $s128 = (short) $b77;
+
+        $s78 = $s128 & 255;
+
+        $r33 = new java.awt.Color;
+
+        $i129 = (int) $s78;
+
+        $i130 = (int) $s78;
+
+        $i131 = (int) $s78;
+
+        specialinvoke $r33.<java.awt.Color: void <init>(int,int,int)>($i129, $i130, $i131);
+
+        r25 = $r33;
+
+     label13:
+        if r25 == null goto label50;
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>("background", r25);
+
+        goto label50;
+
+     label14:
+        $r34 = new sun.awt.image.PNGImageDecoder$Chromaticities;
+
+        $i50 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>(i3);
+
+        $i51 = i3 + 4;
+
+        $i52 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i51);
+
+        $i53 = i3 + 8;
+
+        $i54 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i53);
+
+        $i55 = i3 + 12;
+
+        $i56 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i55);
+
+        $i57 = i3 + 16;
+
+        $i58 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i57);
+
+        $i59 = i3 + 20;
+
+        $i60 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i59);
+
+        $i61 = i3 + 24;
+
+        $i62 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i61);
+
+        $i63 = i3 + 28;
+
+        $i64 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i63);
+
+        specialinvoke $r34.<sun.awt.image.PNGImageDecoder$Chromaticities: void <init>(int,int,int,int,int,int,int,int)>($i50, $i52, $i54, $i56, $i58, $i60, $i62, $i64);
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>("chromaticities", $r34);
+
+        goto label50;
+
+     label15:
+        if i2 == 4 goto label16;
+
+        $r35 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r35.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r0, "bogus gAMA");
+
+        throw $r35;
+
+     label16:
+        $i47 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>(i3);
+
+        r0.<sun.awt.image.PNGImageDecoder: int gamma> = $i47;
+
+        $i48 = r0.<sun.awt.image.PNGImageDecoder: int gamma>;
+
+        if $i48 == 100000 goto label50;
+
+        $i49 = r0.<sun.awt.image.PNGImageDecoder: int gamma>;
+
+        $f0 = (float) $i49;
+
+        $f1 = $f0 / 100000.0F;
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,float)>("gamma", $f1);
+
+        goto label50;
+
+     label17:
+        goto label50;
+
+     label18:
+        return 0;
+
+     label19:
+        goto label50;
+
+     label20:
+        if i2 != 13 goto label21;
+
+        $i84 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>(i3);
+
+        r0.<sun.awt.image.PNGImageDecoder: int width> = $i84;
+
+        if $i84 == 0 goto label21;
+
+        $i85 = i3 + 4;
+
+        $i86 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i85);
+
+        r0.<sun.awt.image.PNGImageDecoder: int height> = $i86;
+
+        if $i86 != 0 goto label22;
+
+     label21:
+        $r36 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r36.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r0, "bogus IHDR");
+
+        throw $r36;
+
+     label22:
+        $i87 = i3 + 8;
+
+        $i88 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i87);
+
+        r0.<sun.awt.image.PNGImageDecoder: int bitDepth> = $i88;
+
+        $i89 = i3 + 9;
+
+        $i90 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i89);
+
+        r0.<sun.awt.image.PNGImageDecoder: int colorType> = $i90;
+
+        $i91 = i3 + 10;
+
+        $i92 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i91);
+
+        r0.<sun.awt.image.PNGImageDecoder: int compressionMethod> = $i92;
+
+        $i93 = i3 + 11;
+
+        $i94 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i93);
+
+        r0.<sun.awt.image.PNGImageDecoder: int filterMethod> = $i94;
+
+        $i95 = i3 + 12;
+
+        $i96 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i95);
+
+        r0.<sun.awt.image.PNGImageDecoder: int interlaceMethod> = $i96;
+
+        goto label50;
+
+     label23:
+        i103 = i2 / 3;
+
+        $r19 = newarray (byte)[i103];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] red_map> = $r19;
+
+        $r20 = newarray (byte)[i103];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] green_map> = $r20;
+
+        $r21 = newarray (byte)[i103];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] blue_map> = $r21;
+
+        i104 = 0;
+
+        i105 = i3;
+
+     label24:
+        if i104 >= i103 goto label25;
+
+        $r22 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $b79 = r3[i105];
+
+        $r22[i104] = $b79;
+
+        $r23 = r0.<sun.awt.image.PNGImageDecoder: byte[] green_map>;
+
+        $i80 = i105 + 1;
+
+        $b81 = r3[$i80];
+
+        $r23[i104] = $b81;
+
+        $r24 = r0.<sun.awt.image.PNGImageDecoder: byte[] blue_map>;
+
+        $i82 = i105 + 2;
+
+        $b83 = r3[$i82];
+
+        $r24[i104] = $b83;
+
+        i104 = i104 + 1;
+
+        i105 = i105 + 3;
+
+        goto label24;
+
+     label25:
+        goto label50;
+
+     label26:
+        goto label50;
+
+     label27:
+        goto label50;
+
+     label28:
+        i106 = 0;
+
+     label29:
+        if i106 >= i2 goto label30;
+
+        $i45 = i3 + i106;
+
+        $b46 = r3[$i45];
+
+        if $b46 == 0 goto label30;
+
+        i106 = i106 + 1;
+
+        goto label29;
+
+     label30:
+        if i106 >= i2 goto label50;
+
+        $r37 = new java.lang.String;
+
+        specialinvoke $r37.<java.lang.String: void <init>(byte[],int,int)>(r3, i3, i106);
+
+        $r38 = new java.lang.String;
+
+        $i41 = i3 + i106;
+
+        $i44 = $i41 + 1;
+
+        $i42 = i2 - i106;
+
+        $i43 = $i42 - 1;
+
+        specialinvoke $r38.<java.lang.String: void <init>(byte[],int,int)>(r3, $i44, $i43);
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>($r37, $r38);
+
+        goto label50;
+
+     label31:
+        $r39 = new java.util.GregorianCalendar;
+
+        $i28 = i3 + 0;
+
+        $i29 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getShort(int)>($i28);
+
+        $i30 = i3 + 2;
+
+        $i31 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i30);
+
+        $i33 = $i31 - 1;
+
+        $i32 = i3 + 3;
+
+        $i34 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i32);
+
+        $i35 = i3 + 4;
+
+        $i36 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i35);
+
+        $i37 = i3 + 5;
+
+        $i38 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i37);
+
+        $i39 = i3 + 6;
+
+        $i40 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i39);
+
+        specialinvoke $r39.<java.util.GregorianCalendar: void <init>(int,int,int,int,int,int)>($i29, $i33, $i34, $i36, $i38, $i40);
+
+        $r10 = virtualinvoke $r39.<java.util.GregorianCalendar: java.util.Date getTime()>();
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>("modtime", $r10);
+
+        goto label50;
+
+     label32:
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        tableswitch($i1)
+        {
+            case 0: goto label44;
+            case 1: goto label49;
+            case 2: goto label38;
+            case 3: goto label33;
+            case 4: goto label44;
+            case 5: goto label49;
+            case 6: goto label38;
+            case 7: goto label33;
+            default: goto label49;
+        };
+
+     label33:
+        i107 = i2;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        if $r1 == null goto label34;
+
+        $r6 = r0.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        i107 = lengthof $r6;
+
+     label34:
+        $r2 = newarray (byte)[i107];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] alpha_map> = $r2;
+
+        $r4 = r0.<sun.awt.image.PNGImageDecoder: byte[] alpha_map>;
+
+        if i2 >= i107 goto label35;
+
+        $i108 = i2;
+
+        goto label36;
+
+     label35:
+        $i108 = i107;
+
+     label36:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i3, $r4, 0, $i108);
+
+     label37:
+        $i133 = (int) -1;
+
+        i107 = i107 + $i133;
+
+        if i107 < i2 goto label49;
+
+        $r5 = r0.<sun.awt.image.PNGImageDecoder: byte[] alpha_map>;
+
+        $r5[i107] = -1;
+
+        goto label37;
+
+     label38:
+        if i2 != 6 goto label39;
+
+        $z4 = 1;
+
+        goto label40;
+
+     label39:
+        $z4 = 0;
+
+     label40:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z4);
+
+        $i4 = r0.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        if $i4 != 16 goto label43;
+
+        $r7 = newarray (byte)[6];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] transparentPixel_16> = $r7;
+
+        i109 = 0;
+
+     label41:
+        if i109 >= 6 goto label42;
+
+        $r8 = r0.<sun.awt.image.PNGImageDecoder: byte[] transparentPixel_16>;
+
+        $i18 = i3 + i109;
+
+        $i19 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getByte(int)>($i18);
+
+        $b20 = (byte) $i19;
+
+        $r8[i109] = $b20;
+
+        i109 = i109 + 1;
+
+        goto label41;
+
+     label42:
+        goto label49;
+
+     label43:
+        $i5 = i3 + 0;
+
+        $i6 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getShort(int)>($i5);
+
+        $i7 = $i6 & 255;
+
+        $i9 = $i7 << 16;
+
+        $i8 = i3 + 2;
+
+        $i10 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getShort(int)>($i8);
+
+        $i11 = $i10 & 255;
+
+        $i12 = $i11 << 8;
+
+        $i14 = $i9 | $i12;
+
+        $i13 = i3 + 4;
+
+        $i15 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getShort(int)>($i13);
+
+        $i16 = $i15 & 255;
+
+        $i17 = $i14 | $i16;
+
+        r0.<sun.awt.image.PNGImageDecoder: int transparentPixel> = $i17;
+
+        goto label49;
+
+     label44:
+        if i2 != 2 goto label45;
+
+        $z5 = 1;
+
+        goto label46;
+
+     label45:
+        $z5 = 0;
+
+     label46:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void pngassert(boolean)>($z5);
+
+        $i21 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getShort(int)>(i3);
+
+        $i22 = r0.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        if $i22 != 16 goto label47;
+
+        $i110 = $i21 >> 8;
+
+        goto label48;
+
+     label47:
+        $i110 = $i21;
+
+     label48:
+        $i27 = 255 & $i110;
+
+        $i24 = $i27 << 16;
+
+        $i23 = $i27 << 8;
+
+        $i25 = $i24 | $i23;
+
+        $i26 = $i25 | $i27;
+
+        r0.<sun.awt.image.PNGImageDecoder: int transparentPixel> = $i26;
+
+     label49:
+        goto label50;
+
+     label50:
+        return 1;
+    }
+
+    public void produceImage() throws java.io.IOException, sun.awt.image.ImageFormatException
+    {
+        java.io.BufferedInputStream $r60;
+        int[] r50;
+        sun.awt.image.PNGFilterInputStream $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i20, $i21, $i22, $i23, i24, $i25, $i26, i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i44, $i45, $i47, $i48, $i49, $i50, $i51, $i53, $i54, $i56, $i57, $i58, $i59, $i60, $i62, $i63, $i65, $i66, $i67, $i68, $i70, $i71, $i73, $i76, $i79, $i80, $i81, $i84, $i85, $i88, $i89, $i90, $i91, $i93, $i94, $i95, $i96, $i99, $i100, $i101, $i102, $i105, $i108, $i109, $i110, $i113, $i114, $i115, $i122, $i125, $i126, $i127, $i130, $i131, $i134, $i135, $i136, $i137, $i139, $i140, $i141, $i142, $i145, $i146, $i147, $i148, $i151, $i154, $i155, $i156, $i159, $i160, $i161, $i162, $i163, $i164, $i165, $i166, $i167, $i168, $i169, $i170, $i171, $i172, $i173, $i174, $i175, $i176, $i178, $i179, $i182, i183, i184, $i186, i187, i190, i191, $i192, $i193, $i194, $i196, $i198, $i199, $i200, $i201, $i202, i203, i205, i206, $i207, i208, i209, i210, $i211, i212, i213, i214, $i217, $i221, $i223, $i225, $i226, $i227, $i228, $i229, $i231, $i233, $i235, $i237, $i239, $i241, $i243, $i245, $i247, $i249, $i251, $i253, $i255, $i257, $i260, $i261, $i263, $i264, $i265, $i267, $i269, $i270, $i271, $i273, $i274, $i275, $i276, $i277, $i278, $i279;
+        sun.awt.image.PNGImageDecoder$PNGException $r57, $r61, $r62, $r67, $r68, $r69, $r70;
+        java.awt.image.ColorModel[] $r33, $r37;
+        java.util.zip.Inflater $r58;
+        boolean $z0, $z1, $z2, z3, $z4, z5, $z6;
+        sun.awt.image.PNGImageDecoder r3;
+        java.util.zip.InflaterInputStream $r59;
+        java.io.InputStream $r42;
+        byte[] $r0, $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r21, $r22, $r24, $r27, $r28, $r29, $r30, $r41, r49, r51, r53, r54, $r55, r56;
+        byte b15, b16, b17, b18, b19, $b43, $b46, $b52, $b55, $b61, $b64, $b69, $b72, $b74, $b77, $b82, $b86, $b92, $b97, $b103, $b106, $b111, $b116, $b117, $b120, $b123, $b128, $b132, $b138, $b143, $b149, $b152, $b157, $b177, $b180, b185, $b188, b189, $b195, $b197, b204, b218, b219;
+        short $s75, $s78, $s83, $s87, $s98, $s104, $s107, $s112, $s118, $s119, $s121, $s124, $s129, $s133, $s144, $s150, $s153, $s158, $s181, s215, s216, $s220, $s230, $s232, $s234, $s236, $s238, $s240, $s242, $s244, $s246, $s248, $s250, $s252, $s254, $s256, $s258, $s259, $s262, $s266, $s268, $s272;
+        java.io.IOException $r47;
+        java.awt.image.IndexColorModel $r63, $r64, $r65, $r66;
+        java.lang.Throwable $r44, $r45, $r46, $r48;
+        java.awt.image.ColorModel $r32, $r34, $r36, $r52;
+
+        r3 := @this: sun.awt.image.PNGImageDecoder;
+
+     label01:
+        i183 = 0;
+
+     label02:
+        $r0 = <sun.awt.image.PNGImageDecoder: byte[] signature>;
+
+        $i0 = lengthof $r0;
+
+        if i183 >= $i0 goto label04;
+
+        $r41 = <sun.awt.image.PNGImageDecoder: byte[] signature>;
+
+        $b180 = $r41[i183];
+
+        $s220 = (short) $b180;
+
+        $s181 = $s220 & 255;
+
+        $r42 = r3.<sun.awt.image.PNGImageDecoder: java.io.InputStream underlyingInputStream>;
+
+        $i182 = virtualinvoke $r42.<java.io.InputStream: int read()>();
+
+        $i221 = (int) $s181;
+
+        if $i221 == $i182 goto label03;
+
+        $r57 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r57.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "Chunk signature mismatch");
+
+        throw $r57;
+
+     label03:
+        i183 = i183 + 1;
+
+        goto label02;
+
+     label04:
+        $r60 = new java.io.BufferedInputStream;
+
+        $r59 = new java.util.zip.InflaterInputStream;
+
+        $r5 = r3.<sun.awt.image.PNGImageDecoder: sun.awt.image.PNGFilterInputStream inputStream>;
+
+        $r58 = new java.util.zip.Inflater;
+
+        specialinvoke $r58.<java.util.zip.Inflater: void <init>()>();
+
+        specialinvoke $r59.<java.util.zip.InflaterInputStream: void <init>(java.io.InputStream,java.util.zip.Inflater)>($r5, $r58);
+
+        specialinvoke $r60.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r59);
+
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: boolean getData()>();
+
+        r49 = null;
+
+        r50 = null;
+
+        i184 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i1 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        lookupswitch($i1)
+        {
+            case 1: goto label05;
+            case 2: goto label06;
+            case 4: goto label07;
+            case 8: goto label08;
+            case 16: goto label09;
+            default: goto label10;
+        };
+
+     label05:
+        b185 = 0;
+
+        b219 = 0;
+
+        b218 = 0;
+
+        goto label11;
+
+     label06:
+        b185 = 1;
+
+        b219 = 1;
+
+        b218 = 1;
+
+        goto label11;
+
+     label07:
+        b185 = 2;
+
+        b219 = 2;
+
+        b218 = 2;
+
+        goto label11;
+
+     label08:
+        b185 = 3;
+
+        b219 = 3;
+
+        b218 = 3;
+
+        goto label11;
+
+     label09:
+        b185 = 4;
+
+        b219 = 4;
+
+        b218 = 4;
+
+        goto label11;
+
+     label10:
+        $r61 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r61.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "invalid depth");
+
+        throw $r61;
+
+     label11:
+        $i186 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i186 == 0 goto label12;
+
+        $i178 = r3.<sun.awt.image.PNGImageDecoder: int height>;
+
+        i184 = i184 * $i178;
+
+        i187 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        goto label13;
+
+     label12:
+        i187 = 0;
+
+     label13:
+        $i4 = r3.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        $i2 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $i3 = $i2 << 3;
+
+        $i179 = $i4 | $i3;
+
+        $i5 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        if $i5 < 8 goto label14;
+
+        goto label14;
+
+     label14:
+        $i6 = r3.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        tableswitch($i6)
+        {
+            case 0: goto label19;
+            case 1: goto label28;
+            case 2: goto label27;
+            case 3: goto label15;
+            case 4: goto label27;
+            case 5: goto label28;
+            case 6: goto label27;
+            case 7: goto label15;
+            default: goto label28;
+        };
+
+     label15:
+        $r6 = r3.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        if $r6 != null goto label16;
+
+        $r62 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r62.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "palette expected");
+
+        throw $r62;
+
+     label16:
+        $r7 = r3.<sun.awt.image.PNGImageDecoder: byte[] alpha_map>;
+
+        if $r7 != null goto label17;
+
+        $r63 = new java.awt.image.IndexColorModel;
+
+        $i165 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $r27 = r3.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $i164 = lengthof $r27;
+
+        $r30 = r3.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $r29 = r3.<sun.awt.image.PNGImageDecoder: byte[] green_map>;
+
+        $r28 = r3.<sun.awt.image.PNGImageDecoder: byte[] blue_map>;
+
+        specialinvoke $r63.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[])>($i165, $i164, $r30, $r29, $r28);
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r63;
+
+        goto label18;
+
+     label17:
+        $r64 = new java.awt.image.IndexColorModel;
+
+        $i8 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $r9 = r3.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $i7 = lengthof $r9;
+
+        $r13 = r3.<sun.awt.image.PNGImageDecoder: byte[] red_map>;
+
+        $r12 = r3.<sun.awt.image.PNGImageDecoder: byte[] green_map>;
+
+        $r11 = r3.<sun.awt.image.PNGImageDecoder: byte[] blue_map>;
+
+        $r10 = r3.<sun.awt.image.PNGImageDecoder: byte[] alpha_map>;
+
+        specialinvoke $r64.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[],byte[])>($i8, $i7, $r13, $r12, $r11, $r10);
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r64;
+
+     label18:
+        r49 = newarray (byte)[i184];
+
+        goto label29;
+
+     label19:
+        if b218 < 4 goto label20;
+
+        $b188 = 3;
+
+        goto label21;
+
+     label20:
+        $b188 = b219;
+
+     label21:
+        b189 = $b188;
+
+        $r33 = <sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel[] greyModels>;
+
+        $r34 = $r33[$b188];
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r34;
+
+        if $r34 != null goto label26;
+
+        $i166 = 1 << $b188;
+
+        i190 = 1 << $i166;
+
+        r51 = newarray (byte)[i190];
+
+        i191 = 0;
+
+     label22:
+        if i191 >= i190 goto label23;
+
+        $i175 = 255 * i191;
+
+        $i174 = i190 - 1;
+
+        $i176 = $i175 / $i174;
+
+        $b177 = (byte) $i176;
+
+        r51[i191] = $b177;
+
+        i191 = i191 + 1;
+
+        goto label22;
+
+     label23:
+        $i167 = r3.<sun.awt.image.PNGImageDecoder: int transparentPixel>;
+
+        $i223 = (int) -1;
+
+        if $i167 != $i223 goto label24;
+
+        $r65 = new java.awt.image.IndexColorModel;
+
+        $i173 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $i172 = lengthof r51;
+
+        specialinvoke $r65.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[])>($i173, $i172, r51, r51, r51);
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r65;
+
+        goto label25;
+
+     label24:
+        $r66 = new java.awt.image.IndexColorModel;
+
+        $i171 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $i170 = lengthof r51;
+
+        $i168 = r3.<sun.awt.image.PNGImageDecoder: int transparentPixel>;
+
+        $i169 = $i168 & 255;
+
+        specialinvoke $r66.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[],int)>($i171, $i170, r51, r51, r51, $i169);
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r66;
+
+     label25:
+        $r37 = <sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel[] greyModels>;
+
+        $r36 = r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm>;
+
+        $r37[b189] = $r36;
+
+     label26:
+        r49 = newarray (byte)[i184];
+
+        goto label29;
+
+     label27:
+        $r32 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm> = $r32;
+
+        r50 = newarray (int)[i184];
+
+        goto label29;
+
+     label28:
+        $r67 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r67.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "invalid color type");
+
+        throw $r67;
+
+     label29:
+        $i192 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i193 = r3.<sun.awt.image.PNGImageDecoder: int height>;
+
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: int setDimensions(int,int)>($i192, $i193);
+
+        $r52 = r3.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm>;
+
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: int setColorModel(java.awt.image.ColorModel)>($r52);
+
+        $i194 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i194 == 0 goto label30;
+
+        $b195 = 6;
+
+        goto label31;
+
+     label30:
+        $b195 = 30;
+
+     label31:
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: int setHints(int)>($b195);
+
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: void headerComplete()>();
+
+        $i9 = r3.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        $i10 = $i9 & 1;
+
+        if $i10 == 0 goto label32;
+
+        $i196 = 1;
+
+        goto label37;
+
+     label32:
+        $i11 = r3.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        $i12 = $i11 & 2;
+
+        if $i12 == 0 goto label33;
+
+        $b197 = 3;
+
+        goto label34;
+
+     label33:
+        $b197 = 1;
+
+     label34:
+        $i13 = r3.<sun.awt.image.PNGImageDecoder: int colorType>;
+
+        $i14 = $i13 & 4;
+
+        if $i14 == 0 goto label35;
+
+        $z2 = 1;
+
+        goto label36;
+
+     label35:
+        $z2 = 0;
+
+     label36:
+        $i196 = $b197 + $z2;
+
+     label37:
+        $i198 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        $i199 = $i196 * $i198;
+
+        $i200 = $i199 + 7;
+
+        $i201 = $i200 >> 3;
+
+        $i202 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i202 != 0 goto label38;
+
+        $i225 = (int) -1;
+
+        i203 = $i225;
+
+        b204 = 0;
+
+        goto label39;
+
+     label38:
+        i203 = 0;
+
+        b204 = 7;
+
+     label39:
+        i203 = i203 + 1;
+
+        if i203 > b204 goto label78;
+
+        $r14 = <sun.awt.image.PNGImageDecoder: byte[] startingRow>;
+
+        i205 = $r14[i203];
+
+        $r15 = <sun.awt.image.PNGImageDecoder: byte[] rowIncrement>;
+
+        b15 = $r15[i203];
+
+        $r16 = <sun.awt.image.PNGImageDecoder: byte[] colIncrement>;
+
+        b16 = $r16[i203];
+
+        $r17 = <sun.awt.image.PNGImageDecoder: byte[] blockWidth>;
+
+        b17 = $r17[i203];
+
+        $r18 = <sun.awt.image.PNGImageDecoder: byte[] blockHeight>;
+
+        b18 = $r18[i203];
+
+        $r19 = <sun.awt.image.PNGImageDecoder: byte[] startingCol>;
+
+        b19 = $r19[i203];
+
+        $i20 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i226 = (int) b19;
+
+        $i22 = $i20 - $i226;
+
+        $i227 = (int) b16;
+
+        $i21 = $i227 - 1;
+
+        $i23 = $i22 + $i21;
+
+        $i228 = (int) b16;
+
+        i24 = $i23 / $i228;
+
+        $i25 = i24 * $i199;
+
+        $i26 = $i25 + 7;
+
+        i27 = $i26 >> 3;
+
+        if i27 != 0 goto label40;
+
+        goto label39;
+
+     label40:
+        $i28 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i28 != 0 goto label41;
+
+        goto label41;
+
+     label41:
+        i206 = i187 * i205;
+
+        z3 = 1;
+
+        r53 = newarray (byte)[i27];
+
+        r54 = newarray (byte)[i27];
+
+     label42:
+        $i207 = r3.<sun.awt.image.PNGImageDecoder: int height>;
+
+        if i205 >= $i207 goto label75;
+
+        $i36 = virtualinvoke $r60.<java.io.InputStream: int read()>();
+
+        i208 = 0;
+
+     label43:
+        if i208 >= i27 goto label45;
+
+        $i162 = i27 - i208;
+
+        $i163 = virtualinvoke $r60.<java.io.InputStream: int read(byte[],int,int)>(r53, i208, $i162);
+
+        if $i163 > 0 goto label44;
+
+        $r68 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r68.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "missing data");
+
+        throw $r68;
+
+     label44:
+        i208 = i208 + $i163;
+
+        goto label43;
+
+     label45:
+        $r24 = r53;
+
+        if z3 == 0 goto label46;
+
+        $r55 = null;
+
+        goto label47;
+
+     label46:
+        $r55 = r54;
+
+     label47:
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: void filterRow(byte[],byte[],int,int,int)>($r24, $r55, $i36, i27, $i201);
+
+        $i229 = (int) b19;
+
+        i209 = $i229;
+
+        i210 = 0;
+
+     label48:
+        $i211 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        if i209 >= $i211 goto label72;
+
+        if r50 == null goto label64;
+
+        lookupswitch($i179)
+        {
+            case 66: goto label51;
+            case 68: goto label61;
+            case 70: goto label49;
+            case 130: goto label53;
+            case 132: goto label62;
+            case 134: goto label50;
+            default: goto label63;
+        };
+
+     label49:
+        $i137 = i209 + i206;
+
+        $b120 = r53[i210];
+
+        $s230 = (short) $b120;
+
+        $s121 = $s230 & 255;
+
+        $i231 = (int) $s121;
+
+        $i126 = $i231 << 16;
+
+        $i122 = i210 + 1;
+
+        $b123 = r53[$i122];
+
+        $s232 = (short) $b123;
+
+        $s124 = $s232 & 255;
+
+        $i233 = (int) $s124;
+
+        $i125 = $i233 << 8;
+
+        $i130 = $i126 | $i125;
+
+        $i127 = i210 + 2;
+
+        $b128 = r53[$i127];
+
+        $s234 = (short) $b128;
+
+        $s129 = $s234 & 255;
+
+        $i235 = (int) $s129;
+
+        $i135 = $i130 | $i235;
+
+        $i131 = i210 + 3;
+
+        $b132 = r53[$i131];
+
+        $s236 = (short) $b132;
+
+        $s133 = $s236 & 255;
+
+        $i237 = (int) $s133;
+
+        $i134 = $i237 << 24;
+
+        $i136 = $i135 | $i134;
+
+        r50[$i137] = $i136;
+
+        i210 = i210 + 4;
+
+        goto label71;
+
+     label50:
+        $i91 = i209 + i206;
+
+        $b74 = r53[i210];
+
+        $s238 = (short) $b74;
+
+        $s75 = $s238 & 255;
+
+        $i239 = (int) $s75;
+
+        $i80 = $i239 << 16;
+
+        $i76 = i210 + 2;
+
+        $b77 = r53[$i76];
+
+        $s240 = (short) $b77;
+
+        $s78 = $s240 & 255;
+
+        $i241 = (int) $s78;
+
+        $i79 = $i241 << 8;
+
+        $i84 = $i80 | $i79;
+
+        $i81 = i210 + 4;
+
+        $b82 = r53[$i81];
+
+        $s242 = (short) $b82;
+
+        $s83 = $s242 & 255;
+
+        $i243 = (int) $s83;
+
+        $i89 = $i84 | $i243;
+
+        $i85 = i210 + 6;
+
+        $b86 = r53[$i85];
+
+        $s244 = (short) $b86;
+
+        $s87 = $s244 & 255;
+
+        $i245 = (int) $s87;
+
+        $i88 = $i245 << 24;
+
+        $i90 = $i89 | $i88;
+
+        r50[$i91] = $i90;
+
+        i210 = i210 + 8;
+
+        goto label71;
+
+     label51:
+        $b149 = r53[i210];
+
+        $s246 = (short) $b149;
+
+        $s150 = $s246 & 255;
+
+        $i247 = (int) $s150;
+
+        $i155 = $i247 << 16;
+
+        $i151 = i210 + 1;
+
+        $b152 = r53[$i151];
+
+        $s248 = (short) $b152;
+
+        $s153 = $s248 & 255;
+
+        $i249 = (int) $s153;
+
+        $i154 = $i249 << 8;
+
+        $i159 = $i155 | $i154;
+
+        $i156 = i210 + 2;
+
+        $b157 = r53[$i156];
+
+        $s250 = (short) $b157;
+
+        $s158 = $s250 & 255;
+
+        $i251 = (int) $s158;
+
+        i212 = $i159 | $i251;
+
+        $i160 = r3.<sun.awt.image.PNGImageDecoder: int transparentPixel>;
+
+        if i212 == $i160 goto label52;
+
+        i212 = i212 | -16777216;
+
+     label52:
+        $i161 = i209 + i206;
+
+        r50[$i161] = i212;
+
+        i210 = i210 + 3;
+
+        goto label71;
+
+     label53:
+        $b103 = r53[i210];
+
+        $s252 = (short) $b103;
+
+        $s104 = $s252 & 255;
+
+        $i253 = (int) $s104;
+
+        $i109 = $i253 << 16;
+
+        $i105 = i210 + 2;
+
+        $b106 = r53[$i105];
+
+        $s254 = (short) $b106;
+
+        $s107 = $s254 & 255;
+
+        $i255 = (int) $s107;
+
+        $i108 = $i255 << 8;
+
+        $i113 = $i109 | $i108;
+
+        $i110 = i210 + 4;
+
+        $b111 = r53[$i110];
+
+        $s256 = (short) $b111;
+
+        $s112 = $s256 & 255;
+
+        $i257 = (int) $s112;
+
+        i213 = $i113 | $i257;
+
+        $r21 = r3.<sun.awt.image.PNGImageDecoder: byte[] transparentPixel_16>;
+
+        if $r21 == null goto label54;
+
+        $z4 = 1;
+
+        goto label55;
+
+     label54:
+        $z4 = 0;
+
+     label55:
+        z5 = $z4;
+
+        i214 = 0;
+
+     label56:
+        if z5 == 0 goto label59;
+
+        if i214 >= 6 goto label59;
+
+        $z0 = z5;
+
+        $i115 = i210 + i214;
+
+        $b116 = r53[$i115];
+
+        $s258 = (short) $b116;
+
+        $s119 = $s258 & 255;
+
+        $r22 = r3.<sun.awt.image.PNGImageDecoder: byte[] transparentPixel_16>;
+
+        $b117 = $r22[i214];
+
+        $s259 = (short) $b117;
+
+        $s118 = $s259 & 255;
+
+        $i260 = (int) $s119;
+
+        $i261 = (int) $s118;
+
+        if $i260 != $i261 goto label57;
+
+        $z6 = 1;
+
+        goto label58;
+
+     label57:
+        $z6 = 0;
+
+     label58:
+        z5 = $z0 & $z6;
+
+        i214 = i214 + 1;
+
+        goto label56;
+
+     label59:
+        if z5 != 0 goto label60;
+
+        i213 = i213 | -16777216;
+
+     label60:
+        $i114 = i209 + i206;
+
+        r50[$i114] = i213;
+
+        i210 = i210 + 6;
+
+        goto label71;
+
+     label61:
+        $b138 = r53[i210];
+
+        $s262 = (short) $b138;
+
+        s215 = $s262 & 255;
+
+        $i148 = i209 + i206;
+
+        $i263 = (int) s215;
+
+        $i140 = $i263 << 16;
+
+        $i264 = (int) s215;
+
+        $i139 = $i264 << 8;
+
+        $i141 = $i140 | $i139;
+
+        $i265 = (int) s215;
+
+        $i146 = $i141 | $i265;
+
+        $i142 = i210 + 1;
+
+        $b143 = r53[$i142];
+
+        $s266 = (short) $b143;
+
+        $s144 = $s266 & 255;
+
+        $i267 = (int) $s144;
+
+        $i145 = $i267 << 24;
+
+        $i147 = $i146 | $i145;
+
+        r50[$i148] = $i147;
+
+        i210 = i210 + 2;
+
+        goto label71;
+
+     label62:
+        $b92 = r53[i210];
+
+        $s268 = (short) $b92;
+
+        s216 = $s268 & 255;
+
+        $i102 = i209 + i206;
+
+        $i269 = (int) s216;
+
+        $i94 = $i269 << 16;
+
+        $i270 = (int) s216;
+
+        $i93 = $i270 << 8;
+
+        $i95 = $i94 | $i93;
+
+        $i271 = (int) s216;
+
+        $i100 = $i95 | $i271;
+
+        $i96 = i210 + 2;
+
+        $b97 = r53[$i96];
+
+        $s272 = (short) $b97;
+
+        $s98 = $s272 & 255;
+
+        $i273 = (int) $s98;
+
+        $i99 = $i273 << 24;
+
+        $i101 = $i100 | $i99;
+
+        r50[$i102] = $i101;
+
+        i210 = i210 + 4;
+
+        goto label71;
+
+     label63:
+        $r69 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r69.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "illegal type/depth");
+
+        throw $r69;
+
+     label64:
+        $i42 = r3.<sun.awt.image.PNGImageDecoder: int bitDepth>;
+
+        lookupswitch($i42)
+        {
+            case 1: goto label65;
+            case 2: goto label66;
+            case 4: goto label67;
+            case 8: goto label68;
+            case 16: goto label69;
+            default: goto label70;
+        };
+
+     label65:
+        $i73 = i209 + i206;
+
+        $i66 = i210 >> 3;
+
+        $b69 = r53[$i66];
+
+        $i67 = i210 & 7;
+
+        $i68 = 7 - $i67;
+
+        $i274 = (int) $b69;
+
+        $i70 = $i274 >> $i68;
+
+        $i71 = $i70 & 1;
+
+        $b72 = (byte) $i71;
+
+        r49[$i73] = $b72;
+
+        i210 = i210 + 1;
+
+        goto label71;
+
+     label66:
+        $i65 = i209 + i206;
+
+        $i57 = i210 >> 2;
+
+        $b61 = r53[$i57];
+
+        $i58 = i210 & 3;
+
+        $i59 = 3 - $i58;
+
+        $i60 = $i59 * 2;
+
+        $i275 = (int) $b61;
+
+        $i62 = $i275 >> $i60;
+
+        $i63 = $i62 & 3;
+
+        $b64 = (byte) $i63;
+
+        r49[$i65] = $b64;
+
+        i210 = i210 + 1;
+
+        goto label71;
+
+     label67:
+        $i56 = i209 + i206;
+
+        $i48 = i210 >> 1;
+
+        $b52 = r53[$i48];
+
+        $i49 = i210 & 1;
+
+        $i50 = 1 - $i49;
+
+        $i51 = $i50 * 4;
+
+        $i276 = (int) $b52;
+
+        $i53 = $i276 >> $i51;
+
+        $i54 = $i53 & 15;
+
+        $b55 = (byte) $i54;
+
+        r49[$i56] = $b55;
+
+        i210 = i210 + 1;
+
+        goto label71;
+
+     label68:
+        $i47 = i209 + i206;
+
+        $i45 = i210;
+
+        i210 = i210 + 1;
+
+        $b46 = r53[$i45];
+
+        r49[$i47] = $b46;
+
+        goto label71;
+
+     label69:
+        $i44 = i209 + i206;
+
+        $b43 = r53[i210];
+
+        r49[$i44] = $b43;
+
+        i210 = i210 + 2;
+
+        goto label71;
+
+     label70:
+        $r70 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r70.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "illegal type/depth");
+
+        throw $r70;
+
+     label71:
+        $i277 = (int) b16;
+
+        i209 = i209 + $i277;
+
+        goto label48;
+
+     label72:
+        $i37 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i37 != 0 goto label74;
+
+        if r50 == null goto label73;
+
+        $i41 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i40 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: boolean sendPixels(int,int,int,int,int[],int,int)>(0, i205, $i41, 1, r50, 0, $i40);
+
+        goto label74;
+
+     label73:
+        $i39 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i38 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: boolean sendPixels(int,int,int,int,byte[],int,int)>(0, i205, $i39, 1, r49, 0, $i38);
+
+     label74:
+        $i278 = (int) b15;
+
+        i205 = i205 + $i278;
+
+        $i279 = (int) b15;
+
+        $i217 = $i279 * i187;
+
+        i206 = i206 + $i217;
+
+        r56 = r53;
+
+        r53 = r54;
+
+        r54 = r56;
+
+        z3 = 0;
+
+        goto label42;
+
+     label75:
+        $i29 = r3.<sun.awt.image.PNGImageDecoder: int interlaceMethod>;
+
+        if $i29 == 0 goto label77;
+
+        if r50 == null goto label76;
+
+        $i35 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i34 = r3.<sun.awt.image.PNGImageDecoder: int height>;
+
+        $i33 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: boolean sendPixels(int,int,int,int,int[],int,int)>(0, 0, $i35, $i34, r50, 0, $i33);
+
+        goto label77;
+
+     label76:
+        $i32 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        $i31 = r3.<sun.awt.image.PNGImageDecoder: int height>;
+
+        $i30 = r3.<sun.awt.image.PNGImageDecoder: int width>;
+
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: boolean sendPixels(int,int,int,int,byte[],int,int)>(0, 0, $i32, $i31, r49, 0, $i30);
+
+     label77:
+        goto label39;
+
+     label78:
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: int imageComplete(int,boolean)>(3, 1);
+
+     label79:
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: void close()>();
+
+     label80:
+        goto label91;
+
+     label81:
+        $r48 := @caughtexception;
+
+        goto label91;
+
+     label82:
+        $r47 := @caughtexception;
+
+        $z1 = r3.<sun.awt.image.PNGImageDecoder: boolean aborted>;
+
+        if $z1 != 0 goto label83;
+
+        specialinvoke r3.<sun.awt.image.PNGImageDecoder: void property(java.lang.String,java.lang.Object)>("error", $r47);
+
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: int imageComplete(int,boolean)>(3, 1);
+
+        throw $r47;
+
+     label83:
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: void close()>();
+
+     label84:
+        goto label91;
+
+     label85:
+        $r46 := @caughtexception;
+
+        goto label91;
+
+     label86:
+        $r45 := @caughtexception;
+
+     label87:
+        virtualinvoke r3.<sun.awt.image.PNGImageDecoder: void close()>();
+
+     label88:
+        goto label90;
+
+     label89:
+        $r44 := @caughtexception;
+
+     label90:
+        throw $r45;
+
+     label91:
+        return;
+
+        catch java.lang.Throwable from label79 to label80 with label81;
+        catch java.io.IOException from label01 to label79 with label82;
+        catch java.lang.Throwable from label83 to label84 with label85;
+        catch java.lang.Throwable from label01 to label79 with label86;
+        catch java.lang.Throwable from label82 to label83 with label86;
+        catch java.lang.Throwable from label87 to label88 with label89;
+        catch java.lang.Throwable from label86 to label87 with label86;
+    }
+
+    private boolean sendPixels(int, int, int, int, int[], int, int)
+    {
+        java.awt.image.ColorModel $r2;
+        int[] r1;
+        sun.awt.image.PNGImageDecoder r0;
+        int i0, i1, i2, i3, i4, i5, $i6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r1 := @parameter4: int[];
+
+        i4 := @parameter5: int;
+
+        i5 := @parameter6: int;
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm>;
+
+        $i6 = virtualinvoke r0.<sun.awt.image.PNGImageDecoder: int setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(i0, i1, i2, i3, $r2, r1, i4, i5);
+
+        if $i6 > 0 goto label1;
+
+        r0.<sun.awt.image.PNGImageDecoder: boolean aborted> = 1;
+
+     label1:
+        $z0 = r0.<sun.awt.image.PNGImageDecoder: boolean aborted>;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    private boolean sendPixels(int, int, int, int, byte[], int, int)
+    {
+        byte[] r1;
+        java.awt.image.ColorModel $r2;
+        sun.awt.image.PNGImageDecoder r0;
+        int i0, i1, i2, i3, i4, i5, $i6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r1 := @parameter4: byte[];
+
+        i4 := @parameter5: int;
+
+        i5 := @parameter6: int;
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel cm>;
+
+        $i6 = virtualinvoke r0.<sun.awt.image.PNGImageDecoder: int setPixels(int,int,int,int,java.awt.image.ColorModel,byte[],int,int)>(i0, i1, i2, i3, $r2, r1, i4, i5);
+
+        if $i6 > 0 goto label1;
+
+        r0.<sun.awt.image.PNGImageDecoder: boolean aborted> = 1;
+
+     label1:
+        $z0 = r0.<sun.awt.image.PNGImageDecoder: boolean aborted>;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    private void filterRow(byte[], byte[], int, int, int) throws java.io.IOException
+    {
+        byte[] r0, r1;
+        byte $b4, $b5, $b7, $b9, $b11, $b14, $b21, $b22, $b24, $b26, $b29, $b31, $b32, $b34, $b39, $b41, $b42, $b45, $b47, $b48, $b49, $b51, $b53, $b54, $b56, $b64, $b67;
+        short s10, s12, s15, $s27, $s35, $s36, $s43, $s65, $s73, $s76, $s77, $s81, $s86, $s87, $s88;
+        sun.awt.image.PNGImageDecoder r3;
+        int i0, i1, i2, $i3, $i6, $i8, $i13, $i16, i17, i18, i19, i20, $i23, $i25, $i28, $i30, $i33, $i37, $i38, $i40, $i44, $i46, $i50, $i52, $i55, i57, i58, i59, $i60, $i61, $i62, $i63, $i66, i68, $i69, $i70, $i71, $i72, $i74, $i75, $i78, $i79, $i80, $i82, $i83, $i84, $i85, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104;
+        sun.awt.image.PNGImageDecoder$PNGException $r4;
+
+        r3 := @this: sun.awt.image.PNGImageDecoder;
+
+        r1 := @parameter0: byte[];
+
+        r0 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i57 = 0;
+
+        tableswitch(i0)
+        {
+            case 0: goto label01;
+            case 1: goto label02;
+            case 2: goto label04;
+            case 3: goto label06;
+            case 4: goto label11;
+            default: goto label25;
+        };
+
+     label01:
+        goto label26;
+
+     label02:
+        i58 = i1;
+
+     label03:
+        if i58 >= i2 goto label26;
+
+        $b54 = r1[i58];
+
+        $i52 = i58 - i1;
+
+        $b53 = r1[$i52];
+
+        $i69 = (int) $b54;
+
+        $i70 = (int) $b53;
+
+        $i55 = $i69 + $i70;
+
+        $b56 = (byte) $i55;
+
+        r1[i58] = $b56;
+
+        i58 = i58 + 1;
+
+        goto label03;
+
+     label04:
+        if r0 == null goto label26;
+
+     label05:
+        if i57 >= i2 goto label26;
+
+        $b49 = r1[i57];
+
+        $b48 = r0[i57];
+
+        $i71 = (int) $b49;
+
+        $i72 = (int) $b48;
+
+        $i50 = $i71 + $i72;
+
+        $b51 = (byte) $i50;
+
+        r1[i57] = $b51;
+
+        i57 = i57 + 1;
+
+        goto label05;
+
+     label06:
+        if r0 == null goto label09;
+
+     label07:
+        if i57 >= i1 goto label08;
+
+        $b45 = r1[i57];
+
+        $b42 = r0[i57];
+
+        $s73 = (short) $b42;
+
+        $s43 = 255 & $s73;
+
+        $i74 = (int) $s43;
+
+        $i44 = $i74 >> 1;
+
+        $i75 = (int) $b45;
+
+        $i46 = $i75 + $i44;
+
+        $b47 = (byte) $i46;
+
+        r1[i57] = $b47;
+
+        i57 = i57 + 1;
+
+        goto label07;
+
+     label08:
+        if i57 >= i2 goto label26;
+
+        $b39 = r1[i57];
+
+        $b32 = r0[i57];
+
+        $s76 = (short) $b32;
+
+        $s36 = $s76 & 255;
+
+        $i33 = i57 - i1;
+
+        $b34 = r1[$i33];
+
+        $s77 = (short) $b34;
+
+        $s35 = $s77 & 255;
+
+        $i78 = (int) $s36;
+
+        $i79 = (int) $s35;
+
+        $i37 = $i78 + $i79;
+
+        $i38 = $i37 >> 1;
+
+        $i80 = (int) $b39;
+
+        $i40 = $i80 + $i38;
+
+        $b41 = (byte) $i40;
+
+        r1[i57] = $b41;
+
+        i57 = i57 + 1;
+
+        goto label08;
+
+     label09:
+        i59 = i1;
+
+     label10:
+        if i59 >= i2 goto label26;
+
+        $b29 = r1[i59];
+
+        $i25 = i59 - i1;
+
+        $b26 = r1[$i25];
+
+        $s81 = (short) $b26;
+
+        $s27 = $s81 & 255;
+
+        $i82 = (int) $s27;
+
+        $i28 = $i82 >> 1;
+
+        $i83 = (int) $b29;
+
+        $i30 = $i83 + $i28;
+
+        $b31 = (byte) $i30;
+
+        r1[i59] = $b31;
+
+        i59 = i59 + 1;
+
+        goto label10;
+
+     label11:
+        if r0 == null goto label23;
+
+     label12:
+        if i57 >= i1 goto label13;
+
+        $b22 = r1[i57];
+
+        $b21 = r0[i57];
+
+        $i84 = (int) $b22;
+
+        $i85 = (int) $b21;
+
+        $i23 = $i84 + $i85;
+
+        $b24 = (byte) $i23;
+
+        r1[i57] = $b24;
+
+        i57 = i57 + 1;
+
+        goto label12;
+
+     label13:
+        if i57 >= i2 goto label26;
+
+        $i8 = i57 - i1;
+
+        $b9 = r1[$i8];
+
+        $s86 = (short) $b9;
+
+        s10 = $s86 & 255;
+
+        $b11 = r0[i57];
+
+        $s87 = (short) $b11;
+
+        s12 = $s87 & 255;
+
+        $i13 = i57 - i1;
+
+        $b14 = r0[$i13];
+
+        $s88 = (short) $b14;
+
+        s15 = $s88 & 255;
+
+        $i89 = (int) s10;
+
+        $i90 = (int) s12;
+
+        $i16 = $i89 + $i90;
+
+        $i91 = (int) s15;
+
+        i17 = $i16 - $i91;
+
+        $i92 = (int) s10;
+
+        if i17 <= $i92 goto label14;
+
+        $i93 = (int) s10;
+
+        $i60 = i17 - $i93;
+
+        goto label15;
+
+     label14:
+        $i94 = (int) s10;
+
+        $i60 = $i94 - i17;
+
+     label15:
+        i18 = $i60;
+
+        $i95 = (int) s12;
+
+        if i17 <= $i95 goto label16;
+
+        $i96 = (int) s12;
+
+        $i61 = i17 - $i96;
+
+        goto label17;
+
+     label16:
+        $i97 = (int) s12;
+
+        $i61 = $i97 - i17;
+
+     label17:
+        i19 = $i61;
+
+        $i98 = (int) s15;
+
+        if i17 <= $i98 goto label18;
+
+        $i99 = (int) s15;
+
+        $i62 = i17 - $i99;
+
+        goto label19;
+
+     label18:
+        $i100 = (int) s15;
+
+        $i62 = $i100 - i17;
+
+     label19:
+        i20 = $i62;
+
+        $i63 = i57;
+
+        $b64 = r1[i57];
+
+        if i18 > i19 goto label20;
+
+        if i18 > $i62 goto label20;
+
+        $s65 = s10;
+
+        goto label22;
+
+     label20:
+        if i19 > i20 goto label21;
+
+        $s65 = s12;
+
+        goto label22;
+
+     label21:
+        $s65 = s15;
+
+     label22:
+        $i101 = (int) $b64;
+
+        $i102 = (int) $s65;
+
+        $i66 = $i101 + $i102;
+
+        $b67 = (byte) $i66;
+
+        r1[$i63] = $b67;
+
+        i57 = i57 + 1;
+
+        goto label13;
+
+     label23:
+        i68 = i1;
+
+     label24:
+        if i68 >= i2 goto label26;
+
+        $b5 = r1[i68];
+
+        $i3 = i68 - i1;
+
+        $b4 = r1[$i3];
+
+        $i103 = (int) $b5;
+
+        $i104 = (int) $b4;
+
+        $i6 = $i103 + $i104;
+
+        $b7 = (byte) $i6;
+
+        r1[i68] = $b7;
+
+        i68 = i68 + 1;
+
+        goto label24;
+
+     label25:
+        $r4 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r4.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r3, "Illegal filter");
+
+        throw $r4;
+
+     label26:
+        return;
+    }
+
+    public void <init>(sun.awt.image.InputStreamImageSource, java.io.InputStream) throws java.io.IOException
+    {
+        byte[] $r3;
+        sun.awt.image.PNGFilterInputStream $r5, $r7;
+        sun.awt.image.InputStreamImageSource r1;
+        sun.awt.image.PNGImageDecoder r0;
+        int $i1;
+        java.io.InputStream r2, $r6;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        r1 := @parameter0: sun.awt.image.InputStreamImageSource;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<sun.awt.image.ImageDecoder: void <init>(sun.awt.image.InputStreamImageSource,java.io.InputStream)>(r1, r2);
+
+        r0.<sun.awt.image.PNGImageDecoder: int gamma> = 100000;
+
+        $i1 = (int) -1;
+
+        r0.<sun.awt.image.PNGImageDecoder: int transparentPixel> = $i1;
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] transparentPixel_16> = null;
+
+        $r3 = newarray (byte)[4096];
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf> = $r3;
+
+        $r7 = new sun.awt.image.PNGFilterInputStream;
+
+        specialinvoke $r7.<sun.awt.image.PNGFilterInputStream: void <init>(sun.awt.image.PNGImageDecoder,java.io.InputStream)>(r0, r2);
+
+        r0.<sun.awt.image.PNGImageDecoder: sun.awt.image.PNGFilterInputStream inputStream> = $r7;
+
+        $r5 = r0.<sun.awt.image.PNGImageDecoder: sun.awt.image.PNGFilterInputStream inputStream>;
+
+        $r6 = $r5.<sun.awt.image.PNGFilterInputStream: java.io.InputStream underlyingInputStream>;
+
+        r0.<sun.awt.image.PNGImageDecoder: java.io.InputStream underlyingInputStream> = $r6;
+
+        return;
+    }
+
+    private void fill() throws java.io.IOException
+    {
+        byte[] $r1, $r3, $r4, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        boolean $z0;
+        sun.awt.image.PNGImageDecoder r0;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        $z0 = r0.<sun.awt.image.PNGImageDecoder: boolean seenEOF>;
+
+        if $z0 != 0 goto label5;
+
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        if $i0 <= 0 goto label1;
+
+        $i10 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i9 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        if $i10 >= $i9 goto label1;
+
+        $r4 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i14 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $r3 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i12 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i11 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i13 = $i12 - $i11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i14, $r3, 0, $i13);
+
+        $i16 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i15 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i17 = $i16 - $i15;
+
+        r0.<sun.awt.image.PNGImageDecoder: int limit> = $i17;
+
+        r0.<sun.awt.image.PNGImageDecoder: int pos> = 0;
+
+        goto label2;
+
+     label1:
+        $i2 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        if $i2 < $i1 goto label2;
+
+        r0.<sun.awt.image.PNGImageDecoder: int pos> = 0;
+
+        r0.<sun.awt.image.PNGImageDecoder: int limit> = 0;
+
+     label2:
+        $r5 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i18 = lengthof $r5;
+
+     label3:
+        $i19 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        if $i19 >= $i18 goto label5;
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: java.io.InputStream underlyingInputStream>;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i5 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i3 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i4 = $i18 - $i3;
+
+        $i6 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>($r1, $i5, $i4);
+
+        if $i6 > 0 goto label4;
+
+        r0.<sun.awt.image.PNGImageDecoder: boolean seenEOF> = 1;
+
+        goto label5;
+
+     label4:
+        $i7 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i8 = $i7 + $i6;
+
+        r0.<sun.awt.image.PNGImageDecoder: int limit> = $i8;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private boolean need(int) throws java.io.IOException
+    {
+        byte[] r1, $r2;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        boolean $z0, $z1;
+        sun.awt.image.PNGImageDecoder r0;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i2 := @parameter0: int;
+
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i3 = $i1 - $i0;
+
+        if $i3 < i2 goto label1;
+
+        return 1;
+
+     label1:
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void fill()>();
+
+        $i5 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i4 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i6 = $i5 - $i4;
+
+        if $i6 < i2 goto label2;
+
+        return 1;
+
+     label2:
+        $z0 = r0.<sun.awt.image.PNGImageDecoder: boolean seenEOF>;
+
+        if $z0 == 0 goto label3;
+
+        return 0;
+
+     label3:
+        $i7 = i2 + 100;
+
+        r1 = newarray (byte)[$i7];
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i11 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i9 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i8 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i10 = $i9 - $i8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i11, r1, 0, $i10);
+
+        $i13 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i12 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i14 = $i13 - $i12;
+
+        r0.<sun.awt.image.PNGImageDecoder: int limit> = $i14;
+
+        r0.<sun.awt.image.PNGImageDecoder: int pos> = 0;
+
+        r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf> = r1;
+
+        specialinvoke r0.<sun.awt.image.PNGImageDecoder: void fill()>();
+
+        $i16 = r0.<sun.awt.image.PNGImageDecoder: int limit>;
+
+        $i15 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i17 = $i16 - $i15;
+
+        if $i17 < i2 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+    }
+
+    private final int getInt(int)
+    {
+        byte[] $r1, $r2, $r3, $r4;
+        short $s2, $s5, $s10, $s15, $s18, $s20, $s22, $s24;
+        byte $b1, $b4, $b9, $b14;
+        int i0, $i3, $i6, $i7, $i8, $i11, $i12, $i13, $i16, $i17, $i19, $i21, $i23, $i25;
+        sun.awt.image.PNGImageDecoder r0;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $b1 = $r1[i0];
+
+        $s18 = (short) $b1;
+
+        $s2 = $s18 & 255;
+
+        $i19 = (int) $s2;
+
+        $i7 = $i19 << 24;
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i3 = i0 + 1;
+
+        $b4 = $r2[$i3];
+
+        $s20 = (short) $b4;
+
+        $s5 = $s20 & 255;
+
+        $i21 = (int) $s5;
+
+        $i6 = $i21 << 16;
+
+        $i12 = $i7 | $i6;
+
+        $r3 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i8 = i0 + 2;
+
+        $b9 = $r3[$i8];
+
+        $s22 = (short) $b9;
+
+        $s10 = $s22 & 255;
+
+        $i23 = (int) $s10;
+
+        $i11 = $i23 << 8;
+
+        $i16 = $i12 | $i11;
+
+        $r4 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i13 = i0 + 3;
+
+        $b14 = $r4[$i13];
+
+        $s24 = (short) $b14;
+
+        $s15 = $s24 & 255;
+
+        $i25 = (int) $s15;
+
+        $i17 = $i16 | $i25;
+
+        return $i17;
+    }
+
+    private final int getShort(int)
+    {
+        byte[] $r1, $r2;
+        short $s2, $s5, $s8, $s9, $s11;
+        byte $b1, $b4;
+        int i0, $i3, $i6, $i7, $i10, $i12, $i13;
+        sun.awt.image.PNGImageDecoder r0;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $b1 = $r1[i0];
+
+        $s9 = (short) $b1;
+
+        $s2 = $s9 & 255;
+
+        $i10 = (int) $s2;
+
+        $i6 = $i10 << 8;
+
+        $r2 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i3 = i0 + 1;
+
+        $b4 = $r2[$i3];
+
+        $s11 = (short) $b4;
+
+        $s5 = $s11 & 255;
+
+        $i12 = (int) $s5;
+
+        $i7 = $i6 | $i12;
+
+        $s8 = (short) $i7;
+
+        $i13 = (int) $s8;
+
+        return $i13;
+    }
+
+    private final int getByte(int)
+    {
+        byte[] $r1;
+        short $s2, $s3;
+        byte $b1;
+        sun.awt.image.PNGImageDecoder r0;
+        int i0, $i4;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $b1 = $r1[i0];
+
+        $s3 = (short) $b1;
+
+        $s2 = $s3 & 255;
+
+        $i4 = (int) $s2;
+
+        return $i4;
+    }
+
+    private final boolean getChunk() throws java.io.IOException
+    {
+        byte[] $r1;
+        boolean $z0, $z1, $z2;
+        sun.awt.image.PNGImageDecoder r0;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        java.lang.String $r7;
+        sun.awt.image.PNGImageDecoder$PNGException $r2, $r3;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkLength> = 0;
+
+        $z0 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: boolean need(int)>(8);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i1 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i0);
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkLength> = $i1;
+
+        $i2 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i3 = $i2 + 4;
+
+        $i4 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i3);
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkKey> = $i4;
+
+        $i5 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        if $i5 >= 0 goto label2;
+
+        $r3 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bogus length: ");
+
+        $i25 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i25);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r0, $r7);
+
+        throw $r3;
+
+     label2:
+        $i6 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $i7 = $i6 + 12;
+
+        $z1 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: boolean need(int)>($i7);
+
+        if $z1 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $i8 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i10 = $i8 + 8;
+
+        $i9 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $i11 = $i10 + $i9;
+
+        $i12 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: int getInt(int)>($i11);
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkCRC> = $i12;
+
+        $i13 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i14 = $i13 + 8;
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkStart> = $i14;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i15 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i18 = $i15 + 4;
+
+        $i16 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $i17 = $i16 + 4;
+
+        $i19 = staticinvoke <sun.awt.image.PNGImageDecoder: int crc(byte[],int,int)>($r1, $i18, $i17);
+
+        $i20 = r0.<sun.awt.image.PNGImageDecoder: int chunkCRC>;
+
+        if $i20 == $i19 goto label4;
+
+        $z2 = <sun.awt.image.PNGImageDecoder: boolean checkCRC>;
+
+        if $z2 == 0 goto label4;
+
+        $r2 = new sun.awt.image.PNGImageDecoder$PNGException;
+
+        specialinvoke $r2.<sun.awt.image.PNGImageDecoder$PNGException: void <init>(sun.awt.image.PNGImageDecoder,java.lang.String)>(r0, "crc corruption");
+
+        throw $r2;
+
+     label4:
+        $i23 = r0.<sun.awt.image.PNGImageDecoder: int pos>;
+
+        $i21 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $i22 = $i21 + 12;
+
+        $i24 = $i23 + $i22;
+
+        r0.<sun.awt.image.PNGImageDecoder: int pos> = $i24;
+
+        return 1;
+    }
+
+    private void readAll() throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.awt.image.PNGImageDecoder r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+     label1:
+        $z0 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: boolean getChunk()>();
+
+        if $z0 == 0 goto label2;
+
+        $i2 = r0.<sun.awt.image.PNGImageDecoder: int chunkKey>;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int chunkStart>;
+
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: boolean handleChunk(int,byte[],int,int)>($i2, $r1, $i1, $i0);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    boolean getData() throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.awt.image.PNGImageDecoder r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+     label1:
+        $i4 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        if $i4 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<sun.awt.image.PNGImageDecoder: boolean getChunk()>();
+
+        if $z0 == 0 goto label2;
+
+        $i3 = r0.<sun.awt.image.PNGImageDecoder: int chunkKey>;
+
+        $r1 = r0.<sun.awt.image.PNGImageDecoder: byte[] inbuf>;
+
+        $i2 = r0.<sun.awt.image.PNGImageDecoder: int chunkStart>;
+
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $z1 = virtualinvoke r0.<sun.awt.image.PNGImageDecoder: boolean handleChunk(int,byte[],int,int)>($i3, $r1, $i2, $i1);
+
+        if $z1 == 0 goto label1;
+
+        r0.<sun.awt.image.PNGImageDecoder: int chunkLength> = 0;
+
+        goto label1;
+
+     label2:
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        if $i0 <= 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    public static boolean getCheckCRC()
+    {
+        boolean $z0;
+
+        $z0 = <sun.awt.image.PNGImageDecoder: boolean checkCRC>;
+
+        return $z0;
+    }
+
+    public static void setCheckCRC(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.awt.image.PNGImageDecoder: boolean checkCRC> = z0;
+
+        return;
+    }
+
+    protected void wrc(int)
+    {
+        java.io.PrintStream $r1;
+        sun.awt.image.PNGImageDecoder r0;
+        int i0, i1;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 = i0 & 255;
+
+        if i1 <= 32 goto label1;
+
+        if i1 <= 122 goto label2;
+
+     label1:
+        i1 = 63;
+
+     label2:
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void write(int)>(i1);
+
+        return;
+    }
+
+    protected void wrk(int)
+    {
+        sun.awt.image.PNGImageDecoder r0;
+        int i0, $i1, $i2, $i3;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 >> 24;
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: void wrc(int)>($i1);
+
+        $i2 = i0 >> 16;
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: void wrc(int)>($i2);
+
+        $i3 = i0 >> 8;
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: void wrc(int)>($i3);
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: void wrc(int)>(i0);
+
+        return;
+    }
+
+    public void print()
+    {
+        java.io.PrintStream $r2;
+        sun.awt.image.PNGImageDecoder r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r1, $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: sun.awt.image.PNGImageDecoder;
+
+        $i0 = r0.<sun.awt.image.PNGImageDecoder: int chunkKey>;
+
+        virtualinvoke r0.<sun.awt.image.PNGImageDecoder: void wrk(int)>($i0);
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i1 = r0.<sun.awt.image.PNGImageDecoder: int chunkLength>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void print(java.lang.String)>($r6);
+
+        return;
+    }
+
+    private static int update_crc(int, byte[], int, int)
+    {
+        byte[] r0;
+        byte $b2;
+        int[] $r1;
+        int i0, $i1, $i3, $i4, $i5, $i6, i7, i8, i9, $i11, $i12;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i7 := @parameter2: int;
+
+        i8 := @parameter3: int;
+
+        i9 = i0;
+
+     label1:
+        $i11 = (int) -1;
+
+        i8 = i8 + $i11;
+
+        if i8 < 0 goto label2;
+
+        $r1 = <sun.awt.image.PNGImageDecoder: int[] crc_table>;
+
+        $i1 = i7;
+
+        i7 = i7 + 1;
+
+        $b2 = r0[$i1];
+
+        $i12 = (int) $b2;
+
+        $i3 = i9 ^ $i12;
+
+        $i4 = $i3 & 255;
+
+        $i6 = $r1[$i4];
+
+        $i5 = i9 >>> 8;
+
+        i9 = $i6 ^ $i5;
+
+        goto label1;
+
+     label2:
+        return i9;
+    }
+
+    private static int crc(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2, $i3, $i5, $i7;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i5 = (int) -1;
+
+        $i2 = staticinvoke <sun.awt.image.PNGImageDecoder: int update_crc(int,byte[],int,int)>($i5, r0, i0, i1);
+
+        $i7 = (int) -1;
+
+        $i3 = $i2 ^ $i7;
+
+        return $i3;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.awt.image.ColorModel[] $r0;
+        int[] $r8, $r9;
+        int $i0, $i1, i2, i3, i4;
+
+        <sun.awt.image.PNGImageDecoder: int zTXtChunk> = 2052348020;
+
+        <sun.awt.image.PNGImageDecoder: int tRNSChunk> = 1951551059;
+
+        <sun.awt.image.PNGImageDecoder: int tIMEChunk> = 1950960965;
+
+        <sun.awt.image.PNGImageDecoder: int tEXtChunk> = 1950701684;
+
+        <sun.awt.image.PNGImageDecoder: int sBITChunk> = 1933723988;
+
+        <sun.awt.image.PNGImageDecoder: int pHYsChunk> = 1883789683;
+
+        <sun.awt.image.PNGImageDecoder: int PLTEChunk> = 1347179589;
+
+        <sun.awt.image.PNGImageDecoder: int IHDRChunk> = 1229472850;
+
+        <sun.awt.image.PNGImageDecoder: int IENDChunk> = 1229278788;
+
+        <sun.awt.image.PNGImageDecoder: int IDATChunk> = 1229209940;
+
+        <sun.awt.image.PNGImageDecoder: int hISTChunk> = 1749635924;
+
+        <sun.awt.image.PNGImageDecoder: int gAMAChunk> = 1732332865;
+
+        <sun.awt.image.PNGImageDecoder: int cHRMChunk> = 1665684045;
+
+        <sun.awt.image.PNGImageDecoder: int bKGDChunk> = 1649100612;
+
+        <sun.awt.image.PNGImageDecoder: int ALPHA> = 4;
+
+        <sun.awt.image.PNGImageDecoder: int COLOR> = 2;
+
+        <sun.awt.image.PNGImageDecoder: int PALETTE> = 1;
+
+        <sun.awt.image.PNGImageDecoder: int GRAY> = 0;
+
+        $r0 = newarray (java.awt.image.ColorModel)[4];
+
+        <sun.awt.image.PNGImageDecoder: java.awt.image.ColorModel[] greyModels> = $r0;
+
+        $r1 = newarray (byte)[8];
+
+        $r1[0] = 0;
+
+        $r1[1] = 0;
+
+        $r1[2] = 0;
+
+        $r1[3] = 4;
+
+        $r1[4] = 0;
+
+        $r1[5] = 2;
+
+        $r1[6] = 0;
+
+        $r1[7] = 1;
+
+        <sun.awt.image.PNGImageDecoder: byte[] startingRow> = $r1;
+
+        $r2 = newarray (byte)[8];
+
+        $r2[0] = 0;
+
+        $r2[1] = 0;
+
+        $r2[2] = 4;
+
+        $r2[3] = 0;
+
+        $r2[4] = 2;
+
+        $r2[5] = 0;
+
+        $r2[6] = 1;
+
+        $r2[7] = 0;
+
+        <sun.awt.image.PNGImageDecoder: byte[] startingCol> = $r2;
+
+        $r3 = newarray (byte)[8];
+
+        $r3[0] = 1;
+
+        $r3[1] = 8;
+
+        $r3[2] = 8;
+
+        $r3[3] = 8;
+
+        $r3[4] = 4;
+
+        $r3[5] = 4;
+
+        $r3[6] = 2;
+
+        $r3[7] = 2;
+
+        <sun.awt.image.PNGImageDecoder: byte[] rowIncrement> = $r3;
+
+        $r4 = newarray (byte)[8];
+
+        $r4[0] = 1;
+
+        $r4[1] = 8;
+
+        $r4[2] = 8;
+
+        $r4[3] = 4;
+
+        $r4[4] = 4;
+
+        $r4[5] = 2;
+
+        $r4[6] = 2;
+
+        $r4[7] = 1;
+
+        <sun.awt.image.PNGImageDecoder: byte[] colIncrement> = $r4;
+
+        $r5 = newarray (byte)[8];
+
+        $r5[0] = 1;
+
+        $r5[1] = 8;
+
+        $r5[2] = 8;
+
+        $r5[3] = 4;
+
+        $r5[4] = 4;
+
+        $r5[5] = 2;
+
+        $r5[6] = 2;
+
+        $r5[7] = 1;
+
+        <sun.awt.image.PNGImageDecoder: byte[] blockHeight> = $r5;
+
+        $r6 = newarray (byte)[8];
+
+        $r6[0] = 1;
+
+        $r6[1] = 8;
+
+        $r6[2] = 4;
+
+        $r6[3] = 4;
+
+        $r6[4] = 2;
+
+        $r6[5] = 2;
+
+        $r6[6] = 1;
+
+        $r6[7] = 1;
+
+        <sun.awt.image.PNGImageDecoder: byte[] blockWidth> = $r6;
+
+        $r7 = newarray (byte)[8];
+
+        $r7[0] = -119;
+
+        $r7[1] = 80;
+
+        $r7[2] = 78;
+
+        $r7[3] = 71;
+
+        $r7[4] = 13;
+
+        $r7[5] = 10;
+
+        $r7[6] = 26;
+
+        $r7[7] = 10;
+
+        <sun.awt.image.PNGImageDecoder: byte[] signature> = $r7;
+
+        <sun.awt.image.PNGImageDecoder: boolean checkCRC> = 1;
+
+        $r8 = newarray (int)[256];
+
+        <sun.awt.image.PNGImageDecoder: int[] crc_table> = $r8;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= 256 goto label6;
+
+        i3 = i2;
+
+        i4 = 0;
+
+     label2:
+        if i4 >= 8 goto label5;
+
+        $i0 = i3 & 1;
+
+        if $i0 == 0 goto label3;
+
+        $i1 = i3 >>> 1;
+
+        i3 = -306674912 ^ $i1;
+
+        goto label4;
+
+     label3:
+        i3 = i3 >>> 1;
+
+     label4:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label5:
+        $r9 = <sun.awt.image.PNGImageDecoder: int[] crc_table>;
+
+        $r9[i2] = i3;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+}

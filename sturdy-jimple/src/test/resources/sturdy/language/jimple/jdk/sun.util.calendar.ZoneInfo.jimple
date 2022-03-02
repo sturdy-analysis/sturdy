@@ -1,0 +1,1360 @@
+public class sun.util.calendar.ZoneInfo extends java.util.TimeZone
+{
+    private static final int UTC_TIME;
+    private static final int STANDARD_TIME;
+    private static final int WALL_TIME;
+    private static final long OFFSET_MASK;
+    private static final long DST_MASK;
+    private static final int DST_NSHIFT;
+    private static final long ABBR_MASK;
+    private static final int TRANSITION_NSHIFT;
+    private static final sun.util.calendar.CalendarSystem gcal;
+    private int rawOffset;
+    private int rawOffsetDiff;
+    private int checksum;
+    private int dstSavings;
+    private long[] transitions;
+    private int[] offsets;
+    private int[] simpleTimeZoneParams;
+    private boolean willGMTOffsetChange;
+    private transient boolean dirty;
+    private static final long serialVersionUID;
+    private transient java.util.SimpleTimeZone lastRule;
+
+    public void <init>()
+    {
+        sun.util.calendar.ZoneInfo r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        specialinvoke r0.<java.util.TimeZone: void <init>()>();
+
+        r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff> = 0;
+
+        r0.<sun.util.calendar.ZoneInfo: boolean willGMTOffsetChange> = 0;
+
+        r0.<sun.util.calendar.ZoneInfo: boolean dirty> = 0;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int)
+    {
+        int i0;
+        java.lang.String r1;
+        sun.util.calendar.ZoneInfo r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int,int,int,long[],int[],int[],boolean)>(r1, i0, 0, 0, null, null, null, 0);
+
+        return;
+    }
+
+    void <init>(java.lang.String, int, int, int, long[], int[], int[], boolean)
+    {
+        long[] r2;
+        sun.util.calendar.ZoneInfo r0;
+        int[] r3, r4;
+        int i0, i1, i2;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r2 := @parameter4: long[];
+
+        r3 := @parameter5: int[];
+
+        r4 := @parameter6: int[];
+
+        z0 := @parameter7: boolean;
+
+        specialinvoke r0.<java.util.TimeZone: void <init>()>();
+
+        r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff> = 0;
+
+        r0.<sun.util.calendar.ZoneInfo: boolean willGMTOffsetChange> = 0;
+
+        r0.<sun.util.calendar.ZoneInfo: boolean dirty> = 0;
+
+        virtualinvoke r0.<sun.util.calendar.ZoneInfo: void setID(java.lang.String)>(r1);
+
+        r0.<sun.util.calendar.ZoneInfo: int rawOffset> = i0;
+
+        r0.<sun.util.calendar.ZoneInfo: int dstSavings> = i1;
+
+        r0.<sun.util.calendar.ZoneInfo: int checksum> = i2;
+
+        r0.<sun.util.calendar.ZoneInfo: long[] transitions> = r2;
+
+        r0.<sun.util.calendar.ZoneInfo: int[] offsets> = r3;
+
+        r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams> = r4;
+
+        r0.<sun.util.calendar.ZoneInfo: boolean willGMTOffsetChange> = z0;
+
+        return;
+    }
+
+    public int getOffset(long)
+    {
+        int $i1;
+        long l0;
+        sun.util.calendar.ZoneInfo r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l0 := @parameter0: long;
+
+        $i1 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>(l0, null, 0);
+
+        return $i1;
+    }
+
+    public int getOffsets(long, int[])
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int[] r1;
+        int $i1;
+        long l0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: int[];
+
+        $i1 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>(l0, r1, 0);
+
+        return $i1;
+    }
+
+    public int getOffsetsByStandard(long, int[])
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int[] r1;
+        int $i1;
+        long l0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: int[];
+
+        $i1 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>(l0, r1, 1);
+
+        return $i1;
+    }
+
+    public int getOffsetsByWall(long, int[])
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int[] r1;
+        int $i1;
+        long l0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: int[];
+
+        $i1 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>(l0, r1, 2);
+
+        return $i1;
+    }
+
+    private int getOffsets(long, int[], int)
+    {
+        int[] r4, $r6, $r7;
+        sun.util.calendar.ZoneInfo r0;
+        java.util.SimpleTimeZone $r3;
+        long $l1, $l10, $l11, $l14, $l16, $l20, $l21, l26, l27, l28, l31;
+        long[] $r1, $r2, $r5;
+        int $i0, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i12, $i13, $i15, $i17, $i18, $i19, i22, $i23, $i24, $i25, i29, $i30, i32;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l26 := @parameter0: long;
+
+        r4 := @parameter1: int[];
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r1 != null goto label02;
+
+        $i25 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        if r4 == null goto label01;
+
+        r4[0] = $i25;
+
+        r4[1] = 0;
+
+     label01:
+        return $i25;
+
+     label02:
+        $i0 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $l1 = (long) $i0;
+
+        l27 = l26 - $l1;
+
+        $i3 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getTransitionIndex(long,int)>(l27, i2);
+
+        if $i3 >= 0 goto label04;
+
+        $i24 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        if r4 == null goto label03;
+
+        r4[0] = $i24;
+
+        r4[1] = 0;
+
+     label03:
+        return $i24;
+
+     label04:
+        $r2 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i4 = lengthof $r2;
+
+        if $i3 >= $i4 goto label08;
+
+        $r5 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        l28 = $r5[$i3];
+
+        $r6 = r0.<sun.util.calendar.ZoneInfo: int[] offsets>;
+
+        $l16 = l28 & 15L;
+
+        $i17 = (int) $l16;
+
+        $i19 = $r6[$i17];
+
+        $i18 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        i29 = $i19 + $i18;
+
+        if r4 == null goto label07;
+
+        $l20 = l28 >>> 4;
+
+        $l21 = $l20 & 15L;
+
+        i22 = (int) $l21;
+
+        if i22 != 0 goto label05;
+
+        $i30 = 0;
+
+        goto label06;
+
+     label05:
+        $r7 = r0.<sun.util.calendar.ZoneInfo: int[] offsets>;
+
+        $i30 = $r7[i22];
+
+     label06:
+        $i23 = i29 - $i30;
+
+        r4[0] = $i23;
+
+        r4[1] = $i30;
+
+     label07:
+        return i29;
+
+     label08:
+        $r3 = specialinvoke r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone getLastRule()>();
+
+        if $r3 == null goto label12;
+
+        $i6 = virtualinvoke $r3.<java.util.SimpleTimeZone: int getRawOffset()>();
+
+        l31 = l27;
+
+        if i2 == 0 goto label09;
+
+        $i13 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $l14 = (long) $i13;
+
+        l31 = l27 - $l14;
+
+     label09:
+        $i7 = virtualinvoke $r3.<java.util.SimpleTimeZone: int getOffset(long)>(l31);
+
+        $i8 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $i15 = $i7 - $i8;
+
+        i32 = $i15;
+
+        if $i15 <= 0 goto label10;
+
+        $l10 = (long) $i15;
+
+        $l11 = l31 - $l10;
+
+        $i12 = virtualinvoke $r3.<java.util.SimpleTimeZone: int getOffset(long)>($l11);
+
+        if $i12 != $i6 goto label10;
+
+        if i2 != 2 goto label10;
+
+        i32 = 0;
+
+     label10:
+        if r4 == null goto label11;
+
+        r4[0] = $i6;
+
+        r4[1] = i32;
+
+     label11:
+        $i9 = $i6 + i32;
+
+        return $i9;
+
+     label12:
+        $i5 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        if r4 == null goto label13;
+
+        r4[0] = $i5;
+
+        r4[1] = 0;
+
+     label13:
+        return $i5;
+    }
+
+    private int getTransitionIndex(long, int)
+    {
+        long l5, l7, $l9, $l10, $l13, $l14, $l17, l20;
+        long[] $r1, $r2, $r3;
+        byte $b8, $b21;
+        int[] $r4, $r5;
+        int $i0, $i1, $i2, $i3, i4, i6, i11, $i12, $i15, $i16, i18, i19, $i22, $i23;
+        sun.util.calendar.ZoneInfo r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        l7 := @parameter0: long;
+
+        i6 := @parameter1: int;
+
+        i18 = 0;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i0 = lengthof $r1;
+
+        i19 = $i0 - 1;
+
+     label1:
+        if i18 > i19 goto label7;
+
+        $i3 = i18 + i19;
+
+        i4 = $i3 / 2;
+
+        $r3 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        l5 = $r3[i4];
+
+        l20 = l5 >> 12;
+
+        if i6 == 0 goto label2;
+
+        $r5 = r0.<sun.util.calendar.ZoneInfo: int[] offsets>;
+
+        $l14 = l5 & 15L;
+
+        $i15 = (int) $l14;
+
+        $i16 = $r5[$i15];
+
+        $l17 = (long) $i16;
+
+        l20 = l20 + $l17;
+
+     label2:
+        if i6 != 1 goto label3;
+
+        $l9 = l5 >>> 4;
+
+        $l10 = $l9 & 15L;
+
+        i11 = (int) $l10;
+
+        if i11 == 0 goto label3;
+
+        $r4 = r0.<sun.util.calendar.ZoneInfo: int[] offsets>;
+
+        $i12 = $r4[i11];
+
+        $l13 = (long) $i12;
+
+        l20 = l20 - $l13;
+
+     label3:
+        $b21 = l20 cmp l7;
+
+        $i22 = (int) $b21;
+
+        if $i22 >= 0 goto label4;
+
+        i18 = i4 + 1;
+
+        goto label6;
+
+     label4:
+        $b8 = l20 cmp l7;
+
+        $i23 = (int) $b8;
+
+        if $i23 <= 0 goto label5;
+
+        i19 = i4 - 1;
+
+        goto label6;
+
+     label5:
+        return i4;
+
+     label6:
+        goto label1;
+
+     label7:
+        $r2 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i1 = lengthof $r2;
+
+        if i18 < $i1 goto label8;
+
+        return i18;
+
+     label8:
+        $i2 = i18 - 1;
+
+        return $i2;
+    }
+
+    public int getOffset(int, int, int, int, int, int)
+    {
+        sun.util.calendar.CalendarDate $r2;
+        sun.util.calendar.CalendarSystem $r1, $r3, $r7;
+        long $l6, $l7, $l9, l13, l14;
+        long[] $r6;
+        int i0, i1, i2, i3, $i4, i5, $i8, $i10, $i11, i12;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r0, $r4, $r8, $r9;
+        sun.util.calendar.ZoneInfo r5;
+
+        r5 := @this: sun.util.calendar.ZoneInfo;
+
+        i1 := @parameter0: int;
+
+        i12 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i5 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 < 86400000 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r0;
+
+     label2:
+        if i1 != 0 goto label3;
+
+        i12 = 1 - i12;
+
+        goto label4;
+
+     label3:
+        if i1 == 1 goto label4;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r9;
+
+     label4:
+        $r1 = <sun.util.calendar.ZoneInfo: sun.util.calendar.CalendarSystem gcal>;
+
+        $r2 = virtualinvoke $r1.<sun.util.calendar.CalendarSystem: sun.util.calendar.CalendarDate newCalendarDate(java.util.TimeZone)>(null);
+
+        $i4 = i2 + 1;
+
+        virtualinvoke $r2.<sun.util.calendar.CalendarDate: sun.util.calendar.CalendarDate setDate(int,int,int)>(i12, $i4, i3);
+
+        $r3 = <sun.util.calendar.ZoneInfo: sun.util.calendar.CalendarSystem gcal>;
+
+        $z0 = virtualinvoke $r3.<sun.util.calendar.CalendarSystem: boolean validate(sun.util.calendar.CalendarDate)>($r2);
+
+        if $z0 != 0 goto label5;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r8;
+
+     label5:
+        if i5 < 1 goto label6;
+
+        if i5 <= 7 goto label7;
+
+     label6:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r4;
+
+     label7:
+        $r6 = r5.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r6 != null goto label8;
+
+        $i11 = specialinvoke r5.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        return $i11;
+
+     label8:
+        $r7 = <sun.util.calendar.ZoneInfo: sun.util.calendar.CalendarSystem gcal>;
+
+        $l6 = virtualinvoke $r7.<sun.util.calendar.CalendarSystem: long getTime(sun.util.calendar.CalendarDate)>($r2);
+
+        $l7 = (long) i0;
+
+        l13 = $l6 + $l7;
+
+        $i8 = r5.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $l9 = (long) $i8;
+
+        l14 = l13 - $l9;
+
+        $i10 = specialinvoke r5.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>(l14, null, 0);
+
+        return $i10;
+    }
+
+    public synchronized void setRawOffset(int)
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        java.util.SimpleTimeZone $r1, $r2;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        i0 := @parameter0: int;
+
+        $i2 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $i1 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $i3 = $i2 + $i1;
+
+        if i0 != $i3 goto label1;
+
+        return;
+
+     label1:
+        $i4 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $i5 = i0 - $i4;
+
+        r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff> = $i5;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+        virtualinvoke $r2.<java.util.SimpleTimeZone: void setRawOffset(int)>(i0);
+
+     label2:
+        r0.<sun.util.calendar.ZoneInfo: boolean dirty> = 1;
+
+        return;
+    }
+
+    public int getRawOffset()
+    {
+        long $l0;
+        sun.util.calendar.ZoneInfo r0;
+        int[] r1;
+        int $i1, $i2, $i3, $i4;
+        boolean $z0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $z0 = r0.<sun.util.calendar.ZoneInfo: boolean willGMTOffsetChange>;
+
+        if $z0 != 0 goto label1;
+
+        $i3 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $i2 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $i4 = $i3 + $i2;
+
+        return $i4;
+
+     label1:
+        r1 = newarray (int)[2];
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke r0.<sun.util.calendar.ZoneInfo: int getOffsets(long,int[],int)>($l0, r1, 0);
+
+        $i1 = r1[0];
+
+        return $i1;
+    }
+
+    public boolean isDirty()
+    {
+        sun.util.calendar.ZoneInfo r0;
+        boolean $z0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $z0 = r0.<sun.util.calendar.ZoneInfo: boolean dirty>;
+
+        return $z0;
+    }
+
+    private int getLastRawOffset()
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $i1 = r0.<sun.util.calendar.ZoneInfo: int rawOffset>;
+
+        $i0 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $i2 = $i1 + $i0;
+
+        return $i2;
+    }
+
+    public boolean useDaylightTime()
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int[] $r1;
+        boolean $z0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean observesDaylightTime()
+    {
+        long $l0, $l2, l3, $l6, $l7;
+        long[] $r2, $r3, $r4;
+        sun.util.calendar.ZoneInfo r0;
+        byte $b8;
+        int[] $r1;
+        int $i1, $i4, $i5, i9;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r2 != null goto label2;
+
+        return 0;
+
+     label2:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $i1 = r0.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $l2 = (long) $i1;
+
+        l3 = $l0 - $l2;
+
+        $i4 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getTransitionIndex(long,int)>(l3, 0);
+
+        if $i4 >= 0 goto label3;
+
+        return 0;
+
+     label3:
+        i9 = $i4;
+
+     label4:
+        $r3 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i5 = lengthof $r3;
+
+        if i9 >= $i5 goto label6;
+
+        $r4 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $l6 = $r4[i9];
+
+        $l7 = $l6 & 240L;
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 == 0 goto label5;
+
+        return 1;
+
+     label5:
+        i9 = i9 + 1;
+
+        goto label4;
+
+     label6:
+        return 0;
+    }
+
+    public boolean inDaylightTime(java.util.Date)
+    {
+        java.util.Date r0;
+        long $l0, $l2, l3, $l6, $l7;
+        java.lang.NullPointerException $r6;
+        long[] $r2, $r3, $r5;
+        byte $b8;
+        int $i1, $i4, $i5;
+        boolean $z0, $z1;
+        sun.util.calendar.ZoneInfo r1;
+        java.util.SimpleTimeZone $r4;
+
+        r1 := @this: sun.util.calendar.ZoneInfo;
+
+        r0 := @parameter0: java.util.Date;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $r2 = r1.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r2 != null goto label2;
+
+        return 0;
+
+     label2:
+        $l0 = virtualinvoke r0.<java.util.Date: long getTime()>();
+
+        $i1 = r1.<sun.util.calendar.ZoneInfo: int rawOffsetDiff>;
+
+        $l2 = (long) $i1;
+
+        l3 = $l0 - $l2;
+
+        $i4 = specialinvoke r1.<sun.util.calendar.ZoneInfo: int getTransitionIndex(long,int)>(l3, 0);
+
+        if $i4 >= 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r3 = r1.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i5 = lengthof $r3;
+
+        if $i4 >= $i5 goto label6;
+
+        $r5 = r1.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $l6 = $r5[$i4];
+
+        $l7 = $l6 & 240L;
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 == 0 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+
+     label6:
+        $r4 = specialinvoke r1.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone getLastRule()>();
+
+        if $r4 == null goto label7;
+
+        $z0 = virtualinvoke $r4.<java.util.SimpleTimeZone: boolean inDaylightTime(java.util.Date)>(r0);
+
+        return $z0;
+
+     label7:
+        return 0;
+    }
+
+    public int getDSTSavings()
+    {
+        int $i0;
+        sun.util.calendar.ZoneInfo r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $i0 = r0.<sun.util.calendar.ZoneInfo: int dstSavings>;
+
+        return $i0;
+    }
+
+    public java.lang.String toString()
+    {
+        long[] $r15, $r22;
+        int $i0, $i1, $i2;
+        java.lang.String $r3, $r6, $r21;
+        boolean $z0;
+        sun.util.calendar.ZoneInfo r1;
+        java.lang.StringBuilder $r0, $r4, $r5, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r16, $r17, $r19, $r20;
+        java.lang.Class $r2;
+        java.util.SimpleTimeZone $r18, $r23;
+
+        r1 := @this: sun.util.calendar.ZoneInfo;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[id=\"");
+
+        $r6 = virtualinvoke r1.<sun.util.calendar.ZoneInfo: java.lang.String getID()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\",offset=");
+
+        $i0 = specialinvoke r1.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",dstSavings=");
+
+        $i1 = r1.<sun.util.calendar.ZoneInfo: int dstSavings>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",useDaylight=");
+
+        $z0 = virtualinvoke r1.<sun.util.calendar.ZoneInfo: boolean useDaylightTime()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",transitions=");
+
+        $r15 = r1.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r15 == null goto label1;
+
+        $r22 = r1.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        $i2 = lengthof $r22;
+
+        goto label2;
+
+     label1:
+        $i2 = 0;
+
+     label2:
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",lastRule=");
+
+        $r18 = r1.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+        if $r18 != null goto label3;
+
+        $r23 = virtualinvoke r1.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone getLastRuleInstance()>();
+
+        goto label4;
+
+     label3:
+        $r23 = r1.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+     label4:
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r21;
+    }
+
+    public static java.lang.String[] getAvailableIDs()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.lang.String[] getZoneIds()>();
+
+        return $r0;
+    }
+
+    public static java.lang.String[] getAvailableIDs(int)
+    {
+        int i0;
+        java.lang.String[] $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.lang.String[] getZoneIds(int)>(i0);
+
+        return $r0;
+    }
+
+    public static java.util.TimeZone getTimeZone(java.lang.String)
+    {
+        java.lang.String r0;
+        sun.util.calendar.ZoneInfo $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.util.calendar.ZoneInfoFile: sun.util.calendar.ZoneInfo getZoneInfo(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    private synchronized java.util.SimpleTimeZone getLastRule()
+    {
+        sun.util.calendar.ZoneInfo r0;
+        java.util.SimpleTimeZone $r1, $r2, $r3;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone getLastRuleInstance()>();
+
+        r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule> = $r3;
+
+     label1:
+        $r2 = r0.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule>;
+
+        return $r2;
+    }
+
+    public java.util.SimpleTimeZone getLastRuleInstance()
+    {
+        int[] $r1, $r2, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24;
+        sun.util.calendar.ZoneInfo r0;
+        java.util.SimpleTimeZone $r3, $r13;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        java.lang.String $r4, $r14;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $r1 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 10 goto label2;
+
+        $r13 = new java.util.SimpleTimeZone;
+
+        $i11 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $r14 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: java.lang.String getID()>();
+
+        $r15 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i22 = $r15[0];
+
+        $r16 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i21 = $r16[1];
+
+        $r17 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i20 = $r17[2];
+
+        $r18 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i19 = $r18[3];
+
+        $r19 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i18 = $r19[4];
+
+        $r20 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i17 = $r20[5];
+
+        $r21 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i16 = $r21[6];
+
+        $r22 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i15 = $r22[7];
+
+        $r23 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i14 = $r23[8];
+
+        $r24 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i13 = $r24[9];
+
+        $i12 = r0.<sun.util.calendar.ZoneInfo: int dstSavings>;
+
+        specialinvoke $r13.<java.util.SimpleTimeZone: void <init>(int,java.lang.String,int,int,int,int,int,int,int,int,int,int,int)>($i11, $r14, $i22, $i21, $i20, $i19, $i18, $i17, $i16, $i15, $i14, $i13, $i12);
+
+        return $r13;
+
+     label2:
+        $r3 = new java.util.SimpleTimeZone;
+
+        $i1 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $r4 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: java.lang.String getID()>();
+
+        $r5 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i10 = $r5[0];
+
+        $r6 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i9 = $r6[1];
+
+        $r7 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i8 = $r7[2];
+
+        $r8 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i7 = $r8[3];
+
+        $r9 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i6 = $r9[4];
+
+        $r10 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i5 = $r10[5];
+
+        $r11 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i4 = $r11[6];
+
+        $r12 = r0.<sun.util.calendar.ZoneInfo: int[] simpleTimeZoneParams>;
+
+        $i3 = $r12[7];
+
+        $i2 = r0.<sun.util.calendar.ZoneInfo: int dstSavings>;
+
+        specialinvoke $r3.<java.util.SimpleTimeZone: void <init>(int,java.lang.String,int,int,int,int,int,int,int,int,int)>($i1, $r4, $i10, $i9, $i8, $i7, $i6, $i5, $i4, $i3, $i2);
+
+        return $r3;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.lang.Object $r1;
+        sun.util.calendar.ZoneInfo r0, r2;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $r1 = specialinvoke r0.<java.util.TimeZone: java.lang.Object clone()>();
+
+        r2 = (sun.util.calendar.ZoneInfo) $r1;
+
+        r2.<sun.util.calendar.ZoneInfo: java.util.SimpleTimeZone lastRule> = null;
+
+        return r2;
+    }
+
+    public int hashCode()
+    {
+        sun.util.calendar.ZoneInfo r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        $i0 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $i1 = r0.<sun.util.calendar.ZoneInfo: int checksum>;
+
+        $i2 = $i0 ^ $i1;
+
+        return $i2;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.util.calendar.ZoneInfo r0, r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object r1;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof sun.util.calendar.ZoneInfo;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (sun.util.calendar.ZoneInfo) r1;
+
+        $r3 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: java.lang.String getID()>();
+
+        $r4 = virtualinvoke r2.<sun.util.calendar.ZoneInfo: java.lang.String getID()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+        $i0 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $i1 = specialinvoke r2.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        if $i0 != $i1 goto label3;
+
+        $i3 = r0.<sun.util.calendar.ZoneInfo: int checksum>;
+
+        $i2 = r2.<sun.util.calendar.ZoneInfo: int checksum>;
+
+        if $i3 != $i2 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    public boolean hasSameRules(java.util.TimeZone)
+    {
+        java.util.TimeZone r1;
+        long[] $r4;
+        sun.util.calendar.ZoneInfo r0, $r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.util.calendar.ZoneInfo;
+
+        r1 := @parameter0: java.util.TimeZone;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = r1 instanceof sun.util.calendar.ZoneInfo;
+
+        if $z0 != 0 goto label5;
+
+        $i4 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: int getRawOffset()>();
+
+        $i5 = virtualinvoke r1.<java.util.TimeZone: int getRawOffset()>();
+
+        if $i4 == $i5 goto label3;
+
+        return 0;
+
+     label3:
+        $r4 = r0.<sun.util.calendar.ZoneInfo: long[] transitions>;
+
+        if $r4 != null goto label4;
+
+        $z1 = virtualinvoke r0.<sun.util.calendar.ZoneInfo: boolean useDaylightTime()>();
+
+        if $z1 != 0 goto label4;
+
+        $z2 = virtualinvoke r1.<java.util.TimeZone: boolean useDaylightTime()>();
+
+        if $z2 != 0 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+
+     label5:
+        $i0 = specialinvoke r0.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        $r2 = (sun.util.calendar.ZoneInfo) r1;
+
+        $i1 = specialinvoke $r2.<sun.util.calendar.ZoneInfo: int getLastRawOffset()>();
+
+        if $i0 == $i1 goto label6;
+
+        return 0;
+
+     label6:
+        $i3 = r0.<sun.util.calendar.ZoneInfo: int checksum>;
+
+        $r3 = (sun.util.calendar.ZoneInfo) r1;
+
+        $i2 = $r3.<sun.util.calendar.ZoneInfo: int checksum>;
+
+        if $i3 != $i2 goto label7;
+
+        $z3 = 1;
+
+        goto label8;
+
+     label7:
+        $z3 = 0;
+
+     label8:
+        return $z3;
+    }
+
+    public static java.util.Map getAliasTable()
+    {
+        java.util.Map $r0;
+
+        $r0 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.util.Map getAliasMap()>();
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        sun.util.calendar.ZoneInfo r1;
+
+        r1 := @this: sun.util.calendar.ZoneInfo;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        r1.<sun.util.calendar.ZoneInfo: boolean dirty> = 1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.calendar.Gregorian $r0;
+
+        <sun.util.calendar.ZoneInfo: long serialVersionUID> = 2653134537216586139L;
+
+        <sun.util.calendar.ZoneInfo: int TRANSITION_NSHIFT> = 12;
+
+        <sun.util.calendar.ZoneInfo: long ABBR_MASK> = 3840L;
+
+        <sun.util.calendar.ZoneInfo: int DST_NSHIFT> = 4;
+
+        <sun.util.calendar.ZoneInfo: long DST_MASK> = 240L;
+
+        <sun.util.calendar.ZoneInfo: long OFFSET_MASK> = 15L;
+
+        <sun.util.calendar.ZoneInfo: int WALL_TIME> = 2;
+
+        <sun.util.calendar.ZoneInfo: int STANDARD_TIME> = 1;
+
+        <sun.util.calendar.ZoneInfo: int UTC_TIME> = 0;
+
+        $r0 = staticinvoke <sun.util.calendar.CalendarSystem: sun.util.calendar.Gregorian getGregorianCalendar()>();
+
+        <sun.util.calendar.ZoneInfo: sun.util.calendar.CalendarSystem gcal> = $r0;
+
+        return;
+    }
+}

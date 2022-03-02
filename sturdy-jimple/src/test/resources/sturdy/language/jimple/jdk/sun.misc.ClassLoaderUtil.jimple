@@ -1,0 +1,219 @@
+public class sun.misc.ClassLoaderUtil extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        sun.misc.ClassLoaderUtil r0;
+
+        r0 := @this: sun.misc.ClassLoaderUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void releaseLoader(java.net.URLClassLoader)
+    {
+        java.net.URLClassLoader r0;
+
+        r0 := @parameter0: java.net.URLClassLoader;
+
+        staticinvoke <sun.misc.ClassLoaderUtil: java.util.List releaseLoader(java.net.URLClassLoader,java.util.List)>(r0, null);
+
+        return;
+    }
+
+    public static java.util.List releaseLoader(java.net.URLClassLoader, java.util.List)
+    {
+        java.lang.Throwable $r13, $r15, $r22, $r23;
+        sun.misc.URLClassPath $r4;
+        sun.misc.URLClassPath$JarLoader r7;
+        java.util.jar.JarFile $r8;
+        java.util.HashMap $r12;
+        java.util.Stack $r11;
+        java.util.ArrayList $r10;
+        java.net.URLClassLoader r3;
+        java.lang.String $r9, $r20, $r24;
+        java.util.LinkedList $r0;
+        boolean $z0, $z1;
+        java.util.Iterator $r5;
+        java.io.IOException $r16, $r21;
+        java.lang.RuntimeException $r14;
+        java.util.List r1;
+        java.lang.Object $r6;
+        java.lang.StringBuilder $r17, $r18, $r19;
+        sun.misc.JavaNetAccess $r2;
+
+        r3 := @parameter0: java.net.URLClassLoader;
+
+        r1 := @parameter1: java.util.List;
+
+        $r0 = new java.util.LinkedList;
+
+        specialinvoke $r0.<java.util.LinkedList: void <init>()>();
+
+     label01:
+        if r1 == null goto label02;
+
+        interfaceinvoke r1.<java.util.List: void clear()>();
+
+     label02:
+        $r2 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaNetAccess getJavaNetAccess()>();
+
+        $r4 = interfaceinvoke $r2.<sun.misc.JavaNetAccess: sun.misc.URLClassPath getURLClassPath(java.net.URLClassLoader)>(r3);
+
+        $r10 = $r4.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $r11 = $r4.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        $r12 = $r4.<sun.misc.URLClassPath: java.util.HashMap lmap>;
+
+        entermonitor $r11;
+
+     label03:
+        virtualinvoke $r11.<java.util.Stack: void clear()>();
+
+        exitmonitor $r11;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r23 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label06:
+        throw $r23;
+
+     label07:
+        entermonitor $r12;
+
+     label08:
+        virtualinvoke $r12.<java.util.HashMap: void clear()>();
+
+        exitmonitor $r12;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r22 := @caughtexception;
+
+        exitmonitor $r12;
+
+     label11:
+        throw $r22;
+
+     label12:
+        entermonitor $r4;
+
+     label13:
+        $r5 = virtualinvoke $r10.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label14:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label21;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        if $r6 == null goto label20;
+
+        $z1 = $r6 instanceof sun.misc.URLClassPath$JarLoader;
+
+        if $z1 == 0 goto label20;
+
+        r7 = (sun.misc.URLClassPath$JarLoader) $r6;
+
+        $r8 = virtualinvoke r7.<sun.misc.URLClassPath$JarLoader: java.util.jar.JarFile getJarFile()>();
+
+     label15:
+        if $r8 == null goto label16;
+
+        virtualinvoke $r8.<java.util.jar.JarFile: void close()>();
+
+        if r1 == null goto label16;
+
+        $r9 = virtualinvoke $r8.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+     label16:
+        goto label20;
+
+     label17:
+        $r16 := @caughtexception;
+
+        if $r8 != null goto label18;
+
+        $r24 = "filename not available";
+
+        goto label19;
+
+     label18:
+        $r24 = virtualinvoke $r8.<java.util.jar.JarFile: java.lang.String getName()>();
+
+     label19:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error closing JAR file: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = new java.io.IOException;
+
+        specialinvoke $r21.<java.io.IOException: void <init>(java.lang.String)>($r20);
+
+        virtualinvoke $r21.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r16);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r21);
+
+     label20:
+        goto label14;
+
+     label21:
+        virtualinvoke $r10.<java.util.ArrayList: void clear()>();
+
+        exitmonitor $r4;
+
+     label22:
+        goto label25;
+
+     label23:
+        $r15 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label24:
+        throw $r15;
+
+     label25:
+        goto label27;
+
+     label26:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.RuntimeException;
+
+        specialinvoke $r14.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label27:
+        return $r0;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.lang.Throwable from label13 to label22 with label23;
+        catch java.lang.Throwable from label23 to label24 with label23;
+        catch java.lang.Throwable from label01 to label25 with label26;
+    }
+}

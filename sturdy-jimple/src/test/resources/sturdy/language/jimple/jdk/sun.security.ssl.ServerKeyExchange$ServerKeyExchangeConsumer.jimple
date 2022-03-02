@@ -1,0 +1,165 @@
+final class sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.nio.ByteBuffer r23;
+        byte $b0, $b1, $b3, $b4;
+        java.lang.Byte $r4, $r7, $r20;
+        boolean $z0;
+        sun.security.ssl.SSLHandshake $r2, $r5, $r21;
+        sun.security.ssl.HandshakeAbsence $r25;
+        javax.net.ssl.SSLException $r16, $r28;
+        sun.security.ssl.CipherSuite $r10;
+        sun.security.ssl.ProtocolVersion $r11;
+        java.util.LinkedHashMap $r3, $r6;
+        sun.security.ssl.CipherSuite$KeyExchange $r12;
+        sun.security.ssl.ConnectionContext r0;
+        int i2, i5, $i6, $i7;
+        java.util.Map$Entry[] $r17;
+        java.util.Map$Entry r18;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer r29;
+        sun.security.ssl.TransportContext $r15, $r27;
+        sun.security.ssl.SSLConsumer r9, $r24;
+        sun.security.ssl.SSLKeyExchange $r13;
+        sun.security.ssl.Alert $r14, $r26;
+        java.lang.Object $r8, $r19, $r22;
+
+        r29 := @this: sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r23 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r2 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake SERVER_KEY_EXCHANGE>;
+
+        $b0 = $r2.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r4 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $z0 = r1.<sun.security.ssl.ClientHandshakeContext: boolean receivedCertReq>;
+
+        if $z0 == 0 goto label1;
+
+        r1.<sun.security.ssl.ClientHandshakeContext: boolean receivedCertReq> = 0;
+
+        $r27 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r26 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r28 = virtualinvoke $r27.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r26, "Unexpected ServerKeyExchange handshake message");
+
+        throw $r28;
+
+     label1:
+        $r6 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r5 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_STATUS>;
+
+        $b1 = $r5.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r7 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b1);
+
+        $r8 = virtualinvoke $r6.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r7);
+
+        r9 = (sun.security.ssl.SSLConsumer) $r8;
+
+        if r9 == null goto label2;
+
+        $r25 = <sun.security.ssl.CertificateStatus: sun.security.ssl.HandshakeAbsence handshakeAbsence>;
+
+        interfaceinvoke $r25.<sun.security.ssl.HandshakeAbsence: void absent(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r0, null);
+
+     label2:
+        $r10 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r12 = $r10.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r11 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r13 = staticinvoke <sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.CipherSuite$KeyExchange,sun.security.ssl.ProtocolVersion)>($r12, $r11);
+
+        if $r13 == null goto label5;
+
+        $r17 = virtualinvoke $r13.<sun.security.ssl.SSLKeyExchange: java.util.Map$Entry[] getHandshakeConsumers(sun.security.ssl.HandshakeContext)>(r1);
+
+        i2 = lengthof $r17;
+
+        i5 = 0;
+
+     label3:
+        if i5 >= i2 goto label5;
+
+        r18 = $r17[i5];
+
+        $r19 = interfaceinvoke r18.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r20 = (java.lang.Byte) $r19;
+
+        $b3 = virtualinvoke $r20.<java.lang.Byte: byte byteValue()>();
+
+        $r21 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake SERVER_KEY_EXCHANGE>;
+
+        $b4 = $r21.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $i6 = (int) $b3;
+
+        $i7 = (int) $b4;
+
+        if $i6 != $i7 goto label4;
+
+        $r22 = interfaceinvoke r18.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r24 = (sun.security.ssl.SSLConsumer) $r22;
+
+        interfaceinvoke $r24.<sun.security.ssl.SSLConsumer: void consume(sun.security.ssl.ConnectionContext,java.nio.ByteBuffer)>(r0, r23);
+
+        return;
+
+     label4:
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label5:
+        $r15 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r14 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r16 = virtualinvoke $r15.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r14, "Unexpected ServerKeyExchange handshake message.");
+
+        throw $r16;
+    }
+
+    void <init>(sun.security.ssl.ServerKeyExchange$1)
+    {
+        sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer r0;
+        sun.security.ssl.ServerKeyExchange$1 r1;
+
+        r0 := @this: sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer;
+
+        r1 := @parameter0: sun.security.ssl.ServerKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.ServerKeyExchange$ServerKeyExchangeConsumer: void <init>()>();
+
+        return;
+    }
+}

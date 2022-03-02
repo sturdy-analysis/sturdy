@@ -1,0 +1,561 @@
+public class sun.net.spi.DefaultProxySelector extends java.net.ProxySelector
+{
+    static final java.lang.String[][] props;
+    private static final java.lang.String SOCKS_PROXY_VERSION;
+    private static boolean hasSystemProxies;
+
+    public void <init>()
+    {
+        sun.net.spi.DefaultProxySelector r0;
+
+        r0 := @this: sun.net.spi.DefaultProxySelector;
+
+        specialinvoke r0.<java.net.ProxySelector: void <init>()>();
+
+        return;
+    }
+
+    public java.util.List select(java.net.URI)
+    {
+        java.net.Proxy $r24;
+        java.net.URI r0;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8;
+        java.util.ArrayList $r10;
+        int $i0, $i1, $i2;
+        java.lang.String $r1, $r2, $r9, $r11, $r12, $r13, $r14, $r16, r18, r19, $r21;
+        java.lang.IllegalArgumentException $r3, $r17;
+        sun.net.spi.DefaultProxySelector$3 $r22;
+        sun.net.spi.DefaultProxySelector r15;
+        sun.net.spi.DefaultProxySelector$NonProxyInfo r20;
+        java.lang.Object $r23;
+
+        r15 := @this: sun.net.spi.DefaultProxySelector;
+
+        r0 := @parameter0: java.net.URI;
+
+        if r0 != null goto label01;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("URI can\'t be null.");
+
+        throw $r17;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.net.URI: java.lang.String getScheme()>();
+
+        $r2 = virtualinvoke r0.<java.net.URI: java.lang.String getHost()>();
+
+        r18 = $r2;
+
+        if $r2 != null goto label04;
+
+        $r16 = virtualinvoke r0.<java.net.URI: java.lang.String getAuthority()>();
+
+        r19 = $r16;
+
+        if $r16 == null goto label04;
+
+        $i0 = virtualinvoke $r16.<java.lang.String: int indexOf(int)>(64);
+
+        if $i0 < 0 goto label02;
+
+        $i2 = $i0 + 1;
+
+        r19 = virtualinvoke $r16.<java.lang.String: java.lang.String substring(int)>($i2);
+
+     label02:
+        $i1 = virtualinvoke r19.<java.lang.String: int lastIndexOf(int)>(58);
+
+        if $i1 < 0 goto label03;
+
+        r19 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label03:
+        r18 = r19;
+
+     label04:
+        if $r1 == null goto label05;
+
+        if r18 != null goto label06;
+
+     label05:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("protocol = ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" host = ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r18);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+     label06:
+        $r10 = new java.util.ArrayList;
+
+        specialinvoke $r10.<java.util.ArrayList: void <init>(int)>(1);
+
+        r20 = null;
+
+        $r11 = "http";
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label07;
+
+        r20 = <sun.net.spi.DefaultProxySelector$NonProxyInfo: sun.net.spi.DefaultProxySelector$NonProxyInfo httpNonProxyInfo>;
+
+        goto label10;
+
+     label07:
+        $r12 = "https";
+
+        $z1 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z1 == 0 goto label08;
+
+        r20 = <sun.net.spi.DefaultProxySelector$NonProxyInfo: sun.net.spi.DefaultProxySelector$NonProxyInfo httpNonProxyInfo>;
+
+        goto label10;
+
+     label08:
+        $r13 = "ftp";
+
+        $z2 = virtualinvoke $r13.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z2 == 0 goto label09;
+
+        r20 = <sun.net.spi.DefaultProxySelector$NonProxyInfo: sun.net.spi.DefaultProxySelector$NonProxyInfo ftpNonProxyInfo>;
+
+        goto label10;
+
+     label09:
+        $r14 = "socket";
+
+        $z3 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z3 == 0 goto label10;
+
+        r20 = <sun.net.spi.DefaultProxySelector$NonProxyInfo: sun.net.spi.DefaultProxySelector$NonProxyInfo socksNonProxyInfo>;
+
+     label10:
+        $r21 = virtualinvoke r18.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r22 = new sun.net.spi.DefaultProxySelector$3;
+
+        specialinvoke $r22.<sun.net.spi.DefaultProxySelector$3: void <init>(sun.net.spi.DefaultProxySelector,java.lang.String,java.lang.String,sun.net.spi.DefaultProxySelector$NonProxyInfo)>(r15, $r1, $r21, r20);
+
+        $r23 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r22);
+
+        $r24 = (java.net.Proxy) $r23;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>($r24);
+
+        return $r10;
+    }
+
+    public void connectFailed(java.net.URI, java.net.SocketAddress, java.io.IOException)
+    {
+        java.net.SocketAddress r1;
+        sun.net.spi.DefaultProxySelector r3;
+        java.io.IOException r2;
+        java.net.URI r0;
+        java.lang.IllegalArgumentException $r4;
+
+        r3 := @this: sun.net.spi.DefaultProxySelector;
+
+        r0 := @parameter0: java.net.URI;
+
+        r1 := @parameter1: java.net.SocketAddress;
+
+        r2 := @parameter2: java.io.IOException;
+
+        if r0 == null goto label1;
+
+        if r1 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Arguments can\'t be null.");
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+
+    private int defaultPort(java.lang.String)
+    {
+        sun.net.spi.DefaultProxySelector r6;
+        int $i1;
+        java.lang.String r0, $r1, $r2, $r3, $r4, $r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r6 := @this: sun.net.spi.DefaultProxySelector;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = "http";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        return 80;
+
+     label1:
+        $r2 = "https";
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        return 443;
+
+     label2:
+        $r3 = "ftp";
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z2 == 0 goto label3;
+
+        return 80;
+
+     label3:
+        $r4 = "socket";
+
+        $z3 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z3 == 0 goto label4;
+
+        return 1080;
+
+     label4:
+        $r5 = "gopher";
+
+        $z4 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z4 == 0 goto label5;
+
+        return 80;
+
+     label5:
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    private static native boolean init();
+
+    private synchronized native java.net.Proxy getSystemProxy(java.lang.String, java.lang.String);
+
+    static boolean shouldNotUseProxyFor(java.util.regex.Pattern, java.lang.String)
+    {
+        java.util.regex.Matcher $r2;
+        java.util.regex.Pattern r0;
+        java.lang.String r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.util.regex.Pattern;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r1);
+
+        $z1 = virtualinvoke $r2.<java.util.regex.Matcher: boolean matches()>();
+
+        return $z1;
+    }
+
+    static java.util.regex.Pattern toPattern(java.lang.String)
+    {
+        java.lang.String[] $r2;
+        java.util.StringJoiner $r0;
+        int i0, i1;
+        java.lang.String r1, $r3, r4, $r5, $r6;
+        java.util.regex.Pattern $r7;
+        boolean $z0, z1;
+
+        r1 := @parameter0: java.lang.String;
+
+        z1 = 1;
+
+        $r0 = new java.util.StringJoiner;
+
+        specialinvoke $r0.<java.util.StringJoiner: void <init>(java.lang.CharSequence)>("|");
+
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\|");
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        r4 = $r2[i1];
+
+        $z0 = virtualinvoke r4.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        goto label3;
+
+     label2:
+        z1 = 0;
+
+        $r5 = virtualinvoke r4.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r6 = staticinvoke <sun.net.spi.DefaultProxySelector: java.lang.String disjunctToRegex(java.lang.String)>($r5);
+
+        virtualinvoke $r0.<java.util.StringJoiner: java.util.StringJoiner add(java.lang.CharSequence)>($r6);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        if z1 == 0 goto label5;
+
+        $r7 = null;
+
+        goto label6;
+
+     label5:
+        $r3 = virtualinvoke $r0.<java.util.StringJoiner: java.lang.String toString()>();
+
+        $r7 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>($r3);
+
+     label6:
+        return $r7;
+    }
+
+    static java.lang.String disjunctToRegex(java.lang.String)
+    {
+        int $i0, $i1;
+        java.lang.String r0, $r2, $r3, $r8, $r9, r11;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r1, $r4, $r5, $r6, $r7, $r10;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("*");
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".*");
+
+        $r8 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $r9 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("*");
+
+        if $z1 == 0 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r3 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".*");
+
+        r11 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label2:
+        r11 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>(r0);
+
+     label3:
+        return r11;
+    }
+
+    static boolean access$000()
+    {
+        boolean $z0;
+
+        $z0 = <sun.net.spi.DefaultProxySelector: boolean hasSystemProxies>;
+
+        return $z0;
+    }
+
+    static java.net.Proxy access$100(sun.net.spi.DefaultProxySelector, java.lang.String, java.lang.String)
+    {
+        java.net.Proxy $r3;
+        sun.net.spi.DefaultProxySelector r0;
+        java.lang.String r1, r2;
+
+        r0 := @parameter0: sun.net.spi.DefaultProxySelector;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        $r3 = specialinvoke r0.<sun.net.spi.DefaultProxySelector: java.net.Proxy getSystemProxy(java.lang.String,java.lang.String)>(r1, r2);
+
+        return $r3;
+    }
+
+    static int access$200(sun.net.spi.DefaultProxySelector, java.lang.String)
+    {
+        int $i0;
+        java.lang.String r1;
+        sun.net.spi.DefaultProxySelector r0;
+
+        r0 := @parameter0: sun.net.spi.DefaultProxySelector;
+
+        r1 := @parameter1: java.lang.String;
+
+        $i0 = specialinvoke r0.<sun.net.spi.DefaultProxySelector: int defaultPort(java.lang.String)>(r1);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r1, $r2, $r3, $r4, $r5;
+        sun.net.spi.DefaultProxySelector$1 $r6;
+        sun.net.spi.DefaultProxySelector$2 $r9;
+        java.lang.Boolean r8;
+        java.lang.Object $r7;
+        java.lang.String[][] $r0;
+        boolean $z0, $z1;
+
+        <sun.net.spi.DefaultProxySelector: java.lang.String SOCKS_PROXY_VERSION> = "socksProxyVersion";
+
+        $r0 = newarray (java.lang.String[])[5];
+
+        $r1 = newarray (java.lang.String)[4];
+
+        $r1[0] = "http";
+
+        $r1[1] = "http.proxy";
+
+        $r1[2] = "proxy";
+
+        $r1[3] = "socksProxy";
+
+        $r0[0] = $r1;
+
+        $r2 = newarray (java.lang.String)[4];
+
+        $r2[0] = "https";
+
+        $r2[1] = "https.proxy";
+
+        $r2[2] = "proxy";
+
+        $r2[3] = "socksProxy";
+
+        $r0[1] = $r2;
+
+        $r3 = newarray (java.lang.String)[5];
+
+        $r3[0] = "ftp";
+
+        $r3[1] = "ftp.proxy";
+
+        $r3[2] = "ftpProxy";
+
+        $r3[3] = "proxy";
+
+        $r3[4] = "socksProxy";
+
+        $r0[2] = $r3;
+
+        $r4 = newarray (java.lang.String)[3];
+
+        $r4[0] = "gopher";
+
+        $r4[1] = "gopherProxy";
+
+        $r4[2] = "socksProxy";
+
+        $r0[3] = $r4;
+
+        $r5 = newarray (java.lang.String)[2];
+
+        $r5[0] = "socket";
+
+        $r5[1] = "socksProxy";
+
+        $r0[4] = $r5;
+
+        <sun.net.spi.DefaultProxySelector: java.lang.String[][] props> = $r0;
+
+        <sun.net.spi.DefaultProxySelector: boolean hasSystemProxies> = 0;
+
+        $r6 = new sun.net.spi.DefaultProxySelector$1;
+
+        specialinvoke $r6.<sun.net.spi.DefaultProxySelector$1: void <init>()>();
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        r8 = (java.lang.Boolean) $r7;
+
+        if r8 == null goto label1;
+
+        $z0 = virtualinvoke r8.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new sun.net.spi.DefaultProxySelector$2;
+
+        specialinvoke $r9.<sun.net.spi.DefaultProxySelector$2: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        $z1 = staticinvoke <sun.net.spi.DefaultProxySelector: boolean init()>();
+
+        <sun.net.spi.DefaultProxySelector: boolean hasSystemProxies> = $z1;
+
+     label1:
+        return;
+    }
+}

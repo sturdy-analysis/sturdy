@@ -1,0 +1,328 @@
+final class java.util.LinkedList$LLSpliterator extends java.lang.Object implements java.util.Spliterator
+{
+    static final int BATCH_UNIT;
+    static final int MAX_BATCH;
+    final java.util.LinkedList list;
+    java.util.LinkedList$Node current;
+    int est;
+    int expectedModCount;
+    int batch;
+
+    void <init>(java.util.LinkedList, int, int)
+    {
+        java.util.LinkedList$LLSpliterator r0;
+        int i0, i1;
+        java.util.LinkedList r1;
+
+        r0 := @this: java.util.LinkedList$LLSpliterator;
+
+        r1 := @parameter0: java.util.LinkedList;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.LinkedList$LLSpliterator: java.util.LinkedList list> = r1;
+
+        r0.<java.util.LinkedList$LLSpliterator: int est> = i0;
+
+        r0.<java.util.LinkedList$LLSpliterator: int expectedModCount> = i1;
+
+        return;
+    }
+
+    final int getEst()
+    {
+        java.util.LinkedList$LLSpliterator r0;
+        java.util.LinkedList$Node $r2;
+        int $i0, $i1, $i2, i3;
+        java.util.LinkedList $r1;
+
+        r0 := @this: java.util.LinkedList$LLSpliterator;
+
+        $i0 = r0.<java.util.LinkedList$LLSpliterator: int est>;
+
+        i3 = $i0;
+
+        if $i0 >= 0 goto label2;
+
+        $r1 = r0.<java.util.LinkedList$LLSpliterator: java.util.LinkedList list>;
+
+        if $r1 != null goto label1;
+
+        r0.<java.util.LinkedList$LLSpliterator: int est> = 0;
+
+        i3 = 0;
+
+        goto label2;
+
+     label1:
+        $i1 = $r1.<java.util.LinkedList: int modCount>;
+
+        r0.<java.util.LinkedList$LLSpliterator: int expectedModCount> = $i1;
+
+        $r2 = $r1.<java.util.LinkedList: java.util.LinkedList$Node first>;
+
+        r0.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current> = $r2;
+
+        $i2 = $r1.<java.util.LinkedList: int size>;
+
+        r0.<java.util.LinkedList$LLSpliterator: int est> = $i2;
+
+        i3 = $i2;
+
+     label2:
+        return i3;
+    }
+
+    public long estimateSize()
+    {
+        int $i0;
+        long $l1;
+        java.util.LinkedList$LLSpliterator r0;
+
+        r0 := @this: java.util.LinkedList$LLSpliterator;
+
+        $i0 = virtualinvoke r0.<java.util.LinkedList$LLSpliterator: int getEst()>();
+
+        $l1 = (long) $i0;
+
+        return $l1;
+    }
+
+    public java.util.Spliterator trySplit()
+    {
+        java.util.LinkedList$LLSpliterator r0;
+        java.lang.Object[] $r3;
+        java.util.LinkedList$Node $r1, r4, $r6;
+        int $i0, $i1, $i2, i3, i4, $i5;
+        java.lang.Object $r5;
+        java.util.Spliterator $r2;
+
+        r0 := @this: java.util.LinkedList$LLSpliterator;
+
+        $i0 = virtualinvoke r0.<java.util.LinkedList$LLSpliterator: int getEst()>();
+
+        if $i0 <= 1 goto label5;
+
+        $r1 = r0.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current>;
+
+        r4 = $r1;
+
+        if $r1 == null goto label5;
+
+        $i1 = r0.<java.util.LinkedList$LLSpliterator: int batch>;
+
+        i3 = $i1 + 1024;
+
+        if i3 <= $i0 goto label1;
+
+        i3 = $i0;
+
+     label1:
+        if i3 <= 33554432 goto label2;
+
+        i3 = 33554432;
+
+     label2:
+        $r3 = newarray (java.lang.Object)[i3];
+
+        i4 = 0;
+
+     label3:
+        $i5 = i4;
+
+        i4 = i4 + 1;
+
+        $r5 = r4.<java.util.LinkedList$Node: java.lang.Object item>;
+
+        $r3[$i5] = $r5;
+
+        $r6 = r4.<java.util.LinkedList$Node: java.util.LinkedList$Node next>;
+
+        r4 = $r6;
+
+        if $r6 == null goto label4;
+
+        if i4 < i3 goto label3;
+
+     label4:
+        r0.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current> = $r6;
+
+        r0.<java.util.LinkedList$LLSpliterator: int batch> = i4;
+
+        $i2 = $i0 - i4;
+
+        r0.<java.util.LinkedList$LLSpliterator: int est> = $i2;
+
+        $r2 = staticinvoke <java.util.Spliterators: java.util.Spliterator spliterator(java.lang.Object[],int,int,int)>($r3, 0, i4, 16);
+
+        return $r2;
+
+     label5:
+        return null;
+    }
+
+    public void forEachRemaining(java.util.function.Consumer)
+    {
+        java.util.LinkedList$LLSpliterator r1;
+        java.lang.NullPointerException $r9;
+        java.util.function.Consumer r0;
+        java.util.LinkedList$Node $r3, $r5, r7;
+        int $i0, i1, $i2, $i3, $i5;
+        java.lang.Object $r4;
+        java.util.LinkedList $r8;
+        java.util.ConcurrentModificationException $r10;
+
+        r1 := @this: java.util.LinkedList$LLSpliterator;
+
+        r0 := @parameter0: java.util.function.Consumer;
+
+        if r0 != null goto label1;
+
+        $r9 = new java.lang.NullPointerException;
+
+        specialinvoke $r9.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.util.LinkedList$LLSpliterator: int getEst()>();
+
+        i1 = $i0;
+
+        if $i0 <= 0 goto label3;
+
+        $r3 = r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current>;
+
+        r7 = $r3;
+
+        if $r3 == null goto label3;
+
+        r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current> = null;
+
+        r1.<java.util.LinkedList$LLSpliterator: int est> = 0;
+
+     label2:
+        $r4 = r7.<java.util.LinkedList$Node: java.lang.Object item>;
+
+        $r5 = r7.<java.util.LinkedList$Node: java.util.LinkedList$Node next>;
+
+        r7 = $r5;
+
+        interfaceinvoke r0.<java.util.function.Consumer: void accept(java.lang.Object)>($r4);
+
+        if $r5 == null goto label3;
+
+        $i5 = (int) -1;
+
+        i1 = i1 + $i5;
+
+        if i1 > 0 goto label2;
+
+     label3:
+        $r8 = r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList list>;
+
+        $i2 = $r8.<java.util.LinkedList: int modCount>;
+
+        $i3 = r1.<java.util.LinkedList$LLSpliterator: int expectedModCount>;
+
+        if $i2 == $i3 goto label4;
+
+        $r10 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r10.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r10;
+
+     label4:
+        return;
+    }
+
+    public boolean tryAdvance(java.util.function.Consumer)
+    {
+        java.util.LinkedList$LLSpliterator r1;
+        java.lang.NullPointerException $r7;
+        java.util.function.Consumer r0;
+        java.util.LinkedList$Node $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Object r3;
+        java.util.LinkedList $r5;
+        java.util.ConcurrentModificationException $r6;
+
+        r1 := @this: java.util.LinkedList$LLSpliterator;
+
+        r0 := @parameter0: java.util.function.Consumer;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.util.LinkedList$LLSpliterator: int getEst()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r2 = r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current>;
+
+        if $r2 == null goto label3;
+
+        $i1 = r1.<java.util.LinkedList$LLSpliterator: int est>;
+
+        $i2 = $i1 - 1;
+
+        r1.<java.util.LinkedList$LLSpliterator: int est> = $i2;
+
+        r3 = $r2.<java.util.LinkedList$Node: java.lang.Object item>;
+
+        $r4 = $r2.<java.util.LinkedList$Node: java.util.LinkedList$Node next>;
+
+        r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList$Node current> = $r4;
+
+        interfaceinvoke r0.<java.util.function.Consumer: void accept(java.lang.Object)>(r3);
+
+        $r5 = r1.<java.util.LinkedList$LLSpliterator: java.util.LinkedList list>;
+
+        $i4 = $r5.<java.util.LinkedList: int modCount>;
+
+        $i3 = r1.<java.util.LinkedList$LLSpliterator: int expectedModCount>;
+
+        if $i4 == $i3 goto label2;
+
+        $r6 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r6.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public int characteristics()
+    {
+        java.util.LinkedList$LLSpliterator r0;
+
+        r0 := @this: java.util.LinkedList$LLSpliterator;
+
+        return 16464;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.LinkedList$LLSpliterator: int MAX_BATCH> = 33554432;
+
+        <java.util.LinkedList$LLSpliterator: int BATCH_UNIT> = 1024;
+
+        return;
+    }
+}

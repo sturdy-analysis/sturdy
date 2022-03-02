@@ -1,0 +1,267 @@
+final class sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer r0;
+
+        r0 := @this: sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        java.security.cert.X509Certificate r9;
+        byte[] $r7, r13, $r16;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r44;
+        java.security.cert.CertificateFactory $r4;
+        byte $b0, $b1;
+        java.io.ByteArrayInputStream $r49;
+        java.util.Map $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.ssl.StatusResponseManager$StaplingParameters $r2, $r10, $r14, $r17, $r45;
+        sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer r43;
+        sun.security.ssl.ServerHandshakeContext r1;
+        javax.net.ssl.SSLException $r38, $r42;
+        java.security.cert.Certificate $r8;
+        sun.security.ssl.CertificateMessage$CertificateEntry $r3, $r6;
+        java.lang.StringBuilder $r20, $r22, $r23, $r24, $r28, $r30, $r50, $r51;
+        sun.security.ssl.CertStatusExtension$CertStatusRequestType $r15, $r18, $r46, $r47;
+        javax.security.auth.x500.X500Principal $r21, $r29;
+        java.lang.Object[] $r26, $r32, $r33, $r34;
+        sun.security.ssl.ConnectionContext r0;
+        int $i2;
+        java.lang.String $r25, $r31;
+        sun.security.ssl.CertStatusExtension$OCSPStatusResponse $r52;
+        java.io.IOException $r35;
+        java.security.cert.CertificateException $r39;
+        sun.security.ssl.TransportContext $r37, $r41;
+        sun.security.ssl.CertStatusExtension$CertStatusResponse $r48, $r53;
+        sun.security.ssl.Alert $r36, $r40;
+        java.lang.Object $r12;
+
+        r43 := @this: sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r44 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.StatusResponseManager$StaplingParameters stapleParams>;
+
+        if $r2 != null goto label02;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label01;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label01;
+
+        $r34 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Stapling is disabled for this connection", $r34);
+
+     label01:
+        return null;
+
+     label02:
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CertificateMessage$CertificateEntry currentCertEntry>;
+
+        if $r3 != null goto label04;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label03;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label03;
+
+        $r33 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Found null CertificateEntry in context", $r33);
+
+     label03:
+        return null;
+
+     label04:
+        $r4 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        $r49 = new java.io.ByteArrayInputStream;
+
+        $r6 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CertificateMessage$CertificateEntry currentCertEntry>;
+
+        $r7 = $r6.<sun.security.ssl.CertificateMessage$CertificateEntry: byte[] encoded>;
+
+        specialinvoke $r49.<java.io.ByteArrayInputStream: void <init>(byte[])>($r7);
+
+        $r8 = virtualinvoke $r4.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r49);
+
+        r9 = (java.security.cert.X509Certificate) $r8;
+
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.StatusResponseManager$StaplingParameters stapleParams>;
+
+        $r11 = $r10.<sun.security.ssl.StatusResponseManager$StaplingParameters: java.util.Map responseMap>;
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>(r9);
+
+        r13 = (byte[]) $r12;
+
+        if r13 != null goto label07;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label05;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake,verbose");
+
+        if $z3 == 0 goto label05;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No status response found for ");
+
+        $r29 = virtualinvoke r9.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r31, $r32);
+
+     label05:
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CertificateMessage$CertificateEntry currentCertEntry> = null;
+
+     label06:
+        return null;
+
+     label07:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label08;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake,verbose");
+
+        if $z1 == 0 goto label08;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Found status response for ");
+
+        $r21 = virtualinvoke r9.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", response length: ");
+
+        $i2 = lengthof r13;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r25, $r26);
+
+     label08:
+        $r45 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.StatusResponseManager$StaplingParameters stapleParams>;
+
+        $r46 = $r45.<sun.security.ssl.StatusResponseManager$StaplingParameters: sun.security.ssl.CertStatusExtension$CertStatusRequestType statReqType>;
+
+        $r47 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP>;
+
+        if $r46 != $r47 goto label09;
+
+        $r52 = new sun.security.ssl.CertStatusExtension$OCSPStatusResponse;
+
+        $r48 = $r52;
+
+        $r17 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.StatusResponseManager$StaplingParameters stapleParams>;
+
+        $r18 = $r17.<sun.security.ssl.StatusResponseManager$StaplingParameters: sun.security.ssl.CertStatusExtension$CertStatusRequestType statReqType>;
+
+        $b1 = $r18.<sun.security.ssl.CertStatusExtension$CertStatusRequestType: byte id>;
+
+        specialinvoke $r52.<sun.security.ssl.CertStatusExtension$OCSPStatusResponse: void <init>(byte,byte[],sun.security.ssl.CertStatusExtension$1)>($b1, r13, null);
+
+        goto label10;
+
+     label09:
+        $r53 = new sun.security.ssl.CertStatusExtension$CertStatusResponse;
+
+        $r48 = $r53;
+
+        $r14 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.StatusResponseManager$StaplingParameters stapleParams>;
+
+        $r15 = $r14.<sun.security.ssl.StatusResponseManager$StaplingParameters: sun.security.ssl.CertStatusExtension$CertStatusRequestType statReqType>;
+
+        $b0 = $r15.<sun.security.ssl.CertStatusExtension$CertStatusRequestType: byte id>;
+
+        specialinvoke $r53.<sun.security.ssl.CertStatusExtension$CertStatusResponse: void <init>(byte,byte[])>($b0, r13);
+
+     label10:
+        $r16 = virtualinvoke $r48.<sun.security.ssl.CertStatusExtension$CertStatusResponse: byte[] toByteArray()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r39 := @caughtexception;
+
+        $r41 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r40 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERTIFICATE>;
+
+        $r42 = virtualinvoke $r41.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r40, "Failed to parse server certificates", $r39);
+
+        throw $r42;
+
+     label13:
+        $r35 := @caughtexception;
+
+        $r37 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r36 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERT_STATUS_RESPONSE>;
+
+        $r38 = virtualinvoke $r37.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r36, "Failed to parse certificate status response", $r35);
+
+        throw $r38;
+
+     label14:
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CertificateMessage$CertificateEntry currentCertEntry> = null;
+
+        return $r16;
+
+        catch java.security.cert.CertificateException from label04 to label06 with label12;
+        catch java.security.cert.CertificateException from label07 to label11 with label12;
+        catch java.io.IOException from label04 to label06 with label13;
+        catch java.io.IOException from label07 to label11 with label13;
+    }
+
+    void <init>(sun.security.ssl.CertStatusExtension$1)
+    {
+        sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer r0;
+        sun.security.ssl.CertStatusExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer;
+
+        r1 := @parameter0: sun.security.ssl.CertStatusExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.CertStatusExtension$CTCertStatusResponseProducer: void <init>()>();
+
+        return;
+    }
+}

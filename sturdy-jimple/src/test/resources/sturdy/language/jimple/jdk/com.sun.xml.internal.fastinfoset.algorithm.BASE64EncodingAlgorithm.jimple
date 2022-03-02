@@ -1,0 +1,899 @@
+public class com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm extends com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm
+{
+    static final char[] encodeBase64;
+    static final int[] decodeBase64;
+
+    public void <init>()
+    {
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r0;
+
+        r0 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        specialinvoke r0.<com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm: void <init>()>();
+
+        return;
+    }
+
+    public final java.lang.Object decodeFromBytes(byte[], int, int) throws com.sun.xml.internal.org.jvnet.fastinfoset.EncodingAlgorithmException
+    {
+        byte[] r0, r1;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r2;
+        int i0, i1;
+
+        r2 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r0 = newarray (byte)[i0];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i1, r0, 0, i0);
+
+        return r0;
+    }
+
+    public final java.lang.Object decodeFromInputStream(java.io.InputStream) throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r3;
+        java.lang.String $r2;
+        com.sun.xml.internal.fastinfoset.CommonResourceBundle $r1;
+        java.io.InputStream r4;
+
+        r3 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r4 := @parameter0: java.io.InputStream;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        $r1 = staticinvoke <com.sun.xml.internal.fastinfoset.CommonResourceBundle: com.sun.xml.internal.fastinfoset.CommonResourceBundle getInstance()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.fastinfoset.CommonResourceBundle: java.lang.String getString(java.lang.String)>("message.notImplemented");
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r2);
+
+        throw $r0;
+    }
+
+    public void encodeToOutputStream(java.lang.Object, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        byte[] $r2, $r3;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r7;
+        java.lang.IllegalArgumentException $r4;
+        com.sun.xml.internal.fastinfoset.CommonResourceBundle $r5;
+        java.lang.Object r0;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r7 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        $z0 = r0 instanceof byte[];
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = staticinvoke <com.sun.xml.internal.fastinfoset.CommonResourceBundle: com.sun.xml.internal.fastinfoset.CommonResourceBundle getInstance()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.fastinfoset.CommonResourceBundle: java.lang.String getString(java.lang.String)>("message.dataNotByteArray");
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label1:
+        $r2 = (byte[]) r0;
+
+        $r3 = (byte[]) $r2;
+
+        virtualinvoke r1.<java.io.OutputStream: void write(byte[])>($r3);
+
+        return;
+    }
+
+    public final java.lang.Object convertFromCharacters(char[], int, int)
+    {
+        byte[] $r7, $r8, $r9;
+        byte $b22, $b27, $b33, b36;
+        int[] $r3, $r4, $r5, $r6;
+        java.lang.StringBuilder $r2;
+        int i0, i1, $i2, i3, $i4, $i7, i8, $i10, i11, $i13, i14, $i16, i17, $i18, $i19, $i20, $i21, $i23, $i24, $i25, $i26, $i28, $i29, $i30, $i31, $i32, $i34, $i37, $i38, $i39, i40, i41, i42, i43, i44, i45, $i46, $i47, $i48, $i49, $i50, $i51;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r0;
+        char $c5, $c6, $c9, $c12, $c15, $c35;
+        char[] r1;
+
+        r0 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r1 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 != 0 goto label1;
+
+        $r8 = newarray (byte)[0];
+
+        return $r8;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: java.lang.StringBuilder removeWhitespace(char[],int,int)>(r1, i1, i0);
+
+        $i2 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i2 != 0 goto label2;
+
+        $r7 = newarray (byte)[0];
+
+        return $r7;
+
+     label2:
+        i3 = $i2 / 4;
+
+        b36 = 3;
+
+        $i4 = $i2 - 1;
+
+        $c5 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>($i4);
+
+        $i46 = (int) $c5;
+
+        if $i46 != 61 goto label3;
+
+        b36 = 2;
+
+        $i34 = $i2 - 2;
+
+        $c35 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>($i34);
+
+        $i47 = (int) $c35;
+
+        if $i47 != 61 goto label3;
+
+        b36 = 1;
+
+     label3:
+        $i37 = i3 - 1;
+
+        $i38 = $i37 * 3;
+
+        $i39 = $i38 + b36;
+
+        $r9 = newarray (byte)[$i39];
+
+        i40 = 0;
+
+        i41 = 0;
+
+        i42 = 0;
+
+     label4:
+        if i42 >= i3 goto label7;
+
+        $r3 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: int[] decodeBase64>;
+
+        i43 = i41 + 1;
+
+        $c6 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>(i41);
+
+        $i48 = (int) $c6;
+
+        $i7 = $i48 - 43;
+
+        i8 = $r3[$i7];
+
+        $r4 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: int[] decodeBase64>;
+
+        i44 = i43 + 1;
+
+        $c9 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>(i43);
+
+        $i49 = (int) $c9;
+
+        $i10 = $i49 - 43;
+
+        i11 = $r4[$i10];
+
+        $r5 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: int[] decodeBase64>;
+
+        i45 = i44 + 1;
+
+        $c12 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>(i44);
+
+        $i50 = (int) $c12;
+
+        $i13 = $i50 - 43;
+
+        i14 = $r5[$i13];
+
+        $r6 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: int[] decodeBase64>;
+
+        i41 = i45 + 1;
+
+        $c15 = virtualinvoke $r2.<java.lang.StringBuilder: char charAt(int)>(i45);
+
+        $i51 = (int) $c15;
+
+        $i16 = $i51 - 43;
+
+        i17 = $r6[$i16];
+
+        $i18 = i40;
+
+        i40 = i40 + 1;
+
+        $i20 = i8 << 2;
+
+        $i19 = i11 >> 4;
+
+        $i21 = $i20 | $i19;
+
+        $b22 = (byte) $i21;
+
+        $r9[$i18] = $b22;
+
+        if i40 >= $i39 goto label5;
+
+        $i28 = i40;
+
+        i40 = i40 + 1;
+
+        $i29 = i11 & 15;
+
+        $i31 = $i29 << 4;
+
+        $i30 = i14 >> 2;
+
+        $i32 = $i31 | $i30;
+
+        $b33 = (byte) $i32;
+
+        $r9[$i28] = $b33;
+
+     label5:
+        if i40 >= $i39 goto label6;
+
+        $i23 = i40;
+
+        i40 = i40 + 1;
+
+        $i24 = i14 & 3;
+
+        $i25 = $i24 << 6;
+
+        $i26 = $i25 | i17;
+
+        $b27 = (byte) $i26;
+
+        $r9[$i23] = $b27;
+
+     label6:
+        i42 = i42 + 1;
+
+        goto label4;
+
+     label7:
+        return $r9;
+    }
+
+    public final void convertToCharacters(java.lang.Object, java.lang.StringBuffer)
+    {
+        byte[] $r1, r2;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r3;
+        java.lang.StringBuffer r4;
+        int $i0;
+        java.lang.Object r0;
+
+        r3 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.StringBuffer;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = (byte[]) r0;
+
+        r2 = (byte[]) $r1;
+
+        $i0 = lengthof r2;
+
+        virtualinvoke r3.<com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: void convertToCharacters(byte[],int,int,java.lang.StringBuffer)>(r2, 0, $i0, r4);
+
+        return;
+    }
+
+    public final int getPrimtiveLengthFromOctetLength(int) throws com.sun.xml.internal.org.jvnet.fastinfoset.EncodingAlgorithmException
+    {
+        int i0;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r0;
+
+        r0 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        i0 := @parameter0: int;
+
+        return i0;
+    }
+
+    public int getOctetLengthFromPrimitiveLength(int)
+    {
+        int i0;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r0;
+
+        r0 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        i0 := @parameter0: int;
+
+        return i0;
+    }
+
+    public final void encodeToBytes(java.lang.Object, int, int, byte[], int)
+    {
+        byte[] $r1, r2, $r3;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r4;
+        int i0, i1, i2;
+        java.lang.Object r0;
+
+        r4 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r0 := @parameter0: java.lang.Object;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        $r1 = (byte[]) r0;
+
+        $r3 = (byte[]) $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, i0, r2, i1, i2);
+
+        return;
+    }
+
+    public final void convertToCharacters(byte[], int, int, java.lang.StringBuffer)
+    {
+        byte[] r0;
+        byte $b13, $b31, $b33;
+        short s14, s15, $s18, $s23, $s28, $s40, $s41, $s42;
+        java.lang.StringBuffer r1;
+        int i0, i1, i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i16, $i19, $i20, $i21, $i24, $i25, $i26, $i30, $i32, $i34, $i35, $i36, $i37, i38, i39, $i43, $i44;
+        com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm r6;
+        char $c17, $c22, $c27, $c29;
+        char[] $r2, $r3, $r4, $r5;
+
+        r6 := @this: com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm;
+
+        r0 := @parameter0: byte[];
+
+        i5 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r1 := @parameter3: java.lang.StringBuffer;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        if i0 != 0 goto label02;
+
+        return;
+
+     label02:
+        i1 = i0 % 3;
+
+        if i1 == 0 goto label03;
+
+        $i34 = i0 / 3;
+
+        $i37 = $i34 + 1;
+
+        goto label04;
+
+     label03:
+        $i37 = i0 / 3;
+
+     label04:
+        i2 = $i37;
+
+        $i35 = $i37 * 4;
+
+        $i3 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        $i4 = $i35 + $i3;
+
+        virtualinvoke r1.<java.lang.StringBuffer: void ensureCapacity(int)>($i4);
+
+        i38 = i5;
+
+        $i36 = i5 + i0;
+
+        i39 = 0;
+
+     label05:
+        if i39 >= i2 goto label10;
+
+        $i12 = i38;
+
+        i38 = i38 + 1;
+
+        $b13 = r0[$i12];
+
+        $s42 = (short) $b13;
+
+        s14 = $s42 & 255;
+
+        if i38 >= $i36 goto label06;
+
+        $i32 = i38;
+
+        i38 = i38 + 1;
+
+        $b33 = r0[$i32];
+
+        $s40 = $b33 & 255;
+
+        goto label07;
+
+     label06:
+        $s40 = 0;
+
+     label07:
+        s15 = $s40;
+
+        if i38 >= $i36 goto label08;
+
+        $i30 = i38;
+
+        i38 = i38 + 1;
+
+        $b31 = r0[$i30];
+
+        $s41 = $b31 & 255;
+
+        goto label09;
+
+     label08:
+        $s41 = 0;
+
+     label09:
+        $r2 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: char[] encodeBase64>;
+
+        $i43 = (int) s14;
+
+        $i16 = $i43 >> 2;
+
+        $c17 = $r2[$i16];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c17);
+
+        $r3 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: char[] encodeBase64>;
+
+        $s18 = s14 & 3;
+
+        $i44 = (int) $s18;
+
+        $i20 = $i44 << 4;
+
+        $i19 = s15 >> 4;
+
+        $i21 = $i20 | $i19;
+
+        $c22 = $r3[$i21];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c22);
+
+        $r4 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: char[] encodeBase64>;
+
+        $s23 = s15 & 15;
+
+        $i25 = $s23 << 2;
+
+        $i24 = $s41 >> 6;
+
+        $i26 = $i25 | $i24;
+
+        $c27 = $r4[$i26];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c27);
+
+        $r5 = <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: char[] encodeBase64>;
+
+        $s28 = $s41 & 63;
+
+        $c29 = $r5[$s28];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c29);
+
+        i39 = i39 + 1;
+
+        goto label05;
+
+     label10:
+        lookupswitch(i1)
+        {
+            case 1: goto label11;
+            case 2: goto label12;
+            default: goto label13;
+        };
+
+     label11:
+        $i8 = $i3 + $i35;
+
+        $i9 = $i8 - 1;
+
+        virtualinvoke r1.<java.lang.StringBuffer: void setCharAt(int,char)>($i9, 61);
+
+        $i10 = $i3 + $i35;
+
+        $i11 = $i10 - 2;
+
+        virtualinvoke r1.<java.lang.StringBuffer: void setCharAt(int,char)>($i11, 61);
+
+        goto label13;
+
+     label12:
+        $i6 = $i3 + $i35;
+
+        $i7 = $i6 - 1;
+
+        virtualinvoke r1.<java.lang.StringBuffer: void setCharAt(int,char)>($i7, 61);
+
+     label13:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r1;
+        int $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i19, $i21, $i23, $i25, $i27, $i29, $i31;
+        char[] $r0;
+
+        $r0 = newarray (char)[64];
+
+        $r0[0] = 65;
+
+        $r0[1] = 66;
+
+        $r0[2] = 67;
+
+        $r0[3] = 68;
+
+        $r0[4] = 69;
+
+        $r0[5] = 70;
+
+        $r0[6] = 71;
+
+        $r0[7] = 72;
+
+        $r0[8] = 73;
+
+        $r0[9] = 74;
+
+        $r0[10] = 75;
+
+        $r0[11] = 76;
+
+        $r0[12] = 77;
+
+        $r0[13] = 78;
+
+        $r0[14] = 79;
+
+        $r0[15] = 80;
+
+        $r0[16] = 81;
+
+        $r0[17] = 82;
+
+        $r0[18] = 83;
+
+        $r0[19] = 84;
+
+        $r0[20] = 85;
+
+        $r0[21] = 86;
+
+        $r0[22] = 87;
+
+        $r0[23] = 88;
+
+        $r0[24] = 89;
+
+        $r0[25] = 90;
+
+        $r0[26] = 97;
+
+        $r0[27] = 98;
+
+        $r0[28] = 99;
+
+        $r0[29] = 100;
+
+        $r0[30] = 101;
+
+        $r0[31] = 102;
+
+        $r0[32] = 103;
+
+        $r0[33] = 104;
+
+        $r0[34] = 105;
+
+        $r0[35] = 106;
+
+        $r0[36] = 107;
+
+        $r0[37] = 108;
+
+        $r0[38] = 109;
+
+        $r0[39] = 110;
+
+        $r0[40] = 111;
+
+        $r0[41] = 112;
+
+        $r0[42] = 113;
+
+        $r0[43] = 114;
+
+        $r0[44] = 115;
+
+        $r0[45] = 116;
+
+        $r0[46] = 117;
+
+        $r0[47] = 118;
+
+        $r0[48] = 119;
+
+        $r0[49] = 120;
+
+        $r0[50] = 121;
+
+        $r0[51] = 122;
+
+        $r0[52] = 48;
+
+        $r0[53] = 49;
+
+        $r0[54] = 50;
+
+        $r0[55] = 51;
+
+        $r0[56] = 52;
+
+        $r0[57] = 53;
+
+        $r0[58] = 54;
+
+        $r0[59] = 55;
+
+        $r0[60] = 56;
+
+        $r0[61] = 57;
+
+        $r0[62] = 43;
+
+        $r0[63] = 47;
+
+        <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: char[] encodeBase64> = $r0;
+
+        $r1 = newarray (int)[80];
+
+        $r1[0] = 62;
+
+        $i1 = (int) -1;
+
+        $r1[1] = $i1;
+
+        $i3 = (int) -1;
+
+        $r1[2] = $i3;
+
+        $i5 = (int) -1;
+
+        $r1[3] = $i5;
+
+        $r1[4] = 63;
+
+        $r1[5] = 52;
+
+        $r1[6] = 53;
+
+        $r1[7] = 54;
+
+        $r1[8] = 55;
+
+        $r1[9] = 56;
+
+        $r1[10] = 57;
+
+        $r1[11] = 58;
+
+        $r1[12] = 59;
+
+        $r1[13] = 60;
+
+        $r1[14] = 61;
+
+        $i7 = (int) -1;
+
+        $r1[15] = $i7;
+
+        $i9 = (int) -1;
+
+        $r1[16] = $i9;
+
+        $i11 = (int) -1;
+
+        $r1[17] = $i11;
+
+        $i13 = (int) -1;
+
+        $r1[18] = $i13;
+
+        $i15 = (int) -1;
+
+        $r1[19] = $i15;
+
+        $i17 = (int) -1;
+
+        $r1[20] = $i17;
+
+        $i19 = (int) -1;
+
+        $r1[21] = $i19;
+
+        $r1[22] = 0;
+
+        $r1[23] = 1;
+
+        $r1[24] = 2;
+
+        $r1[25] = 3;
+
+        $r1[26] = 4;
+
+        $r1[27] = 5;
+
+        $r1[28] = 6;
+
+        $r1[29] = 7;
+
+        $r1[30] = 8;
+
+        $r1[31] = 9;
+
+        $r1[32] = 10;
+
+        $r1[33] = 11;
+
+        $r1[34] = 12;
+
+        $r1[35] = 13;
+
+        $r1[36] = 14;
+
+        $r1[37] = 15;
+
+        $r1[38] = 16;
+
+        $r1[39] = 17;
+
+        $r1[40] = 18;
+
+        $r1[41] = 19;
+
+        $r1[42] = 20;
+
+        $r1[43] = 21;
+
+        $r1[44] = 22;
+
+        $r1[45] = 23;
+
+        $r1[46] = 24;
+
+        $r1[47] = 25;
+
+        $i21 = (int) -1;
+
+        $r1[48] = $i21;
+
+        $i23 = (int) -1;
+
+        $r1[49] = $i23;
+
+        $i25 = (int) -1;
+
+        $r1[50] = $i25;
+
+        $i27 = (int) -1;
+
+        $r1[51] = $i27;
+
+        $i29 = (int) -1;
+
+        $r1[52] = $i29;
+
+        $i31 = (int) -1;
+
+        $r1[53] = $i31;
+
+        $r1[54] = 26;
+
+        $r1[55] = 27;
+
+        $r1[56] = 28;
+
+        $r1[57] = 29;
+
+        $r1[58] = 30;
+
+        $r1[59] = 31;
+
+        $r1[60] = 32;
+
+        $r1[61] = 33;
+
+        $r1[62] = 34;
+
+        $r1[63] = 35;
+
+        $r1[64] = 36;
+
+        $r1[65] = 37;
+
+        $r1[66] = 38;
+
+        $r1[67] = 39;
+
+        $r1[68] = 40;
+
+        $r1[69] = 41;
+
+        $r1[70] = 42;
+
+        $r1[71] = 43;
+
+        $r1[72] = 44;
+
+        $r1[73] = 45;
+
+        $r1[74] = 46;
+
+        $r1[75] = 47;
+
+        $r1[76] = 48;
+
+        $r1[77] = 49;
+
+        $r1[78] = 50;
+
+        $r1[79] = 51;
+
+        <com.sun.xml.internal.fastinfoset.algorithm.BASE64EncodingAlgorithm: int[] decodeBase64> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,3662 @@
+public class javax.swing.text.html.HTMLDocument$HTMLReader extends javax.swing.text.html.HTMLEditorKit$ParserCallback
+{
+    private boolean receivedEndHTML;
+    private int flushCount;
+    private boolean insertAfterImplied;
+    private boolean wantsTrailingNewline;
+    int threshold;
+    int offset;
+    boolean inParagraph;
+    boolean impliedP;
+    boolean inPre;
+    boolean inTextArea;
+    javax.swing.text.html.TextAreaDocument textAreaDocument;
+    boolean inTitle;
+    boolean lastWasNewline;
+    boolean emptyAnchor;
+    boolean midInsert;
+    boolean inBody;
+    javax.swing.text.html.HTML$Tag insertTag;
+    boolean insertInsertTag;
+    boolean foundInsertTag;
+    int insertTagDepthDelta;
+    int popDepth;
+    int pushDepth;
+    javax.swing.text.html.Map lastMap;
+    boolean inStyle;
+    java.lang.String defaultStyle;
+    java.util.Vector styles;
+    boolean inHead;
+    boolean isStyleCSS;
+    boolean emptyDocument;
+    javax.swing.text.AttributeSet styleAttributes;
+    javax.swing.text.html.Option option;
+    protected java.util.Vector parseBuffer;
+    protected javax.swing.text.MutableAttributeSet charAttr;
+    java.util.Stack charAttrStack;
+    java.util.Hashtable tagMap;
+    int inBlock;
+    private javax.swing.text.html.HTML$Tag nextTagAfterPImplied;
+    final javax.swing.text.html.HTMLDocument this$0;
+
+    public void <init>(javax.swing.text.html.HTMLDocument, int)
+    {
+        int i0;
+        javax.swing.text.html.HTMLDocument r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTMLDocument;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void <init>(javax.swing.text.html.HTMLDocument,int,int,int,javax.swing.text.html.HTML$Tag)>(r1, i0, 0, 0, null);
+
+        return;
+    }
+
+    public void <init>(javax.swing.text.html.HTMLDocument, int, int, int, javax.swing.text.html.HTML$Tag)
+    {
+        javax.swing.text.html.HTMLDocument r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTML$Tag r2;
+        int i0, i1, i2;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTMLDocument;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r2 := @parameter4: javax.swing.text.html.HTML$Tag;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void <init>(javax.swing.text.html.HTMLDocument,int,int,int,javax.swing.text.html.HTML$Tag,boolean,boolean,boolean)>(r1, i0, i1, i2, r2, 1, 0, 1);
+
+        return;
+    }
+
+    void <init>(javax.swing.text.html.HTMLDocument, int, int, int, javax.swing.text.html.HTML$Tag, boolean, boolean, boolean)
+    {
+        java.util.Vector $r2;
+        javax.swing.text.html.HTMLDocument r1;
+        javax.swing.text.html.HTML$Tag $r18, $r19, $r21, $r25, $r26, $r30, $r31, $r33, $r35, $r37, $r39, $r41, $r43, $r45, $r47, $r49, $r51, $r53, $r55, $r57, $r59, $r61, $r63, $r67, $r68, $r70, $r72, $r74, $r76, $r78, $r80, $r82, $r86, $r87, $r89, $r91, $r93, $r95, $r99, $r100, $r102, $r106, $r109, $r110, $r114, $r115, $r117, $r119, $r121, $r123, $r125, $r129, $r132, $r133, $r135, $r137, $r139, $r141, $r143, $r145, $r147, $r151, $r152, $r154, $r156, $r158, $r160, $r162, $r166, $r167, $r169, $r171, $r173, $r175, r177, r182;
+        javax.swing.text.html.HTMLDocument$HTMLReader$SpecialAction $r12;
+        javax.swing.text.html.HTMLDocument$HTMLReader$BlockAction $r9;
+        javax.swing.text.html.HTMLDocument$HTMLReader$MetaAction $r112;
+        javax.swing.text.html.HTMLDocument$HTMLReader$StyleAction $r149;
+        javax.swing.text.html.HTMLDocument$HTMLReader$FormTagAction $r65;
+        javax.swing.text.html.HTMLDocument$HTMLReader$IsindexAction $r97;
+        javax.swing.text.html.HTMLDocument$HTMLReader$LinkAction $r104;
+        javax.swing.text.html.HTMLDocument$HTMLReader$AreaAction $r23;
+        javax.swing.text.html.HTMLDocument$HTMLReader$PreAction $r130;
+        java.util.Stack $r4;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12, i13;
+        java.lang.Object $r179, $r180;
+        javax.swing.text.html.HTMLDocument$HTMLReader$AnchorAction $r16;
+        javax.swing.text.AttributeSet $r178;
+        java.lang.String $r5, $r6;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TitleAction $r164;
+        javax.swing.text.html.HTMLDocument$HTMLReader$HiddenAction $r14;
+        javax.swing.text.html.HTMLDocument$HTMLReader$ObjectAction $r127;
+        javax.swing.text.html.HTMLDocument$HTMLReader$FormAction $r13;
+        boolean $z0, z1, $z2, $z3, $z4, z5, z6, $z7, $z8, $z9, $z10;
+        javax.swing.text.html.HTMLDocument$HTMLReader$MapAction $r107;
+        javax.swing.text.html.HTMLDocument$HTMLReader$CharacterAction $r11;
+        javax.swing.text.html.HTMLDocument$HTMLReader$ParagraphAction $r10;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction $r8;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTMLDocument$HTMLReader$HeadAction $r84;
+        java.util.Hashtable $r7, $r17, $r20, $r22, $r24, $r27, $r29, $r32, $r34, $r36, $r38, $r40, $r42, $r44, $r46, $r48, $r50, $r52, $r54, $r56, $r58, $r60, $r62, $r64, $r66, $r69, $r71, $r73, $r75, $r77, $r79, $r81, $r83, $r85, $r88, $r90, $r92, $r94, $r96, $r98, $r101, $r103, $r105, $r108, $r111, $r113, $r116, $r118, $r120, $r122, $r124, $r126, $r128, $r131, $r134, $r136, $r138, $r140, $r142, $r144, $r146, $r148, $r150, $r153, $r155, $r157, $r159, $r161, $r163, $r165, $r168, $r170, $r172, $r174, $r176;
+        javax.swing.text.html.HTMLDocument$TaggedAttributeSet $r3;
+        javax.swing.text.html.HTMLDocument$HTMLReader$ConvertAction $r15;
+        javax.swing.text.Element r181;
+        javax.swing.text.html.HTMLDocument$HTMLReader$BaseAction $r28;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTMLDocument;
+
+        i1 := @parameter1: int;
+
+        i10 := @parameter2: int;
+
+        i11 := @parameter3: int;
+
+        r177 := @parameter4: javax.swing.text.html.HTML$Tag;
+
+        z6 := @parameter5: boolean;
+
+        z1 := @parameter6: boolean;
+
+        z5 := @parameter7: boolean;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0> = r1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLEditorKit$ParserCallback: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inPre> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inTextArea> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.TextAreaDocument textAreaDocument> = null;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inTitle> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inStyle> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inHead> = 0;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer> = $r2;
+
+        $r3 = new javax.swing.text.html.HTMLDocument$TaggedAttributeSet;
+
+        specialinvoke $r3.<javax.swing.text.html.HTMLDocument$TaggedAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr> = $r3;
+
+        $r4 = new java.util.Stack;
+
+        specialinvoke $r4.<java.util.Stack: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Stack charAttrStack> = $r4;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag nextTagAfterPImplied> = null;
+
+        $i0 = virtualinvoke r1.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        if $i0 != 0 goto label01;
+
+        $z7 = 1;
+
+        goto label02;
+
+     label01:
+        $z7 = 0;
+
+     label02:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyDocument> = $z7;
+
+        $r5 = "text/css";
+
+        $r6 = virtualinvoke r1.<javax.swing.text.html.HTMLDocument: java.lang.String getDefaultStyleSheetType()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean isStyleCSS> = $z0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset> = i1;
+
+        $i2 = virtualinvoke r1.<javax.swing.text.html.HTMLDocument: int getTokenThreshold()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int threshold> = $i2;
+
+        $r7 = new java.util.Hashtable;
+
+        specialinvoke $r7.<java.util.Hashtable: void <init>(int)>(57);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap> = $r7;
+
+        $r8 = new javax.swing.text.html.HTMLDocument$HTMLReader$TagAction;
+
+        specialinvoke $r8.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r9 = new javax.swing.text.html.HTMLDocument$HTMLReader$BlockAction;
+
+        specialinvoke $r9.<javax.swing.text.html.HTMLDocument$HTMLReader$BlockAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r10 = new javax.swing.text.html.HTMLDocument$HTMLReader$ParagraphAction;
+
+        specialinvoke $r10.<javax.swing.text.html.HTMLDocument$HTMLReader$ParagraphAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r11 = new javax.swing.text.html.HTMLDocument$HTMLReader$CharacterAction;
+
+        specialinvoke $r11.<javax.swing.text.html.HTMLDocument$HTMLReader$CharacterAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r12 = new javax.swing.text.html.HTMLDocument$HTMLReader$SpecialAction;
+
+        specialinvoke $r12.<javax.swing.text.html.HTMLDocument$HTMLReader$SpecialAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r13 = new javax.swing.text.html.HTMLDocument$HTMLReader$FormAction;
+
+        specialinvoke $r13.<javax.swing.text.html.HTMLDocument$HTMLReader$FormAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r14 = new javax.swing.text.html.HTMLDocument$HTMLReader$HiddenAction;
+
+        specialinvoke $r14.<javax.swing.text.html.HTMLDocument$HTMLReader$HiddenAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r15 = new javax.swing.text.html.HTMLDocument$HTMLReader$ConvertAction;
+
+        specialinvoke $r15.<javax.swing.text.html.HTMLDocument$HTMLReader$ConvertAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        $r17 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r18 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag A>;
+
+        $r16 = new javax.swing.text.html.HTMLDocument$HTMLReader$AnchorAction;
+
+        specialinvoke $r16.<javax.swing.text.html.HTMLDocument$HTMLReader$AnchorAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r17.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r16);
+
+        $r20 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r19 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag ADDRESS>;
+
+        virtualinvoke $r20.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r19, $r11);
+
+        $r22 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r21 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag APPLET>;
+
+        virtualinvoke $r22.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r21, $r14);
+
+        $r24 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r25 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag AREA>;
+
+        $r23 = new javax.swing.text.html.HTMLDocument$HTMLReader$AreaAction;
+
+        specialinvoke $r23.<javax.swing.text.html.HTMLDocument$HTMLReader$AreaAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r24.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r25, $r23);
+
+        $r27 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r26 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag B>;
+
+        virtualinvoke $r27.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r26, $r15);
+
+        $r29 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r30 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BASE>;
+
+        $r28 = new javax.swing.text.html.HTMLDocument$HTMLReader$BaseAction;
+
+        specialinvoke $r28.<javax.swing.text.html.HTMLDocument$HTMLReader$BaseAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r29.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r30, $r28);
+
+        $r32 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r31 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BASEFONT>;
+
+        virtualinvoke $r32.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r31, $r11);
+
+        $r34 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r33 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BIG>;
+
+        virtualinvoke $r34.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r33, $r11);
+
+        $r36 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r35 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BLOCKQUOTE>;
+
+        virtualinvoke $r36.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r35, $r9);
+
+        $r38 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r37 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        virtualinvoke $r38.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r37, $r9);
+
+        $r40 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r39 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BR>;
+
+        virtualinvoke $r40.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r39, $r12);
+
+        $r42 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r41 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CAPTION>;
+
+        virtualinvoke $r42.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r41, $r9);
+
+        $r44 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r43 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CENTER>;
+
+        virtualinvoke $r44.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r43, $r9);
+
+        $r46 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r45 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CITE>;
+
+        virtualinvoke $r46.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r45, $r11);
+
+        $r48 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r47 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CODE>;
+
+        virtualinvoke $r48.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r47, $r11);
+
+        $r50 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r49 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DD>;
+
+        virtualinvoke $r50.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r49, $r9);
+
+        $r52 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r51 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DFN>;
+
+        virtualinvoke $r52.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r51, $r11);
+
+        $r54 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r53 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DIR>;
+
+        virtualinvoke $r54.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r53, $r9);
+
+        $r56 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r55 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DIV>;
+
+        virtualinvoke $r56.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r55, $r9);
+
+        $r58 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r57 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DL>;
+
+        virtualinvoke $r58.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r57, $r9);
+
+        $r60 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r59 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag DT>;
+
+        virtualinvoke $r60.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r59, $r10);
+
+        $r62 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r61 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag EM>;
+
+        virtualinvoke $r62.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r61, $r11);
+
+        $r64 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r63 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FONT>;
+
+        virtualinvoke $r64.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r63, $r15);
+
+        $r66 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r67 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FORM>;
+
+        $r65 = new javax.swing.text.html.HTMLDocument$HTMLReader$FormTagAction;
+
+        specialinvoke $r65.<javax.swing.text.html.HTMLDocument$HTMLReader$FormTagAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader,javax.swing.text.html.HTMLDocument$1)>(r0, null);
+
+        virtualinvoke $r66.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r67, $r65);
+
+        $r69 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r68 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FRAME>;
+
+        virtualinvoke $r69.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r68, $r12);
+
+        $r71 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r70 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FRAMESET>;
+
+        virtualinvoke $r71.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r70, $r9);
+
+        $r73 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r72 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H1>;
+
+        virtualinvoke $r73.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r72, $r10);
+
+        $r75 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r74 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H2>;
+
+        virtualinvoke $r75.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r74, $r10);
+
+        $r77 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r76 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H3>;
+
+        virtualinvoke $r77.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r76, $r10);
+
+        $r79 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r78 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H4>;
+
+        virtualinvoke $r79.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r78, $r10);
+
+        $r81 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r80 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H5>;
+
+        virtualinvoke $r81.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r80, $r10);
+
+        $r83 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r82 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag H6>;
+
+        virtualinvoke $r83.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r82, $r10);
+
+        $r85 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r86 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HEAD>;
+
+        $r84 = new javax.swing.text.html.HTMLDocument$HTMLReader$HeadAction;
+
+        specialinvoke $r84.<javax.swing.text.html.HTMLDocument$HTMLReader$HeadAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r85.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r86, $r84);
+
+        $r88 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r87 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HR>;
+
+        virtualinvoke $r88.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r87, $r12);
+
+        $r90 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r89 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HTML>;
+
+        virtualinvoke $r90.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r89, $r9);
+
+        $r92 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r91 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag I>;
+
+        virtualinvoke $r92.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r91, $r15);
+
+        $r94 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r93 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMG>;
+
+        virtualinvoke $r94.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r93, $r12);
+
+        $r96 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r95 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag INPUT>;
+
+        virtualinvoke $r96.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r95, $r13);
+
+        $r98 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r99 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag ISINDEX>;
+
+        $r97 = new javax.swing.text.html.HTMLDocument$HTMLReader$IsindexAction;
+
+        specialinvoke $r97.<javax.swing.text.html.HTMLDocument$HTMLReader$IsindexAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r98.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r99, $r97);
+
+        $r101 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r100 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag KBD>;
+
+        virtualinvoke $r101.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r100, $r11);
+
+        $r103 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r102 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag LI>;
+
+        virtualinvoke $r103.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r102, $r9);
+
+        $r105 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r106 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag LINK>;
+
+        $r104 = new javax.swing.text.html.HTMLDocument$HTMLReader$LinkAction;
+
+        specialinvoke $r104.<javax.swing.text.html.HTMLDocument$HTMLReader$LinkAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r105.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r106, $r104);
+
+        $r108 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r109 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag MAP>;
+
+        $r107 = new javax.swing.text.html.HTMLDocument$HTMLReader$MapAction;
+
+        specialinvoke $r107.<javax.swing.text.html.HTMLDocument$HTMLReader$MapAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r108.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r109, $r107);
+
+        $r111 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r110 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag MENU>;
+
+        virtualinvoke $r111.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r110, $r9);
+
+        $r113 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r114 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag META>;
+
+        $r112 = new javax.swing.text.html.HTMLDocument$HTMLReader$MetaAction;
+
+        specialinvoke $r112.<javax.swing.text.html.HTMLDocument$HTMLReader$MetaAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r113.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r114, $r112);
+
+        $r116 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r115 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag NOBR>;
+
+        virtualinvoke $r116.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r115, $r11);
+
+        $r118 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r117 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag NOFRAMES>;
+
+        virtualinvoke $r118.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r117, $r9);
+
+        $r120 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r119 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OBJECT>;
+
+        virtualinvoke $r120.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r119, $r12);
+
+        $r122 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r121 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OL>;
+
+        virtualinvoke $r122.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r121, $r9);
+
+        $r124 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r123 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OPTION>;
+
+        virtualinvoke $r124.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r123, $r13);
+
+        $r126 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r125 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag P>;
+
+        virtualinvoke $r126.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r125, $r10);
+
+        $r128 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r129 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PARAM>;
+
+        $r127 = new javax.swing.text.html.HTMLDocument$HTMLReader$ObjectAction;
+
+        specialinvoke $r127.<javax.swing.text.html.HTMLDocument$HTMLReader$ObjectAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r128.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r129, $r127);
+
+        $r131 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r132 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        $r130 = new javax.swing.text.html.HTMLDocument$HTMLReader$PreAction;
+
+        specialinvoke $r130.<javax.swing.text.html.HTMLDocument$HTMLReader$PreAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r131.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r132, $r130);
+
+        $r134 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r133 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SAMP>;
+
+        virtualinvoke $r134.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r133, $r11);
+
+        $r136 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r135 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SCRIPT>;
+
+        virtualinvoke $r136.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r135, $r14);
+
+        $r138 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r137 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SELECT>;
+
+        virtualinvoke $r138.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r137, $r13);
+
+        $r140 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r139 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SMALL>;
+
+        virtualinvoke $r140.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r139, $r11);
+
+        $r142 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r141 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SPAN>;
+
+        virtualinvoke $r142.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r141, $r11);
+
+        $r144 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r143 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag STRIKE>;
+
+        virtualinvoke $r144.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r143, $r15);
+
+        $r146 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r145 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag S>;
+
+        virtualinvoke $r146.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r145, $r11);
+
+        $r148 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r147 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag STRONG>;
+
+        virtualinvoke $r148.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r147, $r11);
+
+        $r150 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r151 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag STYLE>;
+
+        $r149 = new javax.swing.text.html.HTMLDocument$HTMLReader$StyleAction;
+
+        specialinvoke $r149.<javax.swing.text.html.HTMLDocument$HTMLReader$StyleAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r150.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r151, $r149);
+
+        $r153 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r152 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SUB>;
+
+        virtualinvoke $r153.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r152, $r15);
+
+        $r155 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r154 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SUP>;
+
+        virtualinvoke $r155.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r154, $r15);
+
+        $r157 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r156 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TABLE>;
+
+        virtualinvoke $r157.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r156, $r9);
+
+        $r159 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r158 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TD>;
+
+        virtualinvoke $r159.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r158, $r9);
+
+        $r161 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r160 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TEXTAREA>;
+
+        virtualinvoke $r161.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r160, $r13);
+
+        $r163 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r162 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TH>;
+
+        virtualinvoke $r163.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r162, $r9);
+
+        $r165 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r166 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TITLE>;
+
+        $r164 = new javax.swing.text.html.HTMLDocument$HTMLReader$TitleAction;
+
+        specialinvoke $r164.<javax.swing.text.html.HTMLDocument$HTMLReader$TitleAction: void <init>(javax.swing.text.html.HTMLDocument$HTMLReader)>(r0);
+
+        virtualinvoke $r165.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r166, $r164);
+
+        $r168 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r167 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TR>;
+
+        virtualinvoke $r168.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r167, $r9);
+
+        $r170 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r169 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TT>;
+
+        virtualinvoke $r170.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r169, $r11);
+
+        $r172 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r171 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag U>;
+
+        virtualinvoke $r172.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r171, $r15);
+
+        $r174 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r173 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag UL>;
+
+        virtualinvoke $r174.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r173, $r9);
+
+        $r176 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r175 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag VAR>;
+
+        virtualinvoke $r176.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r175, $r11);
+
+        if r177 == null goto label03;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag> = r177;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth> = i10;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth> = i11;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertInsertTag> = z6;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag> = 0;
+
+        goto label04;
+
+     label03:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag> = 1;
+
+     label04:
+        if z1 == 0 goto label05;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth> = i10;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth> = i11;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied> = 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertInsertTag> = 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean wantsTrailingNewline> = z5;
+
+        goto label08;
+
+     label05:
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyDocument>;
+
+        if $z2 != 0 goto label06;
+
+        if r177 != null goto label06;
+
+        $z8 = 1;
+
+        goto label07;
+
+     label06:
+        $z8 = 0;
+
+     label07:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert> = $z8;
+
+        $z9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z9 == 0 goto label08;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void generateEndsSpecsForMidInsert()>();
+
+     label08:
+        $z10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyDocument>;
+
+        if $z10 != 0 goto label13;
+
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z3 != 0 goto label13;
+
+        $i3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i4 = $i3 - 1;
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i4, 0);
+
+        r181 = virtualinvoke r1.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element getCharacterElement(int)>($i5);
+
+        i12 = 0;
+
+     label09:
+        $i6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth>;
+
+        if i12 > $i6 goto label10;
+
+        r181 = interfaceinvoke r181.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        i12 = i12 + 1;
+
+        goto label09;
+
+     label10:
+        i13 = 0;
+
+     label11:
+        $i7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        if i13 >= $i7 goto label12;
+
+        $i8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i9 = interfaceinvoke r181.<javax.swing.text.Element: int getElementIndex(int)>($i8);
+
+        r181 = interfaceinvoke r181.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i9);
+
+        i13 = i13 + 1;
+
+        goto label11;
+
+     label12:
+        $r178 = interfaceinvoke r181.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        if $r178 == null goto label13;
+
+        $r179 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r180 = interfaceinvoke $r178.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r179);
+
+        r182 = (javax.swing.text.html.HTML$Tag) $r180;
+
+        if r182 == null goto label13;
+
+        $z4 = virtualinvoke r182.<javax.swing.text.html.HTML$Tag: boolean isParagraph()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = $z4;
+
+     label13:
+        return;
+    }
+
+    private void generateEndsSpecsForMidInsert()
+    {
+        java.util.Vector $r3, $r5, $r13;
+        boolean $z0, z1, z2, z3;
+        javax.swing.text.BadLocationException $r16;
+        javax.swing.text.html.HTMLDocument $r6;
+        javax.swing.text.html.HTML$Tag $r1, $r9, $r15;
+        javax.swing.text.SimpleAttributeSet $r18;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r19, $r20, $r21;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, $i14, $i16, $i18, $i20, $i22, $i24;
+        java.lang.String $r7;
+        java.lang.RuntimeException $r17;
+        char[] $r12;
+        java.lang.Object $r10;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $r1 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i1 = $i0 - 1;
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i1);
+
+        $i3 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int heightToElementWithName(java.lang.Object,int)>($r1, $i2);
+
+        i13 = $i3;
+
+        z1 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        $i16 = (int) -1;
+
+        if $i3 != $i16 goto label1;
+
+        $i7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        if $i7 <= 0 goto label1;
+
+        $r15 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $i8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i9 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int heightToElementWithName(java.lang.Object,int)>($r15, $i8);
+
+        i13 = $i9;
+
+        $i18 = (int) -1;
+
+        if $i9 == $i18 goto label1;
+
+        $i10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i11 = $i10 - 1;
+
+        $i12 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int depthTo(int)>($i11);
+
+        i13 = $i12 - 1;
+
+        z1 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label1:
+        $i20 = (int) -1;
+
+        if i13 != $i20 goto label2;
+
+        $r17 = new java.lang.RuntimeException;
+
+        specialinvoke $r17.<java.lang.RuntimeException: void <init>(java.lang.String)>("Must insert new content into body element-");
+
+        throw $r17;
+
+     label2:
+        $i22 = (int) -1;
+
+        if i13 == $i22 goto label8;
+
+     label3:
+        if z2 != 0 goto label4;
+
+        $i4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        if $i4 <= 0 goto label4;
+
+        $r6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i6 = $i5 - 1;
+
+        $r7 = virtualinvoke $r6.<javax.swing.text.html.HTMLDocument: java.lang.String getText(int,int)>($i6, 1);
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("\n");
+
+        if $z0 != 0 goto label4;
+
+        $r18 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r18.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        $r10 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r9 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        virtualinvoke $r18.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r10, $r9);
+
+        $r19 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r12 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        specialinvoke $r19.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short,char[],int,int)>($r18, 3, $r12, 0, 1);
+
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r13.<java.util.Vector: void addElement(java.lang.Object)>($r19);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r16 := @caughtexception;
+
+     label6:
+        $i14 = i13;
+
+        $i24 = (int) -1;
+
+        i13 = i13 + $i24;
+
+        if $i14 <= 0 goto label7;
+
+        $r5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r20 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r20.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>(null, 2);
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>($r20);
+
+        goto label6;
+
+     label7:
+        if z3 == 0 goto label8;
+
+        $r21 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r21.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>(null, 1);
+
+        virtualinvoke $r21.<javax.swing.text.DefaultStyledDocument$ElementSpec: void setDirection(short)>(5);
+
+        $r3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+     label8:
+        return;
+
+        catch javax.swing.text.BadLocationException from label3 to label4 with label5;
+    }
+
+    private int depthTo(int)
+    {
+        javax.swing.text.html.HTMLDocument $r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int i0, $i1, i2;
+        javax.swing.text.Element r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        r2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element getDefaultRootElement()>();
+
+        i2 = 0;
+
+     label1:
+        $z0 = interfaceinvoke r2.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label2;
+
+        i2 = i2 + 1;
+
+        $i1 = interfaceinvoke r2.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        r2 = interfaceinvoke r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+
+    private int heightToElementWithName(java.lang.Object, int)
+    {
+        javax.swing.text.html.HTMLDocument $r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int i0, i1, $i2, $i4;
+        java.lang.Object $r4, $r5, r6;
+        javax.swing.text.Element $r2, r7;
+        javax.swing.text.AttributeSet $r3;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r6 := @parameter0: java.lang.Object;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element getCharacterElement(int)>(i0);
+
+        r7 = interfaceinvoke $r2.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        i1 = 0;
+
+     label1:
+        if r7 == null goto label2;
+
+        $r3 = interfaceinvoke r7.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r4 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r5 = interfaceinvoke $r3.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        if $r5 == r6 goto label2;
+
+        i1 = i1 + 1;
+
+        r7 = interfaceinvoke r7.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        goto label1;
+
+     label2:
+        if r7 != null goto label3;
+
+        $i4 = (int) -1;
+
+        $i2 = $i4;
+
+        goto label4;
+
+     label3:
+        $i2 = i1;
+
+     label4:
+        return $i2;
+    }
+
+    private void adjustEndElement()
+    {
+        javax.swing.text.AttributeSet $r5;
+        javax.swing.undo.UndoableEdit $r45;
+        javax.swing.text.BadLocationException $r52;
+        javax.swing.text.AbstractDocument$Content $r44;
+        javax.swing.text.html.HTMLDocument $r1, $r2, $r10, $r25, $r32, $r36, $r38, $r41, $r42, $r43, $r46, $r47, $r49, $r51, $r53, $r56;
+        javax.swing.text.html.HTML$Tag $r8, $r21;
+        javax.swing.text.AbstractDocument$BranchElement $r17, $r29;
+        javax.swing.event.UndoableEditEvent $r37, $r48;
+        java.lang.Throwable $r50;
+        javax.swing.text.SimpleAttributeSet $r20;
+        java.lang.String $r11;
+        javax.swing.text.Element[] $r3, r12, $r34, r54, r55;
+        javax.swing.text.AbstractDocument$ElementEdit $r18, $r33;
+        boolean $z0;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent $r30, $r39;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.lang.Boolean $r23;
+        javax.swing.event.DocumentEvent$EventType $r31, $r40;
+        java.lang.Object $r6, $r7, $r22;
+        javax.swing.text.Element $r4, $r9, $r13, $r14, $r15, $r16, $r19, $r24, $r26, $r27, $r28, $r35;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r2.<javax.swing.text.html.HTMLDocument: void obtainLock()>();
+
+     label2:
+        $i1 = $i0 - 1;
+
+        $r3 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.Element[] getPathTo(int)>($i1);
+
+        i2 = lengthof $r3;
+
+        if i2 <= 1 goto label4;
+
+        $r4 = $r3[1];
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r6 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r7 = interfaceinvoke $r5.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r6);
+
+        $r8 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if $r7 != $r8 goto label4;
+
+        $r9 = $r3[1];
+
+        $i3 = interfaceinvoke $r9.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i3 != $i0 goto label4;
+
+        $r10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i4 = $i0 - 1;
+
+        $r11 = virtualinvoke $r10.<javax.swing.text.html.HTMLDocument: java.lang.String getText(int,int)>($i4, 1);
+
+        r54 = newarray (javax.swing.text.Element)[0];
+
+        r12 = newarray (javax.swing.text.Element)[1];
+
+        $r13 = $r3[0];
+
+        $i5 = interfaceinvoke $r13.<javax.swing.text.Element: int getElementIndex(int)>($i0);
+
+        $r14 = $r3[0];
+
+        $r15 = interfaceinvoke $r14.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i5);
+
+        r12[0] = $r15;
+
+        $r16 = $r3[0];
+
+        $r17 = (javax.swing.text.AbstractDocument$BranchElement) $r16;
+
+        virtualinvoke $r17.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>($i5, 1, r54);
+
+        $r18 = new javax.swing.text.AbstractDocument$ElementEdit;
+
+        $r19 = $r3[0];
+
+        specialinvoke $r18.<javax.swing.text.AbstractDocument$ElementEdit: void <init>(javax.swing.text.Element,int,javax.swing.text.Element[],javax.swing.text.Element[])>($r19, $i5, r12, r54);
+
+        $r20 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r20.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        $r22 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r21 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        virtualinvoke $r20.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r22, $r21);
+
+        $r23 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r20.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("CR", $r23);
+
+        r55 = newarray (javax.swing.text.Element)[1];
+
+        $r25 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i6 = i2 - 1;
+
+        $r24 = $r3[$i6];
+
+        $i7 = $i0 + 1;
+
+        $r26 = virtualinvoke $r25.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r24, $r20, $i0, $i7);
+
+        r55[0] = $r26;
+
+        $i8 = i2 - 1;
+
+        $r27 = $r3[$i8];
+
+        $i9 = interfaceinvoke $r27.<javax.swing.text.Element: int getElementCount()>();
+
+        $i10 = i2 - 1;
+
+        $r28 = $r3[$i10];
+
+        $r29 = (javax.swing.text.AbstractDocument$BranchElement) $r28;
+
+        virtualinvoke $r29.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>($i9, 0, r55);
+
+        $r30 = new javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r32 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r31 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType CHANGE>;
+
+        specialinvoke $r30.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void <init>(javax.swing.text.AbstractDocument,int,int,javax.swing.event.DocumentEvent$EventType)>($r32, $i0, 1, $r31);
+
+        $r33 = new javax.swing.text.AbstractDocument$ElementEdit;
+
+        $i11 = i2 - 1;
+
+        $r35 = $r3[$i11];
+
+        $r34 = newarray (javax.swing.text.Element)[0];
+
+        specialinvoke $r33.<javax.swing.text.AbstractDocument$ElementEdit: void <init>(javax.swing.text.Element,int,javax.swing.text.Element[],javax.swing.text.Element[])>($r35, $i9, $r34, r55);
+
+        virtualinvoke $r30.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r33);
+
+        virtualinvoke $r30.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r18);
+
+        virtualinvoke $r30.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void end()>();
+
+        $r36 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r36.<javax.swing.text.html.HTMLDocument: void fireChangedUpdate(javax.swing.event.DocumentEvent)>($r30);
+
+        $r38 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r37 = new javax.swing.event.UndoableEditEvent;
+
+        specialinvoke $r37.<javax.swing.event.UndoableEditEvent: void <init>(java.lang.Object,javax.swing.undo.UndoableEdit)>(r0, $r30);
+
+        virtualinvoke $r38.<javax.swing.text.html.HTMLDocument: void fireUndoableEditUpdate(javax.swing.event.UndoableEditEvent)>($r37);
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("\n");
+
+        if $z0 == 0 goto label4;
+
+        $r39 = new javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r41 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i12 = $i0 - 1;
+
+        $r40 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        specialinvoke $r39.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void <init>(javax.swing.text.AbstractDocument,int,int,javax.swing.event.DocumentEvent$EventType)>($r41, $i12, 1, $r40);
+
+        $r42 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        staticinvoke <javax.swing.text.html.HTMLDocument: void access$200(javax.swing.text.html.HTMLDocument,javax.swing.text.AbstractDocument$DefaultDocumentEvent)>($r42, $r39);
+
+        $r43 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r44 = staticinvoke <javax.swing.text.html.HTMLDocument: javax.swing.text.AbstractDocument$Content access$300(javax.swing.text.html.HTMLDocument)>($r43);
+
+        $i13 = $i0 - 1;
+
+        $r45 = interfaceinvoke $r44.<javax.swing.text.AbstractDocument$Content: javax.swing.undo.UndoableEdit remove(int,int)>($i13, 1);
+
+        if $r45 == null goto label3;
+
+        virtualinvoke $r39.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r45);
+
+     label3:
+        $r46 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        staticinvoke <javax.swing.text.html.HTMLDocument: void access$400(javax.swing.text.html.HTMLDocument,javax.swing.text.AbstractDocument$DefaultDocumentEvent)>($r46, $r39);
+
+        virtualinvoke $r39.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: void end()>();
+
+        $r47 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        staticinvoke <javax.swing.text.html.HTMLDocument: void access$500(javax.swing.text.html.HTMLDocument,javax.swing.event.DocumentEvent)>($r47, $r39);
+
+        $r49 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r48 = new javax.swing.event.UndoableEditEvent;
+
+        specialinvoke $r48.<javax.swing.event.UndoableEditEvent: void <init>(java.lang.Object,javax.swing.undo.UndoableEdit)>(r0, $r39);
+
+        virtualinvoke $r49.<javax.swing.text.html.HTMLDocument: void fireUndoableEditUpdate(javax.swing.event.UndoableEditEvent)>($r48);
+
+     label4:
+        $r56 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r56.<javax.swing.text.html.HTMLDocument: void releaseLock()>();
+
+        goto label8;
+
+     label5:
+        $r52 := @caughtexception;
+
+        $r53 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r53.<javax.swing.text.html.HTMLDocument: void releaseLock()>();
+
+        goto label8;
+
+     label6:
+        $r50 := @caughtexception;
+
+     label7:
+        $r51 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r51.<javax.swing.text.html.HTMLDocument: void releaseLock()>();
+
+        throw $r50;
+
+     label8:
+        return;
+
+        catch javax.swing.text.BadLocationException from label2 to label4 with label5;
+        catch java.lang.Throwable from label2 to label4 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private javax.swing.text.Element[] getPathTo(int)
+    {
+        javax.swing.text.Element[] r3;
+        java.util.Stack $r0;
+        javax.swing.text.html.HTMLDocument $r2;
+        javax.swing.text.html.HTMLDocument$HTMLReader r1;
+        int $i0, i1, $i2;
+        javax.swing.text.Element r4;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        i1 := @parameter0: int;
+
+        $r0 = new java.util.Stack;
+
+        specialinvoke $r0.<java.util.Stack: void <init>()>();
+
+        $r2 = r1.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        r4 = virtualinvoke $r2.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element getDefaultRootElement()>();
+
+     label1:
+        $z0 = interfaceinvoke r4.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r0.<java.util.Stack: java.lang.Object push(java.lang.Object)>(r4);
+
+        $i2 = interfaceinvoke r4.<javax.swing.text.Element: int getElementIndex(int)>(i1);
+
+        r4 = interfaceinvoke r4.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i2);
+
+        goto label1;
+
+     label2:
+        $i0 = virtualinvoke $r0.<java.util.Stack: int size()>();
+
+        r3 = newarray (javax.swing.text.Element)[$i0];
+
+        virtualinvoke $r0.<java.util.Stack: void copyInto(java.lang.Object[])>(r3);
+
+        return r3;
+    }
+
+    public void flush() throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.html.HTMLDocument $r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r2;
+        int $i0, $i1;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyDocument>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z1 != 0 goto label2;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        if $i0 > 0 goto label1;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i1 <= 0 goto label3;
+
+     label1:
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void flushBuffer(boolean)>(1);
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void adjustEndElement()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void flushBuffer(boolean)>(1);
+
+     label3:
+        return;
+    }
+
+    public void handleText(char[], int)
+    {
+        java.util.Vector $r7, $r9;
+        javax.swing.text.html.Option $r4, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z14, $z15;
+        javax.swing.text.html.HTMLDocument $r1, $r6, $r13, $r15, $r18, $r21;
+        java.awt.font.TextAttribute $r14;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Boolean $r3, $r17, $r19, $r20;
+        java.lang.String $r8, $r10, $r12;
+        char[] r5;
+        java.lang.Object $r2, $r16;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r5 := @parameter0: char[];
+
+        i3 := @parameter1: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML>;
+
+        if $z0 != 0 goto label01;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z1 == 0 goto label02;
+
+        $z11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody>;
+
+        if $z11 != 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: java.lang.Object getProperty(java.lang.Object)>("i18n");
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $z2 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label04;
+
+        $r15 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r14 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r16 = virtualinvoke $r15.<javax.swing.text.html.HTMLDocument: java.lang.Object getProperty(java.lang.Object)>($r14);
+
+        if $r16 == null goto label03;
+
+        $r19 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_RTL>;
+
+        $z10 = virtualinvoke $r16.<java.lang.Object: boolean equals(java.lang.Object)>($r19);
+
+        if $z10 == 0 goto label03;
+
+        $r21 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r20 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r21.<javax.swing.text.html.HTMLDocument: void putProperty(java.lang.Object,java.lang.Object)>("i18n", $r20);
+
+        goto label04;
+
+     label03:
+        $i2 = lengthof r5;
+
+        $z9 = staticinvoke <sun.swing.SwingUtilities2: boolean isComplexLayout(char[],int,int)>(r5, 0, $i2);
+
+        if $z9 == 0 goto label04;
+
+        $r18 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r17 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r18.<javax.swing.text.html.HTMLDocument: void putProperty(java.lang.Object,java.lang.Object)>("i18n", $r17);
+
+     label04:
+        $z12 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inTextArea>;
+
+        if $z12 == 0 goto label05;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void textAreaContent(char[])>(r5);
+
+        goto label13;
+
+     label05:
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inPre>;
+
+        if $z3 == 0 goto label06;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void preContent(char[])>(r5);
+
+        goto label13;
+
+     label06:
+        $z4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inTitle>;
+
+        if $z4 == 0 goto label07;
+
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r12 = new java.lang.String;
+
+        specialinvoke $r12.<java.lang.String: void <init>(char[])>(r5);
+
+        virtualinvoke $r13.<javax.swing.text.html.HTMLDocument: void putProperty(java.lang.Object,java.lang.Object)>("title", $r12);
+
+        goto label13;
+
+     label07:
+        $r4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.Option option>;
+
+        if $r4 == null goto label08;
+
+        $r11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.Option option>;
+
+        $r10 = new java.lang.String;
+
+        specialinvoke $r10.<java.lang.String: void <init>(char[])>(r5);
+
+        virtualinvoke $r11.<javax.swing.text.html.Option: void setLabel(java.lang.String)>($r10);
+
+        goto label13;
+
+     label08:
+        $z5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inStyle>;
+
+        if $z5 == 0 goto label09;
+
+        $r7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector styles>;
+
+        if $r7 == null goto label13;
+
+        $r9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector styles>;
+
+        $r8 = new java.lang.String;
+
+        specialinvoke $r8.<java.lang.String: void <init>(char[])>(r5);
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        goto label13;
+
+     label09:
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        if $i0 <= 0 goto label13;
+
+        $z6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag>;
+
+        if $z6 != 0 goto label12;
+
+        $z7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z7 == 0 goto label12;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void foundInsertTag(boolean)>(0);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag> = 1;
+
+        $r6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $z8 = staticinvoke <javax.swing.text.html.HTMLDocument: boolean access$600(javax.swing.text.html.HTMLDocument)>($r6);
+
+        if $z8 != 0 goto label10;
+
+        $z15 = 1;
+
+        $z14 = 1;
+
+        goto label11;
+
+     label10:
+        $z15 = 0;
+
+        $z14 = 0;
+
+     label11:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP> = $z14;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = $z15;
+
+     label12:
+        $i4 = lengthof r5;
+
+        if $i4 < 1 goto label13;
+
+        $i1 = lengthof r5;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int)>(r5, 0, $i1);
+
+     label13:
+        return;
+    }
+
+    public void handleStartTag(javax.swing.text.html.HTML$Tag, javax.swing.text.MutableAttributeSet, int)
+    {
+        javax.swing.text.html.StyleSheet $r8;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction $r16;
+        javax.swing.text.html.HTML$Attribute $r3, $r4, $r6;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, i2;
+        java.lang.String r13;
+        javax.swing.text.AttributeSet $r9, $r10;
+        java.util.Hashtable $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.swing.text.MutableAttributeSet r2;
+        javax.swing.text.html.HTMLDocument $r7;
+        javax.swing.text.html.HTML$Tag r1, $r11, $r12;
+        java.lang.Object $r5, $r15;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r2 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        i2 := @parameter2: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z1 == 0 goto label3;
+
+        $z4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody>;
+
+        if $z4 != 0 goto label3;
+
+        $r12 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if r1 != $r12 goto label2;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody> = 1;
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        $i1 = $i0 + 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock> = $i1;
+
+     label2:
+        return;
+
+     label3:
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody>;
+
+        if $z2 != 0 goto label4;
+
+        $r11 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if r1 != $r11 goto label4;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody> = 1;
+
+     label4:
+        $z5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean isStyleCSS>;
+
+        if $z5 == 0 goto label5;
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        $z3 = interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: boolean isDefined(java.lang.Object)>($r3);
+
+        if $z3 == 0 goto label5;
+
+        $r4 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        $r5 = interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        r13 = (java.lang.String) $r5;
+
+        $r6 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r6);
+
+        $r7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        $r9 = virtualinvoke $r8.<javax.swing.text.html.StyleSheet: javax.swing.text.AttributeSet getDeclaration(java.lang.String)>(r13);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes> = $r9;
+
+        $r10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>($r10);
+
+        goto label6;
+
+     label5:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes> = null;
+
+     label6:
+        $r14 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r15 = virtualinvoke $r14.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r16 = (javax.swing.text.html.HTMLDocument$HTMLReader$TagAction) $r15;
+
+        if $r16 == null goto label7;
+
+        virtualinvoke $r16.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void start(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>(r1, r2);
+
+     label7:
+        return;
+    }
+
+    public void handleComment(char[], int)
+    {
+        javax.swing.text.SimpleAttributeSet $r2, $r5;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction $r20;
+        javax.swing.text.html.HTML$Attribute $r8;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r13, $r15;
+        int $i0, i1;
+        java.lang.String $r6, $r10, $r14, $r16;
+        java.util.Hashtable $r17;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.text.html.HTMLDocument $r1;
+        javax.swing.text.html.HTML$Tag $r3, $r4, $r9, $r11, $r12, $r18;
+        char[] r7;
+        java.lang.Object $r19;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r7 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML>;
+
+        if $z0 == 0 goto label1;
+
+        $r16 = new java.lang.String;
+
+        specialinvoke $r16.<java.lang.String: void <init>(char[])>(r7);
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addExternalComment(java.lang.String)>($r16);
+
+        return;
+
+     label1:
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inStyle>;
+
+        if $z1 == 0 goto label2;
+
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector styles>;
+
+        if $r13 == null goto label5;
+
+        $r15 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector styles>;
+
+        $r14 = new java.lang.String;
+
+        specialinvoke $r14.<java.lang.String: void <init>(char[])>(r7);
+
+        virtualinvoke $r15.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+        goto label5;
+
+     label2:
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $z2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: boolean getPreservesUnknownTags()>();
+
+        if $z2 == 0 goto label5;
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        if $i0 != 0 goto label4;
+
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag>;
+
+        if $z3 != 0 goto label3;
+
+        $r12 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        $r11 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        if $r12 == $r11 goto label4;
+
+     label3:
+        $r10 = new java.lang.String;
+
+        specialinvoke $r10.<java.lang.String: void <init>(char[])>(r7);
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addExternalComment(java.lang.String)>($r10);
+
+        return;
+
+     label4:
+        $r5 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r5.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        $r8 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute COMMENT>;
+
+        $r6 = new java.lang.String;
+
+        specialinvoke $r6.<java.lang.String: void <init>(char[])>(r7);
+
+        virtualinvoke $r5.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r8, $r6);
+
+        $r9 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addSpecialElement(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>($r9, $r5);
+
+     label5:
+        $r17 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r18 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        $r19 = virtualinvoke $r17.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r18);
+
+        $r20 = (javax.swing.text.html.HTMLDocument$HTMLReader$TagAction) $r19;
+
+        if $r20 == null goto label6;
+
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        $r2 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r2.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        virtualinvoke $r20.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void start(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>($r3, $r2);
+
+        $r4 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        virtualinvoke $r20.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void end(javax.swing.text.html.HTML$Tag)>($r4);
+
+     label6:
+        return;
+    }
+
+    private void addExternalComment(java.lang.String)
+    {
+        javax.swing.text.html.HTMLDocument $r1, $r6;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r4, $r5;
+        java.lang.Object $r2, r7;
+        java.lang.String r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: java.lang.Object getProperty(java.lang.Object)>("AdditionalComments");
+
+        r7 = $r2;
+
+        if $r2 == null goto label1;
+
+        $z0 = $r2 instanceof java.util.Vector;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r5 = new java.util.Vector;
+
+        specialinvoke $r5.<java.util.Vector: void <init>()>();
+
+        r7 = $r5;
+
+        $r6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r6.<javax.swing.text.html.HTMLDocument: void putProperty(java.lang.Object,java.lang.Object)>("AdditionalComments", $r5);
+
+     label2:
+        $r4 = (java.util.Vector) r7;
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>(r3);
+
+        return;
+    }
+
+    public void handleEndTag(javax.swing.text.html.HTML$Tag, int)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction $r6;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTML$Tag r1, $r2, $r3;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        java.util.Hashtable $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        i2 := @parameter1: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z1 == 0 goto label2;
+
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody>;
+
+        if $z3 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HTML>;
+
+        if r1 != $r2 goto label3;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML> = 1;
+
+     label3:
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if r1 != $r3 goto label4;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody> = 0;
+
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z2 == 0 goto label4;
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        $i1 = $i0 - 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock> = $i1;
+
+     label4:
+        $r4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r6 = (javax.swing.text.html.HTMLDocument$HTMLReader$TagAction) $r5;
+
+        if $r6 == null goto label5;
+
+        virtualinvoke $r6.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void end(javax.swing.text.html.HTML$Tag)>(r1);
+
+     label5:
+        return;
+    }
+
+    public void handleSimpleTag(javax.swing.text.html.HTML$Tag, javax.swing.text.MutableAttributeSet, int)
+    {
+        javax.swing.text.html.StyleSheet $r9;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction $r15;
+        javax.swing.text.html.HTML$Attribute $r4, $r5, $r7;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int i0;
+        java.lang.String r12;
+        javax.swing.text.AttributeSet $r10, $r11;
+        java.util.Hashtable $r13;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.swing.text.MutableAttributeSet r3;
+        javax.swing.text.html.HTMLDocument $r2, $r8;
+        javax.swing.text.html.HTML$Tag r1;
+        java.lang.Object $r6, $r14;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r3 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        i0 := @parameter2: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean receivedEndHTML>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean midInsert>;
+
+        if $z1 == 0 goto label2;
+
+        $z5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inBody>;
+
+        if $z5 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean isStyleCSS>;
+
+        if $z2 == 0 goto label3;
+
+        $r4 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        $z4 = interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: boolean isDefined(java.lang.Object)>($r4);
+
+        if $z4 == 0 goto label3;
+
+        $r5 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        $r6 = interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r5);
+
+        r12 = (java.lang.String) $r6;
+
+        $r7 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r7);
+
+        $r8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r9 = virtualinvoke $r8.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        $r10 = virtualinvoke $r9.<javax.swing.text.html.StyleSheet: javax.swing.text.AttributeSet getDeclaration(java.lang.String)>(r12);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes> = $r10;
+
+        $r11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes>;
+
+        interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>($r11);
+
+        goto label4;
+
+     label3:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.AttributeSet styleAttributes> = null;
+
+     label4:
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        $r14 = virtualinvoke $r13.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r15 = (javax.swing.text.html.HTMLDocument$HTMLReader$TagAction) $r14;
+
+        if $r15 == null goto label5;
+
+        virtualinvoke $r15.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void start(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>(r1, r3);
+
+        virtualinvoke $r15.<javax.swing.text.html.HTMLDocument$HTMLReader$TagAction: void end(javax.swing.text.html.HTML$Tag)>(r1);
+
+        goto label6;
+
+     label5:
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $z3 = virtualinvoke $r2.<javax.swing.text.html.HTMLDocument: boolean getPreservesUnknownTags()>();
+
+        if $z3 == 0 goto label6;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addSpecialElement(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>(r1, r3);
+
+     label6:
+        return;
+    }
+
+    public void handleEndOfLineString(java.lang.String)
+    {
+        javax.swing.text.html.HTMLDocument $r2;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyDocument>;
+
+        if $z0 == 0 goto label1;
+
+        if r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r2.<javax.swing.text.html.HTMLDocument: void putProperty(java.lang.Object,java.lang.Object)>("__EndOfLine__", r1);
+
+     label1:
+        return;
+    }
+
+    protected void registerTag(javax.swing.text.html.HTML$Tag, javax.swing.text.html.HTMLDocument$HTMLReader$TagAction)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTML$Tag r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader$TagAction r2;
+        java.util.Hashtable $r3;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r2 := @parameter1: javax.swing.text.html.HTMLDocument$HTMLReader$TagAction;
+
+        $r3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Hashtable tagMap>;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    protected void pushCharacterStyle()
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.AttributeSet $r3;
+        javax.swing.text.MutableAttributeSet $r1;
+        java.util.Stack $r2;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Stack charAttrStack>;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr>;
+
+        $r3 = interfaceinvoke $r1.<javax.swing.text.MutableAttributeSet: javax.swing.text.AttributeSet copyAttributes()>();
+
+        virtualinvoke $r2.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r3);
+
+        return;
+    }
+
+    protected void popCharacterStyle()
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.lang.Object $r3;
+        javax.swing.text.MutableAttributeSet $r4;
+        java.util.Stack $r1, $r2, $r5;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Stack charAttrStack>;
+
+        $z0 = virtualinvoke $r1.<java.util.Stack: boolean empty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Stack charAttrStack>;
+
+        $r3 = virtualinvoke $r2.<java.util.Stack: java.lang.Object peek()>();
+
+        $r4 = (javax.swing.text.MutableAttributeSet) $r3;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr> = $r4;
+
+        $r5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Stack charAttrStack>;
+
+        virtualinvoke $r5.<java.util.Stack: java.lang.Object pop()>();
+
+     label1:
+        return;
+    }
+
+    protected void textAreaContent(char[])
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.TextAreaDocument $r1, $r2;
+        int $i0;
+        char[] r4;
+        java.lang.String $r3;
+        javax.swing.text.BadLocationException $r5;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r4 := @parameter0: char[];
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.TextAreaDocument textAreaDocument>;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.TextAreaDocument textAreaDocument>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.text.html.TextAreaDocument: int getLength()>();
+
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(char[])>(r4);
+
+        virtualinvoke $r2.<javax.swing.text.html.TextAreaDocument: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>($i0, $r3, null);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    protected void preContent(char[])
+    {
+        javax.swing.text.SimpleAttributeSet $r6;
+        javax.swing.text.html.HTMLDocument$HTMLReader r1;
+        int $i0, $i1, $i2, $i3, $i5, $i6, i7, i8, $i9;
+        javax.swing.text.html.CSS$Attribute $r4;
+        char $c4;
+        javax.swing.text.html.HTML$Tag $r2, $r5;
+        char[] r0;
+
+        r1 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r0 := @parameter0: char[];
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i8 >= $i0 goto label3;
+
+        $c4 = r0[i8];
+
+        $i9 = (int) $c4;
+
+        if $i9 != 10 goto label2;
+
+        $i5 = i8 - i7;
+
+        $i6 = $i5 + 1;
+
+        virtualinvoke r1.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int)>(r0, i7, $i6);
+
+        $r2 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        virtualinvoke r1.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockClose(javax.swing.text.html.HTML$Tag)>($r2);
+
+        $r6 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r6.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        $r4 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute WHITE_SPACE>;
+
+        interfaceinvoke $r6.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r4, "pre");
+
+        $r5 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        virtualinvoke r1.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockOpen(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>($r5, $r6);
+
+        i7 = i8 + 1;
+
+     label2:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = lengthof r0;
+
+        if i7 >= $i1 goto label4;
+
+        $i2 = lengthof r0;
+
+        $i3 = $i2 - i7;
+
+        virtualinvoke r1.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int)>(r0, i7, $i3);
+
+     label4:
+        return;
+    }
+
+    protected void blockOpen(javax.swing.text.html.HTML$Tag, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.MutableAttributeSet r2;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r5;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r7;
+        javax.swing.text.html.HTML$Tag r1, $r9;
+        int $i0, $i1;
+        java.lang.Object $r3, $r4, $r8;
+        javax.swing.text.AttributeSet $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r2 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP>;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockClose(javax.swing.text.html.HTML$Tag)>($r9);
+
+     label1:
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        $i1 = $i0 + 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock> = $i1;
+
+        $z1 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean canInsertTag(javax.swing.text.html.HTML$Tag,javax.swing.text.AttributeSet,boolean)>(r1, r2, 1);
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r3 = <javax.swing.text.html.HTMLDocument$HTMLReader: java.lang.Object IMPLIED>;
+
+        $z2 = interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: boolean isDefined(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label3;
+
+        $r8 = <javax.swing.text.html.HTMLDocument$HTMLReader: java.lang.Object IMPLIED>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r8);
+
+     label3:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = 0;
+
+        $r4 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r4, r1);
+
+        $r5 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r6 = interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: javax.swing.text.AttributeSet copyAttributes()>();
+
+        specialinvoke $r5.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>($r6, 1);
+
+        $r7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r7.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        return;
+    }
+
+    protected void blockClose(javax.swing.text.html.HTML$Tag)
+    {
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r10, $r12;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        short $s2;
+        java.util.Vector $r1, $r9, $r13;
+        int $i0, $i1, $i3;
+        java.lang.Boolean $r6;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.MutableAttributeSet $r7;
+        javax.swing.text.html.HTML$Tag r3, $r4, $r5;
+        char[] $r8, r11;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r3 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        $i1 = $i0 - 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock> = $i1;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline>;
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void pushCharacterStyle()>();
+
+        $r7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr>;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r7.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("CR", $r6);
+
+        $r8 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int,boolean)>($r8, 0, 1, 1);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void popCharacterStyle()>();
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = 1;
+
+     label2:
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP>;
+
+        if $z2 == 0 goto label3;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP> = 0;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = 0;
+
+        $r4 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        if r3 == $r4 goto label3;
+
+        $r5 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockClose(javax.swing.text.html.HTML$Tag)>($r5);
+
+     label3:
+        $r9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i3 = virtualinvoke $r9.<java.util.Vector: int size()>();
+
+        if $i3 <= 0 goto label4;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object lastElement()>();
+
+        $r10 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r2;
+
+        goto label5;
+
+     label4:
+        $r10 = null;
+
+     label5:
+        if $r10 == null goto label6;
+
+        $s2 = virtualinvoke $r10.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        if $s2 != 1 goto label6;
+
+        r11 = newarray (char)[1];
+
+        r11[0] = 32;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int)>(r11, 0, 1);
+
+     label6:
+        $r12 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r12.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>(null, 2);
+
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r13.<java.util.Vector: void addElement(java.lang.Object)>($r12);
+
+        return;
+    }
+
+    protected void addContent(char[], int, int)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int i0, i1;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void addContent(char[],int,int,boolean)>(r1, i0, i1, 1);
+
+        return;
+    }
+
+    protected void addContent(char[], int, int, boolean)
+    {
+        javax.swing.text.SimpleAttributeSet $r13;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r14;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r11, $r12;
+        int i0, i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10;
+        javax.swing.text.AttributeSet $r9;
+        boolean $z0, z1, $z2, $z3, $z4;
+        char $c4;
+        javax.swing.text.BadLocationException $r4;
+        javax.swing.text.MutableAttributeSet $r5, $r8;
+        javax.swing.text.html.HTML$Tag $r3, $r7;
+        char[] r1;
+        java.lang.Object $r6;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z1 := @parameter3: boolean;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph>;
+
+        if $z2 != 0 goto label2;
+
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inPre>;
+
+        if $z3 != 0 goto label2;
+
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        $r13 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r13.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockOpen(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>($r3, $r13);
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP> = 1;
+
+     label2:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyAnchor> = 0;
+
+        $r5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr>;
+
+        $r6 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r7 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke $r5.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+        $r8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr>;
+
+        $r9 = interfaceinvoke $r8.<javax.swing.text.MutableAttributeSet: javax.swing.text.AttributeSet copyAttributes()>();
+
+        $r14 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r14.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short,char[],int,int)>($r9, 3, r1, i0, i1);
+
+        $r11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+        $r12 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i8 = virtualinvoke $r12.<java.util.Vector: int size()>();
+
+        $i9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int threshold>;
+
+        if $i8 <= $i9 goto label6;
+
+        $i5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int threshold>;
+
+        if $i5 > 10000 goto label3;
+
+        $i6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int threshold>;
+
+        $i7 = $i6 * 5;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int threshold> = $i7;
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void flushBuffer(boolean)>(0);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        if i1 <= 0 goto label9;
+
+        $i2 = i0 + i1;
+
+        $i3 = $i2 - 1;
+
+        $c4 = r1[$i3];
+
+        $i10 = (int) $c4;
+
+        if $i10 != 10 goto label7;
+
+        $z4 = 1;
+
+        goto label8;
+
+     label7:
+        $z4 = 0;
+
+     label8:
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = $z4;
+
+     label9:
+        return;
+
+        catch javax.swing.text.BadLocationException from label3 to label4 with label5;
+    }
+
+    protected void addSpecialElement(javax.swing.text.html.HTML$Tag, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.SimpleAttributeSet $r13;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r7;
+        javax.swing.text.html.HTMLDocument$HTMLReader r2;
+        java.util.Vector $r9;
+        javax.swing.text.AttributeSet $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.text.MutableAttributeSet r3, $r5;
+        javax.swing.text.html.HTML$Tag r0, $r1, $r10, $r14;
+        char[] $r12;
+        java.lang.Object $r4, $r6, $r11;
+
+        r2 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r0 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r3 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        $r1 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FRAME>;
+
+        if r0 == $r1 goto label1;
+
+        $z1 = r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph>;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inPre>;
+
+        if $z2 != 0 goto label1;
+
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag nextTagAfterPImplied> = r0;
+
+        $r14 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        $r13 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r13.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLDocument$HTMLReader: void blockOpen(javax.swing.text.html.HTML$Tag,javax.swing.text.MutableAttributeSet)>($r14, $r13);
+
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag nextTagAfterPImplied> = null;
+
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = 1;
+
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean impliedP> = 1;
+
+     label1:
+        $z3 = virtualinvoke r0.<javax.swing.text.html.HTML$Tag: boolean isBlock()>();
+
+        $z4 = specialinvoke r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean canInsertTag(javax.swing.text.html.HTML$Tag,javax.swing.text.AttributeSet,boolean)>(r0, r3, $z3);
+
+        if $z4 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r4 = <javax.swing.text.html.HTMLDocument$HTMLReader: java.lang.Object IMPLIED>;
+
+        $z0 = interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: boolean isDefined(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        $r11 = <javax.swing.text.html.HTMLDocument$HTMLReader: java.lang.Object IMPLIED>;
+
+        interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r11);
+
+     label3:
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean emptyAnchor> = 0;
+
+        $r5 = r2.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.MutableAttributeSet charAttr>;
+
+        interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>($r5);
+
+        $r6 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r6, r0);
+
+        $r12 = newarray (char)[1];
+
+        $r12[0] = 32;
+
+        $r7 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r8 = interfaceinvoke r3.<javax.swing.text.MutableAttributeSet: javax.swing.text.AttributeSet copyAttributes()>();
+
+        specialinvoke $r7.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short,char[],int,int)>($r8, 3, $r12, 0, 1);
+
+        $r9 = r2.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        $r10 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FRAME>;
+
+        if r0 != $r10 goto label4;
+
+        r2.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = 1;
+
+     label4:
+        return;
+    }
+
+    void flushBuffer(boolean) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        java.util.Vector $r2, $r6, $r8, $r10;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        boolean z0, $z1, $z2;
+        javax.swing.text.html.HTMLDocument $r1, $r4, $r9, $r11;
+        javax.swing.text.html.HTML$Tag $r3, $r5;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] $r7;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        i2 = $i1;
+
+        if z0 == 0 goto label2;
+
+        $r5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        if $r5 != null goto label1;
+
+        $z2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        if $i1 <= 0 goto label2;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void adjustEndSpecsForPartialInsert()>();
+
+        $r6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        i2 = virtualinvoke $r6.<java.util.Vector: int size()>();
+
+     label2:
+        $r7 = newarray (javax.swing.text.DefaultStyledDocument$ElementSpec)[i2];
+
+        $r8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r8.<java.util.Vector: void copyInto(java.lang.Object[])>($r7);
+
+        if $i0 != 0 goto label3;
+
+        $r3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        if $r3 != null goto label3;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z1 != 0 goto label3;
+
+        $r4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        virtualinvoke $r4.<javax.swing.text.html.HTMLDocument: void create(javax.swing.text.DefaultStyledDocument$ElementSpec[])>($r7);
+
+        goto label4;
+
+     label3:
+        $r9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        virtualinvoke $r9.<javax.swing.text.html.HTMLDocument: void insert(int,javax.swing.text.DefaultStyledDocument$ElementSpec[])>($i3, $r7);
+
+     label4:
+        $r10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r10.<java.util.Vector: void removeAllElements()>();
+
+        $i4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $r11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i5 = virtualinvoke $r11.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        $i6 = $i5 - $i0;
+
+        $i7 = $i4 + $i6;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset> = $i7;
+
+        $i8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int flushCount>;
+
+        $i9 = $i8 + 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int flushCount> = $i9;
+
+        return;
+    }
+
+    private void adjustEndSpecsForPartialInsert()
+    {
+        java.util.Vector $r1, $r2, $r3, $r10, $r12, $r17, $r18, $r21, $r24, $r27, $r30;
+        javax.swing.text.html.HTML$Tag $r7;
+        javax.swing.text.SimpleAttributeSet $r32;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r14, $r20, $r23, $r26, $r29, r31, $r33;
+        short $s2, $s14, $s15, $s16, $s18;
+        char[] $r5, $r11, $r15, $r16;
+        boolean $z0, $z1, z2, $z3;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, $i3, $i4, $i6, $i7, $i8, $i9, $i10, $i13, $i17, i19, i20, $i21, $i22, $i23, $i24, $i25, i26, i27, i28, i29, $i30, $i32, $i33, $i34, $i35, $i36, $i37, $i39, $i40, $i41, $i43;
+        char $c5, $c11, $c12;
+        java.lang.Object $r4, $r8, $r13, $r19, $r22, $r25, $r28;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        i19 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta>;
+
+        if $i0 >= 0 goto label02;
+
+        i20 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta>;
+
+     label01:
+        if i20 >= 0 goto label02;
+
+        if i19 < 0 goto label02;
+
+        $r27 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i17 = i19 - 1;
+
+        $r28 = virtualinvoke $r27.<java.util.Vector: java.lang.Object elementAt(int)>($i17);
+
+        $r29 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r28;
+
+        $s18 = virtualinvoke $r29.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i30 = (int) $s18;
+
+        if $i30 != 2 goto label02;
+
+        $r30 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i32 = (int) -1;
+
+        i19 = i19 + $i32;
+
+        virtualinvoke $r30.<java.util.Vector: void removeElementAt(int)>(i19);
+
+        i20 = i20 + 1;
+
+        goto label01;
+
+     label02:
+        $i21 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int flushCount>;
+
+        if $i21 != 0 goto label10;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z0 == 0 goto label03;
+
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean wantsTrailingNewline>;
+
+        if $z1 != 0 goto label10;
+
+     label03:
+        z2 = 0;
+
+        $i7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        if $i7 <= 0 goto label04;
+
+        $r24 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r25 = virtualinvoke $r24.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        $r26 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r25;
+
+        $s16 = virtualinvoke $r26.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i33 = (int) $s16;
+
+        if $i33 != 3 goto label04;
+
+        z2 = 1;
+
+     label04:
+        $i22 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth>;
+
+        $i23 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        $i24 = $i22 + $i23;
+
+        $i25 = z2 + $i24;
+
+        i26 = $i25;
+
+        i27 = 0;
+
+     label05:
+        if i26 >= i19 goto label06;
+
+        $r21 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r22 = virtualinvoke $r21.<java.util.Vector: java.lang.Object elementAt(int)>(i26);
+
+        $r23 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r22;
+
+        $s15 = virtualinvoke $r23.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i34 = (int) $s15;
+
+        if $i34 != 3 goto label06;
+
+        i26 = i26 + 1;
+
+        i27 = i27 + 1;
+
+        goto label05;
+
+     label06:
+        if i27 <= 1 goto label10;
+
+     label07:
+        if i26 >= i19 goto label08;
+
+        $r18 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r19 = virtualinvoke $r18.<java.util.Vector: java.lang.Object elementAt(int)>(i26);
+
+        $r20 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r19;
+
+        $s14 = virtualinvoke $r20.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i35 = (int) $s14;
+
+        if $i35 != 2 goto label08;
+
+        i26 = i26 + 1;
+
+        goto label07;
+
+     label08:
+        if i26 != i19 goto label10;
+
+        $r12 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i8 = $i25 + i27;
+
+        $i9 = $i8 - 1;
+
+        $r13 = virtualinvoke $r12.<java.util.Vector: java.lang.Object elementAt(int)>($i9);
+
+        $r14 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r13;
+
+        $r15 = virtualinvoke $r14.<javax.swing.text.DefaultStyledDocument$ElementSpec: char[] getArray()>();
+
+        $i10 = lengthof $r15;
+
+        if $i10 != 1 goto label10;
+
+        $c11 = $r15[0];
+
+        $r16 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        $c12 = $r16[0];
+
+        $i36 = (int) $c11;
+
+        $i37 = (int) $c12;
+
+        if $i36 != $i37 goto label10;
+
+        $i13 = $i25 + i27;
+
+        i28 = $i13 - 1;
+
+     label09:
+        if i19 <= i28 goto label10;
+
+        $r17 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i39 = (int) -1;
+
+        i19 = i19 + $i39;
+
+        virtualinvoke $r17.<java.util.Vector: void removeElementAt(int)>(i19);
+
+        goto label09;
+
+     label10:
+        $z3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean wantsTrailingNewline>;
+
+        if $z3 == 0 goto label13;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        i29 = $i1 - 1;
+
+     label11:
+        if i29 < 0 goto label13;
+
+        $r3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(i29);
+
+        r31 = (javax.swing.text.DefaultStyledDocument$ElementSpec) $r4;
+
+        $s2 = virtualinvoke r31.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i40 = (int) $s2;
+
+        if $i40 != 3 goto label12;
+
+        $r5 = virtualinvoke r31.<javax.swing.text.DefaultStyledDocument$ElementSpec: char[] getArray()>();
+
+        $i3 = virtualinvoke r31.<javax.swing.text.DefaultStyledDocument$ElementSpec: int getLength()>();
+
+        $i4 = $i3 - 1;
+
+        $c5 = $r5[$i4];
+
+        $i41 = (int) $c5;
+
+        if $i41 == 10 goto label13;
+
+        $r32 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r32.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        $r8 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r7 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        virtualinvoke $r32.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r8, $r7);
+
+        $r10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r33 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r11 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        specialinvoke $r33.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short,char[],int,int)>($r32, 3, $r11, 0, 1);
+
+        $i6 = i29 + 1;
+
+        virtualinvoke $r10.<java.util.Vector: void insertElementAt(java.lang.Object,int)>($r33, $i6);
+
+        goto label13;
+
+     label12:
+        $i43 = (int) -1;
+
+        i29 = i29 + $i43;
+
+        goto label11;
+
+     label13:
+        return;
+    }
+
+    void addCSSRules(java.lang.String)
+    {
+        javax.swing.text.html.HTMLDocument $r1;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.StyleSheet $r2;
+        java.lang.String r3;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        virtualinvoke $r2.<javax.swing.text.html.StyleSheet: void addRule(java.lang.String)>(r3);
+
+        return;
+    }
+
+    void linkCSSStyleSheet(java.lang.String)
+    {
+        javax.swing.text.html.StyleSheet $r6;
+        java.net.MalformedURLException $r7, $r8;
+        java.net.URL $r0, $r4, $r9, r10;
+        javax.swing.text.html.HTMLDocument $r2, $r5;
+        javax.swing.text.html.HTMLDocument$HTMLReader r1;
+        java.lang.String r3;
+
+        r1 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r3 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new java.net.URL;
+
+        $r2 = r1.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r4 = $r2.<javax.swing.text.html.HTMLDocument: java.net.URL base>;
+
+        specialinvoke $r0.<java.net.URL: void <init>(java.net.URL,java.lang.String)>($r4, r3);
+
+        r10 = $r0;
+
+     label2:
+        goto label7;
+
+     label3:
+        $r8 := @caughtexception;
+
+     label4:
+        $r9 = new java.net.URL;
+
+        specialinvoke $r9.<java.net.URL: void <init>(java.lang.String)>(r3);
+
+        r10 = $r9;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r7 := @caughtexception;
+
+        r10 = null;
+
+     label7:
+        if r10 == null goto label8;
+
+        $r5 = r1.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        virtualinvoke $r6.<javax.swing.text.html.StyleSheet: void importStyleSheet(java.net.URL)>(r10);
+
+     label8:
+        return;
+
+        catch java.net.MalformedURLException from label1 to label2 with label3;
+        catch java.net.MalformedURLException from label4 to label5 with label6;
+    }
+
+    private boolean canInsertTag(javax.swing.text.html.HTML$Tag, javax.swing.text.AttributeSet, boolean)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.AttributeSet r4;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        javax.swing.text.html.HTML$Tag r1, $r2, $r3, $r6, $r7, $r8, $r9;
+        java.lang.Object $r5;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        r4 := @parameter1: javax.swing.text.AttributeSet;
+
+        z2 := @parameter2: boolean;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag>;
+
+        if $z0 != 0 goto label9;
+
+        $r2 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        if r1 != $r2 goto label1;
+
+        $z7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph>;
+
+        if $z7 != 0 goto label1;
+
+        $z8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inPre>;
+
+        if $z8 != 0 goto label1;
+
+        $z9 = 1;
+
+        goto label2;
+
+     label1:
+        $z9 = 0;
+
+     label2:
+        if $z9 == 0 goto label5;
+
+        $r7 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag nextTagAfterPImplied>;
+
+        if $r7 == null goto label5;
+
+        $r8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        if $r8 == null goto label8;
+
+        $r9 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag nextTagAfterPImplied>;
+
+        $z5 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean isInsertTag(javax.swing.text.html.HTML$Tag)>($r9);
+
+        if $z5 == 0 goto label3;
+
+        $z6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertInsertTag>;
+
+        if $z6 != 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        goto label8;
+
+     label5:
+        $r3 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        if $r3 == null goto label6;
+
+        $z4 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean isInsertTag(javax.swing.text.html.HTML$Tag)>(r1);
+
+        if $z4 == 0 goto label7;
+
+     label6:
+        $z1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z1 == 0 goto label8;
+
+        if r4 == null goto label7;
+
+        $r5 = <javax.swing.text.html.HTMLDocument$HTMLReader: java.lang.Object IMPLIED>;
+
+        $z3 = interfaceinvoke r4.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>($r5);
+
+        if $z3 != 0 goto label7;
+
+        $r6 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        if r1 != $r6 goto label8;
+
+     label7:
+        return 0;
+
+     label8:
+        specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: void foundInsertTag(boolean)>(z2);
+
+        $z10 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertInsertTag>;
+
+        if $z10 != 0 goto label9;
+
+        return 0;
+
+     label9:
+        return 1;
+    }
+
+    private boolean isInsertTag(javax.swing.text.html.HTML$Tag)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTML$Tag r1, $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter0: javax.swing.text.html.HTML$Tag;
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTML$Tag insertTag>;
+
+        if $r2 != r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void foundInsertTag(boolean)
+    {
+        java.util.Vector $r2, $r4, $r8;
+        javax.swing.text.AttributeSet $r15;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, z6, z7, z8;
+        javax.swing.text.BadLocationException $r25;
+        javax.swing.text.html.HTMLDocument $r13, $r23;
+        javax.swing.text.html.HTML$Tag $r10, r19, $r20, $r21, $r22;
+        javax.swing.text.SimpleAttributeSet $r9, $r12, r26;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r1, $r3, $r5;
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, $i25, i26;
+        java.lang.String $r24;
+        char[] $r6, $r7;
+        java.lang.Object $r11, $r16, $r17, $r18;
+        javax.swing.text.Element $r14;
+
+        r0 := @this: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        z1 := @parameter0: boolean;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean foundInsertTag> = 1;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        if $z0 != 0 goto label10;
+
+        $i15 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth>;
+
+        if $i15 > 0 goto label01;
+
+        $i23 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        if $i23 <= 0 goto label10;
+
+     label01:
+        $i16 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        if $i16 == 0 goto label02;
+
+        $r23 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i21 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i22 = $i21 - 1;
+
+        $r24 = virtualinvoke $r23.<javax.swing.text.html.HTMLDocument: java.lang.String getText(int,int)>($i22, 1);
+
+        $z5 = virtualinvoke $r24.<java.lang.String: boolean equals(java.lang.Object)>("\n");
+
+        if $z5 != 0 goto label08;
+
+     label02:
+        r26 = null;
+
+        z6 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        $i17 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        if $i17 == 0 goto label05;
+
+        $r13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: javax.swing.text.html.HTMLDocument this$0>;
+
+        $i19 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i20 = $i19 - 1;
+
+        $r14 = virtualinvoke $r13.<javax.swing.text.html.HTMLDocument: javax.swing.text.Element getCharacterElement(int)>($i20);
+
+        $r15 = interfaceinvoke $r14.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r16 = <javax.swing.text.StyleConstants: java.lang.Object ComposedTextAttribute>;
+
+        $z2 = interfaceinvoke $r15.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>($r16);
+
+        if $z2 == 0 goto label03;
+
+        z6 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        goto label05;
+
+     label03:
+        $r17 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r18 = interfaceinvoke $r15.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r17);
+
+        $z3 = $r18 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z3 == 0 goto label05;
+
+        r19 = (javax.swing.text.html.HTML$Tag) $r18;
+
+        $r20 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMG>;
+
+        if r19 == $r20 goto label04;
+
+        $r21 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HR>;
+
+        if r19 == $r21 goto label04;
+
+        $r22 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        if r19 == $r22 goto label04;
+
+        $z4 = r19 instanceof javax.swing.text.html.HTML$UnknownTag;
+
+        if $z4 == 0 goto label05;
+
+     label04:
+        z6 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+     label05:
+        if z7 != 0 goto label06;
+
+        $r9 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r9.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r26 = $r9;
+
+        $r12 = (javax.swing.text.SimpleAttributeSet) $r9;
+
+        $r11 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r10 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        virtualinvoke $r12.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r11, $r10);
+
+     label06:
+        $r5 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r6 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        $r7 = staticinvoke <javax.swing.text.html.HTMLDocument: char[] access$100()>();
+
+        $i18 = lengthof $r7;
+
+        specialinvoke $r5.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short,char[],int,int)>(r26, 3, $r6, 0, $i18);
+
+        if z8 == 0 goto label07;
+
+        virtualinvoke $r5.<javax.swing.text.DefaultStyledDocument$ElementSpec: void setDirection(short)>(4);
+
+     label07:
+        $r8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r8.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r25 := @caughtexception;
+
+     label10:
+        i24 = 0;
+
+     label11:
+        $i25 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth>;
+
+        if i24 >= $i25 goto label12;
+
+        $r4 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        $r3 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r3.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>(null, 2);
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>($r3);
+
+        i24 = i24 + 1;
+
+        goto label11;
+
+     label12:
+        i26 = 0;
+
+     label13:
+        $i0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        if i26 >= $i0 goto label14;
+
+        $r1 = new javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        specialinvoke $r1.<javax.swing.text.DefaultStyledDocument$ElementSpec: void <init>(javax.swing.text.AttributeSet,short)>(null, 1);
+
+        virtualinvoke $r1.<javax.swing.text.DefaultStyledDocument$ElementSpec: void setDirection(short)>(5);
+
+        $r2 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: java.util.Vector parseBuffer>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        i26 = i26 + 1;
+
+        goto label13;
+
+     label14:
+        $i1 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int offset>;
+
+        $i2 = $i1 - 1;
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i2);
+
+        $i4 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int depthTo(int)>($i3);
+
+        $i5 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int popDepth>;
+
+        $i7 = $i4 - $i5;
+
+        $i6 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int pushDepth>;
+
+        $i9 = $i7 + $i6;
+
+        $i8 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int inBlock>;
+
+        $i10 = $i9 - $i8;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta> = $i10;
+
+        if z1 == 0 goto label15;
+
+        $i13 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta>;
+
+        $i14 = $i13 + 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta> = $i14;
+
+        goto label16;
+
+     label15:
+        $i11 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta>;
+
+        $i12 = $i11 - 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: int insertTagDepthDelta> = $i12;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean inParagraph> = 1;
+
+        r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean lastWasNewline> = 0;
+
+     label16:
+        return;
+
+        catch javax.swing.text.BadLocationException from label01 to label08 with label09;
+    }
+
+    static boolean access$800(javax.swing.text.html.HTMLDocument$HTMLReader)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        $z0 = r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean insertAfterImplied>;
+
+        return $z0;
+    }
+
+    static boolean access$900(javax.swing.text.html.HTMLDocument$HTMLReader, javax.swing.text.html.HTML$Tag, javax.swing.text.AttributeSet, boolean)
+    {
+        javax.swing.text.html.HTMLDocument$HTMLReader r0;
+        javax.swing.text.html.HTML$Tag r1;
+        javax.swing.text.AttributeSet r2;
+        boolean z0, $z1;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLDocument$HTMLReader;
+
+        r1 := @parameter1: javax.swing.text.html.HTML$Tag;
+
+        r2 := @parameter2: javax.swing.text.AttributeSet;
+
+        z0 := @parameter3: boolean;
+
+        $z1 = specialinvoke r0.<javax.swing.text.html.HTMLDocument$HTMLReader: boolean canInsertTag(javax.swing.text.html.HTML$Tag,javax.swing.text.AttributeSet,boolean)>(r1, r2, z0);
+
+        return $z1;
+    }
+}

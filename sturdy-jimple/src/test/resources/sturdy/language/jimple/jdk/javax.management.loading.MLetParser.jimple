@@ -1,0 +1,675 @@
+class javax.management.loading.MLetParser extends java.lang.Object
+{
+    private int c;
+    private static java.lang.String tag;
+
+    public void <init>()
+    {
+        javax.management.loading.MLetParser r0;
+
+        r0 := @this: javax.management.loading.MLetParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void skipSpace(java.io.Reader) throws java.io.IOException
+    {
+        java.io.Reader r1;
+        javax.management.loading.MLetParser r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        r0 := @this: javax.management.loading.MLetParser;
+
+        r1 := @parameter0: java.io.Reader;
+
+     label1:
+        $i0 = r0.<javax.management.loading.MLetParser: int c>;
+
+        if $i0 < 0 goto label3;
+
+        $i1 = r0.<javax.management.loading.MLetParser: int c>;
+
+        if $i1 == 32 goto label2;
+
+        $i2 = r0.<javax.management.loading.MLetParser: int c>;
+
+        if $i2 == 9 goto label2;
+
+        $i3 = r0.<javax.management.loading.MLetParser: int c>;
+
+        if $i3 == 10 goto label2;
+
+        $i4 = r0.<javax.management.loading.MLetParser: int c>;
+
+        if $i4 != 13 goto label3;
+
+     label2:
+        $i5 = virtualinvoke r1.<java.io.Reader: int read()>();
+
+        r0.<javax.management.loading.MLetParser: int c> = $i5;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public java.lang.String scanIdentifier(java.io.Reader) throws java.io.IOException
+    {
+        char $c8;
+        java.io.Reader r3;
+        javax.management.loading.MLetParser r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r2;
+
+        r1 := @this: javax.management.loading.MLetParser;
+
+        r3 := @parameter0: java.io.Reader;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+     label1:
+        $i0 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i0 < 97 goto label2;
+
+        $i6 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i6 <= 122 goto label5;
+
+     label2:
+        $i1 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i1 < 65 goto label3;
+
+        $i5 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i5 <= 90 goto label5;
+
+     label3:
+        $i2 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i2 < 48 goto label4;
+
+        $i4 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i4 <= 57 goto label5;
+
+     label4:
+        $i3 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i3 != 95 goto label6;
+
+     label5:
+        $i7 = r1.<javax.management.loading.MLetParser: int c>;
+
+        $c8 = (char) $i7;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c8);
+
+        $i9 = virtualinvoke r3.<java.io.Reader: int read()>();
+
+        r1.<javax.management.loading.MLetParser: int c> = $i9;
+
+        goto label1;
+
+     label6:
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public java.util.Map scanTag(java.io.Reader) throws java.io.IOException
+    {
+        java.util.HashMap $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, $i19, $i20, $i22;
+        java.lang.String $r3, r5, $r7;
+        char $c10;
+        java.io.IOException $r9;
+        java.io.Reader r2;
+        javax.management.loading.MLetParser r1;
+        java.lang.StringBuilder $r10;
+
+        r1 := @this: javax.management.loading.MLetParser;
+
+        r2 := @parameter0: java.io.Reader;
+
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke r1.<javax.management.loading.MLetParser: void skipSpace(java.io.Reader)>(r2);
+
+     label01:
+        $i0 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i0 < 0 goto label11;
+
+        $i1 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i1 == 62 goto label11;
+
+        $i2 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i2 != 60 goto label02;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Missing \'>\' in tag");
+
+        throw $r9;
+
+     label02:
+        $r3 = virtualinvoke r1.<javax.management.loading.MLetParser: java.lang.String scanIdentifier(java.io.Reader)>(r2);
+
+        r5 = "";
+
+        virtualinvoke r1.<javax.management.loading.MLetParser: void skipSpace(java.io.Reader)>(r2);
+
+        $i3 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i3 != 61 goto label10;
+
+        $i22 = (int) -1;
+
+        i18 = $i22;
+
+        $i4 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        r1.<javax.management.loading.MLetParser: int c> = $i4;
+
+        virtualinvoke r1.<javax.management.loading.MLetParser: void skipSpace(java.io.Reader)>(r2);
+
+        $i5 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i5 == 39 goto label03;
+
+        $i17 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i17 != 34 goto label04;
+
+     label03:
+        i18 = r1.<javax.management.loading.MLetParser: int c>;
+
+        $i6 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        r1.<javax.management.loading.MLetParser: int c> = $i6;
+
+     label04:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+     label05:
+        $i19 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i19 <= 0 goto label08;
+
+        if i18 >= 0 goto label06;
+
+        $i12 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i12 == 32 goto label06;
+
+        $i13 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i13 == 9 goto label06;
+
+        $i14 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i14 == 10 goto label06;
+
+        $i15 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i15 == 13 goto label06;
+
+        $i16 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i16 != 62 goto label07;
+
+     label06:
+        if i18 < 0 goto label08;
+
+        $i8 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i8 == i18 goto label08;
+
+     label07:
+        $i9 = r1.<javax.management.loading.MLetParser: int c>;
+
+        $c10 = (char) $i9;
+
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c10);
+
+        $i11 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        r1.<javax.management.loading.MLetParser: int c> = $i11;
+
+        goto label05;
+
+     label08:
+        $i20 = r1.<javax.management.loading.MLetParser: int c>;
+
+        if $i20 != i18 goto label09;
+
+        $i7 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        r1.<javax.management.loading.MLetParser: int c> = $i7;
+
+     label09:
+        virtualinvoke r1.<javax.management.loading.MLetParser: void skipSpace(java.io.Reader)>(r2);
+
+        r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label10:
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r5);
+
+        virtualinvoke r1.<javax.management.loading.MLetParser: void skipSpace(java.io.Reader)>(r2);
+
+        goto label01;
+
+     label11:
+        return $r8;
+    }
+
+    public java.util.List parse(java.net.URL) throws java.io.IOException
+    {
+        java.util.Map $r11, $r25, r57;
+        javax.management.loading.MLetParser r8;
+        java.util.ArrayList r58, r59, $r62, $r63, $r64, $r67, $r68;
+        java.net.URLConnection $r0;
+        java.lang.String $r9, $r10, $r17, $r23, r27, $r31, r34, $r38, $r43, $r48, $r50, $r51;
+        java.io.IOException $r65, $r69, $r70, $r71, $r72, $r73, $r74;
+        java.io.InputStreamReader $r60;
+        java.io.BufferedReader $r61;
+        java.net.URL $r4, r56;
+        javax.management.loading.MLetContent $r66;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r15, $r21, $r29, $r36, $r41, $r46;
+        java.util.logging.Level $r16, $r22, $r30, $r37, $r42, $r47;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8;
+        java.lang.Object $r12, $r13, $r19, $r26, $r33;
+        java.lang.Class $r14, $r20, $r28, $r35, $r40, $r45;
+        java.io.InputStream $r3;
+
+        r8 := @this: javax.management.loading.MLetParser;
+
+        r56 := @parameter0: java.net.URL;
+
+        $r0 = virtualinvoke r56.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r61 = new java.io.BufferedReader;
+
+        $r60 = new java.io.InputStreamReader;
+
+        $r3 = virtualinvoke $r0.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r60.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r3, "UTF-8");
+
+        specialinvoke $r61.<java.io.BufferedReader: void <init>(java.io.Reader)>($r60);
+
+        $r4 = virtualinvoke $r0.<java.net.URLConnection: java.net.URL getURL()>();
+
+        $r62 = new java.util.ArrayList;
+
+        specialinvoke $r62.<java.util.ArrayList: void <init>()>();
+
+        r57 = null;
+
+        $r63 = new java.util.ArrayList;
+
+        specialinvoke $r63.<java.util.ArrayList: void <init>()>();
+
+        r58 = $r63;
+
+        $r64 = new java.util.ArrayList;
+
+        specialinvoke $r64.<java.util.ArrayList: void <init>()>();
+
+        r59 = $r64;
+
+     label01:
+        $i5 = virtualinvoke $r61.<java.io.Reader: int read()>();
+
+        r8.<javax.management.loading.MLetParser: int c> = $i5;
+
+        $i6 = r8.<javax.management.loading.MLetParser: int c>;
+
+        $i8 = (int) -1;
+
+        if $i6 != $i8 goto label02;
+
+        goto label16;
+
+     label02:
+        $i0 = r8.<javax.management.loading.MLetParser: int c>;
+
+        if $i0 != 60 goto label01;
+
+        $i1 = virtualinvoke $r61.<java.io.Reader: int read()>();
+
+        r8.<javax.management.loading.MLetParser: int c> = $i1;
+
+        $i2 = r8.<javax.management.loading.MLetParser: int c>;
+
+        if $i2 != 47 goto label06;
+
+        $i3 = virtualinvoke $r61.<java.io.Reader: int read()>();
+
+        r8.<javax.management.loading.MLetParser: int c> = $i3;
+
+        $r50 = virtualinvoke r8.<javax.management.loading.MLetParser: java.lang.String scanIdentifier(java.io.Reader)>($r61);
+
+        $i4 = r8.<javax.management.loading.MLetParser: int c>;
+
+        if $i4 == 62 goto label03;
+
+        $r65 = new java.io.IOException;
+
+        specialinvoke $r65.<java.io.IOException: void <init>(java.lang.String)>("Missing \'>\' in tag");
+
+        throw $r65;
+
+     label03:
+        $r51 = <javax.management.loading.MLetParser: java.lang.String tag>;
+
+        $z2 = virtualinvoke $r50.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r51);
+
+        if $z2 == 0 goto label05;
+
+        if r57 == null goto label04;
+
+        $r66 = new javax.management.loading.MLetContent;
+
+        specialinvoke $r66.<javax.management.loading.MLetContent: void <init>(java.net.URL,java.util.Map,java.util.List,java.util.List)>($r4, r57, r58, r59);
+
+        interfaceinvoke $r62.<java.util.List: boolean add(java.lang.Object)>($r66);
+
+     label04:
+        r57 = null;
+
+        $r67 = new java.util.ArrayList;
+
+        specialinvoke $r67.<java.util.ArrayList: void <init>()>();
+
+        r58 = $r67;
+
+        $r68 = new java.util.ArrayList;
+
+        specialinvoke $r68.<java.util.ArrayList: void <init>()>();
+
+        r59 = $r68;
+
+     label05:
+        goto label01;
+
+     label06:
+        $r9 = virtualinvoke r8.<javax.management.loading.MLetParser: java.lang.String scanIdentifier(java.io.Reader)>($r61);
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("arg");
+
+        if $z0 == 0 goto label13;
+
+        $r25 = virtualinvoke r8.<javax.management.loading.MLetParser: java.util.Map scanTag(java.io.Reader)>($r61);
+
+        $r26 = interfaceinvoke $r25.<java.util.Map: java.lang.Object get(java.lang.Object)>("type");
+
+        r27 = (java.lang.String) $r26;
+
+        if r27 != null goto label07;
+
+        $r46 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r47 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r45 = class "Ljavax/management/loading/MLetParser;";
+
+        $r48 = virtualinvoke $r45.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r46.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r47, $r48, "parse", "<arg type=... value=...> tag requires type parameter.");
+
+        $r69 = new java.io.IOException;
+
+        specialinvoke $r69.<java.io.IOException: void <init>(java.lang.String)>("<arg type=... value=...> tag requires type parameter.");
+
+        throw $r69;
+
+     label07:
+        if r57 == null goto label08;
+
+        interfaceinvoke r58.<java.util.List: boolean add(java.lang.Object)>(r27);
+
+        goto label09;
+
+     label08:
+        $r29 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r30 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r28 = class "Ljavax/management/loading/MLetParser;";
+
+        $r31 = virtualinvoke $r28.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r29.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r30, $r31, "parse", "<arg> tag outside <mlet> ... </mlet>.");
+
+        $r70 = new java.io.IOException;
+
+        specialinvoke $r70.<java.io.IOException: void <init>(java.lang.String)>("<arg> tag outside <mlet> ... </mlet>.");
+
+        throw $r70;
+
+     label09:
+        $r33 = interfaceinvoke $r25.<java.util.Map: java.lang.Object get(java.lang.Object)>("value");
+
+        r34 = (java.lang.String) $r33;
+
+        if r34 != null goto label10;
+
+        $r41 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r42 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r40 = class "Ljavax/management/loading/MLetParser;";
+
+        $r43 = virtualinvoke $r40.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r41.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r42, $r43, "parse", "<arg type=... value=...> tag requires value parameter.");
+
+        $r71 = new java.io.IOException;
+
+        specialinvoke $r71.<java.io.IOException: void <init>(java.lang.String)>("<arg type=... value=...> tag requires value parameter.");
+
+        throw $r71;
+
+     label10:
+        if r57 == null goto label11;
+
+        interfaceinvoke r59.<java.util.List: boolean add(java.lang.Object)>(r34);
+
+        goto label12;
+
+     label11:
+        $r36 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r37 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r35 = class "Ljavax/management/loading/MLetParser;";
+
+        $r38 = virtualinvoke $r35.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r36.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r37, $r38, "parse", "<arg> tag outside <mlet> ... </mlet>.");
+
+        $r72 = new java.io.IOException;
+
+        specialinvoke $r72.<java.io.IOException: void <init>(java.lang.String)>("<arg> tag outside <mlet> ... </mlet>.");
+
+        throw $r72;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r10 = <javax.management.loading.MLetParser: java.lang.String tag>;
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+        if $z1 == 0 goto label15;
+
+        $r11 = virtualinvoke r8.<javax.management.loading.MLetParser: java.util.Map scanTag(java.io.Reader)>($r61);
+
+        r57 = $r11;
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>("code");
+
+        if $r12 != null goto label14;
+
+        $r19 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>("object");
+
+        if $r19 != null goto label14;
+
+        $r21 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r20 = class "Ljavax/management/loading/MLetParser;";
+
+        $r23 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r21.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r22, $r23, "parse", "<mlet> tag requires either code or object parameter.");
+
+        $r73 = new java.io.IOException;
+
+        specialinvoke $r73.<java.io.IOException: void <init>(java.lang.String)>("<mlet> tag requires either code or object parameter.");
+
+        throw $r73;
+
+     label14:
+        $r13 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>("archive");
+
+        if $r13 != null goto label15;
+
+        $r15 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MLET_LOGGER>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r14 = class "Ljavax/management/loading/MLetParser;";
+
+        $r17 = virtualinvoke $r14.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r15.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r16, $r17, "parse", "<mlet> tag requires archive parameter.");
+
+        $r74 = new java.io.IOException;
+
+        specialinvoke $r74.<java.io.IOException: void <init>(java.lang.String)>("<mlet> tag requires archive parameter.");
+
+        throw $r74;
+
+     label15:
+        goto label01;
+
+     label16:
+        virtualinvoke $r61.<java.io.Reader: void close()>();
+
+        return $r62;
+    }
+
+    public java.util.List parseURL(java.lang.String) throws java.io.IOException
+    {
+        java.net.URL r14, $r16, $r17, $r18;
+        int $i0, $i5, $i6, $i7;
+        java.lang.String r0, $r4, $r8, $r11, r13;
+        char $c1, $c2, $c3, $c4;
+        java.util.List $r3;
+        javax.management.loading.MLetParser r2;
+        java.lang.StringBuilder $r7, $r9, $r10, $r15;
+
+        r2 := @this: javax.management.loading.MLetParser;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 > 1 goto label4;
+
+        $r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.dir");
+
+        $c1 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        $i5 = (int) $c1;
+
+        if $i5 == 47 goto label1;
+
+        $c3 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        $c4 = <java.io.File: char separatorChar>;
+
+        $i6 = (int) $c3;
+
+        $i7 = (int) $c4;
+
+        if $i6 != $i7 goto label2;
+
+     label1:
+        r13 = "file:";
+
+        goto label3;
+
+     label2:
+        r13 = "file:/";
+
+     label3:
+        $r16 = new java.net.URL;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $c2 = <java.io.File: char separatorChar>;
+
+        $r8 = virtualinvoke $r4.<java.lang.String: java.lang.String replace(char,char)>($c2, 47);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.net.URL: void <init>(java.lang.String)>($r11);
+
+        $r17 = new java.net.URL;
+
+        specialinvoke $r17.<java.net.URL: void <init>(java.net.URL,java.lang.String)>($r16, r0);
+
+        r14 = $r17;
+
+        goto label5;
+
+     label4:
+        $r18 = new java.net.URL;
+
+        specialinvoke $r18.<java.net.URL: void <init>(java.lang.String)>(r0);
+
+        r14 = $r18;
+
+     label5:
+        $r3 = virtualinvoke r2.<javax.management.loading.MLetParser: java.util.List parse(java.net.URL)>(r14);
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        <javax.management.loading.MLetParser: java.lang.String tag> = "mlet";
+
+        return;
+    }
+}

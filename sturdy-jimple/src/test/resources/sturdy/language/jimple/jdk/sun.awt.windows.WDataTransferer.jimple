@@ -1,0 +1,1108 @@
+final class sun.awt.windows.WDataTransferer extends sun.awt.datatransfer.DataTransferer
+{
+    private static final java.lang.String[] predefinedClipboardNames;
+    private static final java.util.Map predefinedClipboardNameMap;
+    public static final int CF_TEXT;
+    public static final int CF_METAFILEPICT;
+    public static final int CF_DIB;
+    public static final int CF_ENHMETAFILE;
+    public static final int CF_HDROP;
+    public static final int CF_LOCALE;
+    public static final long CF_HTML;
+    public static final long CFSTR_INETURL;
+    public static final long CF_PNG;
+    public static final long CF_JFIF;
+    public static final long CF_FILEGROUPDESCRIPTORW;
+    public static final long CF_FILEGROUPDESCRIPTORA;
+    private static final java.lang.Long L_CF_LOCALE;
+    private static final java.awt.image.DirectColorModel directColorModel;
+    private static final int[] bandmasks;
+    private static sun.awt.windows.WDataTransferer transferer;
+    private final sun.awt.datatransfer.ToolkitThreadBlockedHandler handler;
+    private static final byte[] UNICODE_NULL_TERMINATOR;
+
+    private void <init>()
+    {
+        sun.awt.windows.WToolkitThreadBlockedHandler $r1;
+        sun.awt.windows.WDataTransferer r0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        specialinvoke r0.<sun.awt.datatransfer.DataTransferer: void <init>()>();
+
+        $r1 = new sun.awt.windows.WToolkitThreadBlockedHandler;
+
+        specialinvoke $r1.<sun.awt.windows.WToolkitThreadBlockedHandler: void <init>()>();
+
+        r0.<sun.awt.windows.WDataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler handler> = $r1;
+
+        return;
+    }
+
+    static synchronized sun.awt.windows.WDataTransferer getInstanceImpl()
+    {
+        sun.awt.windows.WDataTransferer $r0, $r1, $r2;
+
+        $r0 = <sun.awt.windows.WDataTransferer: sun.awt.windows.WDataTransferer transferer>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new sun.awt.windows.WDataTransferer;
+
+        specialinvoke $r2.<sun.awt.windows.WDataTransferer: void <init>()>();
+
+        <sun.awt.windows.WDataTransferer: sun.awt.windows.WDataTransferer transferer> = $r2;
+
+     label1:
+        $r1 = <sun.awt.windows.WDataTransferer: sun.awt.windows.WDataTransferer transferer>;
+
+        return $r1;
+    }
+
+    public java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[], java.awt.datatransfer.FlavorTable)
+    {
+        sun.awt.windows.WDataTransferer r0;
+        java.awt.datatransfer.FlavorTable r2;
+        java.lang.Long $r4;
+        java.awt.datatransfer.DataFlavor[] r1;
+        java.util.SortedMap $r3;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.DataFlavor[];
+
+        r2 := @parameter1: java.awt.datatransfer.FlavorTable;
+
+        $r3 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForFlavors(java.awt.datatransfer.DataFlavor[],java.awt.datatransfer.FlavorTable)>(r1, r2);
+
+        $r4 = <sun.awt.windows.WDataTransferer: java.lang.Long L_CF_LOCALE>;
+
+        interfaceinvoke $r3.<java.util.SortedMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        return $r3;
+    }
+
+    public java.lang.String getDefaultUnicodeEncoding()
+    {
+        sun.awt.windows.WDataTransferer r0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        return "utf-16le";
+    }
+
+    public byte[] translateTransferable(java.awt.datatransfer.Transferable, java.awt.datatransfer.DataFlavor, long) throws java.io.IOException
+    {
+        byte[] $r5, r8;
+        sun.awt.windows.WDataTransferer r0;
+        java.awt.datatransfer.DataFlavor r2, $r3, $r4, $r6, $r7;
+        java.awt.datatransfer.Transferable r1;
+        long l0, $l1;
+        byte $b2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        r1 := @parameter0: java.awt.datatransfer.Transferable;
+
+        r2 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        $l1 = <sun.awt.windows.WDataTransferer: long CF_HTML>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 != 0 goto label3;
+
+        $r3 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor selectionHtmlFlavor>;
+
+        $z0 = interfaceinvoke r1.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor selectionHtmlFlavor>;
+
+        r8 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r1, $r7, l0);
+
+        goto label4;
+
+     label1:
+        $r4 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor allHtmlFlavor>;
+
+        $z1 = interfaceinvoke r1.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>($r4);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor allHtmlFlavor>;
+
+        r8 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r1, $r6, l0);
+
+        goto label4;
+
+     label2:
+        $r5 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r1, r2, l0);
+
+        r8 = staticinvoke <sun.awt.windows.HTMLCodec: byte[] convertToHTMLFormat(byte[])>($r5);
+
+        goto label4;
+
+     label3:
+        r8 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r1, r2, l0);
+
+     label4:
+        return r8;
+    }
+
+    public java.lang.Object translateStream(java.io.InputStream, java.awt.datatransfer.DataFlavor, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        sun.awt.windows.WDataTransferer r0;
+        java.awt.datatransfer.DataFlavor r1;
+        java.awt.datatransfer.Transferable r2;
+        long l0, $l1;
+        sun.awt.windows.EHTMLReadMode $r4;
+        byte $b2;
+        sun.awt.windows.HTMLCodec $r3;
+        java.lang.Object $r6;
+        boolean $z0;
+        java.io.InputStream r5;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        r2 := @parameter3: java.awt.datatransfer.Transferable;
+
+        $l1 = <sun.awt.windows.WDataTransferer: long CF_HTML>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 != 0 goto label1;
+
+        $z0 = virtualinvoke r1.<java.awt.datatransfer.DataFlavor: boolean isFlavorTextType()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.awt.windows.HTMLCodec;
+
+        $r4 = staticinvoke <sun.awt.windows.EHTMLReadMode: sun.awt.windows.EHTMLReadMode getEHTMLReadMode(java.awt.datatransfer.DataFlavor)>(r1);
+
+        specialinvoke $r3.<sun.awt.windows.HTMLCodec: void <init>(java.io.InputStream,sun.awt.windows.EHTMLReadMode)>(r5, $r4);
+
+        r5 = $r3;
+
+     label1:
+        $r6 = specialinvoke r0.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateStream(java.io.InputStream,java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>(r5, r1, l0, r2);
+
+        return $r6;
+    }
+
+    public java.lang.Object translateBytes(byte[], java.awt.datatransfer.DataFlavor, long, java.awt.datatransfer.Transferable) throws java.io.IOException
+    {
+        byte[] r0, $r20, $r21;
+        java.net.URL $r24;
+        byte $b2, $b8, $b10;
+        boolean $z0, $z1, $z2;
+        java.awt.datatransfer.UnsupportedFlavorException $r22;
+        sun.awt.windows.WDataTransferer r11;
+        java.util.List $r7;
+        java.awt.datatransfer.DataFlavor r2, $r3, $r16, $r18;
+        java.awt.datatransfer.Transferable r12;
+        long l0, $l1, $l7, $l9;
+        java.lang.String[] $r5;
+        int $i3, $i4, $i5, $i6, i11;
+        java.lang.String $r4, $r9, $r17, r23, $r25;
+        java.io.IOException $r1;
+        java.io.File $r8, $r10;
+        java.lang.Object $r13, $r19;
+        java.lang.Class $r14, $r15;
+        java.io.File[] r6;
+
+        r11 := @this: sun.awt.windows.WDataTransferer;
+
+        r0 := @parameter0: byte[];
+
+        r2 := @parameter1: java.awt.datatransfer.DataFlavor;
+
+        l0 := @parameter2: long;
+
+        r12 := @parameter3: java.awt.datatransfer.Transferable;
+
+        $l1 = <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORA>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 == 0 goto label01;
+
+        $l7 = <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORW>;
+
+        $b8 = l0 cmp $l7;
+
+        if $b8 != 0 goto label07;
+
+     label01:
+        if r0 == null goto label02;
+
+        $r3 = <java.awt.datatransfer.DataFlavor: java.awt.datatransfer.DataFlavor javaFileListFlavor>;
+
+        $z0 = virtualinvoke $r3.<java.awt.datatransfer.DataFlavor: boolean equals(java.awt.datatransfer.DataFlavor)>(r2);
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r1;
+
+     label03:
+        $r4 = new java.lang.String;
+
+        $i3 = lengthof r0;
+
+        specialinvoke $r4.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>(r0, 0, $i3, "UTF-16LE");
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String[] split(java.lang.String)>("\u0000");
+
+        $i4 = lengthof $r5;
+
+        if 0 != $i4 goto label04;
+
+        return null;
+
+     label04:
+        $i5 = lengthof $r5;
+
+        r6 = newarray (java.io.File)[$i5];
+
+        i11 = 0;
+
+     label05:
+        $i6 = lengthof $r5;
+
+        if i11 >= $i6 goto label06;
+
+        $r8 = new java.io.File;
+
+        $r9 = $r5[i11];
+
+        specialinvoke $r8.<java.io.File: void <init>(java.lang.String)>($r9);
+
+        r6[i11] = $r8;
+
+        $r10 = r6[i11];
+
+        virtualinvoke $r10.<java.io.File: void deleteOnExit()>();
+
+        i11 = i11 + 1;
+
+        goto label05;
+
+     label06:
+        $r7 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r6);
+
+        return $r7;
+
+     label07:
+        $l9 = <sun.awt.windows.WDataTransferer: long CFSTR_INETURL>;
+
+        $b10 = l0 cmp $l9;
+
+        if $b10 != 0 goto label12;
+
+        $r14 = class "Ljava/net/URL;";
+
+        $r15 = virtualinvoke r2.<java.awt.datatransfer.DataFlavor: java.lang.Class getRepresentationClass()>();
+
+        $z1 = virtualinvoke $r14.<java.lang.Object: boolean equals(java.lang.Object)>($r15);
+
+        if $z1 == 0 goto label12;
+
+        r23 = staticinvoke <sun.awt.windows.WDataTransferer: java.lang.String getDefaultTextCharset()>();
+
+        if r12 == null goto label11;
+
+        $r16 = <sun.awt.windows.WDataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $z2 = interfaceinvoke r12.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>($r16);
+
+        if $z2 == 0 goto label11;
+
+     label08:
+        $r17 = new java.lang.String;
+
+        $r18 = <sun.awt.windows.WDataTransferer: java.awt.datatransfer.DataFlavor javaTextEncodingFlavor>;
+
+        $r19 = interfaceinvoke r12.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>($r18);
+
+        $r20 = (byte[]) $r19;
+
+        $r21 = (byte[]) $r20;
+
+        specialinvoke $r17.<java.lang.String: void <init>(byte[],java.lang.String)>($r21, "UTF-8");
+
+        r23 = $r17;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r22 := @caughtexception;
+
+     label11:
+        $r24 = new java.net.URL;
+
+        $r25 = new java.lang.String;
+
+        specialinvoke $r25.<java.lang.String: void <init>(byte[],java.lang.String)>(r0, r23);
+
+        specialinvoke $r24.<java.net.URL: void <init>(java.lang.String)>($r25);
+
+        return $r24;
+
+     label12:
+        $r13 = specialinvoke r11.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateBytes(byte[],java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>(r0, r2, l0, r12);
+
+        return $r13;
+
+        catch java.awt.datatransfer.UnsupportedFlavorException from label08 to label09 with label10;
+    }
+
+    public boolean isLocaleDependentTextFormat(long)
+    {
+        byte $b1, $b3;
+        sun.awt.windows.WDataTransferer r0;
+        long l0, $l2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 1L;
+
+        if $b1 == 0 goto label1;
+
+        $l2 = <sun.awt.windows.WDataTransferer: long CFSTR_INETURL>;
+
+        $b3 = l0 cmp $l2;
+
+        if $b3 != 0 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public boolean isFileFormat(long)
+    {
+        sun.awt.windows.WDataTransferer r0;
+        long l0, $l2, $l4;
+        byte $b1, $b3, $b5;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 15L;
+
+        if $b1 == 0 goto label1;
+
+        $l2 = <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORA>;
+
+        $b3 = l0 cmp $l2;
+
+        if $b3 == 0 goto label1;
+
+        $l4 = <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORW>;
+
+        $b5 = l0 cmp $l4;
+
+        if $b5 != 0 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    protected java.lang.Long getFormatForNativeAsLong(java.lang.String)
+    {
+        sun.awt.windows.WDataTransferer r3;
+        java.lang.Long r4;
+        java.util.Map $r1;
+        java.lang.Object $r2;
+        long $l0;
+        java.lang.String r0;
+
+        r3 := @this: sun.awt.windows.WDataTransferer;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.awt.windows.WDataTransferer: java.util.Map predefinedClipboardNameMap>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r4 = (java.lang.Long) $r2;
+
+        if r4 != null goto label1;
+
+        $l0 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>(r0);
+
+        r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+     label1:
+        return r4;
+    }
+
+    protected java.lang.String getNativeForFormat(long)
+    {
+        sun.awt.windows.WDataTransferer r2;
+        long l0, $l2;
+        java.lang.String[] $r0, $r1;
+        byte $b3;
+        int $i1, $i4, $i5;
+        java.lang.String $r3;
+
+        r2 := @this: sun.awt.windows.WDataTransferer;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $i1 = lengthof $r0;
+
+        $l2 = (long) $i1;
+
+        $b3 = l0 cmp $l2;
+
+        $i5 = (int) $b3;
+
+        if $i5 >= 0 goto label1;
+
+        $r1 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $i4 = (int) l0;
+
+        $r3 = $r1[$i4];
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <sun.awt.windows.WDataTransferer: java.lang.String getClipboardFormatName(long)>(l0);
+
+     label2:
+        return $r3;
+    }
+
+    public sun.awt.datatransfer.ToolkitThreadBlockedHandler getToolkitThreadBlockedHandler()
+    {
+        sun.awt.datatransfer.ToolkitThreadBlockedHandler $r1;
+        sun.awt.windows.WDataTransferer r0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        $r1 = r0.<sun.awt.windows.WDataTransferer: sun.awt.datatransfer.ToolkitThreadBlockedHandler handler>;
+
+        return $r1;
+    }
+
+    private static native long registerClipboardFormat(java.lang.String);
+
+    private static native java.lang.String getClipboardFormatName(long);
+
+    public boolean isImageFormat(long)
+    {
+        sun.awt.windows.WDataTransferer r0;
+        long l0, $l4, $l6;
+        byte $b1, $b2, $b3, $b5, $b7;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 8L;
+
+        if $b1 == 0 goto label1;
+
+        $b2 = l0 cmp 14L;
+
+        if $b2 == 0 goto label1;
+
+        $b3 = l0 cmp 3L;
+
+        if $b3 == 0 goto label1;
+
+        $l4 = <sun.awt.windows.WDataTransferer: long CF_PNG>;
+
+        $b5 = l0 cmp $l4;
+
+        if $b5 == 0 goto label1;
+
+        $l6 = <sun.awt.windows.WDataTransferer: long CF_JFIF>;
+
+        $b7 = l0 cmp $l6;
+
+        if $b7 != 0 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    protected byte[] imageToPlatformBytes(java.awt.Image, long) throws java.io.IOException
+    {
+        byte[] $r10, $r12, $r15;
+        java.awt.image.DataBufferByte r18;
+        byte $b2, $b4;
+        int[] $r2, $r3;
+        sun.awt.image.ImageRepresentation $r14;
+        boolean $z0;
+        sun.awt.windows.WDataTransferer r11;
+        java.awt.Image r0;
+        java.awt.image.BufferedImage $r6;
+        java.awt.geom.AffineTransform $r7;
+        java.awt.image.ComponentColorModel $r4;
+        float $f0;
+        java.awt.image.DataBuffer $r9;
+        java.lang.Throwable $r16;
+        sun.awt.image.ToolkitImage $r13;
+        long l0, $l1, $l3;
+        java.awt.color.ColorSpace $r1;
+        java.awt.Graphics2D $r8;
+        int $i5, $i6, $i7, $i8, i9, i10, $i11;
+        java.lang.String r17, r19, r20;
+        java.awt.image.WritableRaster $r5;
+
+        r11 := @this: sun.awt.windows.WDataTransferer;
+
+        r0 := @parameter0: java.awt.Image;
+
+        l0 := @parameter1: long;
+
+        r17 = null;
+
+        r20 = null;
+
+        r19 = null;
+
+        $l1 = <sun.awt.windows.WDataTransferer: long CF_PNG>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 != 0 goto label01;
+
+        r17 = "image/png";
+
+        r20 = "image/png";
+
+        r19 = "image/png";
+
+        goto label02;
+
+     label01:
+        $l3 = <sun.awt.windows.WDataTransferer: long CF_JFIF>;
+
+        $b4 = l0 cmp $l3;
+
+        if $b4 != 0 goto label02;
+
+        r17 = "image/jpeg";
+
+        r20 = "image/jpeg";
+
+        r19 = "image/jpeg";
+
+     label02:
+        if r19 == null goto label03;
+
+        $r15 = virtualinvoke r11.<sun.awt.windows.WDataTransferer: byte[] imageToStandardBytes(java.awt.Image,java.lang.String)>(r0, r20);
+
+        return $r15;
+
+     label03:
+        $z0 = r0 instanceof sun.awt.image.ToolkitImage;
+
+        if $z0 == 0 goto label04;
+
+        $r13 = (sun.awt.image.ToolkitImage) r0;
+
+        $r14 = virtualinvoke $r13.<sun.awt.image.ToolkitImage: sun.awt.image.ImageRepresentation getImageRep()>();
+
+        virtualinvoke $r14.<sun.awt.image.ImageRepresentation: void reconstruct(int)>(32);
+
+        i9 = virtualinvoke $r14.<sun.awt.image.ImageRepresentation: int getWidth()>();
+
+        i10 = virtualinvoke $r14.<sun.awt.image.ImageRepresentation: int getHeight()>();
+
+        goto label05;
+
+     label04:
+        i9 = virtualinvoke r0.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>(null);
+
+        i10 = virtualinvoke r0.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>(null);
+
+     label05:
+        $i5 = i9 * 3;
+
+        $i8 = $i5 % 4;
+
+        if $i8 <= 0 goto label06;
+
+        $i11 = 4 - $i8;
+
+        goto label07;
+
+     label06:
+        $i11 = 0;
+
+     label07:
+        $r1 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1000);
+
+        $r2 = newarray (int)[3];
+
+        $r2[0] = 8;
+
+        $r2[1] = 8;
+
+        $r2[2] = 8;
+
+        $r3 = newarray (int)[3];
+
+        $r3[0] = 2;
+
+        $r3[1] = 1;
+
+        $r3[2] = 0;
+
+        $r4 = new java.awt.image.ComponentColorModel;
+
+        specialinvoke $r4.<java.awt.image.ComponentColorModel: void <init>(java.awt.color.ColorSpace,int[],boolean,boolean,int,int)>($r1, $r2, 0, 0, 1, 0);
+
+        $i6 = i9 * 3;
+
+        $i7 = $i6 + $i11;
+
+        $r5 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(int,int,int,int,int,int[],java.awt.Point)>(0, i9, i10, $i7, 3, $r3, null);
+
+        $r6 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r6.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r4, $r5, 0, null);
+
+        $r7 = new java.awt.geom.AffineTransform;
+
+        $f0 = (float) i10;
+
+        specialinvoke $r7.<java.awt.geom.AffineTransform: void <init>(float,float,float,float,float,float)>(1.0F, 0.0F, 0.0F, -1.0F, 0.0F, $f0);
+
+        $r8 = virtualinvoke $r6.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+     label08:
+        virtualinvoke $r8.<java.awt.Graphics2D: boolean drawImage(java.awt.Image,java.awt.geom.AffineTransform,java.awt.image.ImageObserver)>(r0, $r7, null);
+
+     label09:
+        virtualinvoke $r8.<java.awt.Graphics2D: void dispose()>();
+
+        goto label12;
+
+     label10:
+        $r16 := @caughtexception;
+
+     label11:
+        virtualinvoke $r8.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r16;
+
+     label12:
+        $r9 = virtualinvoke $r5.<java.awt.image.WritableRaster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        r18 = (java.awt.image.DataBufferByte) $r9;
+
+        $r10 = virtualinvoke r18.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        $r12 = specialinvoke r11.<sun.awt.windows.WDataTransferer: byte[] imageDataToPlatformImageBytes(byte[],int,int,long)>($r10, i9, i10, l0);
+
+        return $r12;
+
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    protected java.io.ByteArrayOutputStream convertFileListToBytes(java.util.ArrayList) throws java.io.IOException
+    {
+        byte[] $r2, $r7, $r8, $r9;
+        java.io.ByteArrayOutputStream $r0;
+        sun.awt.windows.WDataTransferer r4;
+        java.util.ArrayList r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r3;
+        java.lang.String $r5, $r6;
+        boolean $z0;
+
+        r4 := @this: sun.awt.windows.WDataTransferer;
+
+        r1 := @parameter0: java.util.ArrayList;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $z0 = virtualinvoke r1.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r9 = <sun.awt.windows.WDataTransferer: byte[] UNICODE_NULL_TERMINATOR>;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[])>($r9);
+
+        goto label3;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $i0 = virtualinvoke r1.<java.util.ArrayList: int size()>();
+
+        if i2 >= $i0 goto label3;
+
+        $r3 = virtualinvoke r1.<java.util.ArrayList: java.lang.Object get(int)>(i2);
+
+        $r5 = (java.lang.String) $r3;
+
+        $r6 = virtualinvoke r4.<sun.awt.windows.WDataTransferer: java.lang.String getDefaultUnicodeEncoding()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.String: byte[] getBytes(java.lang.String)>($r6);
+
+        $i1 = lengthof $r7;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r7, 0, $i1);
+
+        $r8 = <sun.awt.windows.WDataTransferer: byte[] UNICODE_NULL_TERMINATOR>;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[])>($r8);
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        $r2 = <sun.awt.windows.WDataTransferer: byte[] UNICODE_NULL_TERMINATOR>;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[])>($r2);
+
+        return $r0;
+    }
+
+    private native byte[] imageDataToPlatformImageBytes(byte[], int, int, long);
+
+    protected java.awt.Image platformImageBytesToImage(byte[], long) throws java.io.IOException
+    {
+        byte[] r1;
+        long l0, $l1, $l3;
+        java.awt.image.DataBufferInt $r3;
+        byte $b2, $b4;
+        int[] $r2, $r4;
+        int $i5, i6, i7, $i8, i9;
+        java.lang.String r10, r11, r12;
+        sun.awt.windows.WDataTransferer r0;
+        java.awt.image.BufferedImage $r6;
+        java.awt.Image $r9;
+        java.awt.image.DirectColorModel $r7;
+        java.io.IOException $r8;
+        java.awt.image.WritableRaster $r5;
+
+        r0 := @this: sun.awt.windows.WDataTransferer;
+
+        r1 := @parameter0: byte[];
+
+        l0 := @parameter1: long;
+
+        r10 = null;
+
+        r12 = null;
+
+        r11 = null;
+
+        $l1 = <sun.awt.windows.WDataTransferer: long CF_PNG>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 != 0 goto label1;
+
+        r10 = "image/png";
+
+        r12 = "image/png";
+
+        r11 = "image/png";
+
+        goto label2;
+
+     label1:
+        $l3 = <sun.awt.windows.WDataTransferer: long CF_JFIF>;
+
+        $b4 = l0 cmp $l3;
+
+        if $b4 != 0 goto label2;
+
+        r10 = "image/jpeg";
+
+        r12 = "image/jpeg";
+
+        r11 = "image/jpeg";
+
+     label2:
+        if r11 == null goto label3;
+
+        $r9 = virtualinvoke r0.<sun.awt.windows.WDataTransferer: java.awt.Image standardImageBytesToImage(byte[],java.lang.String)>(r1, r12);
+
+        return $r9;
+
+     label3:
+        $r2 = specialinvoke r0.<sun.awt.windows.WDataTransferer: int[] platformImageBytesToImageData(byte[],long)>(r1, l0);
+
+        if $r2 != null goto label4;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("data translation failed");
+
+        throw $r8;
+
+     label4:
+        $i5 = lengthof $r2;
+
+        i6 = $i5 - 2;
+
+        i7 = $r2[i6];
+
+        $i8 = i6 + 1;
+
+        i9 = $r2[$i8];
+
+        $r3 = new java.awt.image.DataBufferInt;
+
+        specialinvoke $r3.<java.awt.image.DataBufferInt: void <init>(int[],int)>($r2, i6);
+
+        $r4 = <sun.awt.windows.WDataTransferer: int[] bandmasks>;
+
+        $r5 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createPackedRaster(java.awt.image.DataBuffer,int,int,int,int[],java.awt.Point)>($r3, i7, i9, i7, $r4, null);
+
+        $r6 = new java.awt.image.BufferedImage;
+
+        $r7 = <sun.awt.windows.WDataTransferer: java.awt.image.DirectColorModel directColorModel>;
+
+        specialinvoke $r6.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r7, $r5, 0, null);
+
+        return $r6;
+    }
+
+    private native int[] platformImageBytesToImageData(byte[], long) throws java.io.IOException;
+
+    protected native java.lang.String[] dragQueryFile(byte[]);
+
+    static void <clinit>()
+    {
+        byte[] $r15;
+        java.lang.Long $r9, $r18;
+        int[] $r11;
+        java.util.Map $r4, $r7;
+        java.awt.image.DirectColorModel $r12, $r13, $r14, $r20;
+        java.lang.String[] $r0, $r2, $r3, $r5, $r16;
+        long $l2, $l3, $l4, $l5, $l6, $l7, $l11;
+        java.util.HashMap $r19;
+        int $i0, $i1, $i8, $i9, $i10, i12, $i14;
+        java.lang.String $r6, $r17;
+        java.lang.Object $r8;
+
+        <sun.awt.windows.WDataTransferer: int CF_LOCALE> = 16;
+
+        <sun.awt.windows.WDataTransferer: int CF_HDROP> = 15;
+
+        <sun.awt.windows.WDataTransferer: int CF_ENHMETAFILE> = 14;
+
+        <sun.awt.windows.WDataTransferer: int CF_DIB> = 8;
+
+        <sun.awt.windows.WDataTransferer: int CF_METAFILEPICT> = 3;
+
+        <sun.awt.windows.WDataTransferer: int CF_TEXT> = 1;
+
+        $r0 = newarray (java.lang.String)[18];
+
+        $r0[0] = "";
+
+        $r0[1] = "TEXT";
+
+        $r0[2] = "BITMAP";
+
+        $r0[3] = "METAFILEPICT";
+
+        $r0[4] = "SYLK";
+
+        $r0[5] = "DIF";
+
+        $r0[6] = "TIFF";
+
+        $r0[7] = "OEM TEXT";
+
+        $r0[8] = "DIB";
+
+        $r0[9] = "PALETTE";
+
+        $r0[10] = "PENDATA";
+
+        $r0[11] = "RIFF";
+
+        $r0[12] = "WAVE";
+
+        $r0[13] = "UNICODE TEXT";
+
+        $r0[14] = "ENHMETAFILE";
+
+        $r0[15] = "HDROP";
+
+        $r0[16] = "LOCALE";
+
+        $r0[17] = "DIBV5";
+
+        <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames> = $r0;
+
+        $r19 = new java.util.HashMap;
+
+        $r2 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $i0 = lengthof $r2;
+
+        specialinvoke $r19.<java.util.HashMap: void <init>(int,float)>($i0, 1.0F);
+
+        i12 = 1;
+
+     label1:
+        $r3 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $i1 = lengthof $r3;
+
+        if i12 >= $i1 goto label2;
+
+        $r16 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $r17 = $r16[i12];
+
+        $l11 = (long) i12;
+
+        $r18 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l11);
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r17, $r18);
+
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r19);
+
+        <sun.awt.windows.WDataTransferer: java.util.Map predefinedClipboardNameMap> = $r4;
+
+        $l2 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("HTML Format");
+
+        <sun.awt.windows.WDataTransferer: long CF_HTML> = $l2;
+
+        $l3 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("UniformResourceLocator");
+
+        <sun.awt.windows.WDataTransferer: long CFSTR_INETURL> = $l3;
+
+        $l4 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("PNG");
+
+        <sun.awt.windows.WDataTransferer: long CF_PNG> = $l4;
+
+        $l5 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("JFIF");
+
+        <sun.awt.windows.WDataTransferer: long CF_JFIF> = $l5;
+
+        $l6 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("FileGroupDescriptorW");
+
+        <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORW> = $l6;
+
+        $l7 = staticinvoke <sun.awt.windows.WDataTransferer: long registerClipboardFormat(java.lang.String)>("FileGroupDescriptor");
+
+        <sun.awt.windows.WDataTransferer: long CF_FILEGROUPDESCRIPTORA> = $l7;
+
+        $r7 = <sun.awt.windows.WDataTransferer: java.util.Map predefinedClipboardNameMap>;
+
+        $r5 = <sun.awt.windows.WDataTransferer: java.lang.String[] predefinedClipboardNames>;
+
+        $r6 = $r5[16];
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r9 = (java.lang.Long) $r8;
+
+        <sun.awt.windows.WDataTransferer: java.lang.Long L_CF_LOCALE> = $r9;
+
+        $r20 = new java.awt.image.DirectColorModel;
+
+        $i14 = (int) 65280;
+
+        specialinvoke $r20.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, $i14, 255);
+
+        <sun.awt.windows.WDataTransferer: java.awt.image.DirectColorModel directColorModel> = $r20;
+
+        $r11 = newarray (int)[3];
+
+        $r12 = <sun.awt.windows.WDataTransferer: java.awt.image.DirectColorModel directColorModel>;
+
+        $i8 = virtualinvoke $r12.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        $r11[0] = $i8;
+
+        $r13 = <sun.awt.windows.WDataTransferer: java.awt.image.DirectColorModel directColorModel>;
+
+        $i9 = virtualinvoke $r13.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        $r11[1] = $i9;
+
+        $r14 = <sun.awt.windows.WDataTransferer: java.awt.image.DirectColorModel directColorModel>;
+
+        $i10 = virtualinvoke $r14.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        $r11[2] = $i10;
+
+        <sun.awt.windows.WDataTransferer: int[] bandmasks> = $r11;
+
+        $r15 = newarray (byte)[2];
+
+        $r15[0] = 0;
+
+        $r15[1] = 0;
+
+        <sun.awt.windows.WDataTransferer: byte[] UNICODE_NULL_TERMINATOR> = $r15;
+
+        return;
+    }
+}

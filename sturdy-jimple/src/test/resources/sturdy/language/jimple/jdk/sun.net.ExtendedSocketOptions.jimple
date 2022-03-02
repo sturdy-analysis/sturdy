@@ -1,0 +1,342 @@
+public abstract class sun.net.ExtendedSocketOptions extends java.lang.Object
+{
+    public static final short SOCK_STREAM;
+    public static final short SOCK_DGRAM;
+    private final java.util.Set options;
+    private final java.util.Set datagramOptions;
+    private final java.util.Set clientStreamOptions;
+    private final java.util.Set serverStreamOptions;
+    private static volatile sun.net.ExtendedSocketOptions instance;
+
+    public final boolean isOptionSupported(java.net.SocketOption)
+    {
+        sun.net.ExtendedSocketOptions r0;
+        java.net.SocketOption r2;
+        java.util.Set $r1;
+        boolean $z0;
+
+        r0 := @this: sun.net.ExtendedSocketOptions;
+
+        r2 := @parameter0: java.net.SocketOption;
+
+        $r1 = virtualinvoke r0.<sun.net.ExtendedSocketOptions: java.util.Set options()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.Set: boolean contains(java.lang.Object)>(r2);
+
+        return $z0;
+    }
+
+    public final java.util.Set options()
+    {
+        sun.net.ExtendedSocketOptions r0;
+        java.util.Set $r1;
+
+        r0 := @this: sun.net.ExtendedSocketOptions;
+
+        $r1 = r0.<sun.net.ExtendedSocketOptions: java.util.Set options>;
+
+        return $r1;
+    }
+
+    public static java.util.Set serverSocketOptions()
+    {
+        sun.net.ExtendedSocketOptions $r0;
+        java.util.Set $r1;
+
+        $r0 = staticinvoke <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions getInstance()>();
+
+        $r1 = specialinvoke $r0.<sun.net.ExtendedSocketOptions: java.util.Set options0(short,boolean)>(1, 1);
+
+        return $r1;
+    }
+
+    public static java.util.Set clientSocketOptions()
+    {
+        sun.net.ExtendedSocketOptions $r0;
+        java.util.Set $r1;
+
+        $r0 = staticinvoke <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions getInstance()>();
+
+        $r1 = specialinvoke $r0.<sun.net.ExtendedSocketOptions: java.util.Set options0(short,boolean)>(1, 0);
+
+        return $r1;
+    }
+
+    public static java.util.Set datagramSocketOptions()
+    {
+        sun.net.ExtendedSocketOptions $r0;
+        java.util.Set $r1;
+
+        $r0 = staticinvoke <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions getInstance()>();
+
+        $r1 = specialinvoke $r0.<sun.net.ExtendedSocketOptions: java.util.Set options0(short,boolean)>(2, 0);
+
+        return $r1;
+    }
+
+    private static boolean isDatagramOption(java.net.SocketOption)
+    {
+        java.net.SocketOption r0;
+        java.lang.String $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.net.SocketOption;
+
+        $r1 = interfaceinvoke r0.<java.net.SocketOption: java.lang.String name()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("TCP_");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private static boolean isStreamOption(java.net.SocketOption, boolean)
+    {
+        java.net.SocketOption r0;
+        java.lang.String $r1, $r2, $r3;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.net.SocketOption;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r2 = "SO_FLOW_SLA";
+
+        $r3 = interfaceinvoke r0.<java.net.SocketOption: java.lang.String name()>();
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = interfaceinvoke r0.<java.net.SocketOption: java.lang.String name()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("UDP_");
+
+        if $z1 != 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private java.util.Set options0(short, boolean)
+    {
+        sun.net.ExtendedSocketOptions r0;
+        java.util.Set $r1, $r2, $r3;
+        java.lang.IllegalArgumentException $r5;
+        short s0;
+        int $i1;
+        boolean z0;
+
+        r0 := @this: sun.net.ExtendedSocketOptions;
+
+        s0 := @parameter0: short;
+
+        z0 := @parameter1: boolean;
+
+        $i1 = (int) s0;
+
+        lookupswitch($i1)
+        {
+            case 1: goto label2;
+            case 2: goto label1;
+            default: goto label4;
+        };
+
+     label1:
+        $r1 = r0.<sun.net.ExtendedSocketOptions: java.util.Set datagramOptions>;
+
+        return $r1;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $r3 = r0.<sun.net.ExtendedSocketOptions: java.util.Set serverStreamOptions>;
+
+        return $r3;
+
+     label3:
+        $r2 = r0.<sun.net.ExtendedSocketOptions: java.util.Set clientStreamOptions>;
+
+        return $r2;
+
+     label4:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid socket option type");
+
+        throw $r5;
+    }
+
+    public abstract void setOption(java.io.FileDescriptor, java.net.SocketOption, java.lang.Object) throws java.net.SocketException;
+
+    public abstract java.lang.Object getOption(java.io.FileDescriptor, java.net.SocketOption) throws java.net.SocketException;
+
+    protected void <init>(java.util.Set)
+    {
+        sun.net.ExtendedSocketOptions r0;
+        java.util.Iterator $r5;
+        java.net.SocketOption r10;
+        java.util.Set r1;
+        java.util.HashSet $r2, $r3, $r4, $r6, $r7, $r8;
+        java.lang.Object $r9;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.net.ExtendedSocketOptions;
+
+        r1 := @parameter0: java.util.Set;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.ExtendedSocketOptions: java.util.Set options> = r1;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>()>();
+
+        $r5 = interfaceinvoke r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r9 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.net.SocketOption) $r9;
+
+        $z1 = staticinvoke <sun.net.ExtendedSocketOptions: boolean isDatagramOption(java.net.SocketOption)>(r10);
+
+        if $z1 == 0 goto label2;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>(r10);
+
+     label2:
+        $z2 = staticinvoke <sun.net.ExtendedSocketOptions: boolean isStreamOption(java.net.SocketOption,boolean)>(r10, 1);
+
+        if $z2 == 0 goto label3;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>(r10);
+
+     label3:
+        $z3 = staticinvoke <sun.net.ExtendedSocketOptions: boolean isStreamOption(java.net.SocketOption,boolean)>(r10, 0);
+
+        if $z3 == 0 goto label4;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>(r10);
+
+     label4:
+        goto label1;
+
+     label5:
+        $r6 = new java.util.HashSet;
+
+        specialinvoke $r6.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        r0.<sun.net.ExtendedSocketOptions: java.util.Set datagramOptions> = $r6;
+
+        $r7 = new java.util.HashSet;
+
+        specialinvoke $r7.<java.util.HashSet: void <init>(java.util.Collection)>($r3);
+
+        r0.<sun.net.ExtendedSocketOptions: java.util.Set serverStreamOptions> = $r7;
+
+        $r8 = new java.util.HashSet;
+
+        specialinvoke $r8.<java.util.HashSet: void <init>(java.util.Collection)>($r4);
+
+        r0.<sun.net.ExtendedSocketOptions: java.util.Set clientStreamOptions> = $r8;
+
+        return;
+    }
+
+    public static final sun.net.ExtendedSocketOptions getInstance()
+    {
+        sun.net.ExtendedSocketOptions $r0;
+
+        $r0 = <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions instance>;
+
+        return $r0;
+    }
+
+    public static final void register(sun.net.ExtendedSocketOptions)
+    {
+        sun.net.ExtendedSocketOptions $r0, r1;
+        java.lang.InternalError $r2;
+
+        r1 := @parameter0: sun.net.ExtendedSocketOptions;
+
+        $r0 = <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions instance>;
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>("Attempting to reregister extended options");
+
+        throw $r2;
+
+     label1:
+        <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions instance> = r1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ClassNotFoundException $r0;
+        sun.net.ExtendedSocketOptions$NoExtendedSocketOptions $r1;
+
+        <sun.net.ExtendedSocketOptions: short SOCK_DGRAM> = 2;
+
+        <sun.net.ExtendedSocketOptions: short SOCK_STREAM> = 1;
+
+     label1:
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("jdk.net.ExtendedSocketOptions");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r0 := @caughtexception;
+
+        $r1 = new sun.net.ExtendedSocketOptions$NoExtendedSocketOptions;
+
+        specialinvoke $r1.<sun.net.ExtendedSocketOptions$NoExtendedSocketOptions: void <init>()>();
+
+        <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions instance> = $r1;
+
+     label4:
+        return;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+}

@@ -1,0 +1,1113 @@
+public final class com.sun.naming.internal.ResourceManager extends java.lang.Object
+{
+    private static final java.lang.String PROVIDER_RESOURCE_FILE_NAME;
+    private static final java.lang.String APP_RESOURCE_FILE_NAME;
+    private static final java.lang.String JRELIB_PROPERTY_FILE_NAME;
+    private static final java.lang.String DISABLE_APP_RESOURCE_FILES;
+    private static final java.lang.String[] listProperties;
+    private static final com.sun.naming.internal.VersionHelper helper;
+    private static final java.util.WeakHashMap propertiesCache;
+    private static final java.util.WeakHashMap factoryCache;
+    private static final java.util.WeakHashMap urlFactoryCache;
+    private static final java.lang.ref.WeakReference NO_FACTORY;
+
+    private void <init>()
+    {
+        com.sun.naming.internal.ResourceManager r0;
+
+        r0 := @this: com.sun.naming.internal.ResourceManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.util.Hashtable getInitialEnvironment(java.util.Hashtable) throws javax.naming.NamingException
+    {
+        java.lang.String[] r0, $r3;
+        int i0, $i1;
+        java.lang.String $r6, $r8, $r10, $r14, r15;
+        java.util.Hashtable $r5, $r11, r12;
+        boolean $z0;
+        com.sun.naming.internal.VersionHelper $r2, $r9;
+        java.lang.Object $r1, $r4, $r7, r13;
+
+        r12 := @parameter0: java.util.Hashtable;
+
+        r0 = <com.sun.naming.internal.VersionHelper: java.lang.String[] PROPS>;
+
+        if r12 != null goto label1;
+
+        $r11 = new java.util.Hashtable;
+
+        specialinvoke $r11.<java.util.Hashtable: void <init>(int)>(11);
+
+        r12 = $r11;
+
+     label1:
+        $r1 = virtualinvoke r12.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.applet");
+
+        $r2 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r3 = virtualinvoke $r2.<com.sun.naming.internal.VersionHelper: java.lang.String[] getJndiProperties()>();
+
+        i0 = 0;
+
+     label2:
+        $i1 = lengthof r0;
+
+        if i0 >= $i1 goto label8;
+
+        $r6 = r0[i0];
+
+        $r7 = virtualinvoke r12.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r6);
+
+        r13 = $r7;
+
+        if $r7 != null goto label7;
+
+        if $r1 == null goto label3;
+
+        $r10 = r0[i0];
+
+        r13 = staticinvoke <com.sun.naming.internal.ResourceManager$AppletParameter: java.lang.Object get(java.lang.Object,java.lang.String)>($r1, $r10);
+
+     label3:
+        if r13 != null goto label6;
+
+        if $r3 == null goto label4;
+
+        $r14 = $r3[i0];
+
+        goto label5;
+
+     label4:
+        $r9 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r14 = virtualinvoke $r9.<com.sun.naming.internal.VersionHelper: java.lang.String getJndiProperty(int)>(i0);
+
+     label5:
+        r13 = $r14;
+
+     label6:
+        if r13 == null goto label7;
+
+        $r8 = r0[i0];
+
+        virtualinvoke r12.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, r13);
+
+     label7:
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label8:
+        $r4 = virtualinvoke r12.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("com.sun.naming.disable.app.resource.files");
+
+        r15 = (java.lang.String) $r4;
+
+        if r15 == null goto label9;
+
+        $z0 = virtualinvoke r15.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z0 == 0 goto label9;
+
+        return r12;
+
+     label9:
+        $r5 = staticinvoke <com.sun.naming.internal.ResourceManager: java.util.Hashtable getApplicationResources()>();
+
+        staticinvoke <com.sun.naming.internal.ResourceManager: void mergeTables(java.util.Hashtable,java.util.Hashtable)>(r12, $r5);
+
+        return r12;
+    }
+
+    public static java.lang.String getProperty(java.lang.String, java.util.Hashtable, javax.naming.Context, boolean) throws javax.naming.NamingException
+    {
+        java.lang.Object $r5, $r12;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9;
+        java.lang.String r1, r4, $r10, $r11, $r13;
+        javax.naming.Context r2;
+        java.util.Hashtable r0, $r3;
+        boolean z0;
+
+        r4 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.util.Hashtable;
+
+        r2 := @parameter2: javax.naming.Context;
+
+        z0 := @parameter3: boolean;
+
+        if r0 == null goto label1;
+
+        $r12 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        $r13 = (java.lang.String) $r12;
+
+        goto label2;
+
+     label1:
+        $r13 = null;
+
+     label2:
+        r1 = $r13;
+
+        if r2 == null goto label3;
+
+        if $r13 == null goto label4;
+
+        if z0 != 0 goto label4;
+
+     label3:
+        return r1;
+
+     label4:
+        $r3 = staticinvoke <com.sun.naming.internal.ResourceManager: java.util.Hashtable getProviderResource(java.lang.Object)>(r2);
+
+        $r5 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        $r11 = (java.lang.String) $r5;
+
+        if r1 != null goto label5;
+
+        return $r11;
+
+     label5:
+        if $r11 == null goto label6;
+
+        if z0 != 0 goto label7;
+
+     label6:
+        return r1;
+
+     label7:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    public static com.sun.naming.internal.FactoryEnumeration getFactories(java.lang.String, java.util.Hashtable, javax.naming.Context) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r19, $r21;
+        java.util.HashMap $r17;
+        com.sun.naming.internal.FactoryEnumeration $r12, $r25;
+        java.util.ArrayList $r11;
+        java.util.StringTokenizer $r10;
+        java.util.Map r22, r23;
+        int $i0;
+        java.lang.String r0, $r3, $r13;
+        javax.naming.Context r2;
+        java.util.Hashtable r1;
+        java.util.WeakHashMap $r6, $r7, $r18;
+        com.sun.naming.internal.NamedWeakReference $r16;
+        boolean $z0;
+        com.sun.naming.internal.VersionHelper $r4, $r14;
+        java.lang.Exception $r20;
+        java.util.List r24;
+        java.lang.Object $r8, $r9;
+        java.lang.Class $r15;
+        java.lang.ClassLoader $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Hashtable;
+
+        r2 := @parameter2: javax.naming.Context;
+
+        $r3 = staticinvoke <com.sun.naming.internal.ResourceManager: java.lang.String getProperty(java.lang.String,java.util.Hashtable,javax.naming.Context,boolean)>(r0, r1, r2, 1);
+
+        if $r3 != null goto label01;
+
+        return null;
+
+     label01:
+        $r4 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.naming.internal.VersionHelper: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r6 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap factoryCache>;
+
+        entermonitor $r6;
+
+     label02:
+        $r7 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap factoryCache>;
+
+        $r8 = virtualinvoke $r7.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r22 = (java.util.Map) $r8;
+
+        if r22 != null goto label03;
+
+        $r17 = new java.util.HashMap;
+
+        specialinvoke $r17.<java.util.HashMap: void <init>(int)>(11);
+
+        r22 = $r17;
+
+        $r18 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap factoryCache>;
+
+        virtualinvoke $r18.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r17);
+
+     label03:
+        exitmonitor $r6;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r21 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label06:
+        throw $r21;
+
+     label07:
+        r23 = r22;
+
+        entermonitor r22;
+
+     label08:
+        $r9 = interfaceinvoke r22.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r24 = (java.util.List) $r9;
+
+        if r24 == null goto label12;
+
+        $i0 = interfaceinvoke r24.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label09;
+
+        $r25 = null;
+
+        goto label10;
+
+     label09:
+        $r25 = new com.sun.naming.internal.FactoryEnumeration;
+
+        specialinvoke $r25.<com.sun.naming.internal.FactoryEnumeration: void <init>(java.util.List,java.lang.ClassLoader)>(r24, $r5);
+
+     label10:
+        exitmonitor r23;
+
+     label11:
+        return $r25;
+
+     label12:
+        $r10 = new java.util.StringTokenizer;
+
+        specialinvoke $r10.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r3, ":");
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>(int)>(5);
+
+     label13:
+        $z0 = virtualinvoke $r10.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label17;
+
+     label14:
+        $r13 = virtualinvoke $r10.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r14 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r15 = virtualinvoke $r14.<com.sun.naming.internal.VersionHelper: java.lang.Class loadClass(java.lang.String,java.lang.ClassLoader)>($r13, $r5);
+
+        $r16 = new com.sun.naming.internal.NamedWeakReference;
+
+        specialinvoke $r16.<com.sun.naming.internal.NamedWeakReference: void <init>(java.lang.Object,java.lang.String)>($r15, $r13);
+
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r16);
+
+     label15:
+        goto label13;
+
+     label16:
+        $r20 := @caughtexception;
+
+        goto label13;
+
+     label17:
+        interfaceinvoke r22.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r11);
+
+        $r12 = new com.sun.naming.internal.FactoryEnumeration;
+
+        specialinvoke $r12.<com.sun.naming.internal.FactoryEnumeration: void <init>(java.util.List,java.lang.ClassLoader)>($r11, $r5);
+
+        exitmonitor r23;
+
+     label18:
+        return $r12;
+
+     label19:
+        $r19 := @caughtexception;
+
+        exitmonitor r23;
+
+     label20:
+        throw $r19;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Exception from label14 to label15 with label16;
+        catch java.lang.Throwable from label08 to label11 with label19;
+        catch java.lang.Throwable from label12 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    public static java.lang.Object getFactory(java.lang.String, java.util.Hashtable, javax.naming.Context, java.lang.String, java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r39, $r45;
+        java.util.Map $r20, $r35, r52, r53;
+        java.lang.InstantiationException $r44;
+        boolean $z0;
+        java.lang.IllegalAccessException $r38;
+        com.sun.naming.internal.VersionHelper $r5, $r26;
+        java.lang.Exception $r37;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r21, $r23, $r24, $r31, $r32, $r33, $r34, $r40, $r41, $r42, $r46, $r47, $r48;
+        java.lang.ClassLoader $r6;
+        java.lang.Throwable $r36, $r50;
+        java.util.HashMap $r29;
+        java.util.StringTokenizer $r19;
+        java.lang.String r0, $r3, r4, r8, $r12, $r22, $r25, $r43, $r49, r51;
+        javax.naming.Context r2;
+        java.lang.ref.WeakReference r17, $r18, $r55;
+        java.util.Hashtable r1;
+        java.util.WeakHashMap $r13, $r14, $r30;
+        java.lang.Object $r15, $r16, $r28, r54;
+        java.lang.Class $r27;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Hashtable;
+
+        r2 := @parameter2: javax.naming.Context;
+
+        r8 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: java.lang.String;
+
+        $r3 = staticinvoke <com.sun.naming.internal.ResourceManager: java.lang.String getProperty(java.lang.String,java.util.Hashtable,javax.naming.Context,boolean)>(r0, r1, r2, 1);
+
+        if $r3 == null goto label01;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        r51 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label02;
+
+     label01:
+        r51 = r4;
+
+     label02:
+        $r5 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.naming.internal.VersionHelper: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r51);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap urlFactoryCache>;
+
+        entermonitor $r13;
+
+     label03:
+        $r14 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap urlFactoryCache>;
+
+        $r15 = virtualinvoke $r14.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r35 = (java.util.Map) $r15;
+
+        r52 = $r35;
+
+        if $r35 != null goto label04;
+
+        $r29 = new java.util.HashMap;
+
+        specialinvoke $r29.<java.util.HashMap: void <init>(int)>(11);
+
+        r52 = $r29;
+
+        $r30 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap urlFactoryCache>;
+
+        virtualinvoke $r30.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r29);
+
+     label04:
+        exitmonitor $r13;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r50 := @caughtexception;
+
+        exitmonitor $r13;
+
+     label07:
+        throw $r50;
+
+     label08:
+        r53 = r52;
+
+        entermonitor r52;
+
+     label09:
+        r54 = null;
+
+        $r16 = interfaceinvoke r52.<java.util.Map: java.lang.Object get(java.lang.Object)>($r12);
+
+        r17 = (java.lang.ref.WeakReference) $r16;
+
+        $r18 = <com.sun.naming.internal.ResourceManager: java.lang.ref.WeakReference NO_FACTORY>;
+
+        if r17 != $r18 goto label11;
+
+        exitmonitor r52;
+
+     label10:
+        return null;
+
+     label11:
+        if r17 == null goto label13;
+
+        $r28 = virtualinvoke r17.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r54 = $r28;
+
+        if $r28 == null goto label13;
+
+        exitmonitor r52;
+
+     label12:
+        return $r28;
+
+     label13:
+        $r19 = new java.util.StringTokenizer;
+
+        specialinvoke $r19.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r51, ":");
+
+     label14:
+        if r54 != null goto label20;
+
+        $z0 = virtualinvoke $r19.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label20;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r19.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label15:
+        $r26 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r27 = virtualinvoke $r26.<com.sun.naming.internal.VersionHelper: java.lang.Class loadClass(java.lang.String,java.lang.ClassLoader)>($r25, $r6);
+
+        r54 = virtualinvoke $r27.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label16:
+        goto label14;
+
+     label17:
+        $r44 := @caughtexception;
+
+        $r45 = new javax.naming.NamingException;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot instantiate ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<javax.naming.NamingException: void <init>(java.lang.String)>($r49);
+
+        virtualinvoke $r45.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r44);
+
+        throw $r45;
+
+     label18:
+        $r38 := @caughtexception;
+
+        $r39 = new javax.naming.NamingException;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot access ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r39.<javax.naming.NamingException: void <init>(java.lang.String)>($r43);
+
+        virtualinvoke $r39.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r38);
+
+        throw $r39;
+
+     label19:
+        $r37 := @caughtexception;
+
+        goto label14;
+
+     label20:
+        $r20 = r52;
+
+        if r54 == null goto label21;
+
+        $r55 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r55.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r54);
+
+        goto label22;
+
+     label21:
+        $r55 = <com.sun.naming.internal.ResourceManager: java.lang.ref.WeakReference NO_FACTORY>;
+
+     label22:
+        interfaceinvoke $r20.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, $r55);
+
+        exitmonitor r53;
+
+     label23:
+        return r54;
+
+     label24:
+        $r36 := @caughtexception;
+
+        exitmonitor r53;
+
+     label25:
+        throw $r36;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.InstantiationException from label15 to label16 with label17;
+        catch java.lang.IllegalAccessException from label15 to label16 with label18;
+        catch java.lang.Exception from label15 to label16 with label19;
+        catch java.lang.Throwable from label09 to label10 with label24;
+        catch java.lang.Throwable from label11 to label12 with label24;
+        catch java.lang.Throwable from label13 to label23 with label24;
+        catch java.lang.Throwable from label24 to label25 with label24;
+    }
+
+    private static java.util.Hashtable getProviderResource(java.lang.Object) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r11;
+        javax.naming.ConfigurationException $r13;
+        java.lang.String $r17;
+        java.util.WeakHashMap $r1, $r3, $r8;
+        java.util.Hashtable $r10, r18;
+        java.util.Properties $r5, $r9;
+        java.io.IOException $r12;
+        com.sun.naming.internal.VersionHelper $r6;
+        java.lang.Object r0, $r4;
+        java.lang.Class $r2;
+        java.lang.StringBuilder $r14, $r15, $r16;
+        java.io.InputStream $r7;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label01;
+
+        $r10 = new java.util.Hashtable;
+
+        specialinvoke $r10.<java.util.Hashtable: void <init>(int)>(1);
+
+        return $r10;
+
+     label01:
+        $r1 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        $r4 = virtualinvoke $r3.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        r18 = (java.util.Hashtable) $r4;
+
+        if r18 == null goto label04;
+
+        exitmonitor $r1;
+
+     label03:
+        return r18;
+
+     label04:
+        $r5 = new java.util.Properties;
+
+        specialinvoke $r5.<java.util.Properties: void <init>()>();
+
+        $r6 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.naming.internal.VersionHelper: java.io.InputStream getResourceAsStream(java.lang.Class,java.lang.String)>($r2, "jndiprovider.properties");
+
+        if $r7 == null goto label08;
+
+     label05:
+        $r9 = (java.util.Properties) $r5;
+
+        virtualinvoke $r9.<java.util.Properties: void load(java.io.InputStream)>($r7);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.naming.ConfigurationException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error reading provider resource file for ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<javax.naming.ConfigurationException: void <init>(java.lang.String)>($r17);
+
+        virtualinvoke $r13.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label08:
+        $r8 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        virtualinvoke $r8.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r5);
+
+        exitmonitor $r1;
+
+     label09:
+        return $r5;
+
+     label10:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r11;
+
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label04 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private static java.util.Hashtable getApplicationResources() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r16, $r19, $r20, $r23;
+        javax.naming.ConfigurationException $r18;
+        java.util.WeakHashMap $r2, $r3, $r9;
+        java.util.Hashtable $r10, r24;
+        boolean $z0, $z1, $z2;
+        java.util.Properties $r11, $r14;
+        java.io.IOException $r17;
+        com.sun.naming.internal.VersionHelper $r0, $r5, $r7;
+        javax.naming.NamingEnumeration $r6;
+        java.lang.Object $r4, $r12, $r15, $r21;
+        java.lang.ClassLoader $r1;
+        java.io.InputStream $r8, $r13, $r22, r25;
+
+        $r0 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r1 = virtualinvoke $r0.<com.sun.naming.internal.VersionHelper: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r2 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        $r4 = virtualinvoke $r3.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r24 = (java.util.Hashtable) $r4;
+
+        if r24 == null goto label03;
+
+        exitmonitor $r2;
+
+     label02:
+        return r24;
+
+     label03:
+        $r5 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.naming.internal.VersionHelper: javax.naming.NamingEnumeration getResources(java.lang.ClassLoader,java.lang.String)>($r1, "jndi.properties");
+
+     label04:
+        $z0 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z0 == 0 goto label12;
+
+        $r14 = new java.util.Properties;
+
+        specialinvoke $r14.<java.util.Properties: void <init>()>();
+
+        $r15 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        r25 = (java.io.InputStream) $r15;
+
+     label05:
+        virtualinvoke $r14.<java.util.Properties: void load(java.io.InputStream)>(r25);
+
+     label06:
+        virtualinvoke r25.<java.io.InputStream: void close()>();
+
+        goto label09;
+
+     label07:
+        $r23 := @caughtexception;
+
+     label08:
+        virtualinvoke r25.<java.io.InputStream: void close()>();
+
+        throw $r23;
+
+     label09:
+        if r24 != null goto label10;
+
+        r24 = $r14;
+
+        goto label11;
+
+     label10:
+        staticinvoke <com.sun.naming.internal.ResourceManager: void mergeTables(java.util.Hashtable,java.util.Hashtable)>(r24, $r14);
+
+     label11:
+        goto label04;
+
+     label12:
+        $z1 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z1 == 0 goto label16;
+
+        $r12 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        $r13 = (java.io.InputStream) $r12;
+
+        virtualinvoke $r13.<java.io.InputStream: void close()>();
+
+        goto label12;
+
+     label13:
+        $r20 := @caughtexception;
+
+     label14:
+        $z2 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z2 == 0 goto label15;
+
+        $r21 = interfaceinvoke $r6.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        $r22 = (java.io.InputStream) $r21;
+
+        virtualinvoke $r22.<java.io.InputStream: void close()>();
+
+        goto label14;
+
+     label15:
+        throw $r20;
+
+     label16:
+        $r7 = <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.naming.internal.VersionHelper: java.io.InputStream getJavaHomeLibStream(java.lang.String)>("jndi.properties");
+
+        if $r8 == null goto label22;
+
+     label17:
+        $r11 = new java.util.Properties;
+
+        specialinvoke $r11.<java.util.Properties: void <init>()>();
+
+        virtualinvoke $r11.<java.util.Properties: void load(java.io.InputStream)>($r8);
+
+        if r24 != null goto label18;
+
+        r24 = $r11;
+
+        goto label19;
+
+     label18:
+        staticinvoke <com.sun.naming.internal.ResourceManager: void mergeTables(java.util.Hashtable,java.util.Hashtable)>(r24, $r11);
+
+     label19:
+        virtualinvoke $r8.<java.io.InputStream: void close()>();
+
+        goto label22;
+
+     label20:
+        $r19 := @caughtexception;
+
+     label21:
+        virtualinvoke $r8.<java.io.InputStream: void close()>();
+
+        throw $r19;
+
+     label22:
+        goto label24;
+
+     label23:
+        $r17 := @caughtexception;
+
+        $r18 = new javax.naming.ConfigurationException;
+
+        specialinvoke $r18.<javax.naming.ConfigurationException: void <init>(java.lang.String)>("Error reading application resource file");
+
+        virtualinvoke $r18.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label24:
+        if r24 != null goto label25;
+
+        $r10 = new java.util.Hashtable;
+
+        specialinvoke $r10.<java.util.Hashtable: void <init>(int)>(11);
+
+        r24 = $r10;
+
+     label25:
+        $r9 = <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache>;
+
+        virtualinvoke $r9.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r24);
+
+        exitmonitor $r2;
+
+     label26:
+        return r24;
+
+     label27:
+        $r16 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label28:
+        throw $r16;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label04 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label17 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+        catch java.io.IOException from label03 to label22 with label23;
+        catch java.lang.Throwable from label01 to label02 with label27;
+        catch java.lang.Throwable from label03 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+    }
+
+    private static void mergeTables(java.util.Hashtable, java.util.Hashtable)
+    {
+        java.lang.String r4, r8, $r10, $r14;
+        java.util.Hashtable r0, r5;
+        boolean $z0, $z1;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        java.lang.Object $r3, $r6, $r7, $r15;
+        java.lang.StringBuilder $r9, $r11, $r12, $r13;
+
+        r5 := @parameter0: java.util.Hashtable;
+
+        r0 := @parameter1: java.util.Hashtable;
+
+        $r1 = virtualinvoke r0.<java.util.Hashtable: java.util.Set keySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $r6 = virtualinvoke r5.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        if $r6 != null goto label2;
+
+        $r15 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        virtualinvoke r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r4, $r15);
+
+        goto label3;
+
+     label2:
+        $z1 = staticinvoke <com.sun.naming.internal.ResourceManager: boolean isListProperty(java.lang.String)>(r4);
+
+        if $z1 == 0 goto label3;
+
+        $r7 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        r8 = (java.lang.String) $r7;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = (java.lang.String) $r6;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r4, $r14);
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private static boolean isListProperty(java.lang.String)
+    {
+        int $i0, i1;
+        java.lang.String[] $r1, $r2;
+        java.lang.String $r0, $r3, r4;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r0 = virtualinvoke r4.<java.lang.String: java.lang.String intern()>();
+
+        i1 = 0;
+
+     label1:
+        $r1 = <com.sun.naming.internal.ResourceManager: java.lang.String[] listProperties>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = <com.sun.naming.internal.ResourceManager: java.lang.String[] listProperties>;
+
+        $r3 = $r2[i1];
+
+        if $r0 != $r3 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        java.lang.ref.WeakReference $r5;
+        com.sun.naming.internal.VersionHelper $r1;
+        java.util.WeakHashMap $r2, $r3, $r4;
+
+        <com.sun.naming.internal.ResourceManager: java.lang.String DISABLE_APP_RESOURCE_FILES> = "com.sun.naming.disable.app.resource.files";
+
+        <com.sun.naming.internal.ResourceManager: java.lang.String JRELIB_PROPERTY_FILE_NAME> = "jndi.properties";
+
+        <com.sun.naming.internal.ResourceManager: java.lang.String APP_RESOURCE_FILE_NAME> = "jndi.properties";
+
+        <com.sun.naming.internal.ResourceManager: java.lang.String PROVIDER_RESOURCE_FILE_NAME> = "jndiprovider.properties";
+
+        $r0 = newarray (java.lang.String)[4];
+
+        $r0[0] = "java.naming.factory.object";
+
+        $r0[1] = "java.naming.factory.url.pkgs";
+
+        $r0[2] = "java.naming.factory.state";
+
+        $r0[3] = "java.naming.factory.control";
+
+        <com.sun.naming.internal.ResourceManager: java.lang.String[] listProperties> = $r0;
+
+        $r1 = staticinvoke <com.sun.naming.internal.VersionHelper: com.sun.naming.internal.VersionHelper getVersionHelper()>();
+
+        <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.VersionHelper helper> = $r1;
+
+        $r2 = new java.util.WeakHashMap;
+
+        specialinvoke $r2.<java.util.WeakHashMap: void <init>(int)>(11);
+
+        <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap propertiesCache> = $r2;
+
+        $r3 = new java.util.WeakHashMap;
+
+        specialinvoke $r3.<java.util.WeakHashMap: void <init>(int)>(11);
+
+        <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap factoryCache> = $r3;
+
+        $r4 = new java.util.WeakHashMap;
+
+        specialinvoke $r4.<java.util.WeakHashMap: void <init>(int)>(11);
+
+        <com.sun.naming.internal.ResourceManager: java.util.WeakHashMap urlFactoryCache> = $r4;
+
+        $r5 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r5.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        <com.sun.naming.internal.ResourceManager: java.lang.ref.WeakReference NO_FACTORY> = $r5;
+
+        return;
+    }
+}

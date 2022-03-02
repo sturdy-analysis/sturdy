@@ -1,0 +1,249 @@
+final class com.sun.media.sound.Platform extends java.lang.Object
+{
+    private static final java.lang.String libNameMain;
+    private static final java.lang.String libNameALSA;
+    private static final java.lang.String libNameDSound;
+    public static final int LIB_MAIN;
+    public static final int LIB_ALSA;
+    public static final int LIB_DSOUND;
+    private static int loadedLibs;
+    public static final int FEATURE_MIDIIO;
+    public static final int FEATURE_PORTS;
+    public static final int FEATURE_DIRECT_AUDIO;
+    private static boolean signed8;
+    private static boolean bigEndian;
+
+    private void <init>()
+    {
+        com.sun.media.sound.Platform r0;
+
+        r0 := @this: com.sun.media.sound.Platform;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void initialize()
+    {
+        return;
+    }
+
+    static boolean isBigEndian()
+    {
+        boolean $z0;
+
+        $z0 = <com.sun.media.sound.Platform: boolean bigEndian>;
+
+        return $z0;
+    }
+
+    static boolean isSigned8()
+    {
+        boolean $z0;
+
+        $z0 = <com.sun.media.sound.Platform: boolean signed8>;
+
+        return $z0;
+    }
+
+    private static void loadLibraries()
+    {
+        java.lang.Throwable $r5;
+        java.security.PrivilegedAction $r0, $r4;
+        java.util.StringTokenizer $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r1, $r3;
+        boolean $z0, $z1, $z2;
+
+        $r0 = staticinvoke <com.sun.media.sound.Platform$lambda_loadLibraries_0__11: java.security.PrivilegedAction bootstrap$()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $i0 = <com.sun.media.sound.Platform: int loadedLibs>;
+
+        $i1 = $i0 | 1;
+
+        <com.sun.media.sound.Platform: int loadedLibs> = $i1;
+
+        $r1 = staticinvoke <com.sun.media.sound.Platform: java.lang.String nGetExtraLibraries()>();
+
+        $r2 = new java.util.StringTokenizer;
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String)>($r1);
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label7;
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+     label2:
+        $r4 = staticinvoke <com.sun.media.sound.Platform$lambda_loadLibraries_1__12: java.security.PrivilegedAction bootstrap$(java.lang.String)>($r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("jsoundalsa");
+
+        if $z1 == 0 goto label3;
+
+        $i4 = <com.sun.media.sound.Platform: int loadedLibs>;
+
+        $i5 = $i4 | 2;
+
+        <com.sun.media.sound.Platform: int loadedLibs> = $i5;
+
+        goto label4;
+
+     label3:
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("jsoundds");
+
+        if $z2 == 0 goto label4;
+
+        $i2 = <com.sun.media.sound.Platform: int loadedLibs>;
+
+        $i3 = $i2 | 4;
+
+        <com.sun.media.sound.Platform: int loadedLibs> = $i3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+    }
+
+    static boolean isMidiIOEnabled()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <com.sun.media.sound.Platform: boolean isFeatureLibLoaded(int)>(1);
+
+        return $z0;
+    }
+
+    static boolean isPortsEnabled()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <com.sun.media.sound.Platform: boolean isFeatureLibLoaded(int)>(2);
+
+        return $z0;
+    }
+
+    static boolean isDirectAudioEnabled()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <com.sun.media.sound.Platform: boolean isFeatureLibLoaded(int)>(3);
+
+        return $z0;
+    }
+
+    private static boolean isFeatureLibLoaded(int)
+    {
+        int i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <com.sun.media.sound.Platform: int nGetLibraryForFeature(int)>(i0);
+
+        if $i1 == 0 goto label1;
+
+        $i2 = <com.sun.media.sound.Platform: int loadedLibs>;
+
+        $i3 = $i2 & $i1;
+
+        if $i3 != $i1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static native boolean nIsBigEndian();
+
+    private static native boolean nIsSigned8();
+
+    private static native java.lang.String nGetExtraLibraries();
+
+    private static native int nGetLibraryForFeature(int);
+
+    private static void readProperties()
+    {
+        boolean $z0, $z1;
+
+        $z0 = staticinvoke <com.sun.media.sound.Platform: boolean nIsBigEndian()>();
+
+        <com.sun.media.sound.Platform: boolean bigEndian> = $z0;
+
+        $z1 = staticinvoke <com.sun.media.sound.Platform: boolean nIsSigned8()>();
+
+        <com.sun.media.sound.Platform: boolean signed8> = $z1;
+
+        return;
+    }
+
+    public static java.lang.Void lambda$loadLibraries$1(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>(r0);
+
+        return null;
+    }
+
+    public static java.lang.Void lambda$loadLibraries$0()
+    {
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("jsound");
+
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.media.sound.Platform: int FEATURE_DIRECT_AUDIO> = 3;
+
+        <com.sun.media.sound.Platform: int FEATURE_PORTS> = 2;
+
+        <com.sun.media.sound.Platform: int FEATURE_MIDIIO> = 1;
+
+        <com.sun.media.sound.Platform: int LIB_DSOUND> = 4;
+
+        <com.sun.media.sound.Platform: int LIB_ALSA> = 2;
+
+        <com.sun.media.sound.Platform: int LIB_MAIN> = 1;
+
+        <com.sun.media.sound.Platform: java.lang.String libNameDSound> = "jsoundds";
+
+        <com.sun.media.sound.Platform: java.lang.String libNameALSA> = "jsoundalsa";
+
+        <com.sun.media.sound.Platform: java.lang.String libNameMain> = "jsound";
+
+        <com.sun.media.sound.Platform: int loadedLibs> = 0;
+
+        staticinvoke <com.sun.media.sound.Platform: void loadLibraries()>();
+
+        staticinvoke <com.sun.media.sound.Platform: void readProperties()>();
+
+        return;
+    }
+}

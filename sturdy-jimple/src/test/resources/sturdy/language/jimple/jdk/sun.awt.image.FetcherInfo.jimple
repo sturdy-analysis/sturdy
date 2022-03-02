@@ -1,0 +1,99 @@
+class sun.awt.image.FetcherInfo extends java.lang.Object
+{
+    static final int MAX_NUM_FETCHERS_PER_APPCONTEXT;
+    java.lang.Thread[] fetchers;
+    int numFetchers;
+    int numWaiting;
+    java.util.Vector waitList;
+    private static final java.lang.Object FETCHER_INFO_KEY;
+
+    private void <init>()
+    {
+        java.lang.Thread[] $r1;
+        sun.awt.image.FetcherInfo r0;
+        java.util.Vector $r2;
+
+        r0 := @this: sun.awt.image.FetcherInfo;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (java.lang.Thread)[4];
+
+        r0.<sun.awt.image.FetcherInfo: java.lang.Thread[] fetchers> = $r1;
+
+        r0.<sun.awt.image.FetcherInfo: int numFetchers> = 0;
+
+        r0.<sun.awt.image.FetcherInfo: int numWaiting> = 0;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<sun.awt.image.FetcherInfo: java.util.Vector waitList> = $r2;
+
+        return;
+    }
+
+    static sun.awt.image.FetcherInfo getFetcherInfo()
+    {
+        java.lang.Throwable $r5;
+        sun.awt.image.FetcherInfo $r3, r6;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r2, $r4;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <sun.awt.image.FetcherInfo: java.lang.Object FETCHER_INFO_KEY>;
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r1);
+
+        r6 = (sun.awt.image.FetcherInfo) $r2;
+
+        if r6 != null goto label2;
+
+        $r3 = new sun.awt.image.FetcherInfo;
+
+        specialinvoke $r3.<sun.awt.image.FetcherInfo: void <init>()>();
+
+        r6 = $r3;
+
+        $r4 = <sun.awt.image.FetcherInfo: java.lang.Object FETCHER_INFO_KEY>;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return r6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.StringBuffer $r0;
+
+        <sun.awt.image.FetcherInfo: int MAX_NUM_FETCHERS_PER_APPCONTEXT> = 4;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>(java.lang.String)>("FetcherInfo");
+
+        <sun.awt.image.FetcherInfo: java.lang.Object FETCHER_INFO_KEY> = $r0;
+
+        return;
+    }
+}

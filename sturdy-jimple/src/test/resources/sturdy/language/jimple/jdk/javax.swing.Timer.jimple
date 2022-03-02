@@ -1,0 +1,721 @@
+public class javax.swing.Timer extends java.lang.Object implements java.io.Serializable
+{
+    protected javax.swing.event.EventListenerList listenerList;
+    private final transient java.util.concurrent.atomic.AtomicBoolean notify;
+    private volatile int initialDelay;
+    private volatile int delay;
+    private volatile boolean repeats;
+    private volatile boolean coalesce;
+    private final transient java.lang.Runnable doPostEvent;
+    private static volatile boolean logTimers;
+    private final transient java.util.concurrent.locks.Lock lock;
+    transient javax.swing.TimerQueue$DelayedTimer delayedTimer;
+    private volatile java.lang.String actionCommand;
+    private transient volatile java.security.AccessControlContext acc;
+
+    public void <init>(int, java.awt.event.ActionListener)
+    {
+        java.security.AccessControlContext $r4;
+        java.awt.event.ActionListener r6;
+        java.util.concurrent.locks.ReentrantLock $r3;
+        java.util.concurrent.atomic.AtomicBoolean $r2;
+        javax.swing.event.EventListenerList $r1;
+        int i0;
+        javax.swing.Timer r0;
+        javax.swing.Timer$DoPostEvent $r5;
+
+        r0 := @this: javax.swing.Timer;
+
+        i0 := @parameter0: int;
+
+        r6 := @parameter1: java.awt.event.ActionListener;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new javax.swing.event.EventListenerList;
+
+        specialinvoke $r1.<javax.swing.event.EventListenerList: void <init>()>();
+
+        r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList> = $r1;
+
+        $r2 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<javax.swing.Timer: java.util.concurrent.atomic.AtomicBoolean notify> = $r2;
+
+        r0.<javax.swing.Timer: boolean repeats> = 1;
+
+        r0.<javax.swing.Timer: boolean coalesce> = 1;
+
+        $r3 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r3.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<javax.swing.Timer: java.util.concurrent.locks.Lock lock> = $r3;
+
+        r0.<javax.swing.Timer: javax.swing.TimerQueue$DelayedTimer delayedTimer> = null;
+
+        $r4 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<javax.swing.Timer: java.security.AccessControlContext acc> = $r4;
+
+        r0.<javax.swing.Timer: int delay> = i0;
+
+        r0.<javax.swing.Timer: int initialDelay> = i0;
+
+        $r5 = new javax.swing.Timer$DoPostEvent;
+
+        specialinvoke $r5.<javax.swing.Timer$DoPostEvent: void <init>(javax.swing.Timer)>(r0);
+
+        r0.<javax.swing.Timer: java.lang.Runnable doPostEvent> = $r5;
+
+        if r6 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.Timer: void addActionListener(java.awt.event.ActionListener)>(r6);
+
+     label1:
+        return;
+    }
+
+    final java.security.AccessControlContext getAccessControlContext()
+    {
+        java.security.AccessControlContext $r1, $r2;
+        java.lang.SecurityException $r3;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.security.AccessControlContext acc>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("Timer is missing AccessControlContext");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.Timer: java.security.AccessControlContext acc>;
+
+        return $r2;
+    }
+
+    public void addActionListener(java.awt.event.ActionListener)
+    {
+        java.awt.event.ActionListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r1 := @parameter0: java.awt.event.ActionListener;
+
+        $r2 = r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljava/awt/event/ActionListener;", r1);
+
+        return;
+    }
+
+    public void removeActionListener(java.awt.event.ActionListener)
+    {
+        java.awt.event.ActionListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r1 := @parameter0: java.awt.event.ActionListener;
+
+        $r2 = r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljava/awt/event/ActionListener;", r1);
+
+        return;
+    }
+
+    public java.awt.event.ActionListener[] getActionListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.event.EventListenerList $r1;
+        java.awt.event.ActionListener[] $r3;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/ActionListener;");
+
+        $r3 = (java.awt.event.ActionListener[]) $r2;
+
+        return $r3;
+    }
+
+    protected void fireActionPerformed(java.awt.event.ActionEvent)
+    {
+        java.lang.Object[] $r2;
+        java.awt.event.ActionListener $r6;
+        java.awt.event.ActionEvent r5;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r5 := @parameter0: java.awt.event.ActionEvent;
+
+        $r1 = r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljava/awt/event/ActionListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (java.awt.event.ActionListener) $r4;
+
+        interfaceinvoke $r6.<java.awt.event.ActionListener: void actionPerformed(java.awt.event.ActionEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener[] $r3;
+        javax.swing.event.EventListenerList $r2;
+        java.lang.Class r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(r1);
+
+        return $r3;
+    }
+
+    private javax.swing.TimerQueue timerQueue()
+    {
+        javax.swing.TimerQueue $r0;
+        javax.swing.Timer r1;
+
+        r1 := @this: javax.swing.Timer;
+
+        $r0 = staticinvoke <javax.swing.TimerQueue: javax.swing.TimerQueue sharedInstance()>();
+
+        return $r0;
+    }
+
+    public static void setLogTimers(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <javax.swing.Timer: boolean logTimers> = z0;
+
+        return;
+    }
+
+    public static boolean getLogTimers()
+    {
+        boolean $z0;
+
+        $z0 = <javax.swing.Timer: boolean logTimers>;
+
+        return $z0;
+    }
+
+    public void setDelay(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid delay: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.Timer: int delay> = i0;
+
+        return;
+    }
+
+    public int getDelay()
+    {
+        int $i0;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $i0 = r0.<javax.swing.Timer: int delay>;
+
+        return $i0;
+    }
+
+    public void setInitialDelay(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid initial delay: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.Timer: int initialDelay> = i0;
+
+        return;
+    }
+
+    public int getInitialDelay()
+    {
+        int $i0;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $i0 = r0.<javax.swing.Timer: int initialDelay>;
+
+        return $i0;
+    }
+
+    public void setRepeats(boolean)
+    {
+        javax.swing.Timer r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.Timer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.Timer: boolean repeats> = z0;
+
+        return;
+    }
+
+    public boolean isRepeats()
+    {
+        javax.swing.Timer r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $z0 = r0.<javax.swing.Timer: boolean repeats>;
+
+        return $z0;
+    }
+
+    public void setCoalesce(boolean)
+    {
+        javax.swing.Timer r0;
+        boolean z0, z1, $z2;
+
+        r0 := @this: javax.swing.Timer;
+
+        z1 := @parameter0: boolean;
+
+        z0 = r0.<javax.swing.Timer: boolean coalesce>;
+
+        r0.<javax.swing.Timer: boolean coalesce> = z1;
+
+        if z0 != 0 goto label1;
+
+        $z2 = r0.<javax.swing.Timer: boolean coalesce>;
+
+        if $z2 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.Timer: void cancelEvent()>();
+
+     label1:
+        return;
+    }
+
+    public boolean isCoalesce()
+    {
+        javax.swing.Timer r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $z0 = r0.<javax.swing.Timer: boolean coalesce>;
+
+        return $z0;
+    }
+
+    public void setActionCommand(java.lang.String)
+    {
+        java.lang.String r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<javax.swing.Timer: java.lang.String actionCommand> = r1;
+
+        return;
+    }
+
+    public java.lang.String getActionCommand()
+    {
+        java.lang.String $r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.lang.String actionCommand>;
+
+        return $r1;
+    }
+
+    public void start()
+    {
+        javax.swing.TimerQueue $r1;
+        int $i0;
+        long $l1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = specialinvoke r0.<javax.swing.Timer: javax.swing.TimerQueue timerQueue()>();
+
+        $i0 = virtualinvoke r0.<javax.swing.Timer: int getInitialDelay()>();
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r1.<javax.swing.TimerQueue: void addTimer(javax.swing.Timer,long)>(r0, $l1);
+
+        return;
+    }
+
+    public boolean isRunning()
+    {
+        javax.swing.Timer r0;
+        javax.swing.TimerQueue $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = specialinvoke r0.<javax.swing.Timer: javax.swing.TimerQueue timerQueue()>();
+
+        $z0 = virtualinvoke $r1.<javax.swing.TimerQueue: boolean containsTimer(javax.swing.Timer)>(r0);
+
+        return $z0;
+    }
+
+    public void stop()
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.locks.Lock $r1, $r3, $r5;
+        javax.swing.TimerQueue $r2;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        virtualinvoke r0.<javax.swing.Timer: void cancelEvent()>();
+
+        $r2 = specialinvoke r0.<javax.swing.Timer: javax.swing.TimerQueue timerQueue()>();
+
+        virtualinvoke $r2.<javax.swing.TimerQueue: void removeTimer(javax.swing.Timer)>(r0);
+
+     label2:
+        $r3 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void restart()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.locks.Lock $r1, $r2, $r4;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        virtualinvoke r0.<javax.swing.Timer: void stop()>();
+
+        virtualinvoke r0.<javax.swing.Timer: void start()>();
+
+     label2:
+        $r2 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke r0.<javax.swing.Timer: java.util.concurrent.locks.Lock getLock()>();
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void cancelEvent()
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.util.concurrent.atomic.AtomicBoolean notify>;
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        return;
+    }
+
+    void post()
+    {
+        javax.swing.Timer$1 $r2;
+        java.security.AccessControlContext $r3;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        javax.swing.Timer r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.util.concurrent.atomic.AtomicBoolean notify>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(0, 1);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<javax.swing.Timer: boolean coalesce>;
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        $r2 = new javax.swing.Timer$1;
+
+        specialinvoke $r2.<javax.swing.Timer$1: void <init>(javax.swing.Timer)>(r0);
+
+        $r3 = virtualinvoke r0.<javax.swing.Timer: java.security.AccessControlContext getAccessControlContext()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r2, $r3);
+
+     label2:
+        return;
+    }
+
+    java.util.concurrent.locks.Lock getLock()
+    {
+        java.util.concurrent.locks.Lock $r1;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.util.concurrent.locks.Lock lock>;
+
+        return $r1;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.security.AccessControlContext $r1;
+        java.io.ObjectInputStream r2;
+        javax.swing.Timer r0;
+
+        r0 := @this: javax.swing.Timer;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<javax.swing.Timer: java.security.AccessControlContext acc> = $r1;
+
+        virtualinvoke r2.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        return;
+    }
+
+    private java.lang.Object readResolve()
+    {
+        javax.swing.event.EventListenerList $r2;
+        int $i0, $i1, $i2;
+        java.lang.String $r3;
+        javax.swing.Timer $r0, r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.Timer;
+
+        $r0 = new javax.swing.Timer;
+
+        $i0 = virtualinvoke r1.<javax.swing.Timer: int getDelay()>();
+
+        specialinvoke $r0.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>($i0, null);
+
+        $r2 = r1.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList>;
+
+        $r0.<javax.swing.Timer: javax.swing.event.EventListenerList listenerList> = $r2;
+
+        $i1 = r1.<javax.swing.Timer: int initialDelay>;
+
+        $r0.<javax.swing.Timer: int initialDelay> = $i1;
+
+        $i2 = r1.<javax.swing.Timer: int delay>;
+
+        $r0.<javax.swing.Timer: int delay> = $i2;
+
+        $z0 = r1.<javax.swing.Timer: boolean repeats>;
+
+        $r0.<javax.swing.Timer: boolean repeats> = $z0;
+
+        $z1 = r1.<javax.swing.Timer: boolean coalesce>;
+
+        $r0.<javax.swing.Timer: boolean coalesce> = $z1;
+
+        $r3 = r1.<javax.swing.Timer: java.lang.String actionCommand>;
+
+        $r0.<javax.swing.Timer: java.lang.String actionCommand> = $r3;
+
+        return $r0;
+    }
+
+    static boolean access$000()
+    {
+        boolean $z0;
+
+        $z0 = <javax.swing.Timer: boolean logTimers>;
+
+        return $z0;
+    }
+
+    static java.util.concurrent.atomic.AtomicBoolean access$100(javax.swing.Timer)
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        javax.swing.Timer r0;
+
+        r0 := @parameter0: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.util.concurrent.atomic.AtomicBoolean notify>;
+
+        return $r1;
+    }
+
+    static boolean access$200(javax.swing.Timer)
+    {
+        javax.swing.Timer r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.Timer;
+
+        $z0 = r0.<javax.swing.Timer: boolean coalesce>;
+
+        return $z0;
+    }
+
+    static java.lang.Runnable access$300(javax.swing.Timer)
+    {
+        java.lang.Runnable $r1;
+        javax.swing.Timer r0;
+
+        r0 := @parameter0: javax.swing.Timer;
+
+        $r1 = r0.<javax.swing.Timer: java.lang.Runnable doPostEvent>;
+
+        return $r1;
+    }
+}

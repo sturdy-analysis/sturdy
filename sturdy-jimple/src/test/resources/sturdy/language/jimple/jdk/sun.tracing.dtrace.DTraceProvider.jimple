@@ -1,0 +1,476 @@
+class sun.tracing.dtrace.DTraceProvider extends sun.tracing.ProviderSkeleton
+{
+    private sun.tracing.dtrace.Activation activation;
+    private java.lang.Object proxy;
+    private static final java.lang.Class[] constructorParams;
+    private final java.lang.String proxyClassNamePrefix;
+    static final java.lang.String DEFAULT_MODULE;
+    static final java.lang.String DEFAULT_FUNCTION;
+    private static long nextUniqueNumber;
+    static final boolean $assertionsDisabled;
+
+    private static synchronized long getUniqueNumber()
+    {
+        long $l0, $l1;
+
+        $l0 = <sun.tracing.dtrace.DTraceProvider: long nextUniqueNumber>;
+
+        $l1 = $l0 + 1L;
+
+        <sun.tracing.dtrace.DTraceProvider: long nextUniqueNumber> = $l1;
+
+        return $l0;
+    }
+
+    protected sun.tracing.ProbeSkeleton createProbe(java.lang.reflect.Method)
+    {
+        sun.tracing.dtrace.DTraceProbe $r0;
+        sun.tracing.dtrace.DTraceProvider r1;
+        java.lang.Object $r3;
+        java.lang.reflect.Method r2;
+
+        r1 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r2 := @parameter0: java.lang.reflect.Method;
+
+        $r0 = new sun.tracing.dtrace.DTraceProbe;
+
+        $r3 = r1.<sun.tracing.dtrace.DTraceProvider: java.lang.Object proxy>;
+
+        specialinvoke $r0.<sun.tracing.dtrace.DTraceProbe: void <init>(java.lang.Object,java.lang.reflect.Method)>($r3, r2);
+
+        return $r0;
+    }
+
+    void <init>(java.lang.Class)
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Class r1;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: java.lang.Class;
+
+        specialinvoke r0.<sun.tracing.ProviderSkeleton: void <init>(java.lang.Class)>(r1);
+
+        r0.<sun.tracing.dtrace.DTraceProvider: java.lang.String proxyClassNamePrefix> = "$DTraceTracingProxy";
+
+        r0.<sun.tracing.dtrace.DTraceProvider: java.lang.String proxyClassNamePrefix> = "$DTraceTracingProxy";
+
+        return;
+    }
+
+    void setProxy(java.lang.Object)
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Object r1;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Object proxy> = r1;
+
+        return;
+    }
+
+    void setActivation(sun.tracing.dtrace.Activation)
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        sun.tracing.dtrace.Activation r1;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: sun.tracing.dtrace.Activation;
+
+        r0.<sun.tracing.dtrace.DTraceProvider: sun.tracing.dtrace.Activation activation> = r1;
+
+        return;
+    }
+
+    public void dispose()
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        sun.tracing.dtrace.Activation $r1, $r2;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        $r1 = r0.<sun.tracing.dtrace.DTraceProvider: sun.tracing.dtrace.Activation activation>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.tracing.dtrace.DTraceProvider: sun.tracing.dtrace.Activation activation>;
+
+        virtualinvoke $r2.<sun.tracing.dtrace.Activation: void disposeProvider(sun.tracing.dtrace.DTraceProvider)>(r0);
+
+        r0.<sun.tracing.dtrace.DTraceProvider: sun.tracing.dtrace.Activation activation> = null;
+
+     label1:
+        specialinvoke r0.<sun.tracing.ProviderSkeleton: void dispose()>();
+
+        return;
+    }
+
+    public com.sun.tracing.Provider newProxyInstance()
+    {
+        byte[] $r24;
+        java.lang.InternalError $r30;
+        boolean $z0;
+        com.sun.tracing.Provider $r6;
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.StringBuilder $r18, $r19, $r20, $r28;
+        java.lang.ClassLoader $r26;
+        java.lang.Object[] $r4;
+        long $l0;
+        java.lang.ReflectiveOperationException $r9;
+        java.lang.reflect.Constructor $r3;
+        int $i1, $i2, $i3, $i4, $i6;
+        java.lang.String $r8, $r11, $r14, r15, $r16, $r21;
+        java.lang.Class[] $r2, $r22;
+        java.lang.IllegalArgumentException $r29;
+        java.lang.Class $r1, $r7, $r23, $r25, $r27;
+        java.lang.Object $r5;
+        java.lang.ClassFormatError $r12;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        $l0 = staticinvoke <sun.tracing.dtrace.DTraceProvider: long getUniqueNumber()>();
+
+        r15 = "";
+
+        $r1 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $i1 = virtualinvoke $r1.<java.lang.Class: int getModifiers()>();
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i1);
+
+        if $z0 != 0 goto label3;
+
+        $r7 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $i2 = virtualinvoke $r8.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i6 = (int) -1;
+
+        if $i2 != $i6 goto label1;
+
+        $r16 = "";
+
+        goto label2;
+
+     label1:
+        $i3 = $i2 + 1;
+
+        $r16 = virtualinvoke $r8.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+     label2:
+        r15 = $r16;
+
+     label3:
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("$DTraceTracingProxy");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r22 = newarray (java.lang.Class)[1];
+
+        $r23 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r22[0] = $r23;
+
+        $r24 = staticinvoke <sun.misc.ProxyGenerator: byte[] generateProxyClass(java.lang.String,java.lang.Class[])>($r21, $r22);
+
+     label4:
+        $r25 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r26 = virtualinvoke $r25.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $i4 = lengthof $r24;
+
+        $r27 = staticinvoke <sun.tracing.dtrace.JVM: java.lang.Class defineClass(java.lang.ClassLoader,java.lang.String,byte[],int,int)>($r26, $r21, $r24, 0, $i4);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r29 = new java.lang.IllegalArgumentException;
+
+        $r14 = virtualinvoke $r12.<java.lang.ClassFormatError: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r14);
+
+        throw $r29;
+
+     label7:
+        $r2 = <sun.tracing.dtrace.DTraceProvider: java.lang.Class[] constructorParams>;
+
+        $r3 = virtualinvoke $r27.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r2);
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = r0;
+
+        $r5 = virtualinvoke $r3.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r4);
+
+        $r6 = (com.sun.tracing.Provider) $r5;
+
+     label8:
+        return $r6;
+
+     label9:
+        $r9 := @caughtexception;
+
+        $r30 = new java.lang.InternalError;
+
+        $r11 = virtualinvoke $r9.<java.lang.ReflectiveOperationException: java.lang.String toString()>();
+
+        specialinvoke $r30.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r11, $r9);
+
+        throw $r30;
+
+        catch java.lang.ClassFormatError from label4 to label5 with label6;
+        catch java.lang.ReflectiveOperationException from label7 to label8 with label9;
+    }
+
+    protected void triggerProbe(java.lang.reflect.Method, java.lang.Object[])
+    {
+        java.lang.Object[] r3;
+        sun.tracing.dtrace.DTraceProvider r1;
+        java.lang.AssertionError $r0;
+        java.lang.reflect.Method r2;
+        boolean $z0;
+
+        r1 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r2 := @parameter0: java.lang.reflect.Method;
+
+        r3 := @parameter1: java.lang.Object[];
+
+        $z0 = <sun.tracing.dtrace.DTraceProvider: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r0 = new java.lang.AssertionError;
+
+        specialinvoke $r0.<java.lang.AssertionError: void <init>(java.lang.Object)>("This method should have been overridden by the JVM");
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String getProviderName()
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        $r1 = specialinvoke r0.<sun.tracing.ProviderSkeleton: java.lang.String getProviderName()>();
+
+        return $r1;
+    }
+
+    java.lang.String getModuleName()
+    {
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        $r1 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r2 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.String getAnnotationString(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String)>($r1, class "Lcom/sun/tracing/dtrace/ModuleName;", "java_tracing");
+
+        return $r2;
+    }
+
+    static java.lang.String getProbeName(java.lang.reflect.Method)
+    {
+        java.lang.String $r1, $r2;
+        java.lang.reflect.Method r0;
+
+        r0 := @parameter0: java.lang.reflect.Method;
+
+        $r1 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r2 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.String getAnnotationString(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String)>(r0, class "Lcom/sun/tracing/ProbeName;", $r1);
+
+        return $r2;
+    }
+
+    static java.lang.String getFunctionName(java.lang.reflect.Method)
+    {
+        java.lang.String $r1;
+        java.lang.reflect.Method r0;
+
+        r0 := @parameter0: java.lang.reflect.Method;
+
+        $r1 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.String getAnnotationString(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String)>(r0, class "Lcom/sun/tracing/dtrace/FunctionName;", "unspecified");
+
+        return $r1;
+    }
+
+    sun.tracing.dtrace.DTraceProbe[] getProbes()
+    {
+        java.lang.Object[] $r4;
+        java.util.Collection $r2;
+        sun.tracing.dtrace.DTraceProbe[] $r3, $r5;
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.util.HashMap $r1;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        $r1 = r0.<sun.tracing.dtrace.DTraceProvider: java.util.HashMap probes>;
+
+        $r2 = virtualinvoke $r1.<java.util.HashMap: java.util.Collection values()>();
+
+        $r3 = newarray (sun.tracing.dtrace.DTraceProbe)[0];
+
+        $r4 = interfaceinvoke $r2.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (sun.tracing.dtrace.DTraceProbe[]) $r4;
+
+        return $r5;
+    }
+
+    com.sun.tracing.dtrace.StabilityLevel getNameStabilityFor(java.lang.Class)
+    {
+        com.sun.tracing.dtrace.Attributes r4;
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Class r1, $r2;
+        java.lang.Object $r3;
+        com.sun.tracing.dtrace.StabilityLevel $r5, $r6;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r3 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.Object getAnnotationValue(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String,java.lang.Object)>($r2, r1, "value", null);
+
+        r4 = (com.sun.tracing.dtrace.Attributes) $r3;
+
+        if r4 != null goto label1;
+
+        $r6 = <com.sun.tracing.dtrace.StabilityLevel: com.sun.tracing.dtrace.StabilityLevel PRIVATE>;
+
+        return $r6;
+
+     label1:
+        $r5 = interfaceinvoke r4.<com.sun.tracing.dtrace.Attributes: com.sun.tracing.dtrace.StabilityLevel name()>();
+
+        return $r5;
+    }
+
+    com.sun.tracing.dtrace.StabilityLevel getDataStabilityFor(java.lang.Class)
+    {
+        com.sun.tracing.dtrace.Attributes r4;
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Class r1, $r2;
+        java.lang.Object $r3;
+        com.sun.tracing.dtrace.StabilityLevel $r5, $r6;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r3 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.Object getAnnotationValue(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String,java.lang.Object)>($r2, r1, "value", null);
+
+        r4 = (com.sun.tracing.dtrace.Attributes) $r3;
+
+        if r4 != null goto label1;
+
+        $r6 = <com.sun.tracing.dtrace.StabilityLevel: com.sun.tracing.dtrace.StabilityLevel PRIVATE>;
+
+        return $r6;
+
+     label1:
+        $r5 = interfaceinvoke r4.<com.sun.tracing.dtrace.Attributes: com.sun.tracing.dtrace.StabilityLevel data()>();
+
+        return $r5;
+    }
+
+    com.sun.tracing.dtrace.DependencyClass getDependencyClassFor(java.lang.Class)
+    {
+        com.sun.tracing.dtrace.Attributes r4;
+        com.sun.tracing.dtrace.DependencyClass $r5, $r6;
+        sun.tracing.dtrace.DTraceProvider r0;
+        java.lang.Class r1, $r2;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.tracing.dtrace.DTraceProvider;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<sun.tracing.dtrace.DTraceProvider: java.lang.Class providerType>;
+
+        $r3 = staticinvoke <sun.tracing.dtrace.DTraceProvider: java.lang.Object getAnnotationValue(java.lang.reflect.AnnotatedElement,java.lang.Class,java.lang.String,java.lang.Object)>($r2, r1, "value", null);
+
+        r4 = (com.sun.tracing.dtrace.Attributes) $r3;
+
+        if r4 != null goto label1;
+
+        $r6 = <com.sun.tracing.dtrace.DependencyClass: com.sun.tracing.dtrace.DependencyClass UNKNOWN>;
+
+        return $r6;
+
+     label1:
+        $r5 = interfaceinvoke r4.<com.sun.tracing.dtrace.Attributes: com.sun.tracing.dtrace.DependencyClass dependency()>();
+
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class[] $r1;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.tracing.dtrace.DTraceProvider: java.lang.String DEFAULT_FUNCTION> = "unspecified";
+
+        <sun.tracing.dtrace.DTraceProvider: java.lang.String DEFAULT_MODULE> = "java_tracing";
+
+        $r0 = class "Lsun/tracing/dtrace/DTraceProvider;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.tracing.dtrace.DTraceProvider: boolean $assertionsDisabled> = $z1;
+
+        $r1 = newarray (java.lang.Class)[1];
+
+        $r1[0] = class "Ljava/lang/reflect/InvocationHandler;";
+
+        <sun.tracing.dtrace.DTraceProvider: java.lang.Class[] constructorParams> = $r1;
+
+        <sun.tracing.dtrace.DTraceProvider: long nextUniqueNumber> = 0L;
+
+        return;
+    }
+}

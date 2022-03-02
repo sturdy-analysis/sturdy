@@ -1,0 +1,162 @@
+public final class com.sun.media.sound.SoftAudioPusher extends java.lang.Object implements java.lang.Runnable
+{
+    private volatile boolean active;
+    private javax.sound.sampled.SourceDataLine sourceDataLine;
+    private java.lang.Thread audiothread;
+    private final javax.sound.sampled.AudioInputStream ais;
+    private final byte[] buffer;
+
+    public void <init>(javax.sound.sampled.SourceDataLine, javax.sound.sampled.AudioInputStream, int)
+    {
+        byte[] $r2;
+        com.sun.media.sound.SoftAudioPusher r0;
+        javax.sound.sampled.AudioInputStream r1;
+        int i0;
+        javax.sound.sampled.SourceDataLine r3;
+
+        r0 := @this: com.sun.media.sound.SoftAudioPusher;
+
+        r3 := @parameter0: javax.sound.sampled.SourceDataLine;
+
+        r1 := @parameter1: javax.sound.sampled.AudioInputStream;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftAudioPusher: boolean active> = 0;
+
+        r0.<com.sun.media.sound.SoftAudioPusher: javax.sound.sampled.SourceDataLine sourceDataLine> = null;
+
+        r0.<com.sun.media.sound.SoftAudioPusher: javax.sound.sampled.AudioInputStream ais> = r1;
+
+        $r2 = newarray (byte)[i0];
+
+        r0.<com.sun.media.sound.SoftAudioPusher: byte[] buffer> = $r2;
+
+        r0.<com.sun.media.sound.SoftAudioPusher: javax.sound.sampled.SourceDataLine sourceDataLine> = r3;
+
+        return;
+    }
+
+    public synchronized void start()
+    {
+        com.sun.media.sound.SoftAudioPusher r0;
+        java.lang.Thread $r1, $r2, $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftAudioPusher;
+
+        $z0 = r0.<com.sun.media.sound.SoftAudioPusher: boolean active>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<com.sun.media.sound.SoftAudioPusher: boolean active> = 1;
+
+        $r1 = new java.lang.Thread;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.Runnable)>(r0);
+
+        r0.<com.sun.media.sound.SoftAudioPusher: java.lang.Thread audiothread> = $r1;
+
+        $r2 = r0.<com.sun.media.sound.SoftAudioPusher: java.lang.Thread audiothread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        $r3 = r0.<com.sun.media.sound.SoftAudioPusher: java.lang.Thread audiothread>;
+
+        virtualinvoke $r3.<java.lang.Thread: void setPriority(int)>(10);
+
+        $r4 = r0.<com.sun.media.sound.SoftAudioPusher: java.lang.Thread audiothread>;
+
+        virtualinvoke $r4.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public synchronized void stop()
+    {
+        java.lang.InterruptedException $r2;
+        com.sun.media.sound.SoftAudioPusher r0;
+        java.lang.Thread $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftAudioPusher;
+
+        $z0 = r0.<com.sun.media.sound.SoftAudioPusher: boolean active>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<com.sun.media.sound.SoftAudioPusher: boolean active> = 0;
+
+     label2:
+        $r1 = r0.<com.sun.media.sound.SoftAudioPusher: java.lang.Thread audiothread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void join()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    public void run()
+    {
+        byte[] r1;
+        com.sun.media.sound.SoftAudioPusher r0;
+        javax.sound.sampled.AudioInputStream r2;
+        int $i0;
+        java.io.IOException $r4;
+        javax.sound.sampled.SourceDataLine r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftAudioPusher;
+
+        r1 = r0.<com.sun.media.sound.SoftAudioPusher: byte[] buffer>;
+
+        r2 = r0.<com.sun.media.sound.SoftAudioPusher: javax.sound.sampled.AudioInputStream ais>;
+
+        r3 = r0.<com.sun.media.sound.SoftAudioPusher: javax.sound.sampled.SourceDataLine sourceDataLine>;
+
+     label1:
+        $z0 = r0.<com.sun.media.sound.SoftAudioPusher: boolean active>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = virtualinvoke r2.<javax.sound.sampled.AudioInputStream: int read(byte[])>(r1);
+
+        if $i0 >= 0 goto label2;
+
+        goto label3;
+
+     label2:
+        interfaceinvoke r3.<javax.sound.sampled.SourceDataLine: int write(byte[],int,int)>(r1, 0, $i0);
+
+        goto label1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        r0.<com.sun.media.sound.SoftAudioPusher: boolean active> = 0;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+}

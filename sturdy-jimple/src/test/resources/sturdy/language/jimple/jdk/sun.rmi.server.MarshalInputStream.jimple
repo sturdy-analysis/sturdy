@@ -1,0 +1,535 @@
+public class sun.rmi.server.MarshalInputStream extends java.io.ObjectInputStream
+{
+    private volatile sun.rmi.server.MarshalInputStream$StreamChecker streamChecker;
+    private static final boolean useCodebaseOnlyProperty;
+    protected static java.util.Map permittedSunClasses;
+    private boolean skipDefaultResolveClass;
+    private final java.util.Map doneCallbacks;
+    private boolean useCodebaseOnly;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException, java.io.StreamCorruptedException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.util.HashMap $r2;
+        java.io.InputStream r1;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.rmi.server.MarshalInputStream: sun.rmi.server.MarshalInputStream$StreamChecker streamChecker> = null;
+
+        r0.<sun.rmi.server.MarshalInputStream: boolean skipDefaultResolveClass> = 0;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>(int)>(3);
+
+        r0.<sun.rmi.server.MarshalInputStream: java.util.Map doneCallbacks> = $r2;
+
+        $z0 = <sun.rmi.server.MarshalInputStream: boolean useCodebaseOnlyProperty>;
+
+        r0.<sun.rmi.server.MarshalInputStream: boolean useCodebaseOnly> = $z0;
+
+        return;
+    }
+
+    public java.lang.Runnable getDoneCallback(java.lang.Object)
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.util.Map $r2;
+        java.lang.Object r1, $r3;
+        java.lang.Runnable $r4;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<sun.rmi.server.MarshalInputStream: java.util.Map doneCallbacks>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (java.lang.Runnable) $r3;
+
+        return $r4;
+    }
+
+    public void setDoneCallback(java.lang.Object, java.lang.Runnable)
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.util.Map $r3;
+        java.lang.Object r1;
+        java.lang.Runnable r2;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = r0.<sun.rmi.server.MarshalInputStream: java.util.Map doneCallbacks>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    public void done()
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.util.Iterator $r3;
+        java.util.Collection $r2;
+        java.lang.Runnable r6;
+        java.util.Map $r1, $r4;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        $r1 = r0.<sun.rmi.server.MarshalInputStream: java.util.Map doneCallbacks>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.lang.Runnable) $r5;
+
+        interfaceinvoke r6.<java.lang.Runnable: void run()>();
+
+        goto label1;
+
+     label2:
+        $r4 = r0.<sun.rmi.server.MarshalInputStream: java.util.Map doneCallbacks>;
+
+        interfaceinvoke $r4.<java.util.Map: void clear()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        virtualinvoke r0.<sun.rmi.server.MarshalInputStream: void done()>();
+
+        specialinvoke r0.<java.io.ObjectInputStream: void close()>();
+
+        return;
+    }
+
+    protected java.lang.Class resolveClass(java.io.ObjectStreamClass) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.io.ObjectStreamClass r2;
+        int $i1, $i3;
+        java.lang.String $r3, r11;
+        boolean $z0, $z1, $z2, $z3;
+        char $c0;
+        java.security.AccessControlException $r8;
+        java.lang.Object $r1;
+        java.lang.ClassNotFoundException $r5, $r6;
+        java.lang.Class $r7, $r9, $r12;
+        java.lang.ClassLoader r4, $r10;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r2 := @parameter0: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<sun.rmi.server.MarshalInputStream: java.lang.Object readLocation()>();
+
+        $r3 = virtualinvoke r2.<java.io.ObjectStreamClass: java.lang.String getName()>();
+
+        $z0 = r0.<sun.rmi.server.MarshalInputStream: boolean skipDefaultResolveClass>;
+
+        if $z0 == 0 goto label01;
+
+        $r10 = null;
+
+        goto label02;
+
+     label01:
+        $r10 = staticinvoke <sun.rmi.server.MarshalInputStream: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+     label02:
+        r4 = $r10;
+
+        r11 = null;
+
+        $z1 = r0.<sun.rmi.server.MarshalInputStream: boolean useCodebaseOnly>;
+
+        if $z1 != 0 goto label03;
+
+        $z2 = $r1 instanceof java.lang.String;
+
+        if $z2 == 0 goto label03;
+
+        r11 = (java.lang.String) $r1;
+
+     label03:
+        $r12 = staticinvoke <java.rmi.server.RMIClassLoader: java.lang.Class loadClass(java.lang.String,java.lang.String,java.lang.ClassLoader)>(r11, $r3, r4);
+
+     label04:
+        return $r12;
+
+     label05:
+        $r8 := @caughtexception;
+
+        $r9 = specialinvoke r0.<sun.rmi.server.MarshalInputStream: java.lang.Class checkSunClass(java.lang.String,java.security.AccessControlException)>($r3, $r8);
+
+        return $r9;
+
+     label06:
+        $r6 := @caughtexception;
+
+     label07:
+        $c0 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(0);
+
+        $z3 = staticinvoke <java.lang.Character: boolean isLowerCase(char)>($c0);
+
+        if $z3 == 0 goto label09;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(46);
+
+        $i3 = (int) -1;
+
+        if $i1 != $i3 goto label09;
+
+        $r7 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Class resolveClass(java.io.ObjectStreamClass)>(r2);
+
+     label08:
+        return $r7;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r5 := @caughtexception;
+
+     label11:
+        throw $r6;
+
+        catch java.security.AccessControlException from label03 to label04 with label05;
+        catch java.lang.ClassNotFoundException from label03 to label04 with label06;
+        catch java.lang.ClassNotFoundException from label07 to label08 with label10;
+    }
+
+    protected java.lang.Class resolveProxyClass(java.lang.String[]) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.lang.String[] r4;
+        sun.rmi.server.MarshalInputStream$StreamChecker r1;
+        java.lang.Object $r2;
+        java.lang.Class $r7;
+        java.lang.ClassLoader r3, $r5;
+        java.lang.String r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r4 := @parameter0: java.lang.String[];
+
+        r1 = r0.<sun.rmi.server.MarshalInputStream: sun.rmi.server.MarshalInputStream$StreamChecker streamChecker>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<sun.rmi.server.MarshalInputStream$StreamChecker: void checkProxyInterfaceNames(java.lang.String[])>(r4);
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.rmi.server.MarshalInputStream: java.lang.Object readLocation()>();
+
+        $z0 = r0.<sun.rmi.server.MarshalInputStream: boolean skipDefaultResolveClass>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = null;
+
+        goto label3;
+
+     label2:
+        $r5 = staticinvoke <sun.rmi.server.MarshalInputStream: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+     label3:
+        r3 = $r5;
+
+        r6 = null;
+
+        $z1 = r0.<sun.rmi.server.MarshalInputStream: boolean useCodebaseOnly>;
+
+        if $z1 != 0 goto label4;
+
+        $z2 = $r2 instanceof java.lang.String;
+
+        if $z2 == 0 goto label4;
+
+        r6 = (java.lang.String) $r2;
+
+     label4:
+        $r7 = staticinvoke <java.rmi.server.RMIClassLoader: java.lang.Class loadProxyClass(java.lang.String,java.lang.String[],java.lang.ClassLoader)>(r6, r4, r3);
+
+        return $r7;
+    }
+
+    private static java.lang.ClassLoader latestUserDefinedLoader()
+    {
+        java.lang.ClassLoader $r0;
+
+        $r0 = staticinvoke <sun.misc.VM: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+        return $r0;
+    }
+
+    private java.lang.Class checkSunClass(java.lang.String, java.security.AccessControlException) throws java.security.AccessControlException
+    {
+        sun.rmi.server.MarshalInputStream r6;
+        java.security.Permission $r1;
+        java.util.Map $r3;
+        java.security.AccessControlException r0;
+        java.lang.Object $r4;
+        java.lang.Class $r5;
+        java.lang.String r2, r7;
+        boolean $z0, $z1;
+
+        r6 := @this: sun.rmi.server.MarshalInputStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.AccessControlException;
+
+        $r1 = virtualinvoke r0.<java.security.AccessControlException: java.security.Permission getPermission()>();
+
+        r7 = null;
+
+        if $r1 == null goto label1;
+
+        r7 = virtualinvoke $r1.<java.security.Permission: java.lang.String getName()>();
+
+     label1:
+        $r3 = <sun.rmi.server.MarshalInputStream: java.util.Map permittedSunClasses>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r5 = (java.lang.Class) $r4;
+
+        if r7 == null goto label2;
+
+        if $r5 == null goto label2;
+
+        $z0 = virtualinvoke r7.<java.lang.String: boolean equals(java.lang.Object)>("accessClassInPackage.sun.rmi.server");
+
+        if $z0 != 0 goto label3;
+
+        $z1 = virtualinvoke r7.<java.lang.String: boolean equals(java.lang.Object)>("accessClassInPackage.sun.rmi.registry");
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        throw r0;
+
+     label3:
+        return $r5;
+    }
+
+    protected java.lang.Object readLocation() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        $r1 = virtualinvoke r0.<sun.rmi.server.MarshalInputStream: java.lang.Object readObject()>();
+
+        return $r1;
+    }
+
+    void skipDefaultResolveClass()
+    {
+        sun.rmi.server.MarshalInputStream r0;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r0.<sun.rmi.server.MarshalInputStream: boolean skipDefaultResolveClass> = 1;
+
+        return;
+    }
+
+    void useCodebaseOnly()
+    {
+        sun.rmi.server.MarshalInputStream r0;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r0.<sun.rmi.server.MarshalInputStream: boolean useCodebaseOnly> = 1;
+
+        return;
+    }
+
+    synchronized void setStreamChecker(sun.rmi.server.MarshalInputStream$StreamChecker)
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        sun.misc.JavaObjectInputStreamAccess $r2;
+        sun.rmi.server.MarshalInputStream$StreamChecker r1;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r1 := @parameter0: sun.rmi.server.MarshalInputStream$StreamChecker;
+
+        r0.<sun.rmi.server.MarshalInputStream: sun.rmi.server.MarshalInputStream$StreamChecker streamChecker> = r1;
+
+        $r2 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaObjectInputStreamAccess getJavaObjectInputStreamAccess()>();
+
+        interfaceinvoke $r2.<sun.misc.JavaObjectInputStreamAccess: void setValidator(java.io.ObjectInputStream,sun.misc.ObjectStreamClassValidator)>(r0, r1);
+
+        return;
+    }
+
+    protected java.io.ObjectStreamClass readClassDescriptor() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.rmi.server.MarshalInputStream r0;
+        java.io.ObjectStreamClass $r1;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        $r1 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDescriptor()>();
+
+        specialinvoke r0.<sun.rmi.server.MarshalInputStream: void validateDesc(java.io.ObjectStreamClass)>($r1);
+
+        return $r1;
+    }
+
+    private void validateDesc(java.io.ObjectStreamClass)
+    {
+        java.lang.Throwable $r3;
+        sun.rmi.server.MarshalInputStream r0;
+        sun.rmi.server.MarshalInputStream$StreamChecker r1;
+        java.io.ObjectStreamClass r2;
+
+        r0 := @this: sun.rmi.server.MarshalInputStream;
+
+        r2 := @parameter0: java.io.ObjectStreamClass;
+
+        entermonitor r0;
+
+     label1:
+        r1 = r0.<sun.rmi.server.MarshalInputStream: sun.rmi.server.MarshalInputStream$StreamChecker streamChecker>;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r3;
+
+     label5:
+        if r1 == null goto label6;
+
+        interfaceinvoke r1.<sun.rmi.server.MarshalInputStream$StreamChecker: void validateDescriptor(java.io.ObjectStreamClass)>(r2);
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r3;
+        sun.security.action.GetPropertyAction $r0;
+        java.util.Map $r4, $r6;
+        java.lang.String $r2, $r12, $r14;
+        java.lang.NoClassDefFoundError $r9;
+        boolean $z0, $z1;
+        java.lang.Object $r1;
+        java.lang.Class $r5, $r7;
+        java.lang.ClassNotFoundException $r8;
+        java.lang.StringBuilder $r10, $r11, $r13;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("java.rmi.server.useCodebaseOnly", "true");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.rmi.server.MarshalInputStream: boolean useCodebaseOnlyProperty> = $z1;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>(int)>(3);
+
+        <sun.rmi.server.MarshalInputStream: java.util.Map permittedSunClasses> = $r3;
+
+     label3:
+        $r4 = <sun.rmi.server.MarshalInputStream: java.util.Map permittedSunClasses>;
+
+        $r5 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("sun.rmi.server.Activation$ActivationSystemImpl_Stub");
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("sun.rmi.server.Activation$ActivationSystemImpl_Stub", $r5);
+
+        $r6 = <sun.rmi.server.MarshalInputStream: java.util.Map permittedSunClasses>;
+
+        $r7 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("sun.rmi.registry.RegistryImpl_Stub");
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("sun.rmi.registry.RegistryImpl_Stub", $r7);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.NoClassDefFoundError;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Missing system class: ");
+
+        $r12 = virtualinvoke $r8.<java.lang.ClassNotFoundException: java.lang.String getMessage()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.NoClassDefFoundError: void <init>(java.lang.String)>($r14);
+
+        throw $r9;
+
+     label6:
+        return;
+
+        catch java.lang.ClassNotFoundException from label3 to label4 with label5;
+    }
+}

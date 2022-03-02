@@ -1,0 +1,448 @@
+final class sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage extends sun.security.ssl.SSLHandshake$HandshakeMessage
+{
+    private final sun.security.ssl.SignatureScheme signatureScheme;
+    private final byte[] signature;
+
+    void <init>(sun.security.ssl.HandshakeContext, sun.security.ssl.X509Authentication$X509Possession) throws java.io.IOException
+    {
+        byte[] $r12, $r13;
+        sun.security.ssl.ProtocolVersion $r4;
+        java.lang.String $r19, $r22;
+        java.util.Map$Entry $r7;
+        sun.security.ssl.ClientHandshakeContext r2;
+        java.security.SignatureException $r24;
+        sun.security.ssl.X509Authentication$X509Possession r3;
+        java.security.Signature r28;
+        sun.security.ssl.TransportContext $r15, $r26;
+        java.util.List $r5;
+        javax.net.ssl.SSLException $r23, $r27;
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r0;
+        sun.security.ssl.HandshakeHash $r11;
+        java.security.PrivateKey $r18;
+        java.security.AlgorithmConstraints $r6;
+        sun.security.ssl.Alert $r16, $r25;
+        java.lang.Object $r8, $r10;
+        java.lang.StringBuilder $r14, $r17, $r20, $r21;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r9;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r3 := @parameter1: sun.security.ssl.X509Authentication$X509Possession;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ClientHandshakeContext) r1;
+
+        $r6 = r2.<sun.security.ssl.ClientHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r5 = r2.<sun.security.ssl.ClientHandshakeContext: java.util.List peerRequestedSignatureSchemes>;
+
+        $r4 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r7 = staticinvoke <sun.security.ssl.SignatureScheme: java.util.Map$Entry getSignerOfPreferableAlgorithm(java.security.AlgorithmConstraints,java.util.List,sun.security.ssl.X509Authentication$X509Possession,sun.security.ssl.ProtocolVersion)>($r6, $r5, r3, $r4);
+
+        if $r7 != null goto label1;
+
+        $r15 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r16 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No supported CertificateVerify signature algorithm for ");
+
+        $r18 = r3.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r19 = interfaceinvoke $r18.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  key");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = virtualinvoke $r15.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r16, $r22);
+
+        throw $r23;
+
+     label1:
+        $r8 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r9 = (sun.security.ssl.SignatureScheme) $r8;
+
+        r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r9;
+
+     label2:
+        $r10 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r28 = (java.security.Signature) $r10;
+
+        $r11 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r12 = virtualinvoke $r11.<sun.security.ssl.HandshakeHash: byte[] archived()>();
+
+        virtualinvoke r28.<java.security.Signature: void update(byte[])>($r12);
+
+        $r13 = virtualinvoke r28.<java.security.Signature: byte[] sign()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r24 := @caughtexception;
+
+        $r26 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r25 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r27 = virtualinvoke $r26.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r25, "Cannot produce CertificateVerify signature", $r24);
+
+        throw $r27;
+
+     label5:
+        r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature> = $r13;
+
+        return;
+
+        catch java.security.SignatureException from label2 to label3 with label4;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r14, $r19, $r20;
+        java.security.GeneralSecurityException $r47, $r51;
+        sun.security.ssl.ServerHandshakeContext r2;
+        java.security.Signature $r17;
+        javax.net.ssl.SSLException $r12, $r23, $r35, $r43, $r46, $r50, $r61;
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r0;
+        sun.security.ssl.HandshakeHash $r18;
+        java.lang.StringBuilder $r26, $r29, $r32, $r33, $r36, $r39, $r40, $r41, $r52, $r55, $r58, $r59;
+        sun.security.ssl.X509Authentication$X509Credentials r62;
+        java.lang.String $r31, $r34, $r42, $r57, $r60;
+        sun.security.ssl.TransportContext $r11, $r22, $r27, $r37, $r45, $r49, $r53;
+        sun.security.ssl.Alert $r10, $r21, $r28, $r38, $r44, $r48, $r54;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r4, $r5, $r6, $r16, $r30, $r56;
+        sun.security.ssl.SSLCredentials r25;
+        java.nio.ByteBuffer r3;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.List $r7, $r8;
+        int $i0, $i1;
+        java.util.Iterator $r9;
+        java.security.PublicKey $r13, $r15;
+        java.lang.Object $r24;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ServerHandshakeContext) r1;
+
+        $i0 = virtualinvoke r3.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 4 goto label01;
+
+        $r45 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r44 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r46 = virtualinvoke $r45.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r44, "Invalid CertificateVerify message: no sufficient data");
+
+        throw $r46;
+
+     label01:
+        $i1 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        $r4 = staticinvoke <sun.security.ssl.SignatureScheme: sun.security.ssl.SignatureScheme valueOf(int)>($i1);
+
+        r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r4;
+
+        $r5 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        if $r5 != null goto label02;
+
+        $r37 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r38 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid signature algorithm (");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r43 = virtualinvoke $r37.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r38, $r42);
+
+        throw $r43;
+
+     label02:
+        $r7 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $r6 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $z0 = interfaceinvoke $r7.<java.util.List: boolean contains(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label03;
+
+        $r27 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r28 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm (");
+
+        $r30 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r31 = $r30.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r32 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r35 = virtualinvoke $r27.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r28, $r34);
+
+        throw $r35;
+
+     label03:
+        r62 = null;
+
+        $r8 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label06;
+
+        $r24 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r25 = (sun.security.ssl.SSLCredentials) $r24;
+
+        $z3 = r25 instanceof sun.security.ssl.X509Authentication$X509Credentials;
+
+        if $z3 == 0 goto label05;
+
+        r62 = (sun.security.ssl.X509Authentication$X509Credentials) r25;
+
+        goto label06;
+
+     label05:
+        goto label04;
+
+     label06:
+        if r62 == null goto label07;
+
+        $r13 = r62.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        if $r13 != null goto label08;
+
+     label07:
+        $r11 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r10 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r12 = virtualinvoke $r11.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r10, "No X509 credentials negotiated for CertificateVerify");
+
+        throw $r12;
+
+     label08:
+        $r14 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r3);
+
+        r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature> = $r14;
+
+     label09:
+        $r16 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r15 = r62.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        $r17 = virtualinvoke $r16.<sun.security.ssl.SignatureScheme: java.security.Signature getVerifier(java.security.PublicKey)>($r15);
+
+        $r18 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r19 = virtualinvoke $r18.<sun.security.ssl.HandshakeHash: byte[] archived()>();
+
+        virtualinvoke $r17.<java.security.Signature: void update(byte[])>($r19);
+
+        $r20 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature>;
+
+        $z2 = virtualinvoke $r17.<java.security.Signature: boolean verify(byte[])>($r20);
+
+        if $z2 != 0 goto label10;
+
+        $r22 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r21 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r23 = virtualinvoke $r22.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r21, "Invalid CertificateVerify signature");
+
+        throw $r23;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r51 := @caughtexception;
+
+        $r53 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r54 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm (");
+
+        $r56 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r57 = $r56.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r58 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r57);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in CertificateVerify handshake message");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r61 = virtualinvoke $r53.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r54, $r60, $r51);
+
+        throw $r61;
+
+     label12:
+        $r47 := @caughtexception;
+
+        $r49 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r48 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r50 = virtualinvoke $r49.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r48, "Cannot verify CertificateVerify signature", $r47);
+
+        throw $r50;
+
+     label13:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label09 to label10 with label11;
+        catch java.security.InvalidAlgorithmParameterException from label09 to label10 with label11;
+        catch java.security.InvalidKeyException from label09 to label10 with label12;
+        catch java.security.SignatureException from label09 to label10 with label12;
+    }
+
+    public sun.security.ssl.SSLHandshake handshakeType()
+    {
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r1;
+        sun.security.ssl.SSLHandshake $r0;
+
+        r1 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        $r0 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        return $r0;
+    }
+
+    public int messageLength()
+    {
+        byte[] $r1;
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        $r1 = r0.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 4 + $i0;
+
+        return $i1;
+    }
+
+    public void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] $r3;
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r1;
+        int $i0;
+        sun.security.ssl.HandshakeOutStream r0;
+        sun.security.ssl.SignatureScheme $r2;
+
+        r1 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $r2 = r1.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $i0 = $r2.<sun.security.ssl.SignatureScheme: int id>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i0);
+
+        $r3 = r1.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>($r3);
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r7;
+        java.lang.Object[] $r3;
+        java.text.MessageFormat $r0;
+        sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage r4;
+        java.util.Locale $r1;
+        java.lang.String $r6, $r8, $r9, $r10;
+        sun.misc.HexDumpEncoder $r2;
+        sun.security.ssl.SignatureScheme $r5;
+
+        r4 := @this: sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"CertificateVerify\": \'{\'\n  \"signature algorithm\": {0}\n  \"signature\": \'{\'\n{1}\n  \'}\'\n\'}\'", $r1);
+
+        $r2 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r2.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r5 = r4.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r6 = $r5.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r3[0] = $r6;
+
+        $r7 = r4.<sun.security.ssl.CertificateVerify$T12CertificateVerifyMessage: byte[] signature>;
+
+        $r8 = virtualinvoke $r2.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r7);
+
+        $r9 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r8, "    ");
+
+        $r3[1] = $r9;
+
+        $r10 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r3);
+
+        return $r10;
+    }
+}

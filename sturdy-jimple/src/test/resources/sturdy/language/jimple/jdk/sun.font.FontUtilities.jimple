@@ -1,0 +1,622 @@
+public final class sun.font.FontUtilities extends java.lang.Object
+{
+    public static boolean isSolaris;
+    public static boolean isLinux;
+    public static boolean isMacOSX;
+    public static boolean isMacOSX14;
+    public static boolean isSolaris8;
+    public static boolean isSolaris9;
+    public static boolean isOpenSolaris;
+    public static boolean useT2K;
+    public static boolean isWindows;
+    public static boolean isOpenJDK;
+    static final java.lang.String LUCIDA_FILE_NAME;
+    private static boolean debugFonts;
+    private static sun.util.logging.PlatformLogger logger;
+    private static boolean logging;
+    public static final int MIN_LAYOUT_CHARCODE;
+    public static final int MAX_LAYOUT_CHARCODE;
+    private static volatile java.lang.ref.SoftReference compMapRef;
+    private static final java.lang.String[][] nameMap;
+
+    public void <init>()
+    {
+        sun.font.FontUtilities r0;
+
+        r0 := @this: sun.font.FontUtilities;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static sun.font.Font2D getFont2D(java.awt.Font)
+    {
+        sun.font.Font2D $r2;
+        sun.font.FontAccess $r0;
+        java.awt.Font r1;
+
+        r1 := @parameter0: java.awt.Font;
+
+        $r0 = staticinvoke <sun.font.FontAccess: sun.font.FontAccess getFontAccess()>();
+
+        $r2 = virtualinvoke $r0.<sun.font.FontAccess: sun.font.Font2D getFont2D(java.awt.Font)>(r1);
+
+        return $r2;
+    }
+
+    public static boolean isComplexText(char[], int, int)
+    {
+        char $c2, $c3;
+        int i0, i1, i4, $i5;
+        char[] r0;
+        boolean $z0;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i4 = i0;
+
+     label1:
+        if i4 >= i1 goto label4;
+
+        $c2 = r0[i4];
+
+        $i5 = (int) $c2;
+
+        if $i5 >= 768 goto label2;
+
+        goto label3;
+
+     label2:
+        $c3 = r0[i4];
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isNonSimpleChar(char)>($c3);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        return 0;
+    }
+
+    public static boolean isNonSimpleChar(char)
+    {
+        char c0;
+        int $i1, $i2, $i4, $i5, $i7;
+        boolean $z0, $z1;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isComplexCharCode(int)>($i1);
+
+        if $z0 != 0 goto label1;
+
+        $i2 = (int) c0;
+
+        $i4 = (int) 55296;
+
+        if $i2 < $i4 goto label2;
+
+        $i5 = (int) c0;
+
+        $i7 = (int) 57343;
+
+        if $i5 > $i7 goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public static boolean isComplexCharCode(int)
+    {
+        int i0;
+
+        i0 := @parameter0: int;
+
+        if i0 < 768 goto label01;
+
+        if i0 <= 8303 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        if i0 > 879 goto label03;
+
+        return 1;
+
+     label03:
+        if i0 >= 1424 goto label04;
+
+        return 0;
+
+     label04:
+        if i0 > 1791 goto label05;
+
+        return 1;
+
+     label05:
+        if i0 >= 2304 goto label06;
+
+        return 0;
+
+     label06:
+        if i0 > 3711 goto label07;
+
+        return 1;
+
+     label07:
+        if i0 >= 3840 goto label08;
+
+        return 0;
+
+     label08:
+        if i0 > 4095 goto label09;
+
+        return 1;
+
+     label09:
+        if i0 >= 4352 goto label10;
+
+        return 0;
+
+     label10:
+        if i0 >= 4607 goto label11;
+
+        return 1;
+
+     label11:
+        if i0 >= 6016 goto label12;
+
+        return 0;
+
+     label12:
+        if i0 > 6143 goto label13;
+
+        return 1;
+
+     label13:
+        if i0 >= 8204 goto label14;
+
+        return 0;
+
+     label14:
+        if i0 > 8205 goto label15;
+
+        return 1;
+
+     label15:
+        if i0 < 8234 goto label16;
+
+        if i0 > 8238 goto label16;
+
+        return 1;
+
+     label16:
+        if i0 < 8298 goto label17;
+
+        if i0 > 8303 goto label17;
+
+        return 1;
+
+     label17:
+        return 0;
+    }
+
+    public static sun.util.logging.PlatformLogger getLogger()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <sun.font.FontUtilities: sun.util.logging.PlatformLogger logger>;
+
+        return $r0;
+    }
+
+    public static boolean isLogging()
+    {
+        boolean $z0;
+
+        $z0 = <sun.font.FontUtilities: boolean logging>;
+
+        return $z0;
+    }
+
+    public static boolean debugFonts()
+    {
+        boolean $z0;
+
+        $z0 = <sun.font.FontUtilities: boolean debugFonts>;
+
+        return $z0;
+    }
+
+    public static boolean fontSupportsDefaultEncoding(java.awt.Font)
+    {
+        sun.font.Font2D $r1;
+        java.awt.Font r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $r1 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>(r0);
+
+        $z0 = $r1 instanceof sun.font.CompositeFont;
+
+        return $z0;
+    }
+
+    public static javax.swing.plaf.FontUIResource getCompositeFontUIResource(java.awt.Font)
+    {
+        javax.swing.plaf.FontUIResource $r0;
+        sun.font.CompositeFont r5, $r13, $r16, r18;
+        sun.font.FontAccess $r10, $r12;
+        sun.font.Font2DHandle $r11;
+        int $i0;
+        java.lang.ref.SoftReference $r7, $r15;
+        boolean $z0, $z1;
+        java.awt.Font r1;
+        java.util.concurrent.ConcurrentHashMap $r14, r17;
+        sun.font.Font2D $r2, $r4;
+        sun.font.FontManager $r3;
+        java.lang.Object $r8, $r9;
+        sun.font.PhysicalFont r6;
+
+        r1 := @parameter0: java.awt.Font;
+
+        $r0 = new javax.swing.plaf.FontUIResource;
+
+        specialinvoke $r0.<javax.swing.plaf.FontUIResource: void <init>(java.awt.Font)>(r1);
+
+        $r2 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>(r1);
+
+        $z0 = $r2 instanceof sun.font.PhysicalFont;
+
+        if $z0 != 0 goto label1;
+
+        return $r0;
+
+     label1:
+        $r3 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $i0 = virtualinvoke r1.<java.awt.Font: int getStyle()>();
+
+        $r4 = interfaceinvoke $r3.<sun.font.FontManager: sun.font.Font2D findFont2D(java.lang.String,int,int)>("dialog", $i0, 0);
+
+        if $r4 == null goto label2;
+
+        $z1 = $r4 instanceof sun.font.CompositeFont;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        return $r0;
+
+     label3:
+        r5 = (sun.font.CompositeFont) $r4;
+
+        r6 = (sun.font.PhysicalFont) $r2;
+
+        $r7 = <sun.font.FontUtilities: java.lang.ref.SoftReference compMapRef>;
+
+        $r8 = virtualinvoke $r7.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        r17 = (java.util.concurrent.ConcurrentHashMap) $r8;
+
+        if r17 != null goto label4;
+
+        $r14 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r14.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r17 = $r14;
+
+        $r15 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r15.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r14);
+
+        <sun.font.FontUtilities: java.lang.ref.SoftReference compMapRef> = $r15;
+
+     label4:
+        $r9 = virtualinvoke r17.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r6);
+
+        $r16 = (sun.font.CompositeFont) $r9;
+
+        r18 = $r16;
+
+        if $r16 != null goto label5;
+
+        $r13 = new sun.font.CompositeFont;
+
+        specialinvoke $r13.<sun.font.CompositeFont: void <init>(sun.font.PhysicalFont,sun.font.CompositeFont)>(r6, r5);
+
+        r18 = $r13;
+
+        virtualinvoke r17.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r6, $r13);
+
+     label5:
+        $r10 = staticinvoke <sun.font.FontAccess: sun.font.FontAccess getFontAccess()>();
+
+        $r11 = r18.<sun.font.CompositeFont: sun.font.Font2DHandle handle>;
+
+        virtualinvoke $r10.<sun.font.FontAccess: void setFont2D(java.awt.Font,sun.font.Font2DHandle)>($r0, $r11);
+
+        $r12 = staticinvoke <sun.font.FontAccess: sun.font.FontAccess getFontAccess()>();
+
+        virtualinvoke $r12.<sun.font.FontAccess: void setCreatedFont(java.awt.Font)>($r0);
+
+        return $r0;
+    }
+
+    public static java.lang.String mapFcName(java.lang.String)
+    {
+        java.lang.String[] $r3, $r6;
+        int $i0, i1;
+        java.lang.String r1, $r4, $r7;
+        java.lang.String[][] $r0, $r2, $r5;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $r0 = <sun.font.FontUtilities: java.lang.String[][] nameMap>;
+
+        $i0 = lengthof $r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = <sun.font.FontUtilities: java.lang.String[][] nameMap>;
+
+        $r3 = $r2[i1];
+
+        $r4 = $r3[0];
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = <sun.font.FontUtilities: java.lang.String[][] nameMap>;
+
+        $r6 = $r5[i1];
+
+        $r7 = $r6[1];
+
+        return $r7;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public static javax.swing.plaf.FontUIResource getFontConfigFUIR(java.lang.String, int, int)
+    {
+        sun.font.SunFontManager r4;
+        javax.swing.plaf.FontUIResource $r3, r6;
+        sun.font.FontManager $r2;
+        int i0, i1;
+        java.lang.String r0, $r1, r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = staticinvoke <sun.font.FontUtilities: java.lang.String mapFcName(java.lang.String)>(r0);
+
+        r5 = $r1;
+
+        if $r1 != null goto label1;
+
+        r5 = "sansserif";
+
+     label1:
+        $r2 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $z0 = $r2 instanceof sun.font.SunFontManager;
+
+        if $z0 == 0 goto label2;
+
+        r4 = (sun.font.SunFontManager) $r2;
+
+        r6 = virtualinvoke r4.<sun.font.SunFontManager: javax.swing.plaf.FontUIResource getFontConfigFUIR(java.lang.String,int,int)>(r5, i0, i1);
+
+        goto label3;
+
+     label2:
+        $r3 = new javax.swing.plaf.FontUIResource;
+
+        specialinvoke $r3.<javax.swing.plaf.FontUIResource: void <init>(java.lang.String,int,int)>(r5, i0, i1);
+
+        r6 = $r3;
+
+     label3:
+        return r6;
+    }
+
+    public static boolean textLayoutIsCompatible(java.awt.Font)
+    {
+        sun.font.Font2D $r1;
+        sun.font.TrueTypeFont r2;
+        sun.font.TrueTypeFont$DirectoryEntry $r3, $r4;
+        java.awt.Font r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $r1 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>(r0);
+
+        $z0 = $r1 instanceof sun.font.TrueTypeFont;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (sun.font.TrueTypeFont) $r1;
+
+        $r3 = virtualinvoke r2.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1196643650);
+
+        if $r3 == null goto label1;
+
+        $r4 = virtualinvoke r2.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1196445523);
+
+        if $r4 == null goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    static boolean access$002(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.font.FontUtilities: boolean debugFonts> = z0;
+
+        return z0;
+    }
+
+    static sun.util.logging.PlatformLogger access$102(sun.util.logging.PlatformLogger)
+    {
+        sun.util.logging.PlatformLogger r0;
+
+        r0 := @parameter0: sun.util.logging.PlatformLogger;
+
+        <sun.font.FontUtilities: sun.util.logging.PlatformLogger logger> = r0;
+
+        return r0;
+    }
+
+    static sun.util.logging.PlatformLogger access$100()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <sun.font.FontUtilities: sun.util.logging.PlatformLogger logger>;
+
+        return $r0;
+    }
+
+    static boolean access$000()
+    {
+        boolean $z0;
+
+        $z0 = <sun.font.FontUtilities: boolean debugFonts>;
+
+        return $z0;
+    }
+
+    static boolean access$202(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.font.FontUtilities: boolean logging> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.font.FontUtilities$1 $r0;
+        java.lang.String[] $r3, $r4, $r5, $r6;
+        java.lang.ref.SoftReference $r1;
+        java.lang.String[][] $r2;
+
+        <sun.font.FontUtilities: int MAX_LAYOUT_CHARCODE> = 8303;
+
+        <sun.font.FontUtilities: int MIN_LAYOUT_CHARCODE> = 768;
+
+        <sun.font.FontUtilities: java.lang.String LUCIDA_FILE_NAME> = "LucidaSansRegular.ttf";
+
+        <sun.font.FontUtilities: boolean debugFonts> = 0;
+
+        <sun.font.FontUtilities: sun.util.logging.PlatformLogger logger> = null;
+
+        $r0 = new sun.font.FontUtilities$1;
+
+        specialinvoke $r0.<sun.font.FontUtilities$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r1 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r1.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(null);
+
+        <sun.font.FontUtilities: java.lang.ref.SoftReference compMapRef> = $r1;
+
+        $r2 = newarray (java.lang.String[])[4];
+
+        $r3 = newarray (java.lang.String)[2];
+
+        $r3[0] = "sans";
+
+        $r3[1] = "sansserif";
+
+        $r2[0] = $r3;
+
+        $r4 = newarray (java.lang.String)[2];
+
+        $r4[0] = "sans-serif";
+
+        $r4[1] = "sansserif";
+
+        $r2[1] = $r4;
+
+        $r5 = newarray (java.lang.String)[2];
+
+        $r5[0] = "serif";
+
+        $r5[1] = "serif";
+
+        $r2[2] = $r5;
+
+        $r6 = newarray (java.lang.String)[2];
+
+        $r6[0] = "monospace";
+
+        $r6[1] = "monospaced";
+
+        $r2[3] = $r6;
+
+        <sun.font.FontUtilities: java.lang.String[][] nameMap> = $r2;
+
+        return;
+    }
+}

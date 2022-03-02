@@ -1,0 +1,88 @@
+final class com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread extends java.lang.Thread
+{
+    private volatile boolean ran;
+    final com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController this$0;
+
+    public void <init>(com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController, java.lang.Runnable)
+    {
+        com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController r1;
+        java.lang.Runnable r2;
+        com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r0.<com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread: com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController this$0> = r1;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.Runnable)>(r2);
+
+        r0.<com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread: boolean ran> = 0;
+
+        return;
+    }
+
+    public final void run()
+    {
+        java.lang.Throwable $r4;
+        java.lang.IllegalStateException $r2, $r3;
+        java.lang.Thread $r0;
+        com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread r1;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r0 == r1 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("The run() method in a SafeThread cannot be called from another thread.");
+
+        throw $r3;
+
+     label1:
+        entermonitor r1;
+
+     label2:
+        $z0 = r1.<com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread: boolean ran>;
+
+        if $z0 != 0 goto label3;
+
+        r1.<com.sun.org.apache.xml.internal.utils.ThreadControllerWrapper$ThreadController$SafeThread: boolean ran> = 1;
+
+        goto label4;
+
+     label3:
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("The run() method in a SafeThread cannot be called more than once.");
+
+        throw $r2;
+
+     label4:
+        exitmonitor r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label7:
+        throw $r4;
+
+     label8:
+        specialinvoke r1.<java.lang.Thread: void run()>();
+
+        return;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+}

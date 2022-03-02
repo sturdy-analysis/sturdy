@@ -1,0 +1,2414 @@
+class javax.swing.text.rtf.RTFGenerator extends java.lang.Object
+{
+    java.util.Dictionary colorTable;
+    int colorCount;
+    java.util.Dictionary fontTable;
+    int fontCount;
+    java.util.Dictionary styleTable;
+    int styleCount;
+    java.io.OutputStream outputStream;
+    boolean afterKeyword;
+    javax.swing.text.MutableAttributeSet outputAttributes;
+    int unicodeCount;
+    private javax.swing.text.Segment workingSegment;
+    int[] outputConversion;
+    public static final java.awt.Color defaultRTFColor;
+    public static final float defaultFontSize;
+    public static final java.lang.String defaultFontFamily;
+    private static final java.lang.Object MagicToken;
+    protected static javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords;
+    static final char[] hexdigits;
+
+    public static void writeDocument(javax.swing.text.Document, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        javax.swing.text.rtf.RTFGenerator $r0;
+        int $i0, i1;
+        javax.swing.text.Document r2;
+        javax.swing.text.Element $r3, $r4;
+
+        r2 := @parameter0: javax.swing.text.Document;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        $r0 = new javax.swing.text.rtf.RTFGenerator;
+
+        specialinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void <init>(java.io.OutputStream)>(r1);
+
+        $r3 = interfaceinvoke r2.<javax.swing.text.Document: javax.swing.text.Element getDefaultRootElement()>();
+
+        virtualinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void examineElement(javax.swing.text.Element)>($r3);
+
+        virtualinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void writeRTFHeader()>();
+
+        virtualinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void writeDocumentProperties(javax.swing.text.Document)>(r2);
+
+        $i0 = interfaceinvoke $r3.<javax.swing.text.Element: int getElementCount()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i1);
+
+        virtualinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void writeParagraphElement(javax.swing.text.Element)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<javax.swing.text.rtf.RTFGenerator: void writeRTFTrailer()>();
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.awt.Color $r3;
+        java.io.OutputStream r8;
+        java.lang.Integer $r4;
+        javax.swing.text.rtf.RTFGenerator r0;
+        javax.swing.text.Segment $r7;
+        java.util.Hashtable $r1, $r5, $r6;
+        java.util.Dictionary $r2;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r8 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable> = $r1;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r3 = <javax.swing.text.rtf.RTFGenerator: java.awt.Color defaultRTFColor>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        virtualinvoke $r2.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int colorCount> = 1;
+
+        $r5 = new java.util.Hashtable;
+
+        specialinvoke $r5.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable> = $r5;
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int fontCount> = 0;
+
+        $r6 = new java.util.Hashtable;
+
+        specialinvoke $r6.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable> = $r6;
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int styleCount> = 0;
+
+        $r7 = new javax.swing.text.Segment;
+
+        specialinvoke $r7.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.Segment workingSegment> = $r7;
+
+        r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream> = r8;
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int unicodeCount> = 1;
+
+        return;
+    }
+
+    public void examineElement(javax.swing.text.Element)
+    {
+        java.awt.Color $r4;
+        java.lang.Integer $r7, $r11, $r15;
+        javax.swing.text.AttributeSet $r1;
+        java.util.Dictionary $r5, $r8, $r9, $r12, $r13, $r16;
+        javax.swing.text.rtf.RTFGenerator r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10;
+        java.lang.String $r19, r20;
+        java.lang.Object $r6, $r10, $r14, $r17, $r18;
+        javax.swing.text.Element r0, $r3;
+
+        r2 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.Element;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        specialinvoke r2.<javax.swing.text.rtf.RTFGenerator: void tallyStyles(javax.swing.text.AttributeSet)>($r1);
+
+        if $r1 == null goto label4;
+
+        $r4 = staticinvoke <javax.swing.text.StyleConstants: java.awt.Color getForeground(javax.swing.text.AttributeSet)>($r1);
+
+        if $r4 == null goto label1;
+
+        $r13 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r14 = virtualinvoke $r13.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $r14 != null goto label1;
+
+        $r16 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r15 = new java.lang.Integer;
+
+        $i6 = r2.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        specialinvoke $r15.<java.lang.Integer: void <init>(int)>($i6);
+
+        virtualinvoke $r16.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r15);
+
+        $i7 = r2.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        $i8 = $i7 + 1;
+
+        r2.<javax.swing.text.rtf.RTFGenerator: int colorCount> = $i8;
+
+     label1:
+        $r17 = <javax.swing.text.StyleConstants: java.lang.Object Background>;
+
+        $r18 = interfaceinvoke $r1.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r17);
+
+        if $r18 == null goto label2;
+
+        $r9 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r10 = virtualinvoke $r9.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r18);
+
+        if $r10 != null goto label2;
+
+        $r12 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r11 = new java.lang.Integer;
+
+        $i3 = r2.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        specialinvoke $r11.<java.lang.Integer: void <init>(int)>($i3);
+
+        virtualinvoke $r12.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r11);
+
+        $i4 = r2.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        $i5 = $i4 + 1;
+
+        r2.<javax.swing.text.rtf.RTFGenerator: int colorCount> = $i5;
+
+     label2:
+        $r19 = staticinvoke <javax.swing.text.StyleConstants: java.lang.String getFontFamily(javax.swing.text.AttributeSet)>($r1);
+
+        r20 = $r19;
+
+        if $r19 != null goto label3;
+
+        r20 = "Helvetica";
+
+     label3:
+        if r20 == null goto label4;
+
+        $r5 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable>;
+
+        $r6 = virtualinvoke $r5.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r20);
+
+        if $r6 != null goto label4;
+
+        $r8 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable>;
+
+        $r7 = new java.lang.Integer;
+
+        $i0 = r2.<javax.swing.text.rtf.RTFGenerator: int fontCount>;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>($i0);
+
+        virtualinvoke $r8.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>(r20, $r7);
+
+        $i1 = r2.<javax.swing.text.rtf.RTFGenerator: int fontCount>;
+
+        $i2 = $i1 + 1;
+
+        r2.<javax.swing.text.rtf.RTFGenerator: int fontCount> = $i2;
+
+     label4:
+        $i9 = interfaceinvoke r0.<javax.swing.text.Element: int getElementCount()>();
+
+        i10 = 0;
+
+     label5:
+        if i10 >= $i9 goto label6;
+
+        $r3 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i10);
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void examineElement(javax.swing.text.Element)>($r3);
+
+        i10 = i10 + 1;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    private void tallyStyles(javax.swing.text.AttributeSet)
+    {
+        java.lang.Integer $r3, r6;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r2;
+        javax.swing.text.AttributeSet r5;
+        java.util.Dictionary $r1, $r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r5 := @parameter0: javax.swing.text.AttributeSet;
+
+     label1:
+        if r5 == null goto label3;
+
+        $z0 = r5 instanceof javax.swing.text.Style;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r5);
+
+        r6 = (java.lang.Integer) $r2;
+
+        if r6 != null goto label2;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFGenerator: int styleCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int styleCount> = $i1;
+
+        $r3 = new java.lang.Integer;
+
+        $i2 = r0.<javax.swing.text.rtf.RTFGenerator: int styleCount>;
+
+        specialinvoke $r3.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r4 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        virtualinvoke $r4.<java.util.Dictionary: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, $r3);
+
+     label2:
+        r5 = interfaceinvoke r5.<javax.swing.text.AttributeSet: javax.swing.text.AttributeSet getResolveParent()>();
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private javax.swing.text.Style findStyle(javax.swing.text.AttributeSet)
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+        javax.swing.text.Style $r3;
+        java.lang.Object $r2;
+        javax.swing.text.AttributeSet r4;
+        java.util.Dictionary $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r4 := @parameter0: javax.swing.text.AttributeSet;
+
+     label1:
+        if r4 == null goto label3;
+
+        $z0 = r4 instanceof javax.swing.text.Style;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r4);
+
+        if $r2 == null goto label2;
+
+        $r3 = (javax.swing.text.Style) r4;
+
+        return $r3;
+
+     label2:
+        r4 = interfaceinvoke r4.<javax.swing.text.AttributeSet: javax.swing.text.AttributeSet getResolveParent()>();
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private java.lang.Integer findStyleNumber(javax.swing.text.AttributeSet, java.lang.String)
+    {
+        java.lang.Integer r3;
+        javax.swing.text.rtf.RTFGenerator r0;
+        java.lang.Object $r2, $r5;
+        java.lang.String r4;
+        javax.swing.text.AttributeSet r6;
+        java.util.Dictionary $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r6 := @parameter0: javax.swing.text.AttributeSet;
+
+        r4 := @parameter1: java.lang.String;
+
+     label1:
+        if r6 == null goto label4;
+
+        $z0 = r6 instanceof javax.swing.text.Style;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r2 = virtualinvoke $r1.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r6);
+
+        r3 = (java.lang.Integer) $r2;
+
+        if r3 == null goto label3;
+
+        if r4 == null goto label2;
+
+        $r5 = interfaceinvoke r6.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>("style:type");
+
+        $z1 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        return r3;
+
+     label3:
+        r6 = interfaceinvoke r6.<javax.swing.text.AttributeSet: javax.swing.text.AttributeSet getResolveParent()>();
+
+        goto label1;
+
+     label4:
+        return null;
+    }
+
+    private static java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, java.lang.Object, java.lang.Object)
+    {
+        javax.swing.text.MutableAttributeSet r0;
+        java.lang.Object r1, $r2, $r4, r5;
+        javax.swing.text.AttributeSet r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r3 := @parameter1: javax.swing.text.AttributeSet;
+
+        r1 := @parameter2: java.lang.Object;
+
+        r5 := @parameter3: java.lang.Object;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r1);
+
+        $r4 = interfaceinvoke r3.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r1);
+
+        if $r4 != $r2 goto label1;
+
+        return null;
+
+     label1:
+        if $r4 != null goto label3;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>(r1);
+
+        if r5 == null goto label2;
+
+        $z1 = virtualinvoke r5.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        return r5;
+
+     label2:
+        return null;
+
+     label3:
+        if $r2 == null goto label4;
+
+        $z0 = staticinvoke <javax.swing.text.rtf.RTFGenerator: boolean equalArraysOK(java.lang.Object,java.lang.Object)>($r2, $r4);
+
+        if $z0 != 0 goto label5;
+
+     label4:
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+        return $r4;
+
+     label5:
+        return null;
+    }
+
+    private static boolean equalArraysOK(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object[] $r4, r5, $r6, r7;
+        int $i0, $i1, i2, i3;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Object r0, r1, $r8, $r9;
+        java.lang.Class $r2, $r3;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.lang.Object;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        if r0 == null goto label02;
+
+        if r1 != null goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label04;
+
+        return 1;
+
+     label04:
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.Class: boolean isArray()>();
+
+        if $z1 == 0 goto label05;
+
+        $r3 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z2 = virtualinvoke $r3.<java.lang.Class: boolean isArray()>();
+
+        if $z2 != 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $r4 = (java.lang.Object[]) r0;
+
+        r5 = (java.lang.Object[]) $r4;
+
+        $r6 = (java.lang.Object[]) r1;
+
+        r7 = (java.lang.Object[]) $r6;
+
+        $i1 = lengthof r5;
+
+        $i0 = lengthof r7;
+
+        if $i1 == $i0 goto label07;
+
+        return 0;
+
+     label07:
+        i2 = lengthof r5;
+
+        i3 = 0;
+
+     label08:
+        if i3 >= i2 goto label10;
+
+        $r9 = r5[i3];
+
+        $r8 = r7[i3];
+
+        $z3 = staticinvoke <javax.swing.text.rtf.RTFGenerator: boolean equalArraysOK(java.lang.Object,java.lang.Object)>($r9, $r8);
+
+        if $z3 != 0 goto label09;
+
+        return 0;
+
+     label09:
+        i3 = i3 + 1;
+
+        goto label08;
+
+     label10:
+        return 1;
+    }
+
+    public void writeLineBreak() throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>("\n");
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+    }
+
+    public void writeRTFHeader() throws java.io.IOException
+    {
+        java.awt.Color r32, r34;
+        java.util.Enumeration $r4, $r7, $r21;
+        java.lang.Integer $r11, r30, r33, r39, r42;
+        javax.swing.text.AttributeSet $r14, $r37;
+        java.util.Dictionary $r3, $r6, $r9, $r15, $r17, $r20, $r23, $r28;
+        javax.swing.text.SimpleAttributeSet $r5, $r13, $r19, r38;
+        javax.swing.text.rtf.RTFGenerator r0;
+        java.lang.String $r25, r27, r36, $r47;
+        java.awt.Color[] r31;
+        int[] $r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.String[] r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15;
+        java.lang.Boolean $r44, $r46;
+        javax.swing.text.Style r35, $r41;
+        java.lang.Object $r8, $r10, $r12, $r16, $r18, $r22, $r24, $r26, $r29, $r40, $r43, $r45;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeBegingroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("rtf", 1);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("ansi");
+
+        $r1 = staticinvoke <javax.swing.text.rtf.RTFGenerator: int[] outputConversionForName(java.lang.String)>("ansi");
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int[] outputConversion> = $r1;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+        $i0 = r0.<javax.swing.text.rtf.RTFGenerator: int fontCount>;
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        $r3 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Dictionary: java.util.Enumeration keys()>();
+
+     label01:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label02;
+
+        $r26 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r27 = (java.lang.String) $r26;
+
+        $r28 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable>;
+
+        $r29 = virtualinvoke $r28.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r27);
+
+        r30 = (java.lang.Integer) $r29;
+
+        $i13 = virtualinvoke r30.<java.lang.Integer: int intValue()>();
+
+        r2[$i13] = r27;
+
+        goto label01;
+
+     label02:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeBegingroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("fonttbl");
+
+        i14 = 0;
+
+     label03:
+        $i1 = r0.<javax.swing.text.rtf.RTFGenerator: int fontCount>;
+
+        if i14 >= $i1 goto label04;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("f", i14);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("fnil");
+
+        $r25 = r2[i14];
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeText(java.lang.String)>($r25);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeText(java.lang.String)>(";");
+
+        i14 = i14 + 1;
+
+        goto label03;
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeEndgroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+        $i2 = r0.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        if $i2 <= 1 goto label10;
+
+        $i7 = r0.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        r31 = newarray (java.awt.Color)[$i7];
+
+        $r20 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r21 = virtualinvoke $r20.<java.util.Dictionary: java.util.Enumeration keys()>();
+
+     label05:
+        $z7 = interfaceinvoke $r21.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z7 == 0 goto label06;
+
+        $r22 = interfaceinvoke $r21.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r32 = (java.awt.Color) $r22;
+
+        $r23 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r24 = virtualinvoke $r23.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r32);
+
+        r33 = (java.lang.Integer) $r24;
+
+        $i12 = virtualinvoke r33.<java.lang.Integer: int intValue()>();
+
+        r31[$i12] = r32;
+
+        goto label05;
+
+     label06:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeBegingroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("colortbl");
+
+        i15 = 0;
+
+     label07:
+        $i8 = r0.<javax.swing.text.rtf.RTFGenerator: int colorCount>;
+
+        if i15 >= $i8 goto label09;
+
+        r34 = r31[i15];
+
+        if r34 == null goto label08;
+
+        $i9 = virtualinvoke r34.<java.awt.Color: int getRed()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("red", $i9);
+
+        $i10 = virtualinvoke r34.<java.awt.Color: int getGreen()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("green", $i10);
+
+        $i11 = virtualinvoke r34.<java.awt.Color: int getBlue()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("blue", $i11);
+
+     label08:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>(";");
+
+        i15 = i15 + 1;
+
+        goto label07;
+
+     label09:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeEndgroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+     label10:
+        $i3 = r0.<javax.swing.text.rtf.RTFGenerator: int styleCount>;
+
+        if $i3 <= 1 goto label23;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeBegingroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("stylesheet");
+
+        $r6 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r7 = virtualinvoke $r6.<java.util.Dictionary: java.util.Enumeration keys()>();
+
+     label11:
+        $z1 = interfaceinvoke $r7.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label22;
+
+        $r8 = interfaceinvoke $r7.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r35 = (javax.swing.text.Style) $r8;
+
+        $r9 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r10 = virtualinvoke $r9.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>(r35);
+
+        $r11 = (java.lang.Integer) $r10;
+
+        $i4 = virtualinvoke $r11.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeBegingroup()>();
+
+        $r12 = interfaceinvoke r35.<javax.swing.text.Style: java.lang.Object getAttribute(java.lang.Object)>("style:type");
+
+        r36 = (java.lang.String) $r12;
+
+        if r36 != null goto label12;
+
+        r36 = "paragraph";
+
+     label12:
+        $z2 = virtualinvoke r36.<java.lang.String: boolean equals(java.lang.Object)>("character");
+
+        if $z2 == 0 goto label13;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("*");
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("cs", $i4);
+
+        goto label15;
+
+     label13:
+        $z3 = virtualinvoke r36.<java.lang.String: boolean equals(java.lang.Object)>("section");
+
+        if $z3 == 0 goto label14;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("*");
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("ds", $i4);
+
+        goto label15;
+
+     label14:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("s", $i4);
+
+     label15:
+        $r37 = interfaceinvoke r35.<javax.swing.text.Style: javax.swing.text.AttributeSet getResolveParent()>();
+
+        if $r37 != null goto label16;
+
+        $r19 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r19.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r38 = $r19;
+
+        goto label17;
+
+     label16:
+        $r13 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r13.<javax.swing.text.SimpleAttributeSet: void <init>(javax.swing.text.AttributeSet)>($r37);
+
+        r38 = $r13;
+
+     label17:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void updateSectionAttributes(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,boolean)>(r38, r35, 0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void updateParagraphAttributes(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,boolean)>(r38, r35, 0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void updateCharacterAttributes(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,boolean)>(r38, r35, 0);
+
+        $r14 = interfaceinvoke r35.<javax.swing.text.Style: javax.swing.text.AttributeSet getResolveParent()>();
+
+        if $r14 == null goto label18;
+
+        $z6 = $r14 instanceof javax.swing.text.Style;
+
+        if $z6 == 0 goto label18;
+
+        $r17 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r18 = virtualinvoke $r17.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r14);
+
+        r39 = (java.lang.Integer) $r18;
+
+        if r39 == null goto label18;
+
+        $i6 = virtualinvoke r39.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("sbasedon", $i6);
+
+     label18:
+        $r40 = interfaceinvoke r35.<javax.swing.text.Style: java.lang.Object getAttribute(java.lang.Object)>("style:nextStyle");
+
+        $r41 = (javax.swing.text.Style) $r40;
+
+        if $r41 == null goto label19;
+
+        $r15 = r0.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary styleTable>;
+
+        $r16 = virtualinvoke $r15.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r41);
+
+        r42 = (java.lang.Integer) $r16;
+
+        if r42 == null goto label19;
+
+        $i5 = virtualinvoke r42.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("snext", $i5);
+
+     label19:
+        $r43 = interfaceinvoke r35.<javax.swing.text.Style: java.lang.Object getAttribute(java.lang.Object)>("style:hidden");
+
+        $r44 = (java.lang.Boolean) $r43;
+
+        if $r44 == null goto label20;
+
+        $z5 = virtualinvoke $r44.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z5 == 0 goto label20;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("shidden");
+
+     label20:
+        $r45 = interfaceinvoke r35.<javax.swing.text.Style: java.lang.Object getAttribute(java.lang.Object)>("style:additive");
+
+        $r46 = (java.lang.Boolean) $r45;
+
+        if $r46 == null goto label21;
+
+        $z4 = virtualinvoke $r46.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z4 == 0 goto label21;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("additive");
+
+     label21:
+        $r47 = interfaceinvoke r35.<javax.swing.text.Style: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeText(java.lang.String)>($r47);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeText(java.lang.String)>(";");
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeEndgroup()>();
+
+        goto label11;
+
+     label22:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeEndgroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+     label23:
+        $r5 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r5.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.MutableAttributeSet outputAttributes> = $r5;
+
+        return;
+    }
+
+    void writeDocumentProperties(javax.swing.text.Document) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r0, $r2;
+        javax.swing.text.rtf.RTFAttribute r3;
+        javax.swing.text.rtf.RTFGenerator r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r5, $r6;
+        javax.swing.text.Document r4;
+        boolean $z0, z1;
+
+        r1 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r4 := @parameter0: javax.swing.text.Document;
+
+        z1 = 0;
+
+        i2 = 0;
+
+     label1:
+        $r0 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        $i0 = lengthof $r0;
+
+        if i2 >= $i0 goto label4;
+
+        $r2 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        r3 = $r2[i2];
+
+        $i1 = interfaceinvoke r3.<javax.swing.text.rtf.RTFAttribute: int domain()>();
+
+        if $i1 == 3 goto label2;
+
+        goto label3;
+
+     label2:
+        $r5 = interfaceinvoke r3.<javax.swing.text.rtf.RTFAttribute: java.lang.Object swingName()>();
+
+        $r6 = interfaceinvoke r4.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>($r5);
+
+        $z0 = interfaceinvoke r3.<javax.swing.text.rtf.RTFAttribute: boolean writeValue(java.lang.Object,javax.swing.text.rtf.RTFGenerator,boolean)>($r6, r1, 0);
+
+        if $z0 == 0 goto label3;
+
+        z1 = 1;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label4:
+        if z1 == 0 goto label5;
+
+        virtualinvoke r1.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+     label5:
+        return;
+    }
+
+    public void writeRTFTrailer() throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeEndgroup()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+        return;
+    }
+
+    protected void checkNumericControlWord(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, java.lang.Object, java.lang.String, float, float) throws java.io.IOException
+    {
+        javax.swing.text.MutableAttributeSet r0;
+        javax.swing.text.rtf.RTFGenerator r7;
+        int $i0;
+        float f0, $f1, f2, f3;
+        java.lang.Object r2, $r3, $r4, $r5;
+        java.lang.String r8;
+        javax.swing.text.AttributeSet r1;
+        java.lang.Number $r6;
+
+        r7 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r1 := @parameter1: javax.swing.text.AttributeSet;
+
+        r2 := @parameter2: java.lang.Object;
+
+        r8 := @parameter3: java.lang.String;
+
+        f2 := @parameter4: float;
+
+        f0 := @parameter5: float;
+
+        $r3 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        $r4 = staticinvoke <javax.swing.text.rtf.RTFGenerator: java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.Object)>(r0, r1, r2, $r3);
+
+        if $r4 == null goto label3;
+
+        $r5 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        if $r4 != $r5 goto label1;
+
+        f3 = f2;
+
+        goto label2;
+
+     label1:
+        $r6 = (java.lang.Number) $r4;
+
+        f3 = virtualinvoke $r6.<java.lang.Number: float floatValue()>();
+
+     label2:
+        $f1 = f3 * f0;
+
+        $i0 = staticinvoke <java.lang.Math: int round(float)>($f1);
+
+        virtualinvoke r7.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>(r8, $i0);
+
+     label3:
+        return;
+    }
+
+    protected void checkControlWord(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, javax.swing.text.rtf.RTFAttribute) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute r2;
+        javax.swing.text.MutableAttributeSet r0;
+        javax.swing.text.rtf.RTFGenerator r7;
+        java.lang.Object $r3, $r4, $r5, $r6, r8;
+        javax.swing.text.AttributeSet r1;
+
+        r7 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r1 := @parameter1: javax.swing.text.AttributeSet;
+
+        r2 := @parameter2: javax.swing.text.rtf.RTFAttribute;
+
+        $r3 = interfaceinvoke r2.<javax.swing.text.rtf.RTFAttribute: java.lang.Object swingName()>();
+
+        $r4 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        $r5 = staticinvoke <javax.swing.text.rtf.RTFGenerator: java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.Object)>(r0, r1, $r3, $r4);
+
+        r8 = $r5;
+
+        if $r5 == null goto label2;
+
+        $r6 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        if $r5 != $r6 goto label1;
+
+        r8 = null;
+
+     label1:
+        interfaceinvoke r2.<javax.swing.text.rtf.RTFAttribute: boolean writeValue(java.lang.Object,javax.swing.text.rtf.RTFGenerator,boolean)>(r8, r7, 1);
+
+     label2:
+        return;
+    }
+
+    protected void checkControlWords(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, javax.swing.text.rtf.RTFAttribute[], int) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] r0;
+        javax.swing.text.rtf.RTFAttribute r1;
+        javax.swing.text.MutableAttributeSet r3;
+        javax.swing.text.rtf.RTFGenerator r2;
+        int i0, $i1, i2, i3;
+        javax.swing.text.AttributeSet r4;
+
+        r2 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r3 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r4 := @parameter1: javax.swing.text.AttributeSet;
+
+        r0 := @parameter2: javax.swing.text.rtf.RTFAttribute[];
+
+        i2 := @parameter3: int;
+
+        i0 = lengthof r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        r1 = r0[i3];
+
+        $i1 = interfaceinvoke r1.<javax.swing.text.rtf.RTFAttribute: int domain()>();
+
+        if $i1 != i2 goto label2;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void checkControlWord(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,javax.swing.text.rtf.RTFAttribute)>(r3, r4, r1);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    void updateSectionAttributes(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, boolean) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r6;
+        javax.swing.text.MutableAttributeSet r1;
+        java.lang.Integer $r4, $r5;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int $i0;
+        java.lang.Object $r3;
+        javax.swing.text.AttributeSet r2;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r1 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r2 := @parameter1: javax.swing.text.AttributeSet;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>("sectionStyle");
+
+        $r4 = specialinvoke r0.<javax.swing.text.rtf.RTFGenerator: java.lang.Integer findStyleNumber(javax.swing.text.AttributeSet,java.lang.String)>(r2, "section");
+
+        if $r3 == $r4 goto label3;
+
+        if $r3 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void resetSectionAttributes(javax.swing.text.MutableAttributeSet)>(r1);
+
+     label1:
+        if $r4 == null goto label2;
+
+        $r5 = (java.lang.Integer) $r4;
+
+        $i0 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("ds", $i0);
+
+        interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("sectionStyle", $r4);
+
+        goto label3;
+
+     label2:
+        interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("sectionStyle");
+
+     label3:
+        $r6 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void checkControlWords(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,javax.swing.text.rtf.RTFAttribute[],int)>(r1, r2, $r6, 2);
+
+        return;
+    }
+
+    protected void resetSectionAttributes(javax.swing.text.MutableAttributeSet) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r1, $r3;
+        javax.swing.text.rtf.RTFAttribute r4;
+        javax.swing.text.MutableAttributeSet r2;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int i0, $i1, i2;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r2 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("sectd");
+
+        $r1 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        i0 = lengthof $r1;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $r3 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        r4 = $r3[i2];
+
+        $i1 = interfaceinvoke r4.<javax.swing.text.rtf.RTFAttribute: int domain()>();
+
+        if $i1 != 2 goto label2;
+
+        interfaceinvoke r4.<javax.swing.text.rtf.RTFAttribute: boolean setDefault(javax.swing.text.MutableAttributeSet)>(r2);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("sectionStyle");
+
+        return;
+    }
+
+    void updateParagraphAttributes(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, boolean) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r14;
+        java.lang.Integer $r6, $r8, r10;
+        javax.swing.text.TabStop[] $r3, r4;
+        javax.swing.text.rtf.RTFGenerator r2;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6;
+        javax.swing.text.AttributeSet r1;
+        boolean z0;
+        javax.swing.text.MutableAttributeSet r0;
+        float $f0, $f1;
+        java.lang.Object $r7, r9, $r11, r12, $r13;
+        javax.swing.text.TabStop r5;
+
+        r2 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r1 := @parameter1: javax.swing.text.AttributeSet;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label01;
+
+        $r7 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>("paragraphStyle");
+
+        r9 = $r7;
+
+        $r8 = specialinvoke r2.<javax.swing.text.rtf.RTFGenerator: java.lang.Integer findStyleNumber(javax.swing.text.AttributeSet,java.lang.String)>(r1, "paragraph");
+
+        r10 = $r8;
+
+        if $r7 == $r8 goto label02;
+
+        if $r7 == null goto label02;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void resetParagraphAttributes(javax.swing.text.MutableAttributeSet)>(r0);
+
+        r9 = null;
+
+        goto label02;
+
+     label01:
+        r9 = null;
+
+        r10 = null;
+
+     label02:
+        $r11 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>("tabs");
+
+        r12 = $r11;
+
+        $r13 = interfaceinvoke r1.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>("tabs");
+
+        if $r11 == $r13 goto label03;
+
+        if $r11 == null goto label03;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void resetParagraphAttributes(javax.swing.text.MutableAttributeSet)>(r0);
+
+        r12 = null;
+
+        r9 = null;
+
+     label03:
+        if r9 == r10 goto label04;
+
+        if r10 == null goto label04;
+
+        $r6 = (java.lang.Integer) r10;
+
+        $i2 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("s", $i2);
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("paragraphStyle", r10);
+
+     label04:
+        $r14 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void checkControlWords(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,javax.swing.text.rtf.RTFAttribute[],int)>(r0, r1, $r14, 1);
+
+        if r12 == $r13 goto label21;
+
+        if $r13 == null goto label21;
+
+        $r3 = (javax.swing.text.TabStop[]) $r13;
+
+        r4 = (javax.swing.text.TabStop[]) $r3;
+
+        i3 = 0;
+
+     label05:
+        $i0 = lengthof r4;
+
+        if i3 >= $i0 goto label20;
+
+        r5 = r4[i3];
+
+        $i1 = virtualinvoke r5.<javax.swing.text.TabStop: int getAlignment()>();
+
+        tableswitch($i1)
+        {
+            case 0: goto label06;
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label10;
+            case 4: goto label09;
+            case 5: goto label06;
+            default: goto label10;
+        };
+
+     label06:
+        goto label10;
+
+     label07:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tqr");
+
+        goto label10;
+
+     label08:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tqc");
+
+        goto label10;
+
+     label09:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tqdec");
+
+     label10:
+        $i4 = virtualinvoke r5.<javax.swing.text.TabStop: int getLeader()>();
+
+        tableswitch($i4)
+        {
+            case 0: goto label11;
+            case 1: goto label12;
+            case 2: goto label13;
+            case 3: goto label14;
+            case 4: goto label15;
+            case 5: goto label16;
+            default: goto label17;
+        };
+
+     label11:
+        goto label17;
+
+     label12:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tldot");
+
+        goto label17;
+
+     label13:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tlhyph");
+
+        goto label17;
+
+     label14:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tlul");
+
+        goto label17;
+
+     label15:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tlth");
+
+        goto label17;
+
+     label16:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tleq");
+
+     label17:
+        $f0 = virtualinvoke r5.<javax.swing.text.TabStop: float getPosition()>();
+
+        $f1 = 20.0F * $f0;
+
+        $i5 = staticinvoke <java.lang.Math: int round(float)>($f1);
+
+        $i6 = virtualinvoke r5.<javax.swing.text.TabStop: int getAlignment()>();
+
+        if $i6 != 5 goto label18;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("tb", $i5);
+
+        goto label19;
+
+     label18:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("tx", $i5);
+
+     label19:
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label20:
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("tabs", r4);
+
+     label21:
+        return;
+    }
+
+    public void writeParagraphElement(javax.swing.text.Element) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+        int $i0, i1;
+        javax.swing.text.Element r1, $r4;
+        javax.swing.text.AttributeSet $r3;
+        javax.swing.text.MutableAttributeSet $r2;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.MutableAttributeSet outputAttributes>;
+
+        $r3 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void updateParagraphAttributes(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,boolean)>($r2, $r3, 1);
+
+        $i0 = interfaceinvoke r1.<javax.swing.text.Element: int getElementCount()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r4 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i1);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeTextElement(javax.swing.text.Element)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("par");
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeLineBreak()>();
+
+        return;
+    }
+
+    protected void resetParagraphAttributes(javax.swing.text.MutableAttributeSet) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r4, $r5;
+        javax.swing.text.rtf.RTFAttribute r6;
+        javax.swing.text.MutableAttributeSet r1;
+        java.lang.Integer $r3;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int i0, $i1, i2;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r1 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("pard");
+
+        $r2 = <javax.swing.text.StyleConstants: java.lang.Object Alignment>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r2, $r3);
+
+        $r4 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        i0 = lengthof $r4;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $r5 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        r6 = $r5[i2];
+
+        $i1 = interfaceinvoke r6.<javax.swing.text.rtf.RTFAttribute: int domain()>();
+
+        if $i1 != 1 goto label2;
+
+        interfaceinvoke r6.<javax.swing.text.rtf.RTFAttribute: boolean setDefault(javax.swing.text.MutableAttributeSet)>(r1);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("paragraphStyle");
+
+        interfaceinvoke r1.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("tabs");
+
+        return;
+    }
+
+    void updateCharacterAttributes(javax.swing.text.MutableAttributeSet, javax.swing.text.AttributeSet, boolean) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r4;
+        java.lang.Integer $r12, $r16, $r20, $r21, r24;
+        javax.swing.text.AttributeSet r1;
+        boolean z0;
+        javax.swing.text.MutableAttributeSet r0;
+        java.util.Dictionary $r10, $r14, $r17;
+        javax.swing.text.rtf.RTFGenerator r2;
+        int $i0, $i1, i2, i3;
+        java.lang.Object $r3, $r5, $r6, $r7, $r8, $r9, $r11, $r13, $r15, $r18, $r19, $r22, $r23, $r25, $r26;
+
+        r2 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r1 := @parameter1: javax.swing.text.AttributeSet;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label03;
+
+        $r19 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>("characterStyle");
+
+        $r20 = specialinvoke r2.<javax.swing.text.rtf.RTFGenerator: java.lang.Integer findStyleNumber(javax.swing.text.AttributeSet,java.lang.String)>(r1, "character");
+
+        if $r19 == $r20 goto label03;
+
+        if $r19 == null goto label01;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void resetCharacterAttributes(javax.swing.text.MutableAttributeSet)>(r0);
+
+     label01:
+        if $r20 == null goto label02;
+
+        $r21 = (java.lang.Integer) $r20;
+
+        $i1 = virtualinvoke $r21.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("cs", $i1);
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>("characterStyle", $r20);
+
+        goto label03;
+
+     label02:
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("characterStyle");
+
+     label03:
+        $r22 = <javax.swing.text.StyleConstants: java.lang.Object FontFamily>;
+
+        $r23 = staticinvoke <javax.swing.text.rtf.RTFGenerator: java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.Object)>(r0, r1, $r22, null);
+
+        if $r23 == null goto label04;
+
+        $r17 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary fontTable>;
+
+        $r18 = virtualinvoke $r17.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r23);
+
+        r24 = (java.lang.Integer) $r18;
+
+        $i0 = virtualinvoke r24.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("f", $i0);
+
+     label04:
+        $r3 = <javax.swing.text.StyleConstants: java.lang.Object FontSize>;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void checkNumericControlWord(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.String,float,float)>(r0, r1, $r3, "fs", 12.0F, 2.0F);
+
+        $r4 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void checkControlWords(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,javax.swing.text.rtf.RTFAttribute[],int)>(r0, r1, $r4, 0);
+
+        $r5 = <javax.swing.text.StyleConstants: java.lang.Object LineSpacing>;
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void checkNumericControlWord(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.String,float,float)>(r0, r1, $r5, "sl", 0.0F, 20.0F);
+
+        $r7 = <javax.swing.text.StyleConstants: java.lang.Object Background>;
+
+        $r6 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        $r8 = staticinvoke <javax.swing.text.rtf.RTFGenerator: java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.Object)>(r0, r1, $r7, $r6);
+
+        if $r8 == null goto label07;
+
+        $r13 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        if $r8 != $r13 goto label05;
+
+        i2 = 0;
+
+        goto label06;
+
+     label05:
+        $r14 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r15 = virtualinvoke $r14.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r16 = (java.lang.Integer) $r15;
+
+        i2 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+     label06:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("cb", i2);
+
+     label07:
+        $r25 = <javax.swing.text.StyleConstants: java.lang.Object Foreground>;
+
+        $r26 = staticinvoke <javax.swing.text.rtf.RTFGenerator: java.lang.Object attrDiff(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,java.lang.Object,java.lang.Object)>(r0, r1, $r25, null);
+
+        if $r26 == null goto label10;
+
+        $r9 = <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken>;
+
+        if $r26 != $r9 goto label08;
+
+        i3 = 0;
+
+        goto label09;
+
+     label08:
+        $r10 = r2.<javax.swing.text.rtf.RTFGenerator: java.util.Dictionary colorTable>;
+
+        $r11 = virtualinvoke $r10.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r26);
+
+        $r12 = (java.lang.Integer) $r11;
+
+        i3 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+     label09:
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("cf", i3);
+
+     label10:
+        return;
+    }
+
+    protected void resetCharacterAttributes(javax.swing.text.MutableAttributeSet) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFAttribute[] $r1, $r7;
+        javax.swing.text.rtf.RTFAttribute r8;
+        javax.swing.text.MutableAttributeSet r2;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int i0, $i1, i2;
+        java.lang.Object $r3, $r4, $r5, $r6;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r2 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("plain");
+
+        $r1 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        i0 = lengthof $r1;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $r7 = <javax.swing.text.rtf.RTFAttributes: javax.swing.text.rtf.RTFAttribute[] attributes>;
+
+        r8 = $r7[i2];
+
+        $i1 = interfaceinvoke r8.<javax.swing.text.rtf.RTFAttribute: int domain()>();
+
+        if $i1 != 0 goto label2;
+
+        interfaceinvoke r8.<javax.swing.text.rtf.RTFAttribute: boolean setDefault(javax.swing.text.MutableAttributeSet)>(r2);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        staticinvoke <javax.swing.text.StyleConstants: void setFontFamily(javax.swing.text.MutableAttributeSet,java.lang.String)>(r2, "Helvetica");
+
+        $r3 = <javax.swing.text.StyleConstants: java.lang.Object FontSize>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r3);
+
+        $r4 = <javax.swing.text.StyleConstants: java.lang.Object Background>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r4);
+
+        $r5 = <javax.swing.text.StyleConstants: java.lang.Object Foreground>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r5);
+
+        $r6 = <javax.swing.text.StyleConstants: java.lang.Object LineSpacing>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r6);
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>("characterStyle");
+
+        return;
+    }
+
+    public void writeTextElement(javax.swing.text.Element) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.InternalError $r9;
+        java.lang.String $r10;
+        javax.swing.text.AttributeSet $r3;
+        boolean $z0;
+        javax.swing.text.BadLocationException $r8;
+        javax.swing.text.MutableAttributeSet $r2;
+        javax.swing.text.Document $r5;
+        javax.swing.text.Segment $r6, $r7;
+        javax.swing.text.Element r1, $r4;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.MutableAttributeSet outputAttributes>;
+
+        $r3 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void updateCharacterAttributes(javax.swing.text.MutableAttributeSet,javax.swing.text.AttributeSet,boolean)>($r2, $r3, 1);
+
+        $z0 = interfaceinvoke r1.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label5;
+
+     label1:
+        $r5 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.Document getDocument()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i2 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i3 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i4 = $i2 - $i3;
+
+        $r6 = r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.Segment workingSegment>;
+
+        interfaceinvoke $r5.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i1, $i4, $r6);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        virtualinvoke $r8.<javax.swing.text.BadLocationException: void printStackTrace()>();
+
+        $r9 = new java.lang.InternalError;
+
+        $r10 = virtualinvoke $r8.<javax.swing.text.BadLocationException: java.lang.String getMessage()>();
+
+        specialinvoke $r9.<java.lang.InternalError: void <init>(java.lang.String)>($r10);
+
+        throw $r9;
+
+     label4:
+        $r7 = r0.<javax.swing.text.rtf.RTFGenerator: javax.swing.text.Segment workingSegment>;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeText(javax.swing.text.Segment)>($r7);
+
+        goto label7;
+
+     label5:
+        $i0 = interfaceinvoke r1.<javax.swing.text.Element: int getElementCount()>();
+
+        i5 = 0;
+
+     label6:
+        if i5 >= $i0 goto label7;
+
+        $r4 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i5);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeTextElement(javax.swing.text.Element)>($r4);
+
+        i5 = i5 + 1;
+
+        goto label6;
+
+     label7:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public void writeText(javax.swing.text.Segment) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r2;
+        int $i0, i1, i3;
+        char[] r1;
+        char $c2;
+        javax.swing.text.Segment r0;
+
+        r2 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: javax.swing.text.Segment;
+
+        i3 = r0.<javax.swing.text.Segment: int offset>;
+
+        $i0 = r0.<javax.swing.text.Segment: int count>;
+
+        i1 = i3 + $i0;
+
+        r1 = r0.<javax.swing.text.Segment: char[] array>;
+
+     label1:
+        if i3 >= i1 goto label2;
+
+        $c2 = r1[i3];
+
+        virtualinvoke r2.<javax.swing.text.rtf.RTFGenerator: void writeCharacter(char)>($c2);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeText(java.lang.String) throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFGenerator r1;
+        int $i0, i2;
+        char $c1;
+        java.lang.String r0;
+
+        r1 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: java.lang.String;
+
+        i2 = 0;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i2);
+
+        virtualinvoke r1.<javax.swing.text.rtf.RTFGenerator: void writeCharacter(char)>($c1);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeRawString(java.lang.String) throws java.io.IOException
+    {
+        java.io.OutputStream $r2;
+        javax.swing.text.rtf.RTFGenerator r1;
+        int $i0, i2, $i3;
+        char $c1;
+        java.lang.String r0;
+
+        r1 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r2 = r1.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>($i3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeControlWord(java.lang.String) throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        javax.swing.text.rtf.RTFGenerator r0;
+        java.lang.String r2;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(92);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>(r2);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 1;
+
+        return;
+    }
+
+    public void writeControlWord(java.lang.String, int) throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int i0;
+        java.lang.String r2, $r3;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(92);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>(r2);
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>(i0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>($r3);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 1;
+
+        return;
+    }
+
+    public void writeBegingroup() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        javax.swing.text.rtf.RTFGenerator r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(123);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+    }
+
+    public void writeEndgroup() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        javax.swing.text.rtf.RTFGenerator r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(125);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+    }
+
+    public void writeCharacter(char) throws java.io.IOException
+    {
+        int[] $r1;
+        boolean $z0;
+        javax.swing.text.rtf.RTFGenerator r0;
+        int $i1, $i2, $i5, $i6, $i7, $i8, $i9, i11, i12, i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        java.lang.String $r12, $r17;
+        java.io.OutputStream $r2, $r3, $r4, $r5, $r6, $r8, $r10, $r18, $r19;
+        javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] $r11, $r13, $r15;
+        char c0, $c3, $c4, $c10;
+        javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair $r14, $r16;
+        char[] $r7, $r9;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        c0 := @parameter0: char;
+
+        $i14 = (int) c0;
+
+        if $i14 != 160 goto label01;
+
+        $r18 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r18.<java.io.OutputStream: void write(int)>(92);
+
+        $r19 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r19.<java.io.OutputStream: void write(int)>(126);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+
+     label01:
+        $i15 = (int) c0;
+
+        if $i15 != 9 goto label02;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>("tab");
+
+        return;
+
+     label02:
+        $i16 = (int) c0;
+
+        if $i16 == 10 goto label03;
+
+        $i17 = (int) c0;
+
+        if $i17 != 13 goto label04;
+
+     label03:
+        return;
+
+     label04:
+        $r1 = r0.<javax.swing.text.rtf.RTFGenerator: int[] outputConversion>;
+
+        $i1 = staticinvoke <javax.swing.text.rtf.RTFGenerator: int convertCharacter(int[],char)>($r1, c0);
+
+        if $i1 != 0 goto label09;
+
+        i11 = 0;
+
+     label05:
+        $r11 = <javax.swing.text.rtf.RTFGenerator: javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords>;
+
+        $i5 = lengthof $r11;
+
+        if i11 >= $i5 goto label07;
+
+        $r13 = <javax.swing.text.rtf.RTFGenerator: javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords>;
+
+        $r14 = $r13[i11];
+
+        $c10 = $r14.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: char character>;
+
+        $i18 = (int) $c10;
+
+        $i19 = (int) c0;
+
+        if $i18 != $i19 goto label06;
+
+        $r15 = <javax.swing.text.rtf.RTFGenerator: javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords>;
+
+        $r16 = $r15[i11];
+
+        $r17 = $r16.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: java.lang.String keyword>;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String)>($r17);
+
+        return;
+
+     label06:
+        i11 = i11 + 1;
+
+        goto label05;
+
+     label07:
+        $r12 = virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: java.lang.String approximationForUnicode(char)>(c0);
+
+        $i6 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        $i7 = r0.<javax.swing.text.rtf.RTFGenerator: int unicodeCount>;
+
+        if $i6 == $i7 goto label08;
+
+        $i8 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        r0.<javax.swing.text.rtf.RTFGenerator: int unicodeCount> = $i8;
+
+        $i9 = r0.<javax.swing.text.rtf.RTFGenerator: int unicodeCount>;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("uc", $i9);
+
+     label08:
+        $i20 = (int) c0;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeControlWord(java.lang.String,int)>("u", $i20);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>(" ");
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFGenerator: void writeRawString(java.lang.String)>($r12);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+
+     label09:
+        if $i1 <= 127 goto label10;
+
+        $r5 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r5.<java.io.OutputStream: void write(int)>(92);
+
+        $r6 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(int)>(39);
+
+        $i2 = $i1 & 240;
+
+        i12 = $i2 >>> 4;
+
+        $r8 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        $r7 = <javax.swing.text.rtf.RTFGenerator: char[] hexdigits>;
+
+        $c3 = $r7[i12];
+
+        $i21 = (int) $c3;
+
+        virtualinvoke $r8.<java.io.OutputStream: void write(int)>($i21);
+
+        i13 = $i1 & 15;
+
+        $r10 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        $r9 = <javax.swing.text.rtf.RTFGenerator: char[] hexdigits>;
+
+        $c4 = $r9[i13];
+
+        $i22 = (int) $c4;
+
+        virtualinvoke $r10.<java.io.OutputStream: void write(int)>($i22);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+        return;
+
+     label10:
+        lookupswitch($i1)
+        {
+            case 92: goto label11;
+            case 123: goto label11;
+            case 125: goto label11;
+            default: goto label12;
+        };
+
+     label11:
+        $r2 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>(92);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+     label12:
+        $z0 = r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword>;
+
+        if $z0 == 0 goto label13;
+
+        $r4 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(int)>(32);
+
+        r0.<javax.swing.text.rtf.RTFGenerator: boolean afterKeyword> = 0;
+
+     label13:
+        $r3 = r0.<javax.swing.text.rtf.RTFGenerator: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(int)>($i1);
+
+        return;
+    }
+
+    java.lang.String approximationForUnicode(char)
+    {
+        javax.swing.text.rtf.RTFGenerator r0;
+        char c0;
+
+        r0 := @this: javax.swing.text.rtf.RTFGenerator;
+
+        c0 := @parameter0: char;
+
+        return "?";
+    }
+
+    static int[] outputConversionFromTranslationTable(char[])
+    {
+        char $c3;
+        int[] r1;
+        int $i0, $i1, $i2, $i4, $i5, $i6, i7, $i8;
+        char[] r0;
+
+        r0 := @parameter0: char[];
+
+        $i0 = lengthof r0;
+
+        $i1 = 2 * $i0;
+
+        r1 = newarray (int)[$i1];
+
+        i7 = 0;
+
+     label1:
+        $i2 = lengthof r0;
+
+        if i7 >= $i2 goto label2;
+
+        $i4 = i7 * 2;
+
+        $c3 = r0[i7];
+
+        $i8 = (int) $c3;
+
+        r1[$i4] = $i8;
+
+        $i5 = i7 * 2;
+
+        $i6 = $i5 + 1;
+
+        r1[$i6] = i7;
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    static int[] outputConversionForName(java.lang.String) throws java.io.IOException
+    {
+        int[] $r4;
+        char[] $r2, r3;
+        java.lang.Object $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <javax.swing.text.rtf.RTFReader: java.lang.Object getCharacterSet(java.lang.String)>(r0);
+
+        $r2 = (char[]) $r1;
+
+        r3 = (char[]) $r2;
+
+        $r4 = staticinvoke <javax.swing.text.rtf.RTFGenerator: int[] outputConversionFromTranslationTable(char[])>(r3);
+
+        return $r4;
+    }
+
+    protected static int convertCharacter(int[], char)
+    {
+        char c1;
+        int[] r0;
+        int $i0, $i2, $i3, $i4, i5, $i6;
+
+        r0 := @parameter0: int[];
+
+        c1 := @parameter1: char;
+
+        i5 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i5 >= $i0 goto label3;
+
+        $i2 = r0[i5];
+
+        $i6 = (int) c1;
+
+        if $i2 != $i6 goto label2;
+
+        $i3 = i5 + 1;
+
+        $i4 = r0[$i3];
+
+        return $i4;
+
+     label2:
+        i5 = i5 + 2;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.Color $r0;
+        java.util.Enumeration $r3;
+        java.util.Vector $r4;
+        int $i0;
+        java.lang.String $r10, $r11, $r13;
+        boolean $z0;
+        javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] $r5, $r6;
+        char $c1;
+        javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair $r8;
+        char[] $r7;
+        java.lang.Object $r1, $r9, $r12;
+        java.util.Dictionary r2;
+
+        <javax.swing.text.rtf.RTFGenerator: java.lang.String defaultFontFamily> = "Helvetica";
+
+        <javax.swing.text.rtf.RTFGenerator: float defaultFontSize> = 12.0F;
+
+        $r0 = <java.awt.Color: java.awt.Color black>;
+
+        <javax.swing.text.rtf.RTFGenerator: java.awt.Color defaultRTFColor> = $r0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <javax.swing.text.rtf.RTFGenerator: java.lang.Object MagicToken> = $r1;
+
+        r2 = <javax.swing.text.rtf.RTFReader: java.util.Dictionary textKeywords>;
+
+        $r3 = virtualinvoke r2.<java.util.Dictionary: java.util.Enumeration keys()>();
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair;
+
+        specialinvoke $r8.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: void <init>()>();
+
+        $r9 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r10 = (java.lang.String) $r9;
+
+        $r8.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: java.lang.String keyword> = $r10;
+
+        $r11 = $r8.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: java.lang.String keyword>;
+
+        $r12 = virtualinvoke r2.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r13 = (java.lang.String) $r12;
+
+        $c1 = virtualinvoke $r13.<java.lang.String: char charAt(int)>(0);
+
+        $r8.<javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair: char character> = $c1;
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        goto label1;
+
+     label2:
+        $i0 = virtualinvoke $r4.<java.util.Vector: int size()>();
+
+        $r5 = newarray (javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair)[$i0];
+
+        <javax.swing.text.rtf.RTFGenerator: javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords> = $r5;
+
+        $r6 = <javax.swing.text.rtf.RTFGenerator: javax.swing.text.rtf.RTFGenerator$CharacterKeywordPair[] textKeywords>;
+
+        virtualinvoke $r4.<java.util.Vector: void copyInto(java.lang.Object[])>($r6);
+
+        $r7 = newarray (char)[16];
+
+        $r7[0] = 48;
+
+        $r7[1] = 49;
+
+        $r7[2] = 50;
+
+        $r7[3] = 51;
+
+        $r7[4] = 52;
+
+        $r7[5] = 53;
+
+        $r7[6] = 54;
+
+        $r7[7] = 55;
+
+        $r7[8] = 56;
+
+        $r7[9] = 57;
+
+        $r7[10] = 97;
+
+        $r7[11] = 98;
+
+        $r7[12] = 99;
+
+        $r7[13] = 100;
+
+        $r7[14] = 101;
+
+        $r7[15] = 102;
+
+        <javax.swing.text.rtf.RTFGenerator: char[] hexdigits> = $r7;
+
+        return;
+    }
+}

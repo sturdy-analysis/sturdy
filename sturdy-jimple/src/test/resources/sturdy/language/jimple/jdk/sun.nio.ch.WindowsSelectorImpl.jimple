@@ -1,0 +1,1236 @@
+final class sun.nio.ch.WindowsSelectorImpl extends sun.nio.ch.SelectorImpl
+{
+    private final int INIT_CAP;
+    private static final int MAX_SELECTABLE_FDS;
+    private sun.nio.ch.SelectionKeyImpl[] channelArray;
+    private sun.nio.ch.PollArrayWrapper pollWrapper;
+    private int totalChannels;
+    private int threadsCount;
+    private final java.util.List threads;
+    private final java.nio.channels.Pipe wakeupPipe;
+    private final int wakeupSourceFd;
+    private final int wakeupSinkFd;
+    private java.lang.Object closeLock;
+    private final sun.nio.ch.WindowsSelectorImpl$FdMap fdMap;
+    private final sun.nio.ch.WindowsSelectorImpl$SubSelector subSelector;
+    private long timeout;
+    private final java.lang.Object interruptLock;
+    private volatile boolean interruptTriggered;
+    private final sun.nio.ch.WindowsSelectorImpl$StartLock startLock;
+    private final sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock;
+    private long updateCount;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.nio.channels.spi.SelectorProvider) throws java.io.IOException
+    {
+        java.net.Socket $r19;
+        sun.nio.ch.SinkChannelImpl r17;
+        sun.nio.ch.SelectionKeyImpl[] $r2;
+        java.util.ArrayList $r3;
+        sun.nio.ch.PollArrayWrapper $r10, $r20;
+        java.nio.channels.spi.SelectorProvider r1;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock $r9;
+        java.nio.channels.SocketChannel $r18;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, $i1, $i2;
+        java.nio.channels.Pipe $r11, $r12, $r15;
+        sun.nio.ch.WindowsSelectorImpl$StartLock $r8;
+        sun.nio.ch.WindowsSelectorImpl$SubSelector $r6;
+        java.lang.Object $r4, $r7;
+        java.nio.channels.Pipe$SourceChannel $r13;
+        sun.nio.ch.SelChImpl $r14;
+        java.nio.channels.Pipe$SinkChannel $r16;
+        sun.nio.ch.WindowsSelectorImpl$FdMap $r5;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        r1 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke r0.<sun.nio.ch.SelectorImpl: void <init>(java.nio.channels.spi.SelectorProvider)>(r1);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int INIT_CAP> = 8;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int INIT_CAP> = 8;
+
+        $r2 = newarray (sun.nio.ch.SelectionKeyImpl)[8];
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray> = $r2;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels> = 1;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount> = 0;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads> = $r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object closeLock> = $r4;
+
+        $r5 = new sun.nio.ch.WindowsSelectorImpl$FdMap;
+
+        specialinvoke $r5.<sun.nio.ch.WindowsSelectorImpl$FdMap: void <init>(sun.nio.ch.WindowsSelectorImpl$1)>(null);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FdMap fdMap> = $r5;
+
+        $r6 = new sun.nio.ch.WindowsSelectorImpl$SubSelector;
+
+        specialinvoke $r6.<sun.nio.ch.WindowsSelectorImpl$SubSelector: void <init>(sun.nio.ch.WindowsSelectorImpl,sun.nio.ch.WindowsSelectorImpl$1)>(r0, null);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$SubSelector subSelector> = $r6;
+
+        $r7 = new java.lang.Object;
+
+        specialinvoke $r7.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object interruptLock> = $r7;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered> = 0;
+
+        $r8 = new sun.nio.ch.WindowsSelectorImpl$StartLock;
+
+        specialinvoke $r8.<sun.nio.ch.WindowsSelectorImpl$StartLock: void <init>(sun.nio.ch.WindowsSelectorImpl,sun.nio.ch.WindowsSelectorImpl$1)>(r0, null);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$StartLock startLock> = $r8;
+
+        $r9 = new sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        specialinvoke $r9.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void <init>(sun.nio.ch.WindowsSelectorImpl,sun.nio.ch.WindowsSelectorImpl$1)>(r0, null);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock> = $r9;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: long updateCount> = 0L;
+
+        $r10 = new sun.nio.ch.PollArrayWrapper;
+
+        specialinvoke $r10.<sun.nio.ch.PollArrayWrapper: void <init>(int)>(8);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper> = $r10;
+
+        $r11 = staticinvoke <java.nio.channels.Pipe: java.nio.channels.Pipe open()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Pipe wakeupPipe> = $r11;
+
+        $r12 = r0.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Pipe wakeupPipe>;
+
+        $r13 = virtualinvoke $r12.<java.nio.channels.Pipe: java.nio.channels.Pipe$SourceChannel source()>();
+
+        $r14 = (sun.nio.ch.SelChImpl) $r13;
+
+        $i0 = interfaceinvoke $r14.<sun.nio.ch.SelChImpl: int getFDVal()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSourceFd> = $i0;
+
+        $r15 = r0.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Pipe wakeupPipe>;
+
+        $r16 = virtualinvoke $r15.<java.nio.channels.Pipe: java.nio.channels.Pipe$SinkChannel sink()>();
+
+        r17 = (sun.nio.ch.SinkChannelImpl) $r16;
+
+        $r18 = r17.<sun.nio.ch.SinkChannelImpl: java.nio.channels.SocketChannel sc>;
+
+        $r19 = virtualinvoke $r18.<java.nio.channels.SocketChannel: java.net.Socket socket()>();
+
+        virtualinvoke $r19.<java.net.Socket: void setTcpNoDelay(boolean)>(1);
+
+        $i1 = interfaceinvoke r17.<sun.nio.ch.SelChImpl: int getFDVal()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSinkFd> = $i1;
+
+        $r20 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSourceFd>;
+
+        virtualinvoke $r20.<sun.nio.ch.PollArrayWrapper: void addWakeupSocket(int,int)>($i2, 0);
+
+        return;
+    }
+
+    protected int doSelect(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        long l0;
+        sun.nio.ch.SelectionKeyImpl[] $r1;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock $r2, $r6, $r7, $r11;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i1, $i2;
+        boolean $z0;
+        java.io.IOException $r10;
+        sun.nio.ch.WindowsSelectorImpl$StartLock $r3;
+        java.util.List $r5;
+        sun.nio.ch.WindowsSelectorImpl$SubSelector $r4;
+        java.nio.channels.ClosedSelectorException $r8;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        if $r1 != null goto label01;
+
+        $r8 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r8.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r8;
+
+     label01:
+        r0.<sun.nio.ch.WindowsSelectorImpl: long timeout> = l0;
+
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void processDeregisterQueue()>();
+
+        $z0 = r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered>;
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void resetWakeupSocket()>();
+
+        return 0;
+
+     label02:
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void adjustThreadsCount()>();
+
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FinishLock: void access$200(sun.nio.ch.WindowsSelectorImpl$FinishLock)>($r2);
+
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$StartLock startLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$StartLock: void access$300(sun.nio.ch.WindowsSelectorImpl$StartLock)>($r3);
+
+     label03:
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void begin()>();
+
+     label04:
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$SubSelector subSelector>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$SubSelector: int access$400(sun.nio.ch.WindowsSelectorImpl$SubSelector)>($r4);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FinishLock: void access$500(sun.nio.ch.WindowsSelectorImpl$FinishLock,java.io.IOException)>($r11, $r10);
+
+     label07:
+        $r5 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $i1 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        if $i1 <= 0 goto label08;
+
+        $r7 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FinishLock: void access$600(sun.nio.ch.WindowsSelectorImpl$FinishLock)>($r7);
+
+     label08:
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void end()>();
+
+        goto label11;
+
+     label09:
+        $r9 := @caughtexception;
+
+     label10:
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void end()>();
+
+        throw $r9;
+
+     label11:
+        $r6 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FinishLock: void access$700(sun.nio.ch.WindowsSelectorImpl$FinishLock)>($r6);
+
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void processDeregisterQueue()>();
+
+        $i2 = specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: int updateSelectedKeys()>();
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void resetWakeupSocket()>();
+
+        return $i2;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private void adjustThreadsCount()
+    {
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i10;
+        java.util.List $r1, $r2, $r3, $r4, $r7, $r9;
+        java.lang.Object $r5;
+        sun.nio.ch.WindowsSelectorImpl$SelectThread $r6, $r10;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 <= $i1 goto label3;
+
+        $r7 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        i7 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+     label1:
+        $i6 = r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        if i7 >= $i6 goto label2;
+
+        $r10 = new sun.nio.ch.WindowsSelectorImpl$SelectThread;
+
+        specialinvoke $r10.<sun.nio.ch.WindowsSelectorImpl$SelectThread: void <init>(sun.nio.ch.WindowsSelectorImpl,int,sun.nio.ch.WindowsSelectorImpl$1)>(r0, i7, null);
+
+        $r9 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        virtualinvoke $r10.<sun.nio.ch.WindowsSelectorImpl$SelectThread: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r10.<sun.nio.ch.WindowsSelectorImpl$SelectThread: void start()>();
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $i3 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i2 >= $i3 goto label5;
+
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $i4 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        i8 = $i4 - 1;
+
+     label4:
+        $i5 = r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        if i8 < $i5 goto label5;
+
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.lang.Object remove(int)>(i8);
+
+        $r6 = (sun.nio.ch.WindowsSelectorImpl$SelectThread) $r5;
+
+        virtualinvoke $r6.<sun.nio.ch.WindowsSelectorImpl$SelectThread: void makeZombie()>();
+
+        $i10 = (int) -1;
+
+        i8 = i8 + $i10;
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    private void setWakeupSocket()
+    {
+        int $i0;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSinkFd>;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void setWakeupSocket0(int)>($i0);
+
+        return;
+    }
+
+    private native void setWakeupSocket0(int);
+
+    private void resetWakeupSocket()
+    {
+        java.lang.Throwable $r2;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object interruptLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered>;
+
+        if $z0 != 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSourceFd>;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void resetWakeupSocket0(int)>($i0);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered> = 0;
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private native void resetWakeupSocket0(int);
+
+    private native boolean discardUrgentData(int);
+
+    private int updateSelectedKeys()
+    {
+        java.util.Iterator $r3;
+        long $l0, $l1, $l2, $l4;
+        java.util.List $r2;
+        sun.nio.ch.WindowsSelectorImpl$SubSelector $r1, $r6;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i3, $i5, i6;
+        java.lang.Object $r4;
+        sun.nio.ch.WindowsSelectorImpl$SelectThread r5;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $l0 = r0.<sun.nio.ch.WindowsSelectorImpl: long updateCount>;
+
+        $l1 = $l0 + 1L;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: long updateCount> = $l1;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$SubSelector subSelector>;
+
+        $l2 = r0.<sun.nio.ch.WindowsSelectorImpl: long updateCount>;
+
+        $i3 = staticinvoke <sun.nio.ch.WindowsSelectorImpl$SubSelector: int access$2900(sun.nio.ch.WindowsSelectorImpl$SubSelector,long)>($r1, $l2);
+
+        i6 = 0 + $i3;
+
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.nio.ch.WindowsSelectorImpl$SelectThread) $r4;
+
+        $r6 = r5.<sun.nio.ch.WindowsSelectorImpl$SelectThread: sun.nio.ch.WindowsSelectorImpl$SubSelector subSelector>;
+
+        $l4 = r0.<sun.nio.ch.WindowsSelectorImpl: long updateCount>;
+
+        $i5 = staticinvoke <sun.nio.ch.WindowsSelectorImpl$SubSelector: int access$2900(sun.nio.ch.WindowsSelectorImpl$SubSelector,long)>($r6, $l4);
+
+        i6 = i6 + $i5;
+
+        goto label1;
+
+     label2:
+        return i6;
+    }
+
+    protected void implClose() throws java.io.IOException
+    {
+        java.lang.Throwable $r20, $r21;
+        sun.nio.ch.SelectionKeyImpl[] $r2, $r14, $r16;
+        sun.nio.ch.PollArrayWrapper $r3, $r9;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, $i1, i2;
+        sun.nio.ch.SelectionKeyImpl $r15, $r17;
+        java.nio.channels.Pipe $r5, $r7;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r11;
+        sun.nio.ch.WindowsSelectorImpl$StartLock $r12;
+        java.util.List $r10;
+        java.nio.channels.SelectableChannel $r18;
+        java.lang.Object $r1, $r4, $r13;
+        java.nio.channels.Pipe$SourceChannel $r8;
+        sun.nio.ch.WindowsSelectorImpl$SelectThread r22;
+        sun.nio.ch.SelChImpl $r19;
+        java.nio.channels.Pipe$SinkChannel $r6;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object closeLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        if $r2 == null goto label12;
+
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        if $r3 == null goto label12;
+
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object interruptLock>;
+
+        entermonitor $r4;
+
+     label02:
+        r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered> = 1;
+
+        exitmonitor $r4;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r21 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label05:
+        throw $r21;
+
+     label06:
+        $r5 = r0.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Pipe wakeupPipe>;
+
+        $r6 = virtualinvoke $r5.<java.nio.channels.Pipe: java.nio.channels.Pipe$SinkChannel sink()>();
+
+        virtualinvoke $r6.<java.nio.channels.Pipe$SinkChannel: void close()>();
+
+        $r7 = r0.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Pipe wakeupPipe>;
+
+        $r8 = virtualinvoke $r7.<java.nio.channels.Pipe: java.nio.channels.Pipe$SourceChannel source()>();
+
+        virtualinvoke $r8.<java.nio.channels.Pipe$SourceChannel: void close()>();
+
+        i2 = 1;
+
+     label07:
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        if i2 >= $i0 goto label09;
+
+        $i1 = i2 % 1024;
+
+        if $i1 == 0 goto label08;
+
+        $r14 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $r15 = $r14[i2];
+
+        virtualinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void deregister(java.nio.channels.spi.AbstractSelectionKey)>($r15);
+
+        $r16 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $r17 = $r16[i2];
+
+        $r18 = virtualinvoke $r17.<sun.nio.ch.SelectionKeyImpl: java.nio.channels.SelectableChannel channel()>();
+
+        $z1 = virtualinvoke $r18.<java.nio.channels.SelectableChannel: boolean isOpen()>();
+
+        if $z1 != 0 goto label08;
+
+        $z2 = virtualinvoke $r18.<java.nio.channels.SelectableChannel: boolean isRegistered()>();
+
+        if $z2 != 0 goto label08;
+
+        $r19 = (sun.nio.ch.SelChImpl) $r18;
+
+        interfaceinvoke $r19.<sun.nio.ch.SelChImpl: void kill()>();
+
+     label08:
+        i2 = i2 + 1;
+
+        goto label07;
+
+     label09:
+        $r9 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        virtualinvoke $r9.<sun.nio.ch.PollArrayWrapper: void free()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper> = null;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: java.util.Set selectedKeys> = null;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray> = null;
+
+        $r10 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label10:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label11;
+
+        $r13 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (sun.nio.ch.WindowsSelectorImpl$SelectThread) $r13;
+
+        virtualinvoke r22.<sun.nio.ch.WindowsSelectorImpl$SelectThread: void makeZombie()>();
+
+        goto label10;
+
+     label11:
+        $r12 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$StartLock startLock>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$StartLock: void access$300(sun.nio.ch.WindowsSelectorImpl$StartLock)>($r12);
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r20 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        throw $r20;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    protected void implRegister(sun.nio.ch.SelectionKeyImpl)
+    {
+        java.lang.Throwable $r9;
+        sun.nio.ch.SelectionKeyImpl[] $r4;
+        sun.nio.ch.PollArrayWrapper $r2, $r7;
+        java.util.HashSet $r6;
+        java.nio.channels.ClosedSelectorException $r8;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Object $r1;
+        sun.nio.ch.SelectionKeyImpl r3;
+        sun.nio.ch.WindowsSelectorImpl$FdMap $r5;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        r3 := @parameter0: sun.nio.ch.SelectionKeyImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object closeLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        if $r2 != null goto label2;
+
+        $r8 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r8.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void growIfNeeded()>();
+
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $r4[$i0] = r3;
+
+        $i1 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        virtualinvoke r3.<sun.nio.ch.SelectionKeyImpl: void setIndex(int)>($i1);
+
+        $r5 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FdMap fdMap>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FdMap: sun.nio.ch.WindowsSelectorImpl$MapEntry access$3000(sun.nio.ch.WindowsSelectorImpl$FdMap,sun.nio.ch.SelectionKeyImpl)>($r5, r3);
+
+        $r6 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.HashSet keys>;
+
+        virtualinvoke $r6.<java.util.HashSet: boolean add(java.lang.Object)>(r3);
+
+        $r7 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        virtualinvoke $r7.<sun.nio.ch.PollArrayWrapper: void addEntry(int,sun.nio.ch.SelectionKeyImpl)>($i2, r3);
+
+        $i3 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels> = $i4;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r9;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void growIfNeeded()
+    {
+        sun.nio.ch.SelectionKeyImpl[] $r1, r3, $r4;
+        sun.nio.ch.PollArrayWrapper $r2, $r5;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, $i12, $i13;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        if $i1 != $i0 goto label1;
+
+        $i10 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        i11 = $i10 * 2;
+
+        r3 = newarray (sun.nio.ch.SelectionKeyImpl)[i11];
+
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $i12 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i13 = $i12 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 1, r3, 1, $i13);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray> = r3;
+
+        $r5 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        virtualinvoke $r5.<sun.nio.ch.PollArrayWrapper: void grow(int)>(i11);
+
+     label1:
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i3 = $i2 % 1024;
+
+        if $i3 != 0 goto label2;
+
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        $i5 = r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSourceFd>;
+
+        $i4 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        virtualinvoke $r2.<sun.nio.ch.PollArrayWrapper: void addWakeupSocket(int,int)>($i5, $i4);
+
+        $i6 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i7 = $i6 + 1;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels> = $i7;
+
+        $i8 = r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        $i9 = $i8 + 1;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: int threadsCount> = $i9;
+
+     label2:
+        return;
+    }
+
+    protected void implDereg(sun.nio.ch.SelectionKeyImpl) throws java.io.IOException
+    {
+        sun.nio.ch.SelectionKeyImpl[] $r3, $r5, $r7;
+        sun.nio.ch.PollArrayWrapper $r8, $r9, $r10;
+        sun.nio.ch.WindowsSelectorImpl r1;
+        sun.nio.ch.SelectionKeyImpl r0, r6;
+        boolean $z0, $z1, $z2;
+        java.util.Set $r15;
+        sun.nio.ch.WindowsSelectorImpl$FdMap $r13;
+        java.lang.Throwable $r12;
+        java.lang.AssertionError $r17;
+        java.util.HashSet $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i19;
+        java.nio.channels.SelectableChannel $r16;
+        java.lang.Object $r2;
+        sun.nio.ch.SelChImpl $r4;
+
+        r1 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        r0 := @parameter0: sun.nio.ch.SelectionKeyImpl;
+
+        $i0 = virtualinvoke r0.<sun.nio.ch.SelectionKeyImpl: int getIndex()>();
+
+        $z0 = <sun.nio.ch.WindowsSelectorImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $i0 >= 0 goto label1;
+
+        $r17 = new java.lang.AssertionError;
+
+        specialinvoke $r17.<java.lang.AssertionError: void <init>()>();
+
+        throw $r17;
+
+     label1:
+        $r2 = r1.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object closeLock>;
+
+        entermonitor $r2;
+
+     label2:
+        $i1 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i2 = $i1 - 1;
+
+        if $i0 == $i2 goto label3;
+
+        $r5 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $i14 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i15 = $i14 - 1;
+
+        r6 = $r5[$i15];
+
+        $r7 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $r7[$i0] = r6;
+
+        virtualinvoke r6.<sun.nio.ch.SelectionKeyImpl: void setIndex(int)>($i0);
+
+        $r10 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        $r9 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        $i16 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i17 = $i16 - 1;
+
+        $r8 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        virtualinvoke $r10.<sun.nio.ch.PollArrayWrapper: void replaceEntry(sun.nio.ch.PollArrayWrapper,int,sun.nio.ch.PollArrayWrapper,int)>($r9, $i17, $r8, $i0);
+
+     label3:
+        $i19 = (int) -1;
+
+        virtualinvoke r0.<sun.nio.ch.SelectionKeyImpl: void setIndex(int)>($i19);
+
+        exitmonitor $r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r12 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r12;
+
+     label7:
+        $r3 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.SelectionKeyImpl[] channelArray>;
+
+        $i3 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i4 = $i3 - 1;
+
+        $r3[$i4] = null;
+
+        $i5 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i6 = $i5 - 1;
+
+        r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels> = $i6;
+
+        $i7 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        if $i7 == 1 goto label8;
+
+        $i8 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i9 = $i8 % 1024;
+
+        if $i9 != 1 goto label8;
+
+        $i10 = r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        $i11 = $i10 - 1;
+
+        r1.<sun.nio.ch.WindowsSelectorImpl: int totalChannels> = $i11;
+
+        $i12 = r1.<sun.nio.ch.WindowsSelectorImpl: int threadsCount>;
+
+        $i13 = $i12 - 1;
+
+        r1.<sun.nio.ch.WindowsSelectorImpl: int threadsCount> = $i13;
+
+     label8:
+        $r13 = r1.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FdMap fdMap>;
+
+        staticinvoke <sun.nio.ch.WindowsSelectorImpl$FdMap: sun.nio.ch.WindowsSelectorImpl$MapEntry access$3100(sun.nio.ch.WindowsSelectorImpl$FdMap,sun.nio.ch.SelectionKeyImpl)>($r13, r0);
+
+        $r14 = r1.<sun.nio.ch.WindowsSelectorImpl: java.util.HashSet keys>;
+
+        virtualinvoke $r14.<java.util.HashSet: boolean remove(java.lang.Object)>(r0);
+
+        $r15 = r1.<sun.nio.ch.WindowsSelectorImpl: java.util.Set selectedKeys>;
+
+        interfaceinvoke $r15.<java.util.Set: boolean remove(java.lang.Object)>(r0);
+
+        virtualinvoke r1.<sun.nio.ch.WindowsSelectorImpl: void deregister(java.nio.channels.spi.AbstractSelectionKey)>(r0);
+
+        $r16 = virtualinvoke r0.<sun.nio.ch.SelectionKeyImpl: java.nio.channels.SelectableChannel channel()>();
+
+        $z2 = virtualinvoke $r16.<java.nio.channels.SelectableChannel: boolean isOpen()>();
+
+        if $z2 != 0 goto label9;
+
+        $z1 = virtualinvoke $r16.<java.nio.channels.SelectableChannel: boolean isRegistered()>();
+
+        if $z1 != 0 goto label9;
+
+        $r4 = (sun.nio.ch.SelChImpl) $r16;
+
+        interfaceinvoke $r4.<sun.nio.ch.SelChImpl: void kill()>();
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void putEventOps(sun.nio.ch.SelectionKeyImpl, int)
+    {
+        java.lang.Throwable $r7;
+        java.nio.channels.CancelledKeyException $r9;
+        sun.nio.ch.PollArrayWrapper $r2, $r4;
+        java.nio.channels.ClosedSelectorException $r8;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        int $i0, i1, $i3;
+        java.lang.Object $r1;
+        sun.nio.ch.SelectionKeyImpl r3;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        r3 := @parameter0: sun.nio.ch.SelectionKeyImpl;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object closeLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        if $r2 != null goto label2;
+
+        $r8 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r8.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        $i0 = virtualinvoke r3.<sun.nio.ch.SelectionKeyImpl: int getIndex()>();
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label3;
+
+        $r9 = new java.nio.channels.CancelledKeyException;
+
+        specialinvoke $r9.<java.nio.channels.CancelledKeyException: void <init>()>();
+
+        throw $r9;
+
+     label3:
+        $r4 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        virtualinvoke $r4.<sun.nio.ch.PollArrayWrapper: void putEventOps(int,int)>($i0, i1);
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.nio.channels.Selector wakeup()
+    {
+        java.lang.Throwable $r2;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object interruptLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered>;
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: void setWakeupSocket()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered> = 1;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r2;
+
+     label6:
+        return r0;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static sun.nio.ch.WindowsSelectorImpl$StartLock access$1000(sun.nio.ch.WindowsSelectorImpl)
+    {
+        sun.nio.ch.WindowsSelectorImpl$StartLock $r1;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$StartLock startLock>;
+
+        return $r1;
+    }
+
+    static java.util.List access$1200(sun.nio.ch.WindowsSelectorImpl)
+    {
+        java.util.List $r1;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.util.List threads>;
+
+        return $r1;
+    }
+
+    static sun.nio.ch.WindowsSelectorImpl$FinishLock access$1300(sun.nio.ch.WindowsSelectorImpl)
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock $r1;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock finishLock>;
+
+        return $r1;
+    }
+
+    static sun.nio.ch.PollArrayWrapper access$1400(sun.nio.ch.WindowsSelectorImpl)
+    {
+        sun.nio.ch.WindowsSelectorImpl r0;
+        sun.nio.ch.PollArrayWrapper $r1;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.PollArrayWrapper pollWrapper>;
+
+        return $r1;
+    }
+
+    static int access$1500(sun.nio.ch.WindowsSelectorImpl)
+    {
+        int $i0;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int totalChannels>;
+
+        return $i0;
+    }
+
+    static long access$1600(sun.nio.ch.WindowsSelectorImpl)
+    {
+        long $l0;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $l0 = r0.<sun.nio.ch.WindowsSelectorImpl: long timeout>;
+
+        return $l0;
+    }
+
+    static int access$1700(sun.nio.ch.WindowsSelectorImpl)
+    {
+        int $i0;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl: int wakeupSourceFd>;
+
+        return $i0;
+    }
+
+    static java.lang.Object access$1800(sun.nio.ch.WindowsSelectorImpl)
+    {
+        java.lang.Object $r1;
+        sun.nio.ch.WindowsSelectorImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: java.lang.Object interruptLock>;
+
+        return $r1;
+    }
+
+    static boolean access$1902(sun.nio.ch.WindowsSelectorImpl, boolean)
+    {
+        sun.nio.ch.WindowsSelectorImpl r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl: boolean interruptTriggered> = z0;
+
+        return z0;
+    }
+
+    static sun.nio.ch.WindowsSelectorImpl$FdMap access$2000(sun.nio.ch.WindowsSelectorImpl)
+    {
+        sun.nio.ch.WindowsSelectorImpl r0;
+        sun.nio.ch.WindowsSelectorImpl$FdMap $r1;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FdMap fdMap>;
+
+        return $r1;
+    }
+
+    static boolean access$2200(sun.nio.ch.WindowsSelectorImpl, int)
+    {
+        int i0;
+        sun.nio.ch.WindowsSelectorImpl r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        i0 := @parameter1: int;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl: boolean discardUrgentData(int)>(i0);
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.nio.ch.WindowsSelectorImpl: int MAX_SELECTABLE_FDS> = 1024;
+
+        $r0 = class "Lsun/nio/ch/WindowsSelectorImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.WindowsSelectorImpl: boolean $assertionsDisabled> = $z1;
+
+        staticinvoke <sun.nio.ch.IOUtil: void load()>();
+
+        return;
+    }
+}

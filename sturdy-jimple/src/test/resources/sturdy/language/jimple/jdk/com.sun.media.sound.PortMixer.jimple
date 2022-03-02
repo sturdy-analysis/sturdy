@@ -1,0 +1,699 @@
+final class com.sun.media.sound.PortMixer extends com.sun.media.sound.AbstractMixer
+{
+    private static final int SRC_UNKNOWN;
+    private static final int SRC_MICROPHONE;
+    private static final int SRC_LINE_IN;
+    private static final int SRC_COMPACT_DISC;
+    private static final int SRC_MASK;
+    private static final int DST_UNKNOWN;
+    private static final int DST_SPEAKER;
+    private static final int DST_HEADPHONE;
+    private static final int DST_LINE_OUT;
+    private static final int DST_MASK;
+    private javax.sound.sampled.Port$Info[] portInfos;
+    private com.sun.media.sound.PortMixer$PortMixerPort[] ports;
+    private long id;
+
+    void <init>(com.sun.media.sound.PortMixerProvider$PortMixerInfo)
+    {
+        byte $b3, $b5, $b18;
+        boolean $z0, $z1, $z2;
+        javax.sound.sampled.Line$Info[] $r9, $r12;
+        com.sun.media.sound.PortMixerProvider$PortMixerInfo r1;
+        java.lang.Exception $r16;
+        com.sun.media.sound.PortMixer r0;
+        java.lang.Throwable $r15;
+        long $l1, $l2, $l4, $l8, $l9, $l15, $l17, $l19;
+        int $i0, $i6, $i7, $i10, $i11, $i12, $i13, $i14, $i16, i20, i21, i22, i23, i24, i25, i26, $i28;
+        javax.sound.sampled.Port$Info[] $r2, $r3, $r4, $r5, $r7, $r10, $r13;
+        javax.sound.sampled.Port$Info $r6, $r8, $r11, $r14;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        r1 := @parameter0: com.sun.media.sound.PortMixerProvider$PortMixerInfo;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMixer: void <init>(javax.sound.sampled.Mixer$Info,javax.sound.sampled.Control[],javax.sound.sampled.Line$Info[],javax.sound.sampled.Line$Info[])>(r1, null, null, null);
+
+        r0.<com.sun.media.sound.PortMixer: long id> = 0L;
+
+        i20 = 0;
+
+        i21 = 0;
+
+        i22 = 0;
+
+     label01:
+        $i0 = virtualinvoke r0.<com.sun.media.sound.PortMixer: int getMixerIndex()>();
+
+        $l1 = staticinvoke <com.sun.media.sound.PortMixer: long nOpen(int)>($i0);
+
+        r0.<com.sun.media.sound.PortMixer: long id> = $l1;
+
+        $l2 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label02;
+
+        $l15 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        $i16 = staticinvoke <com.sun.media.sound.PortMixer: int nGetPortCount(long)>($l15);
+
+        i20 = $i16;
+
+        if $i16 >= 0 goto label02;
+
+        i20 = 0;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r16 := @caughtexception;
+
+     label04:
+        $r2 = newarray (javax.sound.sampled.Port$Info)[i20];
+
+        r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos> = $r2;
+
+        i23 = 0;
+
+     label05:
+        if i23 >= i20 goto label10;
+
+        $l9 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        $i10 = staticinvoke <com.sun.media.sound.PortMixer: int nGetPortType(long,int)>($l9, i23);
+
+        $i14 = i21;
+
+        $i11 = $i10 & 255;
+
+        if $i11 == 0 goto label06;
+
+        $z1 = 1;
+
+        goto label07;
+
+     label06:
+        $z1 = 0;
+
+     label07:
+        i21 = $i14 + $z1;
+
+        $i13 = i22;
+
+        $i28 = (int) 65280;
+
+        $i12 = $i10 & $i28;
+
+        if $i12 == 0 goto label08;
+
+        $z2 = 1;
+
+        goto label09;
+
+     label08:
+        $z2 = 0;
+
+     label09:
+        i22 = $i13 + $z2;
+
+        $r13 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r14 = specialinvoke r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info getPortInfo(int,int)>(i23, $i10);
+
+        $r13[i23] = $r14;
+
+        i23 = i23 + 1;
+
+        goto label05;
+
+     label10:
+        $l4 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label11;
+
+        $l8 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nClose(long)>($l8);
+
+     label11:
+        r0.<com.sun.media.sound.PortMixer: long id> = 0L;
+
+        goto label15;
+
+     label12:
+        $r15 := @caughtexception;
+
+     label13:
+        $l17 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        $b18 = $l17 cmp 0L;
+
+        if $b18 == 0 goto label14;
+
+        $l19 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nClose(long)>($l19);
+
+     label14:
+        r0.<com.sun.media.sound.PortMixer: long id> = 0L;
+
+        throw $r15;
+
+     label15:
+        $r3 = newarray (javax.sound.sampled.Port$Info)[i21];
+
+        r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info[] sourceLineInfo> = $r3;
+
+        $r4 = newarray (javax.sound.sampled.Port$Info)[i22];
+
+        r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info[] targetLineInfo> = $r4;
+
+        i24 = 0;
+
+        i25 = 0;
+
+        i26 = 0;
+
+     label16:
+        if i26 >= i20 goto label19;
+
+        $r5 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r6 = $r5[i26];
+
+        $z0 = virtualinvoke $r6.<javax.sound.sampled.Port$Info: boolean isSource()>();
+
+        if $z0 == 0 goto label17;
+
+        $r12 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i7 = i24;
+
+        i24 = i24 + 1;
+
+        $r10 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r11 = $r10[i26];
+
+        $r12[$i7] = $r11;
+
+        goto label18;
+
+     label17:
+        $r9 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i6 = i25;
+
+        i25 = i25 + 1;
+
+        $r7 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r8 = $r7[i26];
+
+        $r9[$i6] = $r8;
+
+     label18:
+        i26 = i26 + 1;
+
+        goto label16;
+
+     label19:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Throwable from label01 to label10 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info) throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.PortMixer r0;
+        javax.sound.sampled.Port $r6;
+        javax.sound.sampled.Line$Info r1, $r2;
+        int $i0, i1;
+        javax.sound.sampled.Port$Info[] $r3, $r4;
+        java.lang.String $r11;
+        boolean $z0, $z1;
+        javax.sound.sampled.Port$Info $r5;
+        java.lang.IllegalArgumentException $r7;
+        java.lang.StringBuilder $r8, $r9, $r10;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line$Info;
+
+        $r2 = virtualinvoke r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info getLineInfo(javax.sound.sampled.Line$Info)>(r1);
+
+        if $r2 == null goto label3;
+
+        $z0 = $r2 instanceof javax.sound.sampled.Port$Info;
+
+        if $z0 == 0 goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r5 = $r4[i1];
+
+        $z1 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = virtualinvoke r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port getPort(int)>(i1);
+
+        return $r6;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Line unsupported: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+    }
+
+    public int getMaxLines(javax.sound.sampled.Line$Info)
+    {
+        com.sun.media.sound.PortMixer r0;
+        javax.sound.sampled.Line$Info r1, $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line$Info;
+
+        $r2 = virtualinvoke r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Line$Info getLineInfo(javax.sound.sampled.Line$Info)>(r1);
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = $r2 instanceof javax.sound.sampled.Port$Info;
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    protected void implOpen() throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.PortMixer r0;
+        int $i0;
+        long $l1;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.PortMixer: int getMixerIndex()>();
+
+        $l1 = staticinvoke <com.sun.media.sound.PortMixer: long nOpen(int)>($i0);
+
+        r0.<com.sun.media.sound.PortMixer: long id> = $l1;
+
+        return;
+    }
+
+    protected void implClose()
+    {
+        com.sun.media.sound.PortMixer r0;
+        com.sun.media.sound.PortMixer$PortMixerPort $r4, $r6;
+        long l0;
+        com.sun.media.sound.PortMixer$PortMixerPort[] $r1, $r2, $r3, $r5;
+        int $i1, i2;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        l0 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        r0.<com.sun.media.sound.PortMixer: long id> = 0L;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nClose(long)>(l0);
+
+        $r1 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        if $r1 == null goto label3;
+
+        i2 = 0;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label3;
+
+        $r3 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r4 = $r3[i2];
+
+        if $r4 == null goto label2;
+
+        $r5 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r6 = $r5[i2];
+
+        staticinvoke <com.sun.media.sound.PortMixer$PortMixerPort: void access$000(com.sun.media.sound.PortMixer$PortMixerPort)>($r6);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void implStart()
+    {
+        com.sun.media.sound.PortMixer r0;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        return;
+    }
+
+    protected void implStop()
+    {
+        com.sun.media.sound.PortMixer r0;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        return;
+    }
+
+    private javax.sound.sampled.Port$Info getPortInfo(int, int)
+    {
+        com.sun.media.sound.PortMixer r4;
+        com.sun.media.sound.PortMixer$PortInfo $r3, $r9;
+        javax.sound.sampled.Port$Info $r0, $r1, $r2, $r6, $r7, $r8;
+        long $l1, $l3;
+        int i0, i2;
+        java.lang.String $r5, $r10;
+
+        r4 := @this: com.sun.media.sound.PortMixer;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        lookupswitch(i0)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 256: goto label5;
+            case 512: goto label6;
+            case 768: goto label7;
+            case 1024: goto label8;
+            default: goto label9;
+        };
+
+     label1:
+        $r9 = new com.sun.media.sound.PortMixer$PortInfo;
+
+        $l3 = virtualinvoke r4.<com.sun.media.sound.PortMixer: long getID()>();
+
+        $r10 = staticinvoke <com.sun.media.sound.PortMixer: java.lang.String nGetPortName(long,int)>($l3, i2);
+
+        specialinvoke $r9.<com.sun.media.sound.PortMixer$PortInfo: void <init>(java.lang.String,boolean,com.sun.media.sound.PortMixer$1)>($r10, 1, null);
+
+        return $r9;
+
+     label2:
+        $r8 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info MICROPHONE>;
+
+        return $r8;
+
+     label3:
+        $r7 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info LINE_IN>;
+
+        return $r7;
+
+     label4:
+        $r6 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info COMPACT_DISC>;
+
+        return $r6;
+
+     label5:
+        $r3 = new com.sun.media.sound.PortMixer$PortInfo;
+
+        $l1 = virtualinvoke r4.<com.sun.media.sound.PortMixer: long getID()>();
+
+        $r5 = staticinvoke <com.sun.media.sound.PortMixer: java.lang.String nGetPortName(long,int)>($l1, i2);
+
+        specialinvoke $r3.<com.sun.media.sound.PortMixer$PortInfo: void <init>(java.lang.String,boolean,com.sun.media.sound.PortMixer$1)>($r5, 0, null);
+
+        return $r3;
+
+     label6:
+        $r2 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info SPEAKER>;
+
+        return $r2;
+
+     label7:
+        $r1 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info HEADPHONE>;
+
+        return $r1;
+
+     label8:
+        $r0 = <javax.sound.sampled.Port$Info: javax.sound.sampled.Port$Info LINE_OUT>;
+
+        return $r0;
+
+     label9:
+        return null;
+    }
+
+    int getMixerIndex()
+    {
+        com.sun.media.sound.PortMixer r0;
+        javax.sound.sampled.Mixer$Info $r1;
+        com.sun.media.sound.PortMixerProvider$PortMixerInfo $r2;
+        int $i0;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Mixer$Info getMixerInfo()>();
+
+        $r2 = (com.sun.media.sound.PortMixerProvider$PortMixerInfo) $r1;
+
+        $i0 = virtualinvoke $r2.<com.sun.media.sound.PortMixerProvider$PortMixerInfo: int getIndex()>();
+
+        return $i0;
+    }
+
+    javax.sound.sampled.Port getPort(int)
+    {
+        com.sun.media.sound.PortMixer r0;
+        int i0, $i1;
+        javax.sound.sampled.Port$Info[] $r7, $r12;
+        com.sun.media.sound.PortMixer$PortMixerPort $r3, $r5, $r6, $r11;
+        javax.sound.sampled.Port$Info $r8;
+        com.sun.media.sound.PortMixer$PortMixerPort[] $r1, $r2, $r4, $r9, $r10, $r13;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        if $r1 != null goto label1;
+
+        $r12 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $i1 = lengthof $r12;
+
+        $r13 = newarray (com.sun.media.sound.PortMixer$PortMixerPort)[$i1];
+
+        r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports> = $r13;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r3 = $r2[i0];
+
+        if $r3 != null goto label2;
+
+        $r9 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r6 = new com.sun.media.sound.PortMixer$PortMixerPort;
+
+        $r7 = r0.<com.sun.media.sound.PortMixer: javax.sound.sampled.Port$Info[] portInfos>;
+
+        $r8 = $r7[i0];
+
+        specialinvoke $r6.<com.sun.media.sound.PortMixer$PortMixerPort: void <init>(javax.sound.sampled.Port$Info,com.sun.media.sound.PortMixer,int,com.sun.media.sound.PortMixer$1)>($r8, r0, i0, null);
+
+        $r9[i0] = $r6;
+
+        $r10 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r11 = $r10[i0];
+
+        return $r11;
+
+     label2:
+        $r4 = r0.<com.sun.media.sound.PortMixer: com.sun.media.sound.PortMixer$PortMixerPort[] ports>;
+
+        $r5 = $r4[i0];
+
+        return $r5;
+    }
+
+    long getID()
+    {
+        com.sun.media.sound.PortMixer r0;
+        long $l0;
+
+        r0 := @this: com.sun.media.sound.PortMixer;
+
+        $l0 = r0.<com.sun.media.sound.PortMixer: long id>;
+
+        return $l0;
+    }
+
+    private static native long nOpen(int) throws javax.sound.sampled.LineUnavailableException;
+
+    private static native void nClose(long);
+
+    private static native int nGetPortCount(long);
+
+    private static native int nGetPortType(long, int);
+
+    private static native java.lang.String nGetPortName(long, int);
+
+    private static native void nGetControls(long, int, java.util.Vector);
+
+    private static native void nControlSetIntValue(long, int);
+
+    private static native int nControlGetIntValue(long);
+
+    private static native void nControlSetFloatValue(long, float);
+
+    private static native float nControlGetFloatValue(long);
+
+    static void access$300(long, int, java.util.Vector)
+    {
+        int i1;
+        long l0;
+        java.util.Vector r0;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: java.util.Vector;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nGetControls(long,int,java.util.Vector)>(l0, i1, r0);
+
+        return;
+    }
+
+    static void access$700(long, int)
+    {
+        int i1;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nControlSetIntValue(long,int)>(l0, i1);
+
+        return;
+    }
+
+    static int access$800(long)
+    {
+        int $i1;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $i1 = staticinvoke <com.sun.media.sound.PortMixer: int nControlGetIntValue(long)>(l0);
+
+        return $i1;
+    }
+
+    static void access$1100(long, float)
+    {
+        float f0;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        f0 := @parameter1: float;
+
+        staticinvoke <com.sun.media.sound.PortMixer: void nControlSetFloatValue(long,float)>(l0, f0);
+
+        return;
+    }
+
+    static float access$1200(long)
+    {
+        float $f0;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $f0 = staticinvoke <com.sun.media.sound.PortMixer: float nControlGetFloatValue(long)>(l0);
+
+        return $f0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.PortMixer: int DST_MASK> = 65280;
+
+        <com.sun.media.sound.PortMixer: int DST_LINE_OUT> = 1024;
+
+        <com.sun.media.sound.PortMixer: int DST_HEADPHONE> = 768;
+
+        <com.sun.media.sound.PortMixer: int DST_SPEAKER> = 512;
+
+        <com.sun.media.sound.PortMixer: int DST_UNKNOWN> = 256;
+
+        <com.sun.media.sound.PortMixer: int SRC_MASK> = 255;
+
+        <com.sun.media.sound.PortMixer: int SRC_COMPACT_DISC> = 4;
+
+        <com.sun.media.sound.PortMixer: int SRC_LINE_IN> = 3;
+
+        <com.sun.media.sound.PortMixer: int SRC_MICROPHONE> = 2;
+
+        <com.sun.media.sound.PortMixer: int SRC_UNKNOWN> = 1;
+
+        return;
+    }
+}

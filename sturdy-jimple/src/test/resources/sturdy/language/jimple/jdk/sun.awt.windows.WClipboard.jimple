@@ -1,0 +1,311 @@
+final class sun.awt.windows.WClipboard extends sun.awt.datatransfer.SunClipboard
+{
+    private boolean isClipboardViewerRegistered;
+
+    void <init>()
+    {
+        sun.awt.windows.WClipboard r0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        specialinvoke r0.<sun.awt.datatransfer.SunClipboard: void <init>(java.lang.String)>("System");
+
+        return;
+    }
+
+    public long getID()
+    {
+        sun.awt.windows.WClipboard r0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        return 0L;
+    }
+
+    protected void setContentsNative(java.awt.datatransfer.Transferable)
+    {
+        java.lang.Throwable $r13;
+        byte[] $r12;
+        java.awt.datatransfer.DataFlavor r10;
+        sun.awt.windows.WClipboard r4;
+        java.awt.datatransfer.Transferable r1;
+        sun.awt.datatransfer.DataTransferer $r0, $r11;
+        long $l0, $l1;
+        java.awt.datatransfer.FlavorTable $r2;
+        java.lang.Long r8;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r6;
+        java.util.Set $r5;
+        java.io.IOException $r14;
+        java.lang.Object $r7, $r9;
+        java.util.SortedMap $r3;
+
+        r4 := @this: sun.awt.windows.WClipboard;
+
+        r1 := @parameter0: java.awt.datatransfer.Transferable;
+
+        $r0 = staticinvoke <sun.awt.windows.WDataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r2 = staticinvoke <sun.awt.windows.WClipboard: java.awt.datatransfer.FlavorTable getDefaultFlavorTable()>();
+
+        $r3 = virtualinvoke $r0.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.FlavorTable)>(r1, $r2);
+
+        virtualinvoke r4.<sun.awt.windows.WClipboard: void openClipboard(sun.awt.datatransfer.SunClipboard)>(r4);
+
+     label01:
+        $r5 = interfaceinvoke $r3.<java.util.Map: java.util.Set keySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.lang.Long) $r7;
+
+        $r9 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r8);
+
+        r10 = (java.awt.datatransfer.DataFlavor) $r9;
+
+     label03:
+        $r11 = staticinvoke <sun.awt.windows.WDataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $l0 = virtualinvoke r8.<java.lang.Long: long longValue()>();
+
+        $r12 = virtualinvoke $r11.<sun.awt.datatransfer.DataTransferer: byte[] translateTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.DataFlavor,long)>(r1, r10, $l0);
+
+        $l1 = virtualinvoke r8.<java.lang.Long: long longValue()>();
+
+        specialinvoke r4.<sun.awt.windows.WClipboard: void publishClipboardData(long,byte[])>($l1, $r12);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r14 := @caughtexception;
+
+        $z1 = virtualinvoke r10.<java.awt.datatransfer.DataFlavor: boolean isMimeTypeEqual(java.lang.String)>("application/x-java-jvm-local-objectref");
+
+        if $z1 == 0 goto label06;
+
+        $z2 = $r14 instanceof java.io.NotSerializableException;
+
+        if $z2 != 0 goto label07;
+
+     label06:
+        virtualinvoke $r14.<java.io.IOException: void printStackTrace()>();
+
+     label07:
+        goto label02;
+
+     label08:
+        virtualinvoke r4.<sun.awt.windows.WClipboard: void closeClipboard()>();
+
+        goto label11;
+
+     label09:
+        $r13 := @caughtexception;
+
+     label10:
+        virtualinvoke r4.<sun.awt.windows.WClipboard: void closeClipboard()>();
+
+        throw $r13;
+
+     label11:
+        return;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private void lostSelectionOwnershipImpl()
+    {
+        sun.awt.windows.WClipboard r0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void lostOwnershipImpl()>();
+
+        return;
+    }
+
+    protected void clearNativeContext()
+    {
+        sun.awt.windows.WClipboard r0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        return;
+    }
+
+    public native void openClipboard(sun.awt.datatransfer.SunClipboard) throws java.lang.IllegalStateException;
+
+    public native void closeClipboard();
+
+    private native void publishClipboardData(long, byte[]);
+
+    private static native void init();
+
+    protected native long[] getClipboardFormats();
+
+    protected native byte[] getClipboardData(long) throws java.io.IOException;
+
+    protected void registerClipboardViewerChecked()
+    {
+        sun.awt.windows.WClipboard r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        $z0 = r0.<sun.awt.windows.WClipboard: boolean isClipboardViewerRegistered>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<sun.awt.windows.WClipboard: void registerClipboardViewer()>();
+
+        r0.<sun.awt.windows.WClipboard: boolean isClipboardViewerRegistered> = 1;
+
+     label1:
+        return;
+    }
+
+    private native void registerClipboardViewer();
+
+    protected void unregisterClipboardViewerChecked()
+    {
+        sun.awt.windows.WClipboard r0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        return;
+    }
+
+    private void handleContentsChanged()
+    {
+        java.lang.Throwable $r1;
+        java.lang.IllegalStateException $r2;
+        long[] r3;
+        sun.awt.windows.WClipboard r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WClipboard;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WClipboard: boolean areFlavorListenersRegistered()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        r3 = null;
+
+     label2:
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void openClipboard(sun.awt.datatransfer.SunClipboard)>(null);
+
+        r3 = virtualinvoke r0.<sun.awt.windows.WClipboard: long[] getClipboardFormats()>();
+
+     label3:
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void closeClipboard()>();
+
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void closeClipboard()>();
+
+        goto label6;
+
+     label5:
+        $r1 := @caughtexception;
+
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void closeClipboard()>();
+
+        throw $r1;
+
+     label6:
+        virtualinvoke r0.<sun.awt.windows.WClipboard: void checkChange(long[])>(r3);
+
+        return;
+
+        catch java.lang.IllegalStateException from label2 to label3 with label4;
+        catch java.lang.Throwable from label2 to label3 with label5;
+    }
+
+    protected java.awt.datatransfer.Transferable createLocaleTransferable(long[]) throws java.io.IOException
+    {
+        byte[] $r2;
+        sun.awt.windows.WClipboard r1;
+        long $l1;
+        java.io.IOException $r4;
+        long[] r0;
+        byte $b2;
+        int $i0, i3;
+        sun.awt.windows.WClipboard$1 $r3;
+        boolean z0;
+
+        r1 := @this: sun.awt.windows.WClipboard;
+
+        r0 := @parameter0: long[];
+
+        z0 = 0;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i3 >= $i0 goto label3;
+
+        $l1 = r0[i3];
+
+        $b2 = $l1 cmp 16L;
+
+        if $b2 != 0 goto label2;
+
+        z0 = 1;
+
+        goto label3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        if z0 != 0 goto label4;
+
+        return null;
+
+     label4:
+        $r2 = virtualinvoke r1.<sun.awt.windows.WClipboard: byte[] getClipboardData(long)>(16L);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r4 := @caughtexception;
+
+        return null;
+
+     label7:
+        $r3 = new sun.awt.windows.WClipboard$1;
+
+        specialinvoke $r3.<sun.awt.windows.WClipboard$1: void <init>(sun.awt.windows.WClipboard,byte[])>(r1, $r2);
+
+        return $r3;
+
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    static void <clinit>()
+    {
+        staticinvoke <sun.awt.windows.WClipboard: void init()>();
+
+        return;
+    }
+}

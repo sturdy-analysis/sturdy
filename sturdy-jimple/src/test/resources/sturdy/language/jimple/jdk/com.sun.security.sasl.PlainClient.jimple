@@ -1,0 +1,375 @@
+final class com.sun.security.sasl.PlainClient extends java.lang.Object implements javax.security.sasl.SaslClient
+{
+    private boolean completed;
+    private byte[] pw;
+    private java.lang.String authorizationID;
+    private java.lang.String authenticationID;
+    private static byte SEP;
+
+    void <init>(java.lang.String, java.lang.String, byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r3;
+        com.sun.security.sasl.PlainClient r0;
+        java.lang.String r1, r4;
+        javax.security.sasl.SaslException $r2;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        r4 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.sasl.PlainClient: boolean completed> = 0;
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r2.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("PLAIN: authorization ID and password must be specified");
+
+        throw $r2;
+
+     label2:
+        r0.<com.sun.security.sasl.PlainClient: java.lang.String authorizationID> = r4;
+
+        r0.<com.sun.security.sasl.PlainClient: java.lang.String authenticationID> = r1;
+
+        r0.<com.sun.security.sasl.PlainClient: byte[] pw> = r3;
+
+        return;
+    }
+
+    public java.lang.String getMechanismName()
+    {
+        com.sun.security.sasl.PlainClient r0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        return "PLAIN";
+    }
+
+    public boolean hasInitialResponse()
+    {
+        com.sun.security.sasl.PlainClient r0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        return 1;
+    }
+
+    public void dispose() throws javax.security.sasl.SaslException
+    {
+        com.sun.security.sasl.PlainClient r0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        specialinvoke r0.<com.sun.security.sasl.PlainClient: void clearPassword()>();
+
+        return;
+    }
+
+    public byte[] evaluateChallenge(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] $r3, $r4, $r5, $r6, $r7, r12, $r13, r14;
+        java.lang.IllegalStateException $r9;
+        javax.security.sasl.SaslException $r11;
+        byte $b5, $b8;
+        boolean $z0;
+        java.io.UnsupportedEncodingException $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i6, $i7, $i9, $i10, $i11, $i12, i13, i14, i15;
+        com.sun.security.sasl.PlainClient r0;
+        java.lang.String $r1, $r2, $r8;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        r12 := @parameter0: byte[];
+
+        $z0 = r0.<com.sun.security.sasl.PlainClient: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new java.lang.IllegalStateException;
+
+        specialinvoke $r9.<java.lang.IllegalStateException: void <init>(java.lang.String)>("PLAIN authentication already completed");
+
+        throw $r9;
+
+     label1:
+        r0.<com.sun.security.sasl.PlainClient: boolean completed> = 1;
+
+     label2:
+        $r1 = r0.<com.sun.security.sasl.PlainClient: java.lang.String authorizationID>;
+
+        if $r1 == null goto label3;
+
+        $r8 = r0.<com.sun.security.sasl.PlainClient: java.lang.String authorizationID>;
+
+        $r13 = virtualinvoke $r8.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        goto label4;
+
+     label3:
+        $r13 = null;
+
+     label4:
+        r14 = $r13;
+
+        $r2 = r0.<com.sun.security.sasl.PlainClient: java.lang.String authenticationID>;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        $r4 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        $i1 = lengthof $r4;
+
+        $i0 = lengthof $r3;
+
+        $i2 = $i1 + $i0;
+
+        $i3 = $i2 + 2;
+
+        if $r13 != null goto label5;
+
+        $i12 = 0;
+
+        goto label6;
+
+     label5:
+        $i12 = lengthof $r13;
+
+     label6:
+        $i4 = $i3 + $i12;
+
+        $r7 = newarray (byte)[$i4];
+
+        i13 = 0;
+
+        if r14 == null goto label7;
+
+        $i10 = lengthof r14;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r14, 0, $r7, 0, $i10);
+
+        i13 = lengthof r14;
+
+     label7:
+        i14 = i13 + 1;
+
+        $b5 = <com.sun.security.sasl.PlainClient: byte SEP>;
+
+        $r7[i13] = $b5;
+
+        $i6 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r7, i14, $i6);
+
+        $i7 = lengthof $r3;
+
+        $i11 = i14 + $i7;
+
+        i15 = $i11 + 1;
+
+        $b8 = <com.sun.security.sasl.PlainClient: byte SEP>;
+
+        $r7[$i11] = $b8;
+
+        $r6 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        $r5 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        $i9 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, $r7, i15, $i9);
+
+        specialinvoke r0.<com.sun.security.sasl.PlainClient: void clearPassword()>();
+
+     label8:
+        return $r7;
+
+     label9:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r11.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Cannot get UTF-8 encoding of ids", $r10);
+
+        throw $r11;
+
+        catch java.io.UnsupportedEncodingException from label2 to label8 with label9;
+    }
+
+    public boolean isComplete()
+    {
+        com.sun.security.sasl.PlainClient r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        $z0 = r0.<com.sun.security.sasl.PlainClient: boolean completed>;
+
+        return $z0;
+    }
+
+    public byte[] unwrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r1;
+        byte[] r3;
+        int i0, i1;
+        com.sun.security.sasl.PlainClient r0;
+        javax.security.sasl.SaslException $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        r3 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<com.sun.security.sasl.PlainClient: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r2.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("PLAIN supports neither integrity nor privacy");
+
+        throw $r2;
+
+     label1:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("PLAIN authentication not completed");
+
+        throw $r1;
+    }
+
+    public byte[] wrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r1;
+        byte[] r3;
+        int i0, i1;
+        com.sun.security.sasl.PlainClient r0;
+        javax.security.sasl.SaslException $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        r3 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<com.sun.security.sasl.PlainClient: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r2.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("PLAIN supports neither integrity nor privacy");
+
+        throw $r2;
+
+     label1:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("PLAIN authentication not completed");
+
+        throw $r1;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r1;
+        com.sun.security.sasl.PlainClient r0;
+        java.lang.String r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.security.sasl.PlainClient: boolean completed>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.qop");
+
+        if $z1 == 0 goto label1;
+
+        return "auth";
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("PLAIN authentication not completed");
+
+        throw $r1;
+    }
+
+    private void clearPassword()
+    {
+        byte[] $r1, $r2, $r3;
+        int $i0, i1;
+        com.sun.security.sasl.PlainClient r0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        $r1 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r2 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.security.sasl.PlainClient: byte[] pw>;
+
+        $r3[i1] = 0;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<com.sun.security.sasl.PlainClient: byte[] pw> = null;
+
+     label3:
+        return;
+    }
+
+    protected void finalize()
+    {
+        com.sun.security.sasl.PlainClient r0;
+
+        r0 := @this: com.sun.security.sasl.PlainClient;
+
+        specialinvoke r0.<com.sun.security.sasl.PlainClient: void clearPassword()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.security.sasl.PlainClient: byte SEP> = 0;
+
+        return;
+    }
+}

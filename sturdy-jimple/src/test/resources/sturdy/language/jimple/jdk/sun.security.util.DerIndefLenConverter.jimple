@@ -1,0 +1,1214 @@
+class sun.security.util.DerIndefLenConverter extends java.lang.Object
+{
+    private static final int LEN_LONG;
+    private static final int LEN_MASK;
+    private byte[] data;
+    private byte[] newData;
+    private int newDataPos;
+    private int dataPos;
+    private int dataSize;
+    private int index;
+    private int unresolved;
+    private java.util.ArrayList ndefsList;
+    private int numOfTotalLenBytes;
+    static final boolean $assertionsDisabled;
+
+    private static boolean isEOC(byte[], int)
+    {
+        byte[] r0;
+        byte $b1, $b3;
+        int i0, $i2;
+        boolean $z0;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $b1 = r0[i0];
+
+        if $b1 != 0 goto label1;
+
+        $i2 = i0 + 1;
+
+        $b3 = r0[$i2];
+
+        if $b3 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static boolean isLongForm(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 128;
+
+        if $i1 != 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    void <init>()
+    {
+        sun.security.util.DerIndefLenConverter r0;
+        java.util.ArrayList $r1;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.util.DerIndefLenConverter: int unresolved> = 0;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList> = $r1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int numOfTotalLenBytes> = 0;
+
+        return;
+    }
+
+    static boolean isIndefinite(int)
+    {
+        int i0, $i1;
+        boolean $z0, $z1;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isLongForm(int)>(i0);
+
+        if $z0 == 0 goto label1;
+
+        $i1 = i0 & 127;
+
+        if $i1 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private void parseTag() throws java.io.IOException
+    {
+        byte[] $r1, $r4, $r10, $r11;
+        java.lang.IndexOutOfBoundsException $r12;
+        java.lang.Integer $r3;
+        boolean $z0, $z1, $z2;
+        java.lang.AssertionError $r16;
+        java.util.ArrayList $r2, $r5, $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, $i19, $i20, $i22;
+        java.io.IOException $r15, $r17;
+        sun.security.util.DerIndefLenConverter r0;
+        java.lang.Object $r9, r14;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i0 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i1 != $i0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $z0 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isEOC(byte[],int)>($r1, $i2);
+
+        if $z0 == 0 goto label07;
+
+        i17 = 0;
+
+        r14 = null;
+
+        $r2 = r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList>;
+
+        $i3 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        i18 = $i3 - 1;
+
+     label02:
+        if i18 < 0 goto label04;
+
+        $r8 = r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.lang.Object get(int)>(i18);
+
+        r14 = $r9;
+
+        $z2 = $r9 instanceof java.lang.Integer;
+
+        if $z2 == 0 goto label03;
+
+        goto label04;
+
+     label03:
+        $r10 = (byte[]) $r9;
+
+        $r11 = (byte[]) $r10;
+
+        $i15 = lengthof $r11;
+
+        $i16 = $i15 - 3;
+
+        i17 = i17 + $i16;
+
+        $i22 = (int) -1;
+
+        i18 = i18 + $i22;
+
+        goto label02;
+
+     label04:
+        if i18 >= 0 goto label05;
+
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>("EOC does not have matching indefinite-length tag");
+
+        throw $r15;
+
+     label05:
+        $i4 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $r3 = (java.lang.Integer) r14;
+
+        $i5 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        $i6 = $i4 - $i5;
+
+        i7 = $i6 + i17;
+
+        $r4 = specialinvoke r0.<sun.security.util.DerIndefLenConverter: byte[] getLengthBytes(int)>(i7);
+
+        $r5 = r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList>;
+
+        virtualinvoke $r5.<java.util.ArrayList: java.lang.Object set(int,java.lang.Object)>(i18, $r4);
+
+        $z1 = <sun.security.util.DerIndefLenConverter: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label06;
+
+        $i14 = r0.<sun.security.util.DerIndefLenConverter: int unresolved>;
+
+        if $i14 > 0 goto label06;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>()>();
+
+        throw $r16;
+
+     label06:
+        $i8 = r0.<sun.security.util.DerIndefLenConverter: int unresolved>;
+
+        $i9 = $i8 - 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int unresolved> = $i9;
+
+        $i12 = r0.<sun.security.util.DerIndefLenConverter: int numOfTotalLenBytes>;
+
+        $i10 = lengthof $r4;
+
+        $i11 = $i10 - 3;
+
+        $i13 = $i12 + $i11;
+
+        r0.<sun.security.util.DerIndefLenConverter: int numOfTotalLenBytes> = $i13;
+
+     label07:
+        $i19 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i20 = $i19 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i20;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r12 := @caughtexception;
+
+        $r17 = new java.io.IOException;
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r17;
+
+     label10:
+        return;
+
+        catch java.lang.IndexOutOfBoundsException from label01 to label08 with label09;
+    }
+
+    private void writeTag()
+    {
+        byte[] $r1, $r2, $r3;
+        java.lang.AssertionError $r4;
+        byte $b7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12;
+        boolean $z0, $z1;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i0 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i1 != $i0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = <sun.security.util.DerIndefLenConverter: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $i10 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i12 = $i10 + 1;
+
+        $i11 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i12 < $i11 goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $z1 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isEOC(byte[],int)>($r1, $i2);
+
+        if $z1 == 0 goto label3;
+
+        $i8 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i9 = $i8 + 2;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i9;
+
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void writeTag()>();
+
+        goto label4;
+
+     label3:
+        $r2 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i3 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i4;
+
+        $r3 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i5 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i6 = $i5 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i6;
+
+        $b7 = $r3[$i5];
+
+        $r2[$i3] = $b7;
+
+     label4:
+        return;
+    }
+
+    private int parseLength() throws java.io.IOException
+    {
+        byte[] $r1, $r3;
+        java.lang.Integer $r7;
+        byte $b4, $b12;
+        boolean $z0, $z1;
+        java.util.ArrayList $r6;
+        short $s13, s17, s19, $s21, $s29;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i14, $i15, $i16, i18, i20, $i22, $i23, $i24, $i25, $i27, $i28, $i30, $i31;
+        java.io.IOException $r8, $r9;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i0 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i1 != $i0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s21 = (short) $b4;
+
+        s17 = $s21 & 255;
+
+        $i22 = (int) s17;
+
+        $z0 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isIndefinite(int)>($i22);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList>;
+
+        $r7 = new java.lang.Integer;
+
+        $i14 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>($i14);
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        $i15 = r0.<sun.security.util.DerIndefLenConverter: int unresolved>;
+
+        $i16 = $i15 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int unresolved> = $i16;
+
+        return 0;
+
+     label2:
+        i18 = 0;
+
+        $i23 = (int) s17;
+
+        $z1 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isLongForm(int)>($i23);
+
+        if $z1 == 0 goto label7;
+
+        s19 = s17 & 127;
+
+        $i24 = (int) s19;
+
+        if $i24 <= 4 goto label3;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Too much data");
+
+        throw $r8;
+
+     label3:
+        $i6 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        $i5 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i8 = $i6 - $i5;
+
+        $i25 = (int) s19;
+
+        $i7 = $i25 + 1;
+
+        if $i8 >= $i7 goto label4;
+
+        $i27 = (int) -1;
+
+        return $i27;
+
+     label4:
+        i20 = 0;
+
+     label5:
+        $i28 = (int) s19;
+
+        if i20 >= $i28 goto label6;
+
+        $i11 = i18 << 8;
+
+        $r3 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i9 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i10 = $i9 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i10;
+
+        $b12 = $r3[$i9];
+
+        $s29 = (short) $b12;
+
+        $s13 = $s29 & 255;
+
+        $i30 = (int) $s13;
+
+        i18 = $i11 + $i30;
+
+        i20 = i20 + 1;
+
+        goto label5;
+
+     label6:
+        if i18 >= 0 goto label8;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Invalid length bytes");
+
+        throw $r9;
+
+     label7:
+        $i31 = (int) s17;
+
+        i18 = $i31 & 127;
+
+     label8:
+        return i18;
+    }
+
+    private void writeLengthAndValue() throws java.io.IOException
+    {
+        byte[] $r1, $r3, $r6, $r7, r8;
+        byte $b4, $b8;
+        boolean $z0, $z1;
+        java.util.ArrayList $r4;
+        short $s9, s18, s19, $s21, $s25;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i20, $i22, $i23, $i24, $i26, $i27;
+        java.io.IOException $r9;
+        sun.security.util.DerIndefLenConverter r0;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i0 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i1 != $i0 goto label1;
+
+        return;
+
+     label1:
+        i17 = 0;
+
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s21 = (short) $b4;
+
+        s18 = $s21 & 255;
+
+        $i22 = (int) s18;
+
+        $z0 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isIndefinite(int)>($i22);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<sun.security.util.DerIndefLenConverter: java.util.ArrayList ndefsList>;
+
+        $i10 = r0.<sun.security.util.DerIndefLenConverter: int index>;
+
+        $i11 = $i10 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int index> = $i11;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i10);
+
+        $r6 = (byte[]) $r5;
+
+        r8 = (byte[]) $r6;
+
+        $r7 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i13 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i12 = lengthof r8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r8, 0, $r7, $i13, $i12);
+
+        $i15 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i14 = lengthof r8;
+
+        $i16 = $i15 + $i14;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i16;
+
+        goto label7;
+
+     label2:
+        $i23 = (int) s18;
+
+        $z1 = staticinvoke <sun.security.util.DerIndefLenConverter: boolean isLongForm(int)>($i23);
+
+        if $z1 == 0 goto label5;
+
+        s19 = s18 & 127;
+
+        i20 = 0;
+
+     label3:
+        $i24 = (int) s19;
+
+        if i20 >= $i24 goto label4;
+
+        $i7 = i17 << 8;
+
+        $r3 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i5 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i6 = $i5 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i6;
+
+        $b8 = $r3[$i5];
+
+        $s25 = (short) $b8;
+
+        $s9 = $s25 & 255;
+
+        $i26 = (int) $s9;
+
+        i17 = $i7 + $i26;
+
+        i20 = i20 + 1;
+
+        goto label3;
+
+     label4:
+        if i17 >= 0 goto label6;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Invalid length bytes");
+
+        throw $r9;
+
+     label5:
+        $i27 = (int) s18;
+
+        i17 = $i27 & 127;
+
+     label6:
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void writeLength(int)>(i17);
+
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void writeValue(int)>(i17);
+
+     label7:
+        return;
+    }
+
+    private void writeLength(int)
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15;
+        byte $b6, $b10, $b14, $b17, $b23, $b27, $b30, $b36, $b39, $b44, $b47;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i11, $i12, $i13, $i15, $i16, $i18, $i19, $i20, $i21, $i22, $i24, $i25, $i26, $i28, $i29, $i31, $i32, $i33, $i34, $i35, $i37, $i38, $i40, $i41, $i42, $i43, $i45, $i46;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 128 goto label1;
+
+        $r15 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i45 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i46 = $i45 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i46;
+
+        $b47 = (byte) i0;
+
+        $r15[$i45] = $b47;
+
+        goto label5;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        $r13 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i40 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i41 = $i40 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i41;
+
+        $r13[$i40] = -127;
+
+        $r14 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i42 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i43 = $i42 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i43;
+
+        $b44 = (byte) i0;
+
+        $r14[$i42] = $b44;
+
+        goto label5;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        $r10 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i31 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i32 = $i31 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i32;
+
+        $r10[$i31] = -126;
+
+        $r11 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i33 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i34 = $i33 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i34;
+
+        $i35 = i0 >> 8;
+
+        $b36 = (byte) $i35;
+
+        $r11[$i33] = $b36;
+
+        $r12 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i37 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i38 = $i37 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i38;
+
+        $b39 = (byte) i0;
+
+        $r12[$i37] = $b39;
+
+        goto label5;
+
+     label3:
+        if i0 >= 16777216 goto label4;
+
+        $r6 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i18 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i19 = $i18 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i19;
+
+        $r6[$i18] = -125;
+
+        $r7 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i20 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i21 = $i20 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i21;
+
+        $i22 = i0 >> 16;
+
+        $b23 = (byte) $i22;
+
+        $r7[$i20] = $b23;
+
+        $r8 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i24 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i25 = $i24 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i25;
+
+        $i26 = i0 >> 8;
+
+        $b27 = (byte) $i26;
+
+        $r8[$i24] = $b27;
+
+        $r9 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i28 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i29 = $i28 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i29;
+
+        $b30 = (byte) i0;
+
+        $r9[$i28] = $b30;
+
+        goto label5;
+
+     label4:
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i2 = $i1 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i2;
+
+        $r1[$i1] = -124;
+
+        $r2 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i3 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i4;
+
+        $i5 = i0 >> 24;
+
+        $b6 = (byte) $i5;
+
+        $r2[$i3] = $b6;
+
+        $r3 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i7 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i8 = $i7 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i8;
+
+        $i9 = i0 >> 16;
+
+        $b10 = (byte) $i9;
+
+        $r3[$i7] = $b10;
+
+        $r4 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i11 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i12 = $i11 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i12;
+
+        $i13 = i0 >> 8;
+
+        $b14 = (byte) $i13;
+
+        $r4[$i11] = $b14;
+
+        $r5 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i15 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i16 = $i15 + 1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i16;
+
+        $b17 = (byte) i0;
+
+        $r5[$i15] = $b17;
+
+     label5:
+        return;
+    }
+
+    private byte[] getLengthBytes(int)
+    {
+        byte[] r1;
+        byte $b2, $b4, $b6, $b7, $b9, $b11, $b12, $b14, $b15, $b16, $b17;
+        int i0, $i1, $i3, $i5, $i8, $i10, $i13;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 128 goto label1;
+
+        r1 = newarray (byte)[1];
+
+        $b17 = (byte) i0;
+
+        r1[0] = $b17;
+
+        goto label5;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        r1 = newarray (byte)[2];
+
+        r1[0] = -127;
+
+        $b16 = (byte) i0;
+
+        r1[1] = $b16;
+
+        goto label5;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        r1 = newarray (byte)[3];
+
+        r1[0] = -126;
+
+        $i13 = i0 >> 8;
+
+        $b14 = (byte) $i13;
+
+        r1[1] = $b14;
+
+        $b15 = (byte) i0;
+
+        r1[2] = $b15;
+
+        goto label5;
+
+     label3:
+        if i0 >= 16777216 goto label4;
+
+        r1 = newarray (byte)[4];
+
+        r1[0] = -125;
+
+        $i8 = i0 >> 16;
+
+        $b9 = (byte) $i8;
+
+        r1[1] = $b9;
+
+        $i10 = i0 >> 8;
+
+        $b11 = (byte) $i10;
+
+        r1[2] = $b11;
+
+        $b12 = (byte) i0;
+
+        r1[3] = $b12;
+
+        goto label5;
+
+     label4:
+        r1 = newarray (byte)[5];
+
+        r1[0] = -124;
+
+        $i1 = i0 >> 24;
+
+        $b2 = (byte) $i1;
+
+        r1[1] = $b2;
+
+        $i3 = i0 >> 16;
+
+        $b4 = (byte) $i3;
+
+        r1[2] = $b4;
+
+        $i5 = i0 >> 8;
+
+        $b6 = (byte) $i5;
+
+        r1[3] = $b6;
+
+        $b7 = (byte) i0;
+
+        r1[4] = $b7;
+
+     label5:
+        return r1;
+    }
+
+    private int getNumOfLenBytes(int)
+    {
+        int i0;
+        byte b1;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 128 goto label1;
+
+        b1 = 1;
+
+        goto label5;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        b1 = 2;
+
+        goto label5;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        b1 = 3;
+
+        goto label5;
+
+     label3:
+        if i0 >= 16777216 goto label4;
+
+        b1 = 4;
+
+        goto label5;
+
+     label4:
+        b1 = 5;
+
+     label5:
+        return b1;
+    }
+
+    private void writeValue(int)
+    {
+        byte[] $r1, $r2;
+        sun.security.util.DerIndefLenConverter r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $r1 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i2, $r1, $i1, i0);
+
+        $i3 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i4 = $i3 + i0;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i4;
+
+        $i5 = r0.<sun.security.util.DerIndefLenConverter: int newDataPos>;
+
+        $i6 = $i5 + i0;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = $i6;
+
+        return;
+    }
+
+    byte[] convert(byte[]) throws java.io.IOException
+    {
+        byte[] r1, $r2, $r3, $r4, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, i22;
+        java.io.IOException $r6, $r7;
+        sun.security.util.DerIndefLenConverter r0;
+
+        r0 := @this: sun.security.util.DerIndefLenConverter;
+
+        r1 := @parameter0: byte[];
+
+        r0.<sun.security.util.DerIndefLenConverter: byte[] data> = r1;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = 0;
+
+        r0.<sun.security.util.DerIndefLenConverter: int index> = 0;
+
+        $r2 = r0.<sun.security.util.DerIndefLenConverter: byte[] data>;
+
+        $i0 = lengthof $r2;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataSize> = $i0;
+
+        i22 = 0;
+
+     label1:
+        $i2 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i1 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i2 >= $i1 goto label4;
+
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void parseTag()>();
+
+        $i14 = specialinvoke r0.<sun.security.util.DerIndefLenConverter: int parseLength()>();
+
+        if $i14 >= 0 goto label2;
+
+        return null;
+
+     label2:
+        $i15 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i16 = $i15 + $i14;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = $i16;
+
+        $i17 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        if $i17 >= 0 goto label3;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("Data overflow");
+
+        throw $r7;
+
+     label3:
+        $i18 = r0.<sun.security.util.DerIndefLenConverter: int unresolved>;
+
+        if $i18 != 0 goto label1;
+
+        $i20 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        $i19 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        i22 = $i20 - $i19;
+
+        $i21 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataSize> = $i21;
+
+        goto label4;
+
+     label4:
+        $i3 = r0.<sun.security.util.DerIndefLenConverter: int unresolved>;
+
+        if $i3 == 0 goto label5;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("not all indef len BER resolved");
+
+        throw $r6;
+
+     label5:
+        $i5 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        $i4 = r0.<sun.security.util.DerIndefLenConverter: int numOfTotalLenBytes>;
+
+        $i6 = $i5 + $i4;
+
+        $i7 = $i6 + i22;
+
+        $r3 = newarray (byte)[$i7];
+
+        r0.<sun.security.util.DerIndefLenConverter: byte[] newData> = $r3;
+
+        r0.<sun.security.util.DerIndefLenConverter: int dataPos> = 0;
+
+        r0.<sun.security.util.DerIndefLenConverter: int newDataPos> = 0;
+
+        r0.<sun.security.util.DerIndefLenConverter: int index> = 0;
+
+     label6:
+        $i9 = r0.<sun.security.util.DerIndefLenConverter: int dataPos>;
+
+        $i8 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        if $i9 >= $i8 goto label7;
+
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void writeTag()>();
+
+        specialinvoke r0.<sun.security.util.DerIndefLenConverter: void writeLengthAndValue()>();
+
+        goto label6;
+
+     label7:
+        $i13 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        $r4 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        $i11 = r0.<sun.security.util.DerIndefLenConverter: int dataSize>;
+
+        $i10 = r0.<sun.security.util.DerIndefLenConverter: int numOfTotalLenBytes>;
+
+        $i12 = $i11 + $i10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i13, $r4, $i12, i22);
+
+        $r5 = r0.<sun.security.util.DerIndefLenConverter: byte[] newData>;
+
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.security.util.DerIndefLenConverter: int LEN_MASK> = 127;
+
+        <sun.security.util.DerIndefLenConverter: int LEN_LONG> = 128;
+
+        $r0 = class "Lsun/security/util/DerIndefLenConverter;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.security.util.DerIndefLenConverter: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

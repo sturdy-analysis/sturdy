@@ -1,0 +1,85 @@
+abstract class sun.security.ssl.SSLHandshake$HandshakeMessage extends java.lang.Object
+{
+    final sun.security.ssl.HandshakeContext handshakeContext;
+
+    void <init>(sun.security.ssl.HandshakeContext)
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r0;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.HandshakeContext handshakeContext> = r1;
+
+        return;
+    }
+
+    abstract sun.security.ssl.SSLHandshake handshakeType();
+
+    abstract int messageLength();
+
+    abstract void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException;
+
+    void write(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r0;
+        sun.security.ssl.SSLHandshake $r2, $r6;
+        sun.security.ssl.HandshakeOutStream r1;
+        javax.net.ssl.SSLException $r12;
+        byte $b1;
+        int $i0, $i2;
+        java.lang.StringBuilder $r5, $r7, $r8, $r9, $r11;
+        java.lang.String $r10;
+
+        r0 := @this: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $i0 = virtualinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: int messageLength()>();
+
+        if $i0 < 16777216 goto label1;
+
+        $r12 = new javax.net.ssl.SSLException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Handshake message is overflow, type = ");
+
+        $r6 = virtualinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.SSLHandshake handshakeType()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", len = ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<javax.net.ssl.SSLException: void <init>(java.lang.String)>($r10);
+
+        throw $r12;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.SSLHandshake handshakeType()>();
+
+        $b1 = $r2.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $i2 = (int) $b1;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void write(int)>($i2);
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt24(int)>($i0);
+
+        virtualinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void send(sun.security.ssl.HandshakeOutStream)>(r1);
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void complete()>();
+
+        return;
+    }
+}

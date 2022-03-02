@@ -1,0 +1,522 @@
+public final class sun.java2d.pipe.AAShapePipe extends java.lang.Object implements sun.java2d.pipe.ShapeDrawPipe, sun.java2d.pipe.ParallelogramPipe
+{
+    static final sun.java2d.pipe.RenderingEngine RDR_ENGINE;
+    private static final sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER;
+    final sun.java2d.pipe.CompositePipe outpipe;
+
+    public void <init>(sun.java2d.pipe.CompositePipe)
+    {
+        sun.java2d.pipe.AAShapePipe r0;
+        sun.java2d.pipe.CompositePipe r1;
+
+        r0 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r1 := @parameter0: sun.java2d.pipe.CompositePipe;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe> = r1;
+
+        return;
+    }
+
+    public void draw(sun.java2d.SunGraphics2D, java.awt.Shape)
+    {
+        java.awt.Stroke $r1, $r2, $r4;
+        java.awt.Shape r5;
+        sun.java2d.pipe.AAShapePipe r3;
+        java.awt.BasicStroke r6;
+        sun.java2d.SunGraphics2D r0;
+        boolean $z0;
+
+        r3 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r5 := @parameter1: java.awt.Shape;
+
+        $r1 = r0.<sun.java2d.SunGraphics2D: java.awt.Stroke stroke>;
+
+        $z0 = $r1 instanceof java.awt.BasicStroke;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<sun.java2d.SunGraphics2D: java.awt.Stroke stroke>;
+
+        r6 = (java.awt.BasicStroke) $r4;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.java2d.SunGraphics2D: java.awt.Stroke stroke>;
+
+        r5 = interfaceinvoke $r2.<java.awt.Stroke: java.awt.Shape createStrokedShape(java.awt.Shape)>(r5);
+
+        r6 = null;
+
+     label2:
+        virtualinvoke r3.<sun.java2d.pipe.AAShapePipe: void renderPath(sun.java2d.SunGraphics2D,java.awt.Shape,java.awt.BasicStroke)>(r0, r5, r6);
+
+        return;
+    }
+
+    public void fill(sun.java2d.SunGraphics2D, java.awt.Shape)
+    {
+        sun.java2d.pipe.AAShapePipe r0;
+        java.awt.Shape r2;
+        sun.java2d.SunGraphics2D r1;
+
+        r0 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r1 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        virtualinvoke r0.<sun.java2d.pipe.AAShapePipe: void renderPath(sun.java2d.SunGraphics2D,java.awt.Shape,java.awt.BasicStroke)>(r1, r2, null);
+
+        return;
+    }
+
+    public void fillParallelogram(sun.java2d.SunGraphics2D, double, double, double, double, double, double, double, double, double, double)
+    {
+        java.lang.Throwable $r11;
+        sun.java2d.ReentrantContext $r1;
+        java.awt.geom.Rectangle2D $r10;
+        sun.java2d.pipe.AATileGenerator $r7;
+        int[] r3;
+        sun.java2d.pipe.AAShapePipe r9;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9;
+        sun.java2d.pipe.AAShapePipe$TileState r2;
+        sun.java2d.ReentrantContextProvider $r0, $r8, $r12;
+        sun.java2d.pipe.RenderingEngine $r5;
+        sun.java2d.pipe.Region $r6;
+        sun.java2d.SunGraphics2D r4;
+
+        r9 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r4 := @parameter0: sun.java2d.SunGraphics2D;
+
+        d6 := @parameter1: double;
+
+        d7 := @parameter2: double;
+
+        d8 := @parameter3: double;
+
+        d9 := @parameter4: double;
+
+        d0 := @parameter5: double;
+
+        d1 := @parameter6: double;
+
+        d2 := @parameter7: double;
+
+        d3 := @parameter8: double;
+
+        d4 := @parameter9: double;
+
+        d5 := @parameter10: double;
+
+        $r0 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        $r1 = virtualinvoke $r0.<sun.java2d.ReentrantContextProvider: sun.java2d.ReentrantContext acquire()>();
+
+        r2 = (sun.java2d.pipe.AAShapePipe$TileState) $r1;
+
+     label1:
+        r3 = r2.<sun.java2d.pipe.AAShapePipe$TileState: int[] abox>;
+
+        $r5 = <sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.RenderingEngine RDR_ENGINE>;
+
+        $r6 = virtualinvoke r4.<sun.java2d.SunGraphics2D: sun.java2d.pipe.Region getCompClip()>();
+
+        $r7 = virtualinvoke $r5.<sun.java2d.pipe.RenderingEngine: sun.java2d.pipe.AATileGenerator getAATileGenerator(double,double,double,double,double,double,double,double,sun.java2d.pipe.Region,int[])>(d0, d1, d2, d3, d4, d5, 0.0, 0.0, $r6, r3);
+
+        if $r7 == null goto label2;
+
+        $r10 = virtualinvoke r2.<sun.java2d.pipe.AAShapePipe$TileState: java.awt.geom.Rectangle2D computeBBox(double,double,double,double)>(d6, d7, d8, d9);
+
+        virtualinvoke r9.<sun.java2d.pipe.AAShapePipe: void renderTiles(sun.java2d.SunGraphics2D,java.awt.Shape,sun.java2d.pipe.AATileGenerator,int[],sun.java2d.pipe.AAShapePipe$TileState)>(r4, $r10, $r7, r3, r2);
+
+     label2:
+        $r8 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r8.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>(r2);
+
+        goto label5;
+
+     label3:
+        $r11 := @caughtexception;
+
+     label4:
+        $r12 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r12.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>(r2);
+
+        throw $r11;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void drawParallelogram(sun.java2d.SunGraphics2D, double, double, double, double, double, double, double, double, double, double, double, double)
+    {
+        java.lang.Throwable $r11;
+        sun.java2d.ReentrantContext $r1;
+        java.awt.geom.Rectangle2D $r10;
+        sun.java2d.pipe.AATileGenerator $r7;
+        int[] r3;
+        sun.java2d.pipe.AAShapePipe r9;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11;
+        sun.java2d.pipe.AAShapePipe$TileState r2;
+        sun.java2d.ReentrantContextProvider $r0, $r8, $r12;
+        sun.java2d.pipe.RenderingEngine $r5;
+        sun.java2d.pipe.Region $r6;
+        sun.java2d.SunGraphics2D r4;
+
+        r9 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r4 := @parameter0: sun.java2d.SunGraphics2D;
+
+        d8 := @parameter1: double;
+
+        d9 := @parameter2: double;
+
+        d10 := @parameter3: double;
+
+        d11 := @parameter4: double;
+
+        d0 := @parameter5: double;
+
+        d1 := @parameter6: double;
+
+        d2 := @parameter7: double;
+
+        d3 := @parameter8: double;
+
+        d4 := @parameter9: double;
+
+        d5 := @parameter10: double;
+
+        d6 := @parameter11: double;
+
+        d7 := @parameter12: double;
+
+        $r0 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        $r1 = virtualinvoke $r0.<sun.java2d.ReentrantContextProvider: sun.java2d.ReentrantContext acquire()>();
+
+        r2 = (sun.java2d.pipe.AAShapePipe$TileState) $r1;
+
+     label1:
+        r3 = r2.<sun.java2d.pipe.AAShapePipe$TileState: int[] abox>;
+
+        $r5 = <sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.RenderingEngine RDR_ENGINE>;
+
+        $r6 = virtualinvoke r4.<sun.java2d.SunGraphics2D: sun.java2d.pipe.Region getCompClip()>();
+
+        $r7 = virtualinvoke $r5.<sun.java2d.pipe.RenderingEngine: sun.java2d.pipe.AATileGenerator getAATileGenerator(double,double,double,double,double,double,double,double,sun.java2d.pipe.Region,int[])>(d0, d1, d2, d3, d4, d5, d6, d7, $r6, r3);
+
+        if $r7 == null goto label2;
+
+        $r10 = virtualinvoke r2.<sun.java2d.pipe.AAShapePipe$TileState: java.awt.geom.Rectangle2D computeBBox(double,double,double,double)>(d8, d9, d10, d11);
+
+        virtualinvoke r9.<sun.java2d.pipe.AAShapePipe: void renderTiles(sun.java2d.SunGraphics2D,java.awt.Shape,sun.java2d.pipe.AATileGenerator,int[],sun.java2d.pipe.AAShapePipe$TileState)>(r4, $r10, $r7, r3, r2);
+
+     label2:
+        $r8 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r8.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>(r2);
+
+        goto label5;
+
+     label3:
+        $r11 := @caughtexception;
+
+     label4:
+        $r12 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r12.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>(r2);
+
+        throw $r11;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void renderPath(sun.java2d.SunGraphics2D, java.awt.Shape, java.awt.BasicStroke)
+    {
+        java.lang.Throwable $r13;
+        sun.java2d.ReentrantContext $r3;
+        sun.java2d.pipe.AATileGenerator $r8;
+        int[] $r12;
+        sun.java2d.pipe.AAShapePipe r10;
+        int $i0, $i1;
+        boolean z0, $z1, $z2;
+        java.awt.Shape r4;
+        sun.java2d.pipe.AAShapePipe$TileState $r11;
+        sun.java2d.ReentrantContextProvider $r2, $r9, $r14;
+        sun.java2d.pipe.RenderingEngine $r5;
+        java.awt.geom.AffineTransform $r6;
+        sun.java2d.pipe.Region $r7;
+        java.awt.BasicStroke r0;
+        sun.java2d.SunGraphics2D r1;
+
+        r10 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r1 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r4 := @parameter1: java.awt.Shape;
+
+        r0 := @parameter2: java.awt.BasicStroke;
+
+        if r0 == null goto label1;
+
+        $i0 = r1.<sun.java2d.SunGraphics2D: int strokeHint>;
+
+        if $i0 == 2 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        z0 = $z1;
+
+        $i1 = r1.<sun.java2d.SunGraphics2D: int strokeState>;
+
+        if $i1 > 1 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        $r2 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.ReentrantContextProvider: sun.java2d.ReentrantContext acquire()>();
+
+        $r11 = (sun.java2d.pipe.AAShapePipe$TileState) $r3;
+
+     label5:
+        $r12 = $r11.<sun.java2d.pipe.AAShapePipe$TileState: int[] abox>;
+
+        $r5 = <sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.RenderingEngine RDR_ENGINE>;
+
+        $r6 = r1.<sun.java2d.SunGraphics2D: java.awt.geom.AffineTransform transform>;
+
+        $r7 = virtualinvoke r1.<sun.java2d.SunGraphics2D: sun.java2d.pipe.Region getCompClip()>();
+
+        $r8 = virtualinvoke $r5.<sun.java2d.pipe.RenderingEngine: sun.java2d.pipe.AATileGenerator getAATileGenerator(java.awt.Shape,java.awt.geom.AffineTransform,sun.java2d.pipe.Region,java.awt.BasicStroke,boolean,boolean,int[])>(r4, $r6, $r7, r0, $z2, z0, $r12);
+
+        if $r8 == null goto label6;
+
+        virtualinvoke r10.<sun.java2d.pipe.AAShapePipe: void renderTiles(sun.java2d.SunGraphics2D,java.awt.Shape,sun.java2d.pipe.AATileGenerator,int[],sun.java2d.pipe.AAShapePipe$TileState)>(r1, r4, $r8, $r12, $r11);
+
+     label6:
+        $r9 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r9.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>($r11);
+
+        goto label9;
+
+     label7:
+        $r13 := @caughtexception;
+
+     label8:
+        $r14 = <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER>;
+
+        virtualinvoke $r14.<sun.java2d.ReentrantContextProvider: void release(sun.java2d.ReentrantContext)>($r11);
+
+        throw $r13;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void renderTiles(sun.java2d.SunGraphics2D, java.awt.Shape, sun.java2d.pipe.AATileGenerator, int[], sun.java2d.pipe.AAShapePipe$TileState)
+    {
+        byte[] $r9, r17;
+        sun.java2d.pipe.AATileGenerator r8;
+        int[] r4;
+        sun.java2d.pipe.AAShapePipe r0;
+        boolean $z0;
+        java.awt.Shape r2;
+        sun.java2d.SunGraphics2D r1;
+        java.lang.Throwable $r14;
+        java.awt.Rectangle $r6;
+        int i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, i13;
+        sun.java2d.pipe.AAShapePipe$TileState r3;
+        sun.java2d.pipe.CompositePipe $r5, $r10, $r11, $r12, $r13, $r15;
+        java.lang.Object $r7, r16;
+
+        r0 := @this: sun.java2d.pipe.AAShapePipe;
+
+        r1 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r8 := @parameter2: sun.java2d.pipe.AATileGenerator;
+
+        r4 := @parameter3: int[];
+
+        r3 := @parameter4: sun.java2d.pipe.AAShapePipe$TileState;
+
+        r16 = null;
+
+     label01:
+        $r5 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        $r6 = virtualinvoke r3.<sun.java2d.pipe.AAShapePipe$TileState: java.awt.Rectangle computeDevBox(int[])>(r4);
+
+        $r7 = interfaceinvoke $r5.<sun.java2d.pipe.CompositePipe: java.lang.Object startSequence(sun.java2d.SunGraphics2D,java.awt.Shape,java.awt.Rectangle,int[])>(r1, r2, $r6, r4);
+
+        r16 = $r7;
+
+        i0 = r4[0];
+
+        i1 = r4[1];
+
+        i2 = r4[2];
+
+        i3 = r4[3];
+
+        $i4 = interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: int getTileWidth()>();
+
+        $i5 = interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: int getTileHeight()>();
+
+        $i6 = $i4 * $i5;
+
+        $r9 = virtualinvoke r3.<sun.java2d.pipe.AAShapePipe$TileState: byte[] getAlphaTile(int)>($i6);
+
+        i12 = i1;
+
+     label02:
+        if i12 >= i3 goto label10;
+
+        $i7 = i3 - i12;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i7);
+
+        i13 = i0;
+
+     label03:
+        if i13 >= i2 goto label09;
+
+        $i9 = i2 - i13;
+
+        $i10 = staticinvoke <java.lang.Math: int min(int,int)>($i4, $i9);
+
+        $i11 = interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: int getTypicalAlpha()>();
+
+        if $i11 == 0 goto label04;
+
+        $r12 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        $z0 = interfaceinvoke $r12.<sun.java2d.pipe.CompositePipe: boolean needTile(java.lang.Object,int,int,int,int)>($r7, i13, i12, $i10, $i8);
+
+        if $z0 != 0 goto label05;
+
+     label04:
+        interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: void nextTile()>();
+
+        $r11 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        interfaceinvoke $r11.<sun.java2d.pipe.CompositePipe: void skipTile(java.lang.Object,int,int)>($r7, i13, i12);
+
+        goto label08;
+
+     label05:
+        if $i11 != 255 goto label06;
+
+        r17 = null;
+
+        interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: void nextTile()>();
+
+        goto label07;
+
+     label06:
+        r17 = $r9;
+
+        interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: void getAlpha(byte[],int,int)>($r9, 0, $i4);
+
+     label07:
+        $r13 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        interfaceinvoke $r13.<sun.java2d.pipe.CompositePipe: void renderPathTile(java.lang.Object,byte[],int,int,int,int,int,int)>($r7, r17, 0, $i4, i13, i12, $i10, $i8);
+
+     label08:
+        i13 = i13 + $i4;
+
+        goto label03;
+
+     label09:
+        i12 = i12 + $i5;
+
+        goto label02;
+
+     label10:
+        interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: void dispose()>();
+
+        if $r7 == null goto label14;
+
+        $r10 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        interfaceinvoke $r10.<sun.java2d.pipe.CompositePipe: void endSequence(java.lang.Object)>($r7);
+
+        goto label14;
+
+     label11:
+        $r14 := @caughtexception;
+
+     label12:
+        interfaceinvoke r8.<sun.java2d.pipe.AATileGenerator: void dispose()>();
+
+        if r16 == null goto label13;
+
+        $r15 = r0.<sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.CompositePipe outpipe>;
+
+        interfaceinvoke $r15.<sun.java2d.pipe.CompositePipe: void endSequence(java.lang.Object)>(r16);
+
+     label13:
+        throw $r14;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    static void <clinit>()
+    {
+        sun.java2d.pipe.RenderingEngine $r0;
+        sun.java2d.pipe.AAShapePipe$1 $r1;
+
+        $r0 = staticinvoke <sun.java2d.pipe.RenderingEngine: sun.java2d.pipe.RenderingEngine getInstance()>();
+
+        <sun.java2d.pipe.AAShapePipe: sun.java2d.pipe.RenderingEngine RDR_ENGINE> = $r0;
+
+        $r1 = new sun.java2d.pipe.AAShapePipe$1;
+
+        specialinvoke $r1.<sun.java2d.pipe.AAShapePipe$1: void <init>(int)>(0);
+
+        <sun.java2d.pipe.AAShapePipe: sun.java2d.ReentrantContextProvider TILE_STATE_PROVIDER> = $r1;
+
+        return;
+    }
+}

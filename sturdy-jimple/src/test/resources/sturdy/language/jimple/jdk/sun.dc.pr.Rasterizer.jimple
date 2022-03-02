@@ -1,0 +1,1269 @@
+public class sun.dc.pr.Rasterizer extends java.lang.Object implements sun.java2d.pipe.AATileGenerator
+{
+    public static final int EOFILL;
+    public static final int NZFILL;
+    public static final int STROKE;
+    public static final int ROUND;
+    public static final int SQUARE;
+    public static final int BUTT;
+    public static final int BEVEL;
+    public static final int MITER;
+    public static final int TILE_SIZE;
+    public static final int TILE_SIZE_L2S;
+    public static final int MAX_ALPHA;
+    public static final int MAX_MITER;
+    public static final int MAX_WN;
+    public static final int TILE_IS_ALL_0;
+    public static final int TILE_IS_ALL_1;
+    public static final int TILE_IS_GENERAL;
+    private static final int BEG;
+    private static final int PAC_FILL;
+    private static final int PAC_STROKE;
+    private static final int PATH;
+    private static final int SUBPATH;
+    private static final int RAS;
+    private int state;
+    private sun.dc.pr.PathFiller filler;
+    private sun.dc.pr.PathStroker stroker;
+    private sun.dc.pr.PathDasher dasher;
+    private sun.dc.path.PathConsumer curPC;
+
+    public void <init>()
+    {
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r2, $r5, $r8;
+        sun.dc.pr.PathDasher $r4, $r7;
+        sun.dc.pr.PathFiller $r1, $r3, $r9;
+        sun.dc.pr.Rasterizer$ConsumerDisposer $r6;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 1;
+
+        $r1 = new sun.dc.pr.PathFiller;
+
+        specialinvoke $r1.<sun.dc.pr.PathFiller: void <init>()>();
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler> = $r1;
+
+        $r2 = new sun.dc.pr.PathStroker;
+
+        $r3 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        specialinvoke $r2.<sun.dc.pr.PathStroker: void <init>(sun.dc.path.PathConsumer)>($r3);
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker> = $r2;
+
+        $r4 = new sun.dc.pr.PathDasher;
+
+        $r5 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        specialinvoke $r4.<sun.dc.pr.PathDasher: void <init>(sun.dc.path.PathConsumer)>($r5);
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher> = $r4;
+
+        $r6 = new sun.dc.pr.Rasterizer$ConsumerDisposer;
+
+        $r9 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        $r8 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        $r7 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher>;
+
+        specialinvoke $r6.<sun.dc.pr.Rasterizer$ConsumerDisposer: void <init>(sun.dc.path.PathConsumer,sun.dc.path.PathConsumer,sun.dc.path.PathConsumer)>($r9, $r8, $r7);
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r6);
+
+        return;
+    }
+
+    public void setUsage(int) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r1, $r12;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r2, $r4, $r5, $r6, $r7;
+        sun.dc.pr.PathFiller $r3, $r8, $r9, $r10, $r11;
+        int $i0, i1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 1 goto label1;
+
+        $r12 = new sun.dc.pr.PRError;
+
+        specialinvoke $r12.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setUsage: unexpected");
+
+        throw $r12;
+
+     label1:
+        if i1 != 1 goto label2;
+
+        $r10 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r10.<sun.dc.pr.PathFiller: void setFillMode(int)>(1);
+
+        $r11 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC> = $r11;
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 2;
+
+        goto label5;
+
+     label2:
+        if i1 != 2 goto label3;
+
+        $r8 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r8.<sun.dc.pr.PathFiller: void setFillMode(int)>(2);
+
+        $r9 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC> = $r9;
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 2;
+
+        goto label5;
+
+     label3:
+        if i1 != 3 goto label4;
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC> = $r2;
+
+        $r3 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r3.<sun.dc.pr.PathFiller: void setFillMode(int)>(2);
+
+        $r4 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r4.<sun.dc.pr.PathStroker: void setPenDiameter(float)>(1.0F);
+
+        $r5 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r5.<sun.dc.pr.PathStroker: void setPenT4(float[])>(null);
+
+        $r6 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r6.<sun.dc.pr.PathStroker: void setCaps(int)>(10);
+
+        $r7 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r7.<sun.dc.pr.PathStroker: void setCorners(int,float)>(10, 0.0F);
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 3;
+
+        goto label5;
+
+     label4:
+        $r1 = new sun.dc.pr.PRError;
+
+        specialinvoke $r1.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setUsage: unknown usage type");
+
+        throw $r1;
+
+     label5:
+        return;
+    }
+
+    public void setPenDiameter(float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r1;
+        int $i0;
+        float f0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setPenDiameter: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathStroker: void setPenDiameter(float)>(f0);
+
+        return;
+    }
+
+    public void setPenT4(float[]) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r3;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r2;
+        int $i0;
+        float[] r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: float[];
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r3 = new sun.dc.pr.PRError;
+
+        specialinvoke $r3.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setPenT4: unexpected");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathStroker: void setPenT4(float[])>(r1);
+
+        return;
+    }
+
+    public void setPenFitting(float, int) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r1;
+        int $i0, i1;
+        float f0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        i1 := @parameter1: int;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setPenFitting: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathStroker: void setPenFitting(float,int)>(f0, i1);
+
+        return;
+    }
+
+    public void setPenDisplacement(float, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r3;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r2;
+        int $i0;
+        float f0, f1;
+        float[] $r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r3 = new sun.dc.pr.PRError;
+
+        specialinvoke $r3.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setPenDisplacement: unexpected");
+
+        throw $r3;
+
+     label1:
+        $r1 = newarray (float)[6];
+
+        $r1[0] = 1.0F;
+
+        $r1[1] = 0.0F;
+
+        $r1[2] = 0.0F;
+
+        $r1[3] = 1.0F;
+
+        $r1[4] = f0;
+
+        $r1[5] = f1;
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathStroker: void setOutputT6(float[])>($r1);
+
+        return;
+    }
+
+    public void setCaps(int) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r1;
+        int $i0, i1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setCaps: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathStroker: void setCaps(int)>(i1);
+
+        return;
+    }
+
+    public void setCorners(int, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r1;
+        int $i0, i1;
+        float f0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        i1 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setCorners: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathStroker: void setCorners(int,float)>(i1, f0);
+
+        return;
+    }
+
+    public void setDash(float[], float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathDasher $r2, $r3;
+        int $i0;
+        float f0;
+        float[] r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: float[];
+
+        f0 := @parameter1: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setDash: unexpected");
+
+        throw $r4;
+
+     label1:
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathDasher: void setDash(float[],float)>(r1, f0);
+
+        $r3 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher>;
+
+        r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC> = $r3;
+
+        return;
+    }
+
+    public void setDashT4(float[]) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r3;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathDasher $r2;
+        int $i0;
+        float[] r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: float[];
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r3 = new sun.dc.pr.PRError;
+
+        specialinvoke $r3.<sun.dc.pr.PRError: void <init>(java.lang.String)>("setDashT4: unexpected");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathDasher: void setDashT4(float[])>(r1);
+
+        return;
+    }
+
+    public void beginPath(float[]) throws sun.dc.pr.PRError
+    {
+        float[] r1;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: float[];
+
+        virtualinvoke r0.<sun.dc.pr.Rasterizer: void beginPath()>();
+
+        return;
+    }
+
+    public void beginPath() throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r3;
+        int $i0, $i1;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 2 goto label1;
+
+        $i1 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i1 == 3 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("beginPath: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void beginPath()>();
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void beginSubpath(float, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r3;
+        int $i0, $i1;
+        float f0, f1;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 4 goto label1;
+
+        $i1 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i1 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("beginSubpath: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void beginSubpath(float,float)>(f0, f1);
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 5;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void appendLine(float, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r3;
+        int $i0;
+        float f0, f1;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("appendLine: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void appendLine(float,float)>(f0, f1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void appendQuadratic(float, float, float, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r3;
+        int $i0;
+        float f0, f1, f2, f3;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        f2 := @parameter2: float;
+
+        f3 := @parameter3: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("appendQuadratic: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void appendQuadratic(float,float,float,float)>(f0, f1, f2, f3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void appendCubic(float, float, float, float, float, float) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r3;
+        int $i0;
+        float f0, f1, f2, f3, f4, f5;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        f2 := @parameter2: float;
+
+        f3 := @parameter3: float;
+
+        f4 := @parameter4: float;
+
+        f5 := @parameter5: float;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("appendCubic: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void appendCubic(float,float,float,float,float,float)>(f0, f1, f2, f3, f4, f5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void closedSubpath() throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PRError $r2, $r4;
+        sun.dc.path.PathError $r3;
+        sun.dc.pr.Rasterizer r0;
+        int $i0;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("closedSubpath: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void closedSubpath()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRError;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+    }
+
+    public void endPath() throws sun.dc.pr.PRError, sun.dc.pr.PRException
+    {
+        sun.dc.pr.PRError $r2, $r7;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.PathError $r6;
+        int $i0, $i1;
+        sun.dc.pr.PRException $r4;
+        sun.dc.path.PathException $r3;
+        sun.dc.path.PathConsumer $r1;
+        java.lang.String $r5, $r8;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 4 goto label1;
+
+        $i1 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i1 == 5 goto label1;
+
+        $r2 = new sun.dc.pr.PRError;
+
+        specialinvoke $r2.<sun.dc.pr.PRError: void <init>(java.lang.String)>("endPath: unexpected");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r1.<sun.dc.path.PathConsumer: void endPath()>();
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 6;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new sun.dc.pr.PRError;
+
+        $r8 = virtualinvoke $r6.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.dc.pr.PRException;
+
+        $r5 = virtualinvoke $r3.<sun.dc.path.PathException: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<sun.dc.pr.PRException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label5:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+        catch sun.dc.path.PathException from label1 to label2 with label4;
+    }
+
+    public void useProxy(sun.dc.path.FastPathProducer) throws sun.dc.pr.PRError, sun.dc.pr.PRException
+    {
+        sun.dc.pr.PRError $r3, $r8;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.path.FastPathProducer r1;
+        sun.dc.path.PathError $r7;
+        int $i0, $i1;
+        sun.dc.pr.PRException $r5;
+        sun.dc.path.PathException $r4;
+        sun.dc.path.PathConsumer $r2;
+        java.lang.String $r6, $r9;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: sun.dc.path.FastPathProducer;
+
+        $i0 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i0 == 2 goto label1;
+
+        $i1 = r0.<sun.dc.pr.Rasterizer: int state>;
+
+        if $i1 == 3 goto label1;
+
+        $r3 = new sun.dc.pr.PRError;
+
+        specialinvoke $r3.<sun.dc.pr.PRError: void <init>(java.lang.String)>("useProxy: unexpected");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.path.PathConsumer curPC>;
+
+        interfaceinvoke $r2.<sun.dc.path.PathConsumer: void useProxy(sun.dc.path.FastPathProducer)>(r1);
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 6;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new sun.dc.pr.PRError;
+
+        $r9 = virtualinvoke $r7.<sun.dc.path.PathError: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<sun.dc.pr.PRError: void <init>(java.lang.String)>($r9);
+
+        throw $r8;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r5 = new sun.dc.pr.PRException;
+
+        $r6 = virtualinvoke $r4.<sun.dc.path.PathException: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<sun.dc.pr.PRException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch sun.dc.path.PathError from label1 to label2 with label3;
+        catch sun.dc.path.PathException from label1 to label2 with label4;
+    }
+
+    public void getAlphaBox(int[]) throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PathFiller $r2;
+        int[] r1;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: int[];
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathFiller: void getAlphaBox(int[])>(r1);
+
+        return;
+    }
+
+    public void setOutputArea(float, float, int, int) throws sun.dc.pr.PRError, sun.dc.pr.PRException
+    {
+        sun.dc.pr.Rasterizer r0;
+        int i0, i1;
+        sun.dc.pr.PathFiller $r1;
+        float f0, f1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathFiller: void setOutputArea(float,float,int,int)>(f0, f1, i0, i1);
+
+        return;
+    }
+
+    public int getTileState() throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PathFiller $r1;
+        int $i0;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        $i0 = virtualinvoke $r1.<sun.dc.pr.PathFiller: int getTileState()>();
+
+        return $i0;
+    }
+
+    public void writeAlpha(byte[], int, int, int) throws sun.dc.pr.PRError, sun.dc.pr.PRException, java.lang.InterruptedException
+    {
+        byte[] r1;
+        sun.dc.pr.Rasterizer r0;
+        int i0, i1, i2;
+        sun.dc.pr.PathFiller $r2;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathFiller: void writeAlpha(byte[],int,int,int)>(r1, i0, i1, i2);
+
+        return;
+    }
+
+    public void writeAlpha(char[], int, int, int) throws sun.dc.pr.PRError, sun.dc.pr.PRException, java.lang.InterruptedException
+    {
+        sun.dc.pr.Rasterizer r0;
+        int i0, i1, i2;
+        sun.dc.pr.PathFiller $r2;
+        char[] r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathFiller: void writeAlpha(char[],int,int,int)>(r1, i0, i1, i2);
+
+        return;
+    }
+
+    public void nextTile() throws sun.dc.pr.PRError
+    {
+        sun.dc.pr.PathFiller $r1;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathFiller: void nextTile()>();
+
+        return;
+    }
+
+    public void reset()
+    {
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathStroker $r2;
+        sun.dc.pr.PathDasher $r3;
+        sun.dc.pr.PathFiller $r1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r0.<sun.dc.pr.Rasterizer: int state> = 1;
+
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r1.<sun.dc.pr.PathFiller: void reset()>();
+
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathStroker stroker>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathStroker: void reset()>();
+
+        $r3 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathDasher dasher>;
+
+        virtualinvoke $r3.<sun.dc.pr.PathDasher: void reset()>();
+
+        return;
+    }
+
+    public int getTileWidth()
+    {
+        int $i0;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $i0 = <sun.dc.pr.Rasterizer: int TILE_SIZE>;
+
+        return $i0;
+    }
+
+    public int getTileHeight()
+    {
+        int $i0;
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $i0 = <sun.dc.pr.Rasterizer: int TILE_SIZE>;
+
+        return $i0;
+    }
+
+    public int getTypicalAlpha()
+    {
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathFiller $r1;
+        int $i0, i1;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        $r1 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        $i0 = virtualinvoke $r1.<sun.dc.pr.PathFiller: int getTileState()>();
+
+        i1 = $i0;
+
+        tableswitch($i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        i1 = 0;
+
+        goto label4;
+
+     label2:
+        i1 = 255;
+
+        goto label4;
+
+     label3:
+        i1 = 128;
+
+     label4:
+        return i1;
+    }
+
+    public void getAlpha(byte[], int, int)
+    {
+        java.lang.Throwable $r3;
+        byte[] r1;
+        sun.dc.pr.Rasterizer r0;
+        sun.dc.pr.PathFiller $r2;
+        java.lang.InterruptedException $r4;
+        java.lang.Thread $r5;
+        int i0, i1;
+        sun.dc.pr.PRException $r6;
+        java.lang.InternalError $r7;
+        java.lang.StringBuilder $r8, $r9, $r11;
+        java.lang.String $r10, $r12;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        entermonitor class "Lsun/dc/pr/Rasterizer;";
+
+     label1:
+        $r2 = r0.<sun.dc.pr.Rasterizer: sun.dc.pr.PathFiller filler>;
+
+        virtualinvoke $r2.<sun.dc.pr.PathFiller: void writeAlpha(byte[],int,int,int)>(r1, 1, i0, i1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.InternalError;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ductus AA error: ");
+
+        $r10 = virtualinvoke $r6.<sun.dc.pr.PRException: java.lang.String getMessage()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.InternalError: void <init>(java.lang.String)>($r12);
+
+        throw $r7;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r5.<java.lang.Thread: void interrupt()>();
+
+     label5:
+        exitmonitor class "Lsun/dc/pr/Rasterizer;";
+
+     label6:
+        goto label9;
+
+     label7:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lsun/dc/pr/Rasterizer;";
+
+     label8:
+        throw $r3;
+
+     label9:
+        return;
+
+        catch sun.dc.pr.PRException from label1 to label2 with label3;
+        catch java.lang.InterruptedException from label1 to label2 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void dispose()
+    {
+        sun.dc.pr.Rasterizer r0;
+
+        r0 := @this: sun.dc.pr.Rasterizer;
+
+        staticinvoke <sun.dc.DuctusRenderingEngine: void dropRasterizer(sun.dc.pr.Rasterizer)>(r0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i1, $i2;
+
+        <sun.dc.pr.Rasterizer: int RAS> = 6;
+
+        <sun.dc.pr.Rasterizer: int SUBPATH> = 5;
+
+        <sun.dc.pr.Rasterizer: int PATH> = 4;
+
+        <sun.dc.pr.Rasterizer: int PAC_STROKE> = 3;
+
+        <sun.dc.pr.Rasterizer: int PAC_FILL> = 2;
+
+        <sun.dc.pr.Rasterizer: int BEG> = 1;
+
+        <sun.dc.pr.Rasterizer: int TILE_IS_GENERAL> = 2;
+
+        <sun.dc.pr.Rasterizer: int TILE_IS_ALL_1> = 1;
+
+        <sun.dc.pr.Rasterizer: int TILE_IS_ALL_0> = 0;
+
+        <sun.dc.pr.Rasterizer: int MAX_WN> = 63;
+
+        <sun.dc.pr.Rasterizer: int MAX_MITER> = 10;
+
+        <sun.dc.pr.Rasterizer: int MAX_ALPHA> = 1000000;
+
+        <sun.dc.pr.Rasterizer: int MITER> = 50;
+
+        <sun.dc.pr.Rasterizer: int BEVEL> = 40;
+
+        <sun.dc.pr.Rasterizer: int BUTT> = 30;
+
+        <sun.dc.pr.Rasterizer: int SQUARE> = 20;
+
+        <sun.dc.pr.Rasterizer: int ROUND> = 10;
+
+        <sun.dc.pr.Rasterizer: int STROKE> = 3;
+
+        <sun.dc.pr.Rasterizer: int NZFILL> = 2;
+
+        <sun.dc.pr.Rasterizer: int EOFILL> = 1;
+
+        $i0 = <sun.dc.pr.PathFiller: int tileSizeL2S>;
+
+        $i1 = 1 << $i0;
+
+        <sun.dc.pr.Rasterizer: int TILE_SIZE> = $i1;
+
+        $i2 = <sun.dc.pr.PathFiller: int tileSizeL2S>;
+
+        <sun.dc.pr.Rasterizer: int TILE_SIZE_L2S> = $i2;
+
+        return;
+    }
+}

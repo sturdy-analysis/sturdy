@@ -1,0 +1,989 @@
+class sun.awt.windows.HTMLCodec extends java.io.InputStream
+{
+    public static final java.lang.String ENCODING;
+    public static final java.lang.String VERSION;
+    public static final java.lang.String START_HTML;
+    public static final java.lang.String END_HTML;
+    public static final java.lang.String START_FRAGMENT;
+    public static final java.lang.String END_FRAGMENT;
+    public static final java.lang.String START_SELECTION;
+    public static final java.lang.String END_SELECTION;
+    public static final java.lang.String START_FRAGMENT_CMT;
+    public static final java.lang.String END_FRAGMENT_CMT;
+    public static final java.lang.String SOURCE_URL;
+    public static final java.lang.String DEF_SOURCE_URL;
+    public static final java.lang.String EOLN;
+    private static final java.lang.String VERSION_NUM;
+    private static final int PADDED_WIDTH;
+    private final java.io.BufferedInputStream bufferedStream;
+    private boolean descriptionParsed;
+    private boolean closed;
+    public static final int BYTE_BUFFER_LEN;
+    public static final int CHAR_BUFFER_LEN;
+    private static final java.lang.String FAILURE_MSG;
+    private static final java.lang.String INVALID_MSG;
+    private long iHTMLStart;
+    private long iHTMLEnd;
+    private long iFragStart;
+    private long iFragEnd;
+    private long iSelStart;
+    private long iSelEnd;
+    private java.lang.String stBaseURL;
+    private java.lang.String stVersion;
+    private long iStartOffset;
+    private long iEndOffset;
+    private long iReadCount;
+    private sun.awt.windows.EHTMLReadMode readMode;
+
+    private static java.lang.String toPaddedString(int, int)
+    {
+        java.lang.StringBuffer $r5;
+        int i0, $i1, i2, $i3;
+        char[] r4;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3, r6;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r6 = $r3;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i0 < 0 goto label1;
+
+        if $i1 >= i2 goto label1;
+
+        $i3 = i2 - $i1;
+
+        r4 = newarray (char)[$i3];
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>(r4, 48);
+
+        $r5 = new java.lang.StringBuffer;
+
+        specialinvoke $r5.<java.lang.StringBuffer: void <init>(int)>(i2);
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char[])>(r4);
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        r6 = virtualinvoke $r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+     label1:
+        return r6;
+    }
+
+    public static byte[] convertToHTMLFormat(byte[])
+    {
+        byte[] r1, $r10, r33, r34;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r37, $r38, $r39;
+        java.lang.String $r2, r11, r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r28, $r29, $r30, $r31, $r32, $r35, $r36;
+        java.io.UnsupportedEncodingException $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i59, $i61;
+
+        r1 := @parameter0: byte[];
+
+        r11 = "";
+
+        r12 = "";
+
+        $r36 = new java.lang.String;
+
+        specialinvoke $r36.<java.lang.String: void <init>(byte[])>(r1);
+
+        $r2 = virtualinvoke $r36.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("<HTML");
+
+        $i59 = (int) -1;
+
+        if $i59 != $i0 goto label1;
+
+        r11 = "<HTML>";
+
+        r12 = "</HTML>";
+
+        $i17 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("<BODY");
+
+        $i61 = (int) -1;
+
+        if $i61 != $i17 goto label1;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<HTML>");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<BODY>");
+
+        r11 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</BODY>");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</HTML>");
+
+        r12 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r13 = "Version:";
+
+        $i18 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+        $r14 = "1.0";
+
+        $i19 = virtualinvoke $r14.<java.lang.String: int length()>();
+
+        $i20 = $i18 + $i19;
+
+        $r15 = "\r\n";
+
+        $i21 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        $i22 = $i20 + $i21;
+
+        $r16 = "StartHTML:";
+
+        $i23 = virtualinvoke $r16.<java.lang.String: int length()>();
+
+        $i24 = $i22 + $i23;
+
+        $i25 = $i24 + 10;
+
+        $r17 = "\r\n";
+
+        $i26 = virtualinvoke $r17.<java.lang.String: int length()>();
+
+        $i27 = $i25 + $i26;
+
+        $r18 = "EndHTML:";
+
+        $i28 = virtualinvoke $r18.<java.lang.String: int length()>();
+
+        $i29 = $i27 + $i28;
+
+        $i30 = $i29 + 10;
+
+        $r19 = "\r\n";
+
+        $i31 = virtualinvoke $r19.<java.lang.String: int length()>();
+
+        $i32 = $i30 + $i31;
+
+        $r20 = "StartFragment:";
+
+        $i33 = virtualinvoke $r20.<java.lang.String: int length()>();
+
+        $i34 = $i32 + $i33;
+
+        $i35 = $i34 + 10;
+
+        $r21 = "\r\n";
+
+        $i36 = virtualinvoke $r21.<java.lang.String: int length()>();
+
+        $i37 = $i35 + $i36;
+
+        $r22 = "EndFragment:";
+
+        $i38 = virtualinvoke $r22.<java.lang.String: int length()>();
+
+        $i39 = $i37 + $i38;
+
+        $i40 = $i39 + 10;
+
+        $r23 = "\r\n";
+
+        $i41 = virtualinvoke $r23.<java.lang.String: int length()>();
+
+        $i42 = $i40 + $i41;
+
+        $r24 = "SourceURL:";
+
+        $i43 = virtualinvoke $r24.<java.lang.String: int length()>();
+
+        $i44 = $i42 + $i43;
+
+        $r25 = "about:blank";
+
+        $i45 = virtualinvoke $r25.<java.lang.String: int length()>();
+
+        $i46 = $i44 + $i45;
+
+        $r26 = "\r\n";
+
+        $i47 = virtualinvoke $r26.<java.lang.String: int length()>();
+
+        $i48 = $i46 + $i47;
+
+        $i49 = virtualinvoke r11.<java.lang.String: int length()>();
+
+        $i50 = $i48 + $i49;
+
+        $i51 = lengthof r1;
+
+        $i52 = $i50 + $i51;
+
+        $i53 = $i52 - 1;
+
+        $i54 = virtualinvoke r12.<java.lang.String: int length()>();
+
+        $i55 = $i53 + $i54;
+
+        $r39 = new java.lang.StringBuilder;
+
+        $r28 = "<!--StartFragment-->";
+
+        $i56 = virtualinvoke $r28.<java.lang.String: int length()>();
+
+        $i57 = $i50 + $i56;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>(int)>($i57);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Version:");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.0");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("StartHTML:");
+
+        $r29 = staticinvoke <sun.awt.windows.HTMLCodec: java.lang.String toPaddedString(int,int)>($i48, 10);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EndHTML:");
+
+        $r30 = staticinvoke <sun.awt.windows.HTMLCodec: java.lang.String toPaddedString(int,int)>($i55, 10);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("StartFragment:");
+
+        $r31 = staticinvoke <sun.awt.windows.HTMLCodec: java.lang.String toPaddedString(int,int)>($i50, 10);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EndFragment:");
+
+        $r32 = staticinvoke <sun.awt.windows.HTMLCodec: java.lang.String toPaddedString(int,int)>($i53, 10);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SourceURL:");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("about:blank");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        r33 = null;
+
+        r34 = null;
+
+     label2:
+        $r35 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r33 = virtualinvoke $r35.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        r34 = virtualinvoke r12.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+     label5:
+        $i2 = lengthof r33;
+
+        $i1 = lengthof r1;
+
+        $i4 = $i2 + $i1;
+
+        $i3 = lengthof r34;
+
+        $i5 = $i4 + $i3;
+
+        $r10 = newarray (byte)[$i5];
+
+        $i6 = lengthof r33;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r33, 0, $r10, 0, $i6);
+
+        $i9 = lengthof r33;
+
+        $i7 = lengthof r1;
+
+        $i8 = $i7 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r10, $i9, $i8);
+
+        $i11 = lengthof r33;
+
+        $i10 = lengthof r1;
+
+        $i12 = $i11 + $i10;
+
+        $i14 = $i12 - 1;
+
+        $i13 = lengthof r34;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r34, 0, $r10, $i14, $i13);
+
+        $i15 = lengthof $r10;
+
+        $i16 = $i15 - 1;
+
+        $r10[$i16] = 0;
+
+        return $r10;
+
+        catch java.io.UnsupportedEncodingException from label2 to label3 with label4;
+    }
+
+    public void <init>(java.io.InputStream, sun.awt.windows.EHTMLReadMode) throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r1;
+        sun.awt.windows.EHTMLReadMode r3;
+        sun.awt.windows.HTMLCodec r0;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: sun.awt.windows.EHTMLReadMode;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<sun.awt.windows.HTMLCodec: boolean descriptionParsed> = 0;
+
+        r0.<sun.awt.windows.HTMLCodec: boolean closed> = 0;
+
+        $r1 = new java.io.BufferedInputStream;
+
+        specialinvoke $r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r2, 8192);
+
+        r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream> = $r1;
+
+        r0.<sun.awt.windows.HTMLCodec: sun.awt.windows.EHTMLReadMode readMode> = r3;
+
+        return;
+    }
+
+    public synchronized java.lang.String getBaseURL() throws java.io.IOException
+    {
+        java.lang.String $r1;
+        sun.awt.windows.HTMLCodec r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        $z0 = r0.<sun.awt.windows.HTMLCodec: boolean descriptionParsed>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<sun.awt.windows.HTMLCodec: void parseDescription()>();
+
+     label1:
+        $r1 = r0.<sun.awt.windows.HTMLCodec: java.lang.String stBaseURL>;
+
+        return $r1;
+    }
+
+    public synchronized java.lang.String getVersion() throws java.io.IOException
+    {
+        java.lang.String $r1;
+        sun.awt.windows.HTMLCodec r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        $z0 = r0.<sun.awt.windows.HTMLCodec: boolean descriptionParsed>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<sun.awt.windows.HTMLCodec: void parseDescription()>();
+
+     label1:
+        $r1 = r0.<sun.awt.windows.HTMLCodec: java.lang.String stVersion>;
+
+        return $r1;
+    }
+
+    private void parseDescription() throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r1, $r5, $r10, $r27;
+        byte $b4, $b6, $b8, $b10, $b12, $b19, $b23, $b57;
+        sun.awt.windows.HTMLCodec r0;
+        java.lang.StringBuilder $r20, $r22, $r23, $r24, $r25, $r30;
+        long l1, $l3, $l5, $l7, $l9, $l11, $l15, $l16, $l17, $l18, $l20, $l21, $l22, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, $l39, $l40, $l43, $l45, $l47, $l49, $l51, $l53, l54, $l56;
+        java.lang.String $r6, $r12, $r13, $r14, $r15, $r16, $r21, $r26;
+        java.lang.NumberFormatException $r17;
+        java.io.IOException $r31, $r32, $r33;
+        java.io.InputStreamReader $r28;
+        java.io.BufferedReader $r29;
+        sun.awt.windows.EHTMLReadMode $r7;
+        int[] $r8;
+        boolean $z0;
+        java.lang.String[] $r2;
+        int $i0, i2, $i13, $i14, $i38, $i41, $i42, $i44, $i46, $i48, $i50, $i52, i55, i58, $i59;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        r0.<sun.awt.windows.HTMLCodec: java.lang.String stBaseURL> = null;
+
+        r0.<sun.awt.windows.HTMLCodec: java.lang.String stVersion> = null;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelStart> = -1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelEnd> = -1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragStart> = -1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragEnd> = -1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iHTMLStart> = -1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iHTMLEnd> = -1L;
+
+        $r1 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        virtualinvoke $r1.<java.io.BufferedInputStream: void mark(int)>(8192);
+
+        $r2 = newarray (java.lang.String)[8];
+
+        $r2[0] = "Version:";
+
+        $r2[1] = "StartHTML:";
+
+        $r2[2] = "EndHTML:";
+
+        $r2[3] = "StartFragment:";
+
+        $r2[4] = "EndFragment:";
+
+        $r2[5] = "StartSelection:";
+
+        $r2[6] = "EndSelection:";
+
+        $r2[7] = "SourceURL:";
+
+        $r29 = new java.io.BufferedReader;
+
+        $r28 = new java.io.InputStreamReader;
+
+        $r5 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        specialinvoke $r28.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r5, "UTF-8");
+
+        specialinvoke $r29.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r28, 2730);
+
+        l54 = 0L;
+
+        $r6 = "\r\n";
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        l1 = (long) $i0;
+
+        i2 = lengthof $r2;
+
+        i55 = 0;
+
+     label01:
+        if i55 >= i2 goto label17;
+
+        $r12 = virtualinvoke $r29.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if null != $r12 goto label02;
+
+        goto label17;
+
+     label02:
+        if i55 >= i2 goto label16;
+
+        $r13 = $r2[i55];
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean startsWith(java.lang.String)>($r13);
+
+        if $z0 != 0 goto label03;
+
+        goto label15;
+
+     label03:
+        $i38 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        $l39 = (long) $i38;
+
+        $l40 = $l39 + l1;
+
+        l54 = l54 + $l40;
+
+        $r14 = $r2[i55];
+
+        $i41 = virtualinvoke $r14.<java.lang.String: int length()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.String: java.lang.String substring(int)>($i41);
+
+        $r16 = virtualinvoke $r15.<java.lang.String: java.lang.String trim()>();
+
+        if null == $r16 goto label16;
+
+     label04:
+        tableswitch(i55)
+        {
+            case 0: goto label05;
+            case 1: goto label06;
+            case 2: goto label07;
+            case 3: goto label08;
+            case 4: goto label09;
+            case 5: goto label10;
+            case 6: goto label11;
+            case 7: goto label12;
+            default: goto label13;
+        };
+
+     label05:
+        r0.<sun.awt.windows.HTMLCodec: java.lang.String stVersion> = $r16;
+
+        goto label13;
+
+     label06:
+        $i52 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l53 = (long) $i52;
+
+        r0.<sun.awt.windows.HTMLCodec: long iHTMLStart> = $l53;
+
+        goto label13;
+
+     label07:
+        $i50 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l51 = (long) $i50;
+
+        r0.<sun.awt.windows.HTMLCodec: long iHTMLEnd> = $l51;
+
+        goto label13;
+
+     label08:
+        $i48 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l49 = (long) $i48;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragStart> = $l49;
+
+        goto label13;
+
+     label09:
+        $i46 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l47 = (long) $i46;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragEnd> = $l47;
+
+        goto label13;
+
+     label10:
+        $i44 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l45 = (long) $i44;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelStart> = $l45;
+
+        goto label13;
+
+     label11:
+        $i42 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r16);
+
+        $l43 = (long) $i42;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelEnd> = $l43;
+
+        goto label13;
+
+     label12:
+        r0.<sun.awt.windows.HTMLCodec: java.lang.String stBaseURL> = $r16;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r17 := @caughtexception;
+
+        $r31 = new java.io.IOException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to parse HTML description: ");
+
+        $r21 = $r2[i55];
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" value ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" invalid");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.io.IOException: void <init>(java.lang.String)>($r26);
+
+        throw $r31;
+
+     label15:
+        i55 = i55 + 1;
+
+        goto label02;
+
+     label16:
+        i55 = i55 + 1;
+
+        goto label01;
+
+     label17:
+        $l3 = r0.<sun.awt.windows.HTMLCodec: long iHTMLStart>;
+
+        $b4 = -1L cmp $l3;
+
+        if $b4 != 0 goto label18;
+
+        r0.<sun.awt.windows.HTMLCodec: long iHTMLStart> = l54;
+
+     label18:
+        $l5 = r0.<sun.awt.windows.HTMLCodec: long iFragStart>;
+
+        $b6 = -1L cmp $l5;
+
+        if $b6 != 0 goto label19;
+
+        $l37 = r0.<sun.awt.windows.HTMLCodec: long iHTMLStart>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragStart> = $l37;
+
+     label19:
+        $l7 = r0.<sun.awt.windows.HTMLCodec: long iFragEnd>;
+
+        $b8 = -1L cmp $l7;
+
+        if $b8 != 0 goto label20;
+
+        $l36 = r0.<sun.awt.windows.HTMLCodec: long iHTMLEnd>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iFragEnd> = $l36;
+
+     label20:
+        $l9 = r0.<sun.awt.windows.HTMLCodec: long iSelStart>;
+
+        $b10 = -1L cmp $l9;
+
+        if $b10 != 0 goto label21;
+
+        $l35 = r0.<sun.awt.windows.HTMLCodec: long iFragStart>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelStart> = $l35;
+
+     label21:
+        $l11 = r0.<sun.awt.windows.HTMLCodec: long iSelEnd>;
+
+        $b12 = -1L cmp $l11;
+
+        if $b12 != 0 goto label22;
+
+        $l34 = r0.<sun.awt.windows.HTMLCodec: long iFragEnd>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iSelEnd> = $l34;
+
+     label22:
+        $r8 = <sun.awt.windows.HTMLCodec$1: int[] $SwitchMap$sun$awt$windows$EHTMLReadMode>;
+
+        $r7 = r0.<sun.awt.windows.HTMLCodec: sun.awt.windows.EHTMLReadMode readMode>;
+
+        $i13 = virtualinvoke $r7.<sun.awt.windows.EHTMLReadMode: int ordinal()>();
+
+        $i14 = $r8[$i13];
+
+        tableswitch($i14)
+        {
+            case 1: goto label23;
+            case 2: goto label24;
+            case 3: goto label25;
+            default: goto label25;
+        };
+
+     label23:
+        $l30 = r0.<sun.awt.windows.HTMLCodec: long iHTMLStart>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iStartOffset> = $l30;
+
+        $l31 = r0.<sun.awt.windows.HTMLCodec: long iHTMLEnd>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iEndOffset> = $l31;
+
+        goto label26;
+
+     label24:
+        $l15 = r0.<sun.awt.windows.HTMLCodec: long iFragStart>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iStartOffset> = $l15;
+
+        $l16 = r0.<sun.awt.windows.HTMLCodec: long iFragEnd>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iEndOffset> = $l16;
+
+        goto label26;
+
+     label25:
+        $l32 = r0.<sun.awt.windows.HTMLCodec: long iSelStart>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iStartOffset> = $l32;
+
+        $l33 = r0.<sun.awt.windows.HTMLCodec: long iSelEnd>;
+
+        r0.<sun.awt.windows.HTMLCodec: long iEndOffset> = $l33;
+
+     label26:
+        $r27 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        virtualinvoke $r27.<java.io.BufferedInputStream: void reset()>();
+
+        $l56 = r0.<sun.awt.windows.HTMLCodec: long iStartOffset>;
+
+        $b57 = -1L cmp $l56;
+
+        if $b57 != 0 goto label27;
+
+        $r32 = new java.io.IOException;
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>("Unable to parse HTML description: invalid HTML format.");
+
+        throw $r32;
+
+     label27:
+        i58 = 0;
+
+     label28:
+        $l18 = (long) i58;
+
+        $l17 = r0.<sun.awt.windows.HTMLCodec: long iStartOffset>;
+
+        $b19 = $l18 cmp $l17;
+
+        $i59 = (int) $b19;
+
+        if $i59 >= 0 goto label29;
+
+        $l27 = (long) i58;
+
+        $r10 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        $l25 = r0.<sun.awt.windows.HTMLCodec: long iStartOffset>;
+
+        $l24 = (long) i58;
+
+        $l26 = $l25 - $l24;
+
+        $l28 = virtualinvoke $r10.<java.io.BufferedInputStream: long skip(long)>($l26);
+
+        $l29 = $l27 + $l28;
+
+        i58 = (int) $l29;
+
+        goto label28;
+
+     label29:
+        $l20 = (long) i58;
+
+        r0.<sun.awt.windows.HTMLCodec: long iReadCount> = $l20;
+
+        $l22 = r0.<sun.awt.windows.HTMLCodec: long iStartOffset>;
+
+        $l21 = r0.<sun.awt.windows.HTMLCodec: long iReadCount>;
+
+        $b23 = $l22 cmp $l21;
+
+        if $b23 == 0 goto label30;
+
+        $r33 = new java.io.IOException;
+
+        specialinvoke $r33.<java.io.IOException: void <init>(java.lang.String)>("Unable to parse HTML description: Byte stream ends in description.");
+
+        throw $r33;
+
+     label30:
+        r0.<sun.awt.windows.HTMLCodec: boolean descriptionParsed> = 1;
+
+        return;
+
+        catch java.lang.NumberFormatException from label04 to label13 with label14;
+    }
+
+    public synchronized int read() throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r1;
+        long $l0, $l3, $l4, $l5, $l6;
+        byte $b1, $b7;
+        int $i2, $i8, $i10, $i12, $i14;
+        boolean $z0, $z1;
+        java.io.IOException $r3;
+        sun.awt.windows.HTMLCodec r0;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        $z0 = r0.<sun.awt.windows.HTMLCodec: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r3;
+
+     label1:
+        $z1 = r0.<sun.awt.windows.HTMLCodec: boolean descriptionParsed>;
+
+        if $z1 != 0 goto label2;
+
+        specialinvoke r0.<sun.awt.windows.HTMLCodec: void parseDescription()>();
+
+     label2:
+        $l0 = r0.<sun.awt.windows.HTMLCodec: long iEndOffset>;
+
+        $b1 = -1L cmp $l0;
+
+        if $b1 == 0 goto label3;
+
+        $l6 = r0.<sun.awt.windows.HTMLCodec: long iReadCount>;
+
+        $l5 = r0.<sun.awt.windows.HTMLCodec: long iEndOffset>;
+
+        $b7 = $l6 cmp $l5;
+
+        $i8 = (int) $b7;
+
+        if $i8 < 0 goto label3;
+
+        $i10 = (int) -1;
+
+        return $i10;
+
+     label3:
+        $r1 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        $i2 = virtualinvoke $r1.<java.io.BufferedInputStream: int read()>();
+
+        $i12 = (int) -1;
+
+        if $i2 != $i12 goto label4;
+
+        $i14 = (int) -1;
+
+        return $i14;
+
+     label4:
+        $l3 = r0.<sun.awt.windows.HTMLCodec: long iReadCount>;
+
+        $l4 = $l3 + 1L;
+
+        r0.<sun.awt.windows.HTMLCodec: long iReadCount> = $l4;
+
+        return $i2;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r1;
+        sun.awt.windows.HTMLCodec r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.HTMLCodec;
+
+        $z0 = r0.<sun.awt.windows.HTMLCodec: boolean closed>;
+
+        if $z0 != 0 goto label1;
+
+        r0.<sun.awt.windows.HTMLCodec: boolean closed> = 1;
+
+        $r1 = r0.<sun.awt.windows.HTMLCodec: java.io.BufferedInputStream bufferedStream>;
+
+        virtualinvoke $r1.<java.io.BufferedInputStream: void close()>();
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.awt.windows.HTMLCodec: java.lang.String INVALID_MSG> = " invalid";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String FAILURE_MSG> = "Unable to parse HTML description: ";
+
+        <sun.awt.windows.HTMLCodec: int CHAR_BUFFER_LEN> = 2730;
+
+        <sun.awt.windows.HTMLCodec: int BYTE_BUFFER_LEN> = 8192;
+
+        <sun.awt.windows.HTMLCodec: int PADDED_WIDTH> = 10;
+
+        <sun.awt.windows.HTMLCodec: java.lang.String VERSION_NUM> = "1.0";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String EOLN> = "\r\n";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String DEF_SOURCE_URL> = "about:blank";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String SOURCE_URL> = "SourceURL:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String END_FRAGMENT_CMT> = "<!--EndFragment-->";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String START_FRAGMENT_CMT> = "<!--StartFragment-->";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String END_SELECTION> = "EndSelection:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String START_SELECTION> = "StartSelection:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String END_FRAGMENT> = "EndFragment:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String START_FRAGMENT> = "StartFragment:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String END_HTML> = "EndHTML:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String START_HTML> = "StartHTML:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String VERSION> = "Version:";
+
+        <sun.awt.windows.HTMLCodec: java.lang.String ENCODING> = "UTF-8";
+
+        return;
+    }
+}

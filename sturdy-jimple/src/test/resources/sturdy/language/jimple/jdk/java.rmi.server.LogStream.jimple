@@ -1,0 +1,508 @@
+public class java.rmi.server.LogStream extends java.io.PrintStream
+{
+    private static java.util.Map known;
+    private static java.io.PrintStream defaultStream;
+    private java.lang.String name;
+    private java.io.OutputStream logOut;
+    private java.io.OutputStreamWriter logWriter;
+    private java.lang.StringBuffer buffer;
+    private java.io.ByteArrayOutputStream bufOut;
+    public static final int SILENT;
+    public static final int BRIEF;
+    public static final int VERBOSE;
+
+    private void <init>(java.lang.String, java.io.OutputStream)
+    {
+        java.io.OutputStream $r3, r6;
+        java.rmi.server.LogStream r0;
+        java.io.ByteArrayOutputStream $r1, $r4;
+        java.lang.StringBuffer $r2;
+        java.lang.String r5;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        r5 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.io.OutputStream;
+
+        $r1 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        specialinvoke r0.<java.io.PrintStream: void <init>(java.io.OutputStream)>($r1);
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer> = $r2;
+
+        $r3 = r0.<java.io.PrintStream: java.io.OutputStream out>;
+
+        $r4 = (java.io.ByteArrayOutputStream) $r3;
+
+        r0.<java.rmi.server.LogStream: java.io.ByteArrayOutputStream bufOut> = $r4;
+
+        r0.<java.rmi.server.LogStream: java.lang.String name> = r5;
+
+        virtualinvoke r0.<java.rmi.server.LogStream: void setOutputStream(java.io.OutputStream)>(r6);
+
+        return;
+    }
+
+    public static java.rmi.server.LogStream log(java.lang.String)
+    {
+        java.io.PrintStream $r6;
+        java.lang.Throwable $r7;
+        java.rmi.server.LogStream $r5, r8;
+        java.util.Map $r0, $r2, $r4;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <java.rmi.server.LogStream: java.util.Map known>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <java.rmi.server.LogStream: java.util.Map known>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r8 = (java.rmi.server.LogStream) $r3;
+
+        if r8 != null goto label2;
+
+        $r5 = new java.rmi.server.LogStream;
+
+        $r6 = <java.rmi.server.LogStream: java.io.PrintStream defaultStream>;
+
+        specialinvoke $r5.<java.rmi.server.LogStream: void <init>(java.lang.String,java.io.OutputStream)>(r1, $r6);
+
+        r8 = $r5;
+
+     label2:
+        $r4 = <java.rmi.server.LogStream: java.util.Map known>;
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r8);
+
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r7;
+
+     label6:
+        return r8;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static synchronized java.io.PrintStream getDefaultStream()
+    {
+        java.io.PrintStream $r0;
+
+        $r0 = <java.rmi.server.LogStream: java.io.PrintStream defaultStream>;
+
+        return $r0;
+    }
+
+    public static synchronized void setDefaultStream(java.io.PrintStream)
+    {
+        java.io.PrintStream r1;
+        java.lang.SecurityManager $r0;
+        java.util.logging.LoggingPermission $r2;
+
+        r1 := @parameter0: java.io.PrintStream;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.util.logging.LoggingPermission;
+
+        specialinvoke $r2.<java.util.logging.LoggingPermission: void <init>(java.lang.String,java.lang.String)>("control", null);
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        <java.rmi.server.LogStream: java.io.PrintStream defaultStream> = r1;
+
+        return;
+    }
+
+    public synchronized java.io.OutputStream getOutputStream()
+    {
+        java.io.OutputStream $r1;
+        java.rmi.server.LogStream r0;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        $r1 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        return $r1;
+    }
+
+    public synchronized void setOutputStream(java.io.OutputStream)
+    {
+        java.io.OutputStream r1, $r3;
+        java.rmi.server.LogStream r0;
+        java.io.OutputStreamWriter $r2;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r0.<java.rmi.server.LogStream: java.io.OutputStream logOut> = r1;
+
+        $r2 = new java.io.OutputStreamWriter;
+
+        $r3 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        specialinvoke $r2.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r3);
+
+        r0.<java.rmi.server.LogStream: java.io.OutputStreamWriter logWriter> = $r2;
+
+        return;
+    }
+
+    public void write(int)
+    {
+        java.lang.Throwable $r23, $r24, $r25;
+        java.rmi.server.LogStream r0;
+        java.io.ByteArrayOutputStream $r19, $r22, $r26, $r28;
+        java.util.Date $r3;
+        java.lang.StringBuffer $r2, $r4, $r6, $r8, $r9, $r10, $r13, $r14;
+        java.lang.Thread $r11;
+        int i0;
+        java.io.OutputStreamWriter $r15, $r17;
+        java.lang.String $r5, $r7, $r12, $r16;
+        java.io.OutputStream $r1, $r18, $r20, $r21;
+        java.io.IOException $r27;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        i0 := @parameter0: int;
+
+        if i0 != 10 goto label18;
+
+        entermonitor r0;
+
+     label01:
+        $r1 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: void setLength(int)>(0);
+
+        $r4 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        $r3 = new java.util.Date;
+
+        specialinvoke $r3.<java.util.Date: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.util.Date: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r5);
+
+        $r6 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+        $r8 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        $r7 = r0.<java.rmi.server.LogStream: java.lang.String name>;
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r7);
+
+        $r9 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        virtualinvoke $r9.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+        $r10 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        $r11 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.Thread: java.lang.String getName()>();
+
+        virtualinvoke $r10.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r12);
+
+        $r13 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        virtualinvoke $r13.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+     label03:
+        $r15 = r0.<java.rmi.server.LogStream: java.io.OutputStreamWriter logWriter>;
+
+        $r14 = r0.<java.rmi.server.LogStream: java.lang.StringBuffer buffer>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke $r15.<java.io.OutputStreamWriter: void write(java.lang.String)>($r16);
+
+        $r17 = r0.<java.rmi.server.LogStream: java.io.OutputStreamWriter logWriter>;
+
+        virtualinvoke $r17.<java.io.OutputStreamWriter: void flush()>();
+
+        $r19 = r0.<java.rmi.server.LogStream: java.io.ByteArrayOutputStream bufOut>;
+
+        $r18 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        virtualinvoke $r19.<java.io.ByteArrayOutputStream: void writeTo(java.io.OutputStream)>($r18);
+
+        $r20 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        virtualinvoke $r20.<java.io.OutputStream: void write(int)>(i0);
+
+        $r21 = r0.<java.rmi.server.LogStream: java.io.OutputStream logOut>;
+
+        virtualinvoke $r21.<java.io.OutputStream: void flush()>();
+
+     label04:
+        $r22 = r0.<java.rmi.server.LogStream: java.io.ByteArrayOutputStream bufOut>;
+
+        virtualinvoke $r22.<java.io.ByteArrayOutputStream: void reset()>();
+
+        goto label09;
+
+     label05:
+        $r27 := @caughtexception;
+
+        virtualinvoke r0.<java.rmi.server.LogStream: void setError()>();
+
+     label06:
+        $r28 = r0.<java.rmi.server.LogStream: java.io.ByteArrayOutputStream bufOut>;
+
+        virtualinvoke $r28.<java.io.ByteArrayOutputStream: void reset()>();
+
+        goto label09;
+
+     label07:
+        $r25 := @caughtexception;
+
+     label08:
+        $r26 = r0.<java.rmi.server.LogStream: java.io.ByteArrayOutputStream bufOut>;
+
+        virtualinvoke $r26.<java.io.ByteArrayOutputStream: void reset()>();
+
+        throw $r25;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r24 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r24;
+
+     label13:
+        exitmonitor r0;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r23 := @caughtexception;
+
+        exitmonitor r0;
+
+     label16:
+        throw $r23;
+
+     label17:
+        goto label19;
+
+     label18:
+        specialinvoke r0.<java.io.PrintStream: void write(int)>(i0);
+
+     label19:
+        return;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label02 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label01 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    public void write(byte[], int, int)
+    {
+        java.rmi.server.LogStream r0;
+        byte[] r1;
+        java.lang.ArrayIndexOutOfBoundsException $r3;
+        byte $b3;
+        int i0, i1, $i2, i4, $i5;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.ArrayIndexOutOfBoundsException: void <init>(int)>(i0);
+
+        throw $r3;
+
+     label1:
+        i4 = 0;
+
+     label2:
+        if i4 >= i0 goto label3;
+
+        $i2 = i1 + i4;
+
+        $b3 = r1[$i2];
+
+        $i5 = (int) $b3;
+
+        virtualinvoke r0.<java.rmi.server.LogStream: void write(int)>($i5);
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.rmi.server.LogStream r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.rmi.server.LogStream;
+
+        $r1 = r0.<java.rmi.server.LogStream: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public static int parseLevel(java.lang.String)
+    {
+        int $i0, $i1, $i2, $i4, $i6, $i8;
+        java.lang.String r0, $r2, $r3, $r4, $r5, $r6, $r7;
+        boolean $z0, $z1, $z2;
+        java.lang.NumberFormatException $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 >= 1 goto label2;
+
+     label1:
+        $i4 = (int) -1;
+
+        return $i4;
+
+     label2:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+     label3:
+        return $i1;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i2 >= 1 goto label5;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label5:
+        $r2 = "SILENT";
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label6;
+
+        return 0;
+
+     label6:
+        $r4 = "BRIEF";
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>($r5);
+
+        if $z1 == 0 goto label7;
+
+        return 10;
+
+     label7:
+        $r6 = "VERBOSE";
+
+        $r7 = virtualinvoke r0.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>($r7);
+
+        if $z2 == 0 goto label8;
+
+        return 20;
+
+     label8:
+        $i8 = (int) -1;
+
+        return $i8;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        java.io.PrintStream $r1;
+        java.util.HashMap $r0;
+
+        <java.rmi.server.LogStream: int VERBOSE> = 20;
+
+        <java.rmi.server.LogStream: int BRIEF> = 10;
+
+        <java.rmi.server.LogStream: int SILENT> = 0;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>(int)>(5);
+
+        <java.rmi.server.LogStream: java.util.Map known> = $r0;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        <java.rmi.server.LogStream: java.io.PrintStream defaultStream> = $r1;
+
+        return;
+    }
+}

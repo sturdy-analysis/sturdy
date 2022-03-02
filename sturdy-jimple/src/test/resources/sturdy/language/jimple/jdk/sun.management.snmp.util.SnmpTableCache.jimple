@@ -1,0 +1,148 @@
+public abstract class sun.management.snmp.util.SnmpTableCache extends java.lang.Object implements java.io.Serializable
+{
+    protected long validity;
+    protected transient java.lang.ref.WeakReference datas;
+
+    public void <init>()
+    {
+        sun.management.snmp.util.SnmpTableCache r0;
+
+        r0 := @this: sun.management.snmp.util.SnmpTableCache;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected boolean isObsolete(sun.management.snmp.util.SnmpCachedData)
+    {
+        sun.management.snmp.util.SnmpCachedData r0;
+        long $l0, $l2, $l3, $l4, $l5;
+        byte $b1, $b6;
+        sun.management.snmp.util.SnmpTableCache r1;
+        int $i7, $i8;
+        boolean $z0;
+
+        r1 := @this: sun.management.snmp.util.SnmpTableCache;
+
+        r0 := @parameter0: sun.management.snmp.util.SnmpCachedData;
+
+        if r0 != null goto label1;
+
+        return 1;
+
+     label1:
+        $l0 = r1.<sun.management.snmp.util.SnmpTableCache: long validity>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i7 = (int) $b1;
+
+        if $i7 >= 0 goto label2;
+
+        return 0;
+
+     label2:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = r0.<sun.management.snmp.util.SnmpCachedData: long lastUpdated>;
+
+        $l5 = $l2 - $l3;
+
+        $l4 = r1.<sun.management.snmp.util.SnmpTableCache: long validity>;
+
+        $b6 = $l5 cmp $l4;
+
+        $i8 = (int) $b6;
+
+        if $i8 <= 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    protected sun.management.snmp.util.SnmpCachedData getCachedDatas()
+    {
+        sun.management.snmp.util.SnmpCachedData r4;
+        sun.management.snmp.util.SnmpTableCache r0;
+        java.lang.Object $r3;
+        java.lang.ref.WeakReference $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.management.snmp.util.SnmpTableCache;
+
+        $r1 = r0.<sun.management.snmp.util.SnmpTableCache: java.lang.ref.WeakReference datas>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.management.snmp.util.SnmpTableCache: java.lang.ref.WeakReference datas>;
+
+        $r3 = virtualinvoke $r2.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r4 = (sun.management.snmp.util.SnmpCachedData) $r3;
+
+        if r4 == null goto label2;
+
+        $z0 = virtualinvoke r0.<sun.management.snmp.util.SnmpTableCache: boolean isObsolete(sun.management.snmp.util.SnmpCachedData)>(r4);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        return r4;
+    }
+
+    protected synchronized sun.management.snmp.util.SnmpCachedData getTableDatas(java.lang.Object)
+    {
+        sun.management.snmp.util.SnmpCachedData $r1, $r3;
+        byte $b1;
+        sun.management.snmp.util.SnmpTableCache r0;
+        java.lang.Object r2;
+        long $l0;
+        java.lang.ref.WeakReference $r4;
+
+        r0 := @this: sun.management.snmp.util.SnmpTableCache;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.util.SnmpTableCache: sun.management.snmp.util.SnmpCachedData getCachedDatas()>();
+
+        if $r1 == null goto label1;
+
+        return $r1;
+
+     label1:
+        $r3 = virtualinvoke r0.<sun.management.snmp.util.SnmpTableCache: sun.management.snmp.util.SnmpCachedData updateCachedDatas(java.lang.Object)>(r2);
+
+        $l0 = r0.<sun.management.snmp.util.SnmpTableCache: long validity>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r3);
+
+        r0.<sun.management.snmp.util.SnmpTableCache: java.lang.ref.WeakReference datas> = $r4;
+
+     label2:
+        return $r3;
+    }
+
+    protected abstract sun.management.snmp.util.SnmpCachedData updateCachedDatas(java.lang.Object);
+
+    public abstract sun.management.snmp.util.SnmpTableHandler getTableHandler();
+}

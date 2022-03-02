@@ -1,0 +1,1355 @@
+public class javax.sql.rowset.RowSetMetaDataImpl extends java.lang.Object implements javax.sql.RowSetMetaData, java.io.Serializable
+{
+    private int colCount;
+    private javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo;
+    static final long serialVersionUID;
+
+    public void <init>()
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private void checkColRange(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r0;
+        javax.sql.rowset.RowSetMetaDataImpl r5;
+        int i0, $i1;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4;
+
+        r5 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 <= 0 goto label1;
+
+        $i1 = r5.<javax.sql.rowset.RowSetMetaDataImpl: int colCount>;
+
+        if i0 <= $i1 goto label2;
+
+     label1:
+        $r0 = new java.sql.SQLException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid column index :");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.sql.SQLException: void <init>(java.lang.String)>($r4);
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+
+    private void checkColType(int) throws java.sql.SQLException
+    {
+        java.lang.reflect.Field $r2;
+        java.lang.Exception $r3;
+        java.lang.reflect.Field[] $r0;
+        java.sql.SQLException $r1, $r4;
+        javax.sql.rowset.RowSetMetaDataImpl r6;
+        int $i0, $i1, i2, i3;
+        java.lang.Class r7;
+        java.lang.String $r5;
+
+        r6 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i2 := @parameter0: int;
+
+     label1:
+        r7 = class "Ljava/sql/Types;";
+
+        $r0 = virtualinvoke r7.<java.lang.Class: java.lang.reflect.Field[] getFields()>();
+
+        i3 = 0;
+
+     label2:
+        $i0 = lengthof $r0;
+
+        if i3 >= $i0 goto label5;
+
+        $r2 = $r0[i3];
+
+        $i1 = virtualinvoke $r2.<java.lang.reflect.Field: int getInt(java.lang.Object)>(class "Ljava/sql/Types;");
+
+        if $i1 != i2 goto label4;
+
+     label3:
+        return;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r3 := @caughtexception;
+
+        $r4 = new java.sql.SQLException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label7:
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid SQL type for column");
+
+        throw $r1;
+
+        catch java.lang.Exception from label1 to label3 with label6;
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public void setColumnCount(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1, $r3;
+        java.sql.SQLException $r4;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid column count. Cannot be less or equal to zero");
+
+        throw $r4;
+
+     label1:
+        r0.<javax.sql.rowset.RowSetMetaDataImpl: int colCount> = i0;
+
+        $i1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: int colCount>;
+
+        if $i1 == 2147483647 goto label3;
+
+        $i2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: int colCount>;
+
+        $i3 = $i2 + 1;
+
+        $r1 = newarray (javax.sql.rowset.RowSetMetaDataImpl$ColInfo)[$i3];
+
+        r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo> = $r1;
+
+        i5 = 1;
+
+     label2:
+        $i4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: int colCount>;
+
+        if i5 > $i4 goto label3;
+
+        $r3 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = new javax.sql.rowset.RowSetMetaDataImpl$ColInfo;
+
+        specialinvoke $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: void <init>(javax.sql.rowset.RowSetMetaDataImpl,javax.sql.rowset.RowSetMetaDataImpl$1)>(r0, null);
+
+        $r3[i5] = $r2;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void setAutoIncrement(int, boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean autoIncrement> = z0;
+
+        return;
+    }
+
+    public void setCaseSensitive(int, boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean caseSensitive> = z0;
+
+        return;
+    }
+
+    public void setSearchable(int, boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean searchable> = z0;
+
+        return;
+    }
+
+    public void setCurrency(int, boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean currency> = z0;
+
+        return;
+    }
+
+    public void setNullable(int, int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r0;
+        javax.sql.rowset.RowSetMetaDataImpl r1;
+        int i0, i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2;
+
+        r1 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 <= 2 goto label2;
+
+     label1:
+        $r0 = new java.sql.SQLException;
+
+        specialinvoke $r0.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid nullable constant set. Must be either columnNoNulls, columnNullable or columnNullableUnknown");
+
+        throw $r0;
+
+     label2:
+        specialinvoke r1.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i1);
+
+        $r2 = r1.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i1];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int nullable> = i0;
+
+        return;
+    }
+
+    public void setSigned(int, boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean signed> = z0;
+
+        return;
+    }
+
+    public void setColumnDisplaySize(int, int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r3;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid column display size. Cannot be less than zero");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i1);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i1];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int columnDisplaySize> = i0;
+
+        return;
+    }
+
+    public void setColumnLabel(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnLabel> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnLabel> = "";
+
+     label2:
+        return;
+    }
+
+    public void setColumnName(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnName> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnName> = "";
+
+     label2:
+        return;
+    }
+
+    public void setSchemaName(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String schemaName> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String schemaName> = "";
+
+     label2:
+        return;
+    }
+
+    public void setPrecision(int, int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r3;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid precision value. Cannot be less than zero");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i1);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i1];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colPrecision> = i0;
+
+        return;
+    }
+
+    public void setScale(int, int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r3;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid scale size. Cannot be less than zero");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i1);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i1];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colScale> = i0;
+
+        return;
+    }
+
+    public void setTableName(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String tableName> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String tableName> = "";
+
+     label2:
+        return;
+    }
+
+    public void setCatalogName(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String catName> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String catName> = "";
+
+     label2:
+        return;
+    }
+
+    public void setColumnType(int, int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColType(int)>(i0);
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i1);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i1];
+
+        $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colType> = i0;
+
+        return;
+    }
+
+    public void setColumnTypeName(int, java.lang.String) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String r1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r3, $r5;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r2, $r4;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        if r1 == null goto label1;
+
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String colTypeName> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r3 = $r2[i0];
+
+        $r3.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String colTypeName> = "";
+
+     label2:
+        return;
+    }
+
+    public int getColumnCount() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        $i0 = r0.<javax.sql.rowset.RowSetMetaDataImpl: int colCount>;
+
+        return $i0;
+    }
+
+    public boolean isAutoIncrement(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean autoIncrement>;
+
+        return $z0;
+    }
+
+    public boolean isCaseSensitive(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean caseSensitive>;
+
+        return $z0;
+    }
+
+    public boolean isSearchable(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean searchable>;
+
+        return $z0;
+    }
+
+    public boolean isCurrency(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean currency>;
+
+        return $z0;
+    }
+
+    public int isNullable(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $i1 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int nullable>;
+
+        return $i1;
+    }
+
+    public boolean isSigned(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean signed>;
+
+        return $z0;
+    }
+
+    public int getColumnDisplaySize(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $i1 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int columnDisplaySize>;
+
+        return $i1;
+    }
+
+    public java.lang.String getColumnLabel(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnLabel>;
+
+        return $r3;
+    }
+
+    public java.lang.String getColumnName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String columnName>;
+
+        return $r3;
+    }
+
+    public java.lang.String getSchemaName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1, $r4;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3, r6;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2, $r5;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        r6 = "";
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String schemaName>;
+
+        if $r3 != null goto label1;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        r6 = $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String schemaName>;
+
+     label2:
+        return r6;
+    }
+
+    public int getPrecision(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $i1 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colPrecision>;
+
+        return $i1;
+    }
+
+    public int getScale(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $i1 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colScale>;
+
+        return $i1;
+    }
+
+    public java.lang.String getTableName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String tableName>;
+
+        return $r3;
+    }
+
+    public java.lang.String getCatalogName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1, $r4;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3, r6;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2, $r5;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        r6 = "";
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String catName>;
+
+        if $r3 != null goto label1;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r5 = $r4[i0];
+
+        r6 = $r5.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String catName>;
+
+     label2:
+        return r6;
+    }
+
+    public int getColumnType(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0, $i1;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $i1 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: int colType>;
+
+        return $i1;
+    }
+
+    public java.lang.String getColumnTypeName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        java.lang.String $r3;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: java.lang.String colTypeName>;
+
+        return $r3;
+    }
+
+    public boolean isReadOnly(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean readOnly>;
+
+        return $z0;
+    }
+
+    public boolean isWritable(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo $r2;
+        javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.RowSetMetaDataImpl: javax.sql.rowset.RowSetMetaDataImpl$ColInfo[] colInfo>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<javax.sql.rowset.RowSetMetaDataImpl$ColInfo: boolean writable>;
+
+        return $z0;
+    }
+
+    public boolean isDefinitelyWritable(int) throws java.sql.SQLException
+    {
+        int i0;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: void checkColRange(int)>(i0);
+
+        return 1;
+    }
+
+    public java.lang.String getColumnClassName(int) throws java.sql.SQLException
+    {
+        javax.sql.rowset.RowSetMetaDataImpl r1;
+        int i0, $i1;
+        java.lang.String r15;
+        java.lang.Class $r0, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+
+        r1 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = class "Ljava/lang/String;";
+
+        r15 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $i1 = virtualinvoke r1.<javax.sql.rowset.RowSetMetaDataImpl: int getColumnType(int)>(i0);
+
+        lookupswitch($i1)
+        {
+            case -7: goto label02;
+            case -6: goto label03;
+            case -5: goto label06;
+            case -4: goto label09;
+            case -3: goto label09;
+            case -2: goto label09;
+            case 2: goto label01;
+            case 3: goto label01;
+            case 4: goto label05;
+            case 5: goto label04;
+            case 6: goto label08;
+            case 7: goto label07;
+            case 8: goto label08;
+            case 91: goto label10;
+            case 92: goto label11;
+            case 93: goto label12;
+            case 2004: goto label13;
+            case 2005: goto label14;
+            default: goto label15;
+        };
+
+     label01:
+        $r11 = class "Ljava/math/BigDecimal;";
+
+        r15 = virtualinvoke $r11.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label02:
+        $r14 = class "Ljava/lang/Boolean;";
+
+        r15 = virtualinvoke $r14.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label03:
+        $r13 = class "Ljava/lang/Byte;";
+
+        r15 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label04:
+        $r9 = class "Ljava/lang/Short;";
+
+        r15 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label05:
+        $r10 = class "Ljava/lang/Integer;";
+
+        r15 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label06:
+        $r12 = class "Ljava/lang/Long;";
+
+        r15 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label07:
+        $r7 = class "Ljava/lang/Float;";
+
+        r15 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label08:
+        $r8 = class "Ljava/lang/Double;";
+
+        r15 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label09:
+        r15 = "byte[]";
+
+        goto label15;
+
+     label10:
+        $r6 = class "Ljava/sql/Date;";
+
+        r15 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label11:
+        $r5 = class "Ljava/sql/Time;";
+
+        r15 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label12:
+        $r4 = class "Ljava/sql/Timestamp;";
+
+        r15 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label13:
+        $r3 = class "Ljava/sql/Blob;";
+
+        r15 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label14:
+        $r2 = class "Ljava/sql/Clob;";
+
+        r15 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+     label15:
+        return r15;
+    }
+
+    public java.lang.Object unwrap(java.lang.Class) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r2;
+        javax.sql.rowset.RowSetMetaDataImpl r0;
+        java.lang.Class r1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.Object $r7;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<javax.sql.rowset.RowSetMetaDataImpl: boolean isWrapperFor(java.lang.Class)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = virtualinvoke r1.<java.lang.Class: java.lang.Object cast(java.lang.Object)>(r0);
+
+        return $r7;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unwrap failed for:");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    public boolean isWrapperFor(java.lang.Class) throws java.sql.SQLException
+    {
+        java.lang.Class r0;
+        javax.sql.rowset.RowSetMetaDataImpl r1;
+        boolean $z0;
+
+        r1 := @this: javax.sql.rowset.RowSetMetaDataImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isInstance(java.lang.Object)>(r1);
+
+        return $z0;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.sql.rowset.RowSetMetaDataImpl: long serialVersionUID> = 6893806403181801867L;
+
+        return;
+    }
+}

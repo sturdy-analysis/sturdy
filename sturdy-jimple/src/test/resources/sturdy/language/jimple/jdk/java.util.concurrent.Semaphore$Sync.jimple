@@ -1,0 +1,161 @@
+abstract class java.util.concurrent.Semaphore$Sync extends java.util.concurrent.locks.AbstractQueuedSynchronizer
+{
+    private static final long serialVersionUID;
+
+    void <init>(int)
+    {
+        int i0;
+        java.util.concurrent.Semaphore$Sync r0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer: void <init>()>();
+
+        virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: void setState(int)>(i0);
+
+        return;
+    }
+
+    final int getPermits()
+    {
+        int $i0;
+        java.util.concurrent.Semaphore$Sync r0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: int getState()>();
+
+        return $i0;
+    }
+
+    final int nonfairTryAcquireShared(int)
+    {
+        java.util.concurrent.Semaphore$Sync r0;
+        int $i0, i1, $i2;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+        i1 := @parameter0: int;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: int getState()>();
+
+        $i2 = $i0 - i1;
+
+        if $i2 < 0 goto label2;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: boolean compareAndSetState(int,int)>($i0, $i2);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return $i2;
+
+     label3:
+        goto label1;
+    }
+
+    protected final boolean tryReleaseShared(int)
+    {
+        java.util.concurrent.Semaphore$Sync r0;
+        int $i0, i1, $i2;
+        java.lang.Error $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+        i1 := @parameter0: int;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: int getState()>();
+
+        $i2 = $i0 + i1;
+
+        if $i2 >= $i0 goto label2;
+
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("Maximum permit count exceeded");
+
+        throw $r1;
+
+     label2:
+        $z0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: boolean compareAndSetState(int,int)>($i0, $i2);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        goto label1;
+    }
+
+    final void reducePermits(int)
+    {
+        java.util.concurrent.Semaphore$Sync r0;
+        int $i0, i1, $i2;
+        java.lang.Error $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+        i1 := @parameter0: int;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: int getState()>();
+
+        $i2 = $i0 - i1;
+
+        if $i2 <= $i0 goto label2;
+
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("Permit count underflow");
+
+        throw $r1;
+
+     label2:
+        $z0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: boolean compareAndSetState(int,int)>($i0, $i2);
+
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label3:
+        goto label1;
+    }
+
+    final int drainPermits()
+    {
+        int $i0;
+        java.util.concurrent.Semaphore$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Semaphore$Sync;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: int getState()>();
+
+        if $i0 == 0 goto label2;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.Semaphore$Sync: boolean compareAndSetState(int,int)>($i0, 0);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return $i0;
+
+     label3:
+        goto label1;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.Semaphore$Sync: long serialVersionUID> = 1192457210091910933L;
+
+        return;
+    }
+}

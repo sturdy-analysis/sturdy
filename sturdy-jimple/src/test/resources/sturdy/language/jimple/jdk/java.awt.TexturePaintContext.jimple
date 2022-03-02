@@ -1,0 +1,1045 @@
+abstract class java.awt.TexturePaintContext extends java.lang.Object implements java.awt.PaintContext
+{
+    public static java.awt.image.ColorModel xrgbmodel;
+    public static java.awt.image.ColorModel argbmodel;
+    java.awt.image.ColorModel colorModel;
+    int bWidth;
+    int bHeight;
+    int maxWidth;
+    java.awt.image.WritableRaster outRas;
+    double xOrg;
+    double yOrg;
+    double incXAcross;
+    double incYAcross;
+    double incXDown;
+    double incYDown;
+    int colincx;
+    int colincy;
+    int colincxerr;
+    int colincyerr;
+    int rowincx;
+    int rowincy;
+    int rowincxerr;
+    int rowincyerr;
+    private static java.lang.ref.WeakReference xrgbRasRef;
+    private static java.lang.ref.WeakReference argbRasRef;
+    private static java.lang.ref.WeakReference byteRasRef;
+
+    public static java.awt.PaintContext getContext(java.awt.image.BufferedImage, java.awt.geom.AffineTransform, java.awt.RenderingHints, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r3;
+        java.awt.TexturePaintContext$Byte $r9;
+        java.awt.RenderingHints r4;
+        int i0, $i1, $i2, $i3, $i4;
+        java.awt.TexturePaintContext$ByteFilter $r10;
+        boolean z0, $z1, $z2, $z3, $z5, $z6, $z7;
+        java.awt.TexturePaintContext$Int $r11;
+        java.awt.TexturePaintContext$Any $r17;
+        java.awt.image.BufferedImage r0;
+        java.awt.geom.AffineTransform r8;
+        sun.awt.image.ByteInterleavedRaster r16;
+        java.awt.image.ColorModel $r2;
+        java.awt.RenderingHints$Key $r5, $r13;
+        java.awt.image.WritableRaster $r1;
+        java.lang.Object $r6, $r7, $r14, $r15;
+        sun.awt.image.IntegerInterleavedRaster $r12;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        r8 := @parameter1: java.awt.geom.AffineTransform;
+
+        r4 := @parameter2: java.awt.RenderingHints;
+
+        r3 := @parameter3: java.awt.Rectangle;
+
+        $r1 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r2 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        i0 = r3.<java.awt.Rectangle: int width>;
+
+        $r5 = <java.awt.RenderingHints: java.awt.RenderingHints$Key KEY_INTERPOLATION>;
+
+        $r6 = virtualinvoke r4.<java.awt.RenderingHints: java.lang.Object get(java.lang.Object)>($r5);
+
+        if $r6 != null goto label2;
+
+        $r13 = <java.awt.RenderingHints: java.awt.RenderingHints$Key KEY_RENDERING>;
+
+        $r14 = virtualinvoke r4.<java.awt.RenderingHints: java.lang.Object get(java.lang.Object)>($r13);
+
+        $r15 = <java.awt.RenderingHints: java.lang.Object VALUE_RENDER_QUALITY>;
+
+        if $r14 != $r15 goto label1;
+
+        $z7 = 1;
+
+        $z6 = 1;
+
+        goto label4;
+
+     label1:
+        $z7 = 0;
+
+        $z6 = 0;
+
+        goto label4;
+
+     label2:
+        $r7 = <java.awt.RenderingHints: java.lang.Object VALUE_INTERPOLATION_NEAREST_NEIGHBOR>;
+
+        if $r6 == $r7 goto label3;
+
+        $z7 = 1;
+
+        $z6 = 1;
+
+        goto label4;
+
+     label3:
+        $z7 = 0;
+
+        $z6 = 0;
+
+     label4:
+        z0 = $z6;
+
+        $z5 = $r1 instanceof sun.awt.image.IntegerInterleavedRaster;
+
+        if $z5 == 0 goto label7;
+
+        if $z7 == 0 goto label5;
+
+        $z3 = staticinvoke <java.awt.TexturePaintContext: boolean isFilterableDCM(java.awt.image.ColorModel)>($r2);
+
+        if $z3 == 0 goto label7;
+
+     label5:
+        $r12 = (sun.awt.image.IntegerInterleavedRaster) $r1;
+
+        $i3 = virtualinvoke $r12.<sun.awt.image.IntegerInterleavedRaster: int getNumDataElements()>();
+
+        if $i3 != 1 goto label6;
+
+        $i4 = virtualinvoke $r12.<sun.awt.image.IntegerInterleavedRaster: int getPixelStride()>();
+
+        if $i4 != 1 goto label6;
+
+        $r11 = new java.awt.TexturePaintContext$Int;
+
+        specialinvoke $r11.<java.awt.TexturePaintContext$Int: void <init>(sun.awt.image.IntegerInterleavedRaster,java.awt.image.ColorModel,java.awt.geom.AffineTransform,int,boolean)>($r12, $r2, r8, i0, z0);
+
+        return $r11;
+
+     label6:
+        goto label9;
+
+     label7:
+        $z1 = $r1 instanceof sun.awt.image.ByteInterleavedRaster;
+
+        if $z1 == 0 goto label9;
+
+        r16 = (sun.awt.image.ByteInterleavedRaster) $r1;
+
+        $i1 = virtualinvoke r16.<sun.awt.image.ByteInterleavedRaster: int getNumDataElements()>();
+
+        if $i1 != 1 goto label9;
+
+        $i2 = virtualinvoke r16.<sun.awt.image.ByteInterleavedRaster: int getPixelStride()>();
+
+        if $i2 != 1 goto label9;
+
+        if z0 == 0 goto label8;
+
+        $z2 = staticinvoke <java.awt.TexturePaintContext: boolean isFilterableICM(java.awt.image.ColorModel)>($r2);
+
+        if $z2 == 0 goto label9;
+
+        $r10 = new java.awt.TexturePaintContext$ByteFilter;
+
+        specialinvoke $r10.<java.awt.TexturePaintContext$ByteFilter: void <init>(sun.awt.image.ByteInterleavedRaster,java.awt.image.ColorModel,java.awt.geom.AffineTransform,int)>(r16, $r2, r8, i0);
+
+        return $r10;
+
+     label8:
+        $r9 = new java.awt.TexturePaintContext$Byte;
+
+        specialinvoke $r9.<java.awt.TexturePaintContext$Byte: void <init>(sun.awt.image.ByteInterleavedRaster,java.awt.image.ColorModel,java.awt.geom.AffineTransform,int)>(r16, $r2, r8, i0);
+
+        return $r9;
+
+     label9:
+        $r17 = new java.awt.TexturePaintContext$Any;
+
+        specialinvoke $r17.<java.awt.TexturePaintContext$Any: void <init>(java.awt.image.WritableRaster,java.awt.image.ColorModel,java.awt.geom.AffineTransform,int,boolean)>($r1, $r2, r8, i0, z0);
+
+        return $r17;
+    }
+
+    public static boolean isFilterableICM(java.awt.image.ColorModel)
+    {
+        java.awt.image.ColorModel r0;
+        java.awt.image.IndexColorModel r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        $z0 = r0 instanceof java.awt.image.IndexColorModel;
+
+        if $z0 == 0 goto label1;
+
+        r1 = (java.awt.image.IndexColorModel) r0;
+
+        $i0 = virtualinvoke r1.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        if $i0 > 256 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public static boolean isFilterableDCM(java.awt.image.ColorModel)
+    {
+        java.awt.image.DirectColorModel r1;
+        java.awt.image.ColorModel r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        $z0 = r0 instanceof java.awt.image.DirectColorModel;
+
+        if $z0 == 0 goto label3;
+
+        r1 = (java.awt.image.DirectColorModel) r0;
+
+        $i0 = virtualinvoke r1.<java.awt.image.DirectColorModel: int getAlphaMask()>();
+
+        $z1 = staticinvoke <java.awt.TexturePaintContext: boolean isMaskOK(int,boolean)>($i0, 1);
+
+        if $z1 == 0 goto label1;
+
+        $i1 = virtualinvoke r1.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        $z2 = staticinvoke <java.awt.TexturePaintContext: boolean isMaskOK(int,boolean)>($i1, 0);
+
+        if $z2 == 0 goto label1;
+
+        $i2 = virtualinvoke r1.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        $z3 = staticinvoke <java.awt.TexturePaintContext: boolean isMaskOK(int,boolean)>($i2, 0);
+
+        if $z3 == 0 goto label1;
+
+        $i3 = virtualinvoke r1.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        $z4 = staticinvoke <java.awt.TexturePaintContext: boolean isMaskOK(int,boolean)>($i3, 0);
+
+        if $z4 == 0 goto label1;
+
+        $z5 = 1;
+
+        goto label2;
+
+     label1:
+        $z5 = 0;
+
+     label2:
+        return $z5;
+
+     label3:
+        return 0;
+    }
+
+    public static boolean isMaskOK(int, boolean)
+    {
+        int i0, $i2;
+        boolean z0, $z1;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        if i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        if i0 == 255 goto label2;
+
+        $i2 = (int) 65280;
+
+        if i0 == $i2 goto label2;
+
+        if i0 == 16711680 goto label2;
+
+        if i0 != -16777216 goto label3;
+
+     label2:
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    public static java.awt.image.ColorModel getInternedColorModel(java.awt.image.ColorModel)
+    {
+        java.awt.image.ColorModel r0, $r1, $r2, $r3, $r4, $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        $r1 = <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        if $r1 == r0 goto label1;
+
+        $r3 = <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        $z0 = virtualinvoke $r3.<java.awt.image.ColorModel: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        return $r2;
+
+     label2:
+        $r4 = <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel>;
+
+        if $r4 == r0 goto label3;
+
+        $r6 = <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel>;
+
+        $z1 = virtualinvoke $r6.<java.awt.image.ColorModel: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        $r5 = <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel>;
+
+        return $r5;
+
+     label4:
+        return r0;
+    }
+
+    void <init>(java.awt.image.ColorModel, java.awt.geom.AffineTransform, int, int, int)
+    {
+        java.awt.geom.NoninvertibleTransformException $r3;
+        java.awt.TexturePaintContext r0;
+        java.awt.geom.AffineTransform r4;
+        int i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21;
+        java.awt.image.ColorModel r1, $r2;
+
+        r0 := @this: java.awt.TexturePaintContext;
+
+        r1 := @parameter0: java.awt.image.ColorModel;
+
+        r4 := @parameter1: java.awt.geom.AffineTransform;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = staticinvoke <java.awt.TexturePaintContext: java.awt.image.ColorModel getInternedColorModel(java.awt.image.ColorModel)>(r1);
+
+        r0.<java.awt.TexturePaintContext: java.awt.image.ColorModel colorModel> = $r2;
+
+        r0.<java.awt.TexturePaintContext: int bWidth> = i0;
+
+        r0.<java.awt.TexturePaintContext: int bHeight> = i1;
+
+        r0.<java.awt.TexturePaintContext: int maxWidth> = i2;
+
+     label1:
+        r4 = virtualinvoke r4.<java.awt.geom.AffineTransform: java.awt.geom.AffineTransform createInverse()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r4.<java.awt.geom.AffineTransform: void setToScale(double,double)>(0.0, 0.0);
+
+     label4:
+        $d0 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getScaleX()>();
+
+        $d1 = (double) i0;
+
+        $d2 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d0, $d1);
+
+        r0.<java.awt.TexturePaintContext: double incXAcross> = $d2;
+
+        $d3 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getShearY()>();
+
+        $d4 = (double) i1;
+
+        $d5 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d3, $d4);
+
+        r0.<java.awt.TexturePaintContext: double incYAcross> = $d5;
+
+        $d6 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getShearX()>();
+
+        $d7 = (double) i0;
+
+        $d8 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d6, $d7);
+
+        r0.<java.awt.TexturePaintContext: double incXDown> = $d8;
+
+        $d9 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getScaleY()>();
+
+        $d10 = (double) i1;
+
+        $d11 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d9, $d10);
+
+        r0.<java.awt.TexturePaintContext: double incYDown> = $d11;
+
+        $d12 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        r0.<java.awt.TexturePaintContext: double xOrg> = $d12;
+
+        $d13 = virtualinvoke r4.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        r0.<java.awt.TexturePaintContext: double yOrg> = $d13;
+
+        $d14 = r0.<java.awt.TexturePaintContext: double incXAcross>;
+
+        $i3 = (int) $d14;
+
+        r0.<java.awt.TexturePaintContext: int colincx> = $i3;
+
+        $d15 = r0.<java.awt.TexturePaintContext: double incYAcross>;
+
+        $i4 = (int) $d15;
+
+        r0.<java.awt.TexturePaintContext: int colincy> = $i4;
+
+        $d16 = r0.<java.awt.TexturePaintContext: double incXAcross>;
+
+        $i5 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d16);
+
+        r0.<java.awt.TexturePaintContext: int colincxerr> = $i5;
+
+        $d17 = r0.<java.awt.TexturePaintContext: double incYAcross>;
+
+        $i6 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d17);
+
+        r0.<java.awt.TexturePaintContext: int colincyerr> = $i6;
+
+        $d18 = r0.<java.awt.TexturePaintContext: double incXDown>;
+
+        $i7 = (int) $d18;
+
+        r0.<java.awt.TexturePaintContext: int rowincx> = $i7;
+
+        $d19 = r0.<java.awt.TexturePaintContext: double incYDown>;
+
+        $i8 = (int) $d19;
+
+        r0.<java.awt.TexturePaintContext: int rowincy> = $i8;
+
+        $d20 = r0.<java.awt.TexturePaintContext: double incXDown>;
+
+        $i9 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d20);
+
+        r0.<java.awt.TexturePaintContext: int rowincxerr> = $i9;
+
+        $d21 = r0.<java.awt.TexturePaintContext: double incYDown>;
+
+        $i10 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d21);
+
+        r0.<java.awt.TexturePaintContext: int rowincyerr> = $i10;
+
+        return;
+
+        catch java.awt.geom.NoninvertibleTransformException from label1 to label2 with label3;
+    }
+
+    static int fractAsInt(double)
+    {
+        int $i0;
+        double d0, $d1, $d2;
+
+        d0 := @parameter0: double;
+
+        $d1 = d0 % 1.0;
+
+        $d2 = $d1 * 2.147483647E9;
+
+        $i0 = (int) $d2;
+
+        return $i0;
+    }
+
+    static double mod(double, double)
+    {
+        byte $b0, $b1;
+        int $i2, $i3;
+        double d0, d1, d2;
+
+        d1 := @parameter0: double;
+
+        d0 := @parameter1: double;
+
+        d2 = d1 % d0;
+
+        $b0 = d2 cmpg 0.0;
+
+        $i2 = (int) $b0;
+
+        if $i2 >= 0 goto label1;
+
+        d2 = d2 + d0;
+
+        $b1 = d2 cmpl d0;
+
+        $i3 = (int) $b1;
+
+        if $i3 < 0 goto label1;
+
+        d2 = 0.0;
+
+     label1:
+        return d2;
+    }
+
+    public void dispose()
+    {
+        java.awt.image.WritableRaster $r1;
+        java.awt.TexturePaintContext r0;
+        java.awt.image.ColorModel $r2;
+
+        r0 := @this: java.awt.TexturePaintContext;
+
+        $r2 = r0.<java.awt.TexturePaintContext: java.awt.image.ColorModel colorModel>;
+
+        $r1 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        staticinvoke <java.awt.TexturePaintContext: void dropRaster(java.awt.image.ColorModel,java.awt.image.Raster)>($r2, $r1);
+
+        return;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        java.awt.TexturePaintContext r0;
+        java.awt.image.ColorModel $r1;
+
+        r0 := @this: java.awt.TexturePaintContext;
+
+        $r1 = r0.<java.awt.TexturePaintContext: java.awt.image.ColorModel colorModel>;
+
+        return $r1;
+    }
+
+    public java.awt.image.Raster getRaster(int, int, int, int)
+    {
+        java.awt.TexturePaintContext r0;
+        int i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21;
+        java.awt.image.WritableRaster $r1, $r2, $r3, $r4, $r5, $r6;
+
+        r0 := @this: java.awt.TexturePaintContext;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $r1 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        $i5 = virtualinvoke $r3.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i5 < i1 goto label1;
+
+        $r4 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        $i6 = virtualinvoke $r4.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i6 >= i0 goto label4;
+
+     label1:
+        if i0 != 1 goto label2;
+
+        $i4 = r0.<java.awt.TexturePaintContext: int maxWidth>;
+
+        $i7 = staticinvoke <java.lang.Math: int max(int,int)>(i1, $i4);
+
+        goto label3;
+
+     label2:
+        $i7 = i1;
+
+     label3:
+        $r2 = virtualinvoke r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster makeRaster(int,int)>($i7, i0);
+
+        r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas> = $r2;
+
+     label4:
+        $d0 = r0.<java.awt.TexturePaintContext: double xOrg>;
+
+        $d1 = (double) i2;
+
+        $d2 = r0.<java.awt.TexturePaintContext: double incXAcross>;
+
+        $d3 = $d1 * $d2;
+
+        $d4 = $d0 + $d3;
+
+        $d5 = (double) i3;
+
+        $d6 = r0.<java.awt.TexturePaintContext: double incXDown>;
+
+        $d7 = $d5 * $d6;
+
+        $d8 = $d4 + $d7;
+
+        $i8 = r0.<java.awt.TexturePaintContext: int bWidth>;
+
+        $d9 = (double) $i8;
+
+        $d10 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d8, $d9);
+
+        $d11 = r0.<java.awt.TexturePaintContext: double yOrg>;
+
+        $d12 = (double) i2;
+
+        $d13 = r0.<java.awt.TexturePaintContext: double incYAcross>;
+
+        $d14 = $d12 * $d13;
+
+        $d15 = $d11 + $d14;
+
+        $d16 = (double) i3;
+
+        $d17 = r0.<java.awt.TexturePaintContext: double incYDown>;
+
+        $d18 = $d16 * $d17;
+
+        $d19 = $d15 + $d18;
+
+        $i9 = r0.<java.awt.TexturePaintContext: int bHeight>;
+
+        $d20 = (double) $i9;
+
+        $d21 = staticinvoke <java.awt.TexturePaintContext: double mod(double,double)>($d19, $d20);
+
+        $i10 = (int) $d10;
+
+        $i11 = (int) $d21;
+
+        $i12 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d10);
+
+        $i13 = staticinvoke <java.awt.TexturePaintContext: int fractAsInt(double)>($d21);
+
+        $i14 = r0.<java.awt.TexturePaintContext: int bWidth>;
+
+        $i15 = r0.<java.awt.TexturePaintContext: int bHeight>;
+
+        $i16 = r0.<java.awt.TexturePaintContext: int colincx>;
+
+        $i17 = r0.<java.awt.TexturePaintContext: int colincxerr>;
+
+        $i18 = r0.<java.awt.TexturePaintContext: int colincy>;
+
+        $i19 = r0.<java.awt.TexturePaintContext: int colincyerr>;
+
+        $i20 = r0.<java.awt.TexturePaintContext: int rowincx>;
+
+        $i21 = r0.<java.awt.TexturePaintContext: int rowincxerr>;
+
+        $i22 = r0.<java.awt.TexturePaintContext: int rowincy>;
+
+        $i23 = r0.<java.awt.TexturePaintContext: int rowincyerr>;
+
+        virtualinvoke r0.<java.awt.TexturePaintContext: void setRaster(int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int)>($i10, $i11, $i12, $i13, i1, i0, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23);
+
+        $r5 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        staticinvoke <sun.awt.image.SunWritableRaster: void markDirty(java.awt.image.WritableRaster)>($r5);
+
+        $r6 = r0.<java.awt.TexturePaintContext: java.awt.image.WritableRaster outRas>;
+
+        return $r6;
+    }
+
+    static synchronized java.awt.image.WritableRaster makeRaster(java.awt.image.ColorModel, java.awt.image.Raster, int, int)
+    {
+        java.awt.image.Raster r3;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.ref.WeakReference $r6, $r7, $r9, $r10;
+        java.awt.image.ColorModel r0, $r1, $r2;
+        java.awt.image.WritableRaster $r4, $r5, r12, r13;
+        java.lang.Object $r8, $r11;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        r3 := @parameter1: java.awt.image.Raster;
+
+        i4 := @parameter2: int;
+
+        i5 := @parameter3: int;
+
+        $r1 = <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        if $r1 != r0 goto label2;
+
+        $r9 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference xrgbRasRef>;
+
+        if $r9 == null goto label1;
+
+        $r10 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference xrgbRasRef>;
+
+        $r11 = virtualinvoke $r10.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r12 = (java.awt.image.WritableRaster) $r11;
+
+        if r12 == null goto label1;
+
+        $i2 = virtualinvoke r12.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i2 < i4 goto label1;
+
+        $i3 = virtualinvoke r12.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i3 < i5 goto label1;
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference xrgbRasRef> = null;
+
+        return r12;
+
+     label1:
+        if i4 > 32 goto label4;
+
+        if i5 > 32 goto label4;
+
+        i5 = 32;
+
+        i4 = 32;
+
+        goto label4;
+
+     label2:
+        $r2 = <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel>;
+
+        if $r2 != r0 goto label4;
+
+        $r6 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference argbRasRef>;
+
+        if $r6 == null goto label3;
+
+        $r7 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference argbRasRef>;
+
+        $r8 = virtualinvoke $r7.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r13 = (java.awt.image.WritableRaster) $r8;
+
+        if r13 == null goto label3;
+
+        $i0 = virtualinvoke r13.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i0 < i4 goto label3;
+
+        $i1 = virtualinvoke r13.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i1 < i5 goto label3;
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference argbRasRef> = null;
+
+        return r13;
+
+     label3:
+        if i4 > 32 goto label4;
+
+        if i5 > 32 goto label4;
+
+        i5 = 32;
+
+        i4 = 32;
+
+     label4:
+        if r3 == null goto label5;
+
+        $r5 = virtualinvoke r3.<java.awt.image.Raster: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>(i4, i5);
+
+        return $r5;
+
+     label5:
+        $r4 = virtualinvoke r0.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>(i4, i5);
+
+        return $r4;
+    }
+
+    static synchronized void dropRaster(java.awt.image.ColorModel, java.awt.image.Raster)
+    {
+        java.awt.image.ColorModel r1, $r2, $r3;
+        java.awt.image.Raster r0;
+        java.lang.ref.WeakReference $r4, $r5;
+
+        r1 := @parameter0: java.awt.image.ColorModel;
+
+        r0 := @parameter1: java.awt.image.Raster;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        if $r2 != r1 goto label2;
+
+        $r5 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r5.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference xrgbRasRef> = $r5;
+
+        goto label3;
+
+     label2:
+        $r3 = <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel>;
+
+        if $r3 != r1 goto label3;
+
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference argbRasRef> = $r4;
+
+     label3:
+        return;
+    }
+
+    static synchronized java.awt.image.WritableRaster makeByteRaster(java.awt.image.Raster, int, int)
+    {
+        java.awt.image.Raster r1;
+        int $i0, $i1, i2, i3;
+        java.lang.Object $r3;
+        java.awt.image.WritableRaster r4, $r5;
+        java.lang.ref.WeakReference $r0, $r2;
+
+        r1 := @parameter0: java.awt.image.Raster;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $r0 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference byteRasRef>;
+
+        if $r0 == null goto label1;
+
+        $r2 = <java.awt.TexturePaintContext: java.lang.ref.WeakReference byteRasRef>;
+
+        $r3 = virtualinvoke $r2.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r4 = (java.awt.image.WritableRaster) $r3;
+
+        if r4 == null goto label1;
+
+        $i0 = virtualinvoke r4.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i0 < i2 goto label1;
+
+        $i1 = virtualinvoke r4.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i1 < i3 goto label1;
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference byteRasRef> = null;
+
+        return r4;
+
+     label1:
+        if i2 > 32 goto label2;
+
+        if i3 > 32 goto label2;
+
+        i3 = 32;
+
+        i2 = 32;
+
+     label2:
+        $r5 = virtualinvoke r1.<java.awt.image.Raster: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>(i2, i3);
+
+        return $r5;
+    }
+
+    static synchronized void dropByteRaster(java.awt.image.Raster)
+    {
+        java.awt.image.Raster r0;
+        java.lang.ref.WeakReference $r1;
+
+        r0 := @parameter0: java.awt.image.Raster;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r1.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        <java.awt.TexturePaintContext: java.lang.ref.WeakReference byteRasRef> = $r1;
+
+        return;
+    }
+
+    public abstract java.awt.image.WritableRaster makeRaster(int, int);
+
+    public abstract void setRaster(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
+
+    public static int blend(int[], int, int)
+    {
+        int[] r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, i27, i28, i29, i30, i31, i32, i33, i34, i35;
+
+        r0 := @parameter0: int[];
+
+        i27 := @parameter1: int;
+
+        i28 := @parameter2: int;
+
+        i29 = i27 >>> 19;
+
+        i30 = i28 >>> 19;
+
+        i31 = 0;
+
+        i32 = 0;
+
+        i33 = 0;
+
+        i34 = 0;
+
+        i35 = 0;
+
+     label1:
+        if i35 >= 4 goto label4;
+
+        i14 = r0[i35];
+
+        i29 = 4096 - i29;
+
+        $i15 = i35 & 1;
+
+        if $i15 != 0 goto label2;
+
+        i30 = 4096 - i30;
+
+     label2:
+        $i26 = i29 * i30;
+
+        if $i26 == 0 goto label3;
+
+        $i16 = i14 >>> 24;
+
+        $i17 = $i16 * $i26;
+
+        i34 = i34 + $i17;
+
+        $i18 = i14 >>> 16;
+
+        $i19 = $i18 & 255;
+
+        $i20 = $i19 * $i26;
+
+        i33 = i33 + $i20;
+
+        $i21 = i14 >>> 8;
+
+        $i22 = $i21 & 255;
+
+        $i23 = $i22 * $i26;
+
+        i32 = i32 + $i23;
+
+        $i24 = i14 & 255;
+
+        $i25 = $i24 * $i26;
+
+        i31 = i31 + $i25;
+
+     label3:
+        i35 = i35 + 1;
+
+        goto label1;
+
+     label4:
+        $i0 = i34 + 8388608;
+
+        $i1 = $i0 >>> 24;
+
+        $i5 = $i1 << 24;
+
+        $i2 = i33 + 8388608;
+
+        $i3 = $i2 >>> 24;
+
+        $i4 = $i3 << 16;
+
+        $i9 = $i5 | $i4;
+
+        $i6 = i32 + 8388608;
+
+        $i7 = $i6 >>> 24;
+
+        $i8 = $i7 << 8;
+
+        $i12 = $i9 | $i8;
+
+        $i10 = i31 + 8388608;
+
+        $i11 = $i10 >>> 24;
+
+        $i13 = $i12 | $i11;
+
+        return $i13;
+    }
+
+    static void <clinit>()
+    {
+        int $i1;
+        java.awt.image.ColorModel $r1;
+        java.awt.image.DirectColorModel $r2;
+
+        $r2 = new java.awt.image.DirectColorModel;
+
+        $i1 = (int) 65280;
+
+        specialinvoke $r2.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, $i1, 255);
+
+        <java.awt.TexturePaintContext: java.awt.image.ColorModel xrgbmodel> = $r2;
+
+        $r1 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        <java.awt.TexturePaintContext: java.awt.image.ColorModel argbmodel> = $r1;
+
+        return;
+    }
+}

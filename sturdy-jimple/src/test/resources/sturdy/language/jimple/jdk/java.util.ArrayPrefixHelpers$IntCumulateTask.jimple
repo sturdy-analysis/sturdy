@@ -1,0 +1,514 @@
+final class java.util.ArrayPrefixHelpers$IntCumulateTask extends java.util.concurrent.CountedCompleter
+{
+    final int[] array;
+    final java.util.function.IntBinaryOperator function;
+    java.util.ArrayPrefixHelpers$IntCumulateTask left;
+    java.util.ArrayPrefixHelpers$IntCumulateTask right;
+    int in;
+    int out;
+    final int lo;
+    final int hi;
+    final int origin;
+    final int fence;
+    final int threshold;
+
+    public void <init>(java.util.ArrayPrefixHelpers$IntCumulateTask, java.util.function.IntBinaryOperator, int[], int, int)
+    {
+        java.util.function.IntBinaryOperator r2;
+        int[] r3;
+        java.util.ArrayPrefixHelpers$IntCumulateTask r0, r1;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        r1 := @parameter0: java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        r2 := @parameter1: java.util.function.IntBinaryOperator;
+
+        r3 := @parameter2: int[];
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(r1);
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.function.IntBinaryOperator function> = r2;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int[] array> = r3;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int origin> = i0;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int lo> = i0;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int fence> = i1;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int hi> = i1;
+
+        $i2 = i1 - i0;
+
+        $i3 = staticinvoke <java.util.concurrent.ForkJoinPool: int getCommonPoolParallelism()>();
+
+        $i4 = $i3 << 3;
+
+        $i5 = $i2 / $i4;
+
+        if $i5 > 16 goto label1;
+
+        $i6 = 16;
+
+        goto label2;
+
+     label1:
+        $i6 = $i5;
+
+     label2:
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int threshold> = $i6;
+
+        return;
+    }
+
+    void <init>(java.util.ArrayPrefixHelpers$IntCumulateTask, java.util.function.IntBinaryOperator, int[], int, int, int, int, int)
+    {
+        java.util.function.IntBinaryOperator r2;
+        int[] r3;
+        java.util.ArrayPrefixHelpers$IntCumulateTask r0, r1;
+        int i0, i1, i2, i3, i4;
+
+        r0 := @this: java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        r1 := @parameter0: java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        r2 := @parameter1: java.util.function.IntBinaryOperator;
+
+        r3 := @parameter2: int[];
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        i4 := @parameter7: int;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(r1);
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.function.IntBinaryOperator function> = r2;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int[] array> = r3;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int origin> = i0;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int fence> = i1;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int threshold> = i2;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int lo> = i3;
+
+        r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int hi> = i4;
+
+        return;
+    }
+
+    public final void compute()
+    {
+        java.util.function.IntBinaryOperator $r1;
+        java.util.concurrent.CountedCompleter $r12;
+        byte $b19, b35, $b46, $b47, $b48;
+        java.util.ArrayPrefixHelpers$IntCumulateTask r0, $r4, $r5, $r6, $r7, r8, r9, r10, r11, $r13;
+        java.lang.NullPointerException $r2;
+        int[] $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, z6, $z7, $z8;
+        int i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i23, $i24, $i25, i26, i27, i28, $i29, $i30, $i31, $i32, $i33, $i36, i37, i38, i39, i40, i41, $i42, $i43, $i44, $i45;
+
+        r0 := @this: java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        $r1 = r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.function.IntBinaryOperator function>;
+
+        if $r1 == null goto label01;
+
+        $r3 = r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int[] array>;
+
+        if $r3 != null goto label02;
+
+     label01:
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label02:
+        i0 = r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int threshold>;
+
+        i1 = r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int origin>;
+
+        i2 = r0.<java.util.ArrayPrefixHelpers$IntCumulateTask: int fence>;
+
+        r8 = r0;
+
+     label03:
+        $i3 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int lo>;
+
+        if $i3 < 0 goto label42;
+
+        $i4 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int hi>;
+
+        $i5 = lengthof $r3;
+
+        if $i4 > $i5 goto label42;
+
+        $i6 = $i4 - $i3;
+
+        if $i6 <= i0 goto label15;
+
+        r9 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask left>;
+
+        r10 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask right>;
+
+        if r9 != null goto label04;
+
+        $i25 = $i3 + $i4;
+
+        i26 = $i25 >>> 1;
+
+        $r6 = new java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        specialinvoke $r6.<java.util.ArrayPrefixHelpers$IntCumulateTask: void <init>(java.util.ArrayPrefixHelpers$IntCumulateTask,java.util.function.IntBinaryOperator,int[],int,int,int,int,int)>(r8, $r1, $r3, i1, i2, i0, i26, $i4);
+
+        r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask right> = $r6;
+
+        r11 = $r6;
+
+        $r7 = new java.util.ArrayPrefixHelpers$IntCumulateTask;
+
+        specialinvoke $r7.<java.util.ArrayPrefixHelpers$IntCumulateTask: void <init>(java.util.ArrayPrefixHelpers$IntCumulateTask,java.util.function.IntBinaryOperator,int[],int,int,int,int,int)>(r8, $r1, $r3, i1, i2, i0, $i3, i26);
+
+        r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask left> = $r7;
+
+        r8 = $r7;
+
+        goto label13;
+
+     label04:
+        i27 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int in>;
+
+        r9.<java.util.ArrayPrefixHelpers$IntCumulateTask: int in> = i27;
+
+        r8 = null;
+
+        r11 = null;
+
+        if r10 == null goto label09;
+
+        i28 = r9.<java.util.ArrayPrefixHelpers$IntCumulateTask: int out>;
+
+        if $i3 != i1 goto label05;
+
+        $i29 = i28;
+
+        goto label06;
+
+     label05:
+        $i29 = interfaceinvoke $r1.<java.util.function.IntBinaryOperator: int applyAsInt(int,int)>(i27, i28);
+
+     label06:
+        r10.<java.util.ArrayPrefixHelpers$IntCumulateTask: int in> = $i29;
+
+     label07:
+        $i30 = virtualinvoke r10.<java.util.ArrayPrefixHelpers$IntCumulateTask: int getPendingCount()>();
+
+        $i31 = $i30 & 1;
+
+        if $i31 == 0 goto label08;
+
+        goto label09;
+
+     label08:
+        $i24 = $i30 | 1;
+
+        $z3 = virtualinvoke r10.<java.util.ArrayPrefixHelpers$IntCumulateTask: boolean compareAndSetPendingCount(int,int)>($i30, $i24);
+
+        if $z3 == 0 goto label07;
+
+        r8 = r10;
+
+        goto label09;
+
+     label09:
+        $i32 = virtualinvoke r9.<java.util.ArrayPrefixHelpers$IntCumulateTask: int getPendingCount()>();
+
+        $i33 = $i32 & 1;
+
+        if $i33 == 0 goto label10;
+
+        goto label12;
+
+     label10:
+        $i23 = $i32 | 1;
+
+        $z2 = virtualinvoke r9.<java.util.ArrayPrefixHelpers$IntCumulateTask: boolean compareAndSetPendingCount(int,int)>($i32, $i23);
+
+        if $z2 == 0 goto label09;
+
+        if r8 == null goto label11;
+
+        r11 = r8;
+
+     label11:
+        r8 = r9;
+
+        goto label12;
+
+     label12:
+        if r8 != null goto label13;
+
+        goto label42;
+
+     label13:
+        if r11 == null goto label14;
+
+        virtualinvoke r11.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.concurrent.ForkJoinTask fork()>();
+
+     label14:
+        goto label03;
+
+     label15:
+        $i7 = virtualinvoke r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int getPendingCount()>();
+
+        $i8 = $i7 & 4;
+
+        if $i8 == 0 goto label16;
+
+        goto label42;
+
+     label16:
+        $i9 = $i7 & 1;
+
+        if $i9 == 0 goto label17;
+
+        $b48 = 4;
+
+        $b47 = 4;
+
+        $b46 = 4;
+
+        goto label19;
+
+     label17:
+        if $i3 <= i1 goto label18;
+
+        $b48 = 2;
+
+        $b47 = 2;
+
+        $b46 = 2;
+
+        goto label19;
+
+     label18:
+        $b48 = 6;
+
+        $b47 = 6;
+
+        $b46 = 6;
+
+     label19:
+        b35 = $b48;
+
+        $i36 = $i7 | $b46;
+
+        $z4 = virtualinvoke r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: boolean compareAndSetPendingCount(int,int)>($i7, $i36);
+
+        if $z4 == 0 goto label15;
+
+        goto label20;
+
+     label20:
+        if $b47 == 2 goto label25;
+
+        if $i3 != i1 goto label21;
+
+        i37 = $r3[i1];
+
+        i38 = i1 + 1;
+
+        goto label22;
+
+     label21:
+        i37 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int in>;
+
+        i38 = $i3;
+
+     label22:
+        i39 = i38;
+
+     label23:
+        if i39 >= $i4 goto label24;
+
+        $i21 = $r3[i39];
+
+        $i22 = interfaceinvoke $r1.<java.util.function.IntBinaryOperator: int applyAsInt(int,int)>(i37, $i21);
+
+        i37 = $i22;
+
+        $r3[i39] = $i22;
+
+        i39 = i39 + 1;
+
+        goto label23;
+
+     label24:
+        goto label29;
+
+     label25:
+        if $i4 >= i2 goto label28;
+
+        i37 = $r3[$i3];
+
+        i40 = $i3 + 1;
+
+     label26:
+        if i40 >= $i4 goto label27;
+
+        $i20 = $r3[i40];
+
+        i37 = interfaceinvoke $r1.<java.util.function.IntBinaryOperator: int applyAsInt(int,int)>(i37, $i20);
+
+        i40 = i40 + 1;
+
+        goto label26;
+
+     label27:
+        goto label29;
+
+     label28:
+        i37 = r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int in>;
+
+     label29:
+        r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: int out> = i37;
+
+     label30:
+        $r12 = virtualinvoke r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.concurrent.CountedCompleter getCompleter()>();
+
+        $r13 = (java.util.ArrayPrefixHelpers$IntCumulateTask) $r12;
+
+        if $r13 != null goto label31;
+
+        $b19 = b35 & 4;
+
+        if $b19 == 0 goto label42;
+
+        virtualinvoke r8.<java.util.ArrayPrefixHelpers$IntCumulateTask: void quietlyComplete()>();
+
+        goto label42;
+
+     label31:
+        $i10 = virtualinvoke $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: int getPendingCount()>();
+
+        $i11 = $i10 & b35;
+
+        $i12 = $i11 & 4;
+
+        if $i12 == 0 goto label32;
+
+        r8 = $r13;
+
+        goto label41;
+
+     label32:
+        $i13 = $i10 & b35;
+
+        $i14 = $i13 & 2;
+
+        if $i14 == 0 goto label40;
+
+        $r4 = $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask left>;
+
+        if $r4 == null goto label35;
+
+        $r5 = $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.ArrayPrefixHelpers$IntCumulateTask right>;
+
+        if $r5 == null goto label35;
+
+        i41 = $r4.<java.util.ArrayPrefixHelpers$IntCumulateTask: int out>;
+
+        $i17 = $r5.<java.util.ArrayPrefixHelpers$IntCumulateTask: int hi>;
+
+        if $i17 != i2 goto label33;
+
+        $i42 = i41;
+
+        goto label34;
+
+     label33:
+        $i18 = $r5.<java.util.ArrayPrefixHelpers$IntCumulateTask: int out>;
+
+        $i42 = interfaceinvoke $r1.<java.util.function.IntBinaryOperator: int applyAsInt(int,int)>(i41, $i18);
+
+     label34:
+        $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: int out> = $i42;
+
+     label35:
+        $i43 = $i10 & 1;
+
+        if $i43 != 0 goto label36;
+
+        $i16 = $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: int lo>;
+
+        if $i16 != i1 goto label36;
+
+        $z8 = 1;
+
+        $z7 = 1;
+
+        goto label37;
+
+     label36:
+        $z8 = 0;
+
+        $z7 = 0;
+
+     label37:
+        z6 = $z7;
+
+        $i44 = $i10 | b35;
+
+        $i45 = $i44 | $z8;
+
+        if $i45 == $i10 goto label38;
+
+        $z1 = virtualinvoke $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: boolean compareAndSetPendingCount(int,int)>($i10, $i45);
+
+        if $z1 == 0 goto label39;
+
+     label38:
+        b35 = 2;
+
+        r8 = $r13;
+
+        if z6 == 0 goto label39;
+
+        virtualinvoke $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: java.util.concurrent.ForkJoinTask fork()>();
+
+     label39:
+        goto label41;
+
+     label40:
+        $i15 = $i10 | b35;
+
+        $z0 = virtualinvoke $r13.<java.util.ArrayPrefixHelpers$IntCumulateTask: boolean compareAndSetPendingCount(int,int)>($i10, $i15);
+
+        if $z0 == 0 goto label41;
+
+        goto label42;
+
+     label41:
+        goto label30;
+
+     label42:
+        return;
+    }
+}

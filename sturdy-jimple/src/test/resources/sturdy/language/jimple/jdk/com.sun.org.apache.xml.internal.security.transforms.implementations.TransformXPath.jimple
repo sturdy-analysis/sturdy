@@ -1,0 +1,162 @@
+public class com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath extends com.sun.org.apache.xml.internal.security.transforms.TransformSpi
+{
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.transforms.TransformSpi: void <init>()>();
+
+        return;
+    }
+
+    protected java.lang.String engineGetURI()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath;
+
+        return "http://www.w3.org/TR/1999/REC-xpath-19991116";
+    }
+
+    protected com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput enginePerformTransform(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput, java.io.OutputStream, org.w3c.dom.Element, java.lang.String, boolean) throws com.sun.org.apache.xml.internal.security.transforms.TransformationException
+    {
+        java.lang.Object[] $r11;
+        org.w3c.dom.Node $r1, $r3;
+        org.w3c.dom.DOMException $r10, $r13;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput r5;
+        java.lang.String $r4, r16;
+        boolean $z0, z1;
+        com.sun.org.apache.xml.internal.security.utils.XPathAPI $r8;
+        java.io.OutputStream r15;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath r6;
+        com.sun.org.apache.xml.internal.security.utils.XPathFactory $r7;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath$XPathNodeFilter $r9;
+        org.w3c.dom.Element r0, $r2;
+        com.sun.org.apache.xml.internal.security.transforms.TransformationException $r12, $r14;
+
+        r6 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath;
+
+        r5 := @parameter0: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        r15 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: org.w3c.dom.Element;
+
+        r16 := @parameter3: java.lang.String;
+
+        z1 := @parameter4: boolean;
+
+     label1:
+        $r1 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.Node getFirstChild()>();
+
+        $r2 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: org.w3c.dom.Element selectDsNode(org.w3c.dom.Node,java.lang.String,int)>($r1, "XPath", 0);
+
+        if $r2 != null goto label2;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r11[0] = "ds:XPath";
+
+        $r11[1] = "Transform";
+
+        $r12 = new com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+
+        specialinvoke $r12.<com.sun.org.apache.xml.internal.security.transforms.TransformationException: void <init>(java.lang.String,java.lang.Object[])>("xml.WrongContent", $r11);
+
+        throw $r12;
+
+     label2:
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Element: org.w3c.dom.Node getFirstChild()>();
+
+        if $r3 != null goto label3;
+
+        $r10 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r10.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(3, "Text must be in ds:Xpath");
+
+        throw $r10;
+
+     label3:
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: java.lang.String getStrFromNode(org.w3c.dom.Node)>($r3);
+
+        $z0 = specialinvoke r6.<com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath: boolean needsCircumvent(java.lang.String)>($r4);
+
+        virtualinvoke r5.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setNeedsToBeExpanded(boolean)>($z0);
+
+        $r7 = virtualinvoke r6.<com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath: com.sun.org.apache.xml.internal.security.utils.XPathFactory getXPathFactory()>();
+
+        $r8 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.security.utils.XPathFactory: com.sun.org.apache.xml.internal.security.utils.XPathAPI newXPathAPI()>();
+
+        $r9 = new com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath$XPathNodeFilter;
+
+        specialinvoke $r9.<com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath$XPathNodeFilter: void <init>(org.w3c.dom.Element,org.w3c.dom.Node,java.lang.String,com.sun.org.apache.xml.internal.security.utils.XPathAPI)>($r2, $r3, $r4, $r8);
+
+        virtualinvoke r5.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void addNodeFilter(com.sun.org.apache.xml.internal.security.signature.NodeFilter)>($r9);
+
+        virtualinvoke r5.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setNodeSet(boolean)>(1);
+
+     label4:
+        return r5;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r14 = new com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+
+        specialinvoke $r14.<com.sun.org.apache.xml.internal.security.transforms.TransformationException: void <init>(java.lang.Exception)>($r13);
+
+        throw $r14;
+
+        catch org.w3c.dom.DOMException from label1 to label4 with label5;
+    }
+
+    protected com.sun.org.apache.xml.internal.security.utils.XPathFactory getXPathFactory()
+    {
+        com.sun.org.apache.xml.internal.security.utils.XPathFactory $r0;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath r1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath;
+
+        $r0 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XPathFactory: com.sun.org.apache.xml.internal.security.utils.XPathFactory newInstance()>();
+
+        return $r0;
+    }
+
+    private boolean needsCircumvent(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath r1;
+        int $i0, $i1, $i3, $i5;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXPath;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>("namespace");
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>("name()");
+
+        $i5 = (int) -1;
+
+        if $i1 == $i5 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+}

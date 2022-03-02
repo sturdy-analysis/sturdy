@@ -1,0 +1,315 @@
+public class javax.swing.ProgressMonitorInputStream extends java.io.FilterInputStream
+{
+    private javax.swing.ProgressMonitor monitor;
+    private int nread;
+    private int size;
+
+    public void <init>(java.awt.Component, java.lang.Object, java.io.InputStream)
+    {
+        java.io.IOException $r5;
+        javax.swing.ProgressMonitorInputStream r0;
+        java.awt.Component r3;
+        int $i0, $i1;
+        java.lang.Object r4;
+        javax.swing.ProgressMonitor $r2;
+        java.io.InputStream r1;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        r3 := @parameter0: java.awt.Component;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = 0;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int size> = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.io.InputStream: int available()>();
+
+        r0.<javax.swing.ProgressMonitorInputStream: int size> = $i0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int size> = 0;
+
+     label4:
+        $r2 = new javax.swing.ProgressMonitor;
+
+        $i1 = r0.<javax.swing.ProgressMonitorInputStream: int size>;
+
+        specialinvoke $r2.<javax.swing.ProgressMonitor: void <init>(java.awt.Component,java.lang.Object,java.lang.String,int,int)>(r3, r4, null, 0, $i1);
+
+        r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor> = $r2;
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public javax.swing.ProgressMonitor getProgressMonitor()
+    {
+        javax.swing.ProgressMonitor $r1;
+        javax.swing.ProgressMonitorInputStream r0;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        $r1 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        return $r1;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        javax.swing.ProgressMonitorInputStream r0;
+        java.io.InterruptedIOException $r3;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.ProgressMonitor $r2, $r4;
+        java.io.InputStream $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        $r1 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+        if $i0 < 0 goto label1;
+
+        $r4 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $i2 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $i3 = $i2 + 1;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = $i3;
+
+        virtualinvoke $r4.<javax.swing.ProgressMonitor: void setProgress(int)>($i3);
+
+     label1:
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.ProgressMonitor: boolean isCanceled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.io.InterruptedIOException;
+
+        specialinvoke $r3.<java.io.InterruptedIOException: void <init>(java.lang.String)>("progress");
+
+        $i1 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $r3.<java.io.InterruptedIOException: int bytesTransferred> = $i1;
+
+        throw $r3;
+
+     label2:
+        return $i0;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        javax.swing.ProgressMonitorInputStream r0;
+        java.io.InterruptedIOException $r4;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.ProgressMonitor $r3, $r5;
+        java.io.InputStream $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read(byte[])>(r1);
+
+        if $i0 <= 0 goto label1;
+
+        $r5 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $i2 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $i3 = $i2 + $i0;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = $i3;
+
+        virtualinvoke $r5.<javax.swing.ProgressMonitor: void setProgress(int)>($i3);
+
+     label1:
+        $r3 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.ProgressMonitor: boolean isCanceled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.io.InterruptedIOException;
+
+        specialinvoke $r4.<java.io.InterruptedIOException: void <init>(java.lang.String)>("progress");
+
+        $i1 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $r4.<java.io.InterruptedIOException: int bytesTransferred> = $i1;
+
+        throw $r4;
+
+     label2:
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        javax.swing.ProgressMonitorInputStream r0;
+        java.io.InterruptedIOException $r4;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        javax.swing.ProgressMonitor $r3, $r5;
+        java.io.InputStream $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        $i2 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        if $i2 <= 0 goto label1;
+
+        $r5 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $i4 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $i5 = $i4 + $i2;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = $i5;
+
+        virtualinvoke $r5.<javax.swing.ProgressMonitor: void setProgress(int)>($i5);
+
+     label1:
+        $r3 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.ProgressMonitor: boolean isCanceled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.io.InterruptedIOException;
+
+        specialinvoke $r4.<java.io.InterruptedIOException: void <init>(java.lang.String)>("progress");
+
+        $i3 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $r4.<java.io.InterruptedIOException: int bytesTransferred> = $i3;
+
+        throw $r4;
+
+     label2:
+        return $i2;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        long l0, $l1, $l4, $l5;
+        javax.swing.ProgressMonitorInputStream r0;
+        byte $b2;
+        int $i3, $i6, $i7;
+        javax.swing.ProgressMonitor $r2;
+        java.io.InputStream $r1;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        $l1 = virtualinvoke $r1.<java.io.InputStream: long skip(long)>(l0);
+
+        $b2 = $l1 cmp 0L;
+
+        $i7 = (int) $b2;
+
+        if $i7 <= 0 goto label1;
+
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $i3 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        $l4 = (long) $i3;
+
+        $l5 = $l4 + $l1;
+
+        $i6 = (int) $l5;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = $i6;
+
+        virtualinvoke $r2.<javax.swing.ProgressMonitor: void setProgress(int)>($i6);
+
+     label1:
+        return $l1;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.swing.ProgressMonitor $r2;
+        javax.swing.ProgressMonitorInputStream r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        $r1 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        virtualinvoke $r2.<javax.swing.ProgressMonitor: void close()>();
+
+        return;
+    }
+
+    public synchronized void reset() throws java.io.IOException
+    {
+        javax.swing.ProgressMonitorInputStream r0;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.ProgressMonitor $r3;
+        java.io.InputStream $r1, $r2;
+
+        r0 := @this: javax.swing.ProgressMonitorInputStream;
+
+        $r1 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void reset()>();
+
+        $i0 = r0.<javax.swing.ProgressMonitorInputStream: int size>;
+
+        $r2 = r0.<javax.swing.ProgressMonitorInputStream: java.io.InputStream in>;
+
+        $i1 = virtualinvoke $r2.<java.io.InputStream: int available()>();
+
+        $i2 = $i0 - $i1;
+
+        r0.<javax.swing.ProgressMonitorInputStream: int nread> = $i2;
+
+        $r3 = r0.<javax.swing.ProgressMonitorInputStream: javax.swing.ProgressMonitor monitor>;
+
+        $i3 = r0.<javax.swing.ProgressMonitorInputStream: int nread>;
+
+        virtualinvoke $r3.<javax.swing.ProgressMonitor: void setProgress(int)>($i3);
+
+        return;
+    }
+}

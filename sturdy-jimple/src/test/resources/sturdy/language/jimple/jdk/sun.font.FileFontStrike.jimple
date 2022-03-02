@@ -1,0 +1,2704 @@
+public class sun.font.FileFontStrike extends sun.font.PhysicalStrike
+{
+    static final int INVISIBLE_GLYPHS;
+    private sun.font.FileFont fileFont;
+    private static final int UNINITIALISED;
+    private static final int INTARRAY;
+    private static final int LONGARRAY;
+    private static final int SEGINTARRAY;
+    private static final int SEGLONGARRAY;
+    private volatile int glyphCacheFormat;
+    private static final int SEGSHIFT;
+    private static final int SEGSIZE;
+    private boolean segmentedCache;
+    private int[][] segIntGlyphImages;
+    private long[][] segLongGlyphImages;
+    private float[] horizontalAdvances;
+    private float[][] segHorizontalAdvances;
+    java.util.concurrent.ConcurrentHashMap boundsMap;
+    java.lang.ref.SoftReference glyphMetricsMapRef;
+    java.awt.geom.AffineTransform invertDevTx;
+    boolean useNatives;
+    sun.font.NativeStrike[] nativeStrikes;
+    private int intPtSize;
+    private static boolean isXPorLater;
+    private java.lang.ref.WeakReference outlineMapRef;
+
+    private static native boolean initNative();
+
+    void <init>(sun.font.FileFont, sun.font.FontStrikeDesc)
+    {
+        sun.font.FileFontStrike r0;
+        byte $b8, $b9, $b10, $b15, $b16, $b17, $b18, $b19, $b21, $b22, $b23, $b24, $b25, $b29, $b45, $b49;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r22, $r46;
+        float[] $r6, $r7;
+        long $l28, $l32, $l43, $l44, $l48;
+        sun.util.logging.PlatformLogger $r8;
+        sun.font.FileFont r1;
+        java.awt.geom.NoninvertibleTransformException $r39;
+        sun.font.SunFontManager $r32;
+        sun.font.NativeStrike $r45;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i11, $i12, $i13, $i14, $i20, $i26, $i27, $i30, $i31, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, i46, i47, i50, i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59;
+        float[][] $r5;
+        sun.font.FontScaler $r33, $r34;
+        sun.font.TrueTypeFont $r21, $r30;
+        sun.font.CharToGlyphMapper $r3, $r4;
+        sun.font.FontStrikeDesc r2;
+        sun.font.FontStrikeDisposer $r44, $r47;
+        sun.font.NativeFont[] $r24, $r27;
+        java.awt.geom.AffineTransform $r36, $r37, $r38, $r41, $r42;
+        sun.font.NativeFont $r28;
+        double[] $r40;
+        java.lang.String $r23, $r35;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24;
+        sun.font.NativeStrike[] $r25, $r29;
+        float $f0, $f1, $f2, $f3;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        r1 := @parameter0: sun.font.FileFont;
+
+        r2 := @parameter1: sun.font.FontStrikeDesc;
+
+        specialinvoke r0.<sun.font.PhysicalStrike: void <init>(sun.font.PhysicalFont,sun.font.FontStrikeDesc)>(r1, r2);
+
+        r0.<sun.font.FileFontStrike: int glyphCacheFormat> = 0;
+
+        r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont> = r1;
+
+        $i1 = r2.<sun.font.FontStrikeDesc: int style>;
+
+        $i0 = r1.<sun.font.FileFont: int style>;
+
+        if $i1 == $i0 goto label02;
+
+        $i34 = r2.<sun.font.FontStrikeDesc: int style>;
+
+        $i35 = $i34 & 2;
+
+        if $i35 != 2 goto label01;
+
+        $i38 = r1.<sun.font.FileFont: int style>;
+
+        $i39 = $i38 & 2;
+
+        if $i39 != 0 goto label01;
+
+        r0.<sun.font.FileFontStrike: boolean algoStyle> = 1;
+
+        r0.<sun.font.FileFontStrike: float italic> = 0.7F;
+
+     label01:
+        $i40 = r2.<sun.font.FontStrikeDesc: int style>;
+
+        $i41 = $i40 & 1;
+
+        if $i41 != 1 goto label02;
+
+        $i36 = r1.<sun.font.FileFont: int style>;
+
+        $i37 = $i36 & 1;
+
+        if $i37 != 0 goto label02;
+
+        r0.<sun.font.FileFontStrike: boolean algoStyle> = 1;
+
+        r0.<sun.font.FileFontStrike: float boldness> = 1.33F;
+
+     label02:
+        $r40 = newarray (double)[4];
+
+        $r41 = r2.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform glyphTx>;
+
+        virtualinvoke $r41.<java.awt.geom.AffineTransform: void getMatrix(double[])>($r40);
+
+        $r42 = r2.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform devTx>;
+
+        $z16 = virtualinvoke $r42.<java.awt.geom.AffineTransform: boolean isIdentity()>();
+
+        if $z16 != 0 goto label06;
+
+        $r36 = r2.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform devTx>;
+
+        $i33 = virtualinvoke $r36.<java.awt.geom.AffineTransform: int getType()>();
+
+        if $i33 == 1 goto label06;
+
+     label03:
+        $r37 = r2.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform devTx>;
+
+        $r38 = virtualinvoke $r37.<java.awt.geom.AffineTransform: java.awt.geom.AffineTransform createInverse()>();
+
+        r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx> = $r38;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r39 := @caughtexception;
+
+     label06:
+        $i42 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i42 == 1 goto label07;
+
+        $r35 = r1.<sun.font.FileFont: java.lang.String familyName>;
+
+        $z15 = virtualinvoke $r35.<java.lang.String: boolean startsWith(java.lang.String)>("Amble");
+
+        if $z15 == 0 goto label07;
+
+        $z17 = 1;
+
+        goto label08;
+
+     label07:
+        $z17 = 0;
+
+     label08:
+        $d22 = $r40[0];
+
+        $z18 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d22);
+
+        if $z18 != 0 goto label09;
+
+        $d19 = $r40[1];
+
+        $z12 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d19);
+
+        if $z12 != 0 goto label09;
+
+        $d20 = $r40[2];
+
+        $z13 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d20);
+
+        if $z13 != 0 goto label09;
+
+        $d21 = $r40[3];
+
+        $z14 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d21);
+
+        if $z14 != 0 goto label09;
+
+        $r33 = virtualinvoke r1.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        if $r33 != null goto label10;
+
+     label09:
+        $l43 = staticinvoke <sun.font.NullFontScaler: long getNullScalerContext()>();
+
+        r0.<sun.font.FileFontStrike: long pScalerContext> = $l43;
+
+        goto label11;
+
+     label10:
+        $r34 = virtualinvoke r1.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $i31 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        $i30 = r2.<sun.font.FontStrikeDesc: int fmHint>;
+
+        $f2 = r0.<sun.font.FileFontStrike: float boldness>;
+
+        $f1 = r0.<sun.font.FileFontStrike: float italic>;
+
+        $l32 = virtualinvoke $r34.<sun.font.FontScaler: long createScalerContext(double[],int,int,float,float,boolean)>($r40, $i31, $i30, $f2, $f1, $z17);
+
+        r0.<sun.font.FileFontStrike: long pScalerContext> = $l32;
+
+     label11:
+        $r3 = virtualinvoke r1.<sun.font.FileFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        r0.<sun.font.FileFontStrike: sun.font.CharToGlyphMapper mapper> = $r3;
+
+        $r4 = r0.<sun.font.FileFontStrike: sun.font.CharToGlyphMapper mapper>;
+
+        $i2 = virtualinvoke $r4.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        $d0 = $r40[3];
+
+        $f3 = (float) $d0;
+
+        $i3 = (int) $f3;
+
+        r0.<sun.font.FileFontStrike: int intPtSize> = $i3;
+
+        $i4 = virtualinvoke $r41.<java.awt.geom.AffineTransform: int getType()>();
+
+        $i5 = $i4 & 124;
+
+        if $i5 != 0 goto label12;
+
+        $z19 = 1;
+
+        goto label13;
+
+     label12:
+        $z19 = 0;
+
+     label13:
+        if $i2 > 256 goto label14;
+
+        if $i2 <= 64 goto label15;
+
+        if $z19 == 0 goto label14;
+
+        $f0 = (float) $i3;
+
+        $b29 = $f3 cmpl $f0;
+
+        if $b29 != 0 goto label14;
+
+        if $i3 < 6 goto label14;
+
+        if $i3 <= 36 goto label15;
+
+     label14:
+        $z20 = 1;
+
+        goto label16;
+
+     label15:
+        $z20 = 0;
+
+     label16:
+        r0.<sun.font.FileFontStrike: boolean segmentedCache> = $z20;
+
+        $l44 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $b45 = $l44 cmp 0L;
+
+        if $b45 != 0 goto label17;
+
+        $r44 = new sun.font.FontStrikeDisposer;
+
+        specialinvoke $r44.<sun.font.FontStrikeDisposer: void <init>(sun.font.Font2D,sun.font.FontStrikeDesc)>(r1, r2);
+
+        r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer> = $r44;
+
+        specialinvoke r0.<sun.font.FileFontStrike: void initGlyphCache()>();
+
+        $l28 = staticinvoke <sun.font.NullFontScaler: long getNullScalerContext()>();
+
+        r0.<sun.font.FileFontStrike: long pScalerContext> = $l28;
+
+        $r32 = staticinvoke <sun.font.SunFontManager: sun.font.SunFontManager getInstance()>();
+
+        virtualinvoke $r32.<sun.font.SunFontManager: void deRegisterBadFont(sun.font.Font2D)>(r1);
+
+        return;
+
+     label17:
+        $z0 = <sun.font.FontUtilities: boolean isWindows>;
+
+        if $z0 == 0 goto label19;
+
+        $z7 = <sun.font.FileFontStrike: boolean isXPorLater>;
+
+        if $z7 == 0 goto label19;
+
+        $z8 = <sun.font.FontUtilities: boolean useT2K>;
+
+        if $z8 != 0 goto label19;
+
+        $z9 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z9 != 0 goto label19;
+
+        $z10 = r1.<sun.font.FileFont: boolean useJavaRasterizer>;
+
+        if $z10 != 0 goto label19;
+
+        $i20 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i20 == 4 goto label18;
+
+        $i27 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i27 != 5 goto label19;
+
+     label18:
+        $d13 = $r40[1];
+
+        $b21 = $d13 cmpl 0.0;
+
+        if $b21 != 0 goto label19;
+
+        $d14 = $r40[2];
+
+        $b22 = $d14 cmpl 0.0;
+
+        if $b22 != 0 goto label19;
+
+        $d16 = $r40[0];
+
+        $d15 = $r40[3];
+
+        $b23 = $d16 cmpl $d15;
+
+        if $b23 != 0 goto label19;
+
+        $d17 = $r40[0];
+
+        $b24 = $d17 cmpl 3.0;
+
+        $i52 = (int) $b24;
+
+        if $i52 < 0 goto label19;
+
+        $d18 = $r40[0];
+
+        $b25 = $d18 cmpg 100.0;
+
+        $i53 = (int) $b25;
+
+        if $i53 > 0 goto label19;
+
+        $r30 = (sun.font.TrueTypeFont) r1;
+
+        $i26 = r0.<sun.font.FileFontStrike: int intPtSize>;
+
+        $z11 = virtualinvoke $r30.<sun.font.TrueTypeFont: boolean useEmbeddedBitmapsForSize(int)>($i26);
+
+        if $z11 != 0 goto label19;
+
+        r0.<sun.font.FileFontStrike: boolean useNatives> = 1;
+
+        goto label21;
+
+     label19:
+        $z21 = virtualinvoke r1.<sun.font.FileFont: boolean checkUseNatives()>();
+
+        if $z21 == 0 goto label21;
+
+        $i14 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i14 != 0 goto label21;
+
+        $z6 = r0.<sun.font.FileFontStrike: boolean algoStyle>;
+
+        if $z6 != 0 goto label21;
+
+        $d7 = $r40[1];
+
+        $b15 = $d7 cmpl 0.0;
+
+        if $b15 != 0 goto label21;
+
+        $d8 = $r40[2];
+
+        $b16 = $d8 cmpl 0.0;
+
+        if $b16 != 0 goto label21;
+
+        $d9 = $r40[0];
+
+        $b17 = $d9 cmpl 6.0;
+
+        $i54 = (int) $b17;
+
+        if $i54 < 0 goto label21;
+
+        $d10 = $r40[0];
+
+        $b18 = $d10 cmpg 36.0;
+
+        $i55 = (int) $b18;
+
+        if $i55 > 0 goto label21;
+
+        $d12 = $r40[0];
+
+        $d11 = $r40[3];
+
+        $b19 = $d12 cmpl $d11;
+
+        if $b19 != 0 goto label21;
+
+        r0.<sun.font.FileFontStrike: boolean useNatives> = 1;
+
+        $r24 = r1.<sun.font.FileFont: sun.font.NativeFont[] nativeFonts>;
+
+        i46 = lengthof $r24;
+
+        $r25 = newarray (sun.font.NativeStrike)[i46];
+
+        r0.<sun.font.FileFontStrike: sun.font.NativeStrike[] nativeStrikes> = $r25;
+
+        i47 = 0;
+
+     label20:
+        if i47 >= i46 goto label21;
+
+        $r29 = r0.<sun.font.FileFontStrike: sun.font.NativeStrike[] nativeStrikes>;
+
+        $r45 = new sun.font.NativeStrike;
+
+        $r27 = r1.<sun.font.FileFont: sun.font.NativeFont[] nativeFonts>;
+
+        $r28 = $r27[i47];
+
+        specialinvoke $r45.<sun.font.NativeStrike: void <init>(sun.font.NativeFont,sun.font.FontStrikeDesc,boolean)>($r28, r2, 0);
+
+        $r29[i47] = $r45;
+
+        i47 = i47 + 1;
+
+        goto label20;
+
+     label21:
+        $z22 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z22 == 0 goto label22;
+
+        $z2 = <sun.font.FontUtilities: boolean isWindows>;
+
+        if $z2 == 0 goto label22;
+
+        $r8 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Strike for ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at size = ");
+
+        $i11 = r0.<sun.font.FileFontStrike: int intPtSize>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" use natives = ");
+
+        $z3 = r0.<sun.font.FileFontStrike: boolean useNatives>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" useJavaRasteriser = ");
+
+        $z4 = r1.<sun.font.FileFont: boolean useJavaRasterizer>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z4);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AAHint = ");
+
+        $i12 = r2.<sun.font.FontStrikeDesc: int aaHint>;
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Has Embedded bitmaps = ");
+
+        $r21 = (sun.font.TrueTypeFont) r1;
+
+        $i13 = r0.<sun.font.FileFontStrike: int intPtSize>;
+
+        $z5 = virtualinvoke $r21.<sun.font.TrueTypeFont: boolean useEmbeddedBitmapsForSize(int)>($i13);
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z5);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.util.logging.PlatformLogger: void info(java.lang.String)>($r23);
+
+     label22:
+        $r47 = new sun.font.FontStrikeDisposer;
+
+        $l48 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        specialinvoke $r47.<sun.font.FontStrikeDisposer: void <init>(sun.font.Font2D,sun.font.FontStrikeDesc,long)>(r1, r2, $l48);
+
+        r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer> = $r47;
+
+        $d23 = virtualinvoke $r41.<java.awt.geom.AffineTransform: double getScaleX()>();
+
+        $d24 = staticinvoke <java.lang.Math: double abs(double)>($d23);
+
+        $b49 = $d24 cmpg 48.0;
+
+        $i56 = (int) $b49;
+
+        if $i56 > 0 goto label23;
+
+        $d1 = virtualinvoke $r41.<java.awt.geom.AffineTransform: double getScaleY()>();
+
+        $d2 = staticinvoke <java.lang.Math: double abs(double)>($d1);
+
+        $b8 = $d2 cmpg 48.0;
+
+        $i57 = (int) $b8;
+
+        if $i57 > 0 goto label23;
+
+        $d3 = virtualinvoke $r41.<java.awt.geom.AffineTransform: double getShearX()>();
+
+        $d4 = staticinvoke <java.lang.Math: double abs(double)>($d3);
+
+        $b9 = $d4 cmpg 48.0;
+
+        $i58 = (int) $b9;
+
+        if $i58 > 0 goto label23;
+
+        $d5 = virtualinvoke $r41.<java.awt.geom.AffineTransform: double getShearY()>();
+
+        $d6 = staticinvoke <java.lang.Math: double abs(double)>($d5);
+
+        $b10 = $d6 cmpg 48.0;
+
+        $i59 = (int) $b10;
+
+        if $i59 > 0 goto label23;
+
+        $z23 = 1;
+
+        goto label24;
+
+     label23:
+        $z23 = 0;
+
+     label24:
+        r0.<sun.font.FileFontStrike: boolean getImageWithAdvance> = $z23;
+
+        $z24 = r0.<sun.font.FileFontStrike: boolean getImageWithAdvance>;
+
+        if $z24 != 0 goto label28;
+
+        $z1 = r0.<sun.font.FileFontStrike: boolean segmentedCache>;
+
+        if $z1 != 0 goto label27;
+
+        $r6 = newarray (float)[$i2];
+
+        r0.<sun.font.FileFontStrike: float[] horizontalAdvances> = $r6;
+
+        i50 = 0;
+
+     label25:
+        if i50 >= $i2 goto label26;
+
+        $r7 = r0.<sun.font.FileFontStrike: float[] horizontalAdvances>;
+
+        $r7[i50] = 3.4028235E38F;
+
+        i50 = i50 + 1;
+
+        goto label25;
+
+     label26:
+        goto label28;
+
+     label27:
+        $i6 = $i2 + 32;
+
+        $i7 = $i6 - 1;
+
+        i51 = $i7 / 32;
+
+        $r5 = newarray (float[])[i51];
+
+        r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances> = $r5;
+
+     label28:
+        return;
+
+        catch java.awt.geom.NoninvertibleTransformException from label03 to label04 with label05;
+    }
+
+    public int getNumGlyphs()
+    {
+        int $i0;
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r1;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $i0 = virtualinvoke $r1.<sun.font.FileFont: int getNumGlyphs()>();
+
+        return $i0;
+    }
+
+    long getGlyphImageFromNative(int)
+    {
+        sun.font.FileFontStrike r0;
+        int i0;
+        long $l1, $l2;
+        boolean $z0;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.font.FontUtilities: boolean isWindows>;
+
+        if $z0 == 0 goto label1;
+
+        $l2 = virtualinvoke r0.<sun.font.FileFontStrike: long getGlyphImageFromWindows(int)>(i0);
+
+        return $l2;
+
+     label1:
+        $l1 = virtualinvoke r0.<sun.font.FileFontStrike: long getGlyphImageFromX11(int)>(i0);
+
+        return $l1;
+    }
+
+    private native long _getGlyphImageFromWindows(java.lang.String, int, int, int, boolean, int);
+
+    long getGlyphImageFromWindows(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r1, $r5, $r7, $r9;
+        sun.font.TrueTypeFont $r8;
+        byte $b12;
+        sun.font.FontStrikeDesc $r3, $r4, $r6;
+        boolean $z0, $z1;
+        float $f0;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19;
+        sun.misc.Unsafe $r21;
+        long $l11, $l13, $l14, $l16, $l17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, $i9, $i10, $i15;
+        java.lang.String $r2, $r20;
+        sun.util.logging.PlatformLogger $r10;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i8 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $r2 = virtualinvoke $r1.<sun.font.FileFont: java.lang.String getFamilyName(java.util.Locale)>(null);
+
+        $r3 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $i0 = $r3.<sun.font.FontStrikeDesc: int style>;
+
+        $i3 = $i0 & 1;
+
+        $r4 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $i1 = $r4.<sun.font.FontStrikeDesc: int style>;
+
+        $i2 = $i1 & 2;
+
+        $i4 = $i3 | $i2;
+
+        $r5 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $i5 = virtualinvoke $r5.<sun.font.FileFont: int getStyle()>();
+
+        i6 = $i4 | $i5;
+
+        i7 = r0.<sun.font.FileFontStrike: int intPtSize>;
+
+        $r6 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $i9 = $r6.<sun.font.FontStrikeDesc: int fmHint>;
+
+        if $i9 != 2 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $r7 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $r8 = (sun.font.TrueTypeFont) $r7;
+
+        $i10 = $r8.<sun.font.TrueTypeFont: int fontDataSize>;
+
+        $l11 = specialinvoke r0.<sun.font.FileFontStrike: long _getGlyphImageFromWindows(java.lang.String,int,int,int,boolean,int)>($r2, i6, i7, i8, $z1, $i10);
+
+        $b12 = $l11 cmp 0L;
+
+        if $b12 == 0 goto label3;
+
+        $f0 = specialinvoke r0.<sun.font.FileFontStrike: float getGlyphAdvance(int,boolean)>(i8, 0);
+
+        $r21 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i15 = <sun.font.StrikeCache: int xAdvanceOffset>;
+
+        $l16 = (long) $i15;
+
+        $l17 = $l11 + $l16;
+
+        virtualinvoke $r21.<sun.misc.Unsafe: void putFloat(long,float)>($l17, $f0);
+
+        return $l11;
+
+     label3:
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z0 == 0 goto label4;
+
+        $r10 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to render glyph using GDI: code=");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i8);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", fontFamily=");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", style=");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", size=");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i7);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r20);
+
+     label4:
+        $r9 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l13 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $l14 = virtualinvoke $r9.<sun.font.FileFont: long getGlyphImage(long,int)>($l13, i8);
+
+        return $l14;
+    }
+
+    long getGlyphImageFromX11(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r1, $r4, $r5;
+        sun.font.CharToGlyphMapper $r8;
+        long $l3, $l4, $l8;
+        byte $b9;
+        int i0, $i2, $i5, i6, $i7, i10, $i12;
+        sun.font.NativeStrike[] $r3, $r9;
+        sun.font.NativeFont[] $r6;
+        char c1;
+        sun.font.NativeStrike $r10;
+        sun.font.NativeFont $r7;
+        char[] $r2;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $r2 = $r1.<sun.font.FileFont: char[] glyphToCharMap>;
+
+        c1 = $r2[i0];
+
+        i10 = 0;
+
+     label1:
+        $r3 = r0.<sun.font.FileFontStrike: sun.font.NativeStrike[] nativeStrikes>;
+
+        $i2 = lengthof $r3;
+
+        if i10 >= $i2 goto label3;
+
+        $r5 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $r6 = $r5.<sun.font.FileFont: sun.font.NativeFont[] nativeFonts>;
+
+        $r7 = $r6[i10];
+
+        $r8 = virtualinvoke $r7.<sun.font.NativeFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i5 = virtualinvoke $r8.<sun.font.CharToGlyphMapper: int charToGlyph(char)>(c1);
+
+        $i12 = (int) 65535;
+
+        i6 = $i5 & $i12;
+
+        $i7 = virtualinvoke $r8.<sun.font.CharToGlyphMapper: int getMissingGlyphCode()>();
+
+        if i6 == $i7 goto label2;
+
+        $r9 = r0.<sun.font.FileFontStrike: sun.font.NativeStrike[] nativeStrikes>;
+
+        $r10 = $r9[i10];
+
+        $l8 = virtualinvoke $r10.<sun.font.NativeStrike: long getGlyphImagePtrNoCache(int)>(i6);
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label2;
+
+        return $l8;
+
+     label2:
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l3 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $l4 = virtualinvoke $r4.<sun.font.FileFont: long getGlyphImage(long,int)>($l3, i0);
+
+        return $l4;
+    }
+
+    long getGlyphImagePtr(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r1, $r5;
+        long $l1, $l3, $l4, $l5, $l8, l9;
+        byte $b2, $b6, $b10;
+        int i0, $i7, $i12;
+        java.lang.String $r11;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger $r2;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r9, $r10, $r12;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $i12 = (int) 65534;
+
+        if i0 < $i12 goto label1;
+
+        $l8 = <sun.font.StrikeCache: long invisibleGlyphPtr>;
+
+        return $l8;
+
+     label1:
+        $l1 = virtualinvoke r0.<sun.font.FileFontStrike: long getCachedGlyphPtr(int)>(i0);
+
+        l9 = $l1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        return $l1;
+
+     label2:
+        $z0 = r0.<sun.font.FileFontStrike: boolean useNatives>;
+
+        if $z0 == 0 goto label3;
+
+        $l5 = virtualinvoke r0.<sun.font.FileFontStrike: long getGlyphImageFromNative(int)>(i0);
+
+        l9 = $l5;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 != 0 goto label3;
+
+        $z1 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z1 == 0 goto label3;
+
+        $r2 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Strike for ");
+
+        $r5 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at size = ");
+
+        $i7 = r0.<sun.font.FileFontStrike: int intPtSize>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" couldn\'t get native glyph for code = ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<sun.util.logging.PlatformLogger: void info(java.lang.String)>($r11);
+
+     label3:
+        $b10 = l9 cmp 0L;
+
+        if $b10 != 0 goto label4;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l4 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        l9 = virtualinvoke $r1.<sun.font.FileFont: long getGlyphImage(long,int)>($l4, i0);
+
+     label4:
+        $l3 = specialinvoke r0.<sun.font.FileFontStrike: long setCachedGlyphPtr(int,long)>(i0, l9);
+
+        return $l3;
+    }
+
+    void getGlyphImagePtrs(int[], long[], int)
+    {
+        sun.font.FileFontStrike r2;
+        sun.font.FileFont $r3;
+        long $l2, $l5, $l6, $l7, l9;
+        long[] r1;
+        byte $b3, $b4;
+        int[] r0;
+        int i0, i1, i8, $i11;
+        boolean $z0;
+
+        r2 := @this: sun.font.FileFontStrike;
+
+        r0 := @parameter0: int[];
+
+        r1 := @parameter1: long[];
+
+        i0 := @parameter2: int;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i0 goto label7;
+
+        i1 = r0[i8];
+
+        $i11 = (int) 65534;
+
+        if i1 < $i11 goto label2;
+
+        $l7 = <sun.font.StrikeCache: long invisibleGlyphPtr>;
+
+        r1[i8] = $l7;
+
+        goto label6;
+
+     label2:
+        $l2 = virtualinvoke r2.<sun.font.FileFontStrike: long getCachedGlyphPtr(int)>(i1);
+
+        r1[i8] = $l2;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label3;
+
+        goto label6;
+
+     label3:
+        l9 = 0L;
+
+        $z0 = r2.<sun.font.FileFontStrike: boolean useNatives>;
+
+        if $z0 == 0 goto label4;
+
+        l9 = virtualinvoke r2.<sun.font.FileFontStrike: long getGlyphImageFromNative(int)>(i1);
+
+     label4:
+        $b4 = l9 cmp 0L;
+
+        if $b4 != 0 goto label5;
+
+        $r3 = r2.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l6 = r2.<sun.font.FileFontStrike: long pScalerContext>;
+
+        l9 = virtualinvoke $r3.<sun.font.FileFont: long getGlyphImage(long,int)>($l6, i1);
+
+     label5:
+        $l5 = specialinvoke r2.<sun.font.FileFontStrike: long setCachedGlyphPtr(int,long)>(i1, l9);
+
+        r1[i8] = $l5;
+
+     label6:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    int getSlot0GlyphImagePtrs(int[], long[], int)
+    {
+        sun.font.FileFontStrike r2;
+        sun.font.FileFont $r3;
+        long $l3, $l6, $l7, $l8, l11;
+        long[] r1;
+        byte $b4, $b5;
+        int[] r0;
+        int i0, i1, $i2, i9, i10, $i13;
+        boolean $z0;
+
+        r2 := @this: sun.font.FileFontStrike;
+
+        r0 := @parameter0: int[];
+
+        r1 := @parameter1: long[];
+
+        i0 := @parameter2: int;
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label1:
+        if i10 >= i0 goto label8;
+
+        i1 = r0[i10];
+
+        $i2 = i1 >>> 24;
+
+        if $i2 == 0 goto label2;
+
+        return i9;
+
+     label2:
+        i9 = i9 + 1;
+
+        $i13 = (int) 65534;
+
+        if i1 < $i13 goto label3;
+
+        $l8 = <sun.font.StrikeCache: long invisibleGlyphPtr>;
+
+        r1[i10] = $l8;
+
+        goto label7;
+
+     label3:
+        $l3 = virtualinvoke r2.<sun.font.FileFontStrike: long getCachedGlyphPtr(int)>(i1);
+
+        r1[i10] = $l3;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label4;
+
+        goto label7;
+
+     label4:
+        l11 = 0L;
+
+        $z0 = r2.<sun.font.FileFontStrike: boolean useNatives>;
+
+        if $z0 == 0 goto label5;
+
+        l11 = virtualinvoke r2.<sun.font.FileFontStrike: long getGlyphImageFromNative(int)>(i1);
+
+     label5:
+        $b5 = l11 cmp 0L;
+
+        if $b5 != 0 goto label6;
+
+        $r3 = r2.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l7 = r2.<sun.font.FileFontStrike: long pScalerContext>;
+
+        l11 = virtualinvoke $r3.<sun.font.FileFont: long getGlyphImage(long,int)>($l7, i1);
+
+     label6:
+        $l6 = specialinvoke r2.<sun.font.FileFontStrike: long setCachedGlyphPtr(int,long)>(i1, l11);
+
+        r1[i10] = $l6;
+
+     label7:
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label8:
+        return i9;
+    }
+
+    long getCachedGlyphPtr(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FontScaler $r2;
+        long $l1, $l2, $l3;
+        java.lang.Exception $r1;
+        sun.font.NullFontScaler r3;
+        int i0;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $l1 = specialinvoke r0.<sun.font.FileFontStrike: long getCachedGlyphPtrInternal(int)>(i0);
+
+     label2:
+        return $l1;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r3 = (sun.font.NullFontScaler) $r2;
+
+        $l2 = staticinvoke <sun.font.NullFontScaler: long getNullScalerContext()>();
+
+        $l3 = virtualinvoke r3.<sun.font.NullFontScaler: long getGlyphImage(long,int)>($l2, i0);
+
+        return $l3;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private long getCachedGlyphPtrInternal(int)
+    {
+        int[][] $r5, $r7;
+        sun.font.FileFontStrike r0;
+        long $l2, $l4, $l5, $l6, $l8, $l9;
+        long[] $r2, $r4, $r9;
+        int[] $r6, $r8, $r10;
+        int $i0, i1, $i3, $i7, i10, i11, i12, i13;
+        long[][] $r1, $r3;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<sun.font.FileFontStrike: int glyphCacheFormat>;
+
+        tableswitch($i0)
+        {
+            case 1: goto label1;
+            case 2: goto label4;
+            case 3: goto label2;
+            case 4: goto label5;
+            default: goto label7;
+        };
+
+     label1:
+        $r10 = r0.<sun.font.FileFontStrike: int[] intGlyphImages>;
+
+        $i7 = $r10[i1];
+
+        $l8 = (long) $i7;
+
+        $l9 = $l8 & 4294967295L;
+
+        return $l9;
+
+     label2:
+        i10 = i1 >> 5;
+
+        $r5 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r6 = $r5[i10];
+
+        if $r6 == null goto label3;
+
+        i11 = i1 % 32;
+
+        $r7 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r8 = $r7[i10];
+
+        $i3 = $r8[i11];
+
+        $l4 = (long) $i3;
+
+        $l5 = $l4 & 4294967295L;
+
+        return $l5;
+
+     label3:
+        return 0L;
+
+     label4:
+        $r9 = r0.<sun.font.FileFontStrike: long[] longGlyphImages>;
+
+        $l6 = $r9[i1];
+
+        return $l6;
+
+     label5:
+        i12 = i1 >> 5;
+
+        $r1 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r2 = $r1[i12];
+
+        if $r2 == null goto label6;
+
+        i13 = i1 % 32;
+
+        $r3 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r4 = $r3[i12];
+
+        $l2 = $r4[i13];
+
+        return $l2;
+
+     label6:
+        return 0L;
+
+     label7:
+        return 0L;
+    }
+
+    private synchronized long setCachedGlyphPtr(int, long)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FontScaler $r2;
+        long l1, $l2, $l5, $l6;
+        java.lang.Exception $r1;
+        sun.font.NullFontScaler $r3;
+        int i0, $i3, $i4;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+     label1:
+        $l2 = specialinvoke r0.<sun.font.FileFontStrike: long setCachedGlyphPtrInternal(int,long)>(i0, l1);
+
+     label2:
+        return $l2;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $i3 = r0.<sun.font.FileFontStrike: int glyphCacheFormat>;
+
+        tableswitch($i3)
+        {
+            case 1: goto label4;
+            case 2: goto label5;
+            case 3: goto label4;
+            case 4: goto label5;
+            default: goto label6;
+        };
+
+     label4:
+        $i4 = (int) l1;
+
+        staticinvoke <sun.font.StrikeCache: void freeIntPointer(int)>($i4);
+
+        goto label6;
+
+     label5:
+        staticinvoke <sun.font.StrikeCache: void freeLongPointer(long)>(l1);
+
+     label6:
+        $r2 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        $r3 = (sun.font.NullFontScaler) $r2;
+
+        $l5 = staticinvoke <sun.font.NullFontScaler: long getNullScalerContext()>();
+
+        $l6 = virtualinvoke $r3.<sun.font.NullFontScaler: long getGlyphImage(long,int)>($l5, i0);
+
+        return $l6;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private long setCachedGlyphPtrInternal(int, long)
+    {
+        int[][] $r11, $r13, $r15, $r17, $r20;
+        sun.font.FileFontStrike r0;
+        byte $b3, $b13;
+        int[] $r12, $r14, $r16, $r18, $r19, $r24, $r25, $r26;
+        long $l2, l4, $l5, $l9, $l10, $l12, $l14, $l18, $l19, $l21;
+        long[] $r2, $r4, $r6, $r8, $r9, $r21, $r22, $r23;
+        int $i0, i1, $i6, $i7, $i8, $i11, $i15, $i16, $i17, $i20, i22, i23, i24, i25;
+        long[][] $r1, $r3, $r5, $r7, $r10;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i1 := @parameter0: int;
+
+        l4 := @parameter1: long;
+
+        $i0 = r0.<sun.font.FileFontStrike: int glyphCacheFormat>;
+
+        tableswitch($i0)
+        {
+            case 1: goto label01;
+            case 2: goto label06;
+            case 3: goto label03;
+            case 4: goto label08;
+            default: goto label11;
+        };
+
+     label01:
+        $r24 = r0.<sun.font.FileFontStrike: int[] intGlyphImages>;
+
+        $i15 = $r24[i1];
+
+        if $i15 != 0 goto label02;
+
+        $r26 = r0.<sun.font.FileFontStrike: int[] intGlyphImages>;
+
+        $i20 = (int) l4;
+
+        $r26[i1] = $i20;
+
+        return l4;
+
+     label02:
+        $i16 = (int) l4;
+
+        staticinvoke <sun.font.StrikeCache: void freeIntPointer(int)>($i16);
+
+        $r25 = r0.<sun.font.FileFontStrike: int[] intGlyphImages>;
+
+        $i17 = $r25[i1];
+
+        $l18 = (long) $i17;
+
+        $l19 = $l18 & 4294967295L;
+
+        return $l19;
+
+     label03:
+        i22 = i1 >> 5;
+
+        i23 = i1 % 32;
+
+        $r11 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r12 = $r11[i22];
+
+        if $r12 != null goto label04;
+
+        $r20 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r19 = newarray (int)[32];
+
+        $r20[i22] = $r19;
+
+     label04:
+        $r13 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r14 = $r13[i22];
+
+        $i6 = $r14[i23];
+
+        if $i6 != 0 goto label05;
+
+        $r17 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r18 = $r17[i22];
+
+        $i11 = (int) l4;
+
+        $r18[i23] = $i11;
+
+        return l4;
+
+     label05:
+        $i7 = (int) l4;
+
+        staticinvoke <sun.font.StrikeCache: void freeIntPointer(int)>($i7);
+
+        $r15 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r16 = $r15[i22];
+
+        $i8 = $r16[i23];
+
+        $l9 = (long) $i8;
+
+        $l10 = $l9 & 4294967295L;
+
+        return $l10;
+
+     label06:
+        $r21 = r0.<sun.font.FileFontStrike: long[] longGlyphImages>;
+
+        $l12 = $r21[i1];
+
+        $b13 = $l12 cmp 0L;
+
+        if $b13 != 0 goto label07;
+
+        $r23 = r0.<sun.font.FileFontStrike: long[] longGlyphImages>;
+
+        $r23[i1] = l4;
+
+        return l4;
+
+     label07:
+        staticinvoke <sun.font.StrikeCache: void freeLongPointer(long)>(l4);
+
+        $r22 = r0.<sun.font.FileFontStrike: long[] longGlyphImages>;
+
+        $l14 = $r22[i1];
+
+        return $l14;
+
+     label08:
+        i24 = i1 >> 5;
+
+        i25 = i1 % 32;
+
+        $r1 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r2 = $r1[i24];
+
+        if $r2 != null goto label09;
+
+        $r10 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r9 = newarray (long)[32];
+
+        $r10[i24] = $r9;
+
+     label09:
+        $r3 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r4 = $r3[i24];
+
+        $l2 = $r4[i25];
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label10;
+
+        $r7 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r8 = $r7[i24];
+
+        $r8[i25] = l4;
+
+        return l4;
+
+     label10:
+        staticinvoke <sun.font.StrikeCache: void freeLongPointer(long)>(l4);
+
+        $r5 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r6 = $r5[i24];
+
+        $l5 = $r6[i25];
+
+        return $l5;
+
+     label11:
+        specialinvoke r0.<sun.font.FileFontStrike: void initGlyphCache()>();
+
+        $l21 = specialinvoke r0.<sun.font.FileFontStrike: long setCachedGlyphPtr(int,long)>(i1, l4);
+
+        return $l21;
+    }
+
+    private synchronized void initGlyphCache()
+    {
+        int[][] $r8, $r9;
+        sun.font.FileFontStrike r0;
+        sun.font.CharToGlyphMapper $r1;
+        long[] $r5, $r6;
+        byte b4;
+        int[] $r2, $r3;
+        int $i0, $i1, $i2, i3;
+        boolean $z0, $z1, $z2;
+        long[][] $r11, $r12;
+        sun.font.FontStrikeDisposer $r4, $r7, $r10, $r13;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.CharToGlyphMapper mapper>;
+
+        $i0 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        $z0 = r0.<sun.font.FileFontStrike: boolean segmentedCache>;
+
+        if $z0 == 0 goto label3;
+
+        $i1 = $i0 + 32;
+
+        $i2 = $i1 - 1;
+
+        i3 = $i2 / 32;
+
+        $z2 = <sun.font.FileFontStrike: boolean longAddresses>;
+
+        if $z2 == 0 goto label1;
+
+        b4 = 4;
+
+        $r11 = newarray (long[])[i3];
+
+        r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages> = $r11;
+
+        $r13 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer>;
+
+        $r12 = r0.<sun.font.FileFontStrike: long[][] segLongGlyphImages>;
+
+        $r13.<sun.font.FontStrikeDisposer: long[][] segLongGlyphImages> = $r12;
+
+        goto label2;
+
+     label1:
+        b4 = 3;
+
+        $r8 = newarray (int[])[i3];
+
+        r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages> = $r8;
+
+        $r10 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer>;
+
+        $r9 = r0.<sun.font.FileFontStrike: int[][] segIntGlyphImages>;
+
+        $r10.<sun.font.FontStrikeDisposer: int[][] segIntGlyphImages> = $r9;
+
+     label2:
+        goto label5;
+
+     label3:
+        $z1 = <sun.font.FileFontStrike: boolean longAddresses>;
+
+        if $z1 == 0 goto label4;
+
+        b4 = 2;
+
+        $r5 = newarray (long)[$i0];
+
+        r0.<sun.font.FileFontStrike: long[] longGlyphImages> = $r5;
+
+        $r7 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer>;
+
+        $r6 = r0.<sun.font.FileFontStrike: long[] longGlyphImages>;
+
+        $r7.<sun.font.FontStrikeDisposer: long[] longGlyphImages> = $r6;
+
+        goto label5;
+
+     label4:
+        b4 = 1;
+
+        $r2 = newarray (int)[$i0];
+
+        r0.<sun.font.FileFontStrike: int[] intGlyphImages> = $r2;
+
+        $r4 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDisposer disposer>;
+
+        $r3 = r0.<sun.font.FileFontStrike: int[] intGlyphImages>;
+
+        $r4.<sun.font.FontStrikeDisposer: int[] intGlyphImages> = $r3;
+
+     label5:
+        r0.<sun.font.FileFontStrike: int glyphCacheFormat> = b4;
+
+        return;
+    }
+
+    float getGlyphAdvance(int)
+    {
+        int i0;
+        float $f0;
+        sun.font.FileFontStrike r0;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $f0 = specialinvoke r0.<sun.font.FileFontStrike: float getGlyphAdvance(int,boolean)>(i0, 1);
+
+        return $f0;
+    }
+
+    private float getGlyphAdvance(int, boolean)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r14, $r18;
+        byte $b1, $b8, $b9;
+        sun.font.FontStrikeDesc $r23, $r28;
+        boolean $z0, z1, $z2, $z3;
+        java.awt.geom.AffineTransform $r2, $r16, $r21, $r24, $r26, $r29;
+        float $f0, $f1, $f2, f3, f4, f5;
+        sun.misc.Unsafe $r15;
+        float[] $r1, $r6, $r8, $r9, $r12, $r13, $r25, r30, $r31;
+        long $l2, $l4, $l5, $l6, l11;
+        int i0, $i3, $i7, i10, i12, i13, i14, $i16;
+        float[][] $r4, $r5, $r7, $r10, $r11, $r19, $r20;
+        java.awt.geom.Point2D$Float $r3, $r32, $r33, $r34;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        z1 := @parameter1: boolean;
+
+        $i16 = (int) 65534;
+
+        if i0 < $i16 goto label01;
+
+        return 0.0F;
+
+     label01:
+        $r1 = r0.<sun.font.FileFontStrike: float[] horizontalAdvances>;
+
+        if $r1 == null goto label03;
+
+        $r25 = r0.<sun.font.FileFontStrike: float[] horizontalAdvances>;
+
+        f3 = $r25[i0];
+
+        $b9 = f3 cmpl 3.4028235E38F;
+
+        if $b9 == 0 goto label05;
+
+        if z1 != 0 goto label02;
+
+        $r26 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r26 == null goto label02;
+
+        $r32 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r32.<java.awt.geom.Point2D$Float: void <init>(float,float)>(f3, 0.0F);
+
+        $r28 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $r29 = $r28.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform devTx>;
+
+        virtualinvoke $r29.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r32, $r32);
+
+        $f2 = $r32.<java.awt.geom.Point2D$Float: float x>;
+
+        return $f2;
+
+     label02:
+        return f3;
+
+     label03:
+        $z0 = r0.<sun.font.FileFontStrike: boolean segmentedCache>;
+
+        if $z0 == 0 goto label05;
+
+        $r19 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        if $r19 == null goto label05;
+
+        i10 = i0 >> 5;
+
+        $r20 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        r30 = $r20[i10];
+
+        if r30 == null goto label05;
+
+        $i7 = i0 % 32;
+
+        f4 = r30[$i7];
+
+        $b8 = f4 cmpl 3.4028235E38F;
+
+        if $b8 == 0 goto label05;
+
+        if z1 != 0 goto label04;
+
+        $r21 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r21 == null goto label04;
+
+        $r33 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r33.<java.awt.geom.Point2D$Float: void <init>(float,float)>(f4, 0.0F);
+
+        $r23 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $r24 = $r23.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform devTx>;
+
+        virtualinvoke $r24.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r33, $r33);
+
+        $f1 = $r33.<java.awt.geom.Point2D$Float: float x>;
+
+        return $f1;
+
+     label04:
+        return f4;
+
+     label05:
+        if z1 != 0 goto label06;
+
+        $r16 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r16 == null goto label06;
+
+        $r34 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r34.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        $r18 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l6 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        virtualinvoke $r18.<sun.font.FileFont: void getGlyphMetrics(long,int,java.awt.geom.Point2D$Float)>($l6, i0, $r34);
+
+        $f0 = $r34.<java.awt.geom.Point2D$Float: float x>;
+
+        return $f0;
+
+     label06:
+        $r2 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r2 != null goto label07;
+
+        if z1 != 0 goto label08;
+
+     label07:
+        $r3 = specialinvoke r0.<sun.font.FileFontStrike: java.awt.geom.Point2D$Float getGlyphMetrics(int,boolean)>(i0, z1);
+
+        f5 = $r3.<java.awt.geom.Point2D$Float: float x>;
+
+        goto label12;
+
+     label08:
+        $z3 = r0.<sun.font.FileFontStrike: boolean getImageWithAdvance>;
+
+        if $z3 == 0 goto label09;
+
+        l11 = virtualinvoke r0.<sun.font.FileFontStrike: long getGlyphImagePtr(int)>(i0);
+
+        goto label10;
+
+     label09:
+        l11 = virtualinvoke r0.<sun.font.FileFontStrike: long getCachedGlyphPtr(int)>(i0);
+
+     label10:
+        $b1 = l11 cmp 0L;
+
+        if $b1 == 0 goto label11;
+
+        $r15 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i3 = <sun.font.StrikeCache: int xAdvanceOffset>;
+
+        $l4 = (long) $i3;
+
+        $l5 = l11 + $l4;
+
+        f5 = virtualinvoke $r15.<sun.misc.Unsafe: float getFloat(long)>($l5);
+
+        goto label12;
+
+     label11:
+        $r14 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l2 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        f5 = virtualinvoke $r14.<sun.font.FileFont: float getGlyphAdvance(long,int)>($l2, i0);
+
+     label12:
+        $r31 = r0.<sun.font.FileFontStrike: float[] horizontalAdvances>;
+
+        if $r31 == null goto label13;
+
+        $r13 = r0.<sun.font.FileFontStrike: float[] horizontalAdvances>;
+
+        $r13[i0] = f5;
+
+        goto label16;
+
+     label13:
+        $z2 = r0.<sun.font.FileFontStrike: boolean segmentedCache>;
+
+        if $z2 == 0 goto label16;
+
+        $r4 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        if $r4 == null goto label16;
+
+        i12 = i0 >> 5;
+
+        i13 = i0 % 32;
+
+        $r5 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        $r6 = $r5[i12];
+
+        if $r6 != null goto label15;
+
+        $r10 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        $r9 = newarray (float)[32];
+
+        $r10[i12] = $r9;
+
+        i14 = 0;
+
+     label14:
+        if i14 >= 32 goto label15;
+
+        $r11 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        $r12 = $r11[i12];
+
+        $r12[i14] = 3.4028235E38F;
+
+        i14 = i14 + 1;
+
+        goto label14;
+
+     label15:
+        $r7 = r0.<sun.font.FileFontStrike: float[][] segHorizontalAdvances>;
+
+        $r8 = $r7[i12];
+
+        $r8[i13] = f5;
+
+     label16:
+        return f5;
+    }
+
+    float getCodePointAdvance(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.CharToGlyphMapper $r1;
+        int i0, $i1;
+        float $f0;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.CharToGlyphMapper mapper>;
+
+        $i1 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int charToGlyph(int)>(i0);
+
+        $f0 = virtualinvoke r0.<sun.font.FileFontStrike: float getGlyphAdvance(int)>($i1);
+
+        return $f0;
+    }
+
+    void getGlyphImageBounds(int, java.awt.geom.Point2D$Float, java.awt.Rectangle)
+    {
+        sun.font.FileFontStrike r0;
+        byte $b2, $b22;
+        sun.font.FontStrikeDesc $r7, $r8;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+        sun.misc.Unsafe $r1, $r2, $r5, $r6;
+        java.awt.Rectangle r3;
+        long $l1, $l4, $l5, $l7, $l8, $l12, $l13, $l17, $l18;
+        short $s14, $s19;
+        int i0, $i3, $i6, $i9, $i10, $i11, $i15, $i16, $i20, $i21, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i35, $i36, $i38, $i39;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        java.awt.geom.Point2D$Float r4;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.awt.geom.Point2D$Float;
+
+        r3 := @parameter2: java.awt.Rectangle;
+
+        $l1 = virtualinvoke r0.<sun.font.FileFontStrike: long getGlyphImagePtr(int)>(i0);
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $f6 = r4.<java.awt.geom.Point2D$Float: float x>;
+
+        $d4 = (double) $f6;
+
+        $d5 = staticinvoke <java.lang.Math: double floor(double)>($d4);
+
+        $i31 = (int) $d5;
+
+        r3.<java.awt.Rectangle: int x> = $i31;
+
+        $f7 = r4.<java.awt.geom.Point2D$Float: float y>;
+
+        $d6 = (double) $f7;
+
+        $d7 = staticinvoke <java.lang.Math: double floor(double)>($d6);
+
+        $i32 = (int) $d7;
+
+        r3.<java.awt.Rectangle: int y> = $i32;
+
+        r3.<java.awt.Rectangle: int height> = 0;
+
+        r3.<java.awt.Rectangle: int width> = 0;
+
+        return;
+
+     label1:
+        $r1 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i3 = <sun.font.StrikeCache: int topLeftXOffset>;
+
+        $l4 = (long) $i3;
+
+        $l5 = $l1 + $l4;
+
+        $f0 = virtualinvoke $r1.<sun.misc.Unsafe: float getFloat(long)>($l5);
+
+        $r2 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i6 = <sun.font.StrikeCache: int topLeftYOffset>;
+
+        $l7 = (long) $i6;
+
+        $l8 = $l1 + $l7;
+
+        $f1 = virtualinvoke $r2.<sun.misc.Unsafe: float getFloat(long)>($l8);
+
+        $f2 = r4.<java.awt.geom.Point2D$Float: float x>;
+
+        $f3 = $f2 + $f0;
+
+        $d0 = (double) $f3;
+
+        $d1 = staticinvoke <java.lang.Math: double floor(double)>($d0);
+
+        $i9 = (int) $d1;
+
+        r3.<java.awt.Rectangle: int x> = $i9;
+
+        $f4 = r4.<java.awt.geom.Point2D$Float: float y>;
+
+        $f5 = $f4 + $f1;
+
+        $d2 = (double) $f5;
+
+        $d3 = staticinvoke <java.lang.Math: double floor(double)>($d2);
+
+        $i10 = (int) $d3;
+
+        r3.<java.awt.Rectangle: int y> = $i10;
+
+        $r5 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i11 = <sun.font.StrikeCache: int widthOffset>;
+
+        $l12 = (long) $i11;
+
+        $l13 = $l1 + $l12;
+
+        $s14 = virtualinvoke $r5.<sun.misc.Unsafe: short getShort(long)>($l13);
+
+        $i33 = (int) $s14;
+
+        $i35 = (int) 65535;
+
+        $i15 = $i33 & $i35;
+
+        r3.<java.awt.Rectangle: int width> = $i15;
+
+        $r6 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i16 = <sun.font.StrikeCache: int heightOffset>;
+
+        $l17 = (long) $i16;
+
+        $l18 = $l1 + $l17;
+
+        $s19 = virtualinvoke $r6.<sun.misc.Unsafe: short getShort(long)>($l18);
+
+        $i36 = (int) $s19;
+
+        $i38 = (int) 65535;
+
+        $i20 = $i36 & $i38;
+
+        r3.<java.awt.Rectangle: int height> = $i20;
+
+        $r7 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $i21 = $r7.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i21 == 4 goto label2;
+
+        $r8 = r0.<sun.font.FileFontStrike: sun.font.FontStrikeDesc desc>;
+
+        $i30 = $r8.<sun.font.FontStrikeDesc: int aaHint>;
+
+        if $i30 != 5 goto label3;
+
+     label2:
+        $b22 = $f0 cmpg -2.0F;
+
+        $i39 = (int) $b22;
+
+        if $i39 > 0 goto label3;
+
+        $i23 = r3.<java.awt.Rectangle: int x>;
+
+        $i24 = specialinvoke r0.<sun.font.FileFontStrike: int getGlyphImageMinX(long,int)>($l1, $i23);
+
+        $i25 = r3.<java.awt.Rectangle: int x>;
+
+        if $i24 <= $i25 goto label3;
+
+        $i26 = r3.<java.awt.Rectangle: int x>;
+
+        $i27 = $i26 + 1;
+
+        r3.<java.awt.Rectangle: int x> = $i27;
+
+        $i28 = r3.<java.awt.Rectangle: int width>;
+
+        $i29 = $i28 - 1;
+
+        r3.<java.awt.Rectangle: int width> = $i29;
+
+     label3:
+        return;
+    }
+
+    private int getGlyphImageMinX(long, int)
+    {
+        sun.font.FileFontStrike r5;
+        byte $b17, $b25;
+        sun.misc.Unsafe $r0, $r1, $r2, $r3, $r4;
+        long l0, $l2, $l3, $l6, $l7, $l10, $l11, $l14, $l15, $l16, $l21, $l22, $l23, $l24;
+        int $i1, $i5, $i9, $i13, i18, $i19, $i20, i26, i27, $i28, $i29, $i30, $i31;
+        char $c4, $c8, $c12;
+
+        r5 := @this: sun.font.FileFontStrike;
+
+        l0 := @parameter0: long;
+
+        i18 := @parameter1: int;
+
+        $r0 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i1 = <sun.font.StrikeCache: int widthOffset>;
+
+        $l2 = (long) $i1;
+
+        $l3 = l0 + $l2;
+
+        $c4 = virtualinvoke $r0.<sun.misc.Unsafe: char getChar(long)>($l3);
+
+        $r1 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i5 = <sun.font.StrikeCache: int heightOffset>;
+
+        $l6 = (long) $i5;
+
+        $l7 = l0 + $l6;
+
+        $c8 = virtualinvoke $r1.<sun.misc.Unsafe: char getChar(long)>($l7);
+
+        $r2 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i9 = <sun.font.StrikeCache: int rowBytesOffset>;
+
+        $l10 = (long) $i9;
+
+        $l11 = l0 + $l10;
+
+        $c12 = virtualinvoke $r2.<sun.misc.Unsafe: char getChar(long)>($l11);
+
+        $i28 = (int) $c12;
+
+        $i29 = (int) $c4;
+
+        if $i28 != $i29 goto label1;
+
+        return i18;
+
+     label1:
+        $r3 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i13 = <sun.font.StrikeCache: int pixelDataOffset>;
+
+        $l14 = (long) $i13;
+
+        $l15 = l0 + $l14;
+
+        $l16 = virtualinvoke $r3.<sun.misc.Unsafe: long getAddress(long)>($l15);
+
+        $b17 = $l16 cmp 0L;
+
+        if $b17 != 0 goto label2;
+
+        return i18;
+
+     label2:
+        i26 = 0;
+
+     label3:
+        $i30 = (int) $c8;
+
+        if i26 >= $i30 goto label7;
+
+        i27 = 0;
+
+     label4:
+        if i27 >= 3 goto label6;
+
+        $r4 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i31 = (int) $c12;
+
+        $i20 = i26 * $i31;
+
+        $l21 = (long) $i20;
+
+        $l23 = $l16 + $l21;
+
+        $l22 = (long) i27;
+
+        $l24 = $l23 + $l22;
+
+        $b25 = virtualinvoke $r4.<sun.misc.Unsafe: byte getByte(long)>($l24);
+
+        if $b25 == 0 goto label5;
+
+        return i18;
+
+     label5:
+        i27 = i27 + 1;
+
+        goto label4;
+
+     label6:
+        i26 = i26 + 1;
+
+        goto label3;
+
+     label7:
+        $i19 = i18 + 1;
+
+        return $i19;
+    }
+
+    sun.font.StrikeMetrics getFontMetrics()
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r2;
+        sun.font.StrikeMetrics $r1, $r3, $r6, $r7;
+        long $l0;
+        java.awt.geom.AffineTransform $r4, $r5;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.StrikeMetrics strikeMetrics>;
+
+        if $r1 != null goto label1;
+
+        $r2 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l0 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $r3 = virtualinvoke $r2.<sun.font.FileFont: sun.font.StrikeMetrics getFontMetrics(long)>($l0);
+
+        r0.<sun.font.FileFontStrike: sun.font.StrikeMetrics strikeMetrics> = $r3;
+
+        $r4 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r4 == null goto label1;
+
+        $r6 = r0.<sun.font.FileFontStrike: sun.font.StrikeMetrics strikeMetrics>;
+
+        $r5 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        virtualinvoke $r6.<sun.font.StrikeMetrics: void convertToUserSpace(java.awt.geom.AffineTransform)>($r5);
+
+     label1:
+        $r7 = r0.<sun.font.FileFontStrike: sun.font.StrikeMetrics strikeMetrics>;
+
+        return $r7;
+    }
+
+    java.awt.geom.Point2D$Float getGlyphMetrics(int)
+    {
+        int i0;
+        sun.font.FileFontStrike r0;
+        java.awt.geom.Point2D$Float $r1;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<sun.font.FileFontStrike: java.awt.geom.Point2D$Float getGlyphMetrics(int,boolean)>(i0, 1);
+
+        return $r1;
+    }
+
+    private java.awt.geom.Point2D$Float getGlyphMetrics(int, boolean)
+    {
+        sun.font.FileFontStrike r1;
+        sun.font.FileFont $r4;
+        java.lang.Integer $r2;
+        byte $b9;
+        boolean $z0, z1;
+        java.util.concurrent.ConcurrentHashMap r20, $r24;
+        java.awt.geom.AffineTransform $r5, $r9, $r16, $r17;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        sun.misc.Unsafe $r14, $r15;
+        long $l1, $l3, $l4, $l6, $l7, l8;
+        int i0, $i2, $i5, $i11;
+        java.lang.ref.SoftReference $r3, $r11, $r25;
+        java.awt.geom.Point2D$Float r18, r19, $r21, $r22, $r23;
+        java.lang.Object $r10, $r12;
+
+        r1 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        z1 := @parameter1: boolean;
+
+        $r21 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r21.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        r18 = $r21;
+
+        $i11 = (int) 65534;
+
+        if i0 < $i11 goto label1;
+
+        return $r21;
+
+     label1:
+        $z0 = r1.<sun.font.FileFontStrike: boolean getImageWithAdvance>;
+
+        if $z0 == 0 goto label2;
+
+        if z1 == 0 goto label2;
+
+        l8 = virtualinvoke r1.<sun.font.FileFontStrike: long getGlyphImagePtr(int)>(i0);
+
+        goto label3;
+
+     label2:
+        l8 = virtualinvoke r1.<sun.font.FileFontStrike: long getCachedGlyphPtr(int)>(i0);
+
+     label3:
+        $b9 = l8 cmp 0L;
+
+        if $b9 == 0 goto label4;
+
+        $r22 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r22.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        r18 = $r22;
+
+        $r14 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i2 = <sun.font.StrikeCache: int xAdvanceOffset>;
+
+        $l3 = (long) $i2;
+
+        $l4 = l8 + $l3;
+
+        $f4 = virtualinvoke $r14.<sun.misc.Unsafe: float getFloat(long)>($l4);
+
+        $r22.<java.awt.geom.Point2D$Float: float x> = $f4;
+
+        $r15 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $i5 = <sun.font.StrikeCache: int yAdvanceOffset>;
+
+        $l6 = (long) $i5;
+
+        $l7 = l8 + $l6;
+
+        $f5 = virtualinvoke $r15.<sun.misc.Unsafe: float getFloat(long)>($l7);
+
+        $r22.<java.awt.geom.Point2D$Float: float y> = $f5;
+
+        $r16 = r1.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r16 == null goto label9;
+
+        $r17 = r1.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        virtualinvoke $r17.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r22, $r22);
+
+        goto label9;
+
+     label4:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        r19 = null;
+
+        r20 = null;
+
+        $r3 = r1.<sun.font.FileFontStrike: java.lang.ref.SoftReference glyphMetricsMapRef>;
+
+        if $r3 == null goto label5;
+
+        $r11 = r1.<sun.font.FileFontStrike: java.lang.ref.SoftReference glyphMetricsMapRef>;
+
+        $r12 = virtualinvoke $r11.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        r20 = (java.util.concurrent.ConcurrentHashMap) $r12;
+
+     label5:
+        if r20 == null goto label6;
+
+        $r10 = virtualinvoke r20.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        r19 = (java.awt.geom.Point2D$Float) $r10;
+
+        if r19 == null goto label6;
+
+        $f2 = r19.<java.awt.geom.Point2D$Float: float x>;
+
+        $r21.<java.awt.geom.Point2D$Float: float x> = $f2;
+
+        $f3 = r19.<java.awt.geom.Point2D$Float: float y>;
+
+        $r21.<java.awt.geom.Point2D$Float: float y> = $f3;
+
+        return $r21;
+
+     label6:
+        if r19 != null goto label9;
+
+        $r4 = r1.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l1 = r1.<sun.font.FileFontStrike: long pScalerContext>;
+
+        virtualinvoke $r4.<sun.font.FileFont: void getGlyphMetrics(long,int,java.awt.geom.Point2D$Float)>($l1, i0, $r21);
+
+        $r5 = r1.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r5 == null goto label7;
+
+        $r9 = r1.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        virtualinvoke $r9.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r21, $r21);
+
+     label7:
+        $r23 = new java.awt.geom.Point2D$Float;
+
+        $f1 = $r21.<java.awt.geom.Point2D$Float: float x>;
+
+        $f0 = $r21.<java.awt.geom.Point2D$Float: float y>;
+
+        specialinvoke $r23.<java.awt.geom.Point2D$Float: void <init>(float,float)>($f1, $f0);
+
+        if r20 != null goto label8;
+
+        $r24 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r24.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r20 = $r24;
+
+        $r25 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r25.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r24);
+
+        r1.<sun.font.FileFontStrike: java.lang.ref.SoftReference glyphMetricsMapRef> = $r25;
+
+     label8:
+        virtualinvoke r20.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r23);
+
+     label9:
+        return r18;
+    }
+
+    java.awt.geom.Point2D$Float getCharMetrics(char)
+    {
+        sun.font.FileFontStrike r0;
+        java.awt.geom.Point2D$Float $r2;
+        sun.font.CharToGlyphMapper $r1;
+        int $i1;
+        char c0;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.CharToGlyphMapper mapper>;
+
+        $i1 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int charToGlyph(char)>(c0);
+
+        $r2 = virtualinvoke r0.<sun.font.FileFontStrike: java.awt.geom.Point2D$Float getGlyphMetrics(int)>($i1);
+
+        return $r2;
+    }
+
+    java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r5;
+        java.util.concurrent.ConcurrentHashMap $r1, $r3, $r7, $r8;
+        long $l1;
+        java.awt.geom.Rectangle2D$Float $r6, $r9, r10;
+        java.lang.Integer $r2;
+        int i0;
+        java.lang.Object $r4;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FileFontStrike: java.util.concurrent.ConcurrentHashMap boundsMap>;
+
+        if $r1 != null goto label1;
+
+        $r8 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r8.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.font.FileFontStrike: java.util.concurrent.ConcurrentHashMap boundsMap> = $r8;
+
+     label1:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r3 = r0.<sun.font.FileFontStrike: java.util.concurrent.ConcurrentHashMap boundsMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r9 = (java.awt.geom.Rectangle2D$Float) $r4;
+
+        r10 = $r9;
+
+        if $r9 != null goto label2;
+
+        $r5 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l1 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $r6 = virtualinvoke $r5.<sun.font.FileFont: java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(long,int)>($l1, i0);
+
+        r10 = $r6;
+
+        $r7 = r0.<sun.font.FileFontStrike: java.util.concurrent.ConcurrentHashMap boundsMap>;
+
+        virtualinvoke $r7.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r6);
+
+     label2:
+        return r10;
+    }
+
+    public java.awt.geom.Rectangle2D getOutlineBounds(int)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r1;
+        int i0;
+        long $l1;
+        java.awt.geom.Rectangle2D$Float $r2;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l1 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $r2 = virtualinvoke $r1.<sun.font.FileFont: java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(long,int)>($l1, i0);
+
+        return $r2;
+    }
+
+    java.awt.geom.GeneralPath getGlyphOutline(int, float, float)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r3;
+        long $l2;
+        java.lang.Integer $r5, $r10;
+        byte $b0, $b3;
+        int i1;
+        java.lang.ref.WeakReference $r1, $r7, $r8;
+        double $d0, $d1;
+        java.util.concurrent.ConcurrentHashMap $r6, r13;
+        java.awt.geom.AffineTransform $r2;
+        float f0, f1;
+        java.lang.Object $r9, $r11, $r14;
+        java.awt.geom.GeneralPath $r4, r12, $r15;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        i1 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        r12 = null;
+
+        r13 = null;
+
+        $r1 = r0.<sun.font.FileFontStrike: java.lang.ref.WeakReference outlineMapRef>;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<sun.font.FileFontStrike: java.lang.ref.WeakReference outlineMapRef>;
+
+        $r9 = virtualinvoke $r8.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r13 = (java.util.concurrent.ConcurrentHashMap) $r9;
+
+        if r13 == null goto label1;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        $r11 = virtualinvoke r13.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r10);
+
+        r12 = (java.awt.geom.GeneralPath) $r11;
+
+     label1:
+        if r12 != null goto label3;
+
+        $r3 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l2 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $r4 = virtualinvoke $r3.<sun.font.FileFont: java.awt.geom.GeneralPath getGlyphOutline(long,int,float,float)>($l2, i1, 0.0F, 0.0F);
+
+        r12 = $r4;
+
+        if r13 != null goto label2;
+
+        $r6 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r6.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r13 = $r6;
+
+        $r7 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r7.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r6);
+
+        r0.<sun.font.FileFontStrike: java.lang.ref.WeakReference outlineMapRef> = $r7;
+
+     label2:
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        virtualinvoke r13.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+     label3:
+        $r14 = virtualinvoke r12.<java.awt.geom.GeneralPath: java.lang.Object clone()>();
+
+        $r15 = (java.awt.geom.GeneralPath) $r14;
+
+        $b3 = f0 cmpl 0.0F;
+
+        if $b3 != 0 goto label4;
+
+        $b0 = f1 cmpl 0.0F;
+
+        if $b0 == 0 goto label5;
+
+     label4:
+        $d1 = (double) f0;
+
+        $d0 = (double) f1;
+
+        $r2 = staticinvoke <java.awt.geom.AffineTransform: java.awt.geom.AffineTransform getTranslateInstance(double,double)>($d1, $d0);
+
+        virtualinvoke $r15.<java.awt.geom.GeneralPath: void transform(java.awt.geom.AffineTransform)>($r2);
+
+     label5:
+        return $r15;
+    }
+
+    java.awt.geom.GeneralPath getGlyphVectorOutline(int[], float, float)
+    {
+        sun.font.FileFontStrike r0;
+        sun.font.FileFont $r2;
+        long $l1;
+        int[] r1;
+        int $i0;
+        float f0, f1;
+        java.awt.geom.GeneralPath $r3;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        r1 := @parameter0: int[];
+
+        f0 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        $r2 = r0.<sun.font.FileFontStrike: sun.font.FileFont fileFont>;
+
+        $l1 = r0.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $i0 = lengthof r1;
+
+        $r3 = virtualinvoke $r2.<sun.font.FileFont: java.awt.geom.GeneralPath getGlyphVectorOutline(long,int[],int,float,float)>($l1, r1, $i0, f0, f1);
+
+        return $r3;
+    }
+
+    protected void adjustPoint(java.awt.geom.Point2D$Float)
+    {
+        sun.font.FileFontStrike r0;
+        java.awt.geom.Point2D$Float r2;
+        java.awt.geom.AffineTransform $r1, $r3;
+
+        r0 := @this: sun.font.FileFontStrike;
+
+        r2 := @parameter0: java.awt.geom.Point2D$Float;
+
+        $r1 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.font.FileFontStrike: java.awt.geom.AffineTransform invertDevTx>;
+
+        virtualinvoke $r3.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>(r2, r2);
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0, $z1, $z2, $z3;
+
+        <sun.font.FileFontStrike: int SEGSIZE> = 32;
+
+        <sun.font.FileFontStrike: int SEGSHIFT> = 5;
+
+        <sun.font.FileFontStrike: int SEGLONGARRAY> = 4;
+
+        <sun.font.FileFontStrike: int SEGINTARRAY> = 3;
+
+        <sun.font.FileFontStrike: int LONGARRAY> = 2;
+
+        <sun.font.FileFontStrike: int INTARRAY> = 1;
+
+        <sun.font.FileFontStrike: int UNINITIALISED> = 0;
+
+        <sun.font.FileFontStrike: int INVISIBLE_GLYPHS> = 65534;
+
+        <sun.font.FileFontStrike: boolean isXPorLater> = 0;
+
+        $z0 = <sun.font.FontUtilities: boolean isWindows>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = <sun.font.FontUtilities: boolean useT2K>;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z2 != 0 goto label1;
+
+        $z3 = staticinvoke <sun.font.FileFontStrike: boolean initNative()>();
+
+        <sun.font.FileFontStrike: boolean isXPorLater> = $z3;
+
+     label1:
+        return;
+    }
+}

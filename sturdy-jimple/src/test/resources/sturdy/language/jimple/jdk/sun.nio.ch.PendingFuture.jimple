@@ -1,0 +1,754 @@
+final class sun.nio.ch.PendingFuture extends java.lang.Object implements java.util.concurrent.Future
+{
+    private static final java.util.concurrent.CancellationException CANCELLED;
+    private final java.nio.channels.AsynchronousChannel channel;
+    private final java.nio.channels.CompletionHandler handler;
+    private final java.lang.Object attachment;
+    private volatile boolean haveResult;
+    private volatile java.lang.Object result;
+    private volatile java.lang.Throwable exc;
+    private java.util.concurrent.CountDownLatch latch;
+    private java.util.concurrent.Future timeoutTask;
+    private volatile java.lang.Object context;
+
+    void <init>(java.nio.channels.AsynchronousChannel, java.nio.channels.CompletionHandler, java.lang.Object, java.lang.Object)
+    {
+        java.nio.channels.CompletionHandler r2;
+        java.lang.Object r3, r4;
+        sun.nio.ch.PendingFuture r0;
+        java.nio.channels.AsynchronousChannel r1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.nio.channels.AsynchronousChannel;
+
+        r2 := @parameter1: java.nio.channels.CompletionHandler;
+
+        r3 := @parameter2: java.lang.Object;
+
+        r4 := @parameter3: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel> = r1;
+
+        r0.<sun.nio.ch.PendingFuture: java.nio.channels.CompletionHandler handler> = r2;
+
+        r0.<sun.nio.ch.PendingFuture: java.lang.Object attachment> = r3;
+
+        r0.<sun.nio.ch.PendingFuture: java.lang.Object context> = r4;
+
+        return;
+    }
+
+    void <init>(java.nio.channels.AsynchronousChannel, java.nio.channels.CompletionHandler, java.lang.Object)
+    {
+        java.nio.channels.CompletionHandler r2;
+        java.lang.Object r3;
+        sun.nio.ch.PendingFuture r0;
+        java.nio.channels.AsynchronousChannel r1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.nio.channels.AsynchronousChannel;
+
+        r2 := @parameter1: java.nio.channels.CompletionHandler;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel> = r1;
+
+        r0.<sun.nio.ch.PendingFuture: java.nio.channels.CompletionHandler handler> = r2;
+
+        r0.<sun.nio.ch.PendingFuture: java.lang.Object attachment> = r3;
+
+        return;
+    }
+
+    void <init>(java.nio.channels.AsynchronousChannel)
+    {
+        sun.nio.ch.PendingFuture r0;
+        java.nio.channels.AsynchronousChannel r1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.nio.channels.AsynchronousChannel;
+
+        specialinvoke r0.<sun.nio.ch.PendingFuture: void <init>(java.nio.channels.AsynchronousChannel,java.nio.channels.CompletionHandler,java.lang.Object)>(r1, null, null);
+
+        return;
+    }
+
+    void <init>(java.nio.channels.AsynchronousChannel, java.lang.Object)
+    {
+        java.lang.Object r2;
+        sun.nio.ch.PendingFuture r0;
+        java.nio.channels.AsynchronousChannel r1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.nio.channels.AsynchronousChannel;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<sun.nio.ch.PendingFuture: void <init>(java.nio.channels.AsynchronousChannel,java.nio.channels.CompletionHandler,java.lang.Object,java.lang.Object)>(r1, null, null, r2);
+
+        return;
+    }
+
+    java.nio.channels.AsynchronousChannel channel()
+    {
+        sun.nio.ch.PendingFuture r0;
+        java.nio.channels.AsynchronousChannel $r1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel>;
+
+        return $r1;
+    }
+
+    java.nio.channels.CompletionHandler handler()
+    {
+        java.nio.channels.CompletionHandler $r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.nio.channels.CompletionHandler handler>;
+
+        return $r1;
+    }
+
+    java.lang.Object attachment()
+    {
+        java.lang.Object $r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.lang.Object attachment>;
+
+        return $r1;
+    }
+
+    void setContext(java.lang.Object)
+    {
+        java.lang.Object r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0.<sun.nio.ch.PendingFuture: java.lang.Object context> = r1;
+
+        return;
+    }
+
+    java.lang.Object getContext()
+    {
+        java.lang.Object $r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.lang.Object context>;
+
+        return $r1;
+    }
+
+    void setTimeoutTask(java.util.concurrent.Future)
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.Future r1;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.util.concurrent.Future;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 == 0 goto label2;
+
+        interfaceinvoke r1.<java.util.concurrent.Future: boolean cancel(boolean)>(0);
+
+        goto label3;
+
+     label2:
+        r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask> = r1;
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private boolean prepareForWait()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.CountDownLatch $r1, $r2;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return 0;
+
+     label3:
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        if $r1 != null goto label4;
+
+        $r2 = new java.util.concurrent.CountDownLatch;
+
+        specialinvoke $r2.<java.util.concurrent.CountDownLatch: void <init>(int)>(1);
+
+        r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch> = $r2;
+
+     label4:
+        exitmonitor r0;
+
+     label5:
+        return 1;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void setResult(java.lang.Object)
+    {
+        java.lang.Throwable $r6;
+        java.util.concurrent.CountDownLatch $r3, $r4;
+        java.util.concurrent.Future $r2, $r5;
+        java.lang.Object r1;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        r0.<sun.nio.ch.PendingFuture: java.lang.Object result> = r1;
+
+        r0.<sun.nio.ch.PendingFuture: boolean haveResult> = 1;
+
+        $r2 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        if $r2 == null goto label4;
+
+        $r5 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        interfaceinvoke $r5.<java.util.concurrent.Future: boolean cancel(boolean)>(0);
+
+     label4:
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        virtualinvoke $r4.<java.util.concurrent.CountDownLatch: void countDown()>();
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void setFailure(java.lang.Throwable)
+    {
+        java.lang.Throwable $r6, r7;
+        java.io.IOException $r5;
+        java.util.concurrent.CountDownLatch $r2, $r3;
+        java.util.concurrent.Future $r1, $r4;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        r7 := @parameter0: java.lang.Throwable;
+
+        $z0 = r7 instanceof java.io.IOException;
+
+        if $z0 != 0 goto label01;
+
+        $z1 = r7 instanceof java.lang.SecurityException;
+
+        if $z1 != 0 goto label01;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.Throwable)>(r7);
+
+        r7 = $r5;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z2 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z2 == 0 goto label04;
+
+        exitmonitor r0;
+
+     label03:
+        return;
+
+     label04:
+        r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc> = r7;
+
+        r0.<sun.nio.ch.PendingFuture: boolean haveResult> = 1;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        if $r1 == null goto label05;
+
+        $r4 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        interfaceinvoke $r4.<java.util.concurrent.Future: boolean cancel(boolean)>(0);
+
+     label05:
+        $r2 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        if $r2 == null goto label06;
+
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        virtualinvoke $r3.<java.util.concurrent.CountDownLatch: void countDown()>();
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r6;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label08;
+        catch java.lang.Throwable from label04 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    void setResult(java.lang.Object, java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.lang.Object r2;
+        sun.nio.ch.PendingFuture r1;
+
+        r1 := @this: sun.nio.ch.PendingFuture;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Throwable;
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<sun.nio.ch.PendingFuture: void setResult(java.lang.Object)>(r2);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<sun.nio.ch.PendingFuture: void setFailure(java.lang.Throwable)>(r0);
+
+     label2:
+        return;
+    }
+
+    public java.lang.Object get() throws java.util.concurrent.ExecutionException, java.lang.InterruptedException
+    {
+        java.lang.Throwable $r3, $r5, $r8;
+        java.util.concurrent.CancellationException $r2, $r6;
+        java.util.concurrent.ExecutionException $r4;
+        java.util.concurrent.CountDownLatch $r7;
+        java.lang.Object $r1;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.nio.ch.PendingFuture: boolean prepareForWait()>();
+
+        if $z1 == 0 goto label1;
+
+        $r7 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        virtualinvoke $r7.<java.util.concurrent.CountDownLatch: void await()>();
+
+     label1:
+        $r8 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        if $r8 == null goto label3;
+
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        $r2 = <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED>;
+
+        if $r3 != $r2 goto label2;
+
+        $r6 = new java.util.concurrent.CancellationException;
+
+        specialinvoke $r6.<java.util.concurrent.CancellationException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $r4 = new java.util.concurrent.ExecutionException;
+
+        $r5 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        specialinvoke $r4.<java.util.concurrent.ExecutionException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r4;
+
+     label3:
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.lang.Object result>;
+
+        return $r1;
+    }
+
+    public java.lang.Object get(long, java.util.concurrent.TimeUnit) throws java.util.concurrent.ExecutionException, java.lang.InterruptedException, java.util.concurrent.TimeoutException
+    {
+        java.lang.Throwable $r3, $r5, $r10;
+        java.util.concurrent.CancellationException $r2, $r6;
+        java.util.concurrent.TimeoutException $r9;
+        long l0;
+        java.util.concurrent.ExecutionException $r4;
+        java.util.concurrent.TimeUnit r7;
+        java.util.concurrent.CountDownLatch $r8;
+        java.lang.Object $r1;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        l0 := @parameter0: long;
+
+        r7 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.nio.ch.PendingFuture: boolean prepareForWait()>();
+
+        if $z1 == 0 goto label1;
+
+        $r8 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        $z2 = virtualinvoke $r8.<java.util.concurrent.CountDownLatch: boolean await(long,java.util.concurrent.TimeUnit)>(l0, r7);
+
+        if $z2 != 0 goto label1;
+
+        $r9 = new java.util.concurrent.TimeoutException;
+
+        specialinvoke $r9.<java.util.concurrent.TimeoutException: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        $r10 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        if $r10 == null goto label3;
+
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        $r2 = <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED>;
+
+        if $r3 != $r2 goto label2;
+
+        $r6 = new java.util.concurrent.CancellationException;
+
+        specialinvoke $r6.<java.util.concurrent.CancellationException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $r4 = new java.util.concurrent.ExecutionException;
+
+        $r5 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        specialinvoke $r4.<java.util.concurrent.ExecutionException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r4;
+
+     label3:
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.lang.Object result>;
+
+        return $r1;
+    }
+
+    java.lang.Throwable exception()
+    {
+        java.lang.Throwable $r2, $r3;
+        java.util.concurrent.CancellationException $r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r2 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        $r1 = <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED>;
+
+        if $r2 == $r1 goto label1;
+
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    java.lang.Object value()
+    {
+        java.lang.Object $r1;
+        sun.nio.ch.PendingFuture r0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r1 = r0.<sun.nio.ch.PendingFuture: java.lang.Object result>;
+
+        return $r1;
+    }
+
+    public boolean isCancelled()
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.CancellationException $r1;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $r2 = r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc>;
+
+        $r1 = <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED>;
+
+        if $r2 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isDone()
+    {
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        return $z0;
+    }
+
+    public boolean cancel(boolean)
+    {
+        java.lang.Throwable $r10;
+        java.util.concurrent.CancellationException $r2;
+        java.io.IOException $r9;
+        java.nio.channels.AsynchronousChannel $r1, $r5, $r7;
+        java.util.concurrent.CountDownLatch $r4, $r11;
+        java.util.concurrent.Future $r3, $r6;
+        sun.nio.ch.PendingFuture r0;
+        boolean $z0, $z1, z2;
+        sun.nio.ch.Cancellable $r8;
+
+        r0 := @this: sun.nio.ch.PendingFuture;
+
+        z2 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<sun.nio.ch.PendingFuture: boolean haveResult>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        $r1 = virtualinvoke r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel()>();
+
+        $z1 = $r1 instanceof sun.nio.ch.Cancellable;
+
+        if $z1 == 0 goto label04;
+
+        $r7 = virtualinvoke r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel()>();
+
+        $r8 = (sun.nio.ch.Cancellable) $r7;
+
+        interfaceinvoke $r8.<sun.nio.ch.Cancellable: void onCancel(sun.nio.ch.PendingFuture)>(r0);
+
+     label04:
+        $r2 = <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED>;
+
+        r0.<sun.nio.ch.PendingFuture: java.lang.Throwable exc> = $r2;
+
+        r0.<sun.nio.ch.PendingFuture: boolean haveResult> = 1;
+
+        $r3 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        if $r3 == null goto label05;
+
+        $r6 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.Future timeoutTask>;
+
+        interfaceinvoke $r6.<java.util.concurrent.Future: boolean cancel(boolean)>(0);
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r10;
+
+     label09:
+        if z2 == 0 goto label13;
+
+     label10:
+        $r5 = virtualinvoke r0.<sun.nio.ch.PendingFuture: java.nio.channels.AsynchronousChannel channel()>();
+
+        interfaceinvoke $r5.<java.nio.channels.AsynchronousChannel: void close()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r9 := @caughtexception;
+
+     label13:
+        $r11 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        if $r11 == null goto label14;
+
+        $r4 = r0.<sun.nio.ch.PendingFuture: java.util.concurrent.CountDownLatch latch>;
+
+        virtualinvoke $r4.<java.util.concurrent.CountDownLatch: void countDown()>();
+
+     label14:
+        return 1;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.CancellationException $r0;
+
+        $r0 = new java.util.concurrent.CancellationException;
+
+        specialinvoke $r0.<java.util.concurrent.CancellationException: void <init>()>();
+
+        <sun.nio.ch.PendingFuture: java.util.concurrent.CancellationException CANCELLED> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,1222 @@
+class sun.net.httpserver.ExchangeImpl extends java.lang.Object
+{
+    com.sun.net.httpserver.Headers reqHdrs;
+    com.sun.net.httpserver.Headers rspHdrs;
+    sun.net.httpserver.Request req;
+    java.lang.String method;
+    boolean writefinished;
+    java.net.URI uri;
+    sun.net.httpserver.HttpConnection connection;
+    long reqContentLen;
+    long rspContentLen;
+    java.io.InputStream ris;
+    java.io.OutputStream ros;
+    java.lang.Thread thread;
+    boolean close;
+    boolean closed;
+    boolean http10;
+    private static final java.lang.String pattern;
+    private static final java.util.TimeZone gmtTZ;
+    private static final java.lang.ThreadLocal dateFormat;
+    private static final java.lang.String HEAD;
+    java.io.InputStream uis;
+    java.io.OutputStream uos;
+    sun.net.httpserver.LeftOverInputStream uis_orig;
+    sun.net.httpserver.PlaceholderOutputStream uos_orig;
+    boolean sentHeaders;
+    java.util.Map attributes;
+    int rcode;
+    com.sun.net.httpserver.HttpPrincipal principal;
+    sun.net.httpserver.ServerImpl server;
+    private byte[] rspbuf;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.lang.String, java.net.URI, sun.net.httpserver.Request, long, sun.net.httpserver.HttpConnection) throws java.io.IOException
+    {
+        java.io.OutputStream $r8;
+        byte[] $r1;
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.ServerImpl $r10, $r11;
+        sun.net.httpserver.HttpConnection r7;
+        long l0;
+        sun.net.httpserver.Request r2;
+        com.sun.net.httpserver.Headers $r3, $r12;
+        int $i2;
+        java.lang.String r5;
+        java.net.URI r6;
+        java.io.InputStream $r9;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r5 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.net.URI;
+
+        r2 := @parameter2: sun.net.httpserver.Request;
+
+        l0 := @parameter3: long;
+
+        r7 := @parameter4: sun.net.httpserver.HttpConnection;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: boolean http10> = 0;
+
+        $i2 = (int) -1;
+
+        r0.<sun.net.httpserver.ExchangeImpl: int rcode> = $i2;
+
+        $r1 = newarray (byte)[128];
+
+        r0.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf> = $r1;
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.Request req> = r2;
+
+        $r3 = virtualinvoke r2.<sun.net.httpserver.Request: com.sun.net.httpserver.Headers headers()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers reqHdrs> = $r3;
+
+        $r12 = new com.sun.net.httpserver.Headers;
+
+        specialinvoke $r12.<com.sun.net.httpserver.Headers: void <init>()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs> = $r12;
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.lang.String method> = r5;
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.net.URI uri> = r6;
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection> = r7;
+
+        r0.<sun.net.httpserver.ExchangeImpl: long reqContentLen> = l0;
+
+        $r8 = virtualinvoke r2.<sun.net.httpserver.Request: java.io.OutputStream outputStream()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream ros> = $r8;
+
+        $r9 = virtualinvoke r2.<sun.net.httpserver.Request: java.io.InputStream inputStream()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream ris> = $r9;
+
+        $r10 = virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl getServerImpl()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl server> = $r10;
+
+        $r11 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl server>;
+
+        virtualinvoke $r11.<sun.net.httpserver.ServerImpl: void startExchange()>();
+
+        return;
+    }
+
+    public com.sun.net.httpserver.Headers getRequestHeaders()
+    {
+        com.sun.net.httpserver.Headers $r2;
+        sun.net.httpserver.UnmodifiableHeaders $r0;
+        sun.net.httpserver.ExchangeImpl r1;
+
+        r1 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r0 = new sun.net.httpserver.UnmodifiableHeaders;
+
+        $r2 = r1.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers reqHdrs>;
+
+        specialinvoke $r0.<sun.net.httpserver.UnmodifiableHeaders: void <init>(com.sun.net.httpserver.Headers)>($r2);
+
+        return $r0;
+    }
+
+    public com.sun.net.httpserver.Headers getResponseHeaders()
+    {
+        com.sun.net.httpserver.Headers $r1;
+        sun.net.httpserver.ExchangeImpl r0;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs>;
+
+        return $r1;
+    }
+
+    public java.net.URI getRequestURI()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        java.net.URI $r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: java.net.URI uri>;
+
+        return $r1;
+    }
+
+    public java.lang.String getRequestMethod()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: java.lang.String method>;
+
+        return $r1;
+    }
+
+    public sun.net.httpserver.HttpContextImpl getHttpContext()
+    {
+        sun.net.httpserver.HttpConnection $r1;
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.HttpContextImpl $r2;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpConnection: sun.net.httpserver.HttpContextImpl getHttpContext()>();
+
+        return $r2;
+    }
+
+    private boolean isHeadRequest()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = "HEAD";
+
+        $r2 = virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: java.lang.String getRequestMethod()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        return $z0;
+    }
+
+    public void close()
+    {
+        java.io.OutputStream $r3, $r6;
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.HttpConnection $r2, $r8, $r10;
+        java.io.IOException $r9;
+        sun.net.httpserver.PlaceholderOutputStream $r4;
+        sun.net.httpserver.LeftOverInputStream $r1, $r5, $r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $z0 = r0.<sun.net.httpserver.ExchangeImpl: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        r0.<sun.net.httpserver.ExchangeImpl: boolean closed> = 1;
+
+     label02:
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        if $r1 == null goto label03;
+
+        $r3 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos>;
+
+        if $r3 != null goto label05;
+
+     label03:
+        $r2 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        virtualinvoke $r2.<sun.net.httpserver.HttpConnection: void close()>();
+
+     label04:
+        return;
+
+     label05:
+        $r4 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.PlaceholderOutputStream uos_orig>;
+
+        $z1 = virtualinvoke $r4.<sun.net.httpserver.PlaceholderOutputStream: boolean isWrapped()>();
+
+        if $z1 != 0 goto label07;
+
+        $r8 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        virtualinvoke $r8.<sun.net.httpserver.HttpConnection: void close()>();
+
+     label06:
+        return;
+
+     label07:
+        $r5 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        $z2 = virtualinvoke $r5.<sun.net.httpserver.LeftOverInputStream: boolean isClosed()>();
+
+        if $z2 != 0 goto label08;
+
+        $r7 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        virtualinvoke $r7.<sun.net.httpserver.LeftOverInputStream: void close()>();
+
+     label08:
+        $r6 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void close()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r10 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        virtualinvoke $r10.<sun.net.httpserver.HttpConnection: void close()>();
+
+     label11:
+        return;
+
+        catch java.io.IOException from label02 to label04 with label10;
+        catch java.io.IOException from label05 to label06 with label10;
+        catch java.io.IOException from label07 to label09 with label10;
+    }
+
+    public java.io.InputStream getRequestBody()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.FixedLengthInputStream $r2;
+        long $l0, $l2;
+        sun.net.httpserver.ChunkedInputStream $r6;
+        sun.net.httpserver.LeftOverInputStream $r4, $r8;
+        byte $b1;
+        java.io.InputStream $r1, $r3, $r5, $r7, $r9;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis>;
+
+        return $r9;
+
+     label1:
+        $l0 = r0.<sun.net.httpserver.ExchangeImpl: long reqContentLen>;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label2;
+
+        $r6 = new sun.net.httpserver.ChunkedInputStream;
+
+        $r7 = r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream ris>;
+
+        specialinvoke $r6.<sun.net.httpserver.ChunkedInputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.InputStream)>(r0, $r7);
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig> = $r6;
+
+        $r8 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis> = $r8;
+
+        goto label3;
+
+     label2:
+        $r2 = new sun.net.httpserver.FixedLengthInputStream;
+
+        $r3 = r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream ris>;
+
+        $l2 = r0.<sun.net.httpserver.ExchangeImpl: long reqContentLen>;
+
+        specialinvoke $r2.<sun.net.httpserver.FixedLengthInputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.InputStream,long)>(r0, $r3, $l2);
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig> = $r2;
+
+        $r4 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis> = $r4;
+
+     label3:
+        $r5 = r0.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis>;
+
+        return $r5;
+    }
+
+    sun.net.httpserver.LeftOverInputStream getOriginalInputStream()
+    {
+        sun.net.httpserver.LeftOverInputStream $r1;
+        sun.net.httpserver.ExchangeImpl r0;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream uis_orig>;
+
+        return $r1;
+    }
+
+    public int getResponseCode()
+    {
+        int $i0;
+        sun.net.httpserver.ExchangeImpl r0;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $i0 = r0.<sun.net.httpserver.ExchangeImpl: int rcode>;
+
+        return $i0;
+    }
+
+    public java.io.OutputStream getResponseBody()
+    {
+        java.io.OutputStream $r1, $r2;
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.PlaceholderOutputStream $r3, $r4;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.net.httpserver.PlaceholderOutputStream;
+
+        specialinvoke $r3.<sun.net.httpserver.PlaceholderOutputStream: void <init>(java.io.OutputStream)>(null);
+
+        r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.PlaceholderOutputStream uos_orig> = $r3;
+
+        $r4 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.PlaceholderOutputStream uos_orig>;
+
+        r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos> = $r4;
+
+     label1:
+        $r2 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos>;
+
+        return $r2;
+    }
+
+    sun.net.httpserver.PlaceholderOutputStream getPlaceholderResponseBody()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.PlaceholderOutputStream $r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream getResponseBody()>();
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.PlaceholderOutputStream uos_orig>;
+
+        return $r1;
+    }
+
+    public void sendResponseHeaders(int, long) throws java.io.IOException
+    {
+        byte[] $r13;
+        sun.net.httpserver.ExchangeImpl r0;
+        java.util.Date $r49;
+        sun.net.httpserver.UndefLengthOutputStream $r51;
+        byte $b2, $b3, $b4, $b6;
+        com.sun.net.httpserver.Headers $r15, $r20, $r29, $r40;
+        java.text.DateFormat $r18;
+        boolean $z0, $z1, z2, $z3, z4, z5;
+        java.lang.ThreadLocal $r14;
+        sun.net.httpserver.ServerImpl $r1, $r25, $r28;
+        sun.net.httpserver.WriteFinishedEvent $r55;
+        java.util.logging.Logger $r2;
+        sun.net.httpserver.PlaceholderOutputStream $r12;
+        sun.net.httpserver.Request $r24;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r35, $r36, $r37, $r43, $r44, $r47, $r50, $r54;
+        long l5;
+        java.util.logging.Level $r41;
+        java.io.BufferedOutputStream $r48;
+        int i0, $i1, $i7;
+        java.lang.String $r6, $r9, $r19, $r21, $r26, $r38, $r45;
+        java.io.OutputStream $r11, $r23, $r31, $r33;
+        java.io.IOException $r46;
+        sun.net.httpserver.ChunkedOutputStream $r52;
+        sun.net.httpserver.FixedLengthOutputStream $r53;
+        java.lang.Object $r16;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        i0 := @parameter0: int;
+
+        l5 := @parameter1: long;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl server>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.ServerImpl: java.util.logging.Logger getLogger()>();
+
+        $z0 = r0.<sun.net.httpserver.ExchangeImpl: boolean sentHeaders>;
+
+        if $z0 == 0 goto label01;
+
+        $r46 = new java.io.IOException;
+
+        specialinvoke $r46.<java.io.IOException: void <init>(java.lang.String)>("headers already sent");
+
+        throw $r46;
+
+     label01:
+        r0.<sun.net.httpserver.ExchangeImpl: int rcode> = i0;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP/1.1 ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = staticinvoke <sun.net.httpserver.Code: java.lang.String msg(int)>(i0);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r48 = new java.io.BufferedOutputStream;
+
+        $r11 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream ros>;
+
+        specialinvoke $r48.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r11);
+
+        $r12 = virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.PlaceholderOutputStream getPlaceholderResponseBody()>();
+
+        $r13 = specialinvoke r0.<sun.net.httpserver.ExchangeImpl: byte[] bytes(java.lang.String,int)>($r9, 0);
+
+        $i1 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        virtualinvoke $r48.<java.io.OutputStream: void write(byte[],int,int)>($r13, 0, $i1);
+
+        z2 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $r15 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs>;
+
+        $r14 = <sun.net.httpserver.ExchangeImpl: java.lang.ThreadLocal dateFormat>;
+
+        $r16 = virtualinvoke $r14.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r18 = (java.text.DateFormat) $r16;
+
+        $r49 = new java.util.Date;
+
+        specialinvoke $r49.<java.util.Date: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.text.DateFormat: java.lang.String format(java.util.Date)>($r49);
+
+        virtualinvoke $r15.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("Date", $r19);
+
+        if i0 < 100 goto label02;
+
+        if i0 < 200 goto label03;
+
+     label02:
+        if i0 == 204 goto label03;
+
+        if i0 != 304 goto label05;
+
+     label03:
+        $b6 = l5 cmp -1L;
+
+        if $b6 == 0 goto label04;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sendResponseHeaders: rCode = ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": forcing contentLen = -1");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void warning(java.lang.String)>($r38);
+
+     label04:
+        l5 = -1L;
+
+     label05:
+        $z3 = specialinvoke r0.<sun.net.httpserver.ExchangeImpl: boolean isHeadRequest()>();
+
+        if $z3 == 0 goto label07;
+
+        $b4 = l5 cmp 0L;
+
+        $i7 = (int) $b4;
+
+        if $i7 < 0 goto label06;
+
+        virtualinvoke $r2.<java.util.logging.Logger: void warning(java.lang.String)>("sendResponseHeaders: being invoked with a content length for a HEAD request");
+
+     label06:
+        z2 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        l5 = 0L;
+
+        goto label11;
+
+     label07:
+        $b2 = l5 cmp 0L;
+
+        if $b2 != 0 goto label09;
+
+        $z1 = r0.<sun.net.httpserver.ExchangeImpl: boolean http10>;
+
+        if $z1 == 0 goto label08;
+
+        $r51 = new sun.net.httpserver.UndefLengthOutputStream;
+
+        $r33 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream ros>;
+
+        specialinvoke $r51.<sun.net.httpserver.UndefLengthOutputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.OutputStream)>(r0, $r33);
+
+        virtualinvoke $r12.<sun.net.httpserver.PlaceholderOutputStream: void setWrappedStream(java.io.OutputStream)>($r51);
+
+        r0.<sun.net.httpserver.ExchangeImpl: boolean close> = 1;
+
+        goto label11;
+
+     label08:
+        $r29 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs>;
+
+        virtualinvoke $r29.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("Transfer-encoding", "chunked");
+
+        $r52 = new sun.net.httpserver.ChunkedOutputStream;
+
+        $r31 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream ros>;
+
+        specialinvoke $r52.<sun.net.httpserver.ChunkedOutputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.OutputStream)>(r0, $r31);
+
+        virtualinvoke $r12.<sun.net.httpserver.PlaceholderOutputStream: void setWrappedStream(java.io.OutputStream)>($r52);
+
+        goto label11;
+
+     label09:
+        $b3 = l5 cmp -1L;
+
+        if $b3 != 0 goto label10;
+
+        z2 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        l5 = 0L;
+
+     label10:
+        $r20 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs>;
+
+        $r21 = staticinvoke <java.lang.Long: java.lang.String toString(long)>(l5);
+
+        virtualinvoke $r20.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("Content-length", $r21);
+
+        $r53 = new sun.net.httpserver.FixedLengthOutputStream;
+
+        $r23 = r0.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream ros>;
+
+        specialinvoke $r53.<sun.net.httpserver.FixedLengthOutputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.OutputStream,long)>(r0, $r23, l5);
+
+        virtualinvoke $r12.<sun.net.httpserver.PlaceholderOutputStream: void setWrappedStream(java.io.OutputStream)>($r53);
+
+     label11:
+        $r40 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.Headers rspHdrs>;
+
+        virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: void write(com.sun.net.httpserver.Headers,java.io.OutputStream)>($r40, $r48);
+
+        r0.<sun.net.httpserver.ExchangeImpl: long rspContentLen> = l5;
+
+        virtualinvoke $r48.<java.io.OutputStream: void flush()>();
+
+        r0.<sun.net.httpserver.ExchangeImpl: boolean sentHeaders> = 1;
+
+        $r41 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sent headers: noContentToSend=");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z5);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r41, $r45);
+
+        if z4 == 0 goto label12;
+
+        $r55 = new sun.net.httpserver.WriteFinishedEvent;
+
+        specialinvoke $r55.<sun.net.httpserver.WriteFinishedEvent: void <init>(sun.net.httpserver.ExchangeImpl)>(r0);
+
+        $r28 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl server>;
+
+        virtualinvoke $r28.<sun.net.httpserver.ServerImpl: void addEvent(sun.net.httpserver.Event)>($r55);
+
+        r0.<sun.net.httpserver.ExchangeImpl: boolean closed> = 1;
+
+     label12:
+        $r25 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl server>;
+
+        $r24 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.Request req>;
+
+        $r26 = virtualinvoke $r24.<sun.net.httpserver.Request: java.lang.String requestLine()>();
+
+        virtualinvoke $r25.<sun.net.httpserver.ServerImpl: void logReply(int,java.lang.String,java.lang.String)>(i0, $r26, null);
+
+        return;
+    }
+
+    void write(com.sun.net.httpserver.Headers, java.io.OutputStream) throws java.io.IOException
+    {
+        byte[] $r14, $r15;
+        sun.net.httpserver.ExchangeImpl r13;
+        com.sun.net.httpserver.Headers r0;
+        int $i0, $i1, i2, i3, i4, i5;
+        java.lang.String r7, r12;
+        boolean $z0, $z1;
+        java.io.OutputStream r3;
+        java.util.Map$Entry r5;
+        java.util.Iterator $r2, $r10;
+        java.util.Set $r1;
+        java.util.List r9;
+        java.lang.Object $r4, $r6, $r8, $r11;
+
+        r13 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r0 := @parameter0: com.sun.net.httpserver.Headers;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.net.httpserver.Headers: java.util.Set entrySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.util.Map$Entry) $r4;
+
+        $r6 = interfaceinvoke r5.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r7 = (java.lang.String) $r6;
+
+        $r8 = interfaceinvoke r5.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r9 = (java.util.List) $r8;
+
+        $r10 = interfaceinvoke r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.lang.String) $r11;
+
+        $i0 = virtualinvoke r7.<java.lang.String: int length()>();
+
+        $r14 = specialinvoke r13.<sun.net.httpserver.ExchangeImpl: byte[] bytes(java.lang.String,int)>(r7, 2);
+
+        i2 = $i0 + 1;
+
+        $r14[$i0] = 58;
+
+        i3 = i2 + 1;
+
+        $r14[i2] = 32;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(byte[],int,int)>($r14, 0, i3);
+
+        $r15 = specialinvoke r13.<sun.net.httpserver.ExchangeImpl: byte[] bytes(java.lang.String,int)>(r12, 2);
+
+        $i1 = virtualinvoke r12.<java.lang.String: int length()>();
+
+        i4 = $i1 + 1;
+
+        $r15[$i1] = 13;
+
+        i5 = i4 + 1;
+
+        $r15[i4] = 10;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(byte[],int,int)>($r15, 0, i5);
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        virtualinvoke r3.<java.io.OutputStream: void write(int)>(13);
+
+        virtualinvoke r3.<java.io.OutputStream: void write(int)>(10);
+
+        return;
+    }
+
+    private byte[] bytes(java.lang.String, int)
+    {
+        byte[] $r2, $r4, $r5, $r6, $r7, $r8;
+        sun.net.httpserver.ExchangeImpl r1;
+        byte $b5;
+        int $i0, i1, $i2, $i3, $i6, $i7, $i8, $i9, $i10, i11, i12, $i13;
+        java.lang.String r0;
+        char $c4;
+        char[] $r3;
+
+        r1 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i3 = $i0 + i1;
+
+        $r2 = r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf>;
+
+        $i2 = lengthof $r2;
+
+        if $i3 <= $i2 goto label1;
+
+        $i7 = $i0 + i1;
+
+        $r6 = r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf>;
+
+        $i6 = lengthof $r6;
+
+        i11 = $i7 - $i6;
+
+        $r7 = r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf>;
+
+        $i8 = lengthof $r7;
+
+        $i9 = $i8 + i11;
+
+        $i10 = 2 * $i9;
+
+        $r8 = newarray (byte)[$i10];
+
+        r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf> = $r8;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        i12 = 0;
+
+     label2:
+        $i13 = lengthof $r3;
+
+        if i12 >= $i13 goto label3;
+
+        $r5 = r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf>;
+
+        $c4 = $r3[i12];
+
+        $b5 = (byte) $c4;
+
+        $r5[i12] = $b5;
+
+        i12 = i12 + 1;
+
+        goto label2;
+
+     label3:
+        $r4 = r1.<sun.net.httpserver.ExchangeImpl: byte[] rspbuf>;
+
+        return $r4;
+    }
+
+    public java.net.InetSocketAddress getRemoteAddress()
+    {
+        java.net.InetAddress $r4;
+        java.net.Socket $r3;
+        sun.net.httpserver.ExchangeImpl r0;
+        java.nio.channels.SocketChannel $r2;
+        sun.net.httpserver.HttpConnection $r1;
+        int $i0;
+        java.net.InetSocketAddress $r5;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpConnection: java.nio.channels.SocketChannel getChannel()>();
+
+        $r3 = virtualinvoke $r2.<java.nio.channels.SocketChannel: java.net.Socket socket()>();
+
+        $r4 = virtualinvoke $r3.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $i0 = virtualinvoke $r3.<java.net.Socket: int getPort()>();
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r4, $i0);
+
+        return $r5;
+    }
+
+    public java.net.InetSocketAddress getLocalAddress()
+    {
+        java.net.InetAddress $r4;
+        java.net.Socket $r3;
+        sun.net.httpserver.ExchangeImpl r0;
+        java.nio.channels.SocketChannel $r2;
+        sun.net.httpserver.HttpConnection $r1;
+        int $i0;
+        java.net.InetSocketAddress $r5;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpConnection: java.nio.channels.SocketChannel getChannel()>();
+
+        $r3 = virtualinvoke $r2.<java.nio.channels.SocketChannel: java.net.Socket socket()>();
+
+        $r4 = virtualinvoke $r3.<java.net.Socket: java.net.InetAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke $r3.<java.net.Socket: int getLocalPort()>();
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r4, $i0);
+
+        return $r5;
+    }
+
+    public java.lang.String getProtocol()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.Request $r1;
+        int $i0, $i1;
+        java.lang.String $r2, $r3;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.Request req>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.Request: java.lang.String requestLine()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int lastIndexOf(int)>(32);
+
+        $i1 = $i0 + 1;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        return $r3;
+    }
+
+    public javax.net.ssl.SSLSession getSSLSession()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        javax.net.ssl.SSLSession $r3;
+        sun.net.httpserver.HttpConnection $r1;
+        javax.net.ssl.SSLEngine $r2;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpConnection: javax.net.ssl.SSLEngine getSSLEngine()>();
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = virtualinvoke $r2.<javax.net.ssl.SSLEngine: javax.net.ssl.SSLSession getSession()>();
+
+        return $r3;
+    }
+
+    public java.lang.Object getAttribute(java.lang.String)
+    {
+        sun.net.httpserver.ExchangeImpl r1;
+        java.lang.NullPointerException $r7;
+        java.util.Map $r2, $r3, $r6;
+        sun.net.httpserver.HttpContextImpl $r5;
+        java.lang.Object $r4;
+        java.lang.String r0;
+
+        r1 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("null name parameter");
+
+        throw $r7;
+
+     label1:
+        $r2 = r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes>;
+
+        if $r2 != null goto label2;
+
+        $r5 = virtualinvoke r1.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpContextImpl getHttpContext()>();
+
+        $r6 = virtualinvoke $r5.<sun.net.httpserver.HttpContextImpl: java.util.Map getAttributes()>();
+
+        r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes> = $r6;
+
+     label2:
+        $r3 = r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        return $r4;
+    }
+
+    public void setAttribute(java.lang.String, java.lang.Object)
+    {
+        sun.net.httpserver.ExchangeImpl r1;
+        java.lang.NullPointerException $r7;
+        java.util.Map $r2, $r4, $r6;
+        sun.net.httpserver.HttpContextImpl $r5;
+        java.lang.Object r3;
+        java.lang.String r0;
+
+        r1 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("null name parameter");
+
+        throw $r7;
+
+     label1:
+        $r2 = r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes>;
+
+        if $r2 != null goto label2;
+
+        $r5 = virtualinvoke r1.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpContextImpl getHttpContext()>();
+
+        $r6 = virtualinvoke $r5.<sun.net.httpserver.HttpContextImpl: java.util.Map getAttributes()>();
+
+        r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes> = $r6;
+
+     label2:
+        $r4 = r1.<sun.net.httpserver.ExchangeImpl: java.util.Map attributes>;
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r3);
+
+        return;
+    }
+
+    public void setStreams(java.io.InputStream, java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        sun.net.httpserver.ExchangeImpl r2;
+        java.lang.AssertionError $r4;
+        boolean $z0;
+        java.io.InputStream r0, $r3;
+
+        r2 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        $z0 = <sun.net.httpserver.ExchangeImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r2.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis>;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        if r0 == null goto label2;
+
+        r2.<sun.net.httpserver.ExchangeImpl: java.io.InputStream uis> = r0;
+
+     label2:
+        if r1 == null goto label3;
+
+        r2.<sun.net.httpserver.ExchangeImpl: java.io.OutputStream uos> = r1;
+
+     label3:
+        return;
+    }
+
+    sun.net.httpserver.HttpConnection getConnection()
+    {
+        sun.net.httpserver.HttpConnection $r1;
+        sun.net.httpserver.ExchangeImpl r0;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection connection>;
+
+        return $r1;
+    }
+
+    sun.net.httpserver.ServerImpl getServerImpl()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        sun.net.httpserver.ServerImpl $r2;
+        sun.net.httpserver.HttpContextImpl $r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = virtualinvoke r0.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpContextImpl getHttpContext()>();
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpContextImpl: sun.net.httpserver.ServerImpl getServerImpl()>();
+
+        return $r2;
+    }
+
+    public com.sun.net.httpserver.HttpPrincipal getPrincipal()
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        com.sun.net.httpserver.HttpPrincipal $r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        $r1 = r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.HttpPrincipal principal>;
+
+        return $r1;
+    }
+
+    void setPrincipal(com.sun.net.httpserver.HttpPrincipal)
+    {
+        sun.net.httpserver.ExchangeImpl r0;
+        com.sun.net.httpserver.HttpPrincipal r1;
+
+        r0 := @this: sun.net.httpserver.ExchangeImpl;
+
+        r1 := @parameter0: com.sun.net.httpserver.HttpPrincipal;
+
+        r0.<sun.net.httpserver.ExchangeImpl: com.sun.net.httpserver.HttpPrincipal principal> = r1;
+
+        return;
+    }
+
+    static sun.net.httpserver.ExchangeImpl get(com.sun.net.httpserver.HttpExchange)
+    {
+        sun.net.httpserver.HttpExchangeImpl $r4;
+        sun.net.httpserver.HttpsExchangeImpl $r1;
+        sun.net.httpserver.ExchangeImpl $r2, $r5;
+        java.lang.AssertionError $r3;
+        com.sun.net.httpserver.HttpExchange r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: com.sun.net.httpserver.HttpExchange;
+
+        $z0 = r0 instanceof sun.net.httpserver.HttpExchangeImpl;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (sun.net.httpserver.HttpExchangeImpl) r0;
+
+        $r5 = virtualinvoke $r4.<sun.net.httpserver.HttpExchangeImpl: sun.net.httpserver.ExchangeImpl getExchangeImpl()>();
+
+        return $r5;
+
+     label1:
+        $z1 = <sun.net.httpserver.ExchangeImpl: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r0 instanceof sun.net.httpserver.HttpsExchangeImpl;
+
+        if $z2 != 0 goto label2;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r1 = (sun.net.httpserver.HttpsExchangeImpl) r0;
+
+        $r2 = virtualinvoke $r1.<sun.net.httpserver.HttpsExchangeImpl: sun.net.httpserver.ExchangeImpl getExchangeImpl()>();
+
+        return $r2;
+    }
+
+    static java.util.TimeZone access$000()
+    {
+        java.util.TimeZone $r0;
+
+        $r0 = <sun.net.httpserver.ExchangeImpl: java.util.TimeZone gmtTZ>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.TimeZone $r1;
+        sun.net.httpserver.ExchangeImpl$1 $r2;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.net.httpserver.ExchangeImpl: java.lang.String HEAD> = "HEAD";
+
+        <sun.net.httpserver.ExchangeImpl: java.lang.String pattern> = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+        $r0 = class "Lsun/net/httpserver/ExchangeImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.ExchangeImpl: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>("GMT");
+
+        <sun.net.httpserver.ExchangeImpl: java.util.TimeZone gmtTZ> = $r1;
+
+        $r2 = new sun.net.httpserver.ExchangeImpl$1;
+
+        specialinvoke $r2.<sun.net.httpserver.ExchangeImpl$1: void <init>()>();
+
+        <sun.net.httpserver.ExchangeImpl: java.lang.ThreadLocal dateFormat> = $r2;
+
+        return;
+    }
+}

@@ -1,0 +1,889 @@
+public class com.sun.security.auth.module.NTLoginModule extends java.lang.Object implements javax.security.auth.spi.LoginModule
+{
+    private com.sun.security.auth.module.NTSystem ntSystem;
+    private javax.security.auth.Subject subject;
+    private javax.security.auth.callback.CallbackHandler callbackHandler;
+    private java.util.Map sharedState;
+    private java.util.Map options;
+    private boolean debug;
+    private boolean debugNative;
+    private boolean succeeded;
+    private boolean commitSucceeded;
+    private com.sun.security.auth.NTUserPrincipal userPrincipal;
+    private com.sun.security.auth.NTSidUserPrincipal userSID;
+    private com.sun.security.auth.NTDomainPrincipal userDomain;
+    private com.sun.security.auth.NTSidDomainPrincipal domainSID;
+    private com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup;
+    private com.sun.security.auth.NTSidGroupPrincipal[] groups;
+    private com.sun.security.auth.NTNumericCredential iToken;
+
+    public void <init>()
+    {
+        com.sun.security.auth.module.NTLoginModule r0;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean debug> = 0;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean debugNative> = 0;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean commitSucceeded> = 0;
+
+        return;
+    }
+
+    public void initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map)
+    {
+        com.sun.security.auth.module.NTLoginModule r0;
+        javax.security.auth.Subject r1;
+        javax.security.auth.callback.CallbackHandler r2;
+        java.util.Map r3, r4;
+        java.lang.Object $r6, $r9;
+        java.lang.String $r5, $r7, $r8, $r10;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        r1 := @parameter0: javax.security.auth.Subject;
+
+        r2 := @parameter1: javax.security.auth.callback.CallbackHandler;
+
+        r3 := @parameter2: java.util.Map;
+
+        r4 := @parameter3: java.util.Map;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject> = r1;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.callback.CallbackHandler callbackHandler> = r2;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: java.util.Map sharedState> = r3;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: java.util.Map options> = r4;
+
+        $r5 = "true";
+
+        $r6 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("debug");
+
+        $r7 = (java.lang.String) $r6;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r7);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean debug> = $z0;
+
+        $r8 = "true";
+
+        $r9 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("debugNative");
+
+        $r10 = (java.lang.String) $r9;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean debugNative> = $z1;
+
+        $z2 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debugNative>;
+
+        if $z2 != 1 goto label1;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean debug> = 1;
+
+     label1:
+        return;
+    }
+
+    public boolean login() throws javax.security.auth.login.LoginException
+    {
+        byte $b7;
+        com.sun.security.auth.NTSidUserPrincipal $r64, $r70;
+        com.sun.security.auth.NTSidPrimaryGroupPrincipal $r34, $r40;
+        java.lang.StringBuilder $r12, $r14, $r16, $r26, $r28, $r32, $r37, $r39, $r42, $r47, $r49, $r52, $r57, $r59, $r62, $r67, $r69, $r72, $r75, $r77, $r80;
+        long $l0, $l1, $l6;
+        com.sun.security.auth.NTDomainPrincipal $r54, $r60;
+        java.lang.String $r4, $r7, $r9, $r17, $r24, $r31, $r33, $r36, $r41, $r43, $r46, $r51, $r53, $r56, $r61, $r63, $r66, $r71, $r73, $r79, $r81, $r86, $r88, $r90;
+        com.sun.security.auth.NTNumericCredential $r10;
+        com.sun.security.auth.module.NTLoginModule r0;
+        com.sun.security.auth.NTSidGroupPrincipal $r23, $r30;
+        com.sun.security.auth.NTSidGroupPrincipal[] $r22, $r25, $r29;
+        javax.security.auth.login.FailedLoginException $r82, $r83;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        com.sun.security.auth.NTSidDomainPrincipal $r44, $r50;
+        com.sun.security.auth.NTUserPrincipal $r5, $r78;
+        com.sun.security.auth.module.NTSystem $r1, $r2, $r3, $r6, $r8, $r11, $r15, $r18, $r20, $r35, $r45, $r55, $r65, $r85, $r87, $r89, $r91, $r93;
+        java.lang.String[] $r19, $r21, $r92;
+        int $i2, $i3, $i4, i5;
+        java.io.PrintStream $r13, $r27, $r38, $r48, $r58, $r68, $r74, $r76, $r84;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded> = 0;
+
+        $r1 = new com.sun.security.auth.module.NTSystem;
+
+        $z0 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debugNative>;
+
+        specialinvoke $r1.<com.sun.security.auth.module.NTSystem: void <init>(boolean)>($z0);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem> = $r1;
+
+        $r2 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        if $r2 != null goto label02;
+
+        $z8 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z8 == 0 goto label01;
+
+        $r84 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r84.<java.io.PrintStream: void println(java.lang.String)>("\t\t[NTLoginModule] Failed in NT login");
+
+     label01:
+        $r83 = new javax.security.auth.login.FailedLoginException;
+
+        specialinvoke $r83.<javax.security.auth.login.FailedLoginException: void <init>(java.lang.String)>("Failed in attempt to import the underlying NT system identity information");
+
+        throw $r83;
+
+     label02:
+        $r3 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r4 = virtualinvoke $r3.<com.sun.security.auth.module.NTSystem: java.lang.String getName()>();
+
+        if $r4 != null goto label03;
+
+        $r82 = new javax.security.auth.login.FailedLoginException;
+
+        specialinvoke $r82.<javax.security.auth.login.FailedLoginException: void <init>(java.lang.String)>("Failed in attempt to import the underlying NT system identity information");
+
+        throw $r82;
+
+     label03:
+        $r5 = new com.sun.security.auth.NTUserPrincipal;
+
+        $r6 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r7 = virtualinvoke $r6.<com.sun.security.auth.module.NTSystem: java.lang.String getName()>();
+
+        specialinvoke $r5.<com.sun.security.auth.NTUserPrincipal: void <init>(java.lang.String)>($r7);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal> = $r5;
+
+        $z1 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z1 == 0 goto label04;
+
+        $r74 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r74.<java.io.PrintStream: void println(java.lang.String)>("\t\t[NTLoginModule] succeeded importing info: ");
+
+        $r76 = <java.lang.System: java.io.PrintStream out>;
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r77 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser name = ");
+
+        $r78 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal>;
+
+        $r79 = virtualinvoke $r78.<com.sun.security.auth.NTUserPrincipal: java.lang.String getName()>();
+
+        $r80 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r79);
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r76.<java.io.PrintStream: void println(java.lang.String)>($r81);
+
+     label04:
+        $r8 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r9 = virtualinvoke $r8.<com.sun.security.auth.module.NTSystem: java.lang.String getUserSID()>();
+
+        if $r9 == null goto label05;
+
+        $r64 = new com.sun.security.auth.NTSidUserPrincipal;
+
+        $r65 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r66 = virtualinvoke $r65.<com.sun.security.auth.module.NTSystem: java.lang.String getUserSID()>();
+
+        specialinvoke $r64.<com.sun.security.auth.NTSidUserPrincipal: void <init>(java.lang.String)>($r66);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID> = $r64;
+
+        $z7 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z7 == 0 goto label05;
+
+        $r68 = <java.lang.System: java.io.PrintStream out>;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r69 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser SID = ");
+
+        $r70 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        $r71 = virtualinvoke $r70.<com.sun.security.auth.NTSidUserPrincipal: java.lang.String getName()>();
+
+        $r72 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r71);
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r68.<java.io.PrintStream: void println(java.lang.String)>($r73);
+
+     label05:
+        $r85 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r86 = virtualinvoke $r85.<com.sun.security.auth.module.NTSystem: java.lang.String getDomain()>();
+
+        if $r86 == null goto label06;
+
+        $r54 = new com.sun.security.auth.NTDomainPrincipal;
+
+        $r55 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r56 = virtualinvoke $r55.<com.sun.security.auth.module.NTSystem: java.lang.String getDomain()>();
+
+        specialinvoke $r54.<com.sun.security.auth.NTDomainPrincipal: void <init>(java.lang.String)>($r56);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain> = $r54;
+
+        $z6 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z6 == 0 goto label06;
+
+        $r58 = <java.lang.System: java.io.PrintStream out>;
+
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r59 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser domain = ");
+
+        $r60 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        $r61 = virtualinvoke $r60.<com.sun.security.auth.NTDomainPrincipal: java.lang.String getName()>();
+
+        $r62 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r58.<java.io.PrintStream: void println(java.lang.String)>($r63);
+
+     label06:
+        $r87 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r88 = virtualinvoke $r87.<com.sun.security.auth.module.NTSystem: java.lang.String getDomainSID()>();
+
+        if $r88 == null goto label07;
+
+        $r44 = new com.sun.security.auth.NTSidDomainPrincipal;
+
+        $r45 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r46 = virtualinvoke $r45.<com.sun.security.auth.module.NTSystem: java.lang.String getDomainSID()>();
+
+        specialinvoke $r44.<com.sun.security.auth.NTSidDomainPrincipal: void <init>(java.lang.String)>($r46);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID> = $r44;
+
+        $z5 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z5 == 0 goto label07;
+
+        $r48 = <java.lang.System: java.io.PrintStream out>;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser domain SID = ");
+
+        $r50 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        $r51 = virtualinvoke $r50.<com.sun.security.auth.NTSidDomainPrincipal: java.lang.String getName()>();
+
+        $r52 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r51);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r48.<java.io.PrintStream: void println(java.lang.String)>($r53);
+
+     label07:
+        $r89 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r90 = virtualinvoke $r89.<com.sun.security.auth.module.NTSystem: java.lang.String getPrimaryGroupID()>();
+
+        if $r90 == null goto label08;
+
+        $r34 = new com.sun.security.auth.NTSidPrimaryGroupPrincipal;
+
+        $r35 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r36 = virtualinvoke $r35.<com.sun.security.auth.module.NTSystem: java.lang.String getPrimaryGroupID()>();
+
+        specialinvoke $r34.<com.sun.security.auth.NTSidPrimaryGroupPrincipal: void <init>(java.lang.String)>($r36);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup> = $r34;
+
+        $z4 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z4 == 0 goto label08;
+
+        $r38 = <java.lang.System: java.io.PrintStream out>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser primary group = ");
+
+        $r40 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        $r41 = virtualinvoke $r40.<com.sun.security.auth.NTSidPrimaryGroupPrincipal: java.lang.String getName()>();
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r38.<java.io.PrintStream: void println(java.lang.String)>($r43);
+
+     label08:
+        $r91 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r92 = virtualinvoke $r91.<com.sun.security.auth.module.NTSystem: java.lang.String[] getGroupIDs()>();
+
+        if $r92 == null goto label11;
+
+        $r18 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r19 = virtualinvoke $r18.<com.sun.security.auth.module.NTSystem: java.lang.String[] getGroupIDs()>();
+
+        $i2 = lengthof $r19;
+
+        if $i2 <= 0 goto label11;
+
+        $r20 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $r21 = virtualinvoke $r20.<com.sun.security.auth.module.NTSystem: java.lang.String[] getGroupIDs()>();
+
+        $i3 = lengthof $r21;
+
+        $r22 = newarray (com.sun.security.auth.NTSidGroupPrincipal)[$i3];
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups> = $r22;
+
+        i5 = 0;
+
+     label09:
+        $i4 = lengthof $r21;
+
+        if i5 >= $i4 goto label11;
+
+        $r25 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r23 = new com.sun.security.auth.NTSidGroupPrincipal;
+
+        $r24 = $r21[i5];
+
+        specialinvoke $r23.<com.sun.security.auth.NTSidGroupPrincipal: void <init>(java.lang.String)>($r24);
+
+        $r25[i5] = $r23;
+
+        $z3 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z3 == 0 goto label10;
+
+        $r27 = <java.lang.System: java.io.PrintStream out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\tuser group = ");
+
+        $r29 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r30 = $r29[i5];
+
+        $r31 = virtualinvoke $r30.<com.sun.security.auth.NTSidGroupPrincipal: java.lang.String getName()>();
+
+        $r32 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<java.io.PrintStream: void println(java.lang.String)>($r33);
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label09;
+
+     label11:
+        $r93 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $l6 = virtualinvoke $r93.<com.sun.security.auth.module.NTSystem: long getImpersonationToken()>();
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 == 0 goto label12;
+
+        $r10 = new com.sun.security.auth.NTNumericCredential;
+
+        $r11 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $l0 = virtualinvoke $r11.<com.sun.security.auth.module.NTSystem: long getImpersonationToken()>();
+
+        specialinvoke $r10.<com.sun.security.auth.NTNumericCredential: void <init>(long)>($l0);
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken> = $r10;
+
+        $z2 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z2 == 0 goto label12;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\timpersonation token = ");
+
+        $r15 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem>;
+
+        $l1 = virtualinvoke $r15.<com.sun.security.auth.module.NTSystem: long getImpersonationToken()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>($r17);
+
+     label12:
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded> = 1;
+
+        $z9 = r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded>;
+
+        return $z9;
+    }
+
+    public boolean commit() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r25;
+        com.sun.security.auth.NTSidGroupPrincipal $r13, $r15;
+        com.sun.security.auth.NTSidGroupPrincipal[] $r11, $r12, $r14, $r30;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        com.sun.security.auth.NTSidDomainPrincipal $r18, $r19, $r28;
+        java.util.Set $r3, $r7;
+        com.sun.security.auth.NTSidUserPrincipal $r5, $r22, $r23;
+        com.sun.security.auth.NTUserPrincipal $r4, $r24;
+        com.sun.security.auth.NTSidPrimaryGroupPrincipal $r16, $r17, $r29;
+        com.sun.security.auth.NTDomainPrincipal $r20, $r21, $r27;
+        int $i0, i1;
+        java.io.PrintStream $r26;
+        com.sun.security.auth.NTNumericCredential $r8, $r9, $r10;
+        com.sun.security.auth.module.NTLoginModule r0;
+        javax.security.auth.Subject $r1, $r2, $r6;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded>;
+
+        if $z0 != 0 goto label02;
+
+        $z9 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z9 == 0 goto label01;
+
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>("\t\t[NTLoginModule]: did not add any Principals to Subject because own authentication failed.");
+
+     label01:
+        return 0;
+
+     label02:
+        $r1 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $z1 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z1 == 0 goto label03;
+
+        $r25 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r25.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is ReadOnly");
+
+        throw $r25;
+
+     label03:
+        $r2 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r4 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal>;
+
+        $z2 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z2 != 0 goto label04;
+
+        $r24 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r24);
+
+     label04:
+        $r5 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        if $r5 == null goto label05;
+
+        $r22 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        $z8 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r22);
+
+        if $z8 != 0 goto label05;
+
+        $r23 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r23);
+
+     label05:
+        $r27 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        if $r27 == null goto label06;
+
+        $r20 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        $z7 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r20);
+
+        if $z7 != 0 goto label06;
+
+        $r21 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r21);
+
+     label06:
+        $r28 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        if $r28 == null goto label07;
+
+        $r18 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        $z6 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r18);
+
+        if $z6 != 0 goto label07;
+
+        $r19 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r19);
+
+     label07:
+        $r29 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        if $r29 == null goto label08;
+
+        $r16 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        $z5 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r16);
+
+        if $z5 != 0 goto label08;
+
+        $r17 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r17);
+
+     label08:
+        i1 = 0;
+
+     label09:
+        $r30 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        if $r30 == null goto label11;
+
+        $r11 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $i0 = lengthof $r11;
+
+        if i1 >= $i0 goto label11;
+
+        $r12 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r13 = $r12[i1];
+
+        $z4 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r13);
+
+        if $z4 != 0 goto label10;
+
+        $r14 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r15 = $r14[i1];
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r15);
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label09;
+
+     label11:
+        $r6 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $r7 = virtualinvoke $r6.<javax.security.auth.Subject: java.util.Set getPublicCredentials()>();
+
+        $r8 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken>;
+
+        if $r8 == null goto label12;
+
+        $r9 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken>;
+
+        $z3 = interfaceinvoke $r7.<java.util.Set: boolean contains(java.lang.Object)>($r9);
+
+        if $z3 != 0 goto label12;
+
+        $r10 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken>;
+
+        interfaceinvoke $r7.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label12:
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean commitSucceeded> = 1;
+
+        return 1;
+    }
+
+    public boolean abort() throws javax.security.auth.login.LoginException
+    {
+        java.io.PrintStream $r1;
+        com.sun.security.auth.module.NTLoginModule r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("\t\t[NTLoginModule]: aborted authentication attempt");
+
+     label1:
+        $z1 = r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded>;
+
+        if $z1 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z2 = r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded>;
+
+        if $z2 != 1 goto label3;
+
+        $z3 = r0.<com.sun.security.auth.module.NTLoginModule: boolean commitSucceeded>;
+
+        if $z3 != 0 goto label3;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded> = 0;
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<com.sun.security.auth.module.NTLoginModule: boolean logout()>();
+
+     label4:
+        $z4 = r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded>;
+
+        return $z4;
+    }
+
+    public boolean logout() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r24;
+        com.sun.security.auth.NTSidGroupPrincipal $r16, $r18;
+        com.sun.security.auth.NTSidGroupPrincipal[] $r14, $r15, $r17, $r25;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.security.auth.NTSidDomainPrincipal $r7, $r20;
+        java.util.Set $r3, $r10;
+        com.sun.security.auth.NTSidUserPrincipal $r5, $r22;
+        com.sun.security.auth.NTUserPrincipal $r4, $r23;
+        com.sun.security.auth.NTSidPrimaryGroupPrincipal $r8, $r19;
+        com.sun.security.auth.NTDomainPrincipal $r6, $r21;
+        int $i0, i1;
+        java.io.PrintStream $r12;
+        com.sun.security.auth.NTNumericCredential $r11, $r13;
+        com.sun.security.auth.module.NTLoginModule r0;
+        javax.security.auth.Subject $r1, $r2, $r9;
+
+        r0 := @this: com.sun.security.auth.module.NTLoginModule;
+
+        $r1 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $z0 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label01;
+
+        $r24 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r24.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is ReadOnly");
+
+        throw $r24;
+
+     label01:
+        $r2 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r4 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal>;
+
+        $z1 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label02;
+
+        $r23 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r23);
+
+     label02:
+        $r5 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        $z2 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z2 == 0 goto label03;
+
+        $r22 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r22);
+
+     label03:
+        $r6 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        $z3 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r6);
+
+        if $z3 == 0 goto label04;
+
+        $r21 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r21);
+
+     label04:
+        $r7 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        $z4 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r7);
+
+        if $z4 == 0 goto label05;
+
+        $r20 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r20);
+
+     label05:
+        $r8 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        $z5 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r8);
+
+        if $z5 == 0 goto label06;
+
+        $r19 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r19);
+
+     label06:
+        i1 = 0;
+
+     label07:
+        $r25 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        if $r25 == null goto label09;
+
+        $r14 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $i0 = lengthof $r14;
+
+        if i1 >= $i0 goto label09;
+
+        $r15 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r16 = $r15[i1];
+
+        $z8 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r16);
+
+        if $z8 == 0 goto label08;
+
+        $r17 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups>;
+
+        $r18 = $r17[i1];
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r18);
+
+     label08:
+        i1 = i1 + 1;
+
+        goto label07;
+
+     label09:
+        $r9 = r0.<com.sun.security.auth.module.NTLoginModule: javax.security.auth.Subject subject>;
+
+        $r10 = virtualinvoke $r9.<javax.security.auth.Subject: java.util.Set getPublicCredentials()>();
+
+        $r11 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken>;
+
+        $z6 = interfaceinvoke $r10.<java.util.Set: boolean contains(java.lang.Object)>($r11);
+
+        if $z6 == 0 goto label10;
+
+        $r13 = r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken>;
+
+        interfaceinvoke $r10.<java.util.Set: boolean remove(java.lang.Object)>($r13);
+
+     label10:
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: boolean commitSucceeded> = 0;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTUserPrincipal userPrincipal> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTDomainPrincipal userDomain> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidUserPrincipal userSID> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidDomainPrincipal domainSID> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidGroupPrincipal[] groups> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTSidPrimaryGroupPrincipal primaryGroup> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.NTNumericCredential iToken> = null;
+
+        r0.<com.sun.security.auth.module.NTLoginModule: com.sun.security.auth.module.NTSystem ntSystem> = null;
+
+        $z7 = r0.<com.sun.security.auth.module.NTLoginModule: boolean debug>;
+
+        if $z7 == 0 goto label11;
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>("\t\t[NTLoginModule] completed logout processing");
+
+     label11:
+        return 1;
+    }
+}

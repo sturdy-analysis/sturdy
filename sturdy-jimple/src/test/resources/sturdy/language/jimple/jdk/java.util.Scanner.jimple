@@ -1,0 +1,4985 @@
+public final class java.util.Scanner extends java.lang.Object implements java.util.Iterator, java.io.Closeable
+{
+    private java.nio.CharBuffer buf;
+    private static final int BUFFER_SIZE;
+    private int position;
+    private java.util.regex.Matcher matcher;
+    private java.util.regex.Pattern delimPattern;
+    private java.util.regex.Pattern hasNextPattern;
+    private int hasNextPosition;
+    private java.lang.String hasNextResult;
+    private java.lang.Readable source;
+    private boolean sourceClosed;
+    private boolean needInput;
+    private boolean skipped;
+    private int savedScannerPosition;
+    private java.lang.Object typeCache;
+    private boolean matchValid;
+    private boolean closed;
+    private int radix;
+    private int defaultRadix;
+    private java.util.Locale locale;
+    private sun.misc.LRUCache patternCache;
+    private java.io.IOException lastException;
+    private static java.util.regex.Pattern WHITESPACE_PATTERN;
+    private static java.util.regex.Pattern FIND_ANY_PATTERN;
+    private static java.util.regex.Pattern NON_ASCII_DIGIT;
+    private java.lang.String groupSeparator;
+    private java.lang.String decimalSeparator;
+    private java.lang.String nanString;
+    private java.lang.String infinityString;
+    private java.lang.String positivePrefix;
+    private java.lang.String negativePrefix;
+    private java.lang.String positiveSuffix;
+    private java.lang.String negativeSuffix;
+    private static volatile java.util.regex.Pattern boolPattern;
+    private static final java.lang.String BOOLEAN_PATTERN;
+    private java.util.regex.Pattern integerPattern;
+    private java.lang.String digits;
+    private java.lang.String non0Digit;
+    private int SIMPLE_GROUP_INDEX;
+    private static volatile java.util.regex.Pattern separatorPattern;
+    private static volatile java.util.regex.Pattern linePattern;
+    private static final java.lang.String LINE_SEPARATOR_PATTERN;
+    private static final java.lang.String LINE_PATTERN;
+    private java.util.regex.Pattern floatPattern;
+    private java.util.regex.Pattern decimalPattern;
+    static final boolean $assertionsDisabled;
+
+    private static java.util.regex.Pattern boolPattern()
+    {
+        java.util.regex.Pattern $r0, r1;
+
+        r1 = <java.util.Scanner: java.util.regex.Pattern boolPattern>;
+
+        if r1 != null goto label1;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("true|false", 2);
+
+        r1 = $r0;
+
+        <java.util.Scanner: java.util.regex.Pattern boolPattern> = $r0;
+
+     label1:
+        return r1;
+    }
+
+    private java.lang.String buildIntegerPatternString()
+    {
+        java.util.Scanner r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r8, $r9, $r11, $r12, $r13, $r14, $r15, $r17, $r18, $r19, $r20, $r21, $r23, $r24, $r25, $r26, $r27, $r28, $r30, $r31, $r32, $r33, $r35, $r37, $r38, $r40, $r42, $r44, $r45, $r47, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56;
+        int $i0;
+        java.lang.String $r1, $r2, $r7, $r10, $r16, $r22, $r29, $r34, $r36, $r39, $r41, $r43, $r46, $r48, $r57;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.lang.String digits>;
+
+        $i0 = r0.<java.util.Scanner: int radix>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("((?i)[");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\p{javaDigit}])");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r10 = r0.<java.util.Scanner: java.lang.String non0Digit>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?(");
+
+        $r16 = r0.<java.util.Scanner: java.lang.String groupSeparator>;
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")+)");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("((");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("++)|");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("([-+]?(");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("))");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = r0.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $r37 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r39 = r0.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = r0.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r43);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r46 = r0.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")|(");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r48);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")|(");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r57;
+    }
+
+    private java.util.regex.Pattern integerPattern()
+    {
+        sun.misc.LRUCache $r3;
+        java.util.Scanner r0;
+        java.lang.Object $r5;
+        java.util.regex.Pattern $r1, $r2, $r6;
+        java.lang.String $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern integerPattern>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r4 = specialinvoke r0.<java.util.Scanner: java.lang.String buildIntegerPatternString()>();
+
+        $r5 = virtualinvoke $r3.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>($r4);
+
+        $r6 = (java.util.regex.Pattern) $r5;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern integerPattern> = $r6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Pattern integerPattern>;
+
+        return $r2;
+    }
+
+    private static java.util.regex.Pattern separatorPattern()
+    {
+        java.util.regex.Pattern $r0, r1;
+
+        r1 = <java.util.Scanner: java.util.regex.Pattern separatorPattern>;
+
+        if r1 != null goto label1;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\r\n|[\n\r\u2028\u2029\u0085]");
+
+        r1 = $r0;
+
+        <java.util.Scanner: java.util.regex.Pattern separatorPattern> = $r0;
+
+     label1:
+        return r1;
+    }
+
+    private static java.util.regex.Pattern linePattern()
+    {
+        java.util.regex.Pattern $r0, r1;
+
+        r1 = <java.util.Scanner: java.util.regex.Pattern linePattern>;
+
+        if r1 != null goto label1;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>(".*(\r\n|[\n\r\u2028\u2029\u0085])|.+$");
+
+        r1 = $r0;
+
+        <java.util.Scanner: java.util.regex.Pattern linePattern> = $r0;
+
+     label1:
+        return r1;
+    }
+
+    private void buildFloatAndDecimalPattern()
+    {
+        java.lang.StringBuilder $r0, $r1, $r2, $r3, $r5, $r6, $r9, $r10, $r11, $r12, $r13, $r15, $r16, $r17, $r18, $r19, $r21, $r22, $r23, $r24, $r25, $r26, $r28, $r29, $r30, $r31, $r32, $r34, $r35, $r36, $r38, $r39, $r40, $r42, $r43, $r45, $r46, $r48, $r49, $r51, $r52, $r54, $r55, $r57, $r58, $r59, $r61, $r62, $r64, $r65, $r67, $r68, $r69, $r71, $r72, $r73, $r74, $r75, $r76, $r77, $r78, $r79, $r81, $r82, $r84, $r85, $r87, $r88, $r90, $r91, $r93, $r94, $r96, $r97, $r99, $r100, $r101, $r102, $r103, $r104, $r105, $r106, $r108, $r109, $r110, $r111, $r112, $r113;
+        java.lang.String $r4, $r8, $r14, $r20, $r27, $r33, $r37, $r41, $r44, $r47, $r50, $r53, $r56, $r60, $r63, $r66, $r70, $r80, $r83, $r86, $r89, $r92, $r95, $r98, $r107, $r114;
+        java.util.Scanner r7;
+        java.util.regex.Pattern $r115, $r116;
+
+        r7 := @this: java.util.Scanner;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("([eE][+-]?");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("+)?");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r8 = r7.<java.util.Scanner: java.lang.String non0Digit>;
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?(");
+
+        $r14 = r7.<java.util.Scanner: java.lang.String groupSeparator>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")+)");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("((");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("++)|");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r33 = r7.<java.util.Scanner: java.lang.String decimalSeparator>;
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*+|");
+
+        $r37 = r7.<java.util.Scanner: java.lang.String decimalSeparator>;
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([0-9\\p{javaDigit}]))");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("++)");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(NaN|");
+
+        $r44 = r7.<java.util.Scanner: java.lang.String nanString>;
+
+        $r45 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r44);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|Infinity|");
+
+        $r47 = r7.<java.util.Scanner: java.lang.String infinityString>;
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r47);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r53 = r7.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $r54 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r53);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r56 = r7.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r63 = r7.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $r64 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r63);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r66 = r7.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $r67 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r66);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r71 = new java.lang.StringBuilder;
+
+        specialinvoke $r71.<java.lang.StringBuilder: void <init>()>();
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([-+]?");
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")|");
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r60);
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r70);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r81 = new java.lang.StringBuilder;
+
+        specialinvoke $r81.<java.lang.StringBuilder: void <init>()>();
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r83 = r7.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $r84 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r83);
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r86 = r7.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $r87 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r86);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r89 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r90 = new java.lang.StringBuilder;
+
+        specialinvoke $r90.<java.lang.StringBuilder: void <init>()>();
+
+        $r91 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r92 = r7.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $r93 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r92);
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r95 = r7.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $r96 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r95);
+
+        $r97 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r98 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r99 = new java.lang.StringBuilder;
+
+        specialinvoke $r99.<java.lang.StringBuilder: void <init>()>();
+
+        $r100 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(([-+]?");
+
+        $r101 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r102 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")|");
+
+        $r103 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r89);
+
+        $r104 = virtualinvoke $r103.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r105 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r98);
+
+        $r106 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r107 = virtualinvoke $r106.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r108 = new java.lang.StringBuilder;
+
+        specialinvoke $r108.<java.lang.StringBuilder: void <init>()>();
+
+        $r109 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r80);
+
+        $r110 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r111 = virtualinvoke $r110.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[-+]?0[xX][0-9a-fA-F]*\\.[0-9a-fA-F]+([pP][-+]?[0-9]+)?");
+
+        $r112 = virtualinvoke $r111.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r113 = virtualinvoke $r112.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r107);
+
+        $r114 = virtualinvoke $r113.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r115 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>($r114);
+
+        r7.<java.util.Scanner: java.util.regex.Pattern floatPattern> = $r115;
+
+        $r116 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>($r80);
+
+        r7.<java.util.Scanner: java.util.regex.Pattern decimalPattern> = $r116;
+
+        return;
+    }
+
+    private java.util.regex.Pattern floatPattern()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1, $r2;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern floatPattern>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<java.util.Scanner: void buildFloatAndDecimalPattern()>();
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Pattern floatPattern>;
+
+        return $r2;
+    }
+
+    private java.util.regex.Pattern decimalPattern()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1, $r2;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern decimalPattern>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<java.util.Scanner: void buildFloatAndDecimalPattern()>();
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Pattern decimalPattern>;
+
+        return $r2;
+    }
+
+    private void <init>(java.lang.Readable, java.util.regex.Pattern)
+    {
+        java.util.Scanner$1 $r15;
+        java.util.Scanner r0;
+        java.lang.AssertionError $r16, $r17;
+        java.util.regex.Matcher $r8, $r9, $r10;
+        java.util.Locale $r12;
+        java.lang.Readable r2;
+        int $i1;
+        java.util.Locale$Category $r11;
+        boolean $z0, $z1;
+        java.nio.CharBuffer $r4, $r5, $r6;
+        java.util.regex.Pattern r3, $r7;
+
+        r0 := @this: java.util.Scanner;
+
+        r2 := @parameter0: java.lang.Readable;
+
+        r3 := @parameter1: java.util.regex.Pattern;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.Scanner: boolean sourceClosed> = 0;
+
+        r0.<java.util.Scanner: boolean needInput> = 0;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<java.util.Scanner: int savedScannerPosition> = $i1;
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = null;
+
+        r0.<java.util.Scanner: boolean matchValid> = 0;
+
+        r0.<java.util.Scanner: boolean closed> = 0;
+
+        r0.<java.util.Scanner: int radix> = 10;
+
+        r0.<java.util.Scanner: int defaultRadix> = 10;
+
+        r0.<java.util.Scanner: java.util.Locale locale> = null;
+
+        $r15 = new java.util.Scanner$1;
+
+        specialinvoke $r15.<java.util.Scanner$1: void <init>(java.util.Scanner,int)>(r0, 7);
+
+        r0.<java.util.Scanner: sun.misc.LRUCache patternCache> = $r15;
+
+        r0.<java.util.Scanner: java.lang.String groupSeparator> = "\\,";
+
+        r0.<java.util.Scanner: java.lang.String decimalSeparator> = "\\.";
+
+        r0.<java.util.Scanner: java.lang.String nanString> = "NaN";
+
+        r0.<java.util.Scanner: java.lang.String infinityString> = "Infinity";
+
+        r0.<java.util.Scanner: java.lang.String positivePrefix> = "";
+
+        r0.<java.util.Scanner: java.lang.String negativePrefix> = "\\-";
+
+        r0.<java.util.Scanner: java.lang.String positiveSuffix> = "";
+
+        r0.<java.util.Scanner: java.lang.String negativeSuffix> = "";
+
+        r0.<java.util.Scanner: java.lang.String digits> = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+        r0.<java.util.Scanner: java.lang.String non0Digit> = "[\\p{javaDigit}&&[^0]]";
+
+        r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX> = 5;
+
+        $z0 = <java.util.Scanner: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if r2 != null goto label1;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>(java.lang.Object)>("source should not be null");
+
+        throw $r16;
+
+     label1:
+        $z1 = <java.util.Scanner: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if r3 != null goto label2;
+
+        $r17 = new java.lang.AssertionError;
+
+        specialinvoke $r17.<java.lang.AssertionError: void <init>(java.lang.Object)>("pattern should not be null");
+
+        throw $r17;
+
+     label2:
+        r0.<java.util.Scanner: java.lang.Readable source> = r2;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern delimPattern> = r3;
+
+        $r4 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>(1024);
+
+        r0.<java.util.Scanner: java.nio.CharBuffer buf> = $r4;
+
+        $r5 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r5.<java.nio.CharBuffer: java.nio.Buffer limit(int)>(0);
+
+        $r7 = r0.<java.util.Scanner: java.util.regex.Pattern delimPattern>;
+
+        $r6 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $r8 = virtualinvoke $r7.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r6);
+
+        r0.<java.util.Scanner: java.util.regex.Matcher matcher> = $r8;
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r9.<java.util.regex.Matcher: java.util.regex.Matcher useTransparentBounds(boolean)>(1);
+
+        $r10 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r10.<java.util.regex.Matcher: java.util.regex.Matcher useAnchoringBounds(boolean)>(0);
+
+        $r11 = <java.util.Locale$Category: java.util.Locale$Category FORMAT>;
+
+        $r12 = staticinvoke <java.util.Locale: java.util.Locale getDefault(java.util.Locale$Category)>($r11);
+
+        virtualinvoke r0.<java.util.Scanner: java.util.Scanner useLocale(java.util.Locale)>($r12);
+
+        return;
+    }
+
+    public void <init>(java.lang.Readable)
+    {
+        java.lang.Readable r1, $r4;
+        java.util.Scanner r0;
+        java.lang.Object $r2;
+        java.util.regex.Pattern $r3;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.Readable;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "source");
+
+        $r4 = (java.lang.Readable) $r2;
+
+        $r3 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r4, $r3);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r3;
+        java.io.InputStreamReader $r1;
+        java.io.InputStream r2;
+
+        r0 := @this: java.util.Scanner;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r1 = new java.io.InputStreamReader;
+
+        specialinvoke $r1.<java.io.InputStreamReader: void <init>(java.io.InputStream)>(r2);
+
+        $r3 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r1, $r3);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, java.lang.String)
+    {
+        java.util.Scanner r0;
+        java.nio.charset.Charset $r5;
+        java.lang.Readable $r6;
+        java.lang.Object $r2;
+        java.lang.String r3;
+        java.util.regex.Pattern $r7;
+        java.io.InputStream r1, $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "source");
+
+        $r4 = (java.io.InputStream) $r2;
+
+        $r5 = staticinvoke <java.util.Scanner: java.nio.charset.Charset toCharset(java.lang.String)>(r3);
+
+        $r6 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.io.InputStream,java.nio.charset.Charset)>($r4, $r5);
+
+        $r7 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r6, $r7);
+
+        return;
+    }
+
+    private static java.nio.charset.Charset toCharset(java.lang.String)
+    {
+        java.nio.charset.Charset $r1;
+        java.lang.String r0;
+        java.lang.IllegalArgumentException $r2, $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "charsetName");
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+        catch java.nio.charset.IllegalCharsetNameException from label1 to label2 with label3;
+        catch java.nio.charset.UnsupportedCharsetException from label1 to label2 with label3;
+    }
+
+    private static java.lang.Readable makeReadable(java.io.InputStream, java.nio.charset.Charset)
+    {
+        java.nio.charset.Charset r2;
+        java.io.InputStreamReader $r0;
+        java.io.InputStream r1;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.nio.charset.Charset;
+
+        $r0 = new java.io.InputStreamReader;
+
+        specialinvoke $r0.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.nio.charset.Charset)>(r1, r2);
+
+        return $r0;
+    }
+
+    public void <init>(java.io.File) throws java.io.FileNotFoundException
+    {
+        java.util.Scanner r0;
+        java.io.FileInputStream $r1;
+        java.nio.channels.FileChannel $r3;
+        java.io.File r2;
+
+        r0 := @this: java.util.Scanner;
+
+        r2 := @parameter0: java.io.File;
+
+        $r1 = new java.io.FileInputStream;
+
+        specialinvoke $r1.<java.io.FileInputStream: void <init>(java.io.File)>(r2);
+
+        $r3 = virtualinvoke $r1.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.nio.channels.ReadableByteChannel)>($r3);
+
+        return;
+    }
+
+    public void <init>(java.io.File, java.lang.String) throws java.io.FileNotFoundException
+    {
+        java.util.Scanner r0;
+        java.lang.Object $r2;
+        java.lang.String r3;
+        java.nio.charset.CharsetDecoder $r5;
+        java.io.File r1, $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.io.File;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r1);
+
+        $r4 = (java.io.File) $r2;
+
+        $r5 = staticinvoke <java.util.Scanner: java.nio.charset.CharsetDecoder toDecoder(java.lang.String)>(r3);
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.io.File,java.nio.charset.CharsetDecoder)>($r4, $r5);
+
+        return;
+    }
+
+    private void <init>(java.io.File, java.nio.charset.CharsetDecoder) throws java.io.FileNotFoundException
+    {
+        java.lang.Readable $r5;
+        java.util.Scanner r0;
+        java.io.FileInputStream $r1;
+        java.nio.charset.CharsetDecoder r4;
+        java.nio.channels.FileChannel $r3;
+        java.io.File r2;
+
+        r0 := @this: java.util.Scanner;
+
+        r2 := @parameter0: java.io.File;
+
+        r4 := @parameter1: java.nio.charset.CharsetDecoder;
+
+        $r1 = new java.io.FileInputStream;
+
+        specialinvoke $r1.<java.io.FileInputStream: void <init>(java.io.File)>(r2);
+
+        $r3 = virtualinvoke $r1.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+        $r5 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel,java.nio.charset.CharsetDecoder)>($r3, r4);
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable)>($r5);
+
+        return;
+    }
+
+    private static java.nio.charset.CharsetDecoder toDecoder(java.lang.String)
+    {
+        java.nio.charset.Charset $r1;
+        java.lang.String r0;
+        java.nio.charset.CharsetDecoder $r2;
+        java.lang.IllegalArgumentException $r3, $r4;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "charsetName");
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke $r1.<java.nio.charset.Charset: java.nio.charset.CharsetDecoder newDecoder()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>(r0);
+
+        throw $r4;
+
+        catch java.nio.charset.IllegalCharsetNameException from label1 to label2 with label3;
+        catch java.nio.charset.UnsupportedCharsetException from label1 to label2 with label3;
+    }
+
+    private static java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel, java.nio.charset.CharsetDecoder)
+    {
+        java.nio.channels.ReadableByteChannel r0;
+        int $i1;
+        java.nio.charset.CharsetDecoder r1;
+        java.io.Reader $r2;
+
+        r0 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        r1 := @parameter1: java.nio.charset.CharsetDecoder;
+
+        $i1 = (int) -1;
+
+        $r2 = staticinvoke <java.nio.channels.Channels: java.io.Reader newReader(java.nio.channels.ReadableByteChannel,java.nio.charset.CharsetDecoder,int)>(r0, r1, $i1);
+
+        return $r2;
+    }
+
+    public void <init>(java.nio.file.Path) throws java.io.IOException
+    {
+        java.nio.file.OpenOption[] $r2;
+        java.util.Scanner r0;
+        java.nio.file.Path r1;
+        java.io.InputStream $r3;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        $r2 = newarray (java.nio.file.OpenOption)[0];
+
+        $r3 = staticinvoke <java.nio.file.Files: java.io.InputStream newInputStream(java.nio.file.Path,java.nio.file.OpenOption[])>(r1, $r2);
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.io.InputStream)>($r3);
+
+        return;
+    }
+
+    public void <init>(java.nio.file.Path, java.lang.String) throws java.io.IOException
+    {
+        java.nio.charset.Charset $r5;
+        java.util.Scanner r0;
+        java.lang.Object $r2;
+        java.lang.String r3;
+        java.nio.file.Path r1, $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r1);
+
+        $r4 = (java.nio.file.Path) $r2;
+
+        $r5 = staticinvoke <java.util.Scanner: java.nio.charset.Charset toCharset(java.lang.String)>(r3);
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.nio.file.Path,java.nio.charset.Charset)>($r4, $r5);
+
+        return;
+    }
+
+    private void <init>(java.nio.file.Path, java.nio.charset.Charset) throws java.io.IOException
+    {
+        java.nio.charset.Charset r4;
+        java.nio.file.OpenOption[] $r2;
+        java.lang.Readable $r5;
+        java.util.Scanner r0;
+        java.nio.file.Path r1;
+        java.io.InputStream $r3;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        r4 := @parameter1: java.nio.charset.Charset;
+
+        $r2 = newarray (java.nio.file.OpenOption)[0];
+
+        $r3 = staticinvoke <java.nio.file.Files: java.io.InputStream newInputStream(java.nio.file.Path,java.nio.file.OpenOption[])>(r1, $r2);
+
+        $r5 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.io.InputStream,java.nio.charset.Charset)>($r3, r4);
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable)>($r5);
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.io.StringReader $r1;
+        java.util.Scanner r0;
+        java.lang.String r2;
+        java.util.regex.Pattern $r3;
+
+        r0 := @this: java.util.Scanner;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.io.StringReader;
+
+        specialinvoke $r1.<java.io.StringReader: void <init>(java.lang.String)>(r2);
+
+        $r3 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r1, $r3);
+
+        return;
+    }
+
+    public void <init>(java.nio.channels.ReadableByteChannel)
+    {
+        java.nio.channels.ReadableByteChannel r1, $r3;
+        java.lang.Readable $r4;
+        java.util.Scanner r0;
+        java.lang.Object $r2;
+        java.util.regex.Pattern $r5;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "source");
+
+        $r3 = (java.nio.channels.ReadableByteChannel) $r2;
+
+        $r4 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel)>($r3);
+
+        $r5 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r4, $r5);
+
+        return;
+    }
+
+    private static java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel)
+    {
+        java.nio.channels.ReadableByteChannel r0;
+        java.nio.charset.Charset $r1;
+        java.lang.Readable $r3;
+        java.nio.charset.CharsetDecoder $r2;
+
+        r0 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset()>();
+
+        $r2 = virtualinvoke $r1.<java.nio.charset.Charset: java.nio.charset.CharsetDecoder newDecoder()>();
+
+        $r3 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel,java.nio.charset.CharsetDecoder)>(r0, $r2);
+
+        return $r3;
+    }
+
+    public void <init>(java.nio.channels.ReadableByteChannel, java.lang.String)
+    {
+        java.nio.channels.ReadableByteChannel r1, $r4;
+        java.util.Scanner r0;
+        java.nio.charset.CharsetDecoder $r5;
+        java.lang.Readable $r6;
+        java.lang.Object $r2;
+        java.lang.String r3;
+        java.util.regex.Pattern $r7;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "source");
+
+        $r4 = (java.nio.channels.ReadableByteChannel) $r2;
+
+        $r5 = staticinvoke <java.util.Scanner: java.nio.charset.CharsetDecoder toDecoder(java.lang.String)>(r3);
+
+        $r6 = staticinvoke <java.util.Scanner: java.lang.Readable makeReadable(java.nio.channels.ReadableByteChannel,java.nio.charset.CharsetDecoder)>($r4, $r5);
+
+        $r7 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        specialinvoke r0.<java.util.Scanner: void <init>(java.lang.Readable,java.util.regex.Pattern)>($r6, $r7);
+
+        return;
+    }
+
+    private void saveState()
+    {
+        int $i0;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        r0.<java.util.Scanner: int savedScannerPosition> = $i0;
+
+        return;
+    }
+
+    private void revertState()
+    {
+        int $i0, $i2;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        $i2 = (int) -1;
+
+        r0.<java.util.Scanner: int savedScannerPosition> = $i2;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        return;
+    }
+
+    private boolean revertState(boolean)
+    {
+        int $i0, $i2;
+        java.util.Scanner r0;
+        boolean z0;
+
+        r0 := @this: java.util.Scanner;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        $i2 = (int) -1;
+
+        r0.<java.util.Scanner: int savedScannerPosition> = $i2;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        return z0;
+    }
+
+    private void cacheResult()
+    {
+        java.util.regex.Matcher $r1, $r3, $r4;
+        int $i0;
+        java.util.Scanner r0;
+        java.lang.String $r2;
+        java.util.regex.Pattern $r5;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Matcher: java.lang.String group()>();
+
+        r0.<java.util.Scanner: java.lang.String hasNextResult> = $r2;
+
+        $r3 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r3.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int hasNextPosition> = $i0;
+
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r5 = virtualinvoke $r4.<java.util.regex.Matcher: java.util.regex.Pattern pattern()>();
+
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = $r5;
+
+        return;
+    }
+
+    private void cacheResult(java.lang.String)
+    {
+        java.util.regex.Matcher $r2, $r3;
+        int $i0;
+        java.util.Scanner r0;
+        java.lang.String r1;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.Scanner: java.lang.String hasNextResult> = r1;
+
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r2.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int hasNextPosition> = $i0;
+
+        $r3 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r4 = virtualinvoke $r3.<java.util.regex.Matcher: java.util.regex.Pattern pattern()>();
+
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = $r4;
+
+        return;
+    }
+
+    private void clearCaches()
+    {
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = null;
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = null;
+
+        return;
+    }
+
+    private java.lang.String getCachedResult()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int hasNextPosition>;
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = null;
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = null;
+
+        $r1 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        return $r1;
+    }
+
+    private void useTypeCache()
+    {
+        java.lang.IllegalStateException $r1;
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $z0 = r0.<java.util.Scanner: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Scanner closed");
+
+        throw $r1;
+
+     label1:
+        $i0 = r0.<java.util.Scanner: int hasNextPosition>;
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = null;
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = null;
+
+        return;
+    }
+
+    private void readInput()
+    {
+        java.util.Scanner r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i8, $i10;
+        java.lang.Readable $r9;
+        java.nio.CharBuffer $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r10, $r11, $r12;
+        java.io.IOException $r13;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i0 = virtualinvoke $r1.<java.nio.CharBuffer: int limit()>();
+
+        $r2 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r2.<java.nio.CharBuffer: int capacity()>();
+
+        if $i0 != $i1 goto label1;
+
+        specialinvoke r0.<java.util.Scanner: boolean makeSpace()>();
+
+     label1:
+        $r3 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i2 = virtualinvoke $r3.<java.nio.CharBuffer: int position()>();
+
+        $r5 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $r4 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i3 = virtualinvoke $r4.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r5.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i3);
+
+        $r7 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $r6 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i4 = virtualinvoke $r6.<java.nio.CharBuffer: int capacity()>();
+
+        virtualinvoke $r7.<java.nio.CharBuffer: java.nio.Buffer limit(int)>($i4);
+
+     label2:
+        $r9 = r0.<java.util.Scanner: java.lang.Readable source>;
+
+        $r8 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        i6 = interfaceinvoke $r9.<java.lang.Readable: int read(java.nio.CharBuffer)>($r8);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r13 := @caughtexception;
+
+        r0.<java.util.Scanner: java.io.IOException lastException> = $r13;
+
+        $i8 = (int) -1;
+
+        i6 = $i8;
+
+     label5:
+        $i10 = (int) -1;
+
+        if i6 != $i10 goto label6;
+
+        r0.<java.util.Scanner: boolean sourceClosed> = 1;
+
+        r0.<java.util.Scanner: boolean needInput> = 0;
+
+     label6:
+        if i6 <= 0 goto label7;
+
+        r0.<java.util.Scanner: boolean needInput> = 0;
+
+     label7:
+        $r11 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $r10 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i5 = virtualinvoke $r10.<java.nio.CharBuffer: int position()>();
+
+        virtualinvoke $r11.<java.nio.CharBuffer: java.nio.Buffer limit(int)>($i5);
+
+        $r12 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r12.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i2);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private boolean makeSpace()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Matcher $r6;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.nio.CharBuffer $r1, $r2, $r3, $r4, $r5, $r7, $r8;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+        $i0 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+        $i9 = (int) -1;
+
+        if $i0 != $i9 goto label1;
+
+        $i7 = r0.<java.util.Scanner: int position>;
+
+        goto label2;
+
+     label1:
+        $i7 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+     label2:
+        $r1 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r1.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i7);
+
+        if $i7 <= 0 goto label3;
+
+        $r7 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r7.<java.nio.CharBuffer: java.nio.CharBuffer compact()>();
+
+        specialinvoke r0.<java.util.Scanner: void translateSavedIndexes(int)>($i7);
+
+        $i5 = r0.<java.util.Scanner: int position>;
+
+        $i6 = $i5 - $i7;
+
+        r0.<java.util.Scanner: int position> = $i6;
+
+        $r8 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r8.<java.nio.CharBuffer: java.nio.Buffer flip()>();
+
+        return 1;
+
+     label3:
+        $r2 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r2.<java.nio.CharBuffer: int capacity()>();
+
+        i2 = $i1 * 2;
+
+        $r3 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>(i2);
+
+        $r4 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r3.<java.nio.CharBuffer: java.nio.CharBuffer put(java.nio.CharBuffer)>($r4);
+
+        virtualinvoke $r3.<java.nio.CharBuffer: java.nio.Buffer flip()>();
+
+        specialinvoke r0.<java.util.Scanner: void translateSavedIndexes(int)>($i7);
+
+        $i3 = r0.<java.util.Scanner: int position>;
+
+        $i4 = $i3 - $i7;
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        r0.<java.util.Scanner: java.nio.CharBuffer buf> = $r3;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r5 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher reset(java.lang.CharSequence)>($r5);
+
+        return 1;
+    }
+
+    private void translateSavedIndexes(int)
+    {
+        int $i0, i1, $i2, $i3, $i5;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int savedScannerPosition>;
+
+        $i3 = $i2 - i1;
+
+        r0.<java.util.Scanner: int savedScannerPosition> = $i3;
+
+     label1:
+        return;
+    }
+
+    private void throwFor()
+    {
+        java.nio.CharBuffer $r2;
+        int $i0, $i1;
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r1;
+        java.util.NoSuchElementException $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        $z0 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        $r2 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r2.<java.nio.CharBuffer: int limit()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r3 = new java.util.NoSuchElementException;
+
+        specialinvoke $r3.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r1 = new java.util.InputMismatchException;
+
+        specialinvoke $r1.<java.util.InputMismatchException: void <init>()>();
+
+        throw $r1;
+    }
+
+    private boolean hasTokenInBuffer()
+    {
+        java.nio.CharBuffer $r3, $r6;
+        java.util.Scanner r0;
+        java.util.regex.Matcher $r2, $r4, $r5, $r7;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.util.regex.Pattern $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r0.<java.util.Scanner: boolean matchValid> = 0;
+
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern delimPattern>;
+
+        virtualinvoke $r2.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>($r1);
+
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        $r3 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r3.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r4.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i0, $i1);
+
+        $r5 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z0 = virtualinvoke $r5.<java.util.regex.Matcher: boolean lookingAt()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r7.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+     label1:
+        $i2 = r0.<java.util.Scanner: int position>;
+
+        $r6 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i3 = virtualinvoke $r6.<java.nio.CharBuffer: int limit()>();
+
+        if $i2 != $i3 goto label2;
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    private java.lang.String getCompleteTokenInBuffer(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Matcher $r2, $r4, $r5, $r6, $r8, $r9, $r10, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r20, $r21, $r22, $r24, $r25, $r26, $r27;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, z11;
+        java.nio.CharBuffer $r3, $r7, $r23, $r29;
+        java.util.regex.Pattern $r1, r28;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        java.lang.String $r11, $r19;
+
+        r0 := @this: java.util.Scanner;
+
+        r28 := @parameter0: java.util.regex.Pattern;
+
+        r0.<java.util.Scanner: boolean matchValid> = 0;
+
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern delimPattern>;
+
+        virtualinvoke $r2.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>($r1);
+
+        $z0 = r0.<java.util.Scanner: boolean skipped>;
+
+        if $z0 != 0 goto label02;
+
+        $r24 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i10 = r0.<java.util.Scanner: int position>;
+
+        $r23 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i11 = virtualinvoke $r23.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r24.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i10, $i11);
+
+        $r25 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z8 = virtualinvoke $r25.<java.util.regex.Matcher: boolean lookingAt()>();
+
+        if $z8 == 0 goto label02;
+
+        $r26 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z9 = virtualinvoke $r26.<java.util.regex.Matcher: boolean hitEnd()>();
+
+        if $z9 == 0 goto label01;
+
+        $z10 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z10 != 0 goto label01;
+
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label01:
+        r0.<java.util.Scanner: boolean skipped> = 1;
+
+        $r27 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i12 = virtualinvoke $r27.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i12;
+
+     label02:
+        $i13 = r0.<java.util.Scanner: int position>;
+
+        $r29 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i14 = virtualinvoke $r29.<java.nio.CharBuffer: int limit()>();
+
+        if $i13 != $i14 goto label04;
+
+        $z7 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z7 == 0 goto label03;
+
+        return null;
+
+     label03:
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label04:
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        $r3 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r3.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r4.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i0, $i1);
+
+        $r5 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z1 = virtualinvoke $r5.<java.util.regex.Matcher: boolean find()>();
+
+        z11 = $z1;
+
+        if $z1 == 0 goto label05;
+
+        $r21 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i8 = virtualinvoke $r21.<java.util.regex.Matcher: int end()>();
+
+        $i9 = r0.<java.util.Scanner: int position>;
+
+        if $i8 != $i9 goto label05;
+
+        $r22 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        z11 = virtualinvoke $r22.<java.util.regex.Matcher: boolean find()>();
+
+     label05:
+        if z11 == 0 goto label09;
+
+        $r13 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z4 = virtualinvoke $r13.<java.util.regex.Matcher: boolean requireEnd()>();
+
+        if $z4 == 0 goto label06;
+
+        $z6 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z6 != 0 goto label06;
+
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label06:
+        $r14 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = virtualinvoke $r14.<java.util.regex.Matcher: int start()>();
+
+        if r28 != null goto label07;
+
+        r28 = <java.util.Scanner: java.util.regex.Pattern FIND_ANY_PATTERN>;
+
+     label07:
+        $r15 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r15.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>(r28);
+
+        $r16 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i6 = r0.<java.util.Scanner: int position>;
+
+        virtualinvoke $r16.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i6, $i5);
+
+        $r17 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z5 = virtualinvoke $r17.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z5 == 0 goto label08;
+
+        $r18 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r19 = virtualinvoke $r18.<java.util.regex.Matcher: java.lang.String group()>();
+
+        $r20 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i7 = virtualinvoke $r20.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i7;
+
+        return $r19;
+
+     label08:
+        return null;
+
+     label09:
+        $z2 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z2 == 0 goto label12;
+
+        if r28 != null goto label10;
+
+        r28 = <java.util.Scanner: java.util.regex.Pattern FIND_ANY_PATTERN>;
+
+     label10:
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>(r28);
+
+        $r8 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i2 = r0.<java.util.Scanner: int position>;
+
+        $r7 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i3 = virtualinvoke $r7.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r8.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i2, $i3);
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z3 = virtualinvoke $r9.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z3 == 0 goto label11;
+
+        $r10 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r11 = virtualinvoke $r10.<java.util.regex.Matcher: java.lang.String group()>();
+
+        $r12 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r12.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        return $r11;
+
+     label11:
+        return null;
+
+     label12:
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+    }
+
+    private java.lang.String findPatternInBuffer(java.util.regex.Pattern, int)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Matcher $r2, $r4, $r5, $r6, $r7, $r8, $r9;
+        int $i0, i1, $i2, i3, i4, $i5, $i6, $i8;
+        java.lang.String $r10;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.nio.CharBuffer $r3;
+        java.util.regex.Pattern r1;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        i1 := @parameter1: int;
+
+        r0.<java.util.Scanner: boolean matchValid> = 0;
+
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r2.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>(r1);
+
+        $r3 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i0 = virtualinvoke $r3.<java.nio.CharBuffer: int limit()>();
+
+        $i8 = (int) -1;
+
+        i3 = $i8;
+
+        i4 = $i0;
+
+        if i1 <= 0 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int position>;
+
+        i3 = $i2 + i1;
+
+        if i3 >= $i0 goto label1;
+
+        i4 = i3;
+
+     label1:
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = r0.<java.util.Scanner: int position>;
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i5, i4);
+
+        $r7 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z4 = virtualinvoke $r7.<java.util.regex.Matcher: boolean find()>();
+
+        if $z4 == 0 goto label4;
+
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z1 = virtualinvoke $r4.<java.util.regex.Matcher: boolean hitEnd()>();
+
+        if $z1 == 0 goto label3;
+
+        $z2 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z2 != 0 goto label3;
+
+        if i4 == i3 goto label2;
+
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label2:
+        if i4 != i3 goto label3;
+
+        $r5 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z3 = virtualinvoke $r5.<java.util.regex.Matcher: boolean requireEnd()>();
+
+        if $z3 == 0 goto label3;
+
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label3:
+        $r8 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i6 = virtualinvoke $r8.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i6;
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r10 = virtualinvoke $r9.<java.util.regex.Matcher: java.lang.String group()>();
+
+        return $r10;
+
+     label4:
+        $z0 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z0 == 0 goto label5;
+
+        return null;
+
+     label5:
+        if i1 == 0 goto label6;
+
+        if i4 == i3 goto label7;
+
+     label6:
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+     label7:
+        return null;
+    }
+
+    private java.lang.String matchPatternInBuffer(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Matcher $r2, $r4, $r5, $r6, $r7, $r8;
+        int $i0, $i1, $i2;
+        java.lang.String $r9;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.CharBuffer $r3;
+        java.util.regex.Pattern r1;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        r0.<java.util.Scanner: boolean matchValid> = 0;
+
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        virtualinvoke $r2.<java.util.regex.Matcher: java.util.regex.Matcher usePattern(java.util.regex.Pattern)>(r1);
+
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        $r3 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        $i1 = virtualinvoke $r3.<java.nio.CharBuffer: int limit()>();
+
+        virtualinvoke $r4.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i0, $i1);
+
+        $r5 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z0 = virtualinvoke $r5.<java.util.regex.Matcher: boolean lookingAt()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $z2 = virtualinvoke $r6.<java.util.regex.Matcher: boolean hitEnd()>();
+
+        if $z2 == 0 goto label1;
+
+        $z3 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z3 != 0 goto label1;
+
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+
+     label1:
+        $r7 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i2 = virtualinvoke $r7.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i2;
+
+        $r8 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r9 = virtualinvoke $r8.<java.util.regex.Matcher: java.lang.String group()>();
+
+        return $r9;
+
+     label2:
+        $z1 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z1 == 0 goto label3;
+
+        return null;
+
+     label3:
+        r0.<java.util.Scanner: boolean needInput> = 1;
+
+        return null;
+    }
+
+    private void ensureOpen()
+    {
+        java.util.Scanner r0;
+        java.lang.IllegalStateException $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $z0 = r0.<java.util.Scanner: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Scanner closed");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public void close()
+    {
+        java.io.Closeable $r3;
+        java.lang.Readable $r1, $r2;
+        java.util.Scanner r0;
+        java.io.IOException $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.Scanner;
+
+        $z0 = r0.<java.util.Scanner: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<java.util.Scanner: java.lang.Readable source>;
+
+        $z1 = $r1 instanceof java.io.Closeable;
+
+        if $z1 == 0 goto label5;
+
+     label2:
+        $r2 = r0.<java.util.Scanner: java.lang.Readable source>;
+
+        $r3 = (java.io.Closeable) $r2;
+
+        interfaceinvoke $r3.<java.io.Closeable: void close()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        r0.<java.util.Scanner: java.io.IOException lastException> = $r4;
+
+     label5:
+        r0.<java.util.Scanner: boolean sourceClosed> = 1;
+
+        r0.<java.util.Scanner: java.lang.Readable source> = null;
+
+        r0.<java.util.Scanner: boolean closed> = 1;
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public java.io.IOException ioException()
+    {
+        java.util.Scanner r0;
+        java.io.IOException $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.io.IOException lastException>;
+
+        return $r1;
+    }
+
+    public java.util.regex.Pattern delimiter()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern delimPattern>;
+
+        return $r1;
+    }
+
+    public java.util.Scanner useDelimiter(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern r1;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern delimPattern> = r1;
+
+        return r0;
+    }
+
+    public java.util.Scanner useDelimiter(java.lang.String)
+    {
+        sun.misc.LRUCache $r2;
+        java.util.Scanner r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern delimPattern> = $r4;
+
+        return r0;
+    }
+
+    public java.util.Locale locale()
+    {
+        java.util.Scanner r0;
+        java.util.Locale $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.Locale locale>;
+
+        return $r1;
+    }
+
+    public java.util.Scanner useLocale(java.util.Locale)
+    {
+        java.text.DecimalFormatSymbols $r5;
+        java.util.Scanner r1;
+        java.util.Locale r0, $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r7, $r9, $r10, $r13, $r15, $r16, $r38, $r39;
+        java.text.NumberFormat $r3;
+        int $i2, $i3;
+        java.lang.String $r8, $r11, $r14, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37;
+        java.text.DecimalFormat r4;
+        char $c0, $c1;
+
+        r1 := @this: java.util.Scanner;
+
+        r0 := @parameter0: java.util.Locale;
+
+        $r2 = r1.<java.util.Scanner: java.util.Locale locale>;
+
+        $z0 = virtualinvoke r0.<java.util.Locale: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        return r1;
+
+     label1:
+        r1.<java.util.Scanner: java.util.Locale locale> = r0;
+
+        $r3 = staticinvoke <java.text.NumberFormat: java.text.NumberFormat getNumberInstance(java.util.Locale)>(r0);
+
+        r4 = (java.text.DecimalFormat) $r3;
+
+        $r5 = staticinvoke <java.text.DecimalFormatSymbols: java.text.DecimalFormatSymbols getInstance(java.util.Locale)>(r0);
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\x{");
+
+        $c0 = virtualinvoke $r5.<java.text.DecimalFormatSymbols: char getGroupingSeparator()>();
+
+        $i2 = (int) $c0;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1.<java.util.Scanner: java.lang.String groupSeparator> = $r11;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\x{");
+
+        $c1 = virtualinvoke $r5.<java.text.DecimalFormatSymbols: char getDecimalSeparator()>();
+
+        $i3 = (int) $c1;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i3);
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1.<java.util.Scanner: java.lang.String decimalSeparator> = $r17;
+
+        $r18 = virtualinvoke $r5.<java.text.DecimalFormatSymbols: java.lang.String getNaN()>();
+
+        $r19 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r18);
+
+        r1.<java.util.Scanner: java.lang.String nanString> = $r19;
+
+        $r20 = virtualinvoke $r5.<java.text.DecimalFormatSymbols: java.lang.String getInfinity()>();
+
+        $r21 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r20);
+
+        r1.<java.util.Scanner: java.lang.String infinityString> = $r21;
+
+        $r22 = virtualinvoke r4.<java.text.DecimalFormat: java.lang.String getPositivePrefix()>();
+
+        r1.<java.util.Scanner: java.lang.String positivePrefix> = $r22;
+
+        $r23 = r1.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $z1 = virtualinvoke $r23.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r36 = r1.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $r37 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r36);
+
+        r1.<java.util.Scanner: java.lang.String positivePrefix> = $r37;
+
+     label2:
+        $r24 = virtualinvoke r4.<java.text.DecimalFormat: java.lang.String getNegativePrefix()>();
+
+        r1.<java.util.Scanner: java.lang.String negativePrefix> = $r24;
+
+        $r25 = r1.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $z2 = virtualinvoke $r25.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 != 0 goto label3;
+
+        $r34 = r1.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $r35 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r34);
+
+        r1.<java.util.Scanner: java.lang.String negativePrefix> = $r35;
+
+     label3:
+        $r26 = virtualinvoke r4.<java.text.DecimalFormat: java.lang.String getPositiveSuffix()>();
+
+        r1.<java.util.Scanner: java.lang.String positiveSuffix> = $r26;
+
+        $r27 = r1.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $z3 = virtualinvoke $r27.<java.lang.String: boolean isEmpty()>();
+
+        if $z3 != 0 goto label4;
+
+        $r32 = r1.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $r33 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r32);
+
+        r1.<java.util.Scanner: java.lang.String positiveSuffix> = $r33;
+
+     label4:
+        $r28 = virtualinvoke r4.<java.text.DecimalFormat: java.lang.String getNegativeSuffix()>();
+
+        r1.<java.util.Scanner: java.lang.String negativeSuffix> = $r28;
+
+        $r29 = r1.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $z4 = virtualinvoke $r29.<java.lang.String: boolean isEmpty()>();
+
+        if $z4 != 0 goto label5;
+
+        $r30 = r1.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $r31 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r30);
+
+        r1.<java.util.Scanner: java.lang.String negativeSuffix> = $r31;
+
+     label5:
+        r1.<java.util.Scanner: java.util.regex.Pattern integerPattern> = null;
+
+        r1.<java.util.Scanner: java.util.regex.Pattern floatPattern> = null;
+
+        return r1;
+    }
+
+    public int radix()
+    {
+        int $i0;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        return $i0;
+    }
+
+    public java.util.Scanner useRadix(int)
+    {
+        java.util.Scanner r5;
+        java.lang.IllegalArgumentException $r0;
+        int i0, $i1;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4;
+
+        r5 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        if i0 < 2 goto label1;
+
+        if i0 <= 36 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("radix:");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r0;
+
+     label2:
+        $i1 = r5.<java.util.Scanner: int defaultRadix>;
+
+        if $i1 != i0 goto label3;
+
+        return r5;
+
+     label3:
+        r5.<java.util.Scanner: int defaultRadix> = i0;
+
+        r5.<java.util.Scanner: java.util.regex.Pattern integerPattern> = null;
+
+        return r5;
+    }
+
+    private void setRadix(int)
+    {
+        int i0, $i1;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.util.Scanner: int radix>;
+
+        if $i1 == i0 goto label1;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern integerPattern> = null;
+
+        r0.<java.util.Scanner: int radix> = i0;
+
+     label1:
+        return;
+    }
+
+    public java.util.regex.MatchResult match()
+    {
+        java.lang.IllegalStateException $r3;
+        java.util.regex.Matcher $r1;
+        java.util.regex.MatchResult $r2;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $z0 = r0.<java.util.Scanner: boolean matchValid>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No match result available");
+
+        throw $r3;
+
+     label1:
+        $r1 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Matcher: java.util.regex.MatchResult toMatchResult()>();
+
+        return $r2;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.StringBuilder $r0, $r1, $r2, $r5, $r6, $r8, $r9, $r10, $r11, $r13, $r14, $r15, $r16, $r18, $r19, $r20, $r21, $r23, $r24, $r25, $r26, $r28, $r29, $r30, $r31, $r33, $r34, $r36, $r37, $r39, $r40, $r42, $r43, $r45, $r46, $r48, $r49, $r51, $r52, $r54, $r55, $r57, $r58, $r60, $r61, $r63, $r64, $r66, $r67, $r69, $r70, $r72, $r73, $r75, $r76, $r78, $r79;
+        java.lang.String $r7, $r12, $r17, $r22, $r27, $r32, $r35, $r38, $r41, $r44, $r47, $r50, $r53, $r56, $r59, $r62, $r65, $r68, $r71, $r74, $r77, $r80, $r81;
+        java.util.Scanner r3;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.regex.Pattern $r4;
+        int $i0;
+
+        r3 := @this: java.util.Scanner;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("java.util.Scanner");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[delimiters=");
+
+        $r4 = r3.<java.util.Scanner: java.util.regex.Pattern delimPattern>;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[position=");
+
+        $i0 = r3.<java.util.Scanner: int position>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[match valid=");
+
+        $z0 = r3.<java.util.Scanner: boolean matchValid>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[need input=");
+
+        $z1 = r3.<java.util.Scanner: boolean needInput>;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[source closed=");
+
+        $z2 = r3.<java.util.Scanner: boolean sourceClosed>;
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[skipped=");
+
+        $z3 = r3.<java.util.Scanner: boolean skipped>;
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z3);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[group separator=");
+
+        $r35 = r3.<java.util.Scanner: java.lang.String groupSeparator>;
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[decimal separator=");
+
+        $r41 = r3.<java.util.Scanner: java.lang.String decimalSeparator>;
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r44);
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[positive prefix=");
+
+        $r47 = r3.<java.util.Scanner: java.lang.String positivePrefix>;
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r47);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[negative prefix=");
+
+        $r53 = r3.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $r54 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r53);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[positive suffix=");
+
+        $r59 = r3.<java.util.Scanner: java.lang.String positiveSuffix>;
+
+        $r60 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r59);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r62);
+
+        $r63 = new java.lang.StringBuilder;
+
+        specialinvoke $r63.<java.lang.StringBuilder: void <init>()>();
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[negative suffix=");
+
+        $r65 = r3.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $r66 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r65);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r68);
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[NaN string=");
+
+        $r71 = r3.<java.util.Scanner: java.lang.String nanString>;
+
+        $r72 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r71);
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r74);
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[infinity string=");
+
+        $r77 = r3.<java.util.Scanner: java.lang.String infinityString>;
+
+        $r78 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r77);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r80);
+
+        $r81 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r81;
+    }
+
+    public boolean hasNext()
+    {
+        java.util.Scanner r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        specialinvoke r0.<java.util.Scanner: void saveState()>();
+
+     label1:
+        $z0 = r0.<java.util.Scanner: boolean sourceClosed>;
+
+        if $z0 != 0 goto label3;
+
+        $z3 = specialinvoke r0.<java.util.Scanner: boolean hasTokenInBuffer()>();
+
+        if $z3 == 0 goto label2;
+
+        $z4 = specialinvoke r0.<java.util.Scanner: boolean revertState(boolean)>(1);
+
+        return $z4;
+
+     label2:
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label1;
+
+     label3:
+        $z1 = specialinvoke r0.<java.util.Scanner: boolean hasTokenInBuffer()>();
+
+        $z2 = specialinvoke r0.<java.util.Scanner: boolean revertState(boolean)>($z1);
+
+        return $z2;
+    }
+
+    public java.lang.String next()
+    {
+        java.util.Scanner r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.Scanner: java.lang.String getCompleteTokenInBuffer(java.util.regex.Pattern)>(null);
+
+        if $r1 == null goto label2;
+
+        r0.<java.util.Scanner: boolean matchValid> = 1;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        return $r1;
+
+     label2:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label4;
+
+     label3:
+        specialinvoke r0.<java.util.Scanner: void throwFor()>();
+
+     label4:
+        goto label1;
+    }
+
+    public void remove()
+    {
+        java.lang.UnsupportedOperationException $r0;
+        java.util.Scanner r1;
+
+        r1 := @this: java.util.Scanner;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public boolean hasNext(java.lang.String)
+    {
+        sun.misc.LRUCache $r2;
+        java.util.Scanner r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        java.util.regex.Pattern $r4;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r4);
+
+        return $z0;
+    }
+
+    public java.lang.String next(java.lang.String)
+    {
+        sun.misc.LRUCache $r2;
+        java.util.Scanner r0;
+        java.lang.Object $r3;
+        java.lang.String r1, $r5;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r4);
+
+        return $r5;
+    }
+
+    public boolean hasNext(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern r1;
+        java.lang.String $r2;
+        java.lang.NullPointerException $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        if r1 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern> = null;
+
+        specialinvoke r0.<java.util.Scanner: void saveState()>();
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.lang.String getCompleteTokenInBuffer(java.util.regex.Pattern)>(r1);
+
+        if $r2 == null goto label3;
+
+        r0.<java.util.Scanner: boolean matchValid> = 1;
+
+        specialinvoke r0.<java.util.Scanner: void cacheResult()>();
+
+        $z2 = specialinvoke r0.<java.util.Scanner: boolean revertState(boolean)>(1);
+
+        return $z2;
+
+     label3:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label2;
+
+     label4:
+        $z1 = specialinvoke r0.<java.util.Scanner: boolean revertState(boolean)>(0);
+
+        return $z1;
+    }
+
+    public java.lang.String next(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern r1, $r2;
+        java.lang.String $r3, $r4;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        if r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern>;
+
+        if $r2 != r1 goto label2;
+
+        $r4 = specialinvoke r0.<java.util.Scanner: java.lang.String getCachedResult()>();
+
+        return $r4;
+
+     label2:
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label3:
+        $r3 = specialinvoke r0.<java.util.Scanner: java.lang.String getCompleteTokenInBuffer(java.util.regex.Pattern)>(r1);
+
+        if $r3 == null goto label4;
+
+        r0.<java.util.Scanner: boolean matchValid> = 1;
+
+        r0.<java.util.Scanner: boolean skipped> = 0;
+
+        return $r3;
+
+     label4:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label6;
+
+     label5:
+        specialinvoke r0.<java.util.Scanner: void throwFor()>();
+
+     label6:
+        goto label3;
+    }
+
+    public boolean hasNextLine()
+    {
+        java.util.regex.MatchResult $r3;
+        java.util.Scanner r0;
+        int $i0, $i1, $i2;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r2, $r4, $r5, r6;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void saveState()>();
+
+        $r1 = staticinvoke <java.util.Scanner: java.util.regex.Pattern linePattern()>();
+
+        $r2 = virtualinvoke r0.<java.util.Scanner: java.lang.String findWithinHorizon(java.util.regex.Pattern,int)>($r1, 0);
+
+        r6 = $r2;
+
+        if $r2 == null goto label2;
+
+        $r3 = virtualinvoke r0.<java.util.Scanner: java.util.regex.MatchResult match()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.regex.MatchResult: java.lang.String group(int)>(1);
+
+        if $r4 == null goto label1;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $i2 = $i0 - $i1;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        r6 = $r5;
+
+        specialinvoke r0.<java.util.Scanner: void cacheResult(java.lang.String)>($r5);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void cacheResult()>();
+
+     label2:
+        specialinvoke r0.<java.util.Scanner: void revertState()>();
+
+        if r6 == null goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    public java.lang.String nextLine()
+    {
+        java.util.regex.MatchResult $r5;
+        java.util.Scanner r0;
+        int $i0, $i1, $i2;
+        java.util.regex.Pattern $r1, $r2, $r3;
+        java.lang.String $r4, $r6, $r9, r10;
+        java.util.NoSuchElementException $r7, $r8;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.util.regex.Pattern hasNextPattern>;
+
+        $r2 = staticinvoke <java.util.Scanner: java.util.regex.Pattern linePattern()>();
+
+        if $r1 != $r2 goto label1;
+
+        $r9 = specialinvoke r0.<java.util.Scanner: java.lang.String getCachedResult()>();
+
+        return $r9;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+        $r3 = <java.util.Scanner: java.util.regex.Pattern linePattern>;
+
+        $r4 = virtualinvoke r0.<java.util.Scanner: java.lang.String findWithinHorizon(java.util.regex.Pattern,int)>($r3, 0);
+
+        r10 = $r4;
+
+        if $r4 != null goto label2;
+
+        $r8 = new java.util.NoSuchElementException;
+
+        specialinvoke $r8.<java.util.NoSuchElementException: void <init>(java.lang.String)>("No line found");
+
+        throw $r8;
+
+     label2:
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.util.regex.MatchResult match()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.regex.MatchResult: java.lang.String group(int)>(1);
+
+        if $r6 == null goto label3;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i2 = $i0 - $i1;
+
+        r10 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+     label3:
+        if r10 != null goto label4;
+
+        $r7 = new java.util.NoSuchElementException;
+
+        specialinvoke $r7.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r7;
+
+     label4:
+        return r10;
+    }
+
+    public java.lang.String findInLine(java.lang.String)
+    {
+        sun.misc.LRUCache $r2;
+        java.util.Scanner r0;
+        java.lang.Object $r3;
+        java.lang.String r1, $r5;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.lang.String findInLine(java.util.regex.Pattern)>($r4);
+
+        return $r5;
+    }
+
+    public java.lang.String findInLine(java.util.regex.Pattern)
+    {
+        java.nio.CharBuffer $r4;
+        java.util.Scanner r0;
+        java.lang.NullPointerException $r7;
+        java.util.regex.Matcher $r6;
+        int $i0, $i1, i2;
+        java.util.regex.Pattern r1, $r2;
+        java.lang.String $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        if r1 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+        specialinvoke r0.<java.util.Scanner: void saveState()>();
+
+     label2:
+        $r2 = staticinvoke <java.util.Scanner: java.util.regex.Pattern separatorPattern()>();
+
+        $r3 = specialinvoke r0.<java.util.Scanner: java.lang.String findPatternInBuffer(java.util.regex.Pattern,int)>($r2, 0);
+
+        if $r3 == null goto label3;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        i2 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        goto label6;
+
+     label3:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label5;
+
+     label4:
+        $r4 = r0.<java.util.Scanner: java.nio.CharBuffer buf>;
+
+        i2 = virtualinvoke $r4.<java.nio.CharBuffer: int limit()>();
+
+        goto label6;
+
+     label5:
+        goto label2;
+
+     label6:
+        specialinvoke r0.<java.util.Scanner: void revertState()>();
+
+        $i0 = r0.<java.util.Scanner: int position>;
+
+        $i1 = i2 - $i0;
+
+        if $i1 != 0 goto label7;
+
+        return null;
+
+     label7:
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.lang.String findWithinHorizon(java.util.regex.Pattern,int)>(r1, $i1);
+
+        return $r5;
+    }
+
+    public java.lang.String findWithinHorizon(java.lang.String, int)
+    {
+        sun.misc.LRUCache $r2;
+        int i0;
+        java.util.Scanner r0;
+        java.lang.Object $r3;
+        java.lang.String r1, $r5;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.lang.String findWithinHorizon(java.util.regex.Pattern,int)>($r4, i0);
+
+        return $r5;
+    }
+
+    public java.lang.String findWithinHorizon(java.util.regex.Pattern, int)
+    {
+        int i0;
+        java.util.Scanner r0;
+        java.util.regex.Pattern r1;
+        java.lang.String $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        if r1 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        if i0 >= 0 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("horizon < 0");
+
+        throw $r3;
+
+     label2:
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label3:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.lang.String findPatternInBuffer(java.util.regex.Pattern,int)>(r1, i0);
+
+        if $r2 == null goto label4;
+
+        r0.<java.util.Scanner: boolean matchValid> = 1;
+
+        return $r2;
+
+     label4:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label3;
+
+     label5:
+        return null;
+    }
+
+    public java.util.Scanner skip(java.util.regex.Pattern)
+    {
+        java.util.Scanner r0;
+        java.lang.NullPointerException $r5;
+        java.util.regex.Matcher $r4;
+        int $i0;
+        java.util.regex.Pattern r1;
+        java.lang.String $r2;
+        java.util.NoSuchElementException $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.util.regex.Pattern;
+
+        specialinvoke r0.<java.util.Scanner: void ensureOpen()>();
+
+        if r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.lang.String matchPatternInBuffer(java.util.regex.Pattern)>(r1);
+
+        if $r2 == null goto label3;
+
+        r0.<java.util.Scanner: boolean matchValid> = 1;
+
+        $r4 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r4.<java.util.regex.Matcher: int end()>();
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        return r0;
+
+     label3:
+        $z0 = r0.<java.util.Scanner: boolean needInput>;
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<java.util.Scanner: void readInput()>();
+
+        goto label5;
+
+     label4:
+        $r3 = new java.util.NoSuchElementException;
+
+        specialinvoke $r3.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r3;
+
+     label5:
+        goto label2;
+    }
+
+    public java.util.Scanner skip(java.lang.String)
+    {
+        sun.misc.LRUCache $r2;
+        java.util.Scanner r0, $r5;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        java.util.regex.Pattern $r4;
+
+        r0 := @this: java.util.Scanner;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.Scanner: sun.misc.LRUCache patternCache>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.LRUCache: java.lang.Object forName(java.lang.Object)>(r1);
+
+        $r4 = (java.util.regex.Pattern) $r3;
+
+        $r5 = virtualinvoke r0.<java.util.Scanner: java.util.Scanner skip(java.util.regex.Pattern)>($r4);
+
+        return $r5;
+    }
+
+    public boolean hasNextBoolean()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = staticinvoke <java.util.Scanner: java.util.regex.Pattern boolPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        return $z0;
+    }
+
+    public boolean nextBoolean()
+    {
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+        $r1 = staticinvoke <java.util.Scanner: java.util.regex.Pattern boolPattern()>();
+
+        $r2 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r1);
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r2);
+
+        return $z0;
+    }
+
+    public boolean hasNextByte()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNextByte(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean hasNextByte(int)
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r6;
+        java.util.regex.Matcher $r2;
+        byte $b2;
+        int i0, $i1;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r3, $r5, $r7;
+        java.lang.Byte $r4;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i1 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>($i1);
+
+        if $r3 != null goto label2;
+
+        $r5 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r7 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r5);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+     label3:
+        $b2 = staticinvoke <java.lang.Byte: byte parseByte(java.lang.String,int)>($r7, i0);
+
+        $r4 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        z1 = 0;
+
+     label6:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label4 with label5;
+    }
+
+    public byte nextByte()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        byte $b1;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $b1 = virtualinvoke r0.<java.util.Scanner: byte nextByte(int)>($i0);
+
+        return $b1;
+    }
+
+    public byte nextByte(int)
+    {
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r7;
+        java.util.regex.Matcher $r6, $r12;
+        byte $b1, $b3;
+        int i0, $i2, $i4, $i5;
+        java.lang.String $r8, $r10, r11, $r13;
+        java.lang.Byte $r4;
+        boolean $z0;
+        java.lang.NumberFormatException $r5;
+        java.lang.Object $r1, $r2, $r3;
+        java.util.regex.Pattern $r9;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r2 instanceof java.lang.Byte;
+
+        if $z0 == 0 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int radix>;
+
+        if $i2 != i0 goto label1;
+
+        $r3 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r4 = (java.lang.Byte) $r3;
+
+        $b3 = virtualinvoke $r4.<java.lang.Byte: byte byteValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $b3;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r9 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $r10 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r9);
+
+        r11 = $r10;
+
+        $r12 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r13 = virtualinvoke $r12.<java.util.regex.Matcher: java.lang.String group(int)>($i5);
+
+        if $r13 != null goto label3;
+
+        r11 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r10);
+
+     label3:
+        $b1 = staticinvoke <java.lang.Byte: byte parseByte(java.lang.String,int)>(r11, i0);
+
+     label4:
+        return $b1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        $r7 = new java.util.InputMismatchException;
+
+        $r8 = virtualinvoke $r5.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.util.InputMismatchException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.NumberFormatException from label2 to label4 with label5;
+    }
+
+    public boolean hasNextShort()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNextShort(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean hasNextShort(int)
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r6;
+        short $s2;
+        java.util.regex.Matcher $r2;
+        java.lang.Short $r4;
+        int i0, $i1;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r3, $r5, $r7;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i1 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>($i1);
+
+        if $r3 != null goto label2;
+
+        $r5 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r7 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r5);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+     label3:
+        $s2 = staticinvoke <java.lang.Short: short parseShort(java.lang.String,int)>($r7, i0);
+
+        $r4 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s2);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        z1 = 0;
+
+     label6:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label4 with label5;
+    }
+
+    public short nextShort()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        short $s1;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $s1 = virtualinvoke r0.<java.util.Scanner: short nextShort(int)>($i0);
+
+        return $s1;
+    }
+
+    public short nextShort(int)
+    {
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r7;
+        short $s1, $s3;
+        java.util.regex.Matcher $r6, $r12;
+        java.lang.Short $r4;
+        int i0, $i2, $i4, $i5;
+        java.lang.String $r8, $r10, r11, $r13;
+        boolean $z0;
+        java.lang.NumberFormatException $r5;
+        java.lang.Object $r1, $r2, $r3;
+        java.util.regex.Pattern $r9;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r2 instanceof java.lang.Short;
+
+        if $z0 == 0 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int radix>;
+
+        if $i2 != i0 goto label1;
+
+        $r3 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r4 = (java.lang.Short) $r3;
+
+        $s3 = virtualinvoke $r4.<java.lang.Short: short shortValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $s3;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r9 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $r10 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r9);
+
+        r11 = $r10;
+
+        $r12 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r13 = virtualinvoke $r12.<java.util.regex.Matcher: java.lang.String group(int)>($i5);
+
+        if $r13 != null goto label3;
+
+        r11 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r10);
+
+     label3:
+        $s1 = staticinvoke <java.lang.Short: short parseShort(java.lang.String,int)>(r11, i0);
+
+     label4:
+        return $s1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        $r7 = new java.util.InputMismatchException;
+
+        $r8 = virtualinvoke $r5.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.util.InputMismatchException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.NumberFormatException from label2 to label4 with label5;
+    }
+
+    public boolean hasNextInt()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNextInt(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean hasNextInt(int)
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r6;
+        java.lang.Integer $r4;
+        java.util.regex.Matcher $r2;
+        int i0, $i1, $i2;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r3, $r5, $r7;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i1 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>($i1);
+
+        if $r3 != null goto label2;
+
+        $r5 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r7 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r5);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+     label3:
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r7, i0);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        z1 = 0;
+
+     label6:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label4 with label5;
+    }
+
+    private java.lang.String processIntegerToken(java.lang.String)
+    {
+        java.util.Scanner r3;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String r0, $r4, $r6, $r7, $r8, $r12, $r13, r14, $r15;
+        boolean $z0, $z1, z2;
+        java.lang.StringBuilder $r1, $r2, $r5, $r9, $r10, $r11;
+
+        r3 := @this: java.util.Scanner;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r4 = r3.<java.util.Scanner: java.lang.String groupSeparator>;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = virtualinvoke r0.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r6, "");
+
+        r14 = $r7;
+
+        z2 = 0;
+
+        $r8 = r3.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $i0 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r13 = r3.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean startsWith(java.lang.String)>($r13);
+
+        if $z1 == 0 goto label1;
+
+        z2 = 1;
+
+        r14 = virtualinvoke $r7.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label1:
+        $r15 = r3.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $i4 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        if $i4 <= 0 goto label2;
+
+        $r12 = r3.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $z0 = virtualinvoke r14.<java.lang.String: boolean endsWith(java.lang.String)>($r12);
+
+        if $z0 == 0 goto label2;
+
+        z2 = 1;
+
+        $i1 = virtualinvoke r14.<java.lang.String: int length()>();
+
+        $i2 = $i1 - $i4;
+
+        $i3 = virtualinvoke r14.<java.lang.String: int length()>();
+
+        r14 = virtualinvoke r14.<java.lang.String: java.lang.String substring(int,int)>($i2, $i3);
+
+     label2:
+        if z2 == 0 goto label3;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        return r14;
+    }
+
+    public int nextInt()
+    {
+        int $i0, $i1;
+        java.util.Scanner r0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $i1 = virtualinvoke r0.<java.util.Scanner: int nextInt(int)>($i0);
+
+        return $i1;
+    }
+
+    public int nextInt(int)
+    {
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r7;
+        java.lang.Integer $r4;
+        java.util.regex.Matcher $r6, $r12;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r8, $r10, r11, $r13;
+        boolean $z0;
+        java.lang.NumberFormatException $r5;
+        java.lang.Object $r1, $r2, $r3;
+        java.util.regex.Pattern $r9;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r2 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int radix>;
+
+        if $i2 != i0 goto label1;
+
+        $r3 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i3 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $i3;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r9 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $r10 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r9);
+
+        r11 = $r10;
+
+        $r12 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r13 = virtualinvoke $r12.<java.util.regex.Matcher: java.lang.String group(int)>($i5);
+
+        if $r13 != null goto label3;
+
+        r11 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r10);
+
+     label3:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>(r11, i0);
+
+     label4:
+        return $i1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        $r7 = new java.util.InputMismatchException;
+
+        $r8 = virtualinvoke $r5.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.util.InputMismatchException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.NumberFormatException from label2 to label4 with label5;
+    }
+
+    public boolean hasNextLong()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNextLong(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean hasNextLong(int)
+    {
+        java.util.Scanner r0;
+        long $l2;
+        java.lang.NumberFormatException $r6;
+        java.util.regex.Matcher $r2;
+        java.lang.Long $r4;
+        int i0, $i1;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r3, $r5, $r7;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i1 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>($i1);
+
+        if $r3 != null goto label2;
+
+        $r5 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r7 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r5);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+     label3:
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String,int)>($r7, i0);
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l2);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        z1 = 0;
+
+     label6:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label4 with label5;
+    }
+
+    public long nextLong()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        long $l1;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $l1 = virtualinvoke r0.<java.util.Scanner: long nextLong(int)>($i0);
+
+        return $l1;
+    }
+
+    public long nextLong(int)
+    {
+        java.util.Scanner r0;
+        long $l1, $l3;
+        java.util.InputMismatchException $r7;
+        java.util.regex.Matcher $r6, $r12;
+        java.lang.Long $r4;
+        int i0, $i2, $i4, $i5;
+        java.lang.String $r8, $r10, r11, $r13;
+        boolean $z0;
+        java.lang.NumberFormatException $r5;
+        java.lang.Object $r1, $r2, $r3;
+        java.util.regex.Pattern $r9;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r2 instanceof java.lang.Long;
+
+        if $z0 == 0 goto label1;
+
+        $i2 = r0.<java.util.Scanner: int radix>;
+
+        if $i2 != i0 goto label1;
+
+        $r3 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r4 = (java.lang.Long) $r3;
+
+        $l3 = virtualinvoke $r4.<java.lang.Long: long longValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $l3;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r9 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $r10 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r9);
+
+        r11 = $r10;
+
+        $r12 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i5 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r13 = virtualinvoke $r12.<java.util.regex.Matcher: java.lang.String group(int)>($i5);
+
+        if $r13 != null goto label3;
+
+        r11 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r10);
+
+     label3:
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String,int)>(r11, i0);
+
+     label4:
+        return $l1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i4 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i4;
+
+        $r7 = new java.util.InputMismatchException;
+
+        $r8 = virtualinvoke $r5.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.util.InputMismatchException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.NumberFormatException from label2 to label4 with label5;
+    }
+
+    private java.lang.String processFloatToken(java.lang.String)
+    {
+        java.util.Scanner r1;
+        java.util.regex.Matcher $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, $z7;
+        java.lang.StringBuilder $r11, $r12, $r19, $r20;
+        java.util.regex.Pattern $r7;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i7, i8, $i10;
+        java.lang.String r0, $r2, $r3, $r4, $r5, $r6, $r13, $r14, $r15, r16, $r17, $r18;
+        char $c2;
+
+        r1 := @this: java.util.Scanner;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r2 = r1.<java.util.Scanner: java.lang.String groupSeparator>;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r2, "");
+
+        r16 = $r3;
+
+        $r4 = r1.<java.util.Scanner: java.lang.String decimalSeparator>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("\\.");
+
+        if $z0 != 0 goto label01;
+
+        $r15 = r1.<java.util.Scanner: java.lang.String decimalSeparator>;
+
+        r16 = virtualinvoke $r3.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r15, ".");
+
+     label01:
+        z6 = 0;
+
+        $r5 = r1.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label02;
+
+        $r14 = r1.<java.util.Scanner: java.lang.String negativePrefix>;
+
+        $z5 = virtualinvoke r16.<java.lang.String: boolean startsWith(java.lang.String)>($r14);
+
+        if $z5 == 0 goto label02;
+
+        z6 = 1;
+
+        r16 = virtualinvoke r16.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label02:
+        $r17 = r1.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $i7 = virtualinvoke $r17.<java.lang.String: int length()>();
+
+        if $i7 <= 0 goto label03;
+
+        $r13 = r1.<java.util.Scanner: java.lang.String negativeSuffix>;
+
+        $z4 = virtualinvoke r16.<java.lang.String: boolean endsWith(java.lang.String)>($r13);
+
+        if $z4 == 0 goto label03;
+
+        z6 = 1;
+
+        $i4 = virtualinvoke r16.<java.lang.String: int length()>();
+
+        $i5 = $i4 - $i7;
+
+        $i6 = virtualinvoke r16.<java.lang.String: int length()>();
+
+        r16 = virtualinvoke r16.<java.lang.String: java.lang.String substring(int,int)>($i5, $i6);
+
+     label03:
+        $r18 = r1.<java.util.Scanner: java.lang.String nanString>;
+
+        $z7 = virtualinvoke r16.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        if $z7 == 0 goto label04;
+
+        r16 = "NaN";
+
+     label04:
+        $r6 = r1.<java.util.Scanner: java.lang.String infinityString>;
+
+        $z1 = virtualinvoke r16.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label05;
+
+        r16 = "Infinity";
+
+     label05:
+        if z6 == 0 goto label06;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r16);
+
+        r16 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label06:
+        $r7 = <java.util.Scanner: java.util.regex.Pattern NON_ASCII_DIGIT>;
+
+        $r8 = virtualinvoke $r7.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r16);
+
+        $z2 = virtualinvoke $r8.<java.util.regex.Matcher: boolean find()>();
+
+        if $z2 == 0 goto label13;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        i8 = 0;
+
+     label07:
+        $i1 = virtualinvoke r16.<java.lang.String: int length()>();
+
+        if i8 >= $i1 goto label12;
+
+        $c2 = virtualinvoke r16.<java.lang.String: char charAt(int)>(i8);
+
+        $z3 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c2);
+
+        if $z3 == 0 goto label10;
+
+        $i3 = staticinvoke <java.lang.Character: int digit(char,int)>($c2, 10);
+
+        $i10 = (int) -1;
+
+        if $i3 == $i10 goto label08;
+
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        goto label09;
+
+     label08:
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+     label09:
+        goto label11;
+
+     label10:
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+     label11:
+        i8 = i8 + 1;
+
+        goto label07;
+
+     label12:
+        r16 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label13:
+        return r16;
+    }
+
+    public boolean hasNextFloat()
+    {
+        java.lang.Float $r4;
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r5;
+        float $f0;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern floatPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r3 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r2);
+
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r4 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>($f0);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        z1 = 0;
+
+     label4:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public float nextFloat()
+    {
+        java.lang.Float $r7;
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r10;
+        java.util.regex.Matcher $r9;
+        int $i0;
+        java.lang.String $r3, $r4, $r11;
+        boolean $z0;
+        java.lang.NumberFormatException $r8;
+        float $f0, $f1;
+        java.lang.Object $r1, $r5, $r6;
+        java.util.regex.Pattern $r2;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r5 instanceof java.lang.Float;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r7 = (java.lang.Float) $r6;
+
+        $f1 = virtualinvoke $r7.<java.lang.Float: float floatValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $f1;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern floatPattern()>();
+
+        $r3 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r2);
+
+        $r4 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r3);
+
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r4);
+
+     label3:
+        return $f0;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r9.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        $r10 = new java.util.InputMismatchException;
+
+        $r11 = virtualinvoke $r8.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r10.<java.util.InputMismatchException: void <init>(java.lang.String)>($r11);
+
+        throw $r10;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label4;
+    }
+
+    public boolean hasNextDouble()
+    {
+        java.lang.Double $r4;
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r5;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0, z1;
+        double $d0;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern floatPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r3 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r2);
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r3);
+
+        $r4 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        z1 = 0;
+
+     label4:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public double nextDouble()
+    {
+        java.lang.Double $r7;
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r10;
+        java.util.regex.Matcher $r9;
+        int $i0;
+        java.lang.String $r3, $r4, $r11;
+        double $d0, $d1;
+        boolean $z0;
+        java.lang.NumberFormatException $r8;
+        java.lang.Object $r1, $r5, $r6;
+        java.util.regex.Pattern $r2;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r5 instanceof java.lang.Double;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $r7 = (java.lang.Double) $r6;
+
+        $d1 = virtualinvoke $r7.<java.lang.Double: double doubleValue()>();
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return $d1;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern floatPattern()>();
+
+        $r3 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r2);
+
+        $r4 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r3);
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r4);
+
+     label3:
+        return $d0;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r9.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        $r10 = new java.util.InputMismatchException;
+
+        $r11 = virtualinvoke $r8.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r10.<java.util.InputMismatchException: void <init>(java.lang.String)>($r11);
+
+        throw $r10;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label4;
+    }
+
+    public boolean hasNextBigInteger()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNextBigInteger(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean hasNextBigInteger(int)
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r6;
+        java.util.regex.Matcher $r2;
+        int i0, $i1;
+        java.math.BigInteger $r4;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r3, $r5, $r7;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i1 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>($i1);
+
+        if $r3 != null goto label2;
+
+        $r5 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r7 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r5);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+     label3:
+        $r4 = new java.math.BigInteger;
+
+        specialinvoke $r4.<java.math.BigInteger: void <init>(java.lang.String,int)>($r7, i0);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        z1 = 0;
+
+     label6:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label4 with label5;
+    }
+
+    public java.math.BigInteger nextBigInteger()
+    {
+        int $i0;
+        java.util.Scanner r0;
+        java.math.BigInteger $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $i0 = r0.<java.util.Scanner: int defaultRadix>;
+
+        $r1 = virtualinvoke r0.<java.util.Scanner: java.math.BigInteger nextBigInteger(int)>($i0);
+
+        return $r1;
+    }
+
+    public java.math.BigInteger nextBigInteger(int)
+    {
+        java.util.Scanner r0;
+        java.util.InputMismatchException $r7;
+        java.util.regex.Matcher $r6, $r13;
+        int i0, $i1, $i2, $i3;
+        java.math.BigInteger $r2, r9;
+        java.lang.String $r8, $r11, r12, $r14;
+        boolean $z0;
+        java.lang.NumberFormatException $r5;
+        java.lang.Object $r1, $r3, $r4;
+        java.util.regex.Pattern $r10;
+
+        r0 := @this: java.util.Scanner;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r3 instanceof java.math.BigInteger;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = r0.<java.util.Scanner: int radix>;
+
+        if $i1 != i0 goto label1;
+
+        $r4 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        r9 = (java.math.BigInteger) $r4;
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return r9;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(i0);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r10 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern integerPattern()>();
+
+        $r11 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r10);
+
+        r12 = $r11;
+
+        $r13 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i3 = r0.<java.util.Scanner: int SIMPLE_GROUP_INDEX>;
+
+        $r14 = virtualinvoke $r13.<java.util.regex.Matcher: java.lang.String group(int)>($i3);
+
+        if $r14 != null goto label3;
+
+        r12 = specialinvoke r0.<java.util.Scanner: java.lang.String processIntegerToken(java.lang.String)>($r11);
+
+     label3:
+        $r2 = new java.math.BigInteger;
+
+        specialinvoke $r2.<java.math.BigInteger: void <init>(java.lang.String,int)>(r12, i0);
+
+     label4:
+        return $r2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i2 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i2;
+
+        $r7 = new java.util.InputMismatchException;
+
+        $r8 = virtualinvoke $r5.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.util.InputMismatchException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.NumberFormatException from label2 to label4 with label5;
+    }
+
+    public boolean hasNextBigDecimal()
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r5;
+        java.math.BigDecimal $r4;
+        java.util.regex.Pattern $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0, z1;
+
+        r0 := @this: java.util.Scanner;
+
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        $r1 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern decimalPattern()>();
+
+        $z0 = virtualinvoke r0.<java.util.Scanner: boolean hasNext(java.util.regex.Pattern)>($r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r2 = r0.<java.util.Scanner: java.lang.String hasNextResult>;
+
+        $r3 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r2);
+
+        $r4 = new java.math.BigDecimal;
+
+        specialinvoke $r4.<java.math.BigDecimal: void <init>(java.lang.String)>($r3);
+
+        r0.<java.util.Scanner: java.lang.Object typeCache> = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        z1 = 0;
+
+     label4:
+        return z1;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public java.math.BigDecimal nextBigDecimal()
+    {
+        java.util.Scanner r0;
+        java.lang.NumberFormatException $r8;
+        java.util.InputMismatchException $r10;
+        java.math.BigDecimal $r5, r12;
+        java.util.regex.Matcher $r9;
+        int $i0;
+        java.lang.Object $r1, $r6, $r7;
+        java.util.regex.Pattern $r2;
+        java.lang.String $r3, $r4, $r11;
+        boolean $z0;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        $z0 = $r6 instanceof java.math.BigDecimal;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<java.util.Scanner: java.lang.Object typeCache>;
+
+        r12 = (java.math.BigDecimal) $r7;
+
+        specialinvoke r0.<java.util.Scanner: void useTypeCache()>();
+
+        return r12;
+
+     label1:
+        specialinvoke r0.<java.util.Scanner: void setRadix(int)>(10);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.Scanner: java.util.regex.Pattern decimalPattern()>();
+
+        $r3 = virtualinvoke r0.<java.util.Scanner: java.lang.String next(java.util.regex.Pattern)>($r2);
+
+        $r4 = specialinvoke r0.<java.util.Scanner: java.lang.String processFloatToken(java.lang.String)>($r3);
+
+        $r5 = new java.math.BigDecimal;
+
+        specialinvoke $r5.<java.math.BigDecimal: void <init>(java.lang.String)>($r4);
+
+     label3:
+        return $r5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<java.util.Scanner: java.util.regex.Matcher matcher>;
+
+        $i0 = virtualinvoke $r9.<java.util.regex.Matcher: int start()>();
+
+        r0.<java.util.Scanner: int position> = $i0;
+
+        $r10 = new java.util.InputMismatchException;
+
+        $r11 = virtualinvoke $r8.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r10.<java.util.InputMismatchException: void <init>(java.lang.String)>($r11);
+
+        throw $r10;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label4;
+    }
+
+    public java.util.Scanner reset()
+    {
+        java.util.Locale $r3;
+        java.util.Scanner r0;
+        java.util.regex.Pattern $r1;
+        java.util.Locale$Category $r2;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN>;
+
+        r0.<java.util.Scanner: java.util.regex.Pattern delimPattern> = $r1;
+
+        $r2 = <java.util.Locale$Category: java.util.Locale$Category FORMAT>;
+
+        $r3 = staticinvoke <java.util.Locale: java.util.Locale getDefault(java.util.Locale$Category)>($r2);
+
+        virtualinvoke r0.<java.util.Scanner: java.util.Scanner useLocale(java.util.Locale)>($r3);
+
+        virtualinvoke r0.<java.util.Scanner: java.util.Scanner useRadix(int)>(10);
+
+        specialinvoke r0.<java.util.Scanner: void clearCaches()>();
+
+        return r0;
+    }
+
+    public volatile java.lang.Object next()
+    {
+        java.util.Scanner r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.util.Scanner;
+
+        $r1 = virtualinvoke r0.<java.util.Scanner: java.lang.String next()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.util.regex.Pattern $r1, $r2, $r3;
+        boolean $z0, $z1;
+
+        <java.util.Scanner: java.lang.String LINE_PATTERN> = ".*(\r\n|[\n\r\u2028\u2029\u0085])|.+$";
+
+        <java.util.Scanner: java.lang.String LINE_SEPARATOR_PATTERN> = "\r\n|[\n\r\u2028\u2029\u0085]";
+
+        <java.util.Scanner: java.lang.String BOOLEAN_PATTERN> = "true|false";
+
+        <java.util.Scanner: int BUFFER_SIZE> = 1024;
+
+        $r0 = class "Ljava/util/Scanner;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.util.Scanner: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\p{javaWhitespace}+");
+
+        <java.util.Scanner: java.util.regex.Pattern WHITESPACE_PATTERN> = $r1;
+
+        $r2 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?s).*");
+
+        <java.util.Scanner: java.util.regex.Pattern FIND_ANY_PATTERN> = $r2;
+
+        $r3 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("[\\p{javaDigit}&&[^0-9]]");
+
+        <java.util.Scanner: java.util.regex.Pattern NON_ASCII_DIGIT> = $r3;
+
+        return;
+    }
+}

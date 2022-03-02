@@ -1,0 +1,1348 @@
+public abstract class sun.security.ssl.SSLContextImpl extends javax.net.ssl.SSLContextSpi
+{
+    private final sun.security.ssl.EphemeralKeyManager ephemeralKeyManager;
+    private final sun.security.ssl.SSLSessionContextImpl clientCache;
+    private final sun.security.ssl.SSLSessionContextImpl serverCache;
+    private boolean isInitialized;
+    private javax.net.ssl.X509ExtendedKeyManager keyManager;
+    private javax.net.ssl.X509TrustManager trustManager;
+    private java.security.SecureRandom secureRandom;
+    private volatile sun.security.ssl.HelloCookieManager$Builder helloCookieManagerBuilder;
+    private final boolean clientEnableStapling;
+    private final boolean serverEnableStapling;
+    private static final java.util.Collection clientCustomizedCipherSuites;
+    private static final java.util.Collection serverCustomizedCipherSuites;
+    private volatile sun.security.ssl.StatusResponseManager statusResponseManager;
+
+    void <init>()
+    {
+        sun.security.ssl.SSLSessionContextImpl $r2, $r3;
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.EphemeralKeyManager $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        specialinvoke r0.<javax.net.ssl.SSLContextSpi: void <init>()>();
+
+        $z0 = staticinvoke <sun.security.ssl.Utilities: boolean getBooleanProperty(java.lang.String,boolean)>("jdk.tls.client.enableStatusRequestExtension", 0);
+
+        r0.<sun.security.ssl.SSLContextImpl: boolean clientEnableStapling> = $z0;
+
+        $z1 = staticinvoke <sun.security.ssl.Utilities: boolean getBooleanProperty(java.lang.String,boolean)>("jdk.tls.server.enableStatusRequestExtension", 0);
+
+        r0.<sun.security.ssl.SSLContextImpl: boolean serverEnableStapling> = $z1;
+
+        $r1 = new sun.security.ssl.EphemeralKeyManager;
+
+        specialinvoke $r1.<sun.security.ssl.EphemeralKeyManager: void <init>()>();
+
+        r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.EphemeralKeyManager ephemeralKeyManager> = $r1;
+
+        $r2 = new sun.security.ssl.SSLSessionContextImpl;
+
+        specialinvoke $r2.<sun.security.ssl.SSLSessionContextImpl: void <init>()>();
+
+        r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.SSLSessionContextImpl clientCache> = $r2;
+
+        $r3 = new sun.security.ssl.SSLSessionContextImpl;
+
+        specialinvoke $r3.<sun.security.ssl.SSLSessionContextImpl: void <init>()>();
+
+        r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.SSLSessionContextImpl serverCache> = $r3;
+
+        return;
+    }
+
+    protected void engineInit(javax.net.ssl.KeyManager[], javax.net.ssl.TrustManager[], java.security.SecureRandom) throws java.security.KeyManagementException
+    {
+        java.lang.Object[] $r4, $r5;
+        java.security.SecureRandom r3, $r15, $r21;
+        java.lang.String $r12, $r14, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.net.ssl.TrustManagerFactory $r17;
+        sun.security.ssl.SSLContextImpl r0;
+        java.security.KeyManagementException $r8;
+        java.lang.Exception $r18;
+        java.security.Provider $r6, $r7, $r11;
+        javax.net.ssl.TrustManager[] r19;
+        javax.net.ssl.X509TrustManager $r20;
+        java.lang.StringBuilder $r9, $r10, $r13;
+        javax.net.ssl.KeyManager[] r1;
+        javax.net.ssl.X509ExtendedKeyManager $r2;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        r1 := @parameter0: javax.net.ssl.KeyManager[];
+
+        r19 := @parameter1: javax.net.ssl.TrustManager[];
+
+        r3 := @parameter2: java.security.SecureRandom;
+
+        r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized> = 0;
+
+        $r2 = specialinvoke r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509ExtendedKeyManager chooseKeyManager(javax.net.ssl.KeyManager[])>(r1);
+
+        r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509ExtendedKeyManager keyManager> = $r2;
+
+        if r19 != null goto label4;
+
+     label1:
+        $r16 = staticinvoke <javax.net.ssl.TrustManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r17 = staticinvoke <javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManagerFactory getInstance(java.lang.String)>($r16);
+
+        virtualinvoke $r17.<javax.net.ssl.TrustManagerFactory: void init(java.security.KeyStore)>(null);
+
+        r19 = virtualinvoke $r17.<javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManager[] getTrustManagers()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r18 := @caughtexception;
+
+     label4:
+        $r20 = specialinvoke r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager chooseTrustManager(javax.net.ssl.TrustManager[])>(r19);
+
+        r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager trustManager> = $r20;
+
+        if r3 != null goto label5;
+
+        $r15 = staticinvoke <sun.security.ssl.JsseJce: java.security.SecureRandom getSecureRandom()>();
+
+        r0.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom secureRandom> = $r15;
+
+        goto label7;
+
+     label5:
+        $z0 = staticinvoke <sun.security.ssl.SunJSSE: boolean isFIPS()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = virtualinvoke r3.<java.security.SecureRandom: java.security.Provider getProvider()>();
+
+        $r7 = <sun.security.ssl.SunJSSE: java.security.Provider cryptoProvider>;
+
+        if $r6 == $r7 goto label6;
+
+        $r8 = new java.security.KeyManagementException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FIPS mode: SecureRandom must be from provider ");
+
+        $r11 = <sun.security.ssl.SunJSSE: java.security.Provider cryptoProvider>;
+
+        $r12 = virtualinvoke $r11.<java.security.Provider: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.KeyManagementException: void <init>(java.lang.String)>($r14);
+
+        throw $r8;
+
+     label6:
+        r0.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom secureRandom> = r3;
+
+     label7:
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label8;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z2 == 0 goto label8;
+
+        $r5 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("trigger seeding of SecureRandom", $r5);
+
+     label8:
+        $r21 = r0.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom secureRandom>;
+
+        virtualinvoke $r21.<java.security.SecureRandom: int nextInt()>();
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label9;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z1 == 0 goto label9;
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("done seeding of SecureRandom", $r4);
+
+     label9:
+        r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized> = 1;
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private javax.net.ssl.X509TrustManager chooseTrustManager(javax.net.ssl.TrustManager[]) throws java.security.KeyManagementException
+    {
+        javax.net.ssl.TrustManager $r2, $r3, $r5, $r7, $r9;
+        int $i0, i1;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.ssl.SSLContextImpl r11;
+        java.security.KeyManagementException $r10;
+        javax.net.ssl.TrustManager[] r0;
+        javax.net.ssl.X509TrustManager $r1, $r6, $r8;
+        sun.security.ssl.AbstractTrustManagerWrapper $r4;
+
+        r11 := @this: sun.security.ssl.SSLContextImpl;
+
+        r0 := @parameter0: javax.net.ssl.TrustManager[];
+
+        i1 = 0;
+
+     label1:
+        if r0 == null goto label5;
+
+        $i0 = lengthof r0;
+
+        if i1 >= $i0 goto label5;
+
+        $r2 = r0[i1];
+
+        $z0 = $r2 instanceof javax.net.ssl.X509TrustManager;
+
+        if $z0 == 0 goto label4;
+
+        $z1 = staticinvoke <sun.security.ssl.SunJSSE: boolean isFIPS()>();
+
+        if $z1 == 0 goto label2;
+
+        $r9 = r0[i1];
+
+        $z3 = $r9 instanceof sun.security.ssl.X509TrustManagerImpl;
+
+        if $z3 != 0 goto label2;
+
+        $r10 = new java.security.KeyManagementException;
+
+        specialinvoke $r10.<java.security.KeyManagementException: void <init>(java.lang.String)>("FIPS mode: only SunJSSE TrustManagers may be used");
+
+        throw $r10;
+
+     label2:
+        $r3 = r0[i1];
+
+        $z2 = $r3 instanceof javax.net.ssl.X509ExtendedTrustManager;
+
+        if $z2 == 0 goto label3;
+
+        $r7 = r0[i1];
+
+        $r8 = (javax.net.ssl.X509TrustManager) $r7;
+
+        return $r8;
+
+     label3:
+        $r4 = new sun.security.ssl.AbstractTrustManagerWrapper;
+
+        $r5 = r0[i1];
+
+        $r6 = (javax.net.ssl.X509TrustManager) $r5;
+
+        specialinvoke $r4.<sun.security.ssl.AbstractTrustManagerWrapper: void <init>(javax.net.ssl.X509TrustManager)>($r6);
+
+        return $r4;
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label5:
+        $r1 = <sun.security.ssl.DummyX509TrustManager: javax.net.ssl.X509TrustManager INSTANCE>;
+
+        return $r1;
+    }
+
+    private javax.net.ssl.X509ExtendedKeyManager chooseKeyManager(javax.net.ssl.KeyManager[]) throws java.security.KeyManagementException
+    {
+        javax.net.ssl.X509KeyManager $r9;
+        java.lang.Object[] $r3;
+        int $i0, i1;
+        sun.security.ssl.AbstractKeyManagerWrapper $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.SSLContextImpl r7;
+        java.security.KeyManagementException $r6;
+        javax.net.ssl.KeyManager r2;
+        javax.net.ssl.KeyManager[] r0;
+        javax.net.ssl.X509ExtendedKeyManager $r1, $r4, $r5;
+
+        r7 := @this: sun.security.ssl.SSLContextImpl;
+
+        r0 := @parameter0: javax.net.ssl.KeyManager[];
+
+        i1 = 0;
+
+     label1:
+        if r0 == null goto label9;
+
+        $i0 = lengthof r0;
+
+        if i1 >= $i0 goto label9;
+
+        r2 = r0[i1];
+
+        $z0 = r2 instanceof javax.net.ssl.X509KeyManager;
+
+        if $z0 != 0 goto label2;
+
+        goto label8;
+
+     label2:
+        $z1 = staticinvoke <sun.security.ssl.SunJSSE: boolean isFIPS()>();
+
+        if $z1 == 0 goto label5;
+
+        $z5 = r2 instanceof sun.security.ssl.X509KeyManagerImpl;
+
+        if $z5 != 0 goto label3;
+
+        $z6 = r2 instanceof sun.security.ssl.SunX509KeyManagerImpl;
+
+        if $z6 == 0 goto label4;
+
+     label3:
+        $r5 = (javax.net.ssl.X509ExtendedKeyManager) r2;
+
+        return $r5;
+
+     label4:
+        $r6 = new java.security.KeyManagementException;
+
+        specialinvoke $r6.<java.security.KeyManagementException: void <init>(java.lang.String)>("FIPS mode: only SunJSSE KeyManagers may be used");
+
+        throw $r6;
+
+     label5:
+        $z2 = r2 instanceof javax.net.ssl.X509ExtendedKeyManager;
+
+        if $z2 == 0 goto label6;
+
+        $r4 = (javax.net.ssl.X509ExtendedKeyManager) r2;
+
+        return $r4;
+
+     label6:
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label7;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z4 == 0 goto label7;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("X509KeyManager passed to SSLContext.init():  need an X509ExtendedKeyManager for SSLEngine use", $r3);
+
+     label7:
+        $r8 = new sun.security.ssl.AbstractKeyManagerWrapper;
+
+        $r9 = (javax.net.ssl.X509KeyManager) r2;
+
+        specialinvoke $r8.<sun.security.ssl.AbstractKeyManagerWrapper: void <init>(javax.net.ssl.X509KeyManager)>($r9);
+
+        return $r8;
+
+     label8:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label9:
+        $r1 = <sun.security.ssl.DummyX509KeyManager: javax.net.ssl.X509ExtendedKeyManager INSTANCE>;
+
+        return $r1;
+    }
+
+    abstract javax.net.ssl.SSLEngine createSSLEngineImpl();
+
+    abstract javax.net.ssl.SSLEngine createSSLEngineImpl(java.lang.String, int);
+
+    protected javax.net.ssl.SSLEngine engineCreateSSLEngine()
+    {
+        java.lang.IllegalStateException $r2;
+        sun.security.ssl.SSLContextImpl r0;
+        boolean $z0;
+        javax.net.ssl.SSLEngine $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("SSLContext is not initialized");
+
+        throw $r2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLEngine createSSLEngineImpl()>();
+
+        return $r1;
+    }
+
+    protected javax.net.ssl.SSLEngine engineCreateSSLEngine(java.lang.String, int)
+    {
+        java.lang.IllegalStateException $r3;
+        sun.security.ssl.SSLContextImpl r0;
+        int i0;
+        java.lang.String r1;
+        boolean $z0;
+        javax.net.ssl.SSLEngine $r2;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $z0 = r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("SSLContext is not initialized");
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLEngine createSSLEngineImpl(java.lang.String,int)>(r1, i0);
+
+        return $r2;
+    }
+
+    protected javax.net.ssl.SSLSocketFactory engineGetSocketFactory()
+    {
+        java.lang.IllegalStateException $r2;
+        sun.security.ssl.SSLSocketFactoryImpl $r1;
+        sun.security.ssl.SSLContextImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("SSLContext is not initialized");
+
+        throw $r2;
+
+     label1:
+        $r1 = new sun.security.ssl.SSLSocketFactoryImpl;
+
+        specialinvoke $r1.<sun.security.ssl.SSLSocketFactoryImpl: void <init>(sun.security.ssl.SSLContextImpl)>(r0);
+
+        return $r1;
+    }
+
+    protected javax.net.ssl.SSLServerSocketFactory engineGetServerSocketFactory()
+    {
+        sun.security.ssl.SSLServerSocketFactoryImpl $r1;
+        java.lang.IllegalStateException $r2;
+        sun.security.ssl.SSLContextImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLContextImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("SSLContext is not initialized");
+
+        throw $r2;
+
+     label1:
+        $r1 = new sun.security.ssl.SSLServerSocketFactoryImpl;
+
+        specialinvoke $r1.<sun.security.ssl.SSLServerSocketFactoryImpl: void <init>(sun.security.ssl.SSLContextImpl)>(r0);
+
+        return $r1;
+    }
+
+    protected javax.net.ssl.SSLSessionContext engineGetClientSessionContext()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.SSLSessionContextImpl $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.SSLSessionContextImpl clientCache>;
+
+        return $r1;
+    }
+
+    protected javax.net.ssl.SSLSessionContext engineGetServerSessionContext()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.SSLSessionContextImpl $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.SSLSessionContextImpl serverCache>;
+
+        return $r1;
+    }
+
+    java.security.SecureRandom getSecureRandom()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        java.security.SecureRandom $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom secureRandom>;
+
+        return $r1;
+    }
+
+    javax.net.ssl.X509ExtendedKeyManager getX509KeyManager()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        javax.net.ssl.X509ExtendedKeyManager $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509ExtendedKeyManager keyManager>;
+
+        return $r1;
+    }
+
+    javax.net.ssl.X509TrustManager getX509TrustManager()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        javax.net.ssl.X509TrustManager $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager trustManager>;
+
+        return $r1;
+    }
+
+    sun.security.ssl.EphemeralKeyManager getEphemeralKeyManager()
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.EphemeralKeyManager $r1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.EphemeralKeyManager ephemeralKeyManager>;
+
+        return $r1;
+    }
+
+    sun.security.ssl.HelloCookieManager getHelloCookieManager(sun.security.ssl.ProtocolVersion)
+    {
+        java.lang.Throwable $r8;
+        sun.security.ssl.HelloCookieManager$Builder $r1, $r3, $r5, $r6;
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.ProtocolVersion r2;
+        java.security.SecureRandom $r7;
+        sun.security.ssl.HelloCookieManager $r4;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        r2 := @parameter0: sun.security.ssl.ProtocolVersion;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.HelloCookieManager$Builder helloCookieManagerBuilder>;
+
+        if $r1 != null goto label6;
+
+        entermonitor r0;
+
+     label1:
+        $r5 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.HelloCookieManager$Builder helloCookieManagerBuilder>;
+
+        if $r5 != null goto label2;
+
+        $r6 = new sun.security.ssl.HelloCookieManager$Builder;
+
+        $r7 = r0.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom secureRandom>;
+
+        specialinvoke $r6.<sun.security.ssl.HelloCookieManager$Builder: void <init>(java.security.SecureRandom)>($r7);
+
+        r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.HelloCookieManager$Builder helloCookieManagerBuilder> = $r6;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r8;
+
+     label6:
+        $r3 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.HelloCookieManager$Builder helloCookieManagerBuilder>;
+
+        $r4 = virtualinvoke $r3.<sun.security.ssl.HelloCookieManager$Builder: sun.security.ssl.HelloCookieManager valueOf(sun.security.ssl.ProtocolVersion)>(r2);
+
+        return $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    sun.security.ssl.StatusResponseManager getStatusResponseManager()
+    {
+        java.lang.Throwable $r4;
+        java.lang.Object[] $r3;
+        sun.security.ssl.SSLContextImpl r0;
+        sun.security.ssl.StatusResponseManager $r1, $r2, $r5, $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLContextImpl: boolean serverEnableStapling>;
+
+        if $z0 == 0 goto label7;
+
+        $r1 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.StatusResponseManager statusResponseManager>;
+
+        if $r1 != null goto label7;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.StatusResponseManager statusResponseManager>;
+
+        if $r2 != null goto label3;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z2 == 0 goto label2;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Initializing StatusResponseManager", $r3);
+
+     label2:
+        $r5 = new sun.security.ssl.StatusResponseManager;
+
+        specialinvoke $r5.<sun.security.ssl.StatusResponseManager: void <init>()>();
+
+        r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.StatusResponseManager statusResponseManager> = $r5;
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r4;
+
+     label7:
+        $r6 = r0.<sun.security.ssl.SSLContextImpl: sun.security.ssl.StatusResponseManager statusResponseManager>;
+
+        return $r6;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    abstract java.util.List getSupportedProtocolVersions();
+
+    abstract java.util.List getServerDefaultProtocolVersions();
+
+    abstract java.util.List getClientDefaultProtocolVersions();
+
+    abstract java.util.List getSupportedCipherSuites();
+
+    abstract java.util.List getServerDefaultCipherSuites();
+
+    abstract java.util.List getClientDefaultCipherSuites();
+
+    java.util.List getDefaultProtocolVersions(boolean)
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        java.util.List $r1;
+        boolean z0;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: java.util.List getServerDefaultProtocolVersions()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: java.util.List getClientDefaultProtocolVersions()>();
+
+     label2:
+        return $r1;
+    }
+
+    java.util.List getDefaultCipherSuites(boolean)
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        java.util.List $r1;
+        boolean z0;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: java.util.List getServerDefaultCipherSuites()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLContextImpl: java.util.List getClientDefaultCipherSuites()>();
+
+     label2:
+        return $r1;
+    }
+
+    boolean isDefaultProtocolVesions(java.util.List)
+    {
+        java.util.List r0, $r2, $r3;
+        sun.security.ssl.SSLContextImpl r1;
+        boolean $z0;
+
+        r1 := @this: sun.security.ssl.SSLContextImpl;
+
+        r0 := @parameter0: java.util.List;
+
+        $r2 = virtualinvoke r1.<sun.security.ssl.SSLContextImpl: java.util.List getServerDefaultProtocolVersions()>();
+
+        if r0 == $r2 goto label1;
+
+        $r3 = virtualinvoke r1.<sun.security.ssl.SSLContextImpl: java.util.List getClientDefaultProtocolVersions()>();
+
+        if r0 != $r3 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    boolean isDefaultCipherSuiteList(java.util.List)
+    {
+        java.util.List r0, $r2, $r3;
+        sun.security.ssl.SSLContextImpl r1;
+        boolean $z0;
+
+        r1 := @this: sun.security.ssl.SSLContextImpl;
+
+        r0 := @parameter0: java.util.List;
+
+        $r2 = virtualinvoke r1.<sun.security.ssl.SSLContextImpl: java.util.List getServerDefaultCipherSuites()>();
+
+        if r0 == $r2 goto label1;
+
+        $r3 = virtualinvoke r1.<sun.security.ssl.SSLContextImpl: java.util.List getClientDefaultCipherSuites()>();
+
+        if r0 != $r3 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    boolean isStaplingEnabled(boolean)
+    {
+        sun.security.ssl.SSLContextImpl r0;
+        boolean z0, $z1;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $z1 = r0.<sun.security.ssl.SSLContextImpl: boolean clientEnableStapling>;
+
+        goto label2;
+
+     label1:
+        $z1 = r0.<sun.security.ssl.SSLContextImpl: boolean serverEnableStapling>;
+
+     label2:
+        return $z1;
+    }
+
+    private static java.util.List getApplicableSupportedCipherSuites(java.util.List)
+    {
+        java.util.List r1, $r2;
+        java.util.Collection $r0;
+
+        r1 := @parameter0: java.util.List;
+
+        $r0 = staticinvoke <sun.security.ssl.CipherSuite: java.util.Collection allowedCipherSuites()>();
+
+        $r2 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableCipherSuites(java.util.Collection,java.util.List)>($r0, r1);
+
+        return $r2;
+    }
+
+    private static java.util.List getApplicableEnabledCipherSuites(java.util.List, boolean)
+    {
+        java.util.Collection $r0, $r1, $r4, $r6, $r7;
+        java.util.List r2, $r3, $r5, $r8;
+        boolean z0, $z1, $z2;
+
+        r2 := @parameter0: java.util.List;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r6 = <sun.security.ssl.SSLContextImpl: java.util.Collection clientCustomizedCipherSuites>;
+
+        $z2 = interfaceinvoke $r6.<java.util.Collection: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $r7 = <sun.security.ssl.SSLContextImpl: java.util.Collection clientCustomizedCipherSuites>;
+
+        $r8 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableCipherSuites(java.util.Collection,java.util.List)>($r7, r2);
+
+        return $r8;
+
+     label1:
+        $r0 = <sun.security.ssl.SSLContextImpl: java.util.Collection serverCustomizedCipherSuites>;
+
+        $z1 = interfaceinvoke $r0.<java.util.Collection: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r4 = <sun.security.ssl.SSLContextImpl: java.util.Collection serverCustomizedCipherSuites>;
+
+        $r5 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableCipherSuites(java.util.Collection,java.util.List)>($r4, r2);
+
+        return $r5;
+
+     label2:
+        $r1 = staticinvoke <sun.security.ssl.CipherSuite: java.util.Collection defaultCipherSuites()>();
+
+        $r3 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableCipherSuites(java.util.Collection,java.util.List)>($r1, r2);
+
+        return $r3;
+    }
+
+    private static java.util.List getApplicableCipherSuites(java.util.Collection, java.util.List)
+    {
+        java.util.EnumSet $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, z10, $z11;
+        java.util.Collection r2;
+        java.security.CryptoPrimitive $r15;
+        java.util.List r1;
+        java.lang.StringBuilder $r7, $r8, $r9, $r19, $r20, $r22;
+        sun.security.ssl.CipherSuite r5;
+        java.lang.Object[] $r11, $r24;
+        sun.security.ssl.ProtocolVersion r13;
+        sun.security.ssl.SSLCipher $r14;
+        java.util.ArrayList $r25;
+        java.lang.String $r10, $r18, $r21, $r23;
+        java.util.LinkedHashSet $r0;
+        java.util.Iterator $r3, $r6;
+        java.security.AlgorithmConstraints $r16;
+        java.lang.Object $r4, $r12;
+
+        r2 := @parameter0: java.util.Collection;
+
+        r1 := @parameter1: java.util.List;
+
+        $r0 = new java.util.LinkedHashSet;
+
+        specialinvoke $r0.<java.util.LinkedHashSet: void <init>()>();
+
+        if r1 == null goto label8;
+
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label8;
+
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z9 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label8;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.security.ssl.CipherSuite) $r4;
+
+        $z1 = virtualinvoke r5.<sun.security.ssl.CipherSuite: boolean isAvailable()>();
+
+        if $z1 != 0 goto label2;
+
+        goto label1;
+
+     label2:
+        z10 = 0;
+
+        $r6 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z11 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z11 == 0 goto label6;
+
+        $r12 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (sun.security.ssl.ProtocolVersion) $r12;
+
+        $z4 = virtualinvoke r5.<sun.security.ssl.CipherSuite: boolean supports(sun.security.ssl.ProtocolVersion)>(r13);
+
+        if $z4 == 0 goto label3;
+
+        $r14 = r5.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        $z5 = virtualinvoke $r14.<sun.security.ssl.SSLCipher: boolean isAvailable()>();
+
+        if $z5 != 0 goto label4;
+
+        goto label3;
+
+     label4:
+        $r16 = <sun.security.ssl.SSLAlgorithmConstraints: java.security.AlgorithmConstraints DEFAULT>;
+
+        $r15 = <java.security.CryptoPrimitive: java.security.CryptoPrimitive KEY_AGREEMENT>;
+
+        $r17 = staticinvoke <java.util.EnumSet: java.util.EnumSet of(java.lang.Enum)>($r15);
+
+        $r18 = r5.<sun.security.ssl.CipherSuite: java.lang.String name>;
+
+        $z6 = interfaceinvoke $r16.<java.security.AlgorithmConstraints: boolean permits(java.util.Set,java.lang.String,java.security.AlgorithmParameters)>($r17, $r18, null);
+
+        if $z6 == 0 goto label5;
+
+        virtualinvoke $r0.<java.util.LinkedHashSet: boolean add(java.lang.Object)>(r5);
+
+        z10 = 1;
+
+        goto label6;
+
+     label5:
+        $z7 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z7 == 0 goto label6;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx,verbose");
+
+        if $z8 == 0 goto label6;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore disabled cipher suite: ");
+
+        $r21 = r5.<sun.security.ssl.CipherSuite: java.lang.String name>;
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r24 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r23, $r24);
+
+        goto label6;
+
+     label6:
+        if z10 != 0 goto label7;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label7;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx,verbose");
+
+        if $z3 == 0 goto label7;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unsupported cipher suite: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r10, $r11);
+
+     label7:
+        goto label1;
+
+     label8:
+        $r25 = new java.util.ArrayList;
+
+        specialinvoke $r25.<java.util.ArrayList: void <init>(java.util.Collection)>($r0);
+
+        return $r25;
+    }
+
+    private static java.util.Collection getCustomizedCipherSuites(java.lang.String)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.util.List $r2;
+        java.lang.StringBuilder $r11, $r13, $r17, $r18, $r19, $r20, $r21, $r26, $r28, $r32, $r34, $r35;
+        sun.security.ssl.CipherSuite $r9;
+        java.lang.Object[] $r15, $r23, $r30;
+        java.lang.String[] $r3;
+        java.util.ArrayList $r33;
+        int $i0, $i1, $i2, $i4, $i5, $i7, $i8, i9, $i10, $i11;
+        java.lang.String r0, $r1, $r5, $r6, $r7, $r8, $r12, $r14, $r22, $r27, $r29, r31;
+        char $c3, $c6;
+        java.lang.IllegalArgumentException $r24;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>(r0);
+
+        r31 = $r1;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z7 == 0 goto label01;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("System property ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is set to \'");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r22, $r23);
+
+     label01:
+        if $r1 == null goto label02;
+
+        $z6 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z6 != 0 goto label02;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i2 <= 1 goto label02;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        $i10 = (int) $c3;
+
+        if $i10 != 34 goto label02;
+
+        $i4 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i5 = $i4 - 1;
+
+        $c6 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i5);
+
+        $i11 = (int) $c6;
+
+        if $i11 != 34 goto label02;
+
+        $i7 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i8 = $i7 - 1;
+
+        r31 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(1, $i8);
+
+     label02:
+        if r31 == null goto label12;
+
+        $z1 = virtualinvoke r31.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label12;
+
+        $r3 = virtualinvoke r31.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+        $r33 = new java.util.ArrayList;
+
+        $i0 = lengthof $r3;
+
+        specialinvoke $r33.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i9 = 0;
+
+     label03:
+        $i1 = lengthof $r3;
+
+        if i9 >= $i1 goto label11;
+
+        $r5 = $r3[i9];
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String trim()>();
+
+        $r3[i9] = $r6;
+
+        $r7 = $r3[i9];
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 == 0 goto label04;
+
+        goto label10;
+
+     label04:
+        $r8 = $r3[i9];
+
+        $r9 = staticinvoke <sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite nameOf(java.lang.String)>($r8);
+
+     label05:
+        goto label08;
+
+     label06:
+        $r24 := @caughtexception;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label07;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z9 == 0 goto label07;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown or unsupported cipher suite name: ");
+
+        $r27 = $r3[i9];
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r29, $r30);
+
+     label07:
+        goto label10;
+
+     label08:
+        if $r9 == null goto label09;
+
+        $z5 = virtualinvoke $r9.<sun.security.ssl.CipherSuite: boolean isAvailable()>();
+
+        if $z5 == 0 goto label09;
+
+        interfaceinvoke $r33.<java.util.Collection: boolean add(java.lang.Object)>($r9);
+
+        goto label10;
+
+     label09:
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label10;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,sslctx");
+
+        if $z4 == 0 goto label10;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The current installed providers do not support cipher suite: ");
+
+        $r12 = $r3[i9];
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r14, $r15);
+
+     label10:
+        i9 = i9 + 1;
+
+        goto label03;
+
+     label11:
+        return $r33;
+
+     label12:
+        $r2 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r2;
+
+        catch java.lang.IllegalArgumentException from label04 to label05 with label06;
+    }
+
+    private static java.util.List getAvailableProtocols(sun.security.ssl.ProtocolVersion[])
+    {
+        sun.security.ssl.ProtocolVersion r2;
+        java.util.ArrayList $r1;
+        java.util.List r3;
+        int $i0, $i1, i2, i3;
+        sun.security.ssl.ProtocolVersion[] r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.ssl.ProtocolVersion[];
+
+        r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        if r0 == null goto label3;
+
+        $i0 = lengthof r0;
+
+        if $i0 == 0 goto label3;
+
+        $r1 = new java.util.ArrayList;
+
+        $i1 = lengthof r0;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i1);
+
+        r3 = $r1;
+
+        i2 = lengthof r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i2 goto label3;
+
+        r2 = r0[i3];
+
+        $z0 = r2.<sun.security.ssl.ProtocolVersion: boolean isAvailable>;
+
+        if $z0 == 0 goto label2;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return r3;
+    }
+
+    static java.util.List access$000(sun.security.ssl.ProtocolVersion[])
+    {
+        java.util.List $r1;
+        sun.security.ssl.ProtocolVersion[] r0;
+
+        r0 := @parameter0: sun.security.ssl.ProtocolVersion[];
+
+        $r1 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getAvailableProtocols(sun.security.ssl.ProtocolVersion[])>(r0);
+
+        return $r1;
+    }
+
+    static java.util.List access$100(java.util.List)
+    {
+        java.util.List r0, $r1;
+
+        r0 := @parameter0: java.util.List;
+
+        $r1 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableSupportedCipherSuites(java.util.List)>(r0);
+
+        return $r1;
+    }
+
+    static java.util.List access$200(java.util.List, boolean)
+    {
+        java.util.List r0, $r1;
+        boolean z0;
+
+        r0 := @parameter0: java.util.List;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.List getApplicableEnabledCipherSuites(java.util.List,boolean)>(r0, z0);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Collection $r0, $r1;
+
+        $r0 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.Collection getCustomizedCipherSuites(java.lang.String)>("jdk.tls.client.cipherSuites");
+
+        <sun.security.ssl.SSLContextImpl: java.util.Collection clientCustomizedCipherSuites> = $r0;
+
+        $r1 = staticinvoke <sun.security.ssl.SSLContextImpl: java.util.Collection getCustomizedCipherSuites(java.lang.String)>("jdk.tls.server.cipherSuites");
+
+        <sun.security.ssl.SSLContextImpl: java.util.Collection serverCustomizedCipherSuites> = $r1;
+
+        return;
+    }
+}

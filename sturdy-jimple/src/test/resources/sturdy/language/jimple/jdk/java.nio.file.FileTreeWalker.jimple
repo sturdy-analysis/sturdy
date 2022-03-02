@@ -1,0 +1,708 @@
+class java.nio.file.FileTreeWalker extends java.lang.Object implements java.io.Closeable
+{
+    private final boolean followLinks;
+    private final java.nio.file.LinkOption[] linkOptions;
+    private final int maxDepth;
+    private final java.util.ArrayDeque stack;
+    private boolean closed;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.util.Collection, int)
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.lang.AssertionError $r9;
+        java.nio.file.LinkOption $r4;
+        int[] $r8;
+        int i0, $i1, $i2;
+        boolean $z0, z1, z2, z3;
+        java.util.Iterator $r3;
+        java.nio.file.LinkOption[] $r10;
+        java.util.Collection r2;
+        java.lang.IllegalArgumentException $r5;
+        java.nio.file.FileVisitOption r7;
+        java.lang.Object $r6;
+        java.util.ArrayDeque $r1;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        r2 := @parameter0: java.util.Collection;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayDeque;
+
+        specialinvoke $r1.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack> = $r1;
+
+        z1 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.nio.file.FileVisitOption) $r6;
+
+        $r8 = <java.nio.file.FileTreeWalker$1: int[] $SwitchMap$java$nio$file$FileVisitOption>;
+
+        $i1 = virtualinvoke r7.<java.nio.file.FileVisitOption: int ordinal()>();
+
+        $i2 = $r8[$i1];
+
+        lookupswitch($i2)
+        {
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label2:
+        z1 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        goto label4;
+
+     label3:
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not get here");
+
+        throw $r9;
+
+     label4:
+        goto label1;
+
+     label5:
+        if i0 >= 0 goto label6;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'maxDepth\' is negative");
+
+        throw $r5;
+
+     label6:
+        r0.<java.nio.file.FileTreeWalker: boolean followLinks> = z2;
+
+        if z3 == 0 goto label7;
+
+        $r10 = newarray (java.nio.file.LinkOption)[0];
+
+        goto label8;
+
+     label7:
+        $r10 = newarray (java.nio.file.LinkOption)[1];
+
+        $r4 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        $r10[0] = $r4;
+
+     label8:
+        r0.<java.nio.file.FileTreeWalker: java.nio.file.LinkOption[] linkOptions> = $r10;
+
+        r0.<java.nio.file.FileTreeWalker: int maxDepth> = i0;
+
+        return;
+    }
+
+    private java.nio.file.attribute.BasicFileAttributes getAttributes(java.nio.file.Path, boolean) throws java.io.IOException
+    {
+        java.nio.file.FileTreeWalker r1;
+        java.nio.file.LinkOption[] $r6, $r8;
+        sun.nio.fs.BasicFileAttributesHolder $r3;
+        java.io.IOException $r5;
+        java.nio.file.attribute.BasicFileAttributes $r4, r9;
+        java.lang.SecurityManager $r2;
+        java.nio.file.LinkOption $r7;
+        java.nio.file.Path r0;
+        boolean z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: java.nio.file.FileTreeWalker;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label2;
+
+        $z1 = r0 instanceof sun.nio.fs.BasicFileAttributesHolder;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 != null goto label2;
+
+        $r3 = (sun.nio.fs.BasicFileAttributesHolder) r0;
+
+        $r4 = interfaceinvoke $r3.<sun.nio.fs.BasicFileAttributesHolder: java.nio.file.attribute.BasicFileAttributes get()>();
+
+        if $r4 == null goto label2;
+
+        $z2 = r1.<java.nio.file.FileTreeWalker: boolean followLinks>;
+
+        if $z2 == 0 goto label1;
+
+        $z3 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: boolean isSymbolicLink()>();
+
+        if $z3 != 0 goto label2;
+
+     label1:
+        return $r4;
+
+     label2:
+        $r8 = r1.<java.nio.file.FileTreeWalker: java.nio.file.LinkOption[] linkOptions>;
+
+        r9 = staticinvoke <java.nio.file.Files: java.nio.file.attribute.BasicFileAttributes readAttributes(java.nio.file.Path,java.lang.Class,java.nio.file.LinkOption[])>(r0, class "Ljava/nio/file/attribute/BasicFileAttributes;", $r8);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $z4 = r1.<java.nio.file.FileTreeWalker: boolean followLinks>;
+
+        if $z4 != 0 goto label5;
+
+        throw $r5;
+
+     label5:
+        $r6 = newarray (java.nio.file.LinkOption)[1];
+
+        $r7 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        $r6[0] = $r7;
+
+        r9 = staticinvoke <java.nio.file.Files: java.nio.file.attribute.BasicFileAttributes readAttributes(java.nio.file.Path,java.lang.Class,java.nio.file.LinkOption[])>(r0, class "Ljava/nio/file/attribute/BasicFileAttributes;", $r6);
+
+     label6:
+        return r9;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private boolean wouldLoop(java.nio.file.Path, java.lang.Object)
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.util.Iterator $r2;
+        java.lang.Exception $r9;
+        java.nio.file.FileTreeWalker$DirectoryNode r4;
+        java.lang.Object $r3, $r5, r6;
+        java.util.ArrayDeque $r1;
+        java.nio.file.Path r7, $r8;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        r7 := @parameter0: java.nio.file.Path;
+
+        r6 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayDeque: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.nio.file.FileTreeWalker$DirectoryNode) $r3;
+
+        $r5 = virtualinvoke r4.<java.nio.file.FileTreeWalker$DirectoryNode: java.lang.Object key()>();
+
+        if r6 == null goto label2;
+
+        if $r5 == null goto label2;
+
+        $z2 = virtualinvoke r6.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z2 == 0 goto label6;
+
+        return 1;
+
+     label2:
+        $r8 = virtualinvoke r4.<java.nio.file.FileTreeWalker$DirectoryNode: java.nio.file.Path directory()>();
+
+        $z1 = staticinvoke <java.nio.file.Files: boolean isSameFile(java.nio.file.Path,java.nio.file.Path)>(r7, $r8);
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        return 1;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        goto label1;
+
+     label7:
+        return 0;
+
+        catch java.io.IOException from label2 to label3 with label5;
+        catch java.lang.SecurityException from label2 to label3 with label5;
+    }
+
+    private java.nio.file.FileTreeWalker$Event visit(java.nio.file.Path, boolean, boolean)
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.nio.file.FileTreeWalker$Event $r4, $r10, $r13, $r19, $r23;
+        java.nio.file.DirectoryStream $r6;
+        java.lang.SecurityException $r17, $r21;
+        java.nio.file.Path r1;
+        boolean z0, $z1, $z2, $z3, z4;
+        java.nio.file.FileSystemLoopException $r14;
+        java.nio.file.FileTreeWalker$DirectoryNode $r7;
+        int $i0, $i1;
+        java.lang.String $r16;
+        java.io.IOException $r18, $r22;
+        java.nio.file.attribute.BasicFileAttributes $r2;
+        java.nio.file.FileTreeWalker$EventType $r5, $r11, $r15, $r20, $r24;
+        java.lang.Object $r9, $r12;
+        java.util.ArrayDeque $r3, $r8;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        z4 := @parameter1: boolean;
+
+        z0 := @parameter2: boolean;
+
+     label01:
+        $r2 = specialinvoke r0.<java.nio.file.FileTreeWalker: java.nio.file.attribute.BasicFileAttributes getAttributes(java.nio.file.Path,boolean)>(r1, z0);
+
+     label02:
+        goto label06;
+
+     label03:
+        $r22 := @caughtexception;
+
+        $r23 = new java.nio.file.FileTreeWalker$Event;
+
+        $r24 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType ENTRY>;
+
+        specialinvoke $r23.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.io.IOException)>($r24, r1, $r22);
+
+        return $r23;
+
+     label04:
+        $r21 := @caughtexception;
+
+        if z4 == 0 goto label05;
+
+        return null;
+
+     label05:
+        throw $r21;
+
+     label06:
+        $r3 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayDeque: int size()>();
+
+        $i1 = r0.<java.nio.file.FileTreeWalker: int maxDepth>;
+
+        if $i0 >= $i1 goto label07;
+
+        $z1 = interfaceinvoke $r2.<java.nio.file.attribute.BasicFileAttributes: boolean isDirectory()>();
+
+        if $z1 != 0 goto label08;
+
+     label07:
+        $r4 = new java.nio.file.FileTreeWalker$Event;
+
+        $r5 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType ENTRY>;
+
+        specialinvoke $r4.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.nio.file.attribute.BasicFileAttributes)>($r5, r1, $r2);
+
+        return $r4;
+
+     label08:
+        $z2 = r0.<java.nio.file.FileTreeWalker: boolean followLinks>;
+
+        if $z2 == 0 goto label09;
+
+        $r12 = interfaceinvoke $r2.<java.nio.file.attribute.BasicFileAttributes: java.lang.Object fileKey()>();
+
+        $z3 = specialinvoke r0.<java.nio.file.FileTreeWalker: boolean wouldLoop(java.nio.file.Path,java.lang.Object)>(r1, $r12);
+
+        if $z3 == 0 goto label09;
+
+        $r13 = new java.nio.file.FileTreeWalker$Event;
+
+        $r15 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType ENTRY>;
+
+        $r14 = new java.nio.file.FileSystemLoopException;
+
+        $r16 = interfaceinvoke r1.<java.nio.file.Path: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.nio.file.FileSystemLoopException: void <init>(java.lang.String)>($r16);
+
+        specialinvoke $r13.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.io.IOException)>($r15, r1, $r14);
+
+        return $r13;
+
+     label09:
+        $r6 = staticinvoke <java.nio.file.Files: java.nio.file.DirectoryStream newDirectoryStream(java.nio.file.Path)>(r1);
+
+     label10:
+        goto label14;
+
+     label11:
+        $r18 := @caughtexception;
+
+        $r19 = new java.nio.file.FileTreeWalker$Event;
+
+        $r20 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType ENTRY>;
+
+        specialinvoke $r19.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.io.IOException)>($r20, r1, $r18);
+
+        return $r19;
+
+     label12:
+        $r17 := @caughtexception;
+
+        if z4 == 0 goto label13;
+
+        return null;
+
+     label13:
+        throw $r17;
+
+     label14:
+        $r8 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $r7 = new java.nio.file.FileTreeWalker$DirectoryNode;
+
+        $r9 = interfaceinvoke $r2.<java.nio.file.attribute.BasicFileAttributes: java.lang.Object fileKey()>();
+
+        specialinvoke $r7.<java.nio.file.FileTreeWalker$DirectoryNode: void <init>(java.nio.file.Path,java.lang.Object,java.nio.file.DirectoryStream)>(r1, $r9, $r6);
+
+        virtualinvoke $r8.<java.util.ArrayDeque: void push(java.lang.Object)>($r7);
+
+        $r10 = new java.nio.file.FileTreeWalker$Event;
+
+        $r11 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType START_DIRECTORY>;
+
+        specialinvoke $r10.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.nio.file.attribute.BasicFileAttributes)>($r11, r1, $r2);
+
+        return $r10;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.SecurityException from label01 to label02 with label04;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.SecurityException from label09 to label10 with label12;
+    }
+
+    java.nio.file.FileTreeWalker$Event walk(java.nio.file.Path)
+    {
+        java.lang.IllegalStateException $r4;
+        java.nio.file.FileTreeWalker r0;
+        java.nio.file.FileTreeWalker$Event $r2;
+        java.lang.AssertionError $r3;
+        java.nio.file.Path r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        $z0 = r0.<java.nio.file.FileTreeWalker: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Closed");
+
+        throw $r4;
+
+     label1:
+        $r2 = specialinvoke r0.<java.nio.file.FileTreeWalker: java.nio.file.FileTreeWalker$Event visit(java.nio.file.Path,boolean,boolean)>(r1, 0, 0);
+
+        $z1 = <java.nio.file.FileTreeWalker: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        return $r2;
+    }
+
+    java.nio.file.FileTreeWalker$Event next()
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.nio.file.FileTreeWalker$Event $r4, $r13;
+        java.nio.file.DirectoryStream $r5;
+        java.nio.file.FileTreeWalker$DirectoryNode r3;
+        java.nio.file.Path r10, $r15;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        java.io.IOException $r8, r11;
+        java.nio.file.DirectoryIteratorException $r9;
+        java.nio.file.FileTreeWalker$EventType $r14;
+        java.lang.Object $r2, $r7;
+        java.util.ArrayDeque $r1, $r12;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        $r1 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayDeque: java.lang.Object peek()>();
+
+        r3 = (java.nio.file.FileTreeWalker$DirectoryNode) $r2;
+
+        if r3 != null goto label01;
+
+        return null;
+
+     label01:
+        r10 = null;
+
+        r11 = null;
+
+        $z0 = virtualinvoke r3.<java.nio.file.FileTreeWalker$DirectoryNode: boolean skipped()>();
+
+        if $z0 != 0 goto label05;
+
+        $r6 = virtualinvoke r3.<java.nio.file.FileTreeWalker$DirectoryNode: java.util.Iterator iterator()>();
+
+     label02:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label03;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.nio.file.Path) $r7;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r9 := @caughtexception;
+
+        r11 = virtualinvoke $r9.<java.nio.file.DirectoryIteratorException: java.io.IOException getCause()>();
+
+     label05:
+        if r10 != null goto label11;
+
+     label06:
+        $r5 = virtualinvoke r3.<java.nio.file.FileTreeWalker$DirectoryNode: java.nio.file.DirectoryStream stream()>();
+
+        interfaceinvoke $r5.<java.nio.file.DirectoryStream: void close()>();
+
+     label07:
+        goto label10;
+
+     label08:
+        $r8 := @caughtexception;
+
+        if r11 == null goto label09;
+
+        r11 = $r8;
+
+        goto label10;
+
+     label09:
+        virtualinvoke r11.<java.io.IOException: void addSuppressed(java.lang.Throwable)>($r8);
+
+     label10:
+        $r12 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        virtualinvoke $r12.<java.util.ArrayDeque: java.lang.Object pop()>();
+
+        $r13 = new java.nio.file.FileTreeWalker$Event;
+
+        $r14 = <java.nio.file.FileTreeWalker$EventType: java.nio.file.FileTreeWalker$EventType END_DIRECTORY>;
+
+        $r15 = virtualinvoke r3.<java.nio.file.FileTreeWalker$DirectoryNode: java.nio.file.Path directory()>();
+
+        specialinvoke $r13.<java.nio.file.FileTreeWalker$Event: void <init>(java.nio.file.FileTreeWalker$EventType,java.nio.file.Path,java.io.IOException)>($r14, $r15, r11);
+
+        return $r13;
+
+     label11:
+        $r4 = specialinvoke r0.<java.nio.file.FileTreeWalker: java.nio.file.FileTreeWalker$Event visit(java.nio.file.Path,boolean,boolean)>(r10, 1, 1);
+
+        if $r4 == null goto label01;
+
+        return $r4;
+
+        catch java.nio.file.DirectoryIteratorException from label02 to label03 with label04;
+        catch java.io.IOException from label06 to label07 with label08;
+    }
+
+    void pop()
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.io.IOException $r6;
+        java.nio.file.DirectoryStream $r5;
+        java.nio.file.FileTreeWalker$DirectoryNode r4;
+        java.lang.Object $r3;
+        java.util.ArrayDeque $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        $r1 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayDeque: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $r2 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayDeque: java.lang.Object pop()>();
+
+        r4 = (java.nio.file.FileTreeWalker$DirectoryNode) $r3;
+
+     label1:
+        $r5 = virtualinvoke r4.<java.nio.file.FileTreeWalker$DirectoryNode: java.nio.file.DirectoryStream stream()>();
+
+        interfaceinvoke $r5.<java.nio.file.DirectoryStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void skipRemainingSiblings()
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.nio.file.FileTreeWalker$DirectoryNode $r4;
+        java.lang.Object $r3;
+        java.util.ArrayDeque $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        $r1 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayDeque: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayDeque: java.lang.Object peek()>();
+
+        $r4 = (java.nio.file.FileTreeWalker$DirectoryNode) $r3;
+
+        virtualinvoke $r4.<java.nio.file.FileTreeWalker$DirectoryNode: void skip()>();
+
+     label1:
+        return;
+    }
+
+    boolean isOpen()
+    {
+        java.nio.file.FileTreeWalker r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        $z0 = r0.<java.nio.file.FileTreeWalker: boolean closed>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public void close()
+    {
+        java.nio.file.FileTreeWalker r0;
+        java.util.ArrayDeque $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.nio.file.FileTreeWalker;
+
+        $z0 = r0.<java.nio.file.FileTreeWalker: boolean closed>;
+
+        if $z0 != 0 goto label3;
+
+     label1:
+        $r1 = r0.<java.nio.file.FileTreeWalker: java.util.ArrayDeque stack>;
+
+        $z1 = virtualinvoke $r1.<java.util.ArrayDeque: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke r0.<java.nio.file.FileTreeWalker: void pop()>();
+
+        goto label1;
+
+     label2:
+        r0.<java.nio.file.FileTreeWalker: boolean closed> = 1;
+
+     label3:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Ljava/nio/file/FileTreeWalker;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.nio.file.FileTreeWalker: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

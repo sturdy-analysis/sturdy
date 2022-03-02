@@ -1,0 +1,713 @@
+public class javax.sound.sampled.AudioInputStream extends java.io.InputStream
+{
+    private java.io.InputStream stream;
+    protected javax.sound.sampled.AudioFormat format;
+    protected long frameLength;
+    protected int frameSize;
+    protected long framePos;
+    private long markpos;
+    private byte[] pushBackBuffer;
+    private int pushBackLen;
+    private byte[] markPushBackBuffer;
+    private int markPushBackLen;
+
+    public void <init>(java.io.InputStream, javax.sound.sampled.AudioFormat, long)
+    {
+        javax.sound.sampled.AudioFormat r1;
+        long l0;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i1, $i2, $i3, $i5;
+        java.io.InputStream r2;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: javax.sound.sampled.AudioFormat;
+
+        l0 := @parameter2: long;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer> = null;
+
+        r0.<javax.sound.sampled.AudioInputStream: int pushBackLen> = 0;
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer> = null;
+
+        r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen> = 0;
+
+        r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat format> = r1;
+
+        r0.<javax.sound.sampled.AudioInputStream: long frameLength> = l0;
+
+        $i1 = virtualinvoke r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        r0.<javax.sound.sampled.AudioInputStream: int frameSize> = $i1;
+
+        $i2 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i5 = (int) -1;
+
+        if $i2 == $i5 goto label1;
+
+        $i3 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        if $i3 > 0 goto label2;
+
+     label1:
+        r0.<javax.sound.sampled.AudioInputStream: int frameSize> = 1;
+
+     label2:
+        r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream> = r2;
+
+        r0.<javax.sound.sampled.AudioInputStream: long framePos> = 0L;
+
+        r0.<javax.sound.sampled.AudioInputStream: long markpos> = 0L;
+
+        return;
+    }
+
+    public void <init>(javax.sound.sampled.TargetDataLine)
+    {
+        javax.sound.sampled.TargetDataLine r2;
+        javax.sound.sampled.AudioFormat $r3, $r4;
+        javax.sound.sampled.AudioInputStream$TargetDataLineInputStream $r5;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i0, $i1, $i2, $i4;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        r2 := @parameter0: javax.sound.sampled.TargetDataLine;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer> = null;
+
+        r0.<javax.sound.sampled.AudioInputStream: int pushBackLen> = 0;
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer> = null;
+
+        r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen> = 0;
+
+        $r5 = new javax.sound.sampled.AudioInputStream$TargetDataLineInputStream;
+
+        specialinvoke $r5.<javax.sound.sampled.AudioInputStream$TargetDataLineInputStream: void <init>(javax.sound.sampled.AudioInputStream,javax.sound.sampled.TargetDataLine)>(r0, r2);
+
+        $r3 = interfaceinvoke r2.<javax.sound.sampled.TargetDataLine: javax.sound.sampled.AudioFormat getFormat()>();
+
+        r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat format> = $r3;
+
+        r0.<javax.sound.sampled.AudioInputStream: long frameLength> = -1L;
+
+        $r4 = r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat format>;
+
+        $i0 = virtualinvoke $r4.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        r0.<javax.sound.sampled.AudioInputStream: int frameSize> = $i0;
+
+        $i1 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label1;
+
+        $i2 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        if $i2 > 0 goto label2;
+
+     label1:
+        r0.<javax.sound.sampled.AudioInputStream: int frameSize> = 1;
+
+     label2:
+        r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream> = $r5;
+
+        r0.<javax.sound.sampled.AudioInputStream: long framePos> = 0L;
+
+        r0.<javax.sound.sampled.AudioInputStream: long markpos> = 0L;
+
+        return;
+    }
+
+    public javax.sound.sampled.AudioFormat getFormat()
+    {
+        javax.sound.sampled.AudioInputStream r0;
+        javax.sound.sampled.AudioFormat $r1;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat format>;
+
+        return $r1;
+    }
+
+    public long getFrameLength()
+    {
+        javax.sound.sampled.AudioInputStream r0;
+        long $l0;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $l0 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        return $l0;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.IOException $r3;
+        short $s3, $s6;
+        byte $b2;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i0, $i1, $i5, $i7;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $i0 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        if $i0 == 1 goto label1;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("cannot read a single byte if frame size > 1");
+
+        throw $r3;
+
+     label1:
+        r1 = newarray (byte)[1];
+
+        $i1 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: int read(byte[])>(r1);
+
+        if $i1 > 0 goto label2;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+     label2:
+        $b2 = r1[0];
+
+        $s6 = (short) $b2;
+
+        $s3 = $s6 & 255;
+
+        $i7 = (int) $s3;
+
+        return $i7;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i0, $i1;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $i1 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: int read(byte[],int,int)>(r1, 0, $i0);
+
+        return $i1;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1, $r2, $r3, $r4, $r5;
+        byte $b3, $b21, $b28;
+        javax.sound.sampled.AudioInputStream r0;
+        long $l2, $l19, $l20, $l24, $l25, $l26, $l27, $l29, $l30, $l31, $l41, $l44, $l45;
+        int $i0, $i1, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i22, $i23, $i32, $i33, $i34, $i35, i36, i37, i38, $i39, $i40, $i42, $i43, $i46, $i48, $i49, $i51, $i53;
+        java.io.InputStream $r6;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i36 := @parameter2: int;
+
+        $i0 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i1 = i36 % $i0;
+
+        if $i1 == 0 goto label1;
+
+        $i34 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i35 = i36 % $i34;
+
+        i36 = i36 - $i35;
+
+        if i36 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $l2 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $b3 = $l2 cmp -1L;
+
+        if $b3 == 0 goto label3;
+
+        $l20 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l19 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $b21 = $l20 cmp $l19;
+
+        $i46 = (int) $b21;
+
+        if $i46 < 0 goto label2;
+
+        $i48 = (int) -1;
+
+        return $i48;
+
+     label2:
+        $i22 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i23 = i36 / $i22;
+
+        $l27 = (long) $i23;
+
+        $l25 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l24 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l26 = $l25 - $l24;
+
+        $b28 = $l27 cmp $l26;
+
+        $i49 = (int) $b28;
+
+        if $i49 <= 0 goto label3;
+
+        $l30 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l29 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l31 = $l30 - $l29;
+
+        $i33 = (int) $l31;
+
+        $i32 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        i36 = $i33 * $i32;
+
+     label3:
+        i37 = 0;
+
+        i38 = i4;
+
+        $i39 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        if $i39 <= 0 goto label4;
+
+        $i14 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        if i36 < $i14 goto label4;
+
+        $r5 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        $i15 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r1, i4, $i15);
+
+        $i16 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        i38 = i4 + $i16;
+
+        $i17 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        i36 = i36 - $i17;
+
+        $i18 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        i37 = 0 + $i18;
+
+        r0.<javax.sound.sampled.AudioInputStream: int pushBackLen> = 0;
+
+     label4:
+        $r6 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        $i40 = virtualinvoke $r6.<java.io.InputStream: int read(byte[],int,int)>(r1, i38, i36);
+
+        $i51 = (int) -1;
+
+        if $i40 != $i51 goto label5;
+
+        $i53 = (int) -1;
+
+        return $i53;
+
+     label5:
+        if $i40 <= 0 goto label6;
+
+        i37 = i37 + $i40;
+
+     label6:
+        if i37 <= 0 goto label9;
+
+        $i5 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i6 = i37 % $i5;
+
+        r0.<javax.sound.sampled.AudioInputStream: int pushBackLen> = $i6;
+
+        $i7 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        if $i7 <= 0 goto label8;
+
+        $r2 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        if $r2 != null goto label7;
+
+        $i13 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $r4 = newarray (byte)[$i13];
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer> = $r4;
+
+     label7:
+        $i9 = i4 + i37;
+
+        $i8 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        $i11 = $i9 - $i8;
+
+        $r3 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        $i10 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i11, $r3, 0, $i10);
+
+        $i12 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        i37 = i37 - $i12;
+
+     label8:
+        $l41 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $i42 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i43 = i37 / $i42;
+
+        $l44 = (long) $i43;
+
+        $l45 = $l41 + $l44;
+
+        r0.<javax.sound.sampled.AudioInputStream: long framePos> = $l45;
+
+     label9:
+        return i37;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte $b3, $b5, $b6, $b18, $b32;
+        javax.sound.sampled.AudioInputStream r0;
+        long $l1, $l2, $l4, $l8, $l9, $l10, $l11, $l13, $l14, $l15, $l16, $l17, $l19, $l20, $l22, $l23, $l25, $l26, l27, $l28, $l30, $l31;
+        int $i0, $i7, $i12, $i21, $i24, $i29, $i33, $i34;
+        java.io.IOException $r3;
+        java.io.InputStream $r2;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        l27 := @parameter0: long;
+
+        $i0 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l1 = (long) $i0;
+
+        $l2 = l27 % $l1;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label1;
+
+        $i24 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l25 = (long) $i24;
+
+        $l26 = l27 % $l25;
+
+        l27 = l27 - $l26;
+
+     label1:
+        $l4 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $b5 = $l4 cmp -1L;
+
+        if $b5 == 0 goto label2;
+
+        $i12 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l13 = (long) $i12;
+
+        $l17 = l27 / $l13;
+
+        $l15 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l14 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l16 = $l15 - $l14;
+
+        $b18 = $l17 cmp $l16;
+
+        $i33 = (int) $b18;
+
+        if $i33 <= 0 goto label2;
+
+        $l20 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l19 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l23 = $l20 - $l19;
+
+        $i21 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l22 = (long) $i21;
+
+        l27 = $l23 * $l22;
+
+     label2:
+        $r2 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        $l28 = virtualinvoke $r2.<java.io.InputStream: long skip(long)>(l27);
+
+        $i29 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l30 = (long) $i29;
+
+        $l31 = $l28 % $l30;
+
+        $b32 = $l31 cmp 0L;
+
+        if $b32 == 0 goto label3;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Could not skip an integer number of frames.");
+
+        throw $r3;
+
+     label3:
+        $b6 = $l28 cmp 0L;
+
+        $i34 = (int) $b6;
+
+        if $i34 < 0 goto label4;
+
+        $l10 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $i7 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $l8 = (long) $i7;
+
+        $l9 = $l28 / $l8;
+
+        $l11 = $l10 + $l9;
+
+        r0.<javax.sound.sampled.AudioInputStream: long framePos> = $l11;
+
+     label4:
+        return $l28;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        long $l1, $l5, $l6, $l7, $l8, $l10, $l11, $l12;
+        byte $b2, $b9;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i0, $i3, $i4, $i13, $i14, $i15, $i16;
+        java.io.InputStream $r1;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        $l1 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $b2 = $l1 cmp -1L;
+
+        if $b2 == 0 goto label1;
+
+        $i3 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i4 = $i0 / $i3;
+
+        $l8 = (long) $i4;
+
+        $l6 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l5 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l7 = $l6 - $l5;
+
+        $b9 = $l8 cmp $l7;
+
+        $i16 = (int) $b9;
+
+        if $i16 <= 0 goto label1;
+
+        $l11 = r0.<javax.sound.sampled.AudioInputStream: long frameLength>;
+
+        $l10 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        $l12 = $l11 - $l10;
+
+        $i14 = (int) $l12;
+
+        $i13 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i15 = $i14 * $i13;
+
+        return $i15;
+
+     label1:
+        return $i0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.sound.sampled.AudioInputStream r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        return;
+    }
+
+    public void mark(int)
+    {
+        byte[] $r2, $r3, $r4, $r5;
+        long $l1;
+        javax.sound.sampled.AudioInputStream r0;
+        int i0, $i2, $i3, $i4, $i5;
+        java.io.InputStream $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        virtualinvoke $r1.<java.io.InputStream: void mark(int)>(i0);
+
+        $z0 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: boolean markSupported()>();
+
+        if $z0 == 0 goto label2;
+
+        $l1 = r0.<javax.sound.sampled.AudioInputStream: long framePos>;
+
+        r0.<javax.sound.sampled.AudioInputStream: long markpos> = $l1;
+
+        $i2 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen> = $i2;
+
+        $i3 = r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen>;
+
+        if $i3 <= 0 goto label2;
+
+        $r2 = r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer>;
+
+        if $r2 != null goto label1;
+
+        $i5 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $r5 = newarray (byte)[$i5];
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer> = $r5;
+
+     label1:
+        $r4 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        $r3 = r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer>;
+
+        $i4 = r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r3, 0, $i4);
+
+     label2:
+        return;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        byte[] $r2, $r3, $r4, $r5;
+        long $l0;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i1, $i2, $i3, $i4, $i5;
+        java.io.InputStream $r1;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        virtualinvoke $r1.<java.io.InputStream: void reset()>();
+
+        $l0 = r0.<javax.sound.sampled.AudioInputStream: long markpos>;
+
+        r0.<javax.sound.sampled.AudioInputStream: long framePos> = $l0;
+
+        $i1 = r0.<javax.sound.sampled.AudioInputStream: int markPushBackLen>;
+
+        r0.<javax.sound.sampled.AudioInputStream: int pushBackLen> = $i1;
+
+        $i2 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        if $i2 <= 0 goto label2;
+
+        $r2 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        if $r2 != null goto label1;
+
+        $i4 = r0.<javax.sound.sampled.AudioInputStream: int frameSize>;
+
+        $i5 = $i4 - 1;
+
+        $r5 = newarray (byte)[$i5];
+
+        r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer> = $r5;
+
+     label1:
+        $r4 = r0.<javax.sound.sampled.AudioInputStream: byte[] markPushBackBuffer>;
+
+        $r3 = r0.<javax.sound.sampled.AudioInputStream: byte[] pushBackBuffer>;
+
+        $i3 = r0.<javax.sound.sampled.AudioInputStream: int pushBackLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r3, 0, $i3);
+
+     label2:
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        javax.sound.sampled.AudioInputStream r0;
+        java.io.InputStream $r1;
+        boolean $z0;
+
+        r0 := @this: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<javax.sound.sampled.AudioInputStream: java.io.InputStream stream>;
+
+        $z0 = virtualinvoke $r1.<java.io.InputStream: boolean markSupported()>();
+
+        return $z0;
+    }
+}

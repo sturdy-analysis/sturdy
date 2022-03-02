@@ -1,0 +1,364 @@
+public class java.io.LineNumberInputStream extends java.io.FilterInputStream
+{
+    int pushBack;
+    int lineNumber;
+    int markLineNumber;
+    int markPushBack;
+
+    public void <init>(java.io.InputStream)
+    {
+        java.io.LineNumberInputStream r0;
+        int $i1, $i3;
+        java.io.InputStream r1;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        $i1 = (int) -1;
+
+        r0.<java.io.LineNumberInputStream: int pushBack> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<java.io.LineNumberInputStream: int markPushBack> = $i3;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.io.LineNumberInputStream r0;
+        int $i0, $i1, i2, $i3, $i4, $i6, $i8, $i10;
+        java.io.InputStream $r1, $r2;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        i2 = r0.<java.io.LineNumberInputStream: int pushBack>;
+
+        $i6 = (int) -1;
+
+        if i2 == $i6 goto label1;
+
+        $i8 = (int) -1;
+
+        r0.<java.io.LineNumberInputStream: int pushBack> = $i8;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.LineNumberInputStream: java.io.InputStream in>;
+
+        i2 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+     label2:
+        lookupswitch(i2)
+        {
+            case 10: goto label4;
+            case 13: goto label3;
+            default: goto label5;
+        };
+
+     label3:
+        $r2 = r0.<java.io.LineNumberInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        r0.<java.io.LineNumberInputStream: int pushBack> = $i0;
+
+        $i1 = r0.<java.io.LineNumberInputStream: int pushBack>;
+
+        if $i1 != 10 goto label4;
+
+        $i10 = (int) -1;
+
+        r0.<java.io.LineNumberInputStream: int pushBack> = $i10;
+
+     label4:
+        $i3 = r0.<java.io.LineNumberInputStream: int lineNumber>;
+
+        $i4 = $i3 + 1;
+
+        r0.<java.io.LineNumberInputStream: int lineNumber> = $i4;
+
+        return 10;
+
+     label5:
+        return i2;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.lang.IndexOutOfBoundsException $r6;
+        java.lang.NullPointerException $r5;
+        java.io.LineNumberInputStream r1;
+        byte $b7, $b9;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i8, $i10, i11, $i13, $i15, $i17;
+        java.io.IOException $r3;
+
+        r1 := @this: java.io.LineNumberInputStream;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if r0 != null goto label01;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        if i0 < 0 goto label02;
+
+        $i1 = lengthof r0;
+
+        if i0 > $i1 goto label02;
+
+        if i2 < 0 goto label02;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r0;
+
+        if $i4 > $i3 goto label02;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label03;
+
+     label02:
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label03:
+        if i2 != 0 goto label04;
+
+        return 0;
+
+     label04:
+        $i6 = virtualinvoke r1.<java.io.LineNumberInputStream: int read()>();
+
+        $i13 = (int) -1;
+
+        if $i6 != $i13 goto label05;
+
+        $i15 = (int) -1;
+
+        return $i15;
+
+     label05:
+        $b7 = (byte) $i6;
+
+        r0[i0] = $b7;
+
+        i11 = 1;
+
+     label06:
+        if i11 >= i2 goto label09;
+
+        $i8 = virtualinvoke r1.<java.io.LineNumberInputStream: int read()>();
+
+        $i17 = (int) -1;
+
+        if $i8 != $i17 goto label07;
+
+        goto label09;
+
+     label07:
+        if r0 == null goto label08;
+
+        $i10 = i0 + i11;
+
+        $b9 = (byte) $i8;
+
+        r0[$i10] = $b9;
+
+     label08:
+        i11 = i11 + 1;
+
+        goto label06;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r3 := @caughtexception;
+
+     label11:
+        return i11;
+
+        catch java.io.IOException from label06 to label09 with label10;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte[] r0;
+        long l0, $l3, $l4, $l5, $l8, l9;
+        java.io.LineNumberInputStream r1;
+        byte $b1, $b2;
+        int $i6, $i7, $i10, $i11;
+
+        r1 := @this: java.io.LineNumberInputStream;
+
+        l0 := @parameter0: long;
+
+        l9 = l0;
+
+        $b1 = l0 cmp 0L;
+
+        $i10 = (int) $b1;
+
+        if $i10 > 0 goto label1;
+
+        return 0L;
+
+     label1:
+        r0 = newarray (byte)[2048];
+
+     label2:
+        $b2 = l9 cmp 0L;
+
+        $i11 = (int) $b2;
+
+        if $i11 <= 0 goto label4;
+
+        $l4 = (long) 2048;
+
+        $l5 = staticinvoke <java.lang.Math: long min(long,long)>($l4, l9);
+
+        $i6 = (int) $l5;
+
+        $i7 = virtualinvoke r1.<java.io.LineNumberInputStream: int read(byte[],int,int)>(r0, 0, $i6);
+
+        if $i7 >= 0 goto label3;
+
+        goto label4;
+
+     label3:
+        $l8 = (long) $i7;
+
+        l9 = l9 - $l8;
+
+        goto label2;
+
+     label4:
+        $l3 = l0 - l9;
+
+        return $l3;
+    }
+
+    public void setLineNumber(int)
+    {
+        int i0;
+        java.io.LineNumberInputStream r0;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        i0 := @parameter0: int;
+
+        r0.<java.io.LineNumberInputStream: int lineNumber> = i0;
+
+        return;
+    }
+
+    public int getLineNumber()
+    {
+        int $i0;
+        java.io.LineNumberInputStream r0;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        $i0 = r0.<java.io.LineNumberInputStream: int lineNumber>;
+
+        return $i0;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        java.io.LineNumberInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i6;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        $i0 = r0.<java.io.LineNumberInputStream: int pushBack>;
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label1;
+
+        $i3 = specialinvoke r0.<java.io.FilterInputStream: int available()>();
+
+        $i4 = $i3 / 2;
+
+        goto label2;
+
+     label1:
+        $i1 = specialinvoke r0.<java.io.FilterInputStream: int available()>();
+
+        $i2 = $i1 / 2;
+
+        $i4 = $i2 + 1;
+
+     label2:
+        return $i4;
+    }
+
+    public void mark(int)
+    {
+        java.io.LineNumberInputStream r0;
+        int $i0, $i1, i2;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        i2 := @parameter0: int;
+
+        $i0 = r0.<java.io.LineNumberInputStream: int lineNumber>;
+
+        r0.<java.io.LineNumberInputStream: int markLineNumber> = $i0;
+
+        $i1 = r0.<java.io.LineNumberInputStream: int pushBack>;
+
+        r0.<java.io.LineNumberInputStream: int markPushBack> = $i1;
+
+        $r1 = r0.<java.io.LineNumberInputStream: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void mark(int)>(i2);
+
+        return;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.io.LineNumberInputStream r0;
+        int $i0, $i1;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.io.LineNumberInputStream;
+
+        $i0 = r0.<java.io.LineNumberInputStream: int markLineNumber>;
+
+        r0.<java.io.LineNumberInputStream: int lineNumber> = $i0;
+
+        $i1 = r0.<java.io.LineNumberInputStream: int markPushBack>;
+
+        r0.<java.io.LineNumberInputStream: int pushBack> = $i1;
+
+        $r1 = r0.<java.io.LineNumberInputStream: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void reset()>();
+
+        return;
+    }
+}

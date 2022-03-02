@@ -1,0 +1,201 @@
+class com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter extends com.sun.corba.se.impl.encoding.CodeSetConversion$JavaBTCConverter
+{
+    private boolean defaultToLittleEndian;
+    private boolean converterUsesBOM;
+    private static final char UTF16_BE_MARKER;
+    private static final char UTF16_LE_MARKER;
+    final com.sun.corba.se.impl.encoding.CodeSetConversion this$0;
+
+    public void <init>(com.sun.corba.se.impl.encoding.CodeSetConversion, boolean)
+    {
+        com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry $r2;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter r0;
+        com.sun.corba.se.impl.encoding.CodeSetConversion r1;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter;
+
+        r1 := @parameter0: com.sun.corba.se.impl.encoding.CodeSetConversion;
+
+        z0 := @parameter1: boolean;
+
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: com.sun.corba.se.impl.encoding.CodeSetConversion this$0> = r1;
+
+        $r2 = <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry UTF_16>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$JavaBTCConverter: void <init>(com.sun.corba.se.impl.encoding.CodeSetConversion,com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry)>(r1, $r2);
+
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean converterUsesBOM> = 1;
+
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean defaultToLittleEndian> = z0;
+
+        return;
+    }
+
+    public char[] getChars(byte[], int, int)
+    {
+        byte[] r1;
+        com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry $r2, $r3, $r5;
+        int i0, i1;
+        char[] $r4, $r6;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean hasUTF16ByteOrderMarker(byte[],int,int)>(r1, i0, i1);
+
+        if $z0 == 0 goto label2;
+
+        $z3 = r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean converterUsesBOM>;
+
+        if $z3 != 0 goto label1;
+
+        $r5 = <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry UTF_16>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: void switchToConverter(com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry)>($r5);
+
+     label1:
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean converterUsesBOM> = 1;
+
+        $r4 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$JavaBTCConverter: char[] getChars(byte[],int,int)>(r1, i0, i1);
+
+        return $r4;
+
+     label2:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean converterUsesBOM>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean defaultToLittleEndian>;
+
+        if $z2 == 0 goto label3;
+
+        $r3 = <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry UTF_16LE>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: void switchToConverter(com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry)>($r3);
+
+        goto label4;
+
+     label3:
+        $r2 = <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry UTF_16BE>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: void switchToConverter(com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry)>($r2);
+
+     label4:
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: boolean converterUsesBOM> = 0;
+
+     label5:
+        $r6 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$JavaBTCConverter: char[] getChars(byte[],int,int)>(r1, i0, i1);
+
+        return $r6;
+    }
+
+    private boolean hasUTF16ByteOrderMarker(byte[], int, int)
+    {
+        byte[] r0;
+        short s3, s6, $s11, $s12;
+        byte $b2, $b5;
+        int i0, i1, $i4, $i7, $i8, $i9, $i13, $i14, $i15, $i17, $i18, $i20;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter r1;
+        boolean $z0;
+        char c10;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 < 4 goto label4;
+
+        $b2 = r0[i1];
+
+        $s11 = (short) $b2;
+
+        s3 = $s11 & 255;
+
+        $i4 = i1 + 1;
+
+        $b5 = r0[$i4];
+
+        $s12 = (short) $b5;
+
+        s6 = $s12 & 255;
+
+        $i13 = (int) s3;
+
+        $i8 = $i13 << 8;
+
+        $i14 = (int) s6;
+
+        $i7 = $i14 << 0;
+
+        $i9 = $i8 | $i7;
+
+        c10 = (char) $i9;
+
+        $i15 = (int) c10;
+
+        $i17 = (int) 65279;
+
+        if $i15 == $i17 goto label1;
+
+        $i18 = (int) c10;
+
+        $i20 = (int) 65534;
+
+        if $i18 != $i20 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+
+     label4:
+        return 0;
+    }
+
+    private void switchToConverter(com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry)
+    {
+        com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry r1;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter r0;
+        java.lang.String $r2;
+        java.nio.charset.CharsetDecoder $r3;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter;
+
+        r1 := @parameter0: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry;
+
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry: java.lang.String getName()>();
+
+        $r3 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$JavaBTCConverter: java.nio.charset.CharsetDecoder getConverter(java.lang.String)>($r2);
+
+        r0.<com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: java.nio.charset.CharsetDecoder btc> = $r3;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: char UTF16_LE_MARKER> = 65534;
+
+        <com.sun.corba.se.impl.encoding.CodeSetConversion$UTF16BTCConverter: char UTF16_BE_MARKER> = 65279;
+
+        return;
+    }
+}

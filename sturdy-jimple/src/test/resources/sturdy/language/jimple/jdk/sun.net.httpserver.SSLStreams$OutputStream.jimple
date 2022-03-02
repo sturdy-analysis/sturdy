@@ -1,0 +1,288 @@
+class sun.net.httpserver.SSLStreams$OutputStream extends java.io.OutputStream
+{
+    java.nio.ByteBuffer buf;
+    boolean closed;
+    byte[] single;
+    static final boolean $assertionsDisabled;
+    final sun.net.httpserver.SSLStreams this$0;
+
+    void <init>(sun.net.httpserver.SSLStreams)
+    {
+        byte[] $r2;
+        sun.net.httpserver.SSLStreams r1;
+        sun.net.httpserver.SSLStreams$BufType $r3;
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+        java.nio.ByteBuffer $r4;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        r1 := @parameter0: sun.net.httpserver.SSLStreams;
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: sun.net.httpserver.SSLStreams this$0> = r1;
+
+        specialinvoke r0.<java.io.OutputStream: void <init>()>();
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: boolean closed> = 0;
+
+        $r2 = newarray (byte)[1];
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: byte[] single> = $r2;
+
+        $r3 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType APPLICATION>;
+
+        $r4 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$000(sun.net.httpserver.SSLStreams,sun.net.httpserver.SSLStreams$BufType)>(r1, $r3);
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf> = $r4;
+
+        return;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        byte $b1;
+        int i0;
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.net.httpserver.SSLStreams$OutputStream: byte[] single>;
+
+        $b1 = (byte) i0;
+
+        $r1[0] = $b1;
+
+        $r2 = r0.<sun.net.httpserver.SSLStreams$OutputStream: byte[] single>;
+
+        virtualinvoke r0.<sun.net.httpserver.SSLStreams$OutputStream: void write(byte[],int,int)>($r2, 0, 1);
+
+        return;
+    }
+
+    public void write(byte[]) throws java.io.IOException
+    {
+        int $i0;
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+        byte[] r1;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        virtualinvoke r0.<sun.net.httpserver.SSLStreams$OutputStream: void write(byte[],int,int)>(r1, 0, $i0);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r3;
+        java.nio.ByteBuffer $r1, $r2, $r4, $r5, $r6, $r13;
+        javax.net.ssl.SSLEngineResult $r9;
+        int $i0, $i1, i2, i3, $i4;
+        javax.net.ssl.SSLEngineResult$Status $r10, $r11;
+        boolean $z0;
+        java.io.IOException $r12, $r14;
+        sun.net.httpserver.SSLStreams$WrapperResult $r8;
+        sun.net.httpserver.SSLStreams $r7;
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        r3 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $z0 = r0.<sun.net.httpserver.SSLStreams$OutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.io.IOException;
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>("output stream is closed");
+
+        throw $r14;
+
+     label1:
+        if i3 <= 0 goto label5;
+
+        $r1 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int capacity()>();
+
+        if i3 <= $i0 goto label2;
+
+        $r13 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        $i4 = virtualinvoke $r13.<java.nio.ByteBuffer: int capacity()>();
+
+        goto label3;
+
+     label2:
+        $i4 = i3;
+
+     label3:
+        $r2 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+        $r4 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>(r3, i2, $i4);
+
+        $i1 = i3 - $i4;
+
+        i3 = $i1;
+
+        i2 = i2 + $i4;
+
+        $r5 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        virtualinvoke $r5.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $r7 = r0.<sun.net.httpserver.SSLStreams$OutputStream: sun.net.httpserver.SSLStreams this$0>;
+
+        $r6 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        $r8 = virtualinvoke $r7.<sun.net.httpserver.SSLStreams: sun.net.httpserver.SSLStreams$WrapperResult sendData(java.nio.ByteBuffer)>($r6);
+
+        $r9 = $r8.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $r10 = virtualinvoke $r9.<javax.net.ssl.SSLEngineResult: javax.net.ssl.SSLEngineResult$Status getStatus()>();
+
+        $r11 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status CLOSED>;
+
+        if $r10 != $r11 goto label4;
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: boolean closed> = 1;
+
+        if $i1 <= 0 goto label4;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("output stream is closed");
+
+        throw $r12;
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.net.ssl.SSLEngineResult$HandshakeStatus $r4, r15;
+        java.lang.AssertionError $r8;
+        java.nio.ByteBuffer $r3, $r10;
+        javax.net.ssl.SSLEngine $r2;
+        javax.net.ssl.SSLEngineResult $r5, $r13;
+        javax.net.ssl.SSLEngineResult$Status $r6, $r7;
+        boolean $z0;
+        sun.net.httpserver.SSLStreams$WrapperResult $r12, r14;
+        sun.net.httpserver.SSLStreams $r1, $r9;
+        sun.net.httpserver.SSLStreams$OutputStream r0;
+        sun.net.httpserver.SSLStreams$EngineWrapper $r11;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$OutputStream;
+
+        r14 = null;
+
+        $r1 = r0.<sun.net.httpserver.SSLStreams$OutputStream: sun.net.httpserver.SSLStreams this$0>;
+
+        $r2 = $r1.<sun.net.httpserver.SSLStreams: javax.net.ssl.SSLEngine engine>;
+
+        virtualinvoke $r2.<javax.net.ssl.SSLEngine: void closeOutbound()>();
+
+        r0.<sun.net.httpserver.SSLStreams$OutputStream: boolean closed> = 1;
+
+        r15 = <javax.net.ssl.SSLEngineResult$HandshakeStatus: javax.net.ssl.SSLEngineResult$HandshakeStatus NEED_WRAP>;
+
+        $r3 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        virtualinvoke $r3.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+     label1:
+        $r4 = <javax.net.ssl.SSLEngineResult$HandshakeStatus: javax.net.ssl.SSLEngineResult$HandshakeStatus NEED_WRAP>;
+
+        if r15 != $r4 goto label2;
+
+        $r9 = r0.<sun.net.httpserver.SSLStreams$OutputStream: sun.net.httpserver.SSLStreams this$0>;
+
+        $r11 = $r9.<sun.net.httpserver.SSLStreams: sun.net.httpserver.SSLStreams$EngineWrapper wrapper>;
+
+        $r10 = r0.<sun.net.httpserver.SSLStreams$OutputStream: java.nio.ByteBuffer buf>;
+
+        $r12 = virtualinvoke $r11.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams$WrapperResult wrapAndSend(java.nio.ByteBuffer)>($r10);
+
+        r14 = $r12;
+
+        $r13 = $r12.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        r15 = virtualinvoke $r13.<javax.net.ssl.SSLEngineResult: javax.net.ssl.SSLEngineResult$HandshakeStatus getHandshakeStatus()>();
+
+        goto label1;
+
+     label2:
+        $z0 = <sun.net.httpserver.SSLStreams$OutputStream: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        $r5 = r14.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $r6 = virtualinvoke $r5.<javax.net.ssl.SSLEngineResult: javax.net.ssl.SSLEngineResult$Status getStatus()>();
+
+        $r7 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status CLOSED>;
+
+        if $r6 == $r7 goto label3;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/httpserver/SSLStreams;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.SSLStreams$OutputStream: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

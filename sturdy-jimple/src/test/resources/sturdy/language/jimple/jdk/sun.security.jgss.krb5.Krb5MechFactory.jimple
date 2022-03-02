@@ -1,0 +1,604 @@
+public final class sun.security.jgss.krb5.Krb5MechFactory extends java.lang.Object implements sun.security.jgss.spi.MechanismFactory
+{
+    private static final boolean DEBUG;
+    static final java.security.Provider PROVIDER;
+    static final org.ietf.jgss.Oid GSS_KRB5_MECH_OID;
+    static final org.ietf.jgss.Oid NT_GSS_KRB5_PRINCIPAL;
+    private static org.ietf.jgss.Oid[] nameTypes;
+    private final sun.security.jgss.GSSCaller caller;
+
+    private static sun.security.jgss.krb5.Krb5CredElement getCredFromSubject(sun.security.jgss.spi.GSSNameSpi, boolean) throws org.ietf.jgss.GSSException
+    {
+        org.ietf.jgss.Oid $r1;
+        sun.security.jgss.krb5.Krb5NameElement $r5, $r7;
+        sun.security.jgss.krb5.Krb5CredElement r3, $r10;
+        java.util.Vector $r2;
+        sun.security.jgss.spi.GSSNameSpi r0, $r4, $r6;
+        java.lang.Object $r8;
+        java.lang.Class $r9;
+        boolean z0, $z1;
+
+        r0 := @parameter0: sun.security.jgss.spi.GSSNameSpi;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        if z0 == 0 goto label1;
+
+        $r9 = class "Lsun/security/jgss/krb5/Krb5InitCredential;";
+
+        goto label2;
+
+     label1:
+        $r9 = class "Lsun/security/jgss/krb5/Krb5AcceptCredential;";
+
+     label2:
+        $r2 = staticinvoke <sun.security.jgss.GSSUtil: java.util.Vector searchSubject(sun.security.jgss.spi.GSSNameSpi,org.ietf.jgss.Oid,boolean,java.lang.Class)>(r0, $r1, z0, $r9);
+
+        if $r2 == null goto label3;
+
+        $z1 = virtualinvoke $r2.<java.util.Vector: boolean isEmpty()>();
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        $r10 = null;
+
+        goto label5;
+
+     label4:
+        $r8 = virtualinvoke $r2.<java.util.Vector: java.lang.Object firstElement()>();
+
+        $r10 = (sun.security.jgss.krb5.Krb5CredElement) $r8;
+
+     label5:
+        r3 = $r10;
+
+        if $r10 == null goto label7;
+
+        if z0 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r10.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r7 = (sun.security.jgss.krb5.Krb5NameElement) $r6;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkInitCredPermission(sun.security.jgss.krb5.Krb5NameElement)>($r7);
+
+        goto label7;
+
+     label6:
+        $r4 = interfaceinvoke $r10.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r5 = (sun.security.jgss.krb5.Krb5NameElement) $r4;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkAcceptCredPermission(sun.security.jgss.krb5.Krb5NameElement,sun.security.jgss.spi.GSSNameSpi)>($r5, r0);
+
+     label7:
+        return r3;
+    }
+
+    public void <init>(sun.security.jgss.GSSCaller)
+    {
+        sun.security.jgss.GSSCaller r1;
+        sun.security.jgss.krb5.Krb5MechFactory r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r1 := @parameter0: sun.security.jgss.GSSCaller;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller> = r1;
+
+        return;
+    }
+
+    public sun.security.jgss.spi.GSSNameSpi getNameElement(java.lang.String, org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5MechFactory r3;
+        org.ietf.jgss.Oid r1;
+        sun.security.jgss.krb5.Krb5NameElement $r2;
+        java.lang.String r0;
+
+        r3 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: org.ietf.jgss.Oid;
+
+        $r2 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(java.lang.String,org.ietf.jgss.Oid)>(r0, r1);
+
+        return $r2;
+    }
+
+    public sun.security.jgss.spi.GSSNameSpi getNameElement(byte[], org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1;
+        sun.security.jgss.krb5.Krb5MechFactory r4;
+        org.ietf.jgss.Oid r2;
+        sun.security.jgss.krb5.Krb5NameElement $r3;
+        java.lang.String $r0;
+
+        r4 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r1 := @parameter0: byte[];
+
+        r2 := @parameter1: org.ietf.jgss.Oid;
+
+        $r0 = new java.lang.String;
+
+        specialinvoke $r0.<java.lang.String: void <init>(byte[])>(r1);
+
+        $r3 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(java.lang.String,org.ietf.jgss.Oid)>($r0, r2);
+
+        return $r3;
+    }
+
+    public sun.security.jgss.spi.GSSCredentialSpi getCredentialElement(sun.security.jgss.spi.GSSNameSpi, int, int, int) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5NameElement $r2, $r9, $r11, $r15;
+        sun.security.jgss.GSSCaller $r3, $r6, $r12;
+        sun.security.jgss.spi.GSSNameSpi $r8, $r14, $r16, r19;
+        sun.security.jgss.krb5.Krb5AcceptCredential $r13;
+        int i0, i1, i2, $i4;
+        java.lang.String $r17;
+        boolean $z0, $z1;
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        org.ietf.jgss.Oid $r18;
+        org.ietf.jgss.GSSException $r21;
+        sun.security.jgss.krb5.Krb5CredElement $r0, $r7, r20;
+        sun.security.jgss.krb5.Krb5InitCredential $r4, $r5;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r19 := @parameter0: sun.security.jgss.spi.GSSNameSpi;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if r19 == null goto label1;
+
+        $z0 = r19 instanceof sun.security.jgss.krb5.Krb5NameElement;
+
+        if $z0 != 0 goto label1;
+
+        $r17 = interfaceinvoke r19.<sun.security.jgss.spi.GSSNameSpi: java.lang.String toString()>();
+
+        $r18 = interfaceinvoke r19.<sun.security.jgss.spi.GSSNameSpi: org.ietf.jgss.Oid getStringNameType()>();
+
+        r19 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(java.lang.String,org.ietf.jgss.Oid)>($r17, $r18);
+
+     label1:
+        $r16 = r19;
+
+        if i0 == 2 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        $r0 = staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.krb5.Krb5CredElement getCredFromSubject(sun.security.jgss.spi.GSSNameSpi,boolean)>($r16, $z1);
+
+        r20 = $r0;
+
+        if $r0 != null goto label7;
+
+        if i0 == 1 goto label4;
+
+        if i0 != 0 goto label5;
+
+     label4:
+        $r3 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        $r2 = (sun.security.jgss.krb5.Krb5NameElement) r19;
+
+        $r4 = staticinvoke <sun.security.jgss.krb5.Krb5InitCredential: sun.security.jgss.krb5.Krb5InitCredential getInstance(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement,int)>($r3, $r2, i1);
+
+        $r6 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        $r5 = (sun.security.jgss.krb5.Krb5InitCredential) $r4;
+
+        $r7 = staticinvoke <sun.security.jgss.krb5.Krb5ProxyCredential: sun.security.jgss.krb5.Krb5CredElement tryImpersonation(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5InitCredential)>($r6, $r5);
+
+        r20 = $r7;
+
+        $r8 = interfaceinvoke $r7.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r9 = (sun.security.jgss.krb5.Krb5NameElement) $r8;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkInitCredPermission(sun.security.jgss.krb5.Krb5NameElement)>($r9);
+
+        goto label7;
+
+     label5:
+        if i0 != 2 goto label6;
+
+        $r12 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        $r11 = (sun.security.jgss.krb5.Krb5NameElement) r19;
+
+        $r13 = staticinvoke <sun.security.jgss.krb5.Krb5AcceptCredential: sun.security.jgss.krb5.Krb5AcceptCredential getInstance(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement)>($r12, $r11);
+
+        r20 = $r13;
+
+        $r14 = interfaceinvoke $r13.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r15 = (sun.security.jgss.krb5.Krb5NameElement) $r14;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkAcceptCredPermission(sun.security.jgss.krb5.Krb5NameElement,sun.security.jgss.spi.GSSNameSpi)>($r15, r19);
+
+        goto label7;
+
+     label6:
+        $r21 = new org.ietf.jgss.GSSException;
+
+        $i4 = (int) -1;
+
+        specialinvoke $r21.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i4, "Unknown usage mode requested");
+
+        throw $r21;
+
+     label7:
+        return r20;
+    }
+
+    public static void checkInitCredPermission(sun.security.jgss.krb5.Krb5NameElement)
+    {
+        sun.security.krb5.PrincipalName $r2;
+        sun.security.jgss.krb5.Krb5NameElement r1;
+        java.lang.SecurityException $r12;
+        java.lang.String $r3, $r4, $r10, $r16, $r18;
+        boolean $z0;
+        java.io.PrintStream $r14;
+        java.lang.SecurityManager $r0;
+        javax.security.auth.kerberos.ServicePermission $r11;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9, $r13, $r15, $r17;
+
+        r1 := @parameter0: sun.security.jgss.krb5.Krb5NameElement;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label5;
+
+        $r2 = virtualinvoke r1.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r3 = virtualinvoke $r2.<sun.security.krb5.PrincipalName: java.lang.String getRealmAsString()>();
+
+        $r4 = new java.lang.String;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("krbtgt/");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(64);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.String: void <init>(java.lang.String)>($r10);
+
+        $r11 = new javax.security.auth.kerberos.ServicePermission;
+
+        specialinvoke $r11.<javax.security.auth.kerberos.ServicePermission: void <init>(java.lang.String,java.lang.String)>($r4, "initiate");
+
+     label1:
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r11);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $z0 = <sun.security.jgss.krb5.Krb5MechFactory: boolean DEBUG>;
+
+        if $z0 == 0 goto label4;
+
+        $r14 = <java.lang.System: java.io.PrintStream out>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission to initiatekerberos init credential");
+
+        $r16 = virtualinvoke $r12.<java.lang.SecurityException: java.lang.String getMessage()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<java.io.PrintStream: void println(java.lang.String)>($r18);
+
+     label4:
+        throw $r12;
+
+     label5:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public static void checkAcceptCredPermission(sun.security.jgss.krb5.Krb5NameElement, sun.security.jgss.spi.GSSNameSpi)
+    {
+        sun.security.krb5.PrincipalName $r3;
+        sun.security.jgss.krb5.Krb5NameElement r1;
+        java.lang.SecurityManager $r0;
+        sun.security.jgss.spi.GSSNameSpi r6;
+        javax.security.auth.kerberos.ServicePermission $r2;
+        java.lang.SecurityException $r5, $r7, r8;
+        java.lang.String $r4;
+
+        r1 := @parameter0: sun.security.jgss.krb5.Krb5NameElement;
+
+        r6 := @parameter1: sun.security.jgss.spi.GSSNameSpi;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label5;
+
+        if r1 == null goto label5;
+
+        $r2 = new javax.security.auth.kerberos.ServicePermission;
+
+        $r3 = virtualinvoke r1.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r4 = virtualinvoke $r3.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke $r2.<javax.security.auth.kerberos.ServicePermission: void <init>(java.lang.String,java.lang.String)>($r4, "accept");
+
+     label1:
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        r8 = $r5;
+
+        if r6 != null goto label4;
+
+        $r7 = new java.lang.SecurityException;
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String)>("No permission to acquire Kerberos accept credential");
+
+        r8 = $r7;
+
+     label4:
+        throw r8;
+
+     label5:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public sun.security.jgss.spi.GSSContextSpi getMechanismContext(sun.security.jgss.spi.GSSNameSpi, sun.security.jgss.spi.GSSCredentialSpi, int) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        org.ietf.jgss.Oid $r6;
+        sun.security.jgss.krb5.Krb5NameElement $r3;
+        sun.security.jgss.GSSCaller $r4;
+        sun.security.jgss.krb5.Krb5Context $r0;
+        sun.security.jgss.krb5.Krb5CredElement $r2;
+        sun.security.jgss.spi.GSSCredentialSpi r8;
+        sun.security.jgss.spi.GSSNameSpi r7;
+        int i0;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r7 := @parameter0: sun.security.jgss.spi.GSSNameSpi;
+
+        r8 := @parameter1: sun.security.jgss.spi.GSSCredentialSpi;
+
+        i0 := @parameter2: int;
+
+        if r7 == null goto label1;
+
+        $z0 = r7 instanceof sun.security.jgss.krb5.Krb5NameElement;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = interfaceinvoke r7.<sun.security.jgss.spi.GSSNameSpi: java.lang.String toString()>();
+
+        $r6 = interfaceinvoke r7.<sun.security.jgss.spi.GSSNameSpi: org.ietf.jgss.Oid getStringNameType()>();
+
+        r7 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(java.lang.String,org.ietf.jgss.Oid)>($r5, $r6);
+
+     label1:
+        if r8 != null goto label2;
+
+        r8 = virtualinvoke r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.spi.GSSCredentialSpi getCredentialElement(sun.security.jgss.spi.GSSNameSpi,int,int,int)>(null, i0, 0, 1);
+
+     label2:
+        $r0 = new sun.security.jgss.krb5.Krb5Context;
+
+        $r4 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        $r3 = (sun.security.jgss.krb5.Krb5NameElement) r7;
+
+        $r2 = (sun.security.jgss.krb5.Krb5CredElement) r8;
+
+        specialinvoke $r0.<sun.security.jgss.krb5.Krb5Context: void <init>(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement,sun.security.jgss.krb5.Krb5CredElement,int)>($r4, $r3, $r2, i0);
+
+        return $r0;
+    }
+
+    public sun.security.jgss.spi.GSSContextSpi getMechanismContext(sun.security.jgss.spi.GSSCredentialSpi) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.spi.GSSCredentialSpi r4;
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        sun.security.jgss.GSSCaller $r3;
+        sun.security.jgss.krb5.Krb5Context $r0;
+        sun.security.jgss.krb5.Krb5CredElement $r2;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r4 := @parameter0: sun.security.jgss.spi.GSSCredentialSpi;
+
+        if r4 != null goto label1;
+
+        r4 = virtualinvoke r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.spi.GSSCredentialSpi getCredentialElement(sun.security.jgss.spi.GSSNameSpi,int,int,int)>(null, 0, 2147483647, 2);
+
+     label1:
+        $r0 = new sun.security.jgss.krb5.Krb5Context;
+
+        $r3 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        $r2 = (sun.security.jgss.krb5.Krb5CredElement) r4;
+
+        specialinvoke $r0.<sun.security.jgss.krb5.Krb5Context: void <init>(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5CredElement)>($r3, $r2);
+
+        return $r0;
+    }
+
+    public sun.security.jgss.spi.GSSContextSpi getMechanismContext(byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r2;
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        sun.security.jgss.GSSCaller $r3;
+        sun.security.jgss.krb5.Krb5Context $r0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        r2 := @parameter0: byte[];
+
+        $r0 = new sun.security.jgss.krb5.Krb5Context;
+
+        $r3 = r1.<sun.security.jgss.krb5.Krb5MechFactory: sun.security.jgss.GSSCaller caller>;
+
+        specialinvoke $r0.<sun.security.jgss.krb5.Krb5Context: void <init>(sun.security.jgss.GSSCaller,byte[])>($r3, r2);
+
+        return $r0;
+    }
+
+    public final org.ietf.jgss.Oid getMechanismOid()
+    {
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        org.ietf.jgss.Oid $r0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        $r0 = <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        return $r0;
+    }
+
+    public java.security.Provider getProvider()
+    {
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+        java.security.Provider $r0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        $r0 = <sun.security.jgss.krb5.Krb5MechFactory: java.security.Provider PROVIDER>;
+
+        return $r0;
+    }
+
+    public org.ietf.jgss.Oid[] getNameTypes()
+    {
+        org.ietf.jgss.Oid[] $r0;
+        sun.security.jgss.krb5.Krb5MechFactory r1;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5MechFactory;
+
+        $r0 = <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid[] nameTypes>;
+
+        return $r0;
+    }
+
+    private static org.ietf.jgss.Oid createOid(java.lang.String)
+    {
+        org.ietf.jgss.Oid $r0, r3;
+        java.lang.String r1;
+        org.ietf.jgss.GSSException $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 = null;
+
+     label1:
+        $r0 = new org.ietf.jgss.Oid;
+
+        specialinvoke $r0.<org.ietf.jgss.Oid: void <init>(java.lang.String)>(r1);
+
+        r3 = $r0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return r3;
+
+        catch org.ietf.jgss.GSSException from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        org.ietf.jgss.Oid[] $r3;
+        org.ietf.jgss.Oid $r1, $r2, $r4, $r5, $r6, $r7;
+        sun.security.jgss.SunProvider $r0;
+        boolean $z0;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Util: boolean DEBUG>;
+
+        <sun.security.jgss.krb5.Krb5MechFactory: boolean DEBUG> = $z0;
+
+        $r0 = new sun.security.jgss.SunProvider;
+
+        specialinvoke $r0.<sun.security.jgss.SunProvider: void <init>()>();
+
+        <sun.security.jgss.krb5.Krb5MechFactory: java.security.Provider PROVIDER> = $r0;
+
+        $r1 = staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid createOid(java.lang.String)>("1.2.840.113554.1.2.2");
+
+        <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid GSS_KRB5_MECH_OID> = $r1;
+
+        $r2 = staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid createOid(java.lang.String)>("1.2.840.113554.1.2.2.1");
+
+        <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid NT_GSS_KRB5_PRINCIPAL> = $r2;
+
+        $r3 = newarray (org.ietf.jgss.Oid)[4];
+
+        $r4 = <org.ietf.jgss.GSSName: org.ietf.jgss.Oid NT_USER_NAME>;
+
+        $r3[0] = $r4;
+
+        $r5 = <org.ietf.jgss.GSSName: org.ietf.jgss.Oid NT_HOSTBASED_SERVICE>;
+
+        $r3[1] = $r5;
+
+        $r6 = <org.ietf.jgss.GSSName: org.ietf.jgss.Oid NT_EXPORT_NAME>;
+
+        $r3[2] = $r6;
+
+        $r7 = <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid NT_GSS_KRB5_PRINCIPAL>;
+
+        $r3[3] = $r7;
+
+        <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid[] nameTypes> = $r3;
+
+        return;
+    }
+}

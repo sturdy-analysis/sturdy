@@ -1,0 +1,582 @@
+public class sun.misc.VM extends java.lang.Object
+{
+    private static boolean suspended;
+    public static final int STATE_GREEN;
+    public static final int STATE_YELLOW;
+    public static final int STATE_RED;
+    private static volatile boolean booted;
+    private static final java.lang.Object lock;
+    private static long directMemory;
+    private static boolean pageAlignDirectMemory;
+    private static boolean defaultAllowArraySyntax;
+    private static boolean allowArraySyntax;
+    private static final java.util.Properties savedProps;
+    private static volatile int finalRefCount;
+    private static volatile int peakFinalRefCount;
+    private static final int JVMTI_THREAD_STATE_ALIVE;
+    private static final int JVMTI_THREAD_STATE_TERMINATED;
+    private static final int JVMTI_THREAD_STATE_RUNNABLE;
+    private static final int JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER;
+    private static final int JVMTI_THREAD_STATE_WAITING_INDEFINITELY;
+    private static final int JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT;
+
+    public void <init>()
+    {
+        sun.misc.VM r0;
+
+        r0 := @this: sun.misc.VM;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static boolean threadsSuspended()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.VM: boolean suspended>;
+
+        return $z0;
+    }
+
+    public static boolean allowThreadSuspension(java.lang.ThreadGroup, boolean)
+    {
+        java.lang.ThreadGroup r0;
+        boolean z0, $z1;
+
+        r0 := @parameter0: java.lang.ThreadGroup;
+
+        z0 := @parameter1: boolean;
+
+        $z1 = virtualinvoke r0.<java.lang.ThreadGroup: boolean allowThreadSuspension(boolean)>(z0);
+
+        return $z1;
+    }
+
+    public static boolean suspendThreads()
+    {
+        <sun.misc.VM: boolean suspended> = 1;
+
+        return 1;
+    }
+
+    public static void unsuspendThreads()
+    {
+        <sun.misc.VM: boolean suspended> = 0;
+
+        return;
+    }
+
+    public static void unsuspendSomeThreads()
+    {
+        return;
+    }
+
+    public static final int getState()
+    {
+        return 1;
+    }
+
+    public static void registerVMNotification(sun.misc.VMNotification)
+    {
+        sun.misc.VMNotification r0;
+
+        r0 := @parameter0: sun.misc.VMNotification;
+
+        return;
+    }
+
+    public static void asChange(int, int)
+    {
+        int i0, i1;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        return;
+    }
+
+    public static void asChange_otherthread(int, int)
+    {
+        int i0, i1;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        return;
+    }
+
+    public static void booted()
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object $r0, $r1;
+
+        $r0 = <sun.misc.VM: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        <sun.misc.VM: boolean booted> = 1;
+
+        $r1 = <sun.misc.VM: java.lang.Object lock>;
+
+        virtualinvoke $r1.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static boolean isBooted()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.VM: boolean booted>;
+
+        return $z0;
+    }
+
+    public static void awaitBooted() throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object $r0, $r1;
+        boolean $z0;
+
+        $r0 = <sun.misc.VM: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = <sun.misc.VM: boolean booted>;
+
+        if $z0 != 0 goto label2;
+
+        $r1 = <sun.misc.VM: java.lang.Object lock>;
+
+        virtualinvoke $r1.<java.lang.Object: void wait()>();
+
+        goto label1;
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static long maxDirectMemory()
+    {
+        long $l0;
+
+        $l0 = <sun.misc.VM: long directMemory>;
+
+        return $l0;
+    }
+
+    public static boolean isDirectMemoryPageAligned()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.VM: boolean pageAlignDirectMemory>;
+
+        return $z0;
+    }
+
+    public static boolean allowArraySyntax()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.VM: boolean allowArraySyntax>;
+
+        return $z0;
+    }
+
+    public static boolean isSystemDomainLoader(java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        if r0 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static java.lang.String getSavedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r4;
+        java.util.Properties $r0, $r2;
+        java.lang.String r1, $r3;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.misc.VM: java.util.Properties savedProps>;
+
+        $z0 = virtualinvoke $r0.<java.util.Properties: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Should be non-empty if initialized");
+
+        throw $r4;
+
+     label1:
+        $r2 = <sun.misc.VM: java.util.Properties savedProps>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public static void saveAndRemoveProperties(java.util.Properties)
+    {
+        java.lang.IllegalStateException $r10;
+        long $l0, $l2;
+        byte $b1;
+        int $i3;
+        java.lang.String $r3, r6, $r8, $r9;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Properties r0, $r1;
+        java.lang.Runtime $r4;
+        java.lang.Object $r2, $r7;
+
+        r0 := @parameter0: java.util.Properties;
+
+        $z0 = <sun.misc.VM: boolean booted>;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = new java.lang.IllegalStateException;
+
+        specialinvoke $r10.<java.lang.IllegalStateException: void <init>(java.lang.String)>("System initialization has completed");
+
+        throw $r10;
+
+     label1:
+        $r1 = <sun.misc.VM: java.util.Properties savedProps>;
+
+        virtualinvoke $r1.<java.util.Properties: void putAll(java.util.Map)>(r0);
+
+        $r2 = virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("sun.nio.MaxDirectMemorySize");
+
+        r6 = (java.lang.String) $r2;
+
+        if r6 == null goto label3;
+
+        $z1 = virtualinvoke r6.<java.lang.String: boolean equals(java.lang.Object)>("-1");
+
+        if $z1 == 0 goto label2;
+
+        $r4 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l2 = virtualinvoke $r4.<java.lang.Runtime: long maxMemory()>();
+
+        <sun.misc.VM: long directMemory> = $l2;
+
+        goto label3;
+
+     label2:
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>(r6);
+
+        $b1 = $l0 cmp -1L;
+
+        $i3 = (int) $b1;
+
+        if $i3 <= 0 goto label3;
+
+        <sun.misc.VM: long directMemory> = $l0;
+
+     label3:
+        $r7 = virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("sun.nio.PageAlignDirectMemory");
+
+        $r8 = (java.lang.String) $r7;
+
+        $r9 = "true";
+
+        $z2 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z2 == 0 goto label4;
+
+        <sun.misc.VM: boolean pageAlignDirectMemory> = 1;
+
+     label4:
+        $r3 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("sun.lang.ClassLoader.allowArraySyntax");
+
+        if $r3 != null goto label5;
+
+        $z3 = <sun.misc.VM: boolean defaultAllowArraySyntax>;
+
+        goto label6;
+
+     label5:
+        $z3 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r3);
+
+     label6:
+        <sun.misc.VM: boolean allowArraySyntax> = $z3;
+
+        virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("java.lang.Integer.IntegerCache.high");
+
+        virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("sun.zip.disableMemoryMapping");
+
+        virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("sun.java.launcher.diag");
+
+        virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("sun.cds.enableSharedLookupCache");
+
+        return;
+    }
+
+    public static void initializeOSEnvironment()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.VM: boolean booted>;
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <sun.misc.OSEnvironment: void initialize()>();
+
+     label1:
+        return;
+    }
+
+    public static int getFinalRefCount()
+    {
+        int $i0;
+
+        $i0 = <sun.misc.VM: int finalRefCount>;
+
+        return $i0;
+    }
+
+    public static int getPeakFinalRefCount()
+    {
+        int $i0;
+
+        $i0 = <sun.misc.VM: int peakFinalRefCount>;
+
+        return $i0;
+    }
+
+    public static void addFinalRefCount(int)
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5;
+
+        i0 := @parameter0: int;
+
+        $i1 = <sun.misc.VM: int finalRefCount>;
+
+        $i2 = $i1 + i0;
+
+        <sun.misc.VM: int finalRefCount> = $i2;
+
+        $i4 = <sun.misc.VM: int finalRefCount>;
+
+        $i3 = <sun.misc.VM: int peakFinalRefCount>;
+
+        if $i4 <= $i3 goto label1;
+
+        $i5 = <sun.misc.VM: int finalRefCount>;
+
+        <sun.misc.VM: int peakFinalRefCount> = $i5;
+
+     label1:
+        return;
+    }
+
+    public static java.lang.Thread$State toThreadState(int)
+    {
+        java.lang.Thread$State $r0, $r1, $r2, $r3, $r4, $r5, $r6;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 4;
+
+        if $i1 == 0 goto label1;
+
+        $r6 = <java.lang.Thread$State: java.lang.Thread$State RUNNABLE>;
+
+        return $r6;
+
+     label1:
+        $i2 = i0 & 1024;
+
+        if $i2 == 0 goto label2;
+
+        $r5 = <java.lang.Thread$State: java.lang.Thread$State BLOCKED>;
+
+        return $r5;
+
+     label2:
+        $i3 = i0 & 16;
+
+        if $i3 == 0 goto label3;
+
+        $r4 = <java.lang.Thread$State: java.lang.Thread$State WAITING>;
+
+        return $r4;
+
+     label3:
+        $i4 = i0 & 32;
+
+        if $i4 == 0 goto label4;
+
+        $r3 = <java.lang.Thread$State: java.lang.Thread$State TIMED_WAITING>;
+
+        return $r3;
+
+     label4:
+        $i5 = i0 & 2;
+
+        if $i5 == 0 goto label5;
+
+        $r2 = <java.lang.Thread$State: java.lang.Thread$State TERMINATED>;
+
+        return $r2;
+
+     label5:
+        $i6 = i0 & 1;
+
+        if $i6 != 0 goto label6;
+
+        $r1 = <java.lang.Thread$State: java.lang.Thread$State NEW>;
+
+        return $r1;
+
+     label6:
+        $r0 = <java.lang.Thread$State: java.lang.Thread$State RUNNABLE>;
+
+        return $r0;
+    }
+
+    public static native java.lang.ClassLoader latestUserDefinedLoader0();
+
+    public static java.lang.ClassLoader latestUserDefinedLoader()
+    {
+        java.io.IOException $r2;
+        java.lang.ClassLoader $r0;
+        sun.misc.Launcher$ExtClassLoader $r1;
+
+        $r0 = staticinvoke <sun.misc.VM: java.lang.ClassLoader latestUserDefinedLoader0()>();
+
+        if $r0 == null goto label1;
+
+        return $r0;
+
+     label1:
+        $r1 = staticinvoke <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader getExtClassLoader()>();
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private static native void initialize();
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+        java.util.Properties $r1;
+        boolean $z0;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_WAITING_WITH_TIMEOUT> = 32;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_WAITING_INDEFINITELY> = 16;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_BLOCKED_ON_MONITOR_ENTER> = 1024;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_RUNNABLE> = 4;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_TERMINATED> = 2;
+
+        <sun.misc.VM: int JVMTI_THREAD_STATE_ALIVE> = 1;
+
+        <sun.misc.VM: int STATE_RED> = 3;
+
+        <sun.misc.VM: int STATE_YELLOW> = 2;
+
+        <sun.misc.VM: int STATE_GREEN> = 1;
+
+        <sun.misc.VM: boolean suspended> = 0;
+
+        <sun.misc.VM: boolean booted> = 0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <sun.misc.VM: java.lang.Object lock> = $r0;
+
+        <sun.misc.VM: long directMemory> = 67108864L;
+
+        <sun.misc.VM: boolean defaultAllowArraySyntax> = 0;
+
+        $z0 = <sun.misc.VM: boolean defaultAllowArraySyntax>;
+
+        <sun.misc.VM: boolean allowArraySyntax> = $z0;
+
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        <sun.misc.VM: java.util.Properties savedProps> = $r1;
+
+        <sun.misc.VM: int finalRefCount> = 0;
+
+        <sun.misc.VM: int peakFinalRefCount> = 0;
+
+        staticinvoke <sun.misc.VM: void initialize()>();
+
+        return;
+    }
+}

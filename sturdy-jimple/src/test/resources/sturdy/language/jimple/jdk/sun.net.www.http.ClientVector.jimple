@@ -1,0 +1,160 @@
+class sun.net.www.http.ClientVector extends java.util.Stack
+{
+    private static final long serialVersionUID;
+    int nap;
+
+    void <init>(int)
+    {
+        sun.net.www.http.ClientVector r0;
+        int i0;
+
+        r0 := @this: sun.net.www.http.ClientVector;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Stack: void <init>()>();
+
+        r0.<sun.net.www.http.ClientVector: int nap> = i0;
+
+        return;
+    }
+
+    synchronized sun.net.www.http.HttpClient get()
+    {
+        long $l0, $l1, $l3, $l4;
+        sun.net.www.http.HttpClient $r3, r4;
+        sun.net.www.http.KeepAliveEntry $r2;
+        byte $b5;
+        sun.net.www.http.ClientVector r0;
+        int $i2, $i6;
+        java.lang.Object $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.http.ClientVector;
+
+        $z0 = virtualinvoke r0.<sun.net.www.http.ClientVector: boolean empty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        r4 = null;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label2:
+        $r1 = virtualinvoke r0.<sun.net.www.http.ClientVector: java.lang.Object pop()>();
+
+        $r2 = (sun.net.www.http.KeepAliveEntry) $r1;
+
+        $l1 = $r2.<sun.net.www.http.KeepAliveEntry: long idleStartTime>;
+
+        $l4 = $l0 - $l1;
+
+        $i2 = r0.<sun.net.www.http.ClientVector: int nap>;
+
+        $l3 = (long) $i2;
+
+        $b5 = $l4 cmp $l3;
+
+        $i6 = (int) $b5;
+
+        if $i6 <= 0 goto label3;
+
+        $r3 = $r2.<sun.net.www.http.KeepAliveEntry: sun.net.www.http.HttpClient hc>;
+
+        virtualinvoke $r3.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        goto label4;
+
+     label3:
+        r4 = $r2.<sun.net.www.http.KeepAliveEntry: sun.net.www.http.HttpClient hc>;
+
+     label4:
+        if r4 != null goto label5;
+
+        $z1 = virtualinvoke r0.<sun.net.www.http.ClientVector: boolean empty()>();
+
+        if $z1 == 0 goto label2;
+
+     label5:
+        return r4;
+    }
+
+    synchronized void put(sun.net.www.http.HttpClient)
+    {
+        sun.net.www.http.KeepAliveEntry $r1;
+        sun.net.www.http.ClientVector r0;
+        int $i0, $i1;
+        long $l2;
+        sun.net.www.http.HttpClient r2;
+
+        r0 := @this: sun.net.www.http.ClientVector;
+
+        r2 := @parameter0: sun.net.www.http.HttpClient;
+
+        $i0 = virtualinvoke r0.<sun.net.www.http.ClientVector: int size()>();
+
+        $i1 = staticinvoke <sun.net.www.http.KeepAliveCache: int getMaxConnections()>();
+
+        if $i0 < $i1 goto label1;
+
+        virtualinvoke r2.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        goto label2;
+
+     label1:
+        $r1 = new sun.net.www.http.KeepAliveEntry;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r1.<sun.net.www.http.KeepAliveEntry: void <init>(sun.net.www.http.HttpClient,long)>(r2, $l2);
+
+        virtualinvoke r0.<sun.net.www.http.ClientVector: java.lang.Object push(java.lang.Object)>($r1);
+
+     label2:
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        sun.net.www.http.ClientVector r1;
+        java.io.ObjectOutputStream r2;
+        java.io.NotSerializableException $r0;
+
+        r1 := @this: sun.net.www.http.ClientVector;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r0 = new java.io.NotSerializableException;
+
+        specialinvoke $r0.<java.io.NotSerializableException: void <init>()>();
+
+        throw $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.net.www.http.ClientVector r1;
+        java.io.ObjectInputStream r2;
+        java.io.NotSerializableException $r0;
+
+        r1 := @this: sun.net.www.http.ClientVector;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.NotSerializableException;
+
+        specialinvoke $r0.<java.io.NotSerializableException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.net.www.http.ClientVector: long serialVersionUID> = -8680532108106489459L;
+
+        return;
+    }
+}

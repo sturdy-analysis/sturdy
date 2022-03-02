@@ -1,0 +1,1725 @@
+public class java.util.concurrent.LinkedBlockingQueue extends java.util.AbstractQueue implements java.util.concurrent.BlockingQueue, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final int capacity;
+    private final java.util.concurrent.atomic.AtomicInteger count;
+    transient java.util.concurrent.LinkedBlockingQueue$Node head;
+    private transient java.util.concurrent.LinkedBlockingQueue$Node last;
+    private final java.util.concurrent.locks.ReentrantLock takeLock;
+    private final java.util.concurrent.locks.Condition notEmpty;
+    private final java.util.concurrent.locks.ReentrantLock putLock;
+    private final java.util.concurrent.locks.Condition notFull;
+
+    private void signalNotEmpty()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.locks.Condition $r2;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void signalNotFull()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.locks.Condition $r2;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void enqueue(java.util.concurrent.LinkedBlockingQueue$Node)
+    {
+        java.util.concurrent.LinkedBlockingQueue$Node r1, $r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 := @parameter0: java.util.concurrent.LinkedBlockingQueue$Node;
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last>;
+
+        $r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next> = r1;
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last> = r1;
+
+        return;
+    }
+
+    private java.lang.Object dequeue()
+    {
+        java.util.concurrent.LinkedBlockingQueue$Node r1, r2;
+        java.lang.Object r3;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r2 = r1.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        r1.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next> = r1;
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = r2;
+
+        r3 = r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item> = null;
+
+        return r3;
+    }
+
+    void fullyLock()
+    {
+        java.util.concurrent.locks.ReentrantLock $r1, $r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+        return;
+    }
+
+    void fullyUnlock()
+    {
+        java.util.concurrent.locks.ReentrantLock $r1, $r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        virtualinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+    }
+
+    public void <init>()
+    {
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void <init>(int)>(2147483647);
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        java.util.concurrent.locks.ReentrantLock $r2, $r3, $r5, $r6;
+        java.lang.IllegalArgumentException $r9;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4, $r7;
+        java.util.concurrent.LinkedBlockingQueue$Node $r8;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int i0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.AbstractQueue: void <init>()>();
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count> = $r1;
+
+        $r2 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock> = $r2;
+
+        $r3 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantLock: java.util.concurrent.locks.Condition newCondition()>();
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty> = $r4;
+
+        $r5 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r5.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock> = $r5;
+
+        $r6 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        $r7 = virtualinvoke $r6.<java.util.concurrent.locks.ReentrantLock: java.util.concurrent.locks.Condition newCondition()>();
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull> = $r7;
+
+        if i0 > 0 goto label1;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        r0.<java.util.concurrent.LinkedBlockingQueue: int capacity> = i0;
+
+        $r8 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r8.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>(null);
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = $r8;
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last> = $r8;
+
+        return;
+    }
+
+    public void <init>(java.util.Collection)
+    {
+        java.lang.Throwable $r9;
+        java.lang.IllegalStateException $r7;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.Iterator $r3;
+        java.util.Collection r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.lang.NullPointerException $r8;
+        java.util.concurrent.LinkedBlockingQueue$Node $r6;
+        java.util.concurrent.atomic.AtomicInteger $r4;
+        int $i0, i1;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r2 := @parameter0: java.util.Collection;
+
+        specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void <init>(int)>(2147483647);
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        i1 = 0;
+
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        if $r5 != null goto label3;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        $i0 = r0.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if i1 != $i0 goto label4;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Queue full");
+
+        throw $r7;
+
+     label4:
+        $r6 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r6.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>($r5);
+
+        specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void enqueue(java.util.concurrent.LinkedBlockingQueue$Node)>($r6);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        $r4 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        virtualinvoke $r4.<java.util.concurrent.atomic.AtomicInteger: void set(int)>(i1);
+
+     label6:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label9;
+
+     label7:
+        $r9 := @caughtexception;
+
+     label8:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r9;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public int size()
+    {
+        int $i0;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        return $i0;
+    }
+
+    public int remainingCapacity()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0, $i1, $i2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $i0 = r0.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i1 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i2 = $i0 - $i1;
+
+        return $i2;
+    }
+
+    public void put(java.lang.Object) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r8;
+        java.util.concurrent.locks.ReentrantLock r3;
+        java.util.concurrent.LinkedBlockingQueue r2;
+        java.lang.NullPointerException $r7;
+        java.util.concurrent.locks.Condition $r5, $r6;
+        java.util.concurrent.LinkedBlockingQueue$Node $r1;
+        java.util.concurrent.atomic.AtomicInteger r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Object r0;
+
+        r2 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r1 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r1.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>(r0);
+
+        r3 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        r4 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label2:
+        $i0 = virtualinvoke r4.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i1 = r2.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i0 != $i1 goto label3;
+
+        $r6 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Condition: void await()>();
+
+        goto label2;
+
+     label3:
+        specialinvoke r2.<java.util.concurrent.LinkedBlockingQueue: void enqueue(java.util.concurrent.LinkedBlockingQueue$Node)>($r1);
+
+        $i2 = virtualinvoke r4.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $i4 = $i2 + 1;
+
+        $i3 = r2.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i4 >= $i3 goto label4;
+
+        $r5 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label4:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+     label6:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r8;
+
+     label7:
+        if $i2 != 0 goto label8;
+
+        specialinvoke r2.<java.util.concurrent.LinkedBlockingQueue: void signalNotEmpty()>();
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean offer(java.lang.Object, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r9;
+        long l0, l7;
+        java.lang.NullPointerException $r10;
+        byte $b6;
+        java.util.concurrent.LinkedBlockingQueue$Node $r11;
+        java.util.concurrent.atomic.AtomicInteger r4;
+        int $i1, $i2, $i3, $i4, $i5, $i8;
+        java.util.concurrent.locks.ReentrantLock r3;
+        java.util.concurrent.LinkedBlockingQueue r2;
+        java.util.concurrent.TimeUnit r1;
+        java.util.concurrent.locks.Condition $r6, $r7;
+        java.lang.Object r0;
+
+        r2 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        r1 := @parameter2: java.util.concurrent.TimeUnit;
+
+        if r0 != null goto label01;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r10;
+
+     label01:
+        l7 = virtualinvoke r1.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        r3 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        r4 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label02:
+        $i1 = virtualinvoke r4.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i2 = r2.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i1 != $i2 goto label05;
+
+        $b6 = l7 cmp 0L;
+
+        $i8 = (int) $b6;
+
+        if $i8 > 0 goto label04;
+
+     label03:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 0;
+
+     label04:
+        $r7 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        l7 = interfaceinvoke $r7.<java.util.concurrent.locks.Condition: long awaitNanos(long)>(l7);
+
+        goto label02;
+
+     label05:
+        $r11 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r11.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>(r0);
+
+        specialinvoke r2.<java.util.concurrent.LinkedBlockingQueue: void enqueue(java.util.concurrent.LinkedBlockingQueue$Node)>($r11);
+
+        $i3 = virtualinvoke r4.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $i5 = $i3 + 1;
+
+        $i4 = r2.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i5 >= $i4 goto label06;
+
+        $r6 = r2.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label06:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label09;
+
+     label07:
+        $r9 := @caughtexception;
+
+     label08:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r9;
+
+     label09:
+        if $i3 != 0 goto label10;
+
+        specialinvoke r2.<java.util.concurrent.LinkedBlockingQueue: void signalNotEmpty()>();
+
+     label10:
+        return 1;
+
+        catch java.lang.Throwable from label02 to label03 with label07;
+        catch java.lang.Throwable from label04 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public boolean offer(java.lang.Object)
+    {
+        java.lang.Throwable $r7;
+        java.lang.NullPointerException $r8;
+        java.util.concurrent.LinkedBlockingQueue$Node $r9;
+        java.util.concurrent.atomic.AtomicInteger r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i9;
+        boolean $z0;
+        java.util.concurrent.locks.ReentrantLock r4;
+        java.util.concurrent.LinkedBlockingQueue r1;
+        java.util.concurrent.locks.Condition $r5;
+        java.lang.Object r0;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label01;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label01:
+        r2 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke r2.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i1 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i0 != $i1 goto label02;
+
+        return 0;
+
+     label02:
+        $i9 = (int) -1;
+
+        i7 = $i9;
+
+        $r9 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r9.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>(r0);
+
+        r4 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock putLock>;
+
+        virtualinvoke r4.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label03:
+        $i2 = virtualinvoke r2.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i3 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i2 >= $i3 goto label04;
+
+        specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void enqueue(java.util.concurrent.LinkedBlockingQueue$Node)>($r9);
+
+        $i4 = virtualinvoke r2.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        i7 = $i4;
+
+        $i6 = $i4 + 1;
+
+        $i5 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i6 >= $i5 goto label04;
+
+        $r5 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label04:
+        virtualinvoke r4.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label07;
+
+     label05:
+        $r7 := @caughtexception;
+
+     label06:
+        virtualinvoke r4.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+     label07:
+        if i7 != 0 goto label08;
+
+        specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void signalNotEmpty()>();
+
+     label08:
+        if i7 < 0 goto label09;
+
+        $z0 = 1;
+
+        goto label10;
+
+     label09:
+        $z0 = 0;
+
+     label10:
+        return $z0;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+    }
+
+    public java.lang.Object take() throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r6;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4, $r5;
+        java.util.concurrent.atomic.AtomicInteger r1;
+        int $i0, $i1, $i2;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i0 != 0 goto label2;
+
+        $r5 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Condition: void await()>();
+
+        goto label1;
+
+     label2:
+        $r3 = specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: java.lang.Object dequeue()>();
+
+        $i1 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicInteger: int getAndDecrement()>();
+
+        if $i1 <= 1 goto label3;
+
+        $r4 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label3:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r6;
+
+     label6:
+        $i2 = r0.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i1 != $i2 goto label7;
+
+        specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void signalNotFull()>();
+
+     label7:
+        return $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r7;
+        java.util.concurrent.locks.ReentrantLock r3;
+        long l0, l5;
+        java.util.concurrent.LinkedBlockingQueue r1;
+        java.util.concurrent.TimeUnit r0;
+        java.util.concurrent.locks.Condition $r5, $r6;
+        byte $b4;
+        java.util.concurrent.atomic.AtomicInteger r2;
+        int $i1, $i2, $i3, $i6;
+        java.lang.Object $r4;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        l5 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        r2 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        r3 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i1 = virtualinvoke r2.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i1 != 0 goto label4;
+
+        $b4 = l5 cmp 0L;
+
+        $i6 = (int) $b4;
+
+        if $i6 > 0 goto label3;
+
+     label2:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return null;
+
+     label3:
+        $r6 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        l5 = interfaceinvoke $r6.<java.util.concurrent.locks.Condition: long awaitNanos(long)>(l5);
+
+        goto label1;
+
+     label4:
+        $r4 = specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: java.lang.Object dequeue()>();
+
+        $i2 = virtualinvoke r2.<java.util.concurrent.atomic.AtomicInteger: int getAndDecrement()>();
+
+        if $i2 <= 1 goto label5;
+
+        $r5 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label5:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label8;
+
+     label6:
+        $r7 := @caughtexception;
+
+     label7:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+     label8:
+        $i3 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i2 != $i3 goto label9;
+
+        specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void signalNotFull()>();
+
+     label9:
+        return $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.lang.Object poll()
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r3;
+        java.util.concurrent.atomic.AtomicInteger r1;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.Object r5;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        r5 = null;
+
+        $i6 = (int) -1;
+
+        i4 = $i6;
+
+        r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label2:
+        $i1 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i1 <= 0 goto label3;
+
+        r5 = specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: java.lang.Object dequeue()>();
+
+        $i3 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicInteger: int getAndDecrement()>();
+
+        i4 = $i3;
+
+        if $i3 <= 1 goto label3;
+
+        $r3 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label3:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r4;
+
+     label6:
+        $i2 = r0.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if i4 != $i2 goto label7;
+
+        specialinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void signalNotFull()>();
+
+     label7:
+        return r5;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object peek()
+    {
+        java.lang.Throwable $r5;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.LinkedBlockingQueue$Node $r3, r4;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0;
+        java.lang.Object r6;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label2:
+        $r3 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r4 = $r3.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        if r4 != null goto label4;
+
+     label3:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return null;
+
+     label4:
+        r6 = r4.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return r6;
+
+     label6:
+        $r5 := @caughtexception;
+
+     label7:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void unlink(java.util.concurrent.LinkedBlockingQueue$Node, java.util.concurrent.LinkedBlockingQueue$Node)
+    {
+        java.util.concurrent.LinkedBlockingQueue r3;
+        java.util.concurrent.locks.Condition $r6;
+        java.util.concurrent.LinkedBlockingQueue$Node r0, r1, $r2, $r4;
+        java.util.concurrent.atomic.AtomicInteger $r5;
+        int $i0, $i1;
+
+        r3 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.util.concurrent.LinkedBlockingQueue$Node;
+
+        r1 := @parameter1: java.util.concurrent.LinkedBlockingQueue$Node;
+
+        r0.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item> = null;
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        r1.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next> = $r2;
+
+        $r4 = r3.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last>;
+
+        if $r4 != r0 goto label1;
+
+        r3.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last> = r1;
+
+     label1:
+        $r5 = r3.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r5.<java.util.concurrent.atomic.AtomicInteger: int getAndDecrement()>();
+
+        $i1 = r3.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i0 != $i1 goto label2;
+
+        $r6 = r3.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label2:
+        return;
+    }
+
+    public boolean remove(java.lang.Object)
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.LinkedBlockingQueue$Node r4, r5;
+        java.lang.Object r0, $r2;
+        java.util.concurrent.LinkedBlockingQueue r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label2:
+        r4 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r5 = r4.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+     label3:
+        if r5 == null goto label6;
+
+        $r2 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void unlink(java.util.concurrent.LinkedBlockingQueue$Node,java.util.concurrent.LinkedBlockingQueue$Node)>(r5, r4);
+
+     label4:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return 1;
+
+     label5:
+        r4 = r5;
+
+        r5 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        goto label3;
+
+     label6:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return 0;
+
+     label7:
+        $r3 := @caughtexception;
+
+     label8:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label2 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public boolean contains(java.lang.Object)
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.LinkedBlockingQueue$Node $r2, r5;
+        java.lang.Object r0, $r3;
+        java.util.concurrent.LinkedBlockingQueue r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label2:
+        $r2 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r5 = $r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+     label3:
+        if r5 == null goto label6;
+
+        $r3 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return 1;
+
+     label5:
+        r5 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        goto label3;
+
+     label6:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return 0;
+
+     label7:
+        $r4 := @caughtexception;
+
+     label8:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label2 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public java.lang.Object[] toArray()
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] r2;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.LinkedBlockingQueue$Node $r3, r6;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r4;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label1:
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        r2 = newarray (java.lang.Object)[$i0];
+
+        i2 = 0;
+
+        $r3 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r6 = $r3.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+     label2:
+        if r6 == null goto label3;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r4 = r6.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        r2[$i1] = $r4;
+
+        r6 = r6.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        goto label2;
+
+     label3:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return r2;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object[] toArray(java.lang.Object[])
+    {
+        java.lang.Throwable $r8;
+        java.lang.Object[] $r7, r9;
+        java.util.concurrent.LinkedBlockingQueue$Node $r2, r10;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0, $i1, $i2, $i3, i4;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.lang.Object $r3, $r6;
+        java.lang.Class $r4, $r5;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r9 := @parameter0: java.lang.Object[];
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label1:
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i1 = lengthof r9;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = virtualinvoke r9.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $r6 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r5, $i0);
+
+        $r7 = (java.lang.Object[]) $r6;
+
+        r9 = (java.lang.Object[]) $r7;
+
+     label2:
+        i4 = 0;
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r10 = $r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+     label3:
+        if r10 == null goto label4;
+
+        $i3 = i4;
+
+        i4 = i4 + 1;
+
+        $r3 = r10.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        r9[$i3] = $r3;
+
+        r10 = r10.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        goto label3;
+
+     label4:
+        $i2 = lengthof r9;
+
+        if $i2 <= i4 goto label5;
+
+        r9[i4] = null;
+
+     label5:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return r9;
+
+     label6:
+        $r8 := @caughtexception;
+
+     label7:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Throwable $r8;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.LinkedBlockingQueue$Node $r1, $r7, r9;
+        java.lang.StringBuilder $r2, $r3, $r5;
+        java.lang.Object $r4, $r10;
+        java.lang.String $r6;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label01:
+        $r1 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r9 = $r1.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        if r9 != null goto label03;
+
+     label02:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return "[]";
+
+     label03:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+     label04:
+        $r4 = r9.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        if $r4 != r0 goto label05;
+
+        $r10 = "(this Collection)";
+
+        goto label06;
+
+     label05:
+        $r10 = $r4;
+
+     label06:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r7 = r9.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        r9 = $r7;
+
+        if $r7 != null goto label08;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label07:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        return $r6;
+
+     label08:
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        goto label04;
+
+     label09:
+        $r8 := @caughtexception;
+
+     label10:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    public void clear()
+    {
+        java.lang.Throwable $r5;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4;
+        java.util.concurrent.LinkedBlockingQueue$Node $r1, $r2, r6;
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        int $i0, $i1;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label1:
+        r6 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+     label2:
+        $r1 = r6.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        if $r1 == null goto label3;
+
+        r6.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next> = r6;
+
+        $r1.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item> = null;
+
+        r6 = $r1;
+
+        goto label2;
+
+     label3:
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last>;
+
+        r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = $r2;
+
+        $r3 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int getAndSet(int)>(0);
+
+        $i1 = r0.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i0 != $i1 goto label4;
+
+        $r4 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void signal()>();
+
+     label4:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public int drainTo(java.util.Collection)
+    {
+        int $i0;
+        java.util.concurrent.LinkedBlockingQueue r0;
+        java.util.Collection r1;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 := @parameter0: java.util.Collection;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: int drainTo(java.util.Collection,int)>(r1, 2147483647);
+
+        return $i0;
+    }
+
+    public int drainTo(java.util.Collection, int)
+    {
+        java.lang.Throwable $r8, $r9;
+        java.lang.NullPointerException $r7;
+        java.util.concurrent.LinkedBlockingQueue$Node r11, r12;
+        java.util.concurrent.atomic.AtomicInteger $r3, $r4, $r10;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9;
+        boolean z0, $z1, $z2;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.Collection r0;
+        java.lang.IllegalArgumentException $r6;
+        java.util.concurrent.LinkedBlockingQueue r1;
+        java.lang.Object $r5;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.util.Collection;
+
+        i0 := @parameter1: int;
+
+        if r0 != null goto label01;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label01:
+        if r0 != r1 goto label02;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r6;
+
+     label02:
+        if i0 > 0 goto label03;
+
+        return 0;
+
+     label03:
+        z0 = 0;
+
+        r2 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.locks.ReentrantLock takeLock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label04:
+        $r3 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i1 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        r11 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        i9 = 0;
+
+     label05:
+        if i9 >= $i2 goto label06;
+
+        r12 = r11.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        $r5 = r12.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        interfaceinvoke r0.<java.util.Collection: boolean add(java.lang.Object)>($r5);
+
+        r12.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item> = null;
+
+        r11.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next> = r11;
+
+        r11 = r12;
+
+        i9 = i9 + 1;
+
+        goto label05;
+
+     label06:
+        if i9 <= 0 goto label09;
+
+        r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = r11;
+
+        $r4 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i3 = neg i9;
+
+        $i4 = virtualinvoke $r4.<java.util.concurrent.atomic.AtomicInteger: int getAndAdd(int)>($i3);
+
+        $i5 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i4 != $i5 goto label07;
+
+        $z1 = 1;
+
+        goto label08;
+
+     label07:
+        $z1 = 0;
+
+     label08:
+        z0 = $z1;
+
+     label09:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        if z0 == 0 goto label10;
+
+        specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void signalNotFull()>();
+
+     label10:
+        return $i2;
+
+     label11:
+        $r9 := @caughtexception;
+
+     label12:
+        if i9 <= 0 goto label15;
+
+        r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = r11;
+
+        $r10 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        $i6 = neg i9;
+
+        $i7 = virtualinvoke $r10.<java.util.concurrent.atomic.AtomicInteger: int getAndAdd(int)>($i6);
+
+        $i8 = r1.<java.util.concurrent.LinkedBlockingQueue: int capacity>;
+
+        if $i7 != $i8 goto label13;
+
+        $z2 = 1;
+
+        goto label14;
+
+     label13:
+        $z2 = 0;
+
+     label14:
+        z0 = $z2;
+
+     label15:
+        throw $r9;
+
+     label16:
+        $r8 := @caughtexception;
+
+     label17:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        if z0 == 0 goto label18;
+
+        specialinvoke r1.<java.util.concurrent.LinkedBlockingQueue: void signalNotFull()>();
+
+     label18:
+        throw $r8;
+
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label04 to label09 with label16;
+        catch java.lang.Throwable from label11 to label17 with label16;
+    }
+
+    public java.util.Iterator iterator()
+    {
+        java.util.concurrent.LinkedBlockingQueue$Itr $r0;
+        java.util.concurrent.LinkedBlockingQueue r1;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r0 = new java.util.concurrent.LinkedBlockingQueue$Itr;
+
+        specialinvoke $r0.<java.util.concurrent.LinkedBlockingQueue$Itr: void <init>(java.util.concurrent.LinkedBlockingQueue)>(r1);
+
+        return $r0;
+    }
+
+    public java.util.Spliterator spliterator()
+    {
+        java.util.concurrent.LinkedBlockingQueue$LBQSpliterator $r0;
+        java.util.concurrent.LinkedBlockingQueue r1;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        $r0 = new java.util.concurrent.LinkedBlockingQueue$LBQSpliterator;
+
+        specialinvoke $r0.<java.util.concurrent.LinkedBlockingQueue$LBQSpliterator: void <init>(java.util.concurrent.LinkedBlockingQueue)>(r1);
+
+        return $r0;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.LinkedBlockingQueue$Node $r2, r5;
+        java.io.ObjectOutputStream r1;
+        java.lang.Object $r3;
+        java.util.concurrent.LinkedBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r1 := @parameter0: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyLock()>();
+
+     label1:
+        virtualinvoke r1.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r2 = r0.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head>;
+
+        r5 = $r2.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+     label2:
+        if r5 == null goto label3;
+
+        $r3 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.lang.Object item>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r3);
+
+        r5 = r5.<java.util.concurrent.LinkedBlockingQueue$Node: java.util.concurrent.LinkedBlockingQueue$Node next>;
+
+        goto label2;
+
+     label3:
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+     label4:
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+        virtualinvoke r0.<java.util.concurrent.LinkedBlockingQueue: void fullyUnlock()>();
+
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.concurrent.LinkedBlockingQueue$Node $r3;
+        java.util.concurrent.atomic.AtomicInteger $r2;
+        java.io.ObjectInputStream r0;
+        java.lang.Object $r4;
+        java.util.concurrent.LinkedBlockingQueue r1;
+
+        r1 := @this: java.util.concurrent.LinkedBlockingQueue;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.atomic.AtomicInteger count>;
+
+        virtualinvoke $r2.<java.util.concurrent.atomic.AtomicInteger: void set(int)>(0);
+
+        $r3 = new java.util.concurrent.LinkedBlockingQueue$Node;
+
+        specialinvoke $r3.<java.util.concurrent.LinkedBlockingQueue$Node: void <init>(java.lang.Object)>(null);
+
+        r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node head> = $r3;
+
+        r1.<java.util.concurrent.LinkedBlockingQueue: java.util.concurrent.LinkedBlockingQueue$Node last> = $r3;
+
+     label1:
+        $r4 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if $r4 != null goto label2;
+
+        goto label3;
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.LinkedBlockingQueue: boolean add(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.LinkedBlockingQueue: long serialVersionUID> = -6903933977591709194L;
+
+        return;
+    }
+}

@@ -1,0 +1,3804 @@
+public class com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator extends java.lang.Object
+{
+    private com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver;
+    private com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver;
+    private com.sun.xml.internal.ws.model.AbstractSEIModelImpl model;
+    private com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions;
+    private com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions;
+    private com.sun.xml.internal.ws.wsdl.writer.document.Types types;
+    private static final java.lang.String DOT_WSDL;
+    private static final java.lang.String RESPONSE;
+    private static final java.lang.String PARAMETERS;
+    private static final java.lang.String RESULT;
+    private static final java.lang.String UNWRAPPABLE_RESULT;
+    private static final java.lang.String WSDL_NAMESPACE;
+    private static final java.lang.String XSD_NAMESPACE;
+    private static final java.lang.String XSD_PREFIX;
+    private static final java.lang.String SOAP11_NAMESPACE;
+    private static final java.lang.String SOAP12_NAMESPACE;
+    private static final java.lang.String SOAP_PREFIX;
+    private static final java.lang.String SOAP12_PREFIX;
+    private static final java.lang.String TNS_PREFIX;
+    private static final java.lang.String DOCUMENT;
+    private static final java.lang.String RPC;
+    private static final java.lang.String LITERAL;
+    private static final java.lang.String REPLACE_WITH_ACTUAL_URL;
+    private java.util.Set processedExceptions;
+    private com.sun.xml.internal.ws.api.WSBinding binding;
+    private java.lang.String wsdlLocation;
+    private java.lang.String portWSDLID;
+    private java.lang.String schemaPrefix;
+    private com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension;
+    java.util.List extensionHandlers;
+    private java.lang.String endpointAddress;
+    private com.sun.xml.internal.ws.api.server.Container container;
+    private final java.lang.Class implType;
+    private boolean inlineSchemas;
+    private final boolean disableXmlSecurity;
+    static final boolean $assertionsDisabled;
+
+    public transient void <init>(com.sun.xml.internal.ws.model.AbstractSEIModelImpl, com.oracle.webservices.internal.api.databinding.WSDLResolver, com.sun.xml.internal.ws.api.WSBinding, com.sun.xml.internal.ws.api.server.Container, java.lang.Class, boolean, com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[])
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.api.server.Container r4;
+        com.sun.xml.internal.ws.api.WSBinding r3;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl r1;
+        com.oracle.webservices.internal.api.databinding.WSDLResolver r2;
+        java.lang.Class r5;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[] r6;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.model.AbstractSEIModelImpl;
+
+        r2 := @parameter1: com.oracle.webservices.internal.api.databinding.WSDLResolver;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.WSBinding;
+
+        r4 := @parameter3: com.sun.xml.internal.ws.api.server.Container;
+
+        r5 := @parameter4: java.lang.Class;
+
+        z0 := @parameter5: boolean;
+
+        r6 := @parameter6: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[];
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void <init>(com.sun.xml.internal.ws.model.AbstractSEIModelImpl,com.oracle.webservices.internal.api.databinding.WSDLResolver,com.sun.xml.internal.ws.api.WSBinding,com.sun.xml.internal.ws.api.server.Container,java.lang.Class,boolean,boolean,com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[])>(r1, r2, r3, r4, r5, z0, 0, r6);
+
+        return;
+    }
+
+    public transient void <init>(com.sun.xml.internal.ws.model.AbstractSEIModelImpl, com.oracle.webservices.internal.api.databinding.WSDLResolver, com.sun.xml.internal.ws.api.WSBinding, com.sun.xml.internal.ws.api.server.Container, java.lang.Class, boolean, boolean, com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[])
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        java.lang.Object[] $r16;
+        com.sun.xml.internal.ws.wsdl.writer.W3CAddressingWSDLGeneratorExtension $r9;
+        java.util.ArrayList $r8;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension r19, r21;
+        java.util.HashSet $r1;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl r2;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGeneratorExtensionFacade $r13;
+        int i0, i1, $i2, i3;
+        com.oracle.webservices.internal.api.databinding.WSDLResolver r4;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[] r12, $r14, $r17, r20;
+        boolean z0, z1;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver $r3;
+        com.sun.xml.internal.ws.api.server.Container r6;
+        com.sun.xml.internal.ws.api.WSBinding r5;
+        java.util.List $r15;
+        java.lang.Class r7;
+        java.lang.Object $r18;
+        com.sun.xml.internal.ws.policy.jaxws.PolicyWSDLGeneratorExtension $r11;
+        com.sun.xml.internal.ws.wsdl.writer.W3CAddressingMetadataWSDLGeneratorExtension $r10;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.model.AbstractSEIModelImpl;
+
+        r4 := @parameter1: com.oracle.webservices.internal.api.databinding.WSDLResolver;
+
+        r5 := @parameter2: com.sun.xml.internal.ws.api.WSBinding;
+
+        r6 := @parameter3: com.sun.xml.internal.ws.api.server.Container;
+
+        r7 := @parameter4: java.lang.Class;
+
+        z0 := @parameter5: boolean;
+
+        z1 := @parameter6: boolean;
+
+        r12 := @parameter7: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver> = null;
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.Set processedExceptions> = $r1;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String endpointAddress> = "REPLACE_WITH_ACTUAL_URL";
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model> = r2;
+
+        $r3 = new com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver: void <init>(com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator)>(r0);
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver> = $r3;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver> = r4;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding> = r5;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.server.Container container> = r6;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.Class implType> = r7;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.List extensionHandlers> = $r8;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean inlineSchemas> = z0;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean disableXmlSecurity> = z1;
+
+        $r9 = new com.sun.xml.internal.ws.wsdl.writer.W3CAddressingWSDLGeneratorExtension;
+
+        specialinvoke $r9.<com.sun.xml.internal.ws.wsdl.writer.W3CAddressingWSDLGeneratorExtension: void <init>()>();
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)>($r9);
+
+        $r10 = new com.sun.xml.internal.ws.wsdl.writer.W3CAddressingMetadataWSDLGeneratorExtension;
+
+        specialinvoke $r10.<com.sun.xml.internal.ws.wsdl.writer.W3CAddressingMetadataWSDLGeneratorExtension: void <init>()>();
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)>($r10);
+
+        $r11 = new com.sun.xml.internal.ws.policy.jaxws.PolicyWSDLGeneratorExtension;
+
+        specialinvoke $r11.<com.sun.xml.internal.ws.policy.jaxws.PolicyWSDLGeneratorExtension: void <init>()>();
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)>($r11);
+
+        if r6 == null goto label2;
+
+        $r18 = virtualinvoke r6.<com.sun.xml.internal.ws.api.server.Container: java.lang.Object getSPI(java.lang.Class)>(class "[Lcom/sun/xml/internal/ws/api/wsdl/writer/WSDLGeneratorExtension;");
+
+        r20 = (com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[]) $r18;
+
+        if r20 == null goto label2;
+
+        i0 = lengthof r20;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r19 = r20[i1];
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)>(r19);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $i2 = lengthof r12;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= $i2 goto label4;
+
+        r21 = r12[i3];
+
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)>(r21);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        $r13 = new com.sun.xml.internal.ws.wsdl.writer.WSDLGeneratorExtensionFacade;
+
+        $r15 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.List extensionHandlers>;
+
+        $r14 = newarray (com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)[0];
+
+        $r16 = interfaceinvoke $r15.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r14);
+
+        $r17 = (com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[]) $r16;
+
+        specialinvoke $r13.<com.sun.xml.internal.ws.wsdl.writer.WSDLGeneratorExtensionFacade: void <init>(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension[])>($r17);
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension> = $r13;
+
+        return;
+    }
+
+    public void setEndpointAddress(java.lang.String)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String endpointAddress> = r1;
+
+        return;
+    }
+
+    protected java.lang.String mangleName(java.lang.String)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        java.lang.String r0, $r1;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.xml.internal.ws.spi.db.BindingHelper: java.lang.String mangleNameToClassName(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    public void doGeneration()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$CommentFilter $r12, $r43, r52;
+        javax.xml.transform.Result $r10, $r29;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r1, $r14, $r17, $r19;
+        com.oracle.webservices.internal.api.databinding.WSDLResolver $r6, $r28;
+        com.sun.xml.internal.txw2.output.XmlSerializer $r13, $r44;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r5, $r7, $r8, $r24, $r25, $r26, $r32, $r35, $r36, $r45, $r46, $r47, $r48, $r49, $r50;
+        javax.xml.namespace.QName $r2, $r15, $r20;
+        int $i0;
+        java.lang.String $r3, $r4, $r9, $r11, $r16, $r18, $r21, $r22, $r27, $r31, $r33, $r34, $r37, $r38, $r39, $r40, $r41, $r42, $r51, r53, $r55, $r56, $r57;
+        java.io.File $r54;
+        javax.xml.ws.Holder $r23;
+        java.lang.Object $r30;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r52 = null;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String mangleName(java.lang.String)>($r3);
+
+        $r6 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".wsdl");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = interfaceinvoke $r6.<com.oracle.webservices.internal.api.databinding.WSDLResolver: javax.xml.transform.Result getWSDL(java.lang.String)>($r9);
+
+        $r11 = interfaceinvoke $r10.<javax.xml.transform.Result: java.lang.String getSystemId()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String wsdlLocation> = $r11;
+
+        $r12 = new com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$CommentFilter;
+
+        $r13 = staticinvoke <com.sun.xml.internal.txw2.output.ResultFactory: com.sun.xml.internal.txw2.output.XmlSerializer createSerializer(javax.xml.transform.Result)>($r10);
+
+        specialinvoke $r12.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$CommentFilter: void <init>(com.sun.xml.internal.txw2.output.XmlSerializer)>($r13);
+
+        $r14 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r15 = virtualinvoke $r14.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r16 = virtualinvoke $r15.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        $r17 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r18 = virtualinvoke $r17.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $z0 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        if $z0 == 0 goto label1;
+
+        r52 = $r12;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix> = $r51;
+
+        goto label7;
+
+     label1:
+        $r19 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r20 = virtualinvoke $r19.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getPortTypeName()>();
+
+        $r21 = virtualinvoke $r20.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r22 = virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String mangleName(java.lang.String)>($r21);
+
+        r53 = $r22;
+
+        $z1 = virtualinvoke $r22.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label2;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PortType");
+
+        r53 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r23 = new javax.xml.ws.Holder;
+
+        specialinvoke $r23.<javax.xml.ws.Holder: void <init>()>();
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r53);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".wsdl");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23.<javax.xml.ws.Holder: java.lang.Object value> = $r27;
+
+        $r28 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver>;
+
+        $r29 = interfaceinvoke $r28.<com.oracle.webservices.internal.api.databinding.WSDLResolver: javax.xml.transform.Result getAbstractWSDL(javax.xml.ws.Holder)>($r23);
+
+        if $r29 == null goto label4;
+
+        $r40 = interfaceinvoke $r29.<javax.xml.transform.Result: java.lang.String getSystemId()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID> = $r40;
+
+        $r42 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID>;
+
+        $r41 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String wsdlLocation>;
+
+        $z2 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>($r41);
+
+        if $z2 == 0 goto label3;
+
+        r52 = $r12;
+
+        goto label5;
+
+     label3:
+        $r43 = new com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$CommentFilter;
+
+        $r44 = staticinvoke <com.sun.xml.internal.txw2.output.ResultFactory: com.sun.xml.internal.txw2.output.XmlSerializer createSerializer(javax.xml.transform.Result)>($r29);
+
+        specialinvoke $r43.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$CommentFilter: void <init>(com.sun.xml.internal.txw2.output.XmlSerializer)>($r44);
+
+        r52 = $r43;
+
+        goto label5;
+
+     label4:
+        $r30 = $r23.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        $r31 = (java.lang.String) $r30;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID> = $r31;
+
+     label5:
+        $r54 = new java.io.File;
+
+        $r55 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID>;
+
+        specialinvoke $r54.<java.io.File: void <init>(java.lang.String)>($r55);
+
+        $r56 = virtualinvoke $r54.<java.io.File: java.lang.String getName()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix> = $r56;
+
+        $r57 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix>;
+
+        $i0 = virtualinvoke $r57.<java.lang.String: int lastIndexOf(int)>(46);
+
+        if $i0 <= 0 goto label6;
+
+        $r38 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix>;
+
+        $r39 = virtualinvoke $r38.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix> = $r39;
+
+     label6:
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix>;
+
+        $r34 = virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String mangleName(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix> = $r37;
+
+     label7:
+        specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateDocument(com.sun.xml.internal.txw2.output.XmlSerializer,com.sun.xml.internal.txw2.output.XmlSerializer)>($r12, r52);
+
+        return;
+    }
+
+    private void generateDocument(com.sun.xml.internal.txw2.output.XmlSerializer, com.sun.xml.internal.txw2.output.XmlSerializer)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r6, $r10, $r18, $r26, $r35, $r49, $r56, $r59, $r62;
+        com.sun.xml.internal.txw2.output.XmlSerializer r1, r29;
+        com.sun.xml.internal.ws.wsdl.writer.document.Import $r34, $r37, $r55, $r58;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGenExtnContext $r22;
+        javax.xml.namespace.QName $r8, $r12, $r20;
+        com.sun.xml.internal.ws.api.SOAPVersion $r15, $r16;
+        java.lang.String $r9, $r13, $r21, $r30, $r31, $r32, $r36, $r50, $r51, $r52, $r53, $r57, $r61, $r64;
+        com.sun.xml.internal.ws.api.server.Container $r24;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r28, $r38, $r66;
+        com.sun.xml.internal.txw2.TypedXmlWriter $r2, $r45;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r3, $r4, $r5, $r7, $r11, $r17, $r19, $r27, $r33, $r39, $r40, $r41, $r42, $r43, $r44, $r46, $r47, $r48, $r54, $r60, $r63, $r65, $r67, $r68;
+        com.sun.xml.internal.ws.api.WSBinding $r14, $r25;
+        java.lang.Class $r23;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r1 := @parameter0: com.sun.xml.internal.txw2.output.XmlSerializer;
+
+        r29 := @parameter1: com.sun.xml.internal.txw2.output.XmlSerializer;
+
+        $r2 = staticinvoke <com.sun.xml.internal.txw2.TXW: com.sun.xml.internal.txw2.TypedXmlWriter create(java.lang.Class,com.sun.xml.internal.txw2.output.XmlSerializer)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/Definitions;", r1);
+
+        $r3 = (com.sun.xml.internal.ws.wsdl.writer.document.Definitions) $r2;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://schemas.xmlsoap.org/wsdl/", "");
+
+        $r5 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        interfaceinvoke $r5.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://www.w3.org/2001/XMLSchema", "xsd");
+
+        $r7 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r6 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r8 = virtualinvoke $r6.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r9 = virtualinvoke $r8.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke $r7.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Definitions targetNamespace(java.lang.String)>($r9);
+
+        $r11 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r10 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r12 = virtualinvoke $r10.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r13 = virtualinvoke $r12.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke $r11.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>($r13, "tns");
+
+        $r14 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r15 = interfaceinvoke $r14.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        $r16 = <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion SOAP_12>;
+
+        if $r15 != $r16 goto label1;
+
+        $r65 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        interfaceinvoke $r65.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://schemas.xmlsoap.org/wsdl/soap12/", "soap12");
+
+        goto label2;
+
+     label1:
+        $r17 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        interfaceinvoke $r17.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
+
+     label2:
+        $r19 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r18 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r20 = virtualinvoke $r18.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r21 = virtualinvoke $r20.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        interfaceinvoke $r19.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Definitions name(java.lang.String)>($r21);
+
+        $r22 = new com.sun.xml.internal.ws.api.wsdl.writer.WSDLGenExtnContext;
+
+        $r27 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r26 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r25 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r24 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.server.Container container>;
+
+        $r23 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.Class implType>;
+
+        specialinvoke $r22.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGenExtnContext: void <init>(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.SEIModel,com.sun.xml.internal.ws.api.WSBinding,com.sun.xml.internal.ws.api.server.Container,java.lang.Class)>($r27, $r26, $r25, $r24, $r23);
+
+        $r28 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r28.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void start(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGenExtnContext)>($r22);
+
+        if r1 == r29 goto label4;
+
+        if r29 == null goto label4;
+
+        $r45 = staticinvoke <com.sun.xml.internal.txw2.TXW: com.sun.xml.internal.txw2.TypedXmlWriter create(java.lang.Class,com.sun.xml.internal.txw2.output.XmlSerializer)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/Definitions;", r29);
+
+        $r46 = (com.sun.xml.internal.ws.wsdl.writer.document.Definitions) $r45;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions> = $r46;
+
+        $r47 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        interfaceinvoke $r47.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://schemas.xmlsoap.org/wsdl/", "");
+
+        $r48 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        interfaceinvoke $r48.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>("http://www.w3.org/2001/XMLSchema", "xsd");
+
+        $r49 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r50 = virtualinvoke $r49.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        if $r50 == null goto label3;
+
+        $r60 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r59 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r61 = virtualinvoke $r59.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        interfaceinvoke $r60.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Definitions targetNamespace(java.lang.String)>($r61);
+
+        $r63 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r62 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r64 = virtualinvoke $r62.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        interfaceinvoke $r63.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void _namespace(java.lang.String,java.lang.String)>($r64, "tns");
+
+     label3:
+        $r52 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID>;
+
+        $r51 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String wsdlLocation>;
+
+        $r53 = staticinvoke <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String relativize(java.lang.String,java.lang.String)>($r52, $r51);
+
+        $r54 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r55 = interfaceinvoke $r54.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Import _import()>();
+
+        $r56 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r57 = virtualinvoke $r56.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r58 = interfaceinvoke $r55.<com.sun.xml.internal.ws.wsdl.writer.document.Import: com.sun.xml.internal.ws.wsdl.writer.document.Import namespace(java.lang.String)>($r57);
+
+        interfaceinvoke $r58.<com.sun.xml.internal.ws.wsdl.writer.document.Import: com.sun.xml.internal.ws.wsdl.writer.document.Import location(java.lang.String)>($r53);
+
+        goto label6;
+
+     label4:
+        if r29 == null goto label5;
+
+        $r44 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions> = $r44;
+
+        goto label6;
+
+     label5:
+        $r31 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String portWSDLID>;
+
+        $r30 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String wsdlLocation>;
+
+        $r32 = staticinvoke <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String relativize(java.lang.String,java.lang.String)>($r31, $r30);
+
+        $r33 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r34 = interfaceinvoke $r33.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Import _import()>();
+
+        $r35 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r36 = virtualinvoke $r35.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r37 = interfaceinvoke $r34.<com.sun.xml.internal.ws.wsdl.writer.document.Import: com.sun.xml.internal.ws.wsdl.writer.document.Import namespace(java.lang.String)>($r36);
+
+        interfaceinvoke $r37.<com.sun.xml.internal.ws.wsdl.writer.document.Import: com.sun.xml.internal.ws.wsdl.writer.document.Import location(java.lang.String)>($r32);
+
+     label6:
+        $r66 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        $r67 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        virtualinvoke $r66.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addDefinitionsExtension(com.sun.xml.internal.txw2.TypedXmlWriter)>($r67);
+
+        $r68 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        if $r68 == null goto label7;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateTypes()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateMessages()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generatePortType()>();
+
+     label7:
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateBinding()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateService()>();
+
+        $r38 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r38.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void end(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGenExtnContext)>($r22);
+
+        $r39 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        interfaceinvoke $r39.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void commit()>();
+
+        $r40 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        if $r40 == null goto label8;
+
+        $r42 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r41 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        if $r42 == $r41 goto label8;
+
+        $r43 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        interfaceinvoke $r43.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: void commit()>();
+
+     label8:
+        return;
+    }
+
+    protected void generateTypes()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        javax.xml.transform.Transformer $r8;
+        javax.xml.transform.sax.SAXResult $r42;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r3, $r21, $r36;
+        org.w3c.dom.Document r15;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver $r5, $r9, $r26, $r38;
+        javax.xml.transform.dom.DOMSource $r43;
+        javax.xml.transform.TransformerException $r27;
+        java.util.ArrayList $r6, $r10, $r39;
+        org.w3c.dom.Node $r14;
+        int $i0, $i2;
+        com.sun.xml.internal.ws.wsdl.writer.document.Types $r2, $r18;
+        java.lang.String $r24, $r29, $r32, $r35;
+        com.sun.xml.internal.ws.spi.db.BindingContext $r4, $r22, $r37;
+        java.util.Iterator $r11;
+        javax.xml.transform.TransformerConfigurationException $r30;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r1;
+        java.io.IOException $r33;
+        com.sun.xml.internal.ws.wsdl.writer.TXWContentHandler $r41;
+        org.w3c.dom.Element $r20;
+        javax.xml.ws.WebServiceException $r40, $r44, $r45;
+        java.lang.Object $r12;
+        java.lang.Class $r23;
+        javax.xml.transform.TransformerFactory $r7;
+        javax.xml.transform.dom.DOMResult r13;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Types types()>();
+
+        r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Types types> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: com.sun.xml.internal.ws.spi.db.BindingContext getBindingContext()>();
+
+        if $r4 == null goto label04;
+
+        $z1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean inlineSchemas>;
+
+        if $z1 == 0 goto label01;
+
+        $r21 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r22 = virtualinvoke $r21.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: com.sun.xml.internal.ws.spi.db.BindingContext getBindingContext()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.Class: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r24.<java.lang.String: int indexOf(java.lang.String)>("glassfish");
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label01;
+
+        $r26 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver>;
+
+        $r39 = new java.util.ArrayList;
+
+        specialinvoke $r39.<java.util.ArrayList: void <init>()>();
+
+        $r26.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver: java.util.ArrayList nonGlassfishSchemas> = $r39;
+
+     label01:
+        $r36 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r37 = virtualinvoke $r36.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: com.sun.xml.internal.ws.spi.db.BindingContext getBindingContext()>();
+
+        $r38 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver>;
+
+        interfaceinvoke $r37.<com.sun.xml.internal.ws.spi.db.BindingContext: void generateSchema(javax.xml.bind.SchemaOutputResolver)>($r38);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r33 := @caughtexception;
+
+        $r40 = new javax.xml.ws.WebServiceException;
+
+        $r35 = virtualinvoke $r33.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r40.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r35);
+
+        throw $r40;
+
+     label04:
+        $r5 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver>;
+
+        $r6 = $r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver: java.util.ArrayList nonGlassfishSchemas>;
+
+        if $r6 == null goto label12;
+
+        $z0 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean disableXmlSecurity>;
+
+        if $z0 != 0 goto label05;
+
+        $z2 = 1;
+
+        goto label06;
+
+     label05:
+        $z2 = 0;
+
+     label06:
+        $r7 = staticinvoke <com.sun.xml.internal.ws.util.xml.XmlUtil: javax.xml.transform.TransformerFactory newTransformerFactory(boolean)>($z2);
+
+     label07:
+        $r8 = virtualinvoke $r7.<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer()>();
+
+        $r9 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver resolver>;
+
+        $r10 = $r9.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$JAXWSOutputSchemaResolver: java.util.ArrayList nonGlassfishSchemas>;
+
+        $r11 = virtualinvoke $r10.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label08:
+        $z3 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label09;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (javax.xml.transform.dom.DOMResult) $r12;
+
+        $r14 = virtualinvoke r13.<javax.xml.transform.dom.DOMResult: org.w3c.dom.Node getNode()>();
+
+        r15 = (org.w3c.dom.Document) $r14;
+
+        $r42 = new javax.xml.transform.sax.SAXResult;
+
+        $r41 = new com.sun.xml.internal.ws.wsdl.writer.TXWContentHandler;
+
+        $r18 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Types types>;
+
+        specialinvoke $r41.<com.sun.xml.internal.ws.wsdl.writer.TXWContentHandler: void <init>(com.sun.xml.internal.txw2.TypedXmlWriter)>($r18);
+
+        specialinvoke $r42.<javax.xml.transform.sax.SAXResult: void <init>(org.xml.sax.ContentHandler)>($r41);
+
+        $r43 = new javax.xml.transform.dom.DOMSource;
+
+        $r20 = interfaceinvoke r15.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        specialinvoke $r43.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>($r20);
+
+        virtualinvoke $r8.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>($r43, $r42);
+
+        goto label08;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r30 := @caughtexception;
+
+        $r44 = new javax.xml.ws.WebServiceException;
+
+        $r32 = virtualinvoke $r30.<javax.xml.transform.TransformerConfigurationException: java.lang.String getMessage()>();
+
+        specialinvoke $r44.<javax.xml.ws.WebServiceException: void <init>(java.lang.String,java.lang.Throwable)>($r32, $r30);
+
+        throw $r44;
+
+     label11:
+        $r27 := @caughtexception;
+
+        $r45 = new javax.xml.ws.WebServiceException;
+
+        $r29 = virtualinvoke $r27.<javax.xml.transform.TransformerException: java.lang.String getMessage()>();
+
+        specialinvoke $r45.<javax.xml.ws.WebServiceException: void <init>(java.lang.String,java.lang.Throwable)>($r29, $r27);
+
+        throw $r45;
+
+     label12:
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateWrappers()>();
+
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch javax.xml.transform.TransformerConfigurationException from label07 to label09 with label10;
+        catch javax.xml.transform.TransformerException from label07 to label09 with label11;
+    }
+
+    void generateWrappers()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r1;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r23;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r2, $r28;
+        com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement $r24;
+        com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema $r32, r57;
+        com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element $r33;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r36;
+        javax.xml.namespace.QName $r8, $r12, $r14, $r16, $r25, $r30;
+        java.util.ArrayList $r0;
+        java.lang.String $r9, $r13, $r17, $r26;
+        com.sun.xml.internal.ws.model.ParameterImpl r22, r54, r55;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r53;
+        com.sun.xml.internal.bind.v2.schemagen.xmlschema.ComplexType $r34;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, z12;
+        com.sun.xml.internal.ws.spi.db.TypeInfo $r27, $r44, $r50, r58;
+        com.sun.xml.internal.ws.model.WrapperParameter $r42, $r46, $r48, $r52, r56;
+        java.util.Collection $r3;
+        com.sun.xml.internal.txw2.TypedXmlWriter $r11, $r15;
+        java.util.List $r19, $r37, $r39;
+        java.lang.reflect.Type $r45, $r51;
+        com.sun.xml.internal.bind.v2.schemagen.xmlschema.ExplicitGroup $r18;
+        java.util.HashMap $r5;
+        com.sun.xml.internal.ws.wsdl.writer.document.Types $r31;
+        com.sun.xml.internal.ws.spi.db.BindingContext $r29;
+        java.util.Iterator $r4, $r6, $r20, $r38, $r40;
+        java.lang.Object $r7, $r10, $r21, $r35, $r41, $r47;
+        java.lang.Class $r43, $r49;
+
+        r1 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.util.Collection getJavaMethods()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label01:
+        $z10 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z10 == 0 goto label09;
+
+        $r35 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r53 = (com.sun.xml.internal.ws.model.JavaMethodImpl) $r35;
+
+        $r36 = virtualinvoke r53.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $z3 = virtualinvoke $r36.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: boolean isRpcLit()>();
+
+        if $z3 == 0 goto label02;
+
+        goto label01;
+
+     label02:
+        $r37 = virtualinvoke r53.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r38 = interfaceinvoke $r37.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z4 = interfaceinvoke $r38.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label05;
+
+        $r47 = interfaceinvoke $r38.<java.util.Iterator: java.lang.Object next()>();
+
+        r54 = (com.sun.xml.internal.ws.model.ParameterImpl) $r47;
+
+        $z8 = r54 instanceof com.sun.xml.internal.ws.model.WrapperParameter;
+
+        if $z8 == 0 goto label04;
+
+        $r49 = class "Lcom/sun/xml/internal/ws/spi/db/WrapperComposite;";
+
+        $r48 = (com.sun.xml.internal.ws.model.WrapperParameter) r54;
+
+        $r50 = virtualinvoke $r48.<com.sun.xml.internal.ws.model.WrapperParameter: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r51 = $r50.<com.sun.xml.internal.ws.spi.db.TypeInfo: java.lang.reflect.Type type>;
+
+        $z9 = virtualinvoke $r49.<java.lang.Object: boolean equals(java.lang.Object)>($r51);
+
+        if $z9 == 0 goto label04;
+
+        $r52 = (com.sun.xml.internal.ws.model.WrapperParameter) r54;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r52);
+
+     label04:
+        goto label03;
+
+     label05:
+        $r39 = virtualinvoke r53.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        $r40 = interfaceinvoke $r39.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z5 = interfaceinvoke $r40.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label08;
+
+        $r41 = interfaceinvoke $r40.<java.util.Iterator: java.lang.Object next()>();
+
+        r55 = (com.sun.xml.internal.ws.model.ParameterImpl) $r41;
+
+        $z6 = r55 instanceof com.sun.xml.internal.ws.model.WrapperParameter;
+
+        if $z6 == 0 goto label07;
+
+        $r43 = class "Lcom/sun/xml/internal/ws/spi/db/WrapperComposite;";
+
+        $r42 = (com.sun.xml.internal.ws.model.WrapperParameter) r55;
+
+        $r44 = virtualinvoke $r42.<com.sun.xml.internal.ws.model.WrapperParameter: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r45 = $r44.<com.sun.xml.internal.ws.spi.db.TypeInfo: java.lang.reflect.Type type>;
+
+        $z7 = virtualinvoke $r43.<java.lang.Object: boolean equals(java.lang.Object)>($r45);
+
+        if $z7 == 0 goto label07;
+
+        $r46 = (com.sun.xml.internal.ws.model.WrapperParameter) r55;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r46);
+
+     label07:
+        goto label06;
+
+     label08:
+        goto label01;
+
+     label09:
+        $z0 = interfaceinvoke $r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label10;
+
+        return;
+
+     label10:
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        $r6 = interfaceinvoke $r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label11:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label18;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r56 = (com.sun.xml.internal.ws.model.WrapperParameter) $r7;
+
+        $r8 = virtualinvoke r56.<com.sun.xml.internal.ws.model.WrapperParameter: javax.xml.namespace.QName getName()>();
+
+        $r9 = virtualinvoke $r8.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        $r10 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r9);
+
+        r57 = (com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema) $r10;
+
+        if r57 != null goto label12;
+
+        $r31 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Types types>;
+
+        $r32 = interfaceinvoke $r31.<com.sun.xml.internal.ws.wsdl.writer.document.Types: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema schema()>();
+
+        r57 = $r32;
+
+        interfaceinvoke $r32.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema targetNamespace(java.lang.String)>($r9);
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r32);
+
+     label12:
+        $r11 = interfaceinvoke r57.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/bind/v2/schemagen/xmlschema/Element;");
+
+        $r33 = (com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element) $r11;
+
+        $r12 = virtualinvoke r56.<com.sun.xml.internal.ws.model.WrapperParameter: javax.xml.namespace.QName getName()>();
+
+        $r13 = virtualinvoke $r12.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        interfaceinvoke $r33.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element: void _attribute(java.lang.String,java.lang.Object)>("name", $r13);
+
+        $r14 = virtualinvoke r56.<com.sun.xml.internal.ws.model.WrapperParameter: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r33.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element: com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element type(javax.xml.namespace.QName)>($r14);
+
+        $r15 = interfaceinvoke r57.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/bind/v2/schemagen/xmlschema/ComplexType;");
+
+        $r34 = (com.sun.xml.internal.bind.v2.schemagen.xmlschema.ComplexType) $r15;
+
+        $r16 = virtualinvoke r56.<com.sun.xml.internal.ws.model.WrapperParameter: javax.xml.namespace.QName getName()>();
+
+        $r17 = virtualinvoke $r16.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        interfaceinvoke $r34.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.ComplexType: void _attribute(java.lang.String,java.lang.Object)>("name", $r17);
+
+        $r18 = interfaceinvoke $r34.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.ComplexType: com.sun.xml.internal.bind.v2.schemagen.xmlschema.ExplicitGroup sequence()>();
+
+        $r19 = virtualinvoke r56.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r20 = interfaceinvoke $r19.<java.util.List: java.util.Iterator iterator()>();
+
+     label13:
+        $z11 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+        if $z11 == 0 goto label17;
+
+        $r21 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (com.sun.xml.internal.ws.model.ParameterImpl) $r21;
+
+        $r23 = virtualinvoke r22.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getBinding()>();
+
+        $z2 = virtualinvoke $r23.<com.sun.xml.internal.ws.api.model.ParameterBinding: boolean isBody()>();
+
+        if $z2 == 0 goto label16;
+
+        $r24 = interfaceinvoke $r18.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.ExplicitGroup: com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement element()>();
+
+        $r25 = virtualinvoke r22.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        $r26 = virtualinvoke $r25.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        interfaceinvoke $r24.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement: void _attribute(java.lang.String,java.lang.Object)>("name", $r26);
+
+        $r27 = virtualinvoke r22.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.TypeInfo getItemType()>();
+
+        r58 = $r27;
+
+        z12 = 0;
+
+        if $r27 != null goto label14;
+
+        r58 = virtualinvoke r22.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        goto label15;
+
+     label14:
+        z12 = 1;
+
+     label15:
+        $r28 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r29 = virtualinvoke $r28.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: com.sun.xml.internal.ws.spi.db.BindingContext getBindingContext()>();
+
+        $r30 = interfaceinvoke $r29.<com.sun.xml.internal.ws.spi.db.BindingContext: javax.xml.namespace.QName getTypeName(com.sun.xml.internal.ws.spi.db.TypeInfo)>(r58);
+
+        interfaceinvoke $r24.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement: com.sun.xml.internal.bind.v2.schemagen.xmlschema.Element type(javax.xml.namespace.QName)>($r30);
+
+        if z12 == 0 goto label16;
+
+        interfaceinvoke $r24.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement: com.sun.xml.internal.bind.v2.schemagen.xmlschema.Occurs minOccurs(int)>(0);
+
+        interfaceinvoke $r24.<com.sun.xml.internal.bind.v2.schemagen.xmlschema.LocalElement: com.sun.xml.internal.bind.v2.schemagen.xmlschema.Occurs maxOccurs(java.lang.String)>("unbounded");
+
+     label16:
+        goto label13;
+
+     label17:
+        goto label11;
+
+     label18:
+        return;
+    }
+
+    protected void generateMessages()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        java.util.Iterator $r3;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r5;
+        java.util.Collection $r2;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r1;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r6;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.util.Collection getJavaMethods()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.sun.xml.internal.ws.model.JavaMethodImpl) $r4;
+
+        $r6 = virtualinvoke r5.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAPMessages(com.sun.xml.internal.ws.model.JavaMethodImpl,com.sun.xml.internal.ws.api.model.soap.SOAPBinding)>(r5, $r6);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void generateSOAPMessages(com.sun.xml.internal.ws.model.JavaMethodImpl, com.sun.xml.internal.ws.api.model.soap.SOAPBinding)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r1;
+        com.sun.xml.internal.ws.api.model.MEP $r12, $r13;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r8, $r20;
+        java.util.Set $r22, $r29;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding r0;
+        javax.xml.namespace.QName $r19, $r41, $r51, $r55, $r60, $r70, $r74, r80;
+        com.sun.xml.internal.ws.wsdl.writer.document.Part $r27, $r28, $r38, $r40, $r46, $r48, $r52, $r54, $r57, $r59, $r65, $r67, $r71, $r73;
+        java.lang.String $r5, $r18, $r21, $r32, $r39, $r47, $r53, $r58, $r66, $r72;
+        com.sun.xml.internal.ws.model.ParameterImpl r75, r76, r77, r78;
+        com.sun.xml.internal.ws.wsdl.writer.document.Message $r3, $r6, $r24, $r25, $r31, $r33;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r4;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r7, $r26, $r34;
+        com.sun.xml.internal.ws.spi.db.XMLBridge $r49, $r68;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        com.sun.xml.internal.ws.spi.db.TypeInfo $r17, $r50, $r69;
+        com.sun.xml.internal.ws.model.WrapperParameter $r42, $r61;
+        java.util.List $r10, $r14, $r35, $r43, $r62;
+        com.sun.xml.internal.ws.model.CheckedExceptionImpl r79;
+        com.sun.xml.internal.ws.spi.db.BindingContext $r9;
+        java.util.Iterator $r11, $r15, $r36, $r44, $r63;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r2, $r23, $r30;
+        java.lang.Object $r16, $r37, $r45, $r56, $r64;
+
+        r1 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r4 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        r0 := @parameter1: com.sun.xml.internal.ws.api.model.soap.SOAPBinding;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: boolean isDocLit()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Message message()>();
+
+        $r5 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getRequestMessageName()>();
+
+        $r6 = interfaceinvoke $r3.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Message name(java.lang.String)>($r5);
+
+        $r7 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addInputMessageExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r6, r4);
+
+        $r8 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: com.sun.xml.internal.ws.spi.db.BindingContext getBindingContext()>();
+
+        $r10 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label08;
+
+        $r56 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r75 = (com.sun.xml.internal.ws.model.ParameterImpl) $r56;
+
+        if $z0 == 0 goto label03;
+
+        $z8 = virtualinvoke r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean isHeaderParameter(com.sun.xml.internal.ws.model.ParameterImpl)>(r75);
+
+        if $z8 == 0 goto label02;
+
+     label02:
+        $r71 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r72 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r73 = interfaceinvoke $r71.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r72);
+
+        $r74 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r73.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part element(javax.xml.namespace.QName)>($r74);
+
+        goto label07;
+
+     label03:
+        $z6 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: boolean isWrapperStyle()>();
+
+        if $z6 == 0 goto label06;
+
+        $r61 = (com.sun.xml.internal.ws.model.WrapperParameter) r75;
+
+        $r62 = virtualinvoke $r61.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r63 = interfaceinvoke $r62.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z7 = interfaceinvoke $r63.<java.util.Iterator: boolean hasNext()>();
+
+        if $z7 == 0 goto label05;
+
+        $r64 = interfaceinvoke $r63.<java.util.Iterator: java.lang.Object next()>();
+
+        r76 = (com.sun.xml.internal.ws.model.ParameterImpl) $r64;
+
+        $r65 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r66 = virtualinvoke r76.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r67 = interfaceinvoke $r65.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r66);
+
+        $r68 = virtualinvoke r76.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.XMLBridge getXMLBridge()>();
+
+        $r69 = interfaceinvoke $r68.<com.sun.xml.internal.ws.spi.db.XMLBridge: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r70 = interfaceinvoke $r9.<com.sun.xml.internal.ws.spi.db.BindingContext: javax.xml.namespace.QName getTypeName(com.sun.xml.internal.ws.spi.db.TypeInfo)>($r69);
+
+        interfaceinvoke $r67.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part type(javax.xml.namespace.QName)>($r70);
+
+        goto label04;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r57 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r58 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r59 = interfaceinvoke $r57.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r58);
+
+        $r60 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r59.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part element(javax.xml.namespace.QName)>($r60);
+
+     label07:
+        goto label01;
+
+     label08:
+        $r12 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $r13 = <com.sun.xml.internal.ws.api.model.MEP: com.sun.xml.internal.ws.api.model.MEP ONE_WAY>;
+
+        if $r12 == $r13 goto label15;
+
+        $r30 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r31 = interfaceinvoke $r30.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Message message()>();
+
+        $r32 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getResponseMessageName()>();
+
+        $r33 = interfaceinvoke $r31.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Message name(java.lang.String)>($r32);
+
+        $r34 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r34.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addOutputMessageExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r33, r4);
+
+        $r35 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        $r36 = interfaceinvoke $r35.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z3 = interfaceinvoke $r36.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label15;
+
+        $r37 = interfaceinvoke $r36.<java.util.Iterator: java.lang.Object next()>();
+
+        r77 = (com.sun.xml.internal.ws.model.ParameterImpl) $r37;
+
+        if $z0 == 0 goto label10;
+
+        $r52 = interfaceinvoke $r33.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r53 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r54 = interfaceinvoke $r52.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r53);
+
+        $r55 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r54.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part element(javax.xml.namespace.QName)>($r55);
+
+        goto label14;
+
+     label10:
+        $z4 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: boolean isWrapperStyle()>();
+
+        if $z4 == 0 goto label13;
+
+        $r42 = (com.sun.xml.internal.ws.model.WrapperParameter) r77;
+
+        $r43 = virtualinvoke $r42.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r44 = interfaceinvoke $r43.<java.util.List: java.util.Iterator iterator()>();
+
+     label11:
+        $z5 = interfaceinvoke $r44.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label12;
+
+        $r45 = interfaceinvoke $r44.<java.util.Iterator: java.lang.Object next()>();
+
+        r78 = (com.sun.xml.internal.ws.model.ParameterImpl) $r45;
+
+        $r46 = interfaceinvoke $r33.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r47 = virtualinvoke r78.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r48 = interfaceinvoke $r46.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r47);
+
+        $r49 = virtualinvoke r78.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.XMLBridge getXMLBridge()>();
+
+        $r50 = interfaceinvoke $r49.<com.sun.xml.internal.ws.spi.db.XMLBridge: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r51 = interfaceinvoke $r9.<com.sun.xml.internal.ws.spi.db.BindingContext: javax.xml.namespace.QName getTypeName(com.sun.xml.internal.ws.spi.db.TypeInfo)>($r50);
+
+        interfaceinvoke $r48.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part type(javax.xml.namespace.QName)>($r51);
+
+        goto label11;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r38 = interfaceinvoke $r33.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r39 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $r40 = interfaceinvoke $r38.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r40.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part element(javax.xml.namespace.QName)>($r41);
+
+     label14:
+        goto label09;
+
+     label15:
+        $r14 = virtualinvoke r4.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getCheckedExceptions()>();
+
+        $r15 = interfaceinvoke $r14.<java.util.List: java.util.Iterator iterator()>();
+
+     label16:
+        $z9 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label18;
+
+        $r16 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r79 = (com.sun.xml.internal.ws.model.CheckedExceptionImpl) $r16;
+
+        $r17 = virtualinvoke r79.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: com.sun.xml.internal.ws.spi.db.TypeInfo getDetailType()>();
+
+        r80 = $r17.<com.sun.xml.internal.ws.spi.db.TypeInfo: javax.xml.namespace.QName tagName>;
+
+        $r18 = virtualinvoke r79.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r19 = new javax.xml.namespace.QName;
+
+        $r20 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r21 = virtualinvoke $r20.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        specialinvoke $r19.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r21, $r18);
+
+        $r22 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.Set processedExceptions>;
+
+        $z2 = interfaceinvoke $r22.<java.util.Set: boolean contains(java.lang.Object)>($r19);
+
+        if $z2 == 0 goto label17;
+
+        goto label16;
+
+     label17:
+        $r23 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r24 = interfaceinvoke $r23.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Message message()>();
+
+        $r25 = interfaceinvoke $r24.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Message name(java.lang.String)>($r18);
+
+        $r26 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r26.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addFaultMessageExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod,com.sun.xml.internal.ws.api.model.CheckedException)>($r25, r4, r79);
+
+        $r27 = interfaceinvoke $r25.<com.sun.xml.internal.ws.wsdl.writer.document.Message: com.sun.xml.internal.ws.wsdl.writer.document.Part part()>();
+
+        $r28 = interfaceinvoke $r27.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part name(java.lang.String)>("fault");
+
+        interfaceinvoke $r28.<com.sun.xml.internal.ws.wsdl.writer.document.Part: com.sun.xml.internal.ws.wsdl.writer.document.Part element(javax.xml.namespace.QName)>(r80);
+
+        $r29 = r1.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.Set processedExceptions>;
+
+        interfaceinvoke $r29.<java.util.Set: boolean add(java.lang.Object)>($r19);
+
+        goto label16;
+
+     label18:
+        return;
+    }
+
+    protected void generatePortType()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r12;
+        com.sun.xml.internal.ws.api.model.MEP $r18;
+        com.sun.xml.internal.ws.wsdl.writer.document.PortType $r2, $r6;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r7, $r16, $r29;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r3, $r8, $r22;
+        int[] $r17;
+        boolean $z0, $z1;
+        java.util.Collection $r9;
+        java.util.List $r30;
+        javax.xml.namespace.QName $r4, $r21;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation $r13, $r15;
+        com.sun.xml.internal.ws.model.CheckedExceptionImpl r20;
+        int $i0, $i1;
+        java.lang.String $r5, $r14, $r23, $r24, $r27;
+        java.util.Iterator $r10, $r31;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r1;
+        com.sun.xml.internal.ws.wsdl.writer.document.FaultType $r25, $r26, $r28;
+        java.lang.Object $r11, $r19;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions portDefinitions>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.PortType portType()>();
+
+        $r3 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getPortTypeName()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r6 = interfaceinvoke $r2.<com.sun.xml.internal.ws.wsdl.writer.document.PortType: com.sun.xml.internal.ws.wsdl.writer.document.PortType name(java.lang.String)>($r5);
+
+        $r7 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addPortTypeExtension(com.sun.xml.internal.txw2.TypedXmlWriter)>($r6);
+
+        $r8 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.util.Collection getJavaMethods()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (com.sun.xml.internal.ws.model.JavaMethodImpl) $r11;
+
+        $r13 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.PortType: com.sun.xml.internal.ws.wsdl.writer.document.Operation operation()>();
+
+        $r14 = virtualinvoke r12.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getOperationName()>();
+
+        $r15 = interfaceinvoke $r13.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.Operation name(java.lang.String)>($r14);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>($r15, r12);
+
+        $r16 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r16.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addOperationExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r15, r12);
+
+        $r17 = <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator$1: int[] $SwitchMap$com$sun$xml$internal$ws$api$model$MEP>;
+
+        $r18 = virtualinvoke r12.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $i0 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.model.MEP: int ordinal()>();
+
+        $i1 = $r17[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateInputMessage(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>($r15, r12);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateOutputMessage(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>($r15, r12);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateInputMessage(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>($r15, r12);
+
+        goto label4;
+
+     label4:
+        $r30 = virtualinvoke r12.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getCheckedExceptions()>();
+
+        $r31 = interfaceinvoke $r30.<java.util.List: java.util.Iterator iterator()>();
+
+     label5:
+        $z1 = interfaceinvoke $r31.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label6;
+
+        $r19 = interfaceinvoke $r31.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (com.sun.xml.internal.ws.model.CheckedExceptionImpl) $r19;
+
+        $r21 = new javax.xml.namespace.QName;
+
+        $r22 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r23 = virtualinvoke $r22.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r24 = virtualinvoke r20.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        specialinvoke $r21.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r23, $r24);
+
+        $r25 = interfaceinvoke $r15.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.FaultType fault()>();
+
+        $r26 = interfaceinvoke $r25.<com.sun.xml.internal.ws.wsdl.writer.document.FaultType: com.sun.xml.internal.ws.wsdl.writer.document.FaultType message(javax.xml.namespace.QName)>($r21);
+
+        $r27 = virtualinvoke r20.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r28 = interfaceinvoke $r26.<com.sun.xml.internal.ws.wsdl.writer.document.FaultType: com.sun.xml.internal.ws.wsdl.writer.document.FaultType name(java.lang.String)>($r27);
+
+        $r29 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r29.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addOperationFaultExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod,com.sun.xml.internal.ws.api.model.CheckedException)>($r28, r12, r20);
+
+        goto label5;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    protected boolean isWrapperStyle(com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r6;
+        com.sun.xml.internal.ws.model.ParameterImpl r5;
+        java.util.Iterator $r3;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r0;
+        java.util.List $r1, $r2;
+        int $i0;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r6 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.sun.xml.internal.ws.model.ParameterImpl) $r4;
+
+        $z0 = virtualinvoke r5.<com.sun.xml.internal.ws.model.ParameterImpl: boolean isWrapperStyle()>();
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    protected boolean isRpcLit(com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r4;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r1;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r0;
+        javax.jws.soap.SOAPBinding$Style $r2, $r3;
+        boolean $z0;
+
+        r4 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Style getStyle()>();
+
+        $r3 = <javax.jws.soap.SOAPBinding$Style: javax.jws.soap.SOAPBinding$Style RPC>;
+
+        if $r2 != $r3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected void generateParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r3;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation r4;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r0;
+        com.sun.xml.internal.ws.api.model.MEP $r1, $r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r4 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.document.Operation;
+
+        r0 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $r2 = <com.sun.xml.internal.ws.api.model.MEP: com.sun.xml.internal.ws.api.model.MEP ONE_WAY>;
+
+        if $r1 != $r2 goto label1;
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean isRpcLit(com.sun.xml.internal.ws.model.JavaMethodImpl)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateRpcParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>(r4, r0);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateDocumentParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation,com.sun.xml.internal.ws.model.JavaMethodImpl)>(r4, r0);
+
+     label3:
+        return;
+    }
+
+    protected void generateRpcParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation r6;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        java.util.HashSet $r1;
+        int $i0, $i1, i2;
+        java.lang.String $r7, $r10;
+        boolean $z0, $z1;
+        com.sun.xml.internal.ws.model.ParameterImpl r9;
+        java.util.Iterator $r5;
+        java.util.List $r4;
+        java.lang.StringBuilder $r0;
+        java.lang.Object $r8;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r6 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.document.Operation;
+
+        r3 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r4 = virtualinvoke r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.List sortMethodParameters(com.sun.xml.internal.ws.model.JavaMethodImpl)>(r3);
+
+        i2 = 0;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.sun.xml.internal.ws.model.ParameterImpl) $r8;
+
+        $i0 = virtualinvoke r9.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        if $i0 < 0 goto label3;
+
+        $r10 = virtualinvoke r9.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $z1 = interfaceinvoke $r1.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+        if $z1 != 0 goto label3;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        if $i1 <= 0 goto label2;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label3:
+        goto label1;
+
+     label4:
+        if i2 <= 1 goto label5;
+
+        $r7 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.Operation parameterOrder(java.lang.String)>($r7);
+
+     label5:
+        return;
+    }
+
+    protected void generateDocumentParameterOrder(com.sun.xml.internal.ws.wsdl.writer.document.Operation, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation r6;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        java.util.HashSet $r1;
+        int $i0, $i1, i2;
+        java.lang.String $r7, $r10;
+        boolean $z0, $z1;
+        com.sun.xml.internal.ws.model.ParameterImpl r9;
+        java.util.Iterator $r5;
+        java.util.List $r4;
+        java.lang.StringBuilder $r0;
+        java.lang.Object $r8;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r6 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.document.Operation;
+
+        r3 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r4 = virtualinvoke r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.List sortMethodParameters(com.sun.xml.internal.ws.model.JavaMethodImpl)>(r3);
+
+        i2 = 0;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r8 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.sun.xml.internal.ws.model.ParameterImpl) $r8;
+
+        $i0 = virtualinvoke r9.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        if $i0 >= 0 goto label2;
+
+        goto label1;
+
+     label2:
+        $r10 = virtualinvoke r9.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+        if $z0 != 0 goto label4;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        if $i1 <= 0 goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label4:
+        goto label1;
+
+     label5:
+        if i2 <= 1 goto label6;
+
+        $r7 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.Operation parameterOrder(java.lang.String)>($r7);
+
+     label6:
+        return;
+    }
+
+    protected java.util.List sortMethodParameters(com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.xml.internal.ws.model.WrapperParameter $r16, $r19;
+        java.util.List $r4, $r5, $r11, $r13, $r17, $r20;
+        java.util.ArrayList $r1;
+        java.util.HashSet $r0;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        com.sun.xml.internal.ws.model.ParameterImpl r10, r21, r22, r23, r24;
+        java.util.Iterator $r6, $r12, $r14;
+        java.lang.Object $r7, $r8, $r9, $r15, $r18;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $z0 = virtualinvoke r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean isRpcLit(com.sun.xml.internal.ws.model.JavaMethodImpl)>(r3);
+
+        if $z0 == 0 goto label09;
+
+        $r11 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z3 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label04;
+
+        $r18 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r21 = (com.sun.xml.internal.ws.model.ParameterImpl) $r18;
+
+        $z6 = r21 instanceof com.sun.xml.internal.ws.model.WrapperParameter;
+
+        if $z6 == 0 goto label02;
+
+        $r19 = (com.sun.xml.internal.ws.model.WrapperParameter) r21;
+
+        $r20 = virtualinvoke $r19.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean addAll(java.util.Collection)>($r20);
+
+        goto label03;
+
+     label02:
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>(r21);
+
+     label03:
+        goto label01;
+
+     label04:
+        $r13 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z4 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label08;
+
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (com.sun.xml.internal.ws.model.ParameterImpl) $r15;
+
+        $z5 = r22 instanceof com.sun.xml.internal.ws.model.WrapperParameter;
+
+        if $z5 == 0 goto label06;
+
+        $r16 = (com.sun.xml.internal.ws.model.WrapperParameter) r22;
+
+        $r17 = virtualinvoke $r16.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean addAll(java.util.Collection)>($r17);
+
+        goto label07;
+
+     label06:
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>(r22);
+
+     label07:
+        goto label05;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean addAll(java.util.Collection)>($r4);
+
+        $r5 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean addAll(java.util.Collection)>($r5);
+
+     label10:
+        $r6 = interfaceinvoke $r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        $z1 = interfaceinvoke $r0.<java.util.Set: boolean isEmpty()>();
+
+        if $z1 == 0 goto label11;
+
+        return $r1;
+
+     label11:
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r23 = (com.sun.xml.internal.ws.model.ParameterImpl) $r7;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r23);
+
+        i5 = 1;
+
+     label12:
+        $i0 = interfaceinvoke $r0.<java.util.Set: int size()>();
+
+        if i5 >= $i0 goto label17;
+
+        $r8 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (com.sun.xml.internal.ws.model.ParameterImpl) $r8;
+
+        i6 = 0;
+
+     label13:
+        if i6 >= i5 goto label16;
+
+        $r9 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i6);
+
+        r10 = (com.sun.xml.internal.ws.model.ParameterImpl) $r9;
+
+        $i1 = virtualinvoke r24.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        $i2 = virtualinvoke r10.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        if $i1 != $i2 goto label14;
+
+        $z2 = r24 instanceof com.sun.xml.internal.ws.model.WrapperParameter;
+
+        if $z2 == 0 goto label14;
+
+        goto label16;
+
+     label14:
+        $i3 = virtualinvoke r24.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        $i4 = virtualinvoke r10.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        if $i3 >= $i4 goto label15;
+
+        goto label16;
+
+     label15:
+        i6 = i6 + 1;
+
+        goto label13;
+
+     label16:
+        interfaceinvoke $r1.<java.util.List: void add(int,java.lang.Object)>(i6, r24);
+
+        i5 = i5 + 1;
+
+        goto label12;
+
+     label17:
+        return $r1;
+    }
+
+    protected boolean isBodyParameter(com.sun.xml.internal.ws.model.ParameterImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.model.ParameterImpl r0;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.ParameterImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getBinding()>();
+
+        $z0 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.model.ParameterBinding: boolean isBody()>();
+
+        return $z0;
+    }
+
+    protected boolean isHeaderParameter(com.sun.xml.internal.ws.model.ParameterImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.model.ParameterImpl r0;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.ParameterImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getBinding()>();
+
+        $z0 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.model.ParameterBinding: boolean isHeader()>();
+
+        return $z0;
+    }
+
+    protected boolean isAttachmentParameter(com.sun.xml.internal.ws.model.ParameterImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.model.ParameterImpl r0;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.ParameterImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getBinding()>();
+
+        $z0 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.model.ParameterBinding: boolean isAttachment()>();
+
+        return $z0;
+    }
+
+    protected void generateBinding()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r14;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r7;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r3, $r8, $r10;
+        boolean $z0, $z1, $z2, z3;
+        java.util.Collection $r11;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding $r18;
+        com.sun.xml.internal.ws.api.BindingID $r20, $r26, $r31;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r15;
+        javax.jws.soap.SOAPBinding$Style $r22, $r23, $r28, $r29;
+        javax.xml.namespace.QName $r4, $r9;
+        com.sun.xml.internal.ws.api.SOAPVersion $r16, $r17, $r32, $r33;
+        com.sun.xml.internal.ws.wsdl.writer.document.Binding $r2, $r6;
+        java.lang.String $r5, $r21, $r27;
+        java.util.Iterator $r12;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r1;
+        com.sun.xml.internal.ws.api.WSBinding $r19, $r25, $r30;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding $r24;
+        java.lang.Object $r13;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Binding binding()>();
+
+        $r3 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getBoundPortTypeName()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r6 = interfaceinvoke $r2.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.Binding name(java.lang.String)>($r5);
+
+        $r7 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingExtension(com.sun.xml.internal.txw2.TypedXmlWriter)>($r6);
+
+        $r8 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getPortTypeName()>();
+
+        interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.Binding type(javax.xml.namespace.QName)>($r9);
+
+        z3 = 1;
+
+        $r10 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r11 = virtualinvoke $r10.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.util.Collection getJavaMethods()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (com.sun.xml.internal.ws.model.JavaMethodImpl) $r13;
+
+        if z3 == 0 goto label07;
+
+        $r15 = virtualinvoke r14.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r16 = virtualinvoke $r15.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        $r17 = <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion SOAP_12>;
+
+        if $r16 != $r17 goto label04;
+
+        $r24 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding soap12Binding()>();
+
+        $r25 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r26 = interfaceinvoke $r25.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        $r27 = virtualinvoke $r26.<com.sun.xml.internal.ws.api.BindingID: java.lang.String getTransport()>();
+
+        interfaceinvoke $r24.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding transport(java.lang.String)>($r27);
+
+        $r28 = virtualinvoke $r15.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Style getStyle()>();
+
+        $r29 = <javax.jws.soap.SOAPBinding$Style: javax.jws.soap.SOAPBinding$Style DOCUMENT>;
+
+        $z2 = virtualinvoke $r28.<javax.jws.soap.SOAPBinding$Style: boolean equals(java.lang.Object)>($r29);
+
+        if $z2 == 0 goto label02;
+
+        interfaceinvoke $r24.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding style(java.lang.String)>("document");
+
+        goto label03;
+
+     label02:
+        interfaceinvoke $r24.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPBinding style(java.lang.String)>("rpc");
+
+     label03:
+        goto label06;
+
+     label04:
+        $r18 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding soapBinding()>();
+
+        $r19 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r20 = interfaceinvoke $r19.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        $r21 = virtualinvoke $r20.<com.sun.xml.internal.ws.api.BindingID: java.lang.String getTransport()>();
+
+        interfaceinvoke $r18.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding transport(java.lang.String)>($r21);
+
+        $r22 = virtualinvoke $r15.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Style getStyle()>();
+
+        $r23 = <javax.jws.soap.SOAPBinding$Style: javax.jws.soap.SOAPBinding$Style DOCUMENT>;
+
+        $z1 = virtualinvoke $r22.<javax.jws.soap.SOAPBinding$Style: boolean equals(java.lang.Object)>($r23);
+
+        if $z1 == 0 goto label05;
+
+        interfaceinvoke $r18.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding style(java.lang.String)>("document");
+
+        goto label06;
+
+     label05:
+        interfaceinvoke $r18.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPBinding style(java.lang.String)>("rpc");
+
+     label06:
+        z3 = 0;
+
+     label07:
+        $r30 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r31 = interfaceinvoke $r30.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        $r32 = virtualinvoke $r31.<com.sun.xml.internal.ws.api.BindingID: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        $r33 = <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion SOAP_12>;
+
+        if $r32 != $r33 goto label08;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAP12BindingOperation(com.sun.xml.internal.ws.model.JavaMethodImpl,com.sun.xml.internal.ws.wsdl.writer.document.Binding)>(r14, $r6);
+
+        goto label09;
+
+     label08:
+        virtualinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateBindingOperation(com.sun.xml.internal.ws.model.JavaMethodImpl,com.sun.xml.internal.ws.wsdl.writer.document.Binding)>(r14, $r6);
+
+     label09:
+        goto label01;
+
+     label10:
+        return;
+    }
+
+    protected void generateBindingOperation(com.sun.xml.internal.ws.model.JavaMethodImpl, com.sun.xml.internal.ws.wsdl.writer.document.Binding)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r5;
+        com.sun.xml.internal.ws.api.model.MEP $r25, $r26;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r7;
+        com.sun.xml.internal.ws.wsdl.writer.document.Fault $r28, $r30;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r14;
+        java.lang.StringBuilder $r46, $r48, $r67, r78;
+        javax.xml.namespace.QName $r9, $r44, $r62, $r81;
+        com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType $r1, $r4;
+        java.util.ArrayList $r11, $r12;
+        com.sun.xml.internal.ws.wsdl.writer.document.Binding r0;
+        java.lang.String $r3, $r8, $r10, $r16, $r29, $r34, $r45, $r49, $r55, $r63, $r66, $r71, $r73, $r80, $r82;
+        com.sun.xml.internal.ws.model.ParameterImpl $r43, r54, $r61, r75, r76, $r79;
+        javax.xml.ws.WebServiceException $r24;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType r74, r77;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r2;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r6, $r18, $r31, $r38;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.xml.internal.ws.model.WrapperParameter $r50, $r68;
+        com.sun.xml.internal.txw2.TypedXmlWriter $r19, $r32, $r39;
+        java.util.List $r13, $r36, $r40, $r51, $r58, $r69, $r83;
+        javax.jws.soap.SOAPBinding$Style $r20, $r21;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPOperation $r15;
+        com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType $r17, $r37;
+        com.sun.xml.internal.ws.model.CheckedExceptionImpl r85;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPFault $r33, $r35;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        java.util.Iterator $r41, $r47, $r52, $r56, $r59, $r64, $r70, $r84;
+        javax.jws.soap.SOAPBinding$Use $r22, $r23;
+        java.lang.Object $r27, $r42, $r53, $r57, $r60, $r65, $r72;
+
+        r5 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        r0 := @parameter1: com.sun.xml.internal.ws.wsdl.writer.document.Binding;
+
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType operation()>();
+
+        $r3 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getOperationName()>();
+
+        $r4 = interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType name(java.lang.String)>($r3);
+
+        $r6 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r6.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r4, r2);
+
+        $r7 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r8 = virtualinvoke $r7.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r9 = new javax.xml.namespace.QName;
+
+        $r10 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getOperationName()>();
+
+        specialinvoke $r9.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r8, $r10);
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>()>();
+
+        $r12 = new java.util.ArrayList;
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>()>();
+
+        $r13 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void splitParameters(java.util.List,java.util.List,java.util.List)>($r11, $r12, $r13);
+
+        $r14 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r15 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPOperation soapOperation()>();
+
+        $r16 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: java.lang.String getSOAPAction()>();
+
+        interfaceinvoke $r15.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPOperation: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPOperation soapAction(java.lang.String)>($r16);
+
+        $r17 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType input()>();
+
+        $r18 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r18.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationInputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r17, r2);
+
+        $r19 = interfaceinvoke $r17.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap/Body;");
+
+        r74 = (com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType) $r19;
+
+        $r20 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Style getStyle()>();
+
+        $r21 = <javax.jws.soap.SOAPBinding$Style: javax.jws.soap.SOAPBinding$Style RPC>;
+
+        $z0 = virtualinvoke $r20.<javax.jws.soap.SOAPBinding$Style: boolean equals(java.lang.Object)>($r21);
+
+        $r22 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Use getUse()>();
+
+        $r23 = <javax.jws.soap.SOAPBinding$Use: javax.jws.soap.SOAPBinding$Use LITERAL>;
+
+        if $r22 != $r23 goto label09;
+
+        interfaceinvoke r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType use(java.lang.String)>("literal");
+
+        $i0 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label08;
+
+        $i4 = interfaceinvoke $r11.<java.util.List: int size()>();
+
+        if $i4 <= 0 goto label06;
+
+        $r64 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+        $r65 = interfaceinvoke $r64.<java.util.Iterator: java.lang.Object next()>();
+
+        r75 = (com.sun.xml.internal.ws.model.ParameterImpl) $r65;
+
+        if $z0 == 0 goto label04;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        i6 = 0;
+
+        $r68 = (com.sun.xml.internal.ws.model.WrapperParameter) r75;
+
+        $r69 = virtualinvoke $r68.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r70 = interfaceinvoke $r69.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z3 = interfaceinvoke $r70.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label03;
+
+        $r72 = interfaceinvoke $r70.<java.util.Iterator: java.lang.Object next()>();
+
+        r76 = (com.sun.xml.internal.ws.model.ParameterImpl) $r72;
+
+        $i5 = i6;
+
+        i6 = i6 + 1;
+
+        if $i5 <= 0 goto label02;
+
+        virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label02:
+        $r73 = virtualinvoke r76.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r73);
+
+        goto label01;
+
+     label03:
+        $r71 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType parts(java.lang.String)>($r71);
+
+        goto label05;
+
+     label04:
+        $r66 = virtualinvoke r75.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        interfaceinvoke r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType parts(java.lang.String)>($r66);
+
+     label05:
+        goto label07;
+
+     label06:
+        interfaceinvoke r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType parts(java.lang.String)>("");
+
+     label07:
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAPHeaders(com.sun.xml.internal.txw2.TypedXmlWriter,java.util.List,javax.xml.namespace.QName)>($r17, $r12, $r9);
+
+     label08:
+        if $z0 == 0 goto label10;
+
+        $r58 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r59 = interfaceinvoke $r58.<java.util.List: java.util.Iterator iterator()>();
+
+        $r60 = interfaceinvoke $r59.<java.util.Iterator: java.lang.Object next()>();
+
+        $r61 = (com.sun.xml.internal.ws.model.ParameterImpl) $r60;
+
+        $r62 = virtualinvoke $r61.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        $r63 = virtualinvoke $r62.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType namespace(java.lang.String)>($r63);
+
+        goto label10;
+
+     label09:
+        $r24 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r24.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>("encoded use is not supported");
+
+        throw $r24;
+
+     label10:
+        $r25 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $r26 = <com.sun.xml.internal.ws.api.model.MEP: com.sun.xml.internal.ws.api.model.MEP ONE_WAY>;
+
+        if $r25 == $r26 goto label19;
+
+        interfaceinvoke $r11.<java.util.List: void clear()>();
+
+        interfaceinvoke $r12.<java.util.List: void clear()>();
+
+        $r36 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void splitParameters(java.util.List,java.util.List,java.util.List)>($r11, $r12, $r36);
+
+        $r37 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType output()>();
+
+        $r38 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r38.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationOutputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r37, r2);
+
+        $r39 = interfaceinvoke $r37.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap/Body;");
+
+        r77 = (com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType) $r39;
+
+        interfaceinvoke r77.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType use(java.lang.String)>("literal");
+
+        $i1 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        if $i1 <= 0 goto label18;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        r78 = $r46;
+
+        $i2 = interfaceinvoke $r11.<java.util.List: int size()>();
+
+        if $i2 <= 0 goto label17;
+
+        $r47 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+        $z1 = interfaceinvoke $r47.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label11;
+
+        $r56 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+        $r57 = interfaceinvoke $r56.<java.util.Iterator: java.lang.Object next()>();
+
+        $r79 = (com.sun.xml.internal.ws.model.ParameterImpl) $r57;
+
+        goto label12;
+
+     label11:
+        $r79 = null;
+
+     label12:
+        if $r79 == null goto label17;
+
+        if $z0 == 0 goto label16;
+
+        i7 = 0;
+
+        $r50 = (com.sun.xml.internal.ws.model.WrapperParameter) $r79;
+
+        $r51 = virtualinvoke $r50.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r52 = interfaceinvoke $r51.<java.util.List: java.util.Iterator iterator()>();
+
+     label13:
+        $z2 = interfaceinvoke $r52.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label15;
+
+        $r53 = interfaceinvoke $r52.<java.util.Iterator: java.lang.Object next()>();
+
+        r54 = (com.sun.xml.internal.ws.model.ParameterImpl) $r53;
+
+        $i3 = i7;
+
+        i7 = i7 + 1;
+
+        if $i3 <= 0 goto label14;
+
+        virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+     label14:
+        $r55 = virtualinvoke r54.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r55);
+
+        goto label13;
+
+     label15:
+        goto label17;
+
+     label16:
+        $r48 = new java.lang.StringBuilder;
+
+        $r49 = virtualinvoke $r79.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>(java.lang.String)>($r49);
+
+        r78 = $r48;
+
+     label17:
+        $r80 = virtualinvoke r78.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r77.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType parts(java.lang.String)>($r80);
+
+        $r81 = new javax.xml.namespace.QName;
+
+        $r82 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getResponseMessageName()>();
+
+        specialinvoke $r81.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r8, $r82);
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAPHeaders(com.sun.xml.internal.txw2.TypedXmlWriter,java.util.List,javax.xml.namespace.QName)>($r37, $r12, $r81);
+
+     label18:
+        if $z0 == 0 goto label19;
+
+        $r40 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r41 = interfaceinvoke $r40.<java.util.List: java.util.Iterator iterator()>();
+
+        $r42 = interfaceinvoke $r41.<java.util.Iterator: java.lang.Object next()>();
+
+        $r43 = (com.sun.xml.internal.ws.model.ParameterImpl) $r42;
+
+        $r44 = virtualinvoke $r43.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        $r45 = virtualinvoke $r44.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke r77.<com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType namespace(java.lang.String)>($r45);
+
+     label19:
+        $r83 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getCheckedExceptions()>();
+
+        $r84 = interfaceinvoke $r83.<java.util.List: java.util.Iterator iterator()>();
+
+     label20:
+        $z4 = interfaceinvoke $r84.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label21;
+
+        $r27 = interfaceinvoke $r84.<java.util.Iterator: java.lang.Object next()>();
+
+        r85 = (com.sun.xml.internal.ws.model.CheckedExceptionImpl) $r27;
+
+        $r28 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.Fault fault()>();
+
+        $r29 = virtualinvoke r85.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r30 = interfaceinvoke $r28.<com.sun.xml.internal.ws.wsdl.writer.document.Fault: com.sun.xml.internal.ws.wsdl.writer.document.Fault name(java.lang.String)>($r29);
+
+        $r31 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r31.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationFaultExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod,com.sun.xml.internal.ws.api.model.CheckedException)>($r30, r2, r85);
+
+        $r32 = interfaceinvoke $r30.<com.sun.xml.internal.ws.wsdl.writer.document.Fault: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap/SOAPFault;");
+
+        $r33 = (com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPFault) $r32;
+
+        $r34 = virtualinvoke r85.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r35 = interfaceinvoke $r33.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPFault: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPFault name(java.lang.String)>($r34);
+
+        interfaceinvoke $r35.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPFault: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType use(java.lang.String)>("literal");
+
+        goto label20;
+
+     label21:
+        return;
+    }
+
+    protected void generateSOAP12BindingOperation(com.sun.xml.internal.ws.model.JavaMethodImpl, com.sun.xml.internal.ws.wsdl.writer.document.Binding)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r5;
+        com.sun.xml.internal.ws.api.model.MEP $r24, $r25;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r7;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType $r75, r78;
+        com.sun.xml.internal.ws.wsdl.writer.document.Fault $r27, $r29;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r14;
+        java.lang.StringBuilder $r50, $r67;
+        javax.xml.namespace.QName $r9, $r43, $r45, $r62;
+        com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType $r1, $r4;
+        java.util.ArrayList $r11, $r12;
+        com.sun.xml.internal.ws.wsdl.writer.document.Binding r0;
+        java.lang.String $r3, $r8, $r10, $r15, $r28, $r33, $r44, $r46, $r49, $r54, $r57, $r63, $r66, $r71, $r73;
+        com.sun.xml.internal.ws.model.ParameterImpl $r42, r56, $r61, r76, r77, r79;
+        javax.xml.ws.WebServiceException $r23;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r2;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r6, $r17, $r30, $r37;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPFault $r32, $r34;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.xml.internal.ws.model.WrapperParameter $r51, $r68;
+        com.sun.xml.internal.txw2.TypedXmlWriter $r18, $r31, $r38;
+        java.util.List $r13, $r35, $r39, $r52, $r58, $r69, $r80;
+        javax.jws.soap.SOAPBinding$Style $r19, $r20;
+        com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType $r16, $r36;
+        com.sun.xml.internal.ws.model.CheckedExceptionImpl r82;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        java.util.Iterator $r40, $r47, $r53, $r59, $r64, $r70, $r81;
+        javax.jws.soap.SOAPBinding$Use $r21, $r22;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPOperation $r74;
+        java.lang.Object $r26, $r41, $r48, $r55, $r60, $r65, $r72;
+
+        r5 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        r0 := @parameter1: com.sun.xml.internal.ws.wsdl.writer.document.Binding;
+
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.document.Binding: com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType operation()>();
+
+        $r3 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getOperationName()>();
+
+        $r4 = interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType name(java.lang.String)>($r3);
+
+        $r6 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r6.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r4, r2);
+
+        $r7 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r8 = virtualinvoke $r7.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r9 = new javax.xml.namespace.QName;
+
+        $r10 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getOperationName()>();
+
+        specialinvoke $r9.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r8, $r10);
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>()>();
+
+        $r12 = new java.util.ArrayList;
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>()>();
+
+        $r13 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void splitParameters(java.util.List,java.util.List,java.util.List)>($r11, $r12, $r13);
+
+        $r14 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r15 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: java.lang.String getSOAPAction()>();
+
+        if $r15 == null goto label01;
+
+        $r74 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPOperation soap12Operation()>();
+
+        interfaceinvoke $r74.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPOperation: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPOperation soapAction(java.lang.String)>($r15);
+
+     label01:
+        $r16 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType input()>();
+
+        $r17 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r17.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationInputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r16, r2);
+
+        $r18 = interfaceinvoke $r16.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap12/Body;");
+
+        $r75 = (com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType) $r18;
+
+        $r19 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Style getStyle()>();
+
+        $r20 = <javax.jws.soap.SOAPBinding$Style: javax.jws.soap.SOAPBinding$Style RPC>;
+
+        $z0 = virtualinvoke $r19.<javax.jws.soap.SOAPBinding$Style: boolean equals(java.lang.Object)>($r20);
+
+        $r21 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: javax.jws.soap.SOAPBinding$Use getUse()>();
+
+        $r22 = <javax.jws.soap.SOAPBinding$Use: javax.jws.soap.SOAPBinding$Use LITERAL>;
+
+        $z1 = virtualinvoke $r21.<javax.jws.soap.SOAPBinding$Use: boolean equals(java.lang.Object)>($r22);
+
+        if $z1 == 0 goto label10;
+
+        interfaceinvoke $r75.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType use(java.lang.String)>("literal");
+
+        $i0 = virtualinvoke $r12.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label09;
+
+        $i4 = virtualinvoke $r11.<java.util.ArrayList: int size()>();
+
+        if $i4 <= 0 goto label07;
+
+        $r64 = virtualinvoke $r11.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+        $r65 = interfaceinvoke $r64.<java.util.Iterator: java.lang.Object next()>();
+
+        r76 = (com.sun.xml.internal.ws.model.ParameterImpl) $r65;
+
+        if $z0 == 0 goto label05;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        i6 = 0;
+
+        $r68 = (com.sun.xml.internal.ws.model.WrapperParameter) r76;
+
+        $r69 = virtualinvoke $r68.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r70 = interfaceinvoke $r69.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z3 = interfaceinvoke $r70.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label04;
+
+        $r72 = interfaceinvoke $r70.<java.util.Iterator: java.lang.Object next()>();
+
+        r77 = (com.sun.xml.internal.ws.model.ParameterImpl) $r72;
+
+        $i5 = i6;
+
+        i6 = i6 + 1;
+
+        if $i5 <= 0 goto label03;
+
+        virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label03:
+        $r73 = virtualinvoke r77.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r73);
+
+        goto label02;
+
+     label04:
+        $r71 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r75.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>($r71);
+
+        goto label06;
+
+     label05:
+        $r66 = virtualinvoke r76.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        interfaceinvoke $r75.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>($r66);
+
+     label06:
+        goto label08;
+
+     label07:
+        interfaceinvoke $r75.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>("");
+
+     label08:
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAP12Headers(com.sun.xml.internal.txw2.TypedXmlWriter,java.util.List,javax.xml.namespace.QName)>($r16, $r12, $r9);
+
+     label09:
+        if $z0 == 0 goto label11;
+
+        $r58 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r59 = interfaceinvoke $r58.<java.util.List: java.util.Iterator iterator()>();
+
+        $r60 = interfaceinvoke $r59.<java.util.Iterator: java.lang.Object next()>();
+
+        $r61 = (com.sun.xml.internal.ws.model.ParameterImpl) $r60;
+
+        $r62 = virtualinvoke $r61.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        $r63 = virtualinvoke $r62.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke $r75.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType namespace(java.lang.String)>($r63);
+
+        goto label11;
+
+     label10:
+        $r23 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r23.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>("encoded use is not supported");
+
+        throw $r23;
+
+     label11:
+        $r24 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $r25 = <com.sun.xml.internal.ws.api.model.MEP: com.sun.xml.internal.ws.api.model.MEP ONE_WAY>;
+
+        if $r24 == $r25 goto label20;
+
+        virtualinvoke $r11.<java.util.ArrayList: void clear()>();
+
+        virtualinvoke $r12.<java.util.ArrayList: void clear()>();
+
+        $r35 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void splitParameters(java.util.List,java.util.List,java.util.List)>($r11, $r12, $r35);
+
+        $r36 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType output()>();
+
+        $r37 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r37.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationOutputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r36, r2);
+
+        $r38 = interfaceinvoke $r36.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap12/Body;");
+
+        r78 = (com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType) $r38;
+
+        interfaceinvoke r78.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType use(java.lang.String)>("literal");
+
+        $i1 = virtualinvoke $r12.<java.util.ArrayList: int size()>();
+
+        if $i1 <= 0 goto label19;
+
+        $i2 = virtualinvoke $r11.<java.util.ArrayList: int size()>();
+
+        if $i2 <= 0 goto label17;
+
+        $r47 = virtualinvoke $r11.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+        $r48 = interfaceinvoke $r47.<java.util.Iterator: java.lang.Object next()>();
+
+        r79 = (com.sun.xml.internal.ws.model.ParameterImpl) $r48;
+
+        if $z0 == 0 goto label15;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        i7 = 0;
+
+        $r51 = (com.sun.xml.internal.ws.model.WrapperParameter) r79;
+
+        $r52 = virtualinvoke $r51.<com.sun.xml.internal.ws.model.WrapperParameter: java.util.List getWrapperChildren()>();
+
+        $r53 = interfaceinvoke $r52.<java.util.List: java.util.Iterator iterator()>();
+
+     label12:
+        $z2 = interfaceinvoke $r53.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label14;
+
+        $r55 = interfaceinvoke $r53.<java.util.Iterator: java.lang.Object next()>();
+
+        r56 = (com.sun.xml.internal.ws.model.ParameterImpl) $r55;
+
+        $i3 = i7;
+
+        i7 = i7 + 1;
+
+        if $i3 <= 0 goto label13;
+
+        virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+     label13:
+        $r57 = virtualinvoke r56.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r57);
+
+        goto label12;
+
+     label14:
+        $r54 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r78.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>($r54);
+
+        goto label16;
+
+     label15:
+        $r49 = virtualinvoke r79.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        interfaceinvoke r78.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>($r49);
+
+     label16:
+        goto label18;
+
+     label17:
+        interfaceinvoke r78.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType parts(java.lang.String)>("");
+
+     label18:
+        $r45 = new javax.xml.namespace.QName;
+
+        $r46 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getResponseMessageName()>();
+
+        specialinvoke $r45.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r8, $r46);
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: void generateSOAP12Headers(com.sun.xml.internal.txw2.TypedXmlWriter,java.util.List,javax.xml.namespace.QName)>($r36, $r12, $r45);
+
+     label19:
+        if $z0 == 0 goto label20;
+
+        $r39 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        $r40 = interfaceinvoke $r39.<java.util.List: java.util.Iterator iterator()>();
+
+        $r41 = interfaceinvoke $r40.<java.util.Iterator: java.lang.Object next()>();
+
+        $r42 = (com.sun.xml.internal.ws.model.ParameterImpl) $r41;
+
+        $r43 = virtualinvoke $r42.<com.sun.xml.internal.ws.model.ParameterImpl: javax.xml.namespace.QName getName()>();
+
+        $r44 = virtualinvoke $r43.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke r78.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType namespace(java.lang.String)>($r44);
+
+     label20:
+        $r80 = virtualinvoke r2.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getCheckedExceptions()>();
+
+        $r81 = interfaceinvoke $r80.<java.util.List: java.util.Iterator iterator()>();
+
+     label21:
+        $z4 = interfaceinvoke $r81.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label22;
+
+        $r26 = interfaceinvoke $r81.<java.util.Iterator: java.lang.Object next()>();
+
+        r82 = (com.sun.xml.internal.ws.model.CheckedExceptionImpl) $r26;
+
+        $r27 = interfaceinvoke $r4.<com.sun.xml.internal.ws.wsdl.writer.document.BindingOperationType: com.sun.xml.internal.ws.wsdl.writer.document.Fault fault()>();
+
+        $r28 = virtualinvoke r82.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r29 = interfaceinvoke $r27.<com.sun.xml.internal.ws.wsdl.writer.document.Fault: com.sun.xml.internal.ws.wsdl.writer.document.Fault name(java.lang.String)>($r28);
+
+        $r30 = r5.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r30.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addBindingOperationFaultExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod,com.sun.xml.internal.ws.api.model.CheckedException)>($r29, r2, r82);
+
+        $r31 = interfaceinvoke $r29.<com.sun.xml.internal.ws.wsdl.writer.document.Fault: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap12/SOAPFault;");
+
+        $r32 = (com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPFault) $r31;
+
+        $r33 = virtualinvoke r82.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: java.lang.String getMessageName()>();
+
+        $r34 = interfaceinvoke $r32.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPFault: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPFault name(java.lang.String)>($r33);
+
+        interfaceinvoke $r34.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPFault: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType use(java.lang.String)>("literal");
+
+        goto label21;
+
+     label22:
+        return;
+    }
+
+    protected void splitParameters(java.util.List, java.util.List, java.util.List)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r4;
+        com.sun.xml.internal.ws.model.ParameterImpl r3;
+        java.util.Iterator $r1;
+        java.util.List r0, r5, r6;
+        java.lang.Object $r2;
+        boolean $z0, $z1;
+
+        r4 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r6 := @parameter0: java.util.List;
+
+        r5 := @parameter1: java.util.List;
+
+        r0 := @parameter2: java.util.List;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (com.sun.xml.internal.ws.model.ParameterImpl) $r2;
+
+        $z1 = virtualinvoke r4.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean isBodyParameter(com.sun.xml.internal.ws.model.ParameterImpl)>(r3);
+
+        if $z1 == 0 goto label2;
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>(r3);
+
+        goto label3;
+
+     label2:
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>(r3);
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    protected void generateSOAPHeaders(com.sun.xml.internal.txw2.TypedXmlWriter, java.util.List, javax.xml.namespace.QName)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r9;
+        com.sun.xml.internal.ws.model.ParameterImpl r3;
+        java.util.Iterator $r1;
+        com.sun.xml.internal.txw2.TypedXmlWriter r4, $r5;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.Header r6;
+        java.util.List r0;
+        java.lang.Object $r2;
+        javax.xml.namespace.QName r7;
+        java.lang.String $r8;
+        boolean $z0;
+
+        r9 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r4 := @parameter0: com.sun.xml.internal.txw2.TypedXmlWriter;
+
+        r0 := @parameter1: java.util.List;
+
+        r7 := @parameter2: javax.xml.namespace.QName;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (com.sun.xml.internal.ws.model.ParameterImpl) $r2;
+
+        $r5 = interfaceinvoke r4.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap/Header;");
+
+        r6 = (com.sun.xml.internal.ws.wsdl.writer.document.soap.Header) $r5;
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap.Header message(javax.xml.namespace.QName)>(r7);
+
+        $r8 = virtualinvoke r3.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType part(java.lang.String)>($r8);
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap.BodyType use(java.lang.String)>("literal");
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void generateSOAP12Headers(com.sun.xml.internal.txw2.TypedXmlWriter, java.util.List, javax.xml.namespace.QName)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r9;
+        com.sun.xml.internal.ws.model.ParameterImpl r3;
+        java.util.Iterator $r1;
+        com.sun.xml.internal.txw2.TypedXmlWriter r4, $r5;
+        java.util.List r0;
+        java.lang.Object $r2;
+        javax.xml.namespace.QName r7;
+        java.lang.String $r8;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header r6;
+        boolean $z0;
+
+        r9 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r4 := @parameter0: com.sun.xml.internal.txw2.TypedXmlWriter;
+
+        r0 := @parameter1: java.util.List;
+
+        r7 := @parameter2: javax.xml.namespace.QName;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (com.sun.xml.internal.ws.model.ParameterImpl) $r2;
+
+        $r5 = interfaceinvoke r4.<com.sun.xml.internal.txw2.TypedXmlWriter: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap12/Header;");
+
+        r6 = (com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header) $r5;
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header message(javax.xml.namespace.QName)>(r7);
+
+        $r8 = virtualinvoke r3.<com.sun.xml.internal.ws.model.ParameterImpl: java.lang.String getPartName()>();
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType part(java.lang.String)>($r8);
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.Header: com.sun.xml.internal.ws.wsdl.writer.document.soap12.BodyType use(java.lang.String)>("literal");
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void generateService()
+    {
+        com.sun.xml.internal.ws.wsdl.writer.document.Port $r10, $r12;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        com.sun.xml.internal.ws.api.SOAPVersion $r20, $r21;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPAddress r27;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r9, $r15;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r1, $r3, $r13, $r16;
+        java.lang.String $r7, $r11, $r23, $r25;
+        boolean $z0;
+        com.sun.xml.internal.ws.wsdl.writer.document.Definitions $r5;
+        java.util.Collection $r17;
+        com.sun.xml.internal.ws.wsdl.writer.document.Service $r6, $r8;
+        com.sun.xml.internal.txw2.TypedXmlWriter $r22, $r24;
+        com.sun.xml.internal.ws.api.WSBinding $r18;
+        com.sun.xml.internal.ws.api.BindingID $r19;
+        com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPAddress r26;
+        javax.xml.namespace.QName $r2, $r4, $r14;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $r1 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getPortName()>();
+
+        $r3 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getServiceQName()>();
+
+        $r5 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Definitions serviceDefinitions>;
+
+        $r6 = interfaceinvoke $r5.<com.sun.xml.internal.ws.wsdl.writer.document.Definitions: com.sun.xml.internal.ws.wsdl.writer.document.Service service()>();
+
+        $r7 = virtualinvoke $r4.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r8 = interfaceinvoke $r6.<com.sun.xml.internal.ws.wsdl.writer.document.Service: com.sun.xml.internal.ws.wsdl.writer.document.Service name(java.lang.String)>($r7);
+
+        $r9 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r9.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addServiceExtension(com.sun.xml.internal.txw2.TypedXmlWriter)>($r8);
+
+        $r10 = interfaceinvoke $r8.<com.sun.xml.internal.ws.wsdl.writer.document.Service: com.sun.xml.internal.ws.wsdl.writer.document.Port port()>();
+
+        $r11 = virtualinvoke $r2.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r12 = interfaceinvoke $r10.<com.sun.xml.internal.ws.wsdl.writer.document.Port: com.sun.xml.internal.ws.wsdl.writer.document.Port name(java.lang.String)>($r11);
+
+        $r13 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r14 = virtualinvoke $r13.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: javax.xml.namespace.QName getBoundPortTypeName()>();
+
+        interfaceinvoke $r12.<com.sun.xml.internal.ws.wsdl.writer.document.Port: com.sun.xml.internal.ws.wsdl.writer.document.Port binding(javax.xml.namespace.QName)>($r14);
+
+        $r15 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r15.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addPortExtension(com.sun.xml.internal.txw2.TypedXmlWriter)>($r12);
+
+        $r16 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r17 = virtualinvoke $r16.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.util.Collection getJavaMethods()>();
+
+        $z0 = interfaceinvoke $r17.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r18 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r19 = interfaceinvoke $r18.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        $r20 = virtualinvoke $r19.<com.sun.xml.internal.ws.api.BindingID: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        $r21 = <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion SOAP_12>;
+
+        if $r20 != $r21 goto label2;
+
+        $r24 = interfaceinvoke $r12.<com.sun.xml.internal.ws.wsdl.writer.document.Port: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap12/SOAPAddress;");
+
+        r26 = (com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPAddress) $r24;
+
+        $r25 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String endpointAddress>;
+
+        interfaceinvoke r26.<com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPAddress: com.sun.xml.internal.ws.wsdl.writer.document.soap12.SOAPAddress location(java.lang.String)>($r25);
+
+        goto label3;
+
+     label2:
+        $r22 = interfaceinvoke $r12.<com.sun.xml.internal.ws.wsdl.writer.document.Port: com.sun.xml.internal.txw2.TypedXmlWriter _element(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/wsdl/writer/document/soap/SOAPAddress;");
+
+        r27 = (com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPAddress) $r22;
+
+        $r23 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String endpointAddress>;
+
+        interfaceinvoke r27.<com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPAddress: com.sun.xml.internal.ws.wsdl.writer.document.soap.SOAPAddress location(java.lang.String)>($r23);
+
+     label3:
+        return;
+    }
+
+    protected void generateInputMessage(com.sun.xml.internal.ws.wsdl.writer.document.Operation, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation r0;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        com.sun.xml.internal.ws.wsdl.writer.document.ParamType $r1;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r4;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r6;
+        javax.xml.namespace.QName $r5;
+        java.lang.String $r7, $r8;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.document.Operation;
+
+        r3 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.ParamType input()>();
+
+        $r4 = r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addOperationInputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r1, r3);
+
+        $r5 = new javax.xml.namespace.QName;
+
+        $r6 = r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r8 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getRequestMessageName()>();
+
+        specialinvoke $r5.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r7, $r8);
+
+        interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.ParamType: com.sun.xml.internal.ws.wsdl.writer.document.ParamType message(javax.xml.namespace.QName)>($r5);
+
+        return;
+    }
+
+    protected void generateOutputMessage(com.sun.xml.internal.ws.wsdl.writer.document.Operation, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        com.sun.xml.internal.ws.wsdl.writer.document.Operation r0;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        com.sun.xml.internal.ws.wsdl.writer.document.ParamType $r1;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension $r4;
+        com.sun.xml.internal.ws.model.AbstractSEIModelImpl $r6;
+        javax.xml.namespace.QName $r5;
+        java.lang.String $r7, $r8;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.document.Operation;
+
+        r3 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.document.Operation: com.sun.xml.internal.ws.wsdl.writer.document.ParamType output()>();
+
+        $r4 = r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension extension>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension: void addOperationOutputExtension(com.sun.xml.internal.txw2.TypedXmlWriter,com.sun.xml.internal.ws.api.model.JavaMethod)>($r1, r3);
+
+        $r5 = new javax.xml.namespace.QName;
+
+        $r6 = r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.model.AbstractSEIModelImpl model>;
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.ws.model.AbstractSEIModelImpl: java.lang.String getTargetNamespace()>();
+
+        $r8 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getResponseMessageName()>();
+
+        specialinvoke $r5.<javax.xml.namespace.QName: void <init>(java.lang.String,java.lang.String)>($r7, $r8);
+
+        interfaceinvoke $r1.<com.sun.xml.internal.ws.wsdl.writer.document.ParamType: com.sun.xml.internal.ws.wsdl.writer.document.ParamType message(javax.xml.namespace.QName)>($r5);
+
+        return;
+    }
+
+    public javax.xml.transform.Result createOutputFile(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r3;
+        javax.xml.transform.Result $r10;
+        com.oracle.webservices.internal.api.databinding.WSDLResolver $r9;
+        java.lang.String r0, $r4, r6, $r8, $r11, $r12, $r13, r18;
+        com.sun.xml.internal.ws.wsdl.writer.document.Types $r14;
+        boolean $z0;
+        com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema $r15;
+        com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import $r16;
+        javax.xml.ws.Holder $r1;
+        java.lang.StringBuilder $r2, $r5, $r7;
+        java.lang.Object $r17;
+
+        r3 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new javax.xml.ws.Holder;
+
+        specialinvoke $r1.<javax.xml.ws.Holder: void <init>()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String schemaPrefix>;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1.<javax.xml.ws.Holder: java.lang.Object value> = $r8;
+
+        $r9 = r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.oracle.webservices.internal.api.databinding.WSDLResolver wsdlResolver>;
+
+        $r10 = interfaceinvoke $r9.<com.oracle.webservices.internal.api.databinding.WSDLResolver: javax.xml.transform.Result getSchemaOutput(java.lang.String,javax.xml.ws.Holder)>(r0, $r1);
+
+        if $r10 != null goto label2;
+
+        $r17 = $r1.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        r18 = (java.lang.String) $r17;
+
+        goto label3;
+
+     label2:
+        $r11 = interfaceinvoke $r10.<javax.xml.transform.Result: java.lang.String getSystemId()>();
+
+        $r12 = r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String wsdlLocation>;
+
+        r18 = staticinvoke <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String relativize(java.lang.String,java.lang.String)>($r11, $r12);
+
+     label3:
+        $r13 = virtualinvoke r0.<java.lang.String: java.lang.String trim()>();
+
+        $z0 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label4;
+
+        $r14 = r3.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Types types>;
+
+        $r15 = interfaceinvoke $r14.<com.sun.xml.internal.ws.wsdl.writer.document.Types: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema schema()>();
+
+        $r16 = interfaceinvoke $r15.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Schema: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import _import()>();
+
+        interfaceinvoke $r16.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import namespace(java.lang.String)>(r0);
+
+        interfaceinvoke $r16.<com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import: com.sun.xml.internal.ws.wsdl.writer.document.xsd.Import schemaLocation(java.lang.String)>(r18);
+
+     label4:
+        return $r10;
+    }
+
+    private javax.xml.transform.Result createInlineSchema(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.txw2.output.TXWResult $r1;
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r2;
+        java.lang.String r0, r4;
+        com.sun.xml.internal.ws.wsdl.writer.document.Types $r3;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new com.sun.xml.internal.txw2.output.TXWResult;
+
+        $r3 = r2.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: com.sun.xml.internal.ws.wsdl.writer.document.Types types>;
+
+        specialinvoke $r1.<com.sun.xml.internal.txw2.output.TXWResult: void <init>(com.sun.xml.internal.txw2.TypedXmlWriter)>($r3);
+
+        interfaceinvoke $r1.<javax.xml.transform.Result: void setSystemId(java.lang.String)>("");
+
+        return $r1;
+    }
+
+    protected static java.lang.String relativize(java.lang.String, java.lang.String)
+    {
+        java.net.URISyntaxException $r22;
+        java.lang.InternalError $r23;
+        java.net.URI $r1, $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r13, $r17, $r19, $r24, $r25, $r26, $r27, $r28;
+        java.lang.AssertionError $r21;
+        java.lang.String r0, r2, $r3, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r14, $r15, $r16, $r18, $r20, $r29, r30;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+     label01:
+        $z0 = <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label02;
+
+        if r2 != null goto label02;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label02:
+        if r0 != null goto label04;
+
+     label03:
+        return r2;
+
+     label04:
+        $r1 = new java.net.URI;
+
+        $r3 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: java.lang.String escapeURI(java.lang.String)>(r2);
+
+        specialinvoke $r1.<java.net.URI: void <init>(java.lang.String)>($r3);
+
+        $r4 = new java.net.URI;
+
+        $r5 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: java.lang.String escapeURI(java.lang.String)>(r0);
+
+        specialinvoke $r4.<java.net.URI: void <init>(java.lang.String)>($r5);
+
+        $z1 = virtualinvoke $r1.<java.net.URI: boolean isOpaque()>();
+
+        if $z1 != 0 goto label05;
+
+        $z2 = virtualinvoke $r4.<java.net.URI: boolean isOpaque()>();
+
+        if $z2 == 0 goto label06;
+
+     label05:
+        return r2;
+
+     label06:
+        $r6 = virtualinvoke $r1.<java.net.URI: java.lang.String getScheme()>();
+
+        $r7 = virtualinvoke $r4.<java.net.URI: java.lang.String getScheme()>();
+
+        $z3 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: boolean equalsIgnoreCase(java.lang.String,java.lang.String)>($r6, $r7);
+
+        if $z3 == 0 goto label07;
+
+        $r8 = virtualinvoke $r1.<java.net.URI: java.lang.String getAuthority()>();
+
+        $r9 = virtualinvoke $r4.<java.net.URI: java.lang.String getAuthority()>();
+
+        $z4 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: boolean equal(java.lang.String,java.lang.String)>($r8, $r9);
+
+        if $z4 != 0 goto label08;
+
+     label07:
+        return r2;
+
+     label08:
+        $r10 = virtualinvoke $r1.<java.net.URI: java.lang.String getPath()>();
+
+        $r11 = virtualinvoke $r4.<java.net.URI: java.lang.String getPath()>();
+
+        r30 = $r11;
+
+        $z5 = virtualinvoke $r11.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z5 != 0 goto label09;
+
+        r30 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: java.lang.String normalizeUriPath(java.lang.String)>($r11);
+
+     label09:
+        $z6 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>(r30);
+
+        if $z6 == 0 goto label11;
+
+     label10:
+        return ".";
+
+     label11:
+        $r12 = staticinvoke <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String calculateRelativePath(java.lang.String,java.lang.String)>($r10, r30);
+
+        if $r12 != null goto label13;
+
+     label12:
+        return r2;
+
+     label13:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r1.<java.net.URI: java.lang.String getQuery()>();
+
+        if $r14 == null goto label14;
+
+        $r19 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(63);
+
+        $r20 = virtualinvoke $r1.<java.net.URI: java.lang.String getQuery()>();
+
+        virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+     label14:
+        $r15 = virtualinvoke $r1.<java.net.URI: java.lang.String getFragment()>();
+
+        if $r15 == null goto label15;
+
+        $r17 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(35);
+
+        $r18 = virtualinvoke $r1.<java.net.URI: java.lang.String getFragment()>();
+
+        virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+     label15:
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label16:
+        return $r16;
+
+     label17:
+        $r22 := @caughtexception;
+
+        $r23 = new java.lang.InternalError;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error escaping one of these uris:\n\t");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.InternalError: void <init>(java.lang.String)>($r29);
+
+        throw $r23;
+
+        catch java.net.URISyntaxException from label01 to label03 with label17;
+        catch java.net.URISyntaxException from label04 to label05 with label17;
+        catch java.net.URISyntaxException from label06 to label07 with label17;
+        catch java.net.URISyntaxException from label08 to label10 with label17;
+        catch java.net.URISyntaxException from label11 to label12 with label17;
+        catch java.net.URISyntaxException from label13 to label16 with label17;
+    }
+
+    private static java.lang.String calculateRelativePath(java.lang.String, java.lang.String)
+    {
+        int $i0;
+        java.lang.StringBuilder $r2, $r3, $r6;
+        java.lang.String r0, r1, $r4, $r5, $r7, $r8;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r8 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        return $r8;
+
+     label2:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("../");
+
+        $r4 = staticinvoke <com.sun.xml.internal.bind.v2.schemagen.Util: java.lang.String getParentUriPath(java.lang.String)>(r0);
+
+        $r5 = staticinvoke <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String calculateRelativePath(java.lang.String,java.lang.String)>(r1, $r4);
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    private void register(com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        java.util.List $r2;
+        com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension r1;
+
+        r0 := @this: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.wsdl.writer.WSDLGeneratorExtension;
+
+        $r2 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.util.List extensionHandlers>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    static boolean access$000(com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator)
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        $z0 = r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean inlineSchemas>;
+
+        return $z0;
+    }
+
+    static javax.xml.transform.Result access$100(com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator r0;
+        javax.xml.transform.Result $r3;
+        java.lang.String r1, r2;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        $r3 = specialinvoke r0.<com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: javax.xml.transform.Result createInlineSchema(java.lang.String,java.lang.String)>(r1, r2);
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String REPLACE_WITH_ACTUAL_URL> = "REPLACE_WITH_ACTUAL_URL";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String LITERAL> = "literal";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String RPC> = "rpc";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String DOCUMENT> = "document";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String TNS_PREFIX> = "tns";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String SOAP12_PREFIX> = "soap12";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String SOAP_PREFIX> = "soap";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String SOAP12_NAMESPACE> = "http://schemas.xmlsoap.org/wsdl/soap12/";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String SOAP11_NAMESPACE> = "http://schemas.xmlsoap.org/wsdl/soap/";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String XSD_PREFIX> = "xsd";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String XSD_NAMESPACE> = "http://www.w3.org/2001/XMLSchema";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String WSDL_NAMESPACE> = "http://schemas.xmlsoap.org/wsdl/";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String UNWRAPPABLE_RESULT> = "result";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String RESULT> = "parameters";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String PARAMETERS> = "parameters";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String RESPONSE> = "Response";
+
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: java.lang.String DOT_WSDL> = ".wsdl";
+
+        $r0 = class "Lcom/sun/xml/internal/ws/wsdl/writer/WSDLGenerator;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.xml.internal.ws.wsdl.writer.WSDLGenerator: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

@@ -1,0 +1,1305 @@
+public class javax.swing.text.html.HTMLEditorKit extends javax.swing.text.StyledEditorKit implements javax.accessibility.Accessible
+{
+    private javax.swing.JEditorPane theEditor;
+    public static final java.lang.String DEFAULT_CSS;
+    private javax.accessibility.AccessibleContext accessibleContext;
+    private static final java.awt.Cursor MoveCursor;
+    private static final java.awt.Cursor DefaultCursor;
+    private static final javax.swing.text.ViewFactory defaultFactory;
+    javax.swing.text.MutableAttributeSet input;
+    private static final java.lang.Object DEFAULT_STYLES_KEY;
+    private javax.swing.text.html.HTMLEditorKit$LinkController linkHandler;
+    private static javax.swing.text.html.HTMLEditorKit$Parser defaultParser;
+    private java.awt.Cursor defaultCursor;
+    private java.awt.Cursor linkCursor;
+    private boolean isAutoFormSubmission;
+    public static final java.lang.String BOLD_ACTION;
+    public static final java.lang.String ITALIC_ACTION;
+    public static final java.lang.String PARA_INDENT_LEFT;
+    public static final java.lang.String PARA_INDENT_RIGHT;
+    public static final java.lang.String FONT_CHANGE_BIGGER;
+    public static final java.lang.String FONT_CHANGE_SMALLER;
+    public static final java.lang.String COLOR_ACTION;
+    public static final java.lang.String LOGICAL_STYLE_ACTION;
+    public static final java.lang.String IMG_ALIGN_TOP;
+    public static final java.lang.String IMG_ALIGN_MIDDLE;
+    public static final java.lang.String IMG_ALIGN_BOTTOM;
+    public static final java.lang.String IMG_BORDER;
+    private static final java.lang.String INSERT_TABLE_HTML;
+    private static final java.lang.String INSERT_UL_HTML;
+    private static final java.lang.String INSERT_OL_HTML;
+    private static final java.lang.String INSERT_HR_HTML;
+    private static final java.lang.String INSERT_PRE_HTML;
+    private static final javax.swing.text.html.HTMLEditorKit$NavigateLinkAction nextLinkAction;
+    private static final javax.swing.text.html.HTMLEditorKit$NavigateLinkAction previousLinkAction;
+    private static final javax.swing.text.html.HTMLEditorKit$ActivateLinkAction activateLinkAction;
+    private static final javax.swing.Action[] defaultActions;
+    private boolean foundLink;
+    private int prevHypertextOffset;
+    private java.lang.Object linkNavigationTag;
+
+    public void <init>()
+    {
+        javax.swing.text.html.HTMLEditorKit$LinkController $r4;
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.awt.Cursor $r2, $r3;
+        int $i1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        specialinvoke r0.<javax.swing.text.StyledEditorKit: void <init>()>();
+
+        $r4 = new javax.swing.text.html.HTMLEditorKit$LinkController;
+
+        specialinvoke $r4.<javax.swing.text.html.HTMLEditorKit$LinkController: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler> = $r4;
+
+        $r2 = <javax.swing.text.html.HTMLEditorKit: java.awt.Cursor DefaultCursor>;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor defaultCursor> = $r2;
+
+        $r3 = <javax.swing.text.html.HTMLEditorKit: java.awt.Cursor MoveCursor>;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor linkCursor> = $r3;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: boolean isAutoFormSubmission> = 1;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: boolean foundLink> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: int prevHypertextOffset> = $i1;
+
+        return;
+    }
+
+    public java.lang.String getContentType()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        return "text/html";
+    }
+
+    public javax.swing.text.ViewFactory getViewFactory()
+    {
+        javax.swing.text.html.HTMLEditorKit r1;
+        javax.swing.text.ViewFactory $r0;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r0 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.ViewFactory defaultFactory>;
+
+        return $r0;
+    }
+
+    public javax.swing.text.Document createDefaultDocument()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        javax.swing.text.html.HTMLDocument $r3;
+        javax.swing.text.html.StyleSheet $r1, $r2;
+        javax.swing.text.html.HTMLEditorKit$Parser $r4;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        $r2 = new javax.swing.text.html.StyleSheet;
+
+        specialinvoke $r2.<javax.swing.text.html.StyleSheet: void <init>()>();
+
+        virtualinvoke $r2.<javax.swing.text.html.StyleSheet: void addStyleSheet(javax.swing.text.html.StyleSheet)>($r1);
+
+        $r3 = new javax.swing.text.html.HTMLDocument;
+
+        specialinvoke $r3.<javax.swing.text.html.HTMLDocument: void <init>(javax.swing.text.html.StyleSheet)>($r2);
+
+        $r4 = virtualinvoke r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser getParser()>();
+
+        virtualinvoke $r3.<javax.swing.text.html.HTMLDocument: void setParser(javax.swing.text.html.HTMLEditorKit$Parser)>($r4);
+
+        virtualinvoke $r3.<javax.swing.text.html.HTMLDocument: void setAsynchronousLoadPriority(int)>(4);
+
+        virtualinvoke $r3.<javax.swing.text.html.HTMLDocument: void setTokenThreshold(int)>(100);
+
+        return $r3;
+    }
+
+    private javax.swing.text.html.HTMLEditorKit$Parser ensureParser(javax.swing.text.html.HTMLDocument) throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLDocument r0;
+        javax.swing.text.html.HTMLEditorKit r3;
+        javax.swing.text.html.HTMLEditorKit$Parser $r1, r4;
+        java.io.IOException $r2;
+
+        r3 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLDocument;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.HTMLEditorKit$Parser getParser()>();
+
+        r4 = $r1;
+
+        if $r1 != null goto label1;
+
+        r4 = virtualinvoke r3.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser getParser()>();
+
+     label1:
+        if r4 != null goto label2;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Can\'t load parser");
+
+        throw $r2;
+
+     label2:
+        return r4;
+    }
+
+    public void read(java.io.Reader, javax.swing.text.Document, int) throws java.io.IOException, javax.swing.text.BadLocationException
+    {
+        javax.swing.text.html.HTMLEditorKit$Parser $r4;
+        java.io.Reader r2;
+        javax.swing.text.BadLocationException $r8;
+        javax.swing.text.html.HTMLEditorKit$ParserCallback $r5;
+        javax.swing.text.html.HTMLEditorKit r1;
+        javax.swing.text.html.HTMLDocument r3;
+        int i0, $i1;
+        java.lang.Boolean r7;
+        java.lang.Object $r6;
+        javax.swing.text.Document r0;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r2 := @parameter0: java.io.Reader;
+
+        r0 := @parameter1: javax.swing.text.Document;
+
+        i0 := @parameter2: int;
+
+        $z0 = r0 instanceof javax.swing.text.html.HTMLDocument;
+
+        if $z0 == 0 goto label4;
+
+        r3 = (javax.swing.text.html.HTMLDocument) r0;
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Document: int getLength()>();
+
+        if i0 <= $i1 goto label1;
+
+        $r8 = new javax.swing.text.BadLocationException;
+
+        specialinvoke $r8.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid location", i0);
+
+        throw $r8;
+
+     label1:
+        $r4 = specialinvoke r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser ensureParser(javax.swing.text.html.HTMLDocument)>(r3);
+
+        $r5 = virtualinvoke r3.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.HTMLEditorKit$ParserCallback getReader(int)>(i0);
+
+        $r6 = interfaceinvoke r0.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("IgnoreCharsetDirective");
+
+        r7 = (java.lang.Boolean) $r6;
+
+        if r7 != null goto label2;
+
+        $z1 = 0;
+
+        goto label3;
+
+     label2:
+        $z1 = virtualinvoke r7.<java.lang.Boolean: boolean booleanValue()>();
+
+     label3:
+        virtualinvoke $r4.<javax.swing.text.html.HTMLEditorKit$Parser: void parse(java.io.Reader,javax.swing.text.html.HTMLEditorKit$ParserCallback,boolean)>(r2, $r5, $z1);
+
+        virtualinvoke $r5.<javax.swing.text.html.HTMLEditorKit$ParserCallback: void flush()>();
+
+        goto label5;
+
+     label4:
+        specialinvoke r1.<javax.swing.text.StyledEditorKit: void read(java.io.Reader,javax.swing.text.Document,int)>(r2, r0, i0);
+
+     label5:
+        return;
+    }
+
+    public void insertHTML(javax.swing.text.html.HTMLDocument, int, java.lang.String, int, int, javax.swing.text.html.HTML$Tag) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        javax.swing.text.html.HTMLEditorKit$Parser $r2;
+        javax.swing.text.BadLocationException $r9;
+        javax.swing.text.html.HTMLEditorKit$ParserCallback $r4;
+        javax.swing.text.html.HTMLDocument r0;
+        javax.swing.text.html.HTMLEditorKit r1;
+        java.io.StringReader $r7;
+        javax.swing.text.html.HTML$Tag r3;
+        int i0, $i1, i2, i3;
+        java.lang.Boolean r6;
+        java.lang.Object $r5;
+        java.lang.String r8;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLDocument;
+
+        i0 := @parameter1: int;
+
+        r8 := @parameter2: java.lang.String;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        r3 := @parameter5: javax.swing.text.html.HTML$Tag;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        if i0 <= $i1 goto label1;
+
+        $r9 = new javax.swing.text.BadLocationException;
+
+        specialinvoke $r9.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("Invalid location", i0);
+
+        throw $r9;
+
+     label1:
+        $r2 = specialinvoke r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser ensureParser(javax.swing.text.html.HTMLDocument)>(r0);
+
+        $r4 = virtualinvoke r0.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.HTMLEditorKit$ParserCallback getReader(int,int,int,javax.swing.text.html.HTML$Tag)>(i0, i2, i3, r3);
+
+        $r5 = virtualinvoke r0.<javax.swing.text.html.HTMLDocument: java.lang.Object getProperty(java.lang.Object)>("IgnoreCharsetDirective");
+
+        r6 = (java.lang.Boolean) $r5;
+
+        $r7 = new java.io.StringReader;
+
+        specialinvoke $r7.<java.io.StringReader: void <init>(java.lang.String)>(r8);
+
+        if r6 != null goto label2;
+
+        $z0 = 0;
+
+        goto label3;
+
+     label2:
+        $z0 = virtualinvoke r6.<java.lang.Boolean: boolean booleanValue()>();
+
+     label3:
+        virtualinvoke $r2.<javax.swing.text.html.HTMLEditorKit$Parser: void parse(java.io.Reader,javax.swing.text.html.HTMLEditorKit$ParserCallback,boolean)>($r7, $r4, $z0);
+
+        virtualinvoke $r4.<javax.swing.text.html.HTMLEditorKit$ParserCallback: void flush()>();
+
+        return;
+    }
+
+    public void write(java.io.Writer, javax.swing.text.Document, int, int) throws java.io.IOException, javax.swing.text.BadLocationException
+    {
+        javax.swing.text.StyledDocument $r4;
+        javax.swing.text.html.HTMLEditorKit r1;
+        javax.swing.text.html.HTMLDocument $r6;
+        javax.swing.text.html.MinimalHTMLWriter $r3;
+        javax.swing.text.html.HTMLWriter $r5;
+        java.io.Writer r2;
+        int i0, i1;
+        javax.swing.text.Document r0;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r2 := @parameter0: java.io.Writer;
+
+        r0 := @parameter1: javax.swing.text.Document;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $z0 = r0 instanceof javax.swing.text.html.HTMLDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new javax.swing.text.html.HTMLWriter;
+
+        $r6 = (javax.swing.text.html.HTMLDocument) r0;
+
+        specialinvoke $r5.<javax.swing.text.html.HTMLWriter: void <init>(java.io.Writer,javax.swing.text.html.HTMLDocument,int,int)>(r2, $r6, i0, i1);
+
+        virtualinvoke $r5.<javax.swing.text.html.HTMLWriter: void write()>();
+
+        goto label3;
+
+     label1:
+        $z1 = r0 instanceof javax.swing.text.StyledDocument;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = new javax.swing.text.html.MinimalHTMLWriter;
+
+        $r4 = (javax.swing.text.StyledDocument) r0;
+
+        specialinvoke $r3.<javax.swing.text.html.MinimalHTMLWriter: void <init>(java.io.Writer,javax.swing.text.StyledDocument,int,int)>(r2, $r4, i0, i1);
+
+        virtualinvoke $r3.<javax.swing.text.html.MinimalHTMLWriter: void write()>();
+
+        goto label3;
+
+     label2:
+        specialinvoke r1.<javax.swing.text.StyledEditorKit: void write(java.io.Writer,javax.swing.text.Document,int,int)>(r2, r0, i0, i1);
+
+     label3:
+        return;
+    }
+
+    public void install(javax.swing.JEditorPane)
+    {
+        javax.swing.text.html.HTMLEditorKit$LinkController $r2, $r3;
+        javax.swing.text.html.HTMLEditorKit r1;
+        javax.swing.JEditorPane r0;
+        javax.swing.text.html.HTMLEditorKit$NavigateLinkAction $r4;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r0 := @parameter0: javax.swing.JEditorPane;
+
+        $r2 = r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void addMouseListener(java.awt.event.MouseListener)>($r2);
+
+        $r3 = r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        $r4 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction nextLinkAction>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void addCaretListener(javax.swing.event.CaretListener)>($r4);
+
+        specialinvoke r1.<javax.swing.text.StyledEditorKit: void install(javax.swing.JEditorPane)>(r0);
+
+        r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.JEditorPane theEditor> = r0;
+
+        return;
+    }
+
+    public void deinstall(javax.swing.JEditorPane)
+    {
+        javax.swing.text.html.HTMLEditorKit$LinkController $r2, $r3;
+        javax.swing.text.html.HTMLEditorKit r1;
+        javax.swing.JEditorPane r0;
+        javax.swing.text.html.HTMLEditorKit$NavigateLinkAction $r4;
+
+        r1 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r0 := @parameter0: javax.swing.JEditorPane;
+
+        $r2 = r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void removeMouseListener(java.awt.event.MouseListener)>($r2);
+
+        $r3 = r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        $r4 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction nextLinkAction>;
+
+        virtualinvoke r0.<javax.swing.JEditorPane: void removeCaretListener(javax.swing.event.CaretListener)>($r4);
+
+        specialinvoke r1.<javax.swing.text.StyledEditorKit: void deinstall(javax.swing.JEditorPane)>(r0);
+
+        r1.<javax.swing.text.html.HTMLEditorKit: javax.swing.JEditorPane theEditor> = null;
+
+        return;
+    }
+
+    public void setStyleSheet(javax.swing.text.html.StyleSheet)
+    {
+        javax.swing.text.html.HTMLEditorKit r5;
+        javax.swing.text.html.StyleSheet r0;
+        sun.awt.AppContext $r1, $r3;
+        java.lang.Object $r2, $r4;
+
+        r5 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r0 := @parameter0: javax.swing.text.html.StyleSheet;
+
+        if r0 != null goto label1;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r4 = <javax.swing.text.html.HTMLEditorKit: java.lang.Object DEFAULT_STYLES_KEY>;
+
+        virtualinvoke $r3.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>($r4);
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = <javax.swing.text.html.HTMLEditorKit: java.lang.Object DEFAULT_STYLES_KEY>;
+
+        virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r0);
+
+     label2:
+        return;
+    }
+
+    public javax.swing.text.html.StyleSheet getStyleSheet()
+    {
+        java.lang.Throwable $r8;
+        javax.swing.text.html.StyleSheet $r3, r10;
+        java.io.InputStreamReader $r7;
+        javax.swing.text.html.HTMLEditorKit r9;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r2, $r4;
+        java.io.BufferedReader $r6;
+        java.io.InputStream $r5;
+
+        r9 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = <javax.swing.text.html.HTMLEditorKit: java.lang.Object DEFAULT_STYLES_KEY>;
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r1);
+
+        r10 = (javax.swing.text.html.StyleSheet) $r2;
+
+        if r10 != null goto label4;
+
+        $r3 = new javax.swing.text.html.StyleSheet;
+
+        specialinvoke $r3.<javax.swing.text.html.StyleSheet: void <init>()>();
+
+        r10 = $r3;
+
+        $r4 = <javax.swing.text.html.HTMLEditorKit: java.lang.Object DEFAULT_STYLES_KEY>;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label1:
+        $r5 = staticinvoke <javax.swing.text.html.HTMLEditorKit: java.io.InputStream getResourceAsStream(java.lang.String)>("default.css");
+
+        $r6 = new java.io.BufferedReader;
+
+        $r7 = new java.io.InputStreamReader;
+
+        specialinvoke $r7.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r5, "ISO-8859-1");
+
+        specialinvoke $r6.<java.io.BufferedReader: void <init>(java.io.Reader)>($r7);
+
+        virtualinvoke $r3.<javax.swing.text.html.StyleSheet: void loadRules(java.io.Reader,java.net.URL)>($r6, null);
+
+        virtualinvoke $r6.<java.io.Reader: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+     label4:
+        return r10;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    static java.io.InputStream getResourceAsStream(java.lang.String)
+    {
+        javax.swing.text.html.HTMLEditorKit$1 $r0;
+        java.lang.Object $r2;
+        java.lang.String r1;
+        java.io.InputStream $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new javax.swing.text.html.HTMLEditorKit$1;
+
+        specialinvoke $r0.<javax.swing.text.html.HTMLEditorKit$1: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.io.InputStream) $r2;
+
+        return $r3;
+    }
+
+    public javax.swing.Action[] getActions()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        javax.swing.Action[] $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = specialinvoke r0.<javax.swing.text.StyledEditorKit: javax.swing.Action[] getActions()>();
+
+        $r2 = <javax.swing.text.html.HTMLEditorKit: javax.swing.Action[] defaultActions>;
+
+        $r3 = staticinvoke <javax.swing.text.TextAction: javax.swing.Action[] augmentList(javax.swing.Action[],javax.swing.Action[])>($r1, $r2);
+
+        return $r3;
+    }
+
+    protected void createInputAttributes(javax.swing.text.Element, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.html.HTML$Attribute $r16, $r22, $r23, $r24, $r25;
+        javax.swing.text.html.HTMLEditorKit r28;
+        javax.swing.text.AttributeSet $r2;
+        boolean $z0, $z1;
+        javax.swing.text.MutableAttributeSet r0;
+        javax.swing.text.html.HTML$Tag r6, $r7, $r8, $r9, $r11, $r12, $r13, $r14, $r17, $r19, $r20, $r26;
+        java.lang.Object $r3, $r4, $r5, $r10, $r15, $r18, $r21, $r27;
+        javax.swing.text.Element r1;
+
+        r28 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttributes(javax.swing.text.AttributeSet)>(r0);
+
+        $r2 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>($r2);
+
+        $r3 = <javax.swing.text.StyleConstants: java.lang.Object ComposedTextAttribute>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r3);
+
+        $r4 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r5 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $z0 = $r5 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z0 == 0 goto label6;
+
+        r6 = (javax.swing.text.html.HTML$Tag) $r5;
+
+        $r7 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMG>;
+
+        if r6 != $r7 goto label1;
+
+        $r23 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute SRC>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r23);
+
+        $r24 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute HEIGHT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r24);
+
+        $r25 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute WIDTH>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r25);
+
+        $r27 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r26 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r27, $r26);
+
+        goto label6;
+
+     label1:
+        $r8 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HR>;
+
+        if r6 == $r8 goto label2;
+
+        $r11 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BR>;
+
+        if r6 != $r11 goto label3;
+
+     label2:
+        $r10 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r9 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r10, $r9);
+
+        goto label6;
+
+     label3:
+        $r12 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        if r6 != $r12 goto label4;
+
+        $r21 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r20 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r21, $r20);
+
+        $r22 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute COMMENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r22);
+
+        goto label6;
+
+     label4:
+        $r13 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag INPUT>;
+
+        if r6 != $r13 goto label5;
+
+        $r18 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r17 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r18, $r17);
+
+        $r19 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag INPUT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r19);
+
+        goto label6;
+
+     label5:
+        $z1 = r6 instanceof javax.swing.text.html.HTML$UnknownTag;
+
+        if $z1 == 0 goto label6;
+
+        $r15 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r14 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r15, $r14);
+
+        $r16 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ENDTAG>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void removeAttribute(java.lang.Object)>($r16);
+
+     label6:
+        return;
+    }
+
+    public javax.swing.text.MutableAttributeSet getInputAttributes()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        javax.swing.text.html.StyleSheet $r3;
+        javax.swing.text.Style $r4;
+        javax.swing.text.MutableAttributeSet $r1, $r2;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.MutableAttributeSet input>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.html.StyleSheet: javax.swing.text.Style addStyle(java.lang.String,javax.swing.text.Style)>(null, null);
+
+        r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.MutableAttributeSet input> = $r4;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.MutableAttributeSet input>;
+
+        return $r2;
+    }
+
+    public void setDefaultCursor(java.awt.Cursor)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.awt.Cursor r1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r1 := @parameter0: java.awt.Cursor;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor defaultCursor> = r1;
+
+        return;
+    }
+
+    public java.awt.Cursor getDefaultCursor()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.awt.Cursor $r1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor defaultCursor>;
+
+        return $r1;
+    }
+
+    public void setLinkCursor(java.awt.Cursor)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.awt.Cursor r1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        r1 := @parameter0: java.awt.Cursor;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor linkCursor> = r1;
+
+        return;
+    }
+
+    public java.awt.Cursor getLinkCursor()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.awt.Cursor $r1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = r0.<javax.swing.text.html.HTMLEditorKit: java.awt.Cursor linkCursor>;
+
+        return $r1;
+    }
+
+    public boolean isAutoFormSubmission()
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $z0 = r0.<javax.swing.text.html.HTMLEditorKit: boolean isAutoFormSubmission>;
+
+        return $z0;
+    }
+
+    public void setAutoFormSubmission(boolean)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: boolean isAutoFormSubmission> = z0;
+
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        javax.swing.text.html.HTMLEditorKit$LinkController $r3;
+        javax.swing.text.html.HTMLEditorKit r0, r2;
+        java.lang.Object $r1;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = specialinvoke r0.<javax.swing.text.StyledEditorKit: java.lang.Object clone()>();
+
+        r2 = (javax.swing.text.html.HTMLEditorKit) $r1;
+
+        if r2 == null goto label1;
+
+        r2.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.MutableAttributeSet input> = null;
+
+        $r3 = new javax.swing.text.html.HTMLEditorKit$LinkController;
+
+        specialinvoke $r3.<javax.swing.text.html.HTMLEditorKit$LinkController: void <init>()>();
+
+        r2.<javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$LinkController linkHandler> = $r3;
+
+     label1:
+        return r2;
+    }
+
+    protected javax.swing.text.html.HTMLEditorKit$Parser getParser()
+    {
+        java.lang.Throwable $r4;
+        javax.swing.text.html.HTMLEditorKit r5;
+        javax.swing.text.html.HTMLEditorKit$Parser $r0, $r3, $r6;
+        java.lang.Class $r1;
+        java.lang.Object $r2;
+
+        r5 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r0 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser defaultParser>;
+
+        if $r0 != null goto label4;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("javax.swing.text.html.parser.ParserDelegator");
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r3 = (javax.swing.text.html.HTMLEditorKit$Parser) $r2;
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser defaultParser> = $r3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r6 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser defaultParser>;
+
+        return $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        javax.swing.text.html.AccessibleHTML $r4;
+        javax.swing.text.html.HTMLEditorKit r0;
+        javax.swing.JEditorPane $r1, $r5;
+        javax.accessibility.AccessibleContext $r2, $r3, $r6;
+
+        r0 := @this: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.JEditorPane theEditor>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.HTMLEditorKit: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new javax.swing.text.html.AccessibleHTML;
+
+        $r5 = r0.<javax.swing.text.html.HTMLEditorKit: javax.swing.JEditorPane theEditor>;
+
+        specialinvoke $r4.<javax.swing.text.html.AccessibleHTML: void <init>(javax.swing.JEditorPane)>($r5);
+
+        $r6 = virtualinvoke $r4.<javax.swing.text.html.AccessibleHTML: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        r0.<javax.swing.text.html.HTMLEditorKit: javax.accessibility.AccessibleContext accessibleContext> = $r6;
+
+     label2:
+        $r3 = r0.<javax.swing.text.html.HTMLEditorKit: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r3;
+    }
+
+    private static java.lang.Object getAttrValue(javax.swing.text.AttributeSet, javax.swing.text.html.HTML$Attribute)
+    {
+        java.util.Enumeration $r1;
+        javax.swing.text.html.HTML$Attribute r4;
+        java.lang.Object $r2, $r3, $r6;
+        javax.swing.text.AttributeSet r0, $r5;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r4 := @parameter1: javax.swing.text.html.HTML$Attribute;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.util.Enumeration getAttributeNames()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r3 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r2);
+
+        $z1 = $r3 instanceof javax.swing.text.AttributeSet;
+
+        if $z1 == 0 goto label3;
+
+        $r5 = (javax.swing.text.AttributeSet) $r3;
+
+        $r6 = staticinvoke <javax.swing.text.html.HTMLEditorKit: java.lang.Object getAttrValue(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Attribute)>($r5, r4);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        goto label4;
+
+     label3:
+        if $r2 != r4 goto label4;
+
+        return $r3;
+
+     label4:
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    private static int getBodyElementStart(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.Element[] $r2;
+        javax.swing.text.JTextComponent r0;
+        int $i0, $i1, i2;
+        javax.swing.text.Document $r1;
+        java.lang.String $r5, $r6;
+        javax.swing.text.Element r3, $r4;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Document: javax.swing.text.Element[] getRootElements()>();
+
+        r3 = $r2[0];
+
+        i2 = 0;
+
+     label1:
+        $i0 = interfaceinvoke r3.<javax.swing.text.Element: int getElementCount()>();
+
+        if i2 >= $i0 goto label3;
+
+        $r4 = interfaceinvoke r3.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i2);
+
+        $r5 = "body";
+
+        $r6 = interfaceinvoke $r4.<javax.swing.text.Element: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $i1 = interfaceinvoke $r4.<javax.swing.text.Element: int getStartOffset()>();
+
+        return $i1;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static boolean access$000(javax.swing.text.html.HTMLEditorKit)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        $z0 = r0.<javax.swing.text.html.HTMLEditorKit: boolean foundLink>;
+
+        return $z0;
+    }
+
+    static boolean access$002(javax.swing.text.html.HTMLEditorKit, boolean)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: boolean foundLink> = z0;
+
+        return z0;
+    }
+
+    static int access$100(javax.swing.text.html.HTMLEditorKit)
+    {
+        int $i0;
+        javax.swing.text.html.HTMLEditorKit r0;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        $i0 = r0.<javax.swing.text.html.HTMLEditorKit: int prevHypertextOffset>;
+
+        return $i0;
+    }
+
+    static java.lang.Object access$200(javax.swing.text.AttributeSet, javax.swing.text.html.HTML$Attribute)
+    {
+        javax.swing.text.html.HTML$Attribute r1;
+        java.lang.Object $r2;
+        javax.swing.text.AttributeSet r0;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r1 := @parameter1: javax.swing.text.html.HTML$Attribute;
+
+        $r2 = staticinvoke <javax.swing.text.html.HTMLEditorKit: java.lang.Object getAttrValue(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Attribute)>(r0, r1);
+
+        return $r2;
+    }
+
+    static int access$102(javax.swing.text.html.HTMLEditorKit, int)
+    {
+        int i0;
+        javax.swing.text.html.HTMLEditorKit r0;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        i0 := @parameter1: int;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: int prevHypertextOffset> = i0;
+
+        return i0;
+    }
+
+    static java.lang.Object access$300(javax.swing.text.html.HTMLEditorKit)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.lang.Object $r1;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        $r1 = r0.<javax.swing.text.html.HTMLEditorKit: java.lang.Object linkNavigationTag>;
+
+        return $r1;
+    }
+
+    static java.lang.Object access$302(javax.swing.text.html.HTMLEditorKit, java.lang.Object)
+    {
+        javax.swing.text.html.HTMLEditorKit r0;
+        java.lang.Object r1;
+
+        r0 := @parameter0: javax.swing.text.html.HTMLEditorKit;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r0.<javax.swing.text.html.HTMLEditorKit: java.lang.Object linkNavigationTag> = r1;
+
+        return r1;
+    }
+
+    static int access$400(javax.swing.text.JTextComponent)
+    {
+        int $i0;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $i0 = staticinvoke <javax.swing.text.html.HTMLEditorKit: int getBodyElementStart(javax.swing.text.JTextComponent)>(r0);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.Cursor $r0, $r1;
+        javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction $r8, $r11, $r16, $r21, $r24, $r29, $r32, $r38;
+        javax.swing.text.html.HTMLEditorKit$HTMLFactory $r2;
+        javax.swing.text.html.HTMLEditorKit$NavigateLinkAction $r4, $r5, $r41, $r42;
+        javax.swing.text.html.HTMLEditorKit$InsertHRAction $r37;
+        javax.swing.text.html.HTMLEditorKit$BeginAction $r44, $r45;
+        javax.swing.text.html.HTML$Tag $r9, $r10, $r12, $r13, $r14, $r15, $r17, $r18, $r19, $r20, $r22, $r23, $r25, $r26, $r27, $r28, $r30, $r31, $r33, $r34, $r35, $r36, $r39, $r40;
+        javax.swing.text.html.HTMLEditorKit$ActivateLinkAction $r6, $r43;
+        javax.swing.Action[] $r7;
+        java.lang.Object $r3;
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String INSERT_PRE_HTML> = "<pre></pre>";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String INSERT_HR_HTML> = "<hr>";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String INSERT_OL_HTML> = "<ol><li></li></ol>";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String INSERT_UL_HTML> = "<ul><li></li></ul>";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String INSERT_TABLE_HTML> = "<table border=1><tr><td></td></tr></table>";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String IMG_BORDER> = "html-image-border";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String IMG_ALIGN_BOTTOM> = "html-image-align-bottom";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String IMG_ALIGN_MIDDLE> = "html-image-align-middle";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String IMG_ALIGN_TOP> = "html-image-align-top";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String LOGICAL_STYLE_ACTION> = "html-logical-style-action";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String COLOR_ACTION> = "html-color-action";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String FONT_CHANGE_SMALLER> = "html-font-smaller";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String FONT_CHANGE_BIGGER> = "html-font-bigger";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String PARA_INDENT_RIGHT> = "html-para-indent-right";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String PARA_INDENT_LEFT> = "html-para-indent-left";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String ITALIC_ACTION> = "html-italic-action";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String BOLD_ACTION> = "html-bold-action";
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.String DEFAULT_CSS> = "default.css";
+
+        $r0 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(12);
+
+        <javax.swing.text.html.HTMLEditorKit: java.awt.Cursor MoveCursor> = $r0;
+
+        $r1 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(0);
+
+        <javax.swing.text.html.HTMLEditorKit: java.awt.Cursor DefaultCursor> = $r1;
+
+        $r2 = new javax.swing.text.html.HTMLEditorKit$HTMLFactory;
+
+        specialinvoke $r2.<javax.swing.text.html.HTMLEditorKit$HTMLFactory: void <init>()>();
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.ViewFactory defaultFactory> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        <javax.swing.text.html.HTMLEditorKit: java.lang.Object DEFAULT_STYLES_KEY> = $r3;
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$Parser defaultParser> = null;
+
+        $r4 = new javax.swing.text.html.HTMLEditorKit$NavigateLinkAction;
+
+        specialinvoke $r4.<javax.swing.text.html.HTMLEditorKit$NavigateLinkAction: void <init>(java.lang.String)>("next-link-action");
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction nextLinkAction> = $r4;
+
+        $r5 = new javax.swing.text.html.HTMLEditorKit$NavigateLinkAction;
+
+        specialinvoke $r5.<javax.swing.text.html.HTMLEditorKit$NavigateLinkAction: void <init>(java.lang.String)>("previous-link-action");
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction previousLinkAction> = $r5;
+
+        $r6 = new javax.swing.text.html.HTMLEditorKit$ActivateLinkAction;
+
+        specialinvoke $r6.<javax.swing.text.html.HTMLEditorKit$ActivateLinkAction: void <init>(java.lang.String)>("activate-link-action");
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$ActivateLinkAction activateLinkAction> = $r6;
+
+        $r7 = newarray (javax.swing.Action)[14];
+
+        $r8 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r10 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r9 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TABLE>;
+
+        specialinvoke $r8.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertTable", "<table border=1><tr><td></td></tr></table>", $r10, $r9);
+
+        $r7[0] = $r8;
+
+        $r11 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r15 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TABLE>;
+
+        $r14 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TR>;
+
+        $r13 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r12 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TABLE>;
+
+        specialinvoke $r11.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertTableRow", "<table border=1><tr><td></td></tr></table>", $r15, $r14, $r13, $r12);
+
+        $r7[1] = $r11;
+
+        $r16 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r20 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TR>;
+
+        $r19 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TD>;
+
+        $r18 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r17 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TABLE>;
+
+        specialinvoke $r16.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertTableDataCell", "<table border=1><tr><td></td></tr></table>", $r20, $r19, $r18, $r17);
+
+        $r7[2] = $r16;
+
+        $r21 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r23 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r22 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag UL>;
+
+        specialinvoke $r21.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertUnorderedList", "<ul><li></li></ul>", $r23, $r22);
+
+        $r7[3] = $r21;
+
+        $r24 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r28 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag UL>;
+
+        $r27 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag LI>;
+
+        $r26 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r25 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag UL>;
+
+        specialinvoke $r24.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertUnorderedListItem", "<ul><li></li></ul>", $r28, $r27, $r26, $r25);
+
+        $r7[4] = $r24;
+
+        $r29 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r31 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r30 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OL>;
+
+        specialinvoke $r29.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertOrderedList", "<ol><li></li></ol>", $r31, $r30);
+
+        $r7[5] = $r29;
+
+        $r32 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r36 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OL>;
+
+        $r35 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag LI>;
+
+        $r34 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r33 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag OL>;
+
+        specialinvoke $r32.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertOrderedListItem", "<ol><li></li></ol>", $r36, $r35, $r34, $r33);
+
+        $r7[6] = $r32;
+
+        $r37 = new javax.swing.text.html.HTMLEditorKit$InsertHRAction;
+
+        specialinvoke $r37.<javax.swing.text.html.HTMLEditorKit$InsertHRAction: void <init>()>();
+
+        $r7[7] = $r37;
+
+        $r38 = new javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction;
+
+        $r40 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        $r39 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        specialinvoke $r38.<javax.swing.text.html.HTMLEditorKit$InsertHTMLTextAction: void <init>(java.lang.String,java.lang.String,javax.swing.text.html.HTML$Tag,javax.swing.text.html.HTML$Tag)>("InsertPre", "<pre></pre>", $r40, $r39);
+
+        $r7[8] = $r38;
+
+        $r41 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction nextLinkAction>;
+
+        $r7[9] = $r41;
+
+        $r42 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$NavigateLinkAction previousLinkAction>;
+
+        $r7[10] = $r42;
+
+        $r43 = <javax.swing.text.html.HTMLEditorKit: javax.swing.text.html.HTMLEditorKit$ActivateLinkAction activateLinkAction>;
+
+        $r7[11] = $r43;
+
+        $r44 = new javax.swing.text.html.HTMLEditorKit$BeginAction;
+
+        specialinvoke $r44.<javax.swing.text.html.HTMLEditorKit$BeginAction: void <init>(java.lang.String,boolean)>("caret-begin", 0);
+
+        $r7[12] = $r44;
+
+        $r45 = new javax.swing.text.html.HTMLEditorKit$BeginAction;
+
+        specialinvoke $r45.<javax.swing.text.html.HTMLEditorKit$BeginAction: void <init>(java.lang.String,boolean)>("selection-begin", 1);
+
+        $r7[13] = $r45;
+
+        <javax.swing.text.html.HTMLEditorKit: javax.swing.Action[] defaultActions> = $r7;
+
+        return;
+    }
+}

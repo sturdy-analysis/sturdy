@@ -1,0 +1,2061 @@
+public class com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl extends java.lang.Object implements com.sun.corba.se.pept.protocol.ClientRequestDispatcher
+{
+    private java.util.concurrent.ConcurrentMap locks;
+
+    public void <init>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.util.concurrent.ConcurrentMap locks> = $r1;
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.encoding.OutputObject beginRequest(java.lang.Object, java.lang.String, boolean, com.sun.corba.se.pept.transport.ContactInfo)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r73;
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r8;
+        com.sun.corba.se.pept.transport.EventHandler $r43;
+        org.omg.CORBA.portable.RemarshalException $r71;
+        java.lang.StringBuilder $r11, $r12, $r13, $r15, $r16, $r18, $r19, $r23, $r24, $r26, $r27, $r28, $r31, $r32, $r34, $r35, $r36, $r44, $r45, $r46, $r47, $r48, $r50, $r51, $r52, $r53, $r54, $r62, $r63, $r64, $r67, $r68, $r69, $r81, $r82, $r83, $r85, $r86, $r87, $r89, $r90, $r92, $r93, $r103, $r104, $r105, $r107, $r108, $r109, $r110, $r111;
+        com.sun.corba.se.spi.protocol.PIHandler $r2, $r9, $r10, $r77, $r78;
+        com.sun.corba.se.pept.protocol.MessageMediator $r7;
+        com.sun.corba.se.pept.transport.OutboundConnectionCache $r22, $r40, $r57;
+        com.sun.corba.se.pept.broker.Broker $r1;
+        com.sun.corba.se.spi.transport.CorbaContactInfoListIterator $r72, $r75, $r98, $r99, $r100;
+        com.sun.corba.se.spi.transport.CorbaConnection r115;
+        java.util.concurrent.ConcurrentMap $r4, $r60;
+        com.sun.corba.se.pept.transport.ContactInfo r113, r118, r122;
+        java.lang.Object $r5, $r59, $r61, $r76, r79, $r101, r116, r117, r121;
+        com.sun.corba.se.spi.transport.CorbaContactInfo r0;
+        com.sun.corba.se.pept.transport.Selector $r42;
+        java.lang.Throwable $r66, $r95, $r96;
+        com.sun.corba.se.pept.encoding.OutputObject $r80, $r102, $r120;
+        java.lang.String r6, $r14, $r17, $r20, $r25, $r29, $r33, $r37, $r49, $r55, $r65, $r70, $r84, $r88, $r91, $r94, $r106, $r112;
+        com.sun.corba.se.pept.transport.TransportManager $r21, $r39, $r41, $r56;
+        java.lang.RuntimeException $r97;
+        com.sun.corba.se.spi.orb.ORB r114;
+        org.omg.CORBA.INTERNAL $r74;
+        com.sun.corba.se.pept.transport.Connection $r38, $r58;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext $r30;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r3;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r119;
+
+        r3 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r79 := @parameter0: java.lang.Object;
+
+        r6 := @parameter1: java.lang.String;
+
+        z1 := @parameter2: boolean;
+
+        r113 := @parameter3: com.sun.corba.se.pept.transport.ContactInfo;
+
+        r114 = null;
+
+     label01:
+        r0 = (com.sun.corba.se.spi.transport.CorbaContactInfo) r113;
+
+        $r1 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        r114 = (com.sun.corba.se.spi.orb.ORB) $r1;
+
+        $z0 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest->: op/");
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r65);
+
+     label02:
+        $r2 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r2.<com.sun.corba.se.spi.protocol.PIHandler: void initiateClientPIRequest(boolean)>(0);
+
+        r115 = null;
+
+        $r4 = r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.util.concurrent.ConcurrentMap locks>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>(r113);
+
+        r116 = $r5;
+
+        if $r5 != null goto label03;
+
+        $r59 = new java.lang.Object;
+
+        specialinvoke $r59.<java.lang.Object: void <init>()>();
+
+        $r60 = r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.util.concurrent.ConcurrentMap locks>;
+
+        $r61 = interfaceinvoke $r60.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r113, $r59);
+
+        r116 = $r61;
+
+        if $r61 != null goto label03;
+
+        r116 = $r59;
+
+     label03:
+        r117 = r116;
+
+        entermonitor r116;
+
+     label04:
+        $z22 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: boolean isConnectionBased()>();
+
+        if $z22 == 0 goto label16;
+
+        $z7 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: boolean shouldCacheConnection()>();
+
+        if $z7 == 0 goto label05;
+
+        $r56 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r57 = interfaceinvoke $r56.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.OutboundConnectionCache getOutboundConnectionCache(com.sun.corba.se.pept.transport.ContactInfo)>(r113);
+
+        $r58 = interfaceinvoke $r57.<com.sun.corba.se.pept.transport.OutboundConnectionCache: com.sun.corba.se.pept.transport.Connection get(com.sun.corba.se.pept.transport.ContactInfo)>(r113);
+
+        r115 = (com.sun.corba.se.spi.transport.CorbaConnection) $r58;
+
+     label05:
+        if r115 == null goto label06;
+
+        $z11 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z11 == 0 goto label16;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: op/");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Using cached connection: ");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r115);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r55);
+
+        goto label16;
+
+     label06:
+        $r38 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: com.sun.corba.se.pept.transport.Connection createConnection()>();
+
+        r115 = (com.sun.corba.se.spi.transport.CorbaConnection) $r38;
+
+        $z8 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z8 == 0 goto label07;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: op/");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Using created connection: ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r115);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r49);
+
+     label07:
+        goto label14;
+
+     label08:
+        $r97 := @caughtexception;
+
+        $z18 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z18 == 0 goto label09;
+
+        $r107 = new java.lang.StringBuilder;
+
+        specialinvoke $r107.<java.lang.StringBuilder: void <init>()>();
+
+        $r108 = virtualinvoke $r107.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: op/");
+
+        $r109 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r110 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": failed to create connection: ");
+
+        $r111 = virtualinvoke $r110.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r97);
+
+        $r112 = virtualinvoke $r111.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r112);
+
+     label09:
+        $r98 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $z19 = interfaceinvoke $r98.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: boolean reportException(com.sun.corba.se.pept.transport.ContactInfo,java.lang.RuntimeException)>(r113, $r97);
+
+        if $z19 == 0 goto label13;
+
+        $r99 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $z20 = interfaceinvoke $r99.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: boolean hasNext()>();
+
+        if $z20 == 0 goto label12;
+
+        $r100 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $r101 = interfaceinvoke $r100.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: java.lang.Object next()>();
+
+        r118 = (com.sun.corba.se.pept.transport.ContactInfo) $r101;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void unregisterWaiter(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $r102 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.pept.encoding.OutputObject beginRequest(java.lang.Object,java.lang.String,boolean,com.sun.corba.se.pept.transport.ContactInfo)>(r79, r6, z1, r118);
+
+        exitmonitor r117;
+
+     label10:
+        $z21 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z21 == 0 goto label11;
+
+        $r103 = new java.lang.StringBuilder;
+
+        specialinvoke $r103.<java.lang.StringBuilder: void <init>()>();
+
+        $r104 = virtualinvoke $r103.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest<-: op/");
+
+        $r105 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r106 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r106);
+
+     label11:
+        return $r102;
+
+     label12:
+        throw $r97;
+
+     label13:
+        throw $r97;
+
+     label14:
+        $z9 = interfaceinvoke r115.<com.sun.corba.se.spi.transport.CorbaConnection: boolean shouldRegisterReadEvent()>();
+
+        if $z9 == 0 goto label15;
+
+        $r41 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r42 = interfaceinvoke $r41.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.Selector getSelector(int)>(0);
+
+        $r43 = interfaceinvoke r115.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.pept.transport.EventHandler getEventHandler()>();
+
+        interfaceinvoke $r42.<com.sun.corba.se.pept.transport.Selector: void registerForEvent(com.sun.corba.se.pept.transport.EventHandler)>($r43);
+
+        interfaceinvoke r115.<com.sun.corba.se.spi.transport.CorbaConnection: void setState(java.lang.String)>("ESTABLISHED");
+
+     label15:
+        $z10 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: boolean shouldCacheConnection()>();
+
+        if $z10 == 0 goto label16;
+
+        $r39 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r40 = interfaceinvoke $r39.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.OutboundConnectionCache getOutboundConnectionCache(com.sun.corba.se.pept.transport.ContactInfo)>(r113);
+
+        interfaceinvoke $r40.<com.sun.corba.se.pept.transport.OutboundConnectionCache: void stampTime(com.sun.corba.se.pept.transport.Connection)>(r115);
+
+        interfaceinvoke $r40.<com.sun.corba.se.pept.transport.OutboundConnectionCache: void put(com.sun.corba.se.pept.transport.ContactInfo,com.sun.corba.se.pept.transport.Connection)>(r113, r115);
+
+     label16:
+        exitmonitor r117;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r96 := @caughtexception;
+
+        exitmonitor r117;
+
+     label19:
+        throw $r96;
+
+     label20:
+        $r7 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: com.sun.corba.se.pept.protocol.MessageMediator createMessageMediator(com.sun.corba.se.pept.broker.Broker,com.sun.corba.se.pept.transport.ContactInfo,com.sun.corba.se.pept.transport.Connection,java.lang.String,boolean)>(r114, r113, r115, r6, z1);
+
+        r119 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) $r7;
+
+        $z2 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z2 == 0 goto label21;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: ");
+
+        $r33 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": created message mediator: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r119);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r37);
+
+     label21:
+        $r8 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        interfaceinvoke $r8.<com.sun.corba.se.pept.protocol.ClientInvocationInfo: void setMessageMediator(com.sun.corba.se.pept.protocol.MessageMediator)>(r119);
+
+        if r115 == null goto label22;
+
+        $r30 = interfaceinvoke r115.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext getCodeSetContext()>();
+
+        if $r30 != null goto label22;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void performCodeSetNegotiation(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+     label22:
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void addServiceContexts(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        $r120 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: com.sun.corba.se.pept.encoding.OutputObject createOutputObject(com.sun.corba.se.pept.protocol.MessageMediator)>(r119);
+
+        $z23 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z23 == 0 goto label23;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: ");
+
+        $r25 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": created output object: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r120);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r29);
+
+     label23:
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void registerWaiter(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        r121 = r116;
+
+        entermonitor r116;
+
+     label24:
+        $z3 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: boolean isConnectionBased()>();
+
+        if $z3 == 0 goto label25;
+
+        $z6 = interfaceinvoke r113.<com.sun.corba.se.pept.transport.ContactInfo: boolean shouldCacheConnection()>();
+
+        if $z6 == 0 goto label25;
+
+        $r21 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r22 = interfaceinvoke $r21.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.OutboundConnectionCache getOutboundConnectionCache(com.sun.corba.se.pept.transport.ContactInfo)>(r113);
+
+        interfaceinvoke $r22.<com.sun.corba.se.pept.transport.OutboundConnectionCache: boolean reclaim()>();
+
+     label25:
+        exitmonitor r121;
+
+     label26:
+        goto label29;
+
+     label27:
+        $r95 := @caughtexception;
+
+        exitmonitor r121;
+
+     label28:
+        throw $r95;
+
+     label29:
+        $r9 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r9.<com.sun.corba.se.spi.protocol.PIHandler: void setClientPIInfo(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+     label30:
+        $r10 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r10.<com.sun.corba.se.spi.protocol.PIHandler: void invokeClientPIStartingPoint()>();
+
+     label31:
+        goto label39;
+
+     label32:
+        $r71 := @caughtexception;
+
+        $z13 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z13 == 0 goto label33;
+
+        $r89 = new java.lang.StringBuilder;
+
+        specialinvoke $r89.<java.lang.StringBuilder: void <init>()>();
+
+        $r90 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: ");
+
+        $r91 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        $r92 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r91);
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Remarshal");
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r94);
+
+     label33:
+        $r72 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $z14 = interfaceinvoke $r72.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: boolean hasNext()>();
+
+        if $z14 == 0 goto label37;
+
+        $r75 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $r76 = interfaceinvoke $r75.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: java.lang.Object next()>();
+
+        r122 = (com.sun.corba.se.pept.transport.ContactInfo) $r76;
+
+        $z16 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z16 == 0 goto label34;
+
+        $r85 = new java.lang.StringBuilder;
+
+        specialinvoke $r85.<java.lang.StringBuilder: void <init>()>();
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RemarshalException: hasNext true\ncontact info ");
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r122);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r88);
+
+     label34:
+        $r77 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r77.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception makeCompletedClientRequest(int,java.lang.Exception)>(3, null);
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void unregisterWaiter(com.sun.corba.se.spi.orb.ORB)>(r114);
+
+        $r78 = virtualinvoke r114.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r78.<com.sun.corba.se.spi.protocol.PIHandler: void cleanupClientPIRequest()>();
+
+        $r80 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.pept.encoding.OutputObject beginRequest(java.lang.Object,java.lang.String,boolean,com.sun.corba.se.pept.transport.ContactInfo)>(r79, r6, z1, r122);
+
+     label35:
+        $z17 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z17 == 0 goto label36;
+
+        $r81 = new java.lang.StringBuilder;
+
+        specialinvoke $r81.<java.lang.StringBuilder: void <init>()>();
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest<-: op/");
+
+        $r83 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r84 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r84);
+
+     label36:
+        return $r80;
+
+     label37:
+        $z15 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z15 == 0 goto label38;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>("RemarshalException: hasNext false");
+
+     label38:
+        $r73 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r114, "rpc.protocol");
+
+        $r74 = virtualinvoke $r73.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL remarshalWithNowhereToGo()>();
+
+        throw $r74;
+
+     label39:
+        interfaceinvoke r119.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void initializeMessage()>();
+
+        $z4 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z4 == 0 goto label40;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest: ");
+
+        $r17 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r119);
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": initialized message");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r20);
+
+     label40:
+        $z5 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z5 == 0 goto label41;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest<-: op/");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r14);
+
+     label41:
+        return $r120;
+
+     label42:
+        $r66 := @caughtexception;
+
+     label43:
+        $z12 = r114.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z12 == 0 goto label44;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".beginRequest<-: op/");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r70);
+
+     label44:
+        throw $r66;
+
+        catch java.lang.RuntimeException from label06 to label07 with label08;
+        catch java.lang.Throwable from label04 to label10 with label18;
+        catch java.lang.Throwable from label12 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.Throwable from label24 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+        catch org.omg.CORBA.portable.RemarshalException from label30 to label31 with label32;
+        catch java.lang.Throwable from label01 to label10 with label42;
+        catch java.lang.Throwable from label12 to label35 with label42;
+        catch java.lang.Throwable from label37 to label40 with label42;
+        catch java.lang.Throwable from label42 to label43 with label42;
+    }
+
+    public com.sun.corba.se.pept.encoding.InputObject marshalingComplete(java.lang.Object, com.sun.corba.se.pept.encoding.OutputObject) throws org.omg.CORBA.portable.ApplicationException, org.omg.CORBA.portable.RemarshalException
+    {
+        java.lang.Throwable $r16;
+        com.sun.corba.se.pept.protocol.MessageMediator $r1;
+        com.sun.corba.se.pept.encoding.OutputObject r0;
+        java.lang.String $r8, $r10, $r13, $r15, $r19, $r21;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.pept.encoding.InputObject $r4, $r5;
+        com.sun.corba.se.pept.broker.Broker $r2;
+        com.sun.corba.se.spi.orb.ORB r23;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r24;
+        java.lang.StringBuilder $r6, $r7, $r9, $r11, $r12, $r14, $r17, $r18, $r20;
+        java.lang.Object r22;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r3;
+
+        r3 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r22 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: com.sun.corba.se.pept.encoding.OutputObject;
+
+        r23 = null;
+
+        r24 = null;
+
+     label1:
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.pept.encoding.OutputObject: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator()>();
+
+        r24 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) $r1;
+
+        $r2 = interfaceinvoke r24.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        r23 = (com.sun.corba.se.spi.orb.ORB) $r2;
+
+        $z0 = r23.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z0 == 0 goto label2;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".marshalingComplete->: ");
+
+        $r13 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r24);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r15);
+
+     label2:
+        $r4 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.pept.encoding.InputObject marshalingComplete1(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r23, r24);
+
+        $r5 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.pept.encoding.InputObject processResponse(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.protocol.CorbaMessageMediator,com.sun.corba.se.pept.encoding.InputObject)>(r23, r24, $r4);
+
+     label3:
+        $z1 = r23.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z1 == 0 goto label4;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".marshalingComplete<-: ");
+
+        $r8 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r24);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r10);
+
+     label4:
+        return $r5;
+
+     label5:
+        $r16 := @caughtexception;
+
+     label6:
+        $z2 = r23.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z2 == 0 goto label7;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".marshalingComplete<-: ");
+
+        $r19 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r24);
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r21);
+
+     label7:
+        throw $r16;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public com.sun.corba.se.pept.encoding.InputObject marshalingComplete1(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.protocol.CorbaMessageMediator) throws org.omg.CORBA.portable.ApplicationException, org.omg.CORBA.portable.RemarshalException
+    {
+        com.sun.corba.se.spi.transport.CorbaContactInfoListIterator $r11;
+        java.lang.String $r6, $r9, $r20, $r23, $r25;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.pept.encoding.InputObject $r2;
+        com.sun.corba.se.spi.protocol.PIHandler $r13;
+        org.omg.CORBA.portable.RemarshalException $r15, $r17;
+        java.lang.RuntimeException $r10, $r16;
+        com.sun.corba.se.spi.orb.ORB r1;
+        java.lang.Exception $r14;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        com.sun.corba.se.pept.transport.ContactInfo $r12;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r18, $r19, $r21, $r22, $r24;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r3;
+
+        r3 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r0 := @parameter1: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+     label01:
+        interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void finishSendingRequest()>();
+
+        $z0 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".marshalingComplete: ");
+
+        $r6 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": finished sending request");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r9);
+
+     label02:
+        $r2 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.encoding.InputObject waitForResponse()>();
+
+     label03:
+        return $r2;
+
+     label04:
+        $r10 := @caughtexception;
+
+        $z1 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z1 == 0 goto label05;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".marshalingComplete: ");
+
+        $r20 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0);
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": exception: ");
+
+        $r23 = virtualinvoke $r10.<java.lang.RuntimeException: java.lang.String toString()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r25);
+
+     label05:
+        $r11 = virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $r12 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $z2 = interfaceinvoke $r11.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: boolean reportException(com.sun.corba.se.pept.transport.ContactInfo,java.lang.RuntimeException)>($r12, $r10);
+
+        $r13 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r14 = interfaceinvoke $r13.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r10);
+
+        if $z2 == 0 goto label07;
+
+        if $r14 != $r10 goto label06;
+
+        $r17 = new org.omg.CORBA.portable.RemarshalException;
+
+        specialinvoke $r17.<org.omg.CORBA.portable.RemarshalException: void <init>()>();
+
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r0, $r17);
+
+        goto label10;
+
+     label06:
+        virtualinvoke r3.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r0, $r14);
+
+        goto label10;
+
+     label07:
+        $z3 = $r14 instanceof java.lang.RuntimeException;
+
+        if $z3 == 0 goto label08;
+
+        $r16 = (java.lang.RuntimeException) $r14;
+
+        throw $r16;
+
+     label08:
+        $z4 = $r14 instanceof org.omg.CORBA.portable.RemarshalException;
+
+        if $z4 == 0 goto label09;
+
+        $r15 = (org.omg.CORBA.portable.RemarshalException) $r14;
+
+        throw $r15;
+
+     label09:
+        throw $r10;
+
+     label10:
+        return null;
+
+        catch java.lang.RuntimeException from label01 to label03 with label04;
+    }
+
+    protected com.sun.corba.se.pept.encoding.InputObject processResponse(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.protocol.CorbaMessageMediator, com.sun.corba.se.pept.encoding.InputObject) throws org.omg.CORBA.portable.ApplicationException, org.omg.CORBA.portable.RemarshalException
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        org.omg.CORBA_2_3.portable.InputStream $r9, $r52;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r20, $r33;
+        com.sun.corba.se.impl.encoding.CDRInputObject $r6;
+        org.omg.CORBA.portable.RemarshalException $r23, $r37, $r79;
+        java.lang.Exception $r11, $r22, $r36, $r53, $r55, $r67, $r74, $r77, $r91, r100, r101, r102;
+        java.lang.StringBuilder $r12, $r13, $r15, $r16, $r25, $r26, $r28, $r29, $r39, $r40, $r42, $r43, $r56, $r57, $r59, $r60, $r81, $r82, $r84, $r85, $r86, $r94, $r95, $r97, $r98;
+        java.lang.Throwable $r71;
+        short $s0;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r65;
+        java.lang.String $r14, $r17, $r27, $r30, $r41, $r44, $r47, $r58, $r61, $r83, $r87, $r96, $r99;
+        org.omg.CORBA.portable.UnknownException $r72;
+        com.sun.corba.se.spi.protocol.PIHandler $r10, $r21, $r35, $r50, $r54, $r66, $r73, $r76, $r90;
+        com.sun.corba.se.spi.orb.ORB r0;
+        com.sun.corba.se.spi.servicecontext.ServiceContext $r69;
+        org.omg.CORBA.INTERNAL $r24, $r38, $r68, $r75, $r78, $r80;
+        org.omg.CORBA.SystemException $r62;
+        org.omg.CORBA.portable.InputStream $r49;
+        com.sun.corba.se.pept.transport.Connection $r3, $r92;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15;
+        com.sun.corba.se.pept.encoding.InputObject r5;
+        com.sun.corba.se.spi.ior.IOR $r34;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r4;
+        org.omg.CORBA.portable.ApplicationException $r48, $r51;
+        com.sun.corba.se.spi.transport.CorbaContactInfoListIterator $r7, $r18, $r31, $r45, $r63, $r88;
+        com.sun.corba.se.spi.transport.CorbaConnection $r93;
+        com.sun.corba.se.spi.servicecontext.UEInfoServiceContext r70;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r2;
+        com.sun.corba.se.pept.transport.ContactInfo $r8, $r19, $r32, $r46, $r64, $r89;
+
+        r4 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        r5 := @parameter2: com.sun.corba.se.pept.encoding.InputObject;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r0, "rpc.protocol");
+
+        $z0 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        $r94 = new java.lang.StringBuilder;
+
+        specialinvoke $r94.<java.lang.StringBuilder: void <init>()>();
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r96 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r97 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r96);
+
+        $r98 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": response received");
+
+        $r99 = virtualinvoke $r98.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r99);
+
+     label01:
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        if $r3 == null goto label02;
+
+        $r92 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        $r93 = (com.sun.corba.se.spi.transport.CorbaConnection) $r92;
+
+        interfaceinvoke $r93.<com.sun.corba.se.spi.transport.CorbaConnection: void setPostInitialContexts()>();
+
+     label02:
+        r100 = null;
+
+        $z1 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isOneWay()>();
+
+        if $z1 == 0 goto label03;
+
+        $r88 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r89 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        interfaceinvoke $r88.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportSuccess(com.sun.corba.se.pept.transport.ContactInfo)>($r89);
+
+        $r90 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r91 = interfaceinvoke $r90.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(0, null);
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r91);
+
+        return null;
+
+     label03:
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void consumeServiceContexts(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0, r2);
+
+        $r6 = (com.sun.corba.se.impl.encoding.CDRInputObject) r5;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.encoding.CDRInputObject: void performORBVersionSpecificInit()>();
+
+        $z2 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isSystemExceptionReply()>();
+
+        if $z2 == 0 goto label08;
+
+        $r62 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: org.omg.CORBA.SystemException getSystemExceptionReply()>();
+
+        $z14 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z14 == 0 goto label04;
+
+        $r81 = new java.lang.StringBuilder;
+
+        specialinvoke $r81.<java.lang.StringBuilder: void <init>()>();
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r83 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r84 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r83);
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": received system exception: ");
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r62);
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r87);
+
+     label04:
+        $r63 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r64 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $z15 = interfaceinvoke $r63.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: boolean reportException(com.sun.corba.se.pept.transport.ContactInfo,java.lang.RuntimeException)>($r64, $r62);
+
+        if $z15 == 0 goto label06;
+
+        $r76 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r77 = interfaceinvoke $r76.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r62);
+
+        if $r62 != $r77 goto label05;
+
+        $r79 = new org.omg.CORBA.portable.RemarshalException;
+
+        specialinvoke $r79.<org.omg.CORBA.portable.RemarshalException: void <init>()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r79);
+
+        $r80 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable1()>();
+
+        throw $r80;
+
+     label05:
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r77);
+
+        $r78 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable2()>();
+
+        throw $r78;
+
+     label06:
+        $r65 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getReplyServiceContexts()>();
+
+        if $r65 == null goto label07;
+
+        $r69 = virtualinvoke $r65.<com.sun.corba.se.spi.servicecontext.ServiceContexts: com.sun.corba.se.spi.servicecontext.ServiceContext get(int)>(9);
+
+        r70 = (com.sun.corba.se.spi.servicecontext.UEInfoServiceContext) $r69;
+
+        if r70 == null goto label07;
+
+        $r71 = virtualinvoke r70.<com.sun.corba.se.spi.servicecontext.UEInfoServiceContext: java.lang.Throwable getUE()>();
+
+        $r72 = new org.omg.CORBA.portable.UnknownException;
+
+        specialinvoke $r72.<org.omg.CORBA.portable.UnknownException: void <init>(java.lang.Throwable)>($r71);
+
+        $r73 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r74 = interfaceinvoke $r73.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r72);
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r74);
+
+        $r75 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable3()>();
+
+        throw $r75;
+
+     label07:
+        $r66 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r67 = interfaceinvoke $r66.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(2, $r62);
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r67);
+
+        $r68 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable4()>();
+
+        throw $r68;
+
+     label08:
+        $z3 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isUserExceptionReply()>();
+
+        if $z3 == 0 goto label14;
+
+        $z11 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z11 == 0 goto label09;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r58 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r59 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r58);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": received user exception");
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r61);
+
+     label09:
+        $r45 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r46 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        interfaceinvoke $r45.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportSuccess(com.sun.corba.se.pept.transport.ContactInfo)>($r46);
+
+        $r47 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String peekUserExceptionId(com.sun.corba.se.pept.encoding.InputObject)>(r5);
+
+        $z12 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isDIIRequest()>();
+
+        if $z12 == 0 goto label10;
+
+        $r52 = (org.omg.CORBA_2_3.portable.InputStream) r5;
+
+        $r53 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: java.lang.Exception unmarshalDIIUserException(java.lang.String,org.omg.CORBA_2_3.portable.InputStream)>($r47, $r52);
+
+        r101 = $r53;
+
+        $r54 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r55 = interfaceinvoke $r54.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(1, $r53);
+
+        r102 = $r55;
+
+        interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void setDIIException(java.lang.Exception)>($r55);
+
+        goto label11;
+
+     label10:
+        $r48 = new org.omg.CORBA.portable.ApplicationException;
+
+        $r49 = (org.omg.CORBA.portable.InputStream) r5;
+
+        specialinvoke $r48.<org.omg.CORBA.portable.ApplicationException: void <init>(java.lang.String,org.omg.CORBA.portable.InputStream)>($r47, $r49);
+
+        r101 = $r48;
+
+        $r50 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        r102 = interfaceinvoke $r50.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(1, $r48);
+
+     label11:
+        if r102 == r101 goto label12;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, r102);
+
+     label12:
+        $z13 = r102 instanceof org.omg.CORBA.portable.ApplicationException;
+
+        if $z13 == 0 goto label13;
+
+        $r51 = (org.omg.CORBA.portable.ApplicationException) r102;
+
+        throw $r51;
+
+     label13:
+        return r5;
+
+     label14:
+        $z4 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isLocationForwardReply()>();
+
+        if $z4 == 0 goto label18;
+
+        $z9 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z9 == 0 goto label15;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r41 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": received location forward");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r44);
+
+     label15:
+        $r31 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r32 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r33 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r32;
+
+        $r34 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.ior.IOR getForwardedIOR()>();
+
+        interfaceinvoke $r31.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportRedirect(com.sun.corba.se.spi.transport.CorbaContactInfo,com.sun.corba.se.spi.ior.IOR)>($r33, $r34);
+
+        $r35 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r36 = interfaceinvoke $r35.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(3, null);
+
+        $z10 = $r36 instanceof org.omg.CORBA.portable.RemarshalException;
+
+        if $z10 != 0 goto label16;
+
+        r100 = $r36;
+
+     label16:
+        if r100 == null goto label17;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, r100);
+
+     label17:
+        $r37 = new org.omg.CORBA.portable.RemarshalException;
+
+        specialinvoke $r37.<org.omg.CORBA.portable.RemarshalException: void <init>()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r37);
+
+        $r38 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable5()>();
+
+        throw $r38;
+
+     label18:
+        $z5 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isDifferentAddrDispositionRequestedReply()>();
+
+        if $z5 == 0 goto label22;
+
+        $z7 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z7 == 0 goto label19;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r27 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": received different addressing dispostion request");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r30);
+
+     label19:
+        $r18 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r19 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r20 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r19;
+
+        $s0 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: short getAddrDispositionReply()>();
+
+        interfaceinvoke $r18.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportAddrDispositionRetry(com.sun.corba.se.spi.transport.CorbaContactInfo,short)>($r20, $s0);
+
+        $r21 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r22 = interfaceinvoke $r21.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(5, null);
+
+        $z8 = $r22 instanceof org.omg.CORBA.portable.RemarshalException;
+
+        if $z8 != 0 goto label20;
+
+        r100 = $r22;
+
+     label20:
+        if r100 == null goto label21;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, r100);
+
+     label21:
+        $r23 = new org.omg.CORBA.portable.RemarshalException;
+
+        specialinvoke $r23.<org.omg.CORBA.portable.RemarshalException: void <init>()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r23);
+
+        $r24 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL statementNotReachable6()>();
+
+        throw $r24;
+
+     label22:
+        $z6 = r0.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z6 == 0 goto label23;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse: ");
+
+        $r14 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r2);
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": received normal response");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r17);
+
+     label23:
+        $r7 = virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)>(r0);
+
+        $r8 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        interfaceinvoke $r7.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportSuccess(com.sun.corba.se.pept.transport.ContactInfo)>($r8);
+
+        $r9 = (org.omg.CORBA_2_3.portable.InputStream) r5;
+
+        interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void handleDIIReply(org.omg.CORBA_2_3.portable.InputStream)>($r9);
+
+        $r10 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        $r11 = interfaceinvoke $r10.<com.sun.corba.se.spi.protocol.PIHandler: java.lang.Exception invokeClientPIEndingPoint(int,java.lang.Exception)>(0, null);
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator,java.lang.Exception)>(r2, $r11);
+
+        return r5;
+    }
+
+    protected void continueOrThrowSystemOrRemarshal(com.sun.corba.se.spi.protocol.CorbaMessageMediator, java.lang.Exception) throws org.omg.CORBA.SystemException, org.omg.CORBA.portable.RemarshalException
+    {
+        org.omg.CORBA.SystemException $r4;
+        java.lang.String $r8, $r12, $r17, $r20;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r13;
+        com.sun.corba.se.pept.broker.Broker $r1;
+        org.omg.CORBA.portable.RemarshalException $r14;
+        com.sun.corba.se.spi.orb.ORB r2;
+        java.lang.Exception r3;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        java.lang.StringBuilder $r6, $r7, $r9, $r10, $r11, $r15, $r16, $r18, $r19;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r5;
+
+        r5 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        r3 := @parameter1: java.lang.Exception;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        r2 = (com.sun.corba.se.spi.orb.ORB) $r1;
+
+        if r3 != null goto label1;
+
+        goto label5;
+
+     label1:
+        $z0 = r3 instanceof org.omg.CORBA.portable.RemarshalException;
+
+        if $z0 == 0 goto label3;
+
+        $r13 = virtualinvoke r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        interfaceinvoke $r13.<com.sun.corba.se.pept.protocol.ClientInvocationInfo: void setIsRetryInvocation(boolean)>(1);
+
+        virtualinvoke r5.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void unregisterWaiter(com.sun.corba.se.spi.orb.ORB)>(r2);
+
+        $z2 = r2.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z2 == 0 goto label2;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".continueOrThrowSystemOrRemarshal: ");
+
+        $r17 = virtualinvoke r5.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0);
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": throwing Remarshal");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r5.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r20);
+
+     label2:
+        $r14 = (org.omg.CORBA.portable.RemarshalException) r3;
+
+        throw $r14;
+
+     label3:
+        $z1 = r2.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z1 == 0 goto label4;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".continueOrThrowSystemOrRemarshal: ");
+
+        $r8 = virtualinvoke r5.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": throwing sex:");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r5.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r12);
+
+     label4:
+        $r4 = (org.omg.CORBA.SystemException) r3;
+
+        throw $r4;
+
+     label5:
+        return;
+    }
+
+    protected com.sun.corba.se.spi.transport.CorbaContactInfoListIterator getContactInfoListIterator(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r1;
+        com.sun.corba.se.impl.protocol.CorbaInvocationInfo $r2;
+        java.util.Iterator $r3;
+        com.sun.corba.se.spi.transport.CorbaContactInfoListIterator $r4;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r5;
+        com.sun.corba.se.spi.orb.ORB r0;
+
+        r5 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        $r2 = (com.sun.corba.se.impl.protocol.CorbaInvocationInfo) $r1;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.protocol.CorbaInvocationInfo: java.util.Iterator getContactInfoListIterator()>();
+
+        $r4 = (com.sun.corba.se.spi.transport.CorbaContactInfoListIterator) $r3;
+
+        return $r4;
+    }
+
+    protected void registerWaiter(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        com.sun.corba.se.pept.transport.Connection $r1, $r2;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r3;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+
+        r3 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        interfaceinvoke $r2.<com.sun.corba.se.pept.transport.Connection: void registerWaiter(com.sun.corba.se.pept.protocol.MessageMediator)>(r0);
+
+     label1:
+        return;
+    }
+
+    protected void unregisterWaiter(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r1;
+        com.sun.corba.se.pept.transport.Connection $r3, $r4;
+        com.sun.corba.se.pept.protocol.MessageMediator $r2;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r5;
+        com.sun.corba.se.spi.orb.ORB r0;
+
+        r5 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.pept.protocol.ClientInvocationInfo: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        if $r3 == null goto label1;
+
+        $r4 = interfaceinvoke $r2.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Connection: void unregisterWaiter(com.sun.corba.se.pept.protocol.MessageMediator)>($r2);
+
+     label1:
+        return;
+    }
+
+    protected void addServiceContexts(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r5;
+        com.sun.corba.se.spi.ior.IOR $r12;
+        com.sun.corba.se.pept.broker.Broker $r1;
+        com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext $r9;
+        com.sun.corba.se.spi.transport.CorbaConnection r4;
+        com.sun.corba.se.spi.orb.ORB r2;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        com.sun.corba.se.spi.servicecontext.MaxStreamFormatVersionServiceContext $r8;
+        com.sun.corba.se.pept.transport.Connection $r3;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r6;
+        com.sun.corba.se.spi.orb.ORBVersion $r10;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r7;
+        boolean $z0;
+        com.sun.corba.se.spi.servicecontext.SendingContextServiceContext $r11;
+
+        r7 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        r2 = (com.sun.corba.se.spi.orb.ORB) $r1;
+
+        $r3 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        r4 = (com.sun.corba.se.spi.transport.CorbaConnection) $r3;
+
+        $r5 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()>();
+
+        $r6 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getRequestServiceContexts()>();
+
+        virtualinvoke r7.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void addCodeSetServiceContext(com.sun.corba.se.spi.transport.CorbaConnection,com.sun.corba.se.spi.servicecontext.ServiceContexts,com.sun.corba.se.spi.ior.iiop.GIOPVersion)>(r4, $r6, $r5);
+
+        $r8 = <com.sun.corba.se.spi.servicecontext.MaxStreamFormatVersionServiceContext: com.sun.corba.se.spi.servicecontext.MaxStreamFormatVersionServiceContext singleton>;
+
+        virtualinvoke $r6.<com.sun.corba.se.spi.servicecontext.ServiceContexts: void put(com.sun.corba.se.spi.servicecontext.ServiceContext)>($r8);
+
+        $r9 = new com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext;
+
+        $r10 = staticinvoke <com.sun.corba.se.spi.orb.ORBVersionFactory: com.sun.corba.se.spi.orb.ORBVersion getORBVersion()>();
+
+        specialinvoke $r9.<com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext: void <init>(com.sun.corba.se.spi.orb.ORBVersion)>($r10);
+
+        virtualinvoke $r6.<com.sun.corba.se.spi.servicecontext.ServiceContexts: void put(com.sun.corba.se.spi.servicecontext.ServiceContext)>($r9);
+
+        if r4 == null goto label1;
+
+        $z0 = interfaceinvoke r4.<com.sun.corba.se.spi.transport.CorbaConnection: boolean isPostInitialContexts()>();
+
+        if $z0 != 0 goto label1;
+
+        $r11 = new com.sun.corba.se.spi.servicecontext.SendingContextServiceContext;
+
+        $r12 = virtualinvoke r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.ior.IOR getFVDCodeBaseIOR()>();
+
+        specialinvoke $r11.<com.sun.corba.se.spi.servicecontext.SendingContextServiceContext: void <init>(com.sun.corba.se.spi.ior.IOR)>($r12);
+
+        virtualinvoke $r6.<com.sun.corba.se.spi.servicecontext.ServiceContexts: void put(com.sun.corba.se.spi.servicecontext.ServiceContext)>($r11);
+
+     label1:
+        return;
+    }
+
+    protected void consumeServiceContexts(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        java.lang.Throwable $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3;
+        com.sun.corba.se.spi.transport.CorbaConnection $r11;
+        com.sun.corba.se.pept.transport.Connection $r9, $r10;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r1;
+        com.sun.corba.se.spi.orb.ORBVersion $r7;
+        com.sun.corba.se.spi.servicecontext.SendingContextServiceContext r15;
+        com.sun.corba.se.spi.ior.IOR $r8;
+        com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext r16;
+        org.omg.CORBA.DATA_CONVERSION $r13;
+        com.sun.corba.se.spi.orb.ORB r2;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        java.lang.ThreadDeath $r14;
+        com.sun.corba.se.spi.servicecontext.ServiceContext $r4, $r5;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r6;
+
+        r6 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r0 := @parameter1: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getReplyServiceContexts()>();
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r2, "rpc.protocol");
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r1.<com.sun.corba.se.spi.servicecontext.ServiceContexts: com.sun.corba.se.spi.servicecontext.ServiceContext get(int)>(6);
+
+        if $r4 == null goto label6;
+
+        r15 = (com.sun.corba.se.spi.servicecontext.SendingContextServiceContext) $r4;
+
+        $r8 = virtualinvoke r15.<com.sun.corba.se.spi.servicecontext.SendingContextServiceContext: com.sun.corba.se.spi.ior.IOR getIOR()>();
+
+     label2:
+        $r9 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        if $r9 == null goto label3;
+
+        $r10 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        $r11 = (com.sun.corba.se.spi.transport.CorbaConnection) $r10;
+
+        interfaceinvoke $r11.<com.sun.corba.se.spi.transport.CorbaConnection: void setCodeBaseIOR(com.sun.corba.se.spi.ior.IOR)>($r8);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r14 := @caughtexception;
+
+        throw $r14;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.DATA_CONVERSION badStringifiedIor(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label6:
+        $r5 = virtualinvoke $r1.<com.sun.corba.se.spi.servicecontext.ServiceContexts: com.sun.corba.se.spi.servicecontext.ServiceContext get(int)>(1313165056);
+
+        if $r5 == null goto label7;
+
+        r16 = (com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext) $r5;
+
+        $r7 = virtualinvoke r16.<com.sun.corba.se.spi.servicecontext.ORBVersionServiceContext: com.sun.corba.se.spi.orb.ORBVersion getVersion()>();
+
+        virtualinvoke r2.<com.sun.corba.se.spi.orb.ORB: void setORBVersion(com.sun.corba.se.spi.orb.ORBVersion)>($r7);
+
+     label7:
+        virtualinvoke r6.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void getExceptionDetailMessage(com.sun.corba.se.spi.protocol.CorbaMessageMediator,com.sun.corba.se.impl.logging.ORBUtilSystemException)>(r0, $r3);
+
+        return;
+
+        catch java.lang.ThreadDeath from label2 to label3 with label4;
+        catch java.lang.Throwable from label2 to label3 with label5;
+    }
+
+    protected void getExceptionDetailMessage(com.sun.corba.se.spi.protocol.CorbaMessageMediator, com.sun.corba.se.impl.logging.ORBUtilSystemException)
+    {
+        org.omg.CORBA.INTERNAL $r15;
+        byte[] $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException r14;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r1;
+        int $i0;
+        com.sun.corba.se.impl.encoding.EncapsInputStream $r7;
+        java.lang.String $r10, $r13;
+        boolean $z0;
+        com.sun.corba.se.pept.broker.Broker $r5;
+        com.sun.corba.se.spi.orb.ORB $r6;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        com.sun.corba.se.spi.servicecontext.ServiceContext $r2;
+        java.lang.StringBuilder $r8, $r9, $r11, $r12;
+        com.sun.corba.se.spi.servicecontext.UnknownServiceContext $r3;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r16;
+
+        r16 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        r14 := @parameter1: com.sun.corba.se.impl.logging.ORBUtilSystemException;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getReplyServiceContexts()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.servicecontext.ServiceContexts: com.sun.corba.se.spi.servicecontext.ServiceContext get(int)>(14);
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = $r2 instanceof com.sun.corba.se.spi.servicecontext.UnknownServiceContext;
+
+        if $z0 != 0 goto label2;
+
+        $r15 = virtualinvoke r14.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL badExceptionDetailMessageServiceContextType()>();
+
+        throw $r15;
+
+     label2:
+        $r3 = (com.sun.corba.se.spi.servicecontext.UnknownServiceContext) $r2;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.servicecontext.UnknownServiceContext: byte[] getData()>();
+
+        $r5 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        $r6 = (com.sun.corba.se.spi.orb.ORB) $r5;
+
+        $i0 = lengthof $r4;
+
+        $r7 = staticinvoke <sun.corba.EncapsInputStreamFactory: com.sun.corba.se.impl.encoding.EncapsInputStream newEncapsInputStream(org.omg.CORBA.ORB,byte[],int)>($r6, $r4, $i0);
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.encoding.EncapsInputStream: void consumeEndian()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("----------BEGIN server-side stack trace----------\n");
+
+        $r10 = virtualinvoke $r7.<com.sun.corba.se.impl.encoding.EncapsInputStream: java.lang.String read_wstring()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n----------END server-side stack trace----------");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void setReplyExceptionDetailMessage(java.lang.String)>($r13);
+
+        return;
+    }
+
+    public void endRequest(com.sun.corba.se.pept.broker.Broker, java.lang.Object, com.sun.corba.se.pept.encoding.InputObject)
+    {
+        java.lang.Throwable $r9;
+        com.sun.corba.se.pept.protocol.MessageMediator $r3;
+        com.sun.corba.se.pept.transport.Connection $r5;
+        com.sun.corba.se.pept.encoding.OutputObject $r7;
+        java.lang.String $r13, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r2;
+        com.sun.corba.se.pept.encoding.InputObject $r6, r17;
+        com.sun.corba.se.spi.protocol.PIHandler $r18;
+        com.sun.corba.se.pept.broker.Broker r0;
+        java.io.IOException $r10;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r8;
+        java.lang.StringBuilder $r11, $r12, $r14;
+        java.lang.Object r16;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r4;
+
+        r4 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.pept.broker.Broker;
+
+        r16 := @parameter1: java.lang.Object;
+
+        r17 := @parameter2: com.sun.corba.se.pept.encoding.InputObject;
+
+        r1 = (com.sun.corba.se.spi.orb.ORB) r0;
+
+     label01:
+        $z0 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>(".endRequest->");
+
+     label02:
+        $r2 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.pept.protocol.ClientInvocationInfo: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator()>();
+
+        if $r3 == null goto label05;
+
+        $r5 = interfaceinvoke $r3.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        if $r5 == null goto label03;
+
+        $r8 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) $r3;
+
+        interfaceinvoke $r8.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void sendCancelRequestIfFinalFragmentNotSent()>();
+
+     label03:
+        $r6 = interfaceinvoke $r3.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.encoding.InputObject getInputObject()>();
+
+        if $r6 == null goto label04;
+
+        interfaceinvoke $r6.<com.sun.corba.se.pept.encoding.InputObject: void close()>();
+
+     label04:
+        $r7 = interfaceinvoke $r3.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.encoding.OutputObject getOutputObject()>();
+
+        if $r7 == null goto label05;
+
+        interfaceinvoke $r7.<com.sun.corba.se.pept.encoding.OutputObject: void close()>();
+
+     label05:
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void unregisterWaiter(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $r18 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        interfaceinvoke $r18.<com.sun.corba.se.spi.protocol.PIHandler: void cleanupClientPIRequest()>();
+
+     label06:
+        $z4 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z4 == 0 goto label12;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>(".endRequest<-");
+
+        goto label12;
+
+     label07:
+        $r10 := @caughtexception;
+
+        $z2 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z2 == 0 goto label08;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".endRequest: ignoring IOException - ");
+
+        $r13 = virtualinvoke $r10.<java.io.IOException: java.lang.String toString()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>($r15);
+
+     label08:
+        $z3 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z3 == 0 goto label12;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>(".endRequest<-");
+
+        goto label12;
+
+     label09:
+        $r9 := @caughtexception;
+
+     label10:
+        $z1 = r1.<com.sun.corba.se.spi.orb.ORB: boolean subcontractDebugFlag>;
+
+        if $z1 == 0 goto label11;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl: void dprint(java.lang.String)>(".endRequest<-");
+
+     label11:
+        throw $r9;
+
+     label12:
+        return;
+
+        catch java.io.IOException from label01 to label06 with label07;
+        catch java.lang.Throwable from label01 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    protected void performCodeSetNegotiation(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        java.lang.Throwable $r22;
+        com.sun.corba.se.spi.ior.iiop.CodeSetsComponent $r15;
+        com.sun.corba.se.spi.ior.TaggedProfileTemplate $r11;
+        com.sun.corba.se.spi.transport.CorbaConnection r2;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r4;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo $r16, $r20;
+        com.sun.corba.se.pept.transport.Connection $r1;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext $r7, $r9, $r21;
+        com.sun.corba.se.impl.encoding.CodeSetConversion $r17;
+        boolean $z0, $z1;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r6, $r8;
+        java.util.Iterator $r13;
+        com.sun.corba.se.spi.ior.IOR $r5;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate r12;
+        com.sun.corba.se.spi.orb.ORB $r18;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+        com.sun.corba.se.pept.transport.ContactInfo $r3;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfile $r10;
+        java.lang.Object $r14;
+        com.sun.corba.se.spi.orb.ORBData $r19;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r23;
+
+        r23 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        r2 = (com.sun.corba.se.spi.transport.CorbaConnection) $r1;
+
+        $r3 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r4 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r3;
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.spi.ior.IOR getEffectiveTargetIOR()>();
+
+        $r6 = interfaceinvoke r0.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()>();
+
+        if r2 == null goto label9;
+
+        $r7 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext getCodeSetContext()>();
+
+        if $r7 != null goto label9;
+
+        $r8 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_0>;
+
+        $z0 = virtualinvoke $r6.<com.sun.corba.se.spi.ior.iiop.GIOPVersion: boolean equals(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r8);
+
+        if $z0 != 0 goto label9;
+
+        entermonitor r2;
+
+     label1:
+        $r9 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext getCodeSetContext()>();
+
+        if $r9 == null goto label3;
+
+        exitmonitor r2;
+
+     label2:
+        return;
+
+     label3:
+        $r10 = interfaceinvoke $r5.<com.sun.corba.se.spi.ior.IOR: com.sun.corba.se.spi.ior.iiop.IIOPProfile getProfile()>();
+
+        $r11 = interfaceinvoke $r10.<com.sun.corba.se.spi.ior.iiop.IIOPProfile: com.sun.corba.se.spi.ior.TaggedProfileTemplate getTaggedProfileTemplate()>();
+
+        r12 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r11;
+
+        $r13 = interfaceinvoke r12.<com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate: java.util.Iterator iteratorById(int)>(1);
+
+        $z1 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 != 0 goto label5;
+
+        exitmonitor r2;
+
+     label4:
+        return;
+
+     label5:
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r15 = (com.sun.corba.se.spi.ior.iiop.CodeSetsComponent) $r14;
+
+        $r16 = interfaceinvoke $r15.<com.sun.corba.se.spi.ior.iiop.CodeSetsComponent: com.sun.corba.se.impl.encoding.CodeSetComponentInfo getCodeSetComponentInfo()>();
+
+        $r17 = staticinvoke <com.sun.corba.se.impl.encoding.CodeSetConversion: com.sun.corba.se.impl.encoding.CodeSetConversion impl()>();
+
+        $r18 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.orb.ORB getBroker()>();
+
+        $r19 = virtualinvoke $r18.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r20 = interfaceinvoke $r19.<com.sun.corba.se.spi.orb.ORBData: com.sun.corba.se.impl.encoding.CodeSetComponentInfo getCodeSetComponentInfo()>();
+
+        $r21 = virtualinvoke $r17.<com.sun.corba.se.impl.encoding.CodeSetConversion: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext negotiate(com.sun.corba.se.impl.encoding.CodeSetComponentInfo,com.sun.corba.se.impl.encoding.CodeSetComponentInfo)>($r20, $r16);
+
+        interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: void setCodeSetContext(com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext)>($r21);
+
+        exitmonitor r2;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r22 := @caughtexception;
+
+        exitmonitor r2;
+
+     label8:
+        throw $r22;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected void addCodeSetServiceContext(com.sun.corba.se.spi.transport.CorbaConnection, com.sun.corba.se.spi.servicecontext.ServiceContexts, com.sun.corba.se.spi.ior.iiop.GIOPVersion)
+    {
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r0, $r1;
+        com.sun.corba.se.spi.transport.CorbaConnection r2;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        com.sun.corba.se.spi.servicecontext.CodeSetServiceContext $r5;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts r6;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext r8;
+        com.sun.corba.se.spi.orb.ORBData $r4;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r7;
+        boolean $z0, $z1, $z2;
+
+        r7 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.transport.CorbaConnection;
+
+        r6 := @parameter1: com.sun.corba.se.spi.servicecontext.ServiceContexts;
+
+        r0 := @parameter2: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        $r1 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_0>;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.spi.ior.iiop.GIOPVersion: boolean equals(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        return;
+
+     label2:
+        r8 = null;
+
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.orb.ORB getBroker()>();
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $z1 = interfaceinvoke $r4.<com.sun.corba.se.spi.orb.ORBData: boolean alwaysSendCodeSetServiceContext()>();
+
+        if $z1 != 0 goto label3;
+
+        $z2 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: boolean isPostInitialContexts()>();
+
+        if $z2 != 0 goto label4;
+
+     label3:
+        r8 = interfaceinvoke r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext getCodeSetContext()>();
+
+     label4:
+        if r8 != null goto label5;
+
+        return;
+
+     label5:
+        $r5 = new com.sun.corba.se.spi.servicecontext.CodeSetServiceContext;
+
+        specialinvoke $r5.<com.sun.corba.se.spi.servicecontext.CodeSetServiceContext: void <init>(com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext)>(r8);
+
+        virtualinvoke r6.<com.sun.corba.se.spi.servicecontext.ServiceContexts: void put(com.sun.corba.se.spi.servicecontext.ServiceContext)>($r5);
+
+        return;
+    }
+
+    protected java.lang.String peekUserExceptionId(com.sun.corba.se.pept.encoding.InputObject)
+    {
+        com.sun.corba.se.pept.encoding.InputObject r0;
+        com.sun.corba.se.impl.encoding.CDRInputObject r1;
+        java.lang.String $r2;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r3;
+
+        r3 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.pept.encoding.InputObject;
+
+        r1 = (com.sun.corba.se.impl.encoding.CDRInputObject) r0;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDRInputObject: void mark(int)>(2147483647);
+
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDRInputObject: java.lang.String read_string()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDRInputObject: void reset()>();
+
+        return $r2;
+    }
+
+    protected void dprint(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r1;
+
+        r1 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.String,java.lang.String)>("CorbaClientRequestDispatcherImpl", r0);
+
+        return;
+    }
+
+    protected java.lang.String opAndId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        java.lang.String $r1;
+        com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl r2;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r0;
+
+        r2 := @this: com.sun.corba.se.impl.protocol.CorbaClientRequestDispatcherImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String operationNameAndRequestId(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>(r0);
+
+        return $r1;
+    }
+}

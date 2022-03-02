@@ -1,0 +1,123 @@
+final class com.sun.xml.internal.org.jvnet.mimepull.MimeUtility extends java.lang.Object
+{
+    private static final boolean ignoreUnknownEncoding;
+
+    private void <init>()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MimeUtility r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MimeUtility;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.io.InputStream decode(java.io.InputStream, java.lang.String) throws com.sun.xml.internal.org.jvnet.mimepull.DecodingException
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.QPDecoderStream $r7;
+        java.lang.String r0, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.xml.internal.org.jvnet.mimepull.DecodingException $r2;
+        com.sun.xml.internal.org.jvnet.mimepull.BASE64DecoderStream $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.UUDecoderStream $r9;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.io.InputStream r1;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r0 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("base64");
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new com.sun.xml.internal.org.jvnet.mimepull.BASE64DecoderStream;
+
+        specialinvoke $r8.<com.sun.xml.internal.org.jvnet.mimepull.BASE64DecoderStream: void <init>(java.io.InputStream)>(r1);
+
+        return $r8;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("quoted-printable");
+
+        if $z1 == 0 goto label2;
+
+        $r7 = new com.sun.xml.internal.org.jvnet.mimepull.QPDecoderStream;
+
+        specialinvoke $r7.<com.sun.xml.internal.org.jvnet.mimepull.QPDecoderStream: void <init>(java.io.InputStream)>(r1);
+
+        return $r7;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("uuencode");
+
+        if $z2 != 0 goto label3;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("x-uuencode");
+
+        if $z3 != 0 goto label3;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("x-uue");
+
+        if $z4 == 0 goto label4;
+
+     label3:
+        $r9 = new com.sun.xml.internal.org.jvnet.mimepull.UUDecoderStream;
+
+        specialinvoke $r9.<com.sun.xml.internal.org.jvnet.mimepull.UUDecoderStream: void <init>(java.io.InputStream)>(r1);
+
+        return $r9;
+
+     label4:
+        $z5 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("binary");
+
+        if $z5 != 0 goto label5;
+
+        $z6 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("7bit");
+
+        if $z6 != 0 goto label5;
+
+        $z7 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("8bit");
+
+        if $z7 == 0 goto label6;
+
+     label5:
+        return r1;
+
+     label6:
+        $z8 = <com.sun.xml.internal.org.jvnet.mimepull.MimeUtility: boolean ignoreUnknownEncoding>;
+
+        if $z8 != 0 goto label7;
+
+        $r2 = new com.sun.xml.internal.org.jvnet.mimepull.DecodingException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown encoding: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.sun.xml.internal.org.jvnet.mimepull.DecodingException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label7:
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.PropUtil: boolean getBooleanSystemProperty(java.lang.String,boolean)>("mail.mime.ignoreunknownencoding", 0);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.MimeUtility: boolean ignoreUnknownEncoding> = $z0;
+
+        return;
+    }
+}

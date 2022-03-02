@@ -1,0 +1,535 @@
+public abstract class sun.awt.image.ImageDecoder extends java.lang.Object
+{
+    sun.awt.image.InputStreamImageSource source;
+    java.io.InputStream input;
+    java.lang.Thread feeder;
+    protected boolean aborted;
+    protected boolean finished;
+    sun.awt.image.ImageConsumerQueue queue;
+    sun.awt.image.ImageDecoder next;
+
+    public void <init>(sun.awt.image.InputStreamImageSource, java.io.InputStream)
+    {
+        java.lang.Thread $r3;
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.InputStreamImageSource r1;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r1 := @parameter0: sun.awt.image.InputStreamImageSource;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source> = r1;
+
+        r0.<sun.awt.image.ImageDecoder: java.io.InputStream input> = r2;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r0.<sun.awt.image.ImageDecoder: java.lang.Thread feeder> = $r3;
+
+        return;
+    }
+
+    public boolean isConsumer(java.awt.image.ImageConsumer)
+    {
+        sun.awt.image.ImageConsumerQueue $r2;
+        sun.awt.image.ImageDecoder r0;
+        java.awt.image.ImageConsumer r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r1 := @parameter0: java.awt.image.ImageConsumer;
+
+        $r2 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue queue>;
+
+        $z0 = staticinvoke <sun.awt.image.ImageConsumerQueue: boolean isConsumer(sun.awt.image.ImageConsumerQueue,java.awt.image.ImageConsumer)>($r2, r1);
+
+        return $z0;
+    }
+
+    public void removeConsumer(java.awt.image.ImageConsumer)
+    {
+        sun.awt.image.ImageConsumerQueue $r2, $r3, $r4;
+        sun.awt.image.ImageDecoder r0;
+        java.awt.image.ImageConsumer r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r1 := @parameter0: java.awt.image.ImageConsumer;
+
+        $r2 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue queue>;
+
+        $r3 = staticinvoke <sun.awt.image.ImageConsumerQueue: sun.awt.image.ImageConsumerQueue removeConsumer(sun.awt.image.ImageConsumerQueue,java.awt.image.ImageConsumer,boolean)>($r2, r1, 0);
+
+        r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue queue> = $r3;
+
+        $z0 = r0.<sun.awt.image.ImageDecoder: boolean finished>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue queue>;
+
+        if $r4 != null goto label1;
+
+        virtualinvoke r0.<sun.awt.image.ImageDecoder: void abort()>();
+
+     label1:
+        return;
+    }
+
+    protected sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)
+    {
+        java.lang.Throwable $r2;
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.InputStreamImageSource $r1;
+        sun.awt.image.ImageConsumerQueue r3, $r4, r5;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r3 := @parameter0: sun.awt.image.ImageConsumerQueue;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<sun.awt.image.ImageDecoder: boolean aborted>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return null;
+
+     label03:
+        if r3 != null goto label04;
+
+        $r4 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue queue>;
+
+        goto label05;
+
+     label04:
+        $r4 = r3.<sun.awt.image.ImageConsumerQueue: sun.awt.image.ImageConsumerQueue next>;
+
+     label05:
+        r5 = $r4;
+
+     label06:
+        if r5 == null goto label09;
+
+        $z1 = r5.<sun.awt.image.ImageConsumerQueue: boolean interested>;
+
+        if $z1 == 0 goto label08;
+
+        exitmonitor $r1;
+
+     label07:
+        return r5;
+
+     label08:
+        r5 = r5.<sun.awt.image.ImageConsumerQueue: sun.awt.image.ImageConsumerQueue next>;
+
+        goto label06;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r2;
+
+     label13:
+        return null;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label07 with label11;
+        catch java.lang.Throwable from label08 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    protected int setDimensions(int, int)
+    {
+        sun.awt.image.ImageConsumerQueue $r1, r3;
+        sun.awt.image.ImageDecoder r0;
+        int i0, i1, i2;
+        java.awt.image.ImageConsumer $r2;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r3 = null;
+
+        i2 = 0;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r3);
+
+        r3 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r2 = $r1.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r2.<java.awt.image.ImageConsumer: void setDimensions(int,int)>(i0, i1);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+
+    protected int setProperties(java.util.Hashtable)
+    {
+        sun.awt.image.ImageConsumerQueue $r1, r4;
+        sun.awt.image.ImageDecoder r0;
+        int i0;
+        java.util.Hashtable r2;
+        java.awt.image.ImageConsumer $r3;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r2 := @parameter0: java.util.Hashtable;
+
+        r4 = null;
+
+        i0 = 0;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r4);
+
+        r4 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r3 = $r1.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r3.<java.awt.image.ImageConsumer: void setProperties(java.util.Hashtable)>(r2);
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return i0;
+    }
+
+    protected int setColorModel(java.awt.image.ColorModel)
+    {
+        sun.awt.image.ImageConsumerQueue $r1, r4;
+        java.awt.image.ColorModel r2;
+        sun.awt.image.ImageDecoder r0;
+        int i0;
+        java.awt.image.ImageConsumer $r3;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r2 := @parameter0: java.awt.image.ColorModel;
+
+        r4 = null;
+
+        i0 = 0;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r4);
+
+        r4 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r3 = $r1.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r3.<java.awt.image.ImageConsumer: void setColorModel(java.awt.image.ColorModel)>(r2);
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return i0;
+    }
+
+    protected int setHints(int)
+    {
+        sun.awt.image.ImageConsumerQueue $r1, r3;
+        sun.awt.image.ImageDecoder r0;
+        int i0, i1;
+        java.awt.image.ImageConsumer $r2;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        i0 := @parameter0: int;
+
+        r3 = null;
+
+        i1 = 0;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r3);
+
+        r3 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r2 = $r1.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r2.<java.awt.image.ImageConsumer: void setHints(int)>(i0);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return i1;
+    }
+
+    protected void headerComplete()
+    {
+        sun.awt.image.ImageDecoder r0;
+        java.lang.Thread $r1;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: java.lang.Thread feeder>;
+
+        virtualinvoke $r1.<java.lang.Thread: void setPriority(int)>(3);
+
+        return;
+    }
+
+    protected int setPixels(int, int, int, int, java.awt.image.ColorModel, byte[], int, int)
+    {
+        byte[] r4;
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.InputStreamImageSource $r1;
+        java.awt.image.ImageConsumer $r5;
+        sun.awt.image.ImageConsumerQueue $r2, r6;
+        java.awt.image.ColorModel r3;
+        int i0, i1, i2, i3, i4, i5, i6;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r3 := @parameter4: java.awt.image.ColorModel;
+
+        r4 := @parameter5: byte[];
+
+        i4 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        virtualinvoke $r1.<sun.awt.image.InputStreamImageSource: void latchConsumers(sun.awt.image.ImageDecoder)>(r0);
+
+        r6 = null;
+
+        i6 = 0;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r6);
+
+        r6 = $r2;
+
+        if $r2 == null goto label2;
+
+        $r5 = $r2.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r5.<java.awt.image.ImageConsumer: void setPixels(int,int,int,int,java.awt.image.ColorModel,byte[],int,int)>(i0, i1, i2, i3, r3, r4, i4, i5);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return i6;
+    }
+
+    protected int setPixels(int, int, int, int, java.awt.image.ColorModel, int[], int, int)
+    {
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.InputStreamImageSource $r1;
+        java.awt.image.ImageConsumer $r5;
+        sun.awt.image.ImageConsumerQueue $r2, r6;
+        java.awt.image.ColorModel r3;
+        int[] r4;
+        int i0, i1, i2, i3, i4, i5, i6;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r3 := @parameter4: java.awt.image.ColorModel;
+
+        r4 := @parameter5: int[];
+
+        i4 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        virtualinvoke $r1.<sun.awt.image.InputStreamImageSource: void latchConsumers(sun.awt.image.ImageDecoder)>(r0);
+
+        r6 = null;
+
+        i6 = 0;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r6);
+
+        r6 = $r2;
+
+        if $r2 == null goto label2;
+
+        $r5 = $r2.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r5.<java.awt.image.ImageConsumer: void setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(i0, i1, i2, i3, r3, r4, i4, i5);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return i6;
+    }
+
+    protected int imageComplete(int, boolean)
+    {
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.InputStreamImageSource $r1, $r3;
+        java.awt.image.ImageConsumer $r2;
+        sun.awt.image.ImageConsumerQueue r4, $r5;
+        int i0, i1;
+        boolean z0;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        virtualinvoke $r1.<sun.awt.image.InputStreamImageSource: void latchConsumers(sun.awt.image.ImageDecoder)>(r0);
+
+        if z0 == 0 goto label1;
+
+        r0.<sun.awt.image.ImageDecoder: boolean finished> = 1;
+
+        $r3 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        virtualinvoke $r3.<sun.awt.image.InputStreamImageSource: void doneDecoding(sun.awt.image.ImageDecoder)>(r0);
+
+     label1:
+        r4 = null;
+
+        i1 = 0;
+
+     label2:
+        $r5 = virtualinvoke r0.<sun.awt.image.ImageDecoder: sun.awt.image.ImageConsumerQueue nextConsumer(sun.awt.image.ImageConsumerQueue)>(r4);
+
+        r4 = $r5;
+
+        if $r5 == null goto label3;
+
+        $r2 = $r5.<sun.awt.image.ImageConsumerQueue: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r2.<java.awt.image.ImageConsumer: void imageComplete(int)>(i0);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        return i1;
+    }
+
+    public abstract void produceImage() throws java.io.IOException, sun.awt.image.ImageFormatException;
+
+    public void abort()
+    {
+        sun.awt.image.ImageDecoder r0;
+        sun.awt.image.ImageDecoder$1 $r2;
+        sun.awt.image.InputStreamImageSource $r1;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        r0.<sun.awt.image.ImageDecoder: boolean aborted> = 1;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: sun.awt.image.InputStreamImageSource source>;
+
+        virtualinvoke $r1.<sun.awt.image.InputStreamImageSource: void doneDecoding(sun.awt.image.ImageDecoder)>(r0);
+
+        virtualinvoke r0.<sun.awt.image.ImageDecoder: void close()>();
+
+        $r2 = new sun.awt.image.ImageDecoder$1;
+
+        specialinvoke $r2.<sun.awt.image.ImageDecoder$1: void <init>(sun.awt.image.ImageDecoder)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        return;
+    }
+
+    public synchronized void close()
+    {
+        sun.awt.image.ImageDecoder r0;
+        java.io.IOException $r3;
+        java.io.InputStream $r1, $r2;
+
+        r0 := @this: sun.awt.image.ImageDecoder;
+
+        $r1 = r0.<sun.awt.image.ImageDecoder: java.io.InputStream input>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = r0.<sun.awt.image.ImageDecoder: java.io.InputStream input>;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+}

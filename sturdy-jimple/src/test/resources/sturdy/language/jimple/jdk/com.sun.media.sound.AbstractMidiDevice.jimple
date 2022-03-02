@@ -1,0 +1,960 @@
+abstract class com.sun.media.sound.AbstractMidiDevice extends java.lang.Object implements javax.sound.midi.MidiDevice, com.sun.media.sound.ReferenceCountingDevice
+{
+    private static final boolean TRACE_TRANSMITTER;
+    private java.util.ArrayList receiverList;
+    private com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList;
+    private final java.lang.Object traRecLock;
+    private final javax.sound.midi.MidiDevice$Info info;
+    private volatile boolean open;
+    private int openRefCount;
+    private java.util.List openKeepingObjects;
+    protected volatile long id;
+
+    protected void <init>(javax.sound.midi.MidiDevice$Info)
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        javax.sound.midi.MidiDevice$Info r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        r2 := @parameter0: javax.sound.midi.MidiDevice$Info;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock> = $r1;
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.MidiDevice$Info info> = r2;
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount> = 0;
+
+        return;
+    }
+
+    public final javax.sound.midi.MidiDevice$Info getDeviceInfo()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        javax.sound.midi.MidiDevice$Info $r1;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.MidiDevice$Info info>;
+
+        return $r1;
+    }
+
+    public final void open() throws javax.sound.midi.MidiUnavailableException
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Throwable $r1;
+        int $i1;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        entermonitor r0;
+
+     label1:
+        $i1 = (int) -1;
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount> = $i1;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void doOpen()>();
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r1;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void openInternal(java.lang.Object) throws javax.sound.midi.MidiUnavailableException
+    {
+        java.lang.Throwable $r3;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.util.List $r1;
+        int $i0, $i1, $i2, $i4;
+        java.lang.Object r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        r2 := @parameter0: java.lang.Object;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount>;
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label2;
+
+        $i1 = r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount> = $i2;
+
+        $r1 = specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List getOpenKeepingObjects()>();
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+     label2:
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void doOpen()>();
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void doOpen() throws javax.sound.midi.MidiUnavailableException
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Throwable $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: boolean isOpen()>();
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void implOpen()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: boolean open> = 1;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public final void close()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void doClose()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount> = 0;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r1;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final void closeInternal(java.lang.Object)
+    {
+        java.lang.Throwable $r3;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.util.List $r1;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        r2 := @parameter0: java.lang.Object;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List getOpenKeepingObjects()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount>;
+
+        $i2 = $i1 - 1;
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount> = $i2;
+
+        $i3 = r0.<com.sun.media.sound.AbstractMidiDevice: int openRefCount>;
+
+        if $i3 != 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void doClose()>();
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public final void doClose()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Throwable $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: boolean isOpen()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void implClose()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: boolean open> = 0;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public final boolean isOpen()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $z0 = r0.<com.sun.media.sound.AbstractMidiDevice: boolean open>;
+
+        return $z0;
+    }
+
+    protected void implClose()
+    {
+        java.lang.Throwable $r10;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        com.sun.media.sound.AbstractMidiDevice$TransmitterList $r3, $r4;
+        java.util.ArrayList $r2, $r5, $r6, $r7;
+        int $i0, i1;
+        java.lang.Object $r1, $r8;
+        javax.sound.midi.Receiver $r9;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        if $r2 == null goto label4;
+
+        i1 = 0;
+
+     label2:
+        $r5 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        $i0 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if i1 >= $i0 goto label3;
+
+        $r7 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        $r9 = (javax.sound.midi.Receiver) $r8;
+
+        interfaceinvoke $r9.<javax.sound.midi.Receiver: void close()>();
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r6 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        virtualinvoke $r6.<java.util.ArrayList: void clear()>();
+
+     label4:
+        $r3 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        virtualinvoke $r4.<com.sun.media.sound.AbstractMidiDevice$TransmitterList: void close()>();
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r10;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public long getMicrosecondPosition()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        return -1L;
+    }
+
+    public final int getMaxReceivers()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        int $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: boolean hasReceivers()>();
+
+        if $z0 == 0 goto label1;
+
+        $i1 = (int) -1;
+
+        return $i1;
+
+     label1:
+        return 0;
+    }
+
+    public final int getMaxTransmitters()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        int $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: boolean hasTransmitters()>();
+
+        if $z0 == 0 goto label1;
+
+        $i1 = (int) -1;
+
+        return $i1;
+
+     label1:
+        return 0;
+    }
+
+    public final javax.sound.midi.Receiver getReceiver() throws javax.sound.midi.MidiUnavailableException
+    {
+        java.lang.Throwable $r4;
+        java.util.List $r3;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        javax.sound.midi.Receiver $r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.Receiver createReceiver()>();
+
+        $r3 = specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List getReceiverList()>();
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final java.util.List getReceivers()
+    {
+        java.lang.Throwable $r8;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.util.ArrayList $r2, $r3, $r7;
+        java.util.List $r5, $r6, r9;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        if $r2 != null goto label2;
+
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>(int)>(0);
+
+        r9 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r7);
+
+        goto label3;
+
+     label2:
+        $r3 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object clone()>();
+
+        $r5 = (java.util.List) $r4;
+
+        $r6 = (java.util.List) $r5;
+
+        r9 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r6);
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r8;
+
+     label7:
+        return r9;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public final javax.sound.midi.Transmitter getTransmitter() throws javax.sound.midi.MidiUnavailableException
+    {
+        java.lang.Throwable $r4;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        com.sun.media.sound.AbstractMidiDevice$TransmitterList $r3;
+        javax.sound.midi.Transmitter $r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.Transmitter createTransmitter()>();
+
+        $r3 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList getTransmitterList()>();
+
+        staticinvoke <com.sun.media.sound.AbstractMidiDevice$TransmitterList: void access$000(com.sun.media.sound.AbstractMidiDevice$TransmitterList,javax.sound.midi.Transmitter)>($r3, $r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final java.util.List getTransmitters()
+    {
+        java.lang.Throwable $r11;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        com.sun.media.sound.AbstractMidiDevice$TransmitterList $r2, $r4, $r6;
+        java.util.ArrayList $r3, $r5, $r7;
+        java.util.List $r9, $r10, r12;
+        int $i0;
+        java.lang.Object $r1, $r8;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        $r5 = staticinvoke <com.sun.media.sound.AbstractMidiDevice$TransmitterList: java.util.ArrayList access$100(com.sun.media.sound.AbstractMidiDevice$TransmitterList)>($r4);
+
+        $i0 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if $i0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(int)>(0);
+
+        r12 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r3);
+
+        goto label4;
+
+     label3:
+        $r6 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        $r7 = staticinvoke <com.sun.media.sound.AbstractMidiDevice$TransmitterList: java.util.ArrayList access$100(com.sun.media.sound.AbstractMidiDevice$TransmitterList)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object clone()>();
+
+        $r9 = (java.util.List) $r8;
+
+        $r10 = (java.util.List) $r9;
+
+        r12 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r10);
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r11;
+
+     label8:
+        return r12;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    final long getId()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        long $l0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $l0 = r0.<com.sun.media.sound.AbstractMidiDevice: long id>;
+
+        return $l0;
+    }
+
+    public final javax.sound.midi.Receiver getReceiverReferenceCounting() throws javax.sound.midi.MidiUnavailableException
+    {
+        java.lang.Throwable $r3;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        javax.sound.midi.Receiver $r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.Receiver getReceiver()>();
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void openInternal(java.lang.Object)>($r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final javax.sound.midi.Transmitter getTransmitterReferenceCounting() throws javax.sound.midi.MidiUnavailableException
+    {
+        java.lang.Throwable $r3;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        javax.sound.midi.Transmitter $r2;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: javax.sound.midi.Transmitter getTransmitter()>();
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void openInternal(java.lang.Object)>($r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private synchronized java.util.List getOpenKeepingObjects()
+    {
+        java.util.List $r1, $r2;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.util.ArrayList $r3;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List openKeepingObjects>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List openKeepingObjects> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List openKeepingObjects>;
+
+        return $r2;
+    }
+
+    private java.util.List getReceiverList()
+    {
+        java.lang.Throwable $r5;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        java.util.ArrayList $r2, $r3, $r4;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList> = $r4;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        $r3 = r0.<com.sun.media.sound.AbstractMidiDevice: java.util.ArrayList receiverList>;
+
+        return $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected boolean hasReceivers()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        return 0;
+    }
+
+    protected javax.sound.midi.Receiver createReceiver() throws javax.sound.midi.MidiUnavailableException
+    {
+        com.sun.media.sound.AbstractMidiDevice r1;
+        javax.sound.midi.MidiUnavailableException $r0;
+
+        r1 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r0 = new javax.sound.midi.MidiUnavailableException;
+
+        specialinvoke $r0.<javax.sound.midi.MidiUnavailableException: void <init>(java.lang.String)>("MIDI IN receiver not available");
+
+        throw $r0;
+    }
+
+    final com.sun.media.sound.AbstractMidiDevice$TransmitterList getTransmitterList()
+    {
+        java.lang.Throwable $r5;
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+        com.sun.media.sound.AbstractMidiDevice$TransmitterList $r2, $r3, $r4;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new com.sun.media.sound.AbstractMidiDevice$TransmitterList;
+
+        specialinvoke $r4.<com.sun.media.sound.AbstractMidiDevice$TransmitterList: void <init>(com.sun.media.sound.AbstractMidiDevice)>(r0);
+
+        r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList> = $r4;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        $r3 = r0.<com.sun.media.sound.AbstractMidiDevice: com.sun.media.sound.AbstractMidiDevice$TransmitterList transmitterList>;
+
+        return $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected boolean hasTransmitters()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        return 0;
+    }
+
+    protected javax.sound.midi.Transmitter createTransmitter() throws javax.sound.midi.MidiUnavailableException
+    {
+        com.sun.media.sound.AbstractMidiDevice r1;
+        javax.sound.midi.MidiUnavailableException $r0;
+
+        r1 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        $r0 = new javax.sound.midi.MidiUnavailableException;
+
+        specialinvoke $r0.<javax.sound.midi.MidiUnavailableException: void <init>(java.lang.String)>("MIDI OUT transmitter not available");
+
+        throw $r0;
+    }
+
+    protected abstract void implOpen() throws javax.sound.midi.MidiUnavailableException;
+
+    protected final void finalize()
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMidiDevice;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void close()>();
+
+        return;
+    }
+
+    static java.lang.Object access$200(com.sun.media.sound.AbstractMidiDevice)
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.lang.Object $r1;
+
+        r0 := @parameter0: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMidiDevice: java.lang.Object traRecLock>;
+
+        return $r1;
+    }
+
+    static java.util.List access$300(com.sun.media.sound.AbstractMidiDevice)
+    {
+        com.sun.media.sound.AbstractMidiDevice r0;
+        java.util.List $r1;
+
+        r0 := @parameter0: com.sun.media.sound.AbstractMidiDevice;
+
+        $r1 = specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: java.util.List getReceiverList()>();
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.AbstractMidiDevice: boolean TRACE_TRANSMITTER> = 0;
+
+        return;
+    }
+}

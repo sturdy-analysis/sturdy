@@ -1,0 +1,240 @@
+public final class com.sun.media.sound.SoftReceiver extends java.lang.Object implements javax.sound.midi.MidiDeviceReceiver
+{
+    boolean open;
+    private final java.lang.Object control_mutex;
+    private final com.sun.media.sound.SoftSynthesizer synth;
+    java.util.TreeMap midimessages;
+    com.sun.media.sound.SoftMainMixer mainmixer;
+
+    public void <init>(com.sun.media.sound.SoftSynthesizer)
+    {
+        java.util.TreeMap $r6;
+        com.sun.media.sound.SoftMainMixer $r3, $r4, $r5;
+        java.lang.Object $r2;
+        com.sun.media.sound.SoftReceiver r0;
+        com.sun.media.sound.SoftSynthesizer r1;
+
+        r0 := @this: com.sun.media.sound.SoftReceiver;
+
+        r1 := @parameter0: com.sun.media.sound.SoftSynthesizer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftReceiver: boolean open> = 1;
+
+        $r2 = r1.<com.sun.media.sound.SoftSynthesizer: java.lang.Object control_mutex>;
+
+        r0.<com.sun.media.sound.SoftReceiver: java.lang.Object control_mutex> = $r2;
+
+        r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftSynthesizer synth> = r1;
+
+        $r3 = virtualinvoke r1.<com.sun.media.sound.SoftSynthesizer: com.sun.media.sound.SoftMainMixer getMainMixer()>();
+
+        r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftMainMixer mainmixer> = $r3;
+
+        $r4 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftMainMixer mainmixer>;
+
+        if $r4 == null goto label1;
+
+        $r5 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftMainMixer mainmixer>;
+
+        $r6 = $r5.<com.sun.media.sound.SoftMainMixer: java.util.TreeMap midimessages>;
+
+        r0.<com.sun.media.sound.SoftReceiver: java.util.TreeMap midimessages> = $r6;
+
+     label1:
+        return;
+    }
+
+    public javax.sound.midi.MidiDevice getMidiDevice()
+    {
+        com.sun.media.sound.SoftReceiver r0;
+        com.sun.media.sound.SoftSynthesizer $r1;
+
+        r0 := @this: com.sun.media.sound.SoftReceiver;
+
+        $r1 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftSynthesizer synth>;
+
+        return $r1;
+    }
+
+    public void send(javax.sound.midi.MidiMessage, long)
+    {
+        java.lang.Throwable $r17, $r18;
+        byte[] $r11;
+        java.lang.IllegalStateException $r16;
+        javax.sound.midi.ShortMessage $r12;
+        long l2;
+        com.sun.media.sound.SoftReceiver r0;
+        javax.sound.midi.MidiMessage r2;
+        byte $b0;
+        java.lang.Long $r7, $r10, $r14;
+        int $i1;
+        boolean $z0, $z1;
+        com.sun.media.sound.SoftMainMixer $r3, $r5;
+        java.util.TreeMap $r6, $r9, $r13;
+        java.lang.Object $r1, $r4, $r8, $r15;
+
+        r0 := @this: com.sun.media.sound.SoftReceiver;
+
+        r2 := @parameter0: javax.sound.midi.MidiMessage;
+
+        l2 := @parameter1: long;
+
+        $r1 = r0.<com.sun.media.sound.SoftReceiver: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<com.sun.media.sound.SoftReceiver: boolean open>;
+
+        if $z0 != 0 goto label02;
+
+        $r16 = new java.lang.IllegalStateException;
+
+        specialinvoke $r16.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Receiver is not open");
+
+        throw $r16;
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r18 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label05:
+        throw $r18;
+
+     label06:
+        $b0 = l2 cmp -1L;
+
+        if $b0 == 0 goto label16;
+
+        $r4 = r0.<com.sun.media.sound.SoftReceiver: java.lang.Object control_mutex>;
+
+        entermonitor $r4;
+
+     label07:
+        $r5 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftMainMixer mainmixer>;
+
+        virtualinvoke $r5.<com.sun.media.sound.SoftMainMixer: void activity()>();
+
+     label08:
+        $r6 = r0.<com.sun.media.sound.SoftReceiver: java.util.TreeMap midimessages>;
+
+        $r7 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l2);
+
+        $r8 = virtualinvoke $r6.<java.util.TreeMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        if $r8 == null goto label09;
+
+        l2 = l2 + 1L;
+
+        goto label08;
+
+     label09:
+        $z1 = r2 instanceof javax.sound.midi.ShortMessage;
+
+        if $z1 == 0 goto label10;
+
+        $r12 = (javax.sound.midi.ShortMessage) r2;
+
+        $i1 = virtualinvoke $r12.<javax.sound.midi.ShortMessage: int getChannel()>();
+
+        if $i1 <= 15 goto label10;
+
+        $r13 = r0.<com.sun.media.sound.SoftReceiver: java.util.TreeMap midimessages>;
+
+        $r14 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l2);
+
+        $r15 = virtualinvoke r2.<javax.sound.midi.MidiMessage: java.lang.Object clone()>();
+
+        virtualinvoke $r13.<java.util.TreeMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r15);
+
+        goto label11;
+
+     label10:
+        $r9 = r0.<com.sun.media.sound.SoftReceiver: java.util.TreeMap midimessages>;
+
+        $r10 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l2);
+
+        $r11 = virtualinvoke r2.<javax.sound.midi.MidiMessage: byte[] getMessage()>();
+
+        virtualinvoke $r9.<java.util.TreeMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r11);
+
+     label11:
+        exitmonitor $r4;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r17 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label14:
+        throw $r17;
+
+     label15:
+        goto label17;
+
+     label16:
+        $r3 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftMainMixer mainmixer>;
+
+        virtualinvoke $r3.<com.sun.media.sound.SoftMainMixer: void processMessage(javax.sound.midi.MidiMessage)>(r2);
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public void close()
+    {
+        java.lang.Throwable $r3;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftReceiver r0;
+        com.sun.media.sound.SoftSynthesizer $r2;
+
+        r0 := @this: com.sun.media.sound.SoftReceiver;
+
+        $r1 = r0.<com.sun.media.sound.SoftReceiver: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<com.sun.media.sound.SoftReceiver: boolean open> = 0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        $r2 = r0.<com.sun.media.sound.SoftReceiver: com.sun.media.sound.SoftSynthesizer synth>;
+
+        virtualinvoke $r2.<com.sun.media.sound.SoftSynthesizer: void removeReceiver(javax.sound.midi.Receiver)>(r0);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+}

@@ -1,0 +1,358 @@
+public class java.util.zip.GZIPOutputStream extends java.util.zip.DeflaterOutputStream
+{
+    protected java.util.zip.CRC32 crc;
+    private static final int GZIP_MAGIC;
+    private static final int TRAILER_SIZE;
+
+    public void <init>(java.io.OutputStream, int) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        int i0;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream,int,boolean)>(r1, i0, 0);
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream, int, boolean) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        java.util.zip.Deflater $r5;
+        int i0, $i2;
+        java.util.zip.CRC32 $r4, $r6;
+        java.util.zip.GZIPOutputStream r0;
+        boolean z0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r5 = new java.util.zip.Deflater;
+
+        $i2 = (int) -1;
+
+        specialinvoke $r5.<java.util.zip.Deflater: void <init>(int,boolean)>($i2, 1);
+
+        specialinvoke r0.<java.util.zip.DeflaterOutputStream: void <init>(java.io.OutputStream,java.util.zip.Deflater,int,boolean)>(r1, $r5, i0, z0);
+
+        $r6 = new java.util.zip.CRC32;
+
+        specialinvoke $r6.<java.util.zip.CRC32: void <init>()>();
+
+        r0.<java.util.zip.GZIPOutputStream: java.util.zip.CRC32 crc> = $r6;
+
+        r0.<java.util.zip.GZIPOutputStream: boolean usesDefaultDeflater> = 1;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeHeader()>();
+
+        $r4 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r4.<java.util.zip.CRC32: void reset()>();
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream,int,boolean)>(r1, 512, 0);
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream, boolean) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        java.util.zip.GZIPOutputStream r0;
+        boolean z0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream,int,boolean)>(r1, 512, z0);
+
+        return;
+    }
+
+    public synchronized void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        int i0, i1;
+        java.util.zip.CRC32 $r2;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.util.zip.DeflaterOutputStream: void write(byte[],int,int)>(r1, i0, i1);
+
+        $r2 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r2.<java.util.zip.CRC32: void update(byte[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void finish() throws java.io.IOException
+    {
+        byte[] $r5, $r6, $r9, $r11, $r12, $r13, r15;
+        int $i0, $i1, $i2, $i3, i4;
+        boolean $z0, $z1, $z2;
+        java.io.OutputStream $r4, $r10, $r14;
+        java.util.zip.Deflater $r1, $r2, $r3, $r7, $r8;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        $r1 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        $z0 = virtualinvoke $r1.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z0 != 0 goto label5;
+
+        $r2 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        virtualinvoke $r2.<java.util.zip.Deflater: void finish()>();
+
+     label1:
+        $r3 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        $z1 = virtualinvoke $r3.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z1 != 0 goto label4;
+
+        $r7 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        $r6 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        $r5 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        $i0 = lengthof $r5;
+
+        $i1 = virtualinvoke $r7.<java.util.zip.Deflater: int deflate(byte[],int,int)>($r6, 0, $i0);
+
+        $r8 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        $z2 = virtualinvoke $r8.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z2 == 0 goto label2;
+
+        $r11 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        $i2 = lengthof $r11;
+
+        $i3 = $i2 - 8;
+
+        if $i1 > $i3 goto label2;
+
+        $r12 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeTrailer(byte[],int)>($r12, $i1);
+
+        i4 = $i1 + 8;
+
+        $r14 = r0.<java.util.zip.GZIPOutputStream: java.io.OutputStream out>;
+
+        $r13 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        virtualinvoke $r14.<java.io.OutputStream: void write(byte[],int,int)>($r13, 0, i4);
+
+        return;
+
+     label2:
+        if $i1 <= 0 goto label3;
+
+        $r10 = r0.<java.util.zip.GZIPOutputStream: java.io.OutputStream out>;
+
+        $r9 = r0.<java.util.zip.GZIPOutputStream: byte[] buf>;
+
+        virtualinvoke $r10.<java.io.OutputStream: void write(byte[],int,int)>($r9, 0, $i1);
+
+     label3:
+        goto label1;
+
+     label4:
+        r15 = newarray (byte)[8];
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeTrailer(byte[],int)>(r15, 0);
+
+        $r4 = r0.<java.util.zip.GZIPOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(byte[])>(r15);
+
+     label5:
+        return;
+    }
+
+    private void writeHeader() throws java.io.IOException
+    {
+        java.io.OutputStream $r2;
+        byte[] $r1;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        $r2 = r0.<java.util.zip.GZIPOutputStream: java.io.OutputStream out>;
+
+        $r1 = newarray (byte)[10];
+
+        $r1[0] = 31;
+
+        $r1[1] = -117;
+
+        $r1[2] = 8;
+
+        $r1[3] = 0;
+
+        $r1[4] = 0;
+
+        $r1[5] = 0;
+
+        $r1[6] = 0;
+
+        $r1[7] = 0;
+
+        $r1[8] = 0;
+
+        $r1[9] = 0;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r1);
+
+        return;
+    }
+
+    private void writeTrailer(byte[], int) throws java.io.IOException
+    {
+        byte[] r2;
+        long $l0;
+        java.util.zip.Deflater $r3;
+        int i1, $i2, $i3, $i4;
+        java.util.zip.CRC32 $r1;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        r2 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.CRC32 crc>;
+
+        $l0 = virtualinvoke $r1.<java.util.zip.CRC32: long getValue()>();
+
+        $i2 = (int) $l0;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeInt(int,byte[],int)>($i2, r2, i1);
+
+        $r3 = r0.<java.util.zip.GZIPOutputStream: java.util.zip.Deflater def>;
+
+        $i3 = virtualinvoke $r3.<java.util.zip.Deflater: int getTotalIn()>();
+
+        $i4 = i1 + 4;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeInt(int,byte[],int)>($i3, r2, $i4);
+
+        return;
+    }
+
+    private void writeInt(int, byte[], int) throws java.io.IOException
+    {
+        byte[] r1;
+        int i0, i1, $i2, $i3, $i4, $i5, $i7, $i9;
+        java.util.zip.GZIPOutputStream r0;
+
+        r0 := @this: java.util.zip.GZIPOutputStream;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        $i7 = (int) 65535;
+
+        $i2 = i0 & $i7;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeShort(int,byte[],int)>($i2, r1, i1);
+
+        $i3 = i0 >> 16;
+
+        $i9 = (int) 65535;
+
+        $i5 = $i3 & $i9;
+
+        $i4 = i1 + 2;
+
+        specialinvoke r0.<java.util.zip.GZIPOutputStream: void writeShort(int,byte[],int)>($i5, r1, $i4);
+
+        return;
+    }
+
+    private void writeShort(int, byte[], int) throws java.io.IOException
+    {
+        byte[] r0;
+        byte $b3, $b6;
+        int i0, i1, $i2, $i4, $i5, $i7;
+        java.util.zip.GZIPOutputStream r1;
+
+        r1 := @this: java.util.zip.GZIPOutputStream;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        $i2 = i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[i0] = $b3;
+
+        $i7 = i0 + 1;
+
+        $i4 = i1 >> 8;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        r0[$i7] = $b6;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.zip.GZIPOutputStream: int TRAILER_SIZE> = 8;
+
+        <java.util.zip.GZIPOutputStream: int GZIP_MAGIC> = 35615;
+
+        return;
+    }
+}

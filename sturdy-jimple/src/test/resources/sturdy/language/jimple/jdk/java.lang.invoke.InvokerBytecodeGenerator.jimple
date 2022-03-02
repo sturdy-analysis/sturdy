@@ -1,0 +1,5309 @@
+class java.lang.invoke.InvokerBytecodeGenerator extends java.lang.Object
+{
+    private static final java.lang.String MH;
+    private static final java.lang.String MHI;
+    private static final java.lang.String LF;
+    private static final java.lang.String LFN;
+    private static final java.lang.String CLS;
+    private static final java.lang.String OBJ;
+    private static final java.lang.String OBJARY;
+    private static final java.lang.String MH_SIG;
+    private static final java.lang.String LF_SIG;
+    private static final java.lang.String LFN_SIG;
+    private static final java.lang.String LL_SIG;
+    private static final java.lang.String LLV_SIG;
+    private static final java.lang.String CLL_SIG;
+    private static final java.lang.String superName;
+    private final java.lang.String className;
+    private final java.lang.String sourceFile;
+    private final java.lang.invoke.LambdaForm lambdaForm;
+    private final java.lang.String invokerName;
+    private final java.lang.invoke.MethodType invokerType;
+    private final int[] localsMap;
+    private final java.lang.invoke.LambdaForm$BasicType[] localTypes;
+    private final java.lang.Class[] localClasses;
+    private jdk.internal.org.objectweb.asm.ClassWriter cw;
+    private jdk.internal.org.objectweb.asm.MethodVisitor mv;
+    private static final java.lang.invoke.MemberName$Factory MEMBERNAME_FACTORY;
+    private static final java.lang.Class HOST_CLASS;
+    private static final java.util.HashMap DUMP_CLASS_FILES_COUNTERS;
+    private static final java.io.File DUMP_CLASS_FILES_DIR;
+    java.util.Map cpPatches;
+    int cph;
+    private static java.lang.Class[] STATICALLY_INVOCABLE_PACKAGES;
+    static final boolean $assertionsDisabled;
+
+    private void <init>(java.lang.invoke.LambdaForm, int, java.lang.String, java.lang.String, java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.LambdaForm r10;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.util.HashMap $r1;
+        int[] $r12;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r5, $r9, r15, r16;
+        boolean $z0, $z1;
+        java.lang.Class[] $r14;
+        java.lang.invoke.LambdaForm$BasicType[] $r13;
+        java.lang.invoke.MethodType r11;
+        java.lang.StringBuilder $r2, $r3, $r4, $r6, $r7, $r8;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r10 := @parameter0: java.lang.invoke.LambdaForm;
+
+        i0 := @parameter1: int;
+
+        r15 := @parameter2: java.lang.String;
+
+        r16 := @parameter3: java.lang.String;
+
+        r11 := @parameter4: java.lang.invoke.MethodType;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.util.Map cpPatches> = $r1;
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: int cph> = 0;
+
+        $z0 = virtualinvoke r16.<java.lang.String: boolean contains(java.lang.CharSequence)>(".");
+
+        if $z0 == 0 goto label1;
+
+        $i4 = virtualinvoke r16.<java.lang.String: int indexOf(java.lang.String)>(".");
+
+        r15 = virtualinvoke r16.<java.lang.String: java.lang.String substring(int,int)>(0, $i4);
+
+        $i5 = $i4 + 1;
+
+        r16 = virtualinvoke r16.<java.lang.String: java.lang.String substring(int)>($i5);
+
+     label1:
+        $z1 = <java.lang.invoke.MethodHandleStatics: boolean DUMP_CLASS_FILES>;
+
+        if $z1 == 0 goto label2;
+
+        r15 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String makeDumpableClassName(java.lang.String)>(r15);
+
+     label2:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("java/lang/invoke/LambdaForm$");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String className> = $r5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LambdaForm$");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String sourceFile> = $r9;
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm> = r10;
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String invokerName> = r16;
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType> = r11;
+
+        $i1 = i0 + 1;
+
+        $r12 = newarray (int)[$i1];
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap> = $r12;
+
+        $i2 = i0 + 1;
+
+        $r13 = newarray (java.lang.invoke.LambdaForm$BasicType)[$i2];
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes> = $r13;
+
+        $i3 = i0 + 1;
+
+        $r14 = newarray (java.lang.Class)[$i3];
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses> = $r14;
+
+        return;
+    }
+
+    private void <init>(java.lang.String, java.lang.String, java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int[] $r7, $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8;
+        java.lang.String r2, r3;
+        java.lang.invoke.LambdaForm$BasicType $r5, $r11;
+        java.lang.invoke.LambdaForm$BasicType[] $r4, $r6, $r9;
+        java.lang.invoke.MethodType r1;
+        java.lang.Class $r10;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.invoke.MethodType;
+
+        $i0 = virtualinvoke r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void <init>(java.lang.invoke.LambdaForm,int,java.lang.String,java.lang.String,java.lang.invoke.MethodType)>(null, $i0, r2, r3, r1);
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        $i1 = lengthof $r4;
+
+        $i2 = $i1 - 1;
+
+        $r5 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType V_TYPE>;
+
+        $r6[$i2] = $r5;
+
+        i8 = 0;
+
+     label1:
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i3 = lengthof $r7;
+
+        if i8 >= $i3 goto label3;
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i4 = virtualinvoke r1.<java.lang.invoke.MethodType: int parameterSlotCount()>();
+
+        $i5 = virtualinvoke r1.<java.lang.invoke.MethodType: int parameterSlotDepth(int)>(i8);
+
+        $i6 = $i4 - $i5;
+
+        $r8[i8] = $i6;
+
+        $i7 = virtualinvoke r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if i8 >= $i7 goto label2;
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        $r10 = virtualinvoke r1.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i8);
+
+        $r11 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r10);
+
+        $r9[i8] = $r11;
+
+     label2:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private void <init>(java.lang.String, java.lang.invoke.LambdaForm, java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.LambdaForm r1;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int[] $r7, $r8;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String r3, $r5;
+        java.lang.invoke.LambdaForm$Name[] $r2, r6;
+        java.lang.invoke.LambdaForm$BasicType $r10;
+        java.lang.invoke.LambdaForm$Name $r9;
+        java.lang.invoke.LambdaForm$BasicType[] $r11;
+        java.lang.invoke.MethodType r4;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r3 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.invoke.LambdaForm;
+
+        r4 := @parameter2: java.lang.invoke.MethodType;
+
+        $r2 = r1.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i0 = lengthof $r2;
+
+        $r5 = r1.<java.lang.invoke.LambdaForm: java.lang.String debugName>;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void <init>(java.lang.invoke.LambdaForm,int,java.lang.String,java.lang.String,java.lang.invoke.MethodType)>(r1, $i0, r3, $r5, r4);
+
+        r6 = r1.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        i4 = 0;
+
+        i5 = 0;
+
+     label1:
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i1 = lengthof $r7;
+
+        if i4 >= $i1 goto label3;
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $r8[i4] = i5;
+
+        $i2 = lengthof r6;
+
+        if i4 >= $i2 goto label2;
+
+        $r9 = r6[i4];
+
+        $r10 = virtualinvoke $r9.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type()>();
+
+        $i3 = virtualinvoke $r10.<java.lang.invoke.LambdaForm$BasicType: int basicTypeSlots()>();
+
+        i5 = i5 + $i3;
+
+        $r11 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        $r11[i4] = $r10;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    static void maybeDump(java.lang.String, byte[])
+    {
+        byte[] r2;
+        java.lang.invoke.InvokerBytecodeGenerator$1 $r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+        $z0 = <java.lang.invoke.MethodHandleStatics: boolean DUMP_CLASS_FILES>;
+
+        if $z0 == 0 goto label1;
+
+        $r0 = new java.lang.invoke.InvokerBytecodeGenerator$1;
+
+        specialinvoke $r0.<java.lang.invoke.InvokerBytecodeGenerator$1: void <init>(java.lang.String,byte[])>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+     label1:
+        return;
+    }
+
+    private static java.lang.String makeDumpableClassName(java.lang.String)
+    {
+        java.lang.Throwable $r12;
+        java.util.HashMap $r0, $r1, $r3;
+        java.lang.Integer $r4, r14;
+        int $i0, $i1, $i2;
+        java.lang.String $r8, r13, r15;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r11;
+
+        r13 := @parameter0: java.lang.String;
+
+        $r0 = <java.lang.invoke.InvokerBytecodeGenerator: java.util.HashMap DUMP_CLASS_FILES_COUNTERS>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator: java.util.HashMap DUMP_CLASS_FILES_COUNTERS>;
+
+        $r2 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r13);
+
+        r14 = (java.lang.Integer) $r2;
+
+        if r14 != null goto label2;
+
+        r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+     label2:
+        $r3 = <java.lang.invoke.InvokerBytecodeGenerator: java.util.HashMap DUMP_CLASS_FILES_COUNTERS>;
+
+        $i0 = virtualinvoke r14.<java.lang.Integer: int intValue()>();
+
+        $i1 = $i0 + 1;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r13, $r4);
+
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r12 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r12;
+
+     label6:
+        r15 = virtualinvoke r14.<java.lang.Integer: java.lang.String toString()>();
+
+     label7:
+        $i2 = virtualinvoke r15.<java.lang.String: int length()>();
+
+        if $i2 >= 3 goto label8;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        r15 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label7;
+
+     label8:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    java.lang.String constantPlaceholder(java.lang.Object)
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r6;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        java.util.Map $r5, $r9;
+        int $i0, $i1, $i2;
+        java.lang.InternalError $r10;
+        java.lang.String $r4, $r14, $r18, r21;
+        boolean $z0, $z1;
+        java.lang.invoke.InvokerBytecodeGenerator$CpPatch $r7;
+        java.lang.StringBuilder $r0, $r1, $r3, $r11, $r12, $r13, $r15, $r16, $r17, $r19, $r20;
+        java.lang.Object r8;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r8 := @parameter0: java.lang.Object;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CONSTANT_PLACEHOLDER_");
+
+        $i0 = r2.<java.lang.invoke.InvokerBytecodeGenerator: int cph>;
+
+        $i1 = $i0 + 1;
+
+        r2.<java.lang.invoke.InvokerBytecodeGenerator: int cph> = $i1;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r21 = $r4;
+
+        $z0 = <java.lang.invoke.MethodHandleStatics: boolean DUMP_CLASS_FILES>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" <<");
+
+        $r18 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String debugString(java.lang.Object)>(r8);
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>");
+
+        r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r5 = r2.<java.lang.invoke.InvokerBytecodeGenerator: java.util.Map cpPatches>;
+
+        $z1 = interfaceinvoke $r5.<java.util.Map: boolean containsKey(java.lang.Object)>(r21);
+
+        if $z1 == 0 goto label2;
+
+        $r10 = new java.lang.InternalError;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("observed CP placeholder twice: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r21);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.InternalError: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+     label2:
+        $r6 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $i2 = virtualinvoke $r6.<jdk.internal.org.objectweb.asm.ClassWriter: int newConst(java.lang.Object)>(r21);
+
+        $r9 = r2.<java.lang.invoke.InvokerBytecodeGenerator: java.util.Map cpPatches>;
+
+        $r7 = new java.lang.invoke.InvokerBytecodeGenerator$CpPatch;
+
+        specialinvoke $r7.<java.lang.invoke.InvokerBytecodeGenerator$CpPatch: void <init>(java.lang.invoke.InvokerBytecodeGenerator,int,java.lang.String,java.lang.Object)>(r2, $i2, r21, r8);
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r21, $r7);
+
+        return r21;
+    }
+
+    java.lang.Object[] cpPatches(byte[])
+    {
+        byte[] r0, $r16;
+        java.lang.Object[] r1;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        java.util.Map $r3;
+        int $i0, $i1, $i2;
+        java.lang.InternalError $r9;
+        java.lang.String $r17, $r19;
+        boolean $z0;
+        java.util.Iterator $r5;
+        java.util.Collection $r4;
+        java.lang.invoke.InvokerBytecodeGenerator$CpPatch r7;
+        java.lang.Object $r6, $r8;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r14, $r15, $r18;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: int getConstantPoolSize(byte[])>(r0);
+
+        r1 = newarray (java.lang.Object)[$i0];
+
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: java.util.Map cpPatches>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.invoke.InvokerBytecodeGenerator$CpPatch) $r6;
+
+        $i1 = r7.<java.lang.invoke.InvokerBytecodeGenerator$CpPatch: int index>;
+
+        if $i1 < $i0 goto label2;
+
+        $r9 = new java.lang.InternalError;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("in cpool[");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r16 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, 20);
+
+        $r17 = staticinvoke <java.util.Arrays: java.lang.String toString(byte[])>($r16);
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.InternalError: void <init>(java.lang.String)>($r19);
+
+        throw $r9;
+
+     label2:
+        $i2 = r7.<java.lang.invoke.InvokerBytecodeGenerator$CpPatch: int index>;
+
+        $r8 = r7.<java.lang.invoke.InvokerBytecodeGenerator$CpPatch: java.lang.Object value>;
+
+        r1[$i2] = $r8;
+
+        goto label1;
+
+     label3:
+        return r1;
+    }
+
+    private static java.lang.String debugString(java.lang.Object)
+    {
+        java.lang.invoke.MethodHandle r2;
+        java.lang.invoke.MemberName $r3;
+        java.lang.Object r0;
+        java.lang.String $r1, $r4, $r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.invoke.MethodHandle;
+
+        if $z0 == 0 goto label2;
+
+        r2 = (java.lang.invoke.MethodHandle) r0;
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.invoke.MemberName internalMemberName()>();
+
+        if $r3 == null goto label1;
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        return $r5;
+
+     label1:
+        $r4 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.String debugString()>();
+
+        return $r4;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    private static int getConstantPoolSize(byte[])
+    {
+        byte[] r0;
+        short $s1, $s3, $s6, $s8;
+        byte $b0, $b2;
+        int $i4, $i5, $i7, $i9;
+
+        r0 := @parameter0: byte[];
+
+        $b0 = r0[8];
+
+        $s6 = (short) $b0;
+
+        $s1 = $s6 & 255;
+
+        $i7 = (int) $s1;
+
+        $i4 = $i7 << 8;
+
+        $b2 = r0[9];
+
+        $s8 = (short) $b2;
+
+        $s3 = $s8 & 255;
+
+        $i9 = (int) $s3;
+
+        $i5 = $i4 | $i9;
+
+        return $i5;
+    }
+
+    private java.lang.invoke.MemberName loadMethod(byte[])
+    {
+        byte[] r0;
+        java.lang.Object[] $r2;
+        java.lang.invoke.MethodType $r4;
+        java.lang.invoke.MemberName $r6;
+        java.lang.invoke.InvokerBytecodeGenerator r1;
+        java.lang.Class $r3;
+        java.lang.String $r5;
+
+        r1 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: byte[];
+
+        $r2 = virtualinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Object[] cpPatches(byte[])>(r0);
+
+        $r3 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class loadAndInitializeInvokerClass(byte[],java.lang.Object[])>(r0, $r2);
+
+        $r5 = r1.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String invokerName>;
+
+        $r4 = r1.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r6 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName resolveInvokerMember(java.lang.Class,java.lang.String,java.lang.invoke.MethodType)>($r3, $r5, $r4);
+
+        return $r6;
+    }
+
+    private static java.lang.Class loadAndInitializeInvokerClass(byte[], java.lang.Object[])
+    {
+        sun.misc.Unsafe $r3, $r5;
+        byte[] r0;
+        java.lang.Object[] r1;
+        java.lang.Class $r2, $r4;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: java.lang.Object[];
+
+        $r3 = <java.lang.invoke.MethodHandleStatics: sun.misc.Unsafe UNSAFE>;
+
+        $r2 = <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class HOST_CLASS>;
+
+        $r4 = virtualinvoke $r3.<sun.misc.Unsafe: java.lang.Class defineAnonymousClass(java.lang.Class,byte[],java.lang.Object[])>($r2, r0, r1);
+
+        $r5 = <java.lang.invoke.MethodHandleStatics: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: void ensureClassInitialized(java.lang.Class)>($r4);
+
+        return $r4;
+    }
+
+    private static java.lang.invoke.MemberName resolveInvokerMember(java.lang.Class, java.lang.String, java.lang.invoke.MethodType)
+    {
+        java.lang.ReflectiveOperationException $r7;
+        java.lang.invoke.MemberName$Factory $r5;
+        java.lang.invoke.MethodType r3;
+        java.lang.invoke.MemberName $r0, $r6;
+        java.lang.InternalError $r8;
+        java.lang.Class r1, $r4;
+        java.lang.String r2;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.invoke.MethodType;
+
+        $r0 = new java.lang.invoke.MemberName;
+
+        specialinvoke $r0.<java.lang.invoke.MemberName: void <init>(java.lang.Class,java.lang.String,java.lang.invoke.MethodType,byte)>(r1, r2, r3, 6);
+
+     label1:
+        $r5 = <java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName$Factory MEMBERNAME_FACTORY>;
+
+        $r4 = <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class HOST_CLASS>;
+
+        $r6 = virtualinvoke $r5.<java.lang.invoke.MemberName$Factory: java.lang.invoke.MemberName resolveOrFail(byte,java.lang.invoke.MemberName,java.lang.Class,java.lang.Class)>(6, $r0, $r4, class "Ljava/lang/ReflectiveOperationException;");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label4:
+        return $r6;
+
+        catch java.lang.ReflectiveOperationException from label1 to label2 with label3;
+    }
+
+    private void classFilePrologue()
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r1, $r3, $r5, $r9;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.invoke.MethodType $r6;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r10;
+        java.lang.String $r2, $r4, $r7, $r8;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        $r1 = new jdk.internal.org.objectweb.asm.ClassWriter;
+
+        specialinvoke $r1.<jdk.internal.org.objectweb.asm.ClassWriter: void <init>(int)>(3);
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw> = $r1;
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String className>;
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.ClassWriter: void visit(int,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String[])>(52, 48, $r2, null, "java/lang/Object", null);
+
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String sourceFile>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.ClassWriter: void visitSource(java.lang.String,java.lang.String)>($r4, null);
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r7 = virtualinvoke $r6.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String invokerName>;
+
+        $r10 = virtualinvoke $r9.<jdk.internal.org.objectweb.asm.ClassWriter: jdk.internal.org.objectweb.asm.MethodVisitor visitMethod(int,java.lang.String,java.lang.String,java.lang.String,java.lang.String[])>(8, $r8, $r7, null, null);
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv> = $r10;
+
+        return;
+    }
+
+    private void classFileEpilogue()
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r1, $r2;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r1.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMaxs(int,int)>(0, 0);
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r2.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitEnd()>();
+
+        return;
+    }
+
+    private void emitConst(java.lang.Object)
+    {
+        java.lang.Float $r6;
+        java.lang.invoke.InvokerBytecodeGenerator r1;
+        java.lang.Integer $r10;
+        byte $b2, $b6, $b12, $b15;
+        java.lang.Long $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        float $f0, $f1;
+        java.lang.Double $r4;
+        long $l8, $l11;
+        short $s1, $s5, $s10;
+        int $i0, $i3, $i4, $i7, $i9, $i13, $i14;
+        java.lang.Boolean $r3;
+        double $d0, $d1;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r2, $r5, $r7, $r9, $r11;
+        java.lang.Object r0;
+
+        r1 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r11 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r11.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(1);
+
+        return;
+
+     label1:
+        $z0 = r0 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label2;
+
+        $r10 = (java.lang.Integer) r0;
+
+        $i14 = virtualinvoke $r10.<java.lang.Integer: int intValue()>();
+
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i14);
+
+        return;
+
+     label2:
+        $z1 = r0 instanceof java.lang.Long;
+
+        if $z1 == 0 goto label3;
+
+        $r8 = (java.lang.Long) r0;
+
+        $l8 = virtualinvoke $r8.<java.lang.Long: long longValue()>();
+
+        $i9 = (int) $l8;
+
+        $s10 = (short) $i9;
+
+        $l11 = (long) $s10;
+
+        $b12 = $l8 cmp $l11;
+
+        if $b12 != 0 goto label3;
+
+        $i13 = (int) $l8;
+
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i13);
+
+        $r9 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r9.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(133);
+
+        return;
+
+     label3:
+        $z2 = r0 instanceof java.lang.Float;
+
+        if $z2 == 0 goto label4;
+
+        $r6 = (java.lang.Float) r0;
+
+        $f0 = virtualinvoke $r6.<java.lang.Float: float floatValue()>();
+
+        $i4 = (int) $f0;
+
+        $s5 = (short) $i4;
+
+        $f1 = (float) $s5;
+
+        $b6 = $f0 cmpl $f1;
+
+        if $b6 != 0 goto label4;
+
+        $i7 = (int) $f0;
+
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i7);
+
+        $r7 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(134);
+
+        return;
+
+     label4:
+        $z3 = r0 instanceof java.lang.Double;
+
+        if $z3 == 0 goto label5;
+
+        $r4 = (java.lang.Double) r0;
+
+        $d0 = virtualinvoke $r4.<java.lang.Double: double doubleValue()>();
+
+        $i0 = (int) $d0;
+
+        $s1 = (short) $i0;
+
+        $d1 = (double) $s1;
+
+        $b2 = $d0 cmpl $d1;
+
+        if $b2 != 0 goto label5;
+
+        $i3 = (int) $d0;
+
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i3);
+
+        $r5 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(135);
+
+        return;
+
+     label5:
+        $z4 = r0 instanceof java.lang.Boolean;
+
+        if $z4 == 0 goto label8;
+
+        $r3 = (java.lang.Boolean) r0;
+
+        $z5 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z5 == 0 goto label6;
+
+        $b15 = 1;
+
+        goto label7;
+
+     label6:
+        $b15 = 0;
+
+     label7:
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($b15);
+
+        return;
+
+     label8:
+        $r2 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r2.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    private void emitIconstInsn(int)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        char $c3;
+        java.lang.Integer $r2;
+        short $s2;
+        byte $b1, b5;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r1, $r3, $r4, $r5;
+        int i0, $i4, $i6, $i7, $i8;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 0: goto label01;
+            case 1: goto label02;
+            case 2: goto label03;
+            case 3: goto label04;
+            case 4: goto label05;
+            case 5: goto label06;
+            default: goto label07;
+        };
+
+     label01:
+        b5 = 3;
+
+        goto label11;
+
+     label02:
+        b5 = 4;
+
+        goto label11;
+
+     label03:
+        b5 = 5;
+
+        goto label11;
+
+     label04:
+        b5 = 6;
+
+        goto label11;
+
+     label05:
+        b5 = 7;
+
+        goto label11;
+
+     label06:
+        b5 = 8;
+
+        goto label11;
+
+     label07:
+        $b1 = (byte) i0;
+
+        $i6 = (int) $b1;
+
+        if i0 != $i6 goto label08;
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i4 = i0 & 255;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitIntInsn(int,int)>(16, $i4);
+
+        goto label10;
+
+     label08:
+        $s2 = (short) i0;
+
+        $i7 = (int) $s2;
+
+        if i0 != $i7 goto label09;
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $c3 = (char) i0;
+
+        $i8 = (int) $c3;
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitIntInsn(int,int)>(17, $i8);
+
+        goto label10;
+
+     label09:
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r1.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r2);
+
+     label10:
+        return;
+
+     label11:
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(b5);
+
+        return;
+    }
+
+    private void emitLoadInsn(java.lang.invoke.LambdaForm$BasicType, int)
+    {
+        java.lang.invoke.LambdaForm$BasicType r1;
+        int[] $r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3;
+        int $i0, i1, $i2;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        i1 := @parameter1: int;
+
+        $i0 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int loadInsnOpcode(java.lang.invoke.LambdaForm$BasicType)>(r1);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i2 = $r2[i1];
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>($i0, $i2);
+
+        return;
+    }
+
+    private int loadInsnOpcode(java.lang.invoke.LambdaForm$BasicType) throws java.lang.InternalError
+    {
+        java.lang.invoke.LambdaForm$BasicType r0;
+        java.lang.invoke.InvokerBytecodeGenerator r7;
+        int[] $r1;
+        int $i0, $i1;
+        java.lang.InternalError $r2;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r7 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$java$lang$invoke$LambdaForm$BasicType>;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.LambdaForm$BasicType: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            default: goto label6;
+        };
+
+     label1:
+        return 21;
+
+     label2:
+        return 22;
+
+     label3:
+        return 23;
+
+     label4:
+        return 24;
+
+     label5:
+        return 25;
+
+     label6:
+        $r2 = new java.lang.InternalError;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown type: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    private void emitAloadInsn(int)
+    {
+        int i0;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.invoke.LambdaForm$BasicType $r1;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitLoadInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r1, i0);
+
+        return;
+    }
+
+    private void emitStoreInsn(java.lang.invoke.LambdaForm$BasicType, int)
+    {
+        java.lang.invoke.LambdaForm$BasicType r1;
+        int[] $r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3;
+        int $i0, i1, $i2;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        i1 := @parameter1: int;
+
+        $i0 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int storeInsnOpcode(java.lang.invoke.LambdaForm$BasicType)>(r1);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i2 = $r2[i1];
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>($i0, $i2);
+
+        return;
+    }
+
+    private int storeInsnOpcode(java.lang.invoke.LambdaForm$BasicType) throws java.lang.InternalError
+    {
+        java.lang.invoke.LambdaForm$BasicType r0;
+        java.lang.invoke.InvokerBytecodeGenerator r7;
+        int[] $r1;
+        int $i0, $i1;
+        java.lang.InternalError $r2;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r7 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$java$lang$invoke$LambdaForm$BasicType>;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.LambdaForm$BasicType: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            default: goto label6;
+        };
+
+     label1:
+        return 54;
+
+     label2:
+        return 55;
+
+     label3:
+        return 56;
+
+     label4:
+        return 57;
+
+     label5:
+        return 58;
+
+     label6:
+        $r2 = new java.lang.InternalError;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown type: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    private void emitAstoreInsn(int)
+    {
+        int i0;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.invoke.LambdaForm$BasicType $r1;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitStoreInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r1, i0);
+
+        return;
+    }
+
+    private byte arrayTypeCode(sun.invoke.util.Wrapper)
+    {
+        sun.invoke.util.Wrapper r0;
+        int[] $r1;
+        int $i0, $i1;
+        java.lang.InternalError $r2;
+        java.lang.invoke.InvokerBytecodeGenerator r3;
+
+        r3 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: sun.invoke.util.Wrapper;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i0 = virtualinvoke r0.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label08;
+            case 9: goto label09;
+            default: goto label10;
+        };
+
+     label01:
+        return 4;
+
+     label02:
+        return 8;
+
+     label03:
+        return 5;
+
+     label04:
+        return 9;
+
+     label05:
+        return 10;
+
+     label06:
+        return 11;
+
+     label07:
+        return 6;
+
+     label08:
+        return 7;
+
+     label09:
+        return 0;
+
+     label10:
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>()>();
+
+        throw $r2;
+    }
+
+    private int arrayInsnOpcode(byte, int) throws java.lang.InternalError
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        java.lang.AssertionError $r3;
+        byte b0, b2;
+        int i1, $i3, $i4, $i5;
+        java.lang.InternalError $r4;
+        boolean $z0;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        b0 := @parameter0: byte;
+
+        i1 := @parameter1: int;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        if i1 == 83 goto label01;
+
+        if i1 == 50 goto label01;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label01:
+        $i5 = (int) b0;
+
+        tableswitch($i5)
+        {
+            case 0: goto label10;
+            case 1: goto label11;
+            case 2: goto label11;
+            case 3: goto label11;
+            case 4: goto label02;
+            case 5: goto label04;
+            case 6: goto label08;
+            case 7: goto label09;
+            case 8: goto label03;
+            case 9: goto label05;
+            case 10: goto label06;
+            case 11: goto label07;
+            default: goto label11;
+        };
+
+     label02:
+        b2 = 84;
+
+        goto label12;
+
+     label03:
+        b2 = 84;
+
+        goto label12;
+
+     label04:
+        b2 = 85;
+
+        goto label12;
+
+     label05:
+        b2 = 86;
+
+        goto label12;
+
+     label06:
+        b2 = 79;
+
+        goto label12;
+
+     label07:
+        b2 = 80;
+
+        goto label12;
+
+     label08:
+        b2 = 81;
+
+        goto label12;
+
+     label09:
+        b2 = 82;
+
+        goto label12;
+
+     label10:
+        b2 = 83;
+
+        goto label12;
+
+     label11:
+        $r4 = new java.lang.InternalError;
+
+        specialinvoke $r4.<java.lang.InternalError: void <init>()>();
+
+        throw $r4;
+
+     label12:
+        $i3 = b2 - 83;
+
+        $i4 = $i3 + i1;
+
+        return $i4;
+    }
+
+    private void freeFrameLocal(int)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.AssertionError $r6, $r8;
+        int[] $r5, $r7;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0, $z1;
+        java.lang.invoke.LambdaForm$BasicType r2;
+        java.lang.invoke.LambdaForm$BasicType[] $r1;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r4;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int indexForFrameLocal(int)>(i0);
+
+        if $i1 >= 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        r2 = $r1[$i1];
+
+        $i2 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int makeLocalTemp(java.lang.invoke.LambdaForm$BasicType)>(r2);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i3 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int loadInsnOpcode(java.lang.invoke.LambdaForm$BasicType)>(r2);
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>($i3, i0);
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i4 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int storeInsnOpcode(java.lang.invoke.LambdaForm$BasicType)>(r2);
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>($i4, $i2);
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i6 = $r7[$i1];
+
+        if $i6 == i0 goto label2;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $r5[$i1] = $i2;
+
+        $z1 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label3;
+
+        $i5 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: int indexForFrameLocal(int)>(i0);
+
+        if $i5 < 0 goto label3;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        return;
+    }
+
+    private int indexForFrameLocal(int)
+    {
+        java.lang.invoke.LambdaForm$BasicType $r4, $r5;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.invoke.LambdaForm$BasicType[] $r3;
+        int[] $r1, $r2;
+        int $i0, i1, $i2, i3, $i5;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i1 := @parameter0: int;
+
+        i3 = 0;
+
+     label1:
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i2 = $r2[i3];
+
+        if $i2 != i1 goto label2;
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$BasicType[] localTypes>;
+
+        $r5 = $r3[i3];
+
+        $r4 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType V_TYPE>;
+
+        if $r5 == $r4 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i5 = (int) -1;
+
+        return $i5;
+    }
+
+    private int makeLocalTemp(java.lang.invoke.LambdaForm$BasicType)
+    {
+        java.lang.invoke.LambdaForm$BasicType r4;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int[] $r1, $r2, $r3, $r5;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r4 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        i2 = $r2[$i1];
+
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i3 = lengthof $r3;
+
+        $i4 = $i3 - 1;
+
+        $i5 = virtualinvoke r4.<java.lang.invoke.LambdaForm$BasicType: int basicTypeSlots()>();
+
+        $i6 = i2 + $i5;
+
+        $r5[$i4] = $i6;
+
+        return i2;
+    }
+
+    private void emitBoxing(sun.invoke.util.Wrapper)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r14;
+        java.lang.String $r4, $r6, $r13;
+        char $c0;
+        sun.invoke.util.Wrapper r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r15;
+        java.lang.StringBuilder $r0, $r1, $r5, $r7, $r8, $r9, $r10, $r11, $r12;
+        java.lang.Class $r3;
+
+        r14 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r2 := @parameter0: sun.invoke.util.Wrapper;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("java/lang/");
+
+        $r3 = virtualinvoke r2.<sun.invoke.util.Wrapper: java.lang.Class wrapperType()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $c0 = virtualinvoke r2.<sun.invoke.util.Wrapper: char basicTypeChar()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")L");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = r14.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r15.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(184, $r6, "valueOf", $r13, 0);
+
+        return;
+    }
+
+    private void emitUnboxing(sun.invoke.util.Wrapper)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r16;
+        java.lang.String $r4, $r6, $r8, $r11, $r15;
+        char $c0;
+        sun.invoke.util.Wrapper r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r18;
+        java.lang.StringBuilder $r0, $r1, $r5, $r7, $r9, $r10, $r12, $r13, $r14;
+        java.lang.Class $r3, $r17;
+
+        r16 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r2 := @parameter0: sun.invoke.util.Wrapper;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("java/lang/");
+
+        $r3 = virtualinvoke r2.<sun.invoke.util.Wrapper: java.lang.Class wrapperType()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke r2.<sun.invoke.util.Wrapper: java.lang.String primitiveSimpleName()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("()");
+
+        $c0 = virtualinvoke r2.<sun.invoke.util.Wrapper: char basicTypeChar()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = virtualinvoke r2.<sun.invoke.util.Wrapper: java.lang.Class wrapperType()>();
+
+        specialinvoke r16.<java.lang.invoke.InvokerBytecodeGenerator: void emitReferenceCast(java.lang.Class,java.lang.Object)>($r17, null);
+
+        $r18 = r16.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r18.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, $r6, $r11, $r15, 0);
+
+        return;
+    }
+
+    private void emitImplicitConversion(java.lang.invoke.LambdaForm$BasicType, java.lang.Class, java.lang.Object)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r4;
+        java.lang.AssertionError $r18;
+        int[] $r3;
+        int $i0, $i1, $i2;
+        java.lang.InternalError $r15;
+        java.lang.String $r14;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.LambdaForm$BasicType r1, $r16, $r17;
+        sun.invoke.util.Wrapper $r7, $r8;
+        java.lang.Class r0, $r2, $r6;
+        java.lang.Object r5;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r13;
+
+        r4 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        r0 := @parameter1: java.lang.Class;
+
+        r5 := @parameter2: java.lang.Object;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r17 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>(r0);
+
+        if $r17 == r1 goto label1;
+
+        $r18 = new java.lang.AssertionError;
+
+        specialinvoke $r18.<java.lang.AssertionError: void <init>()>();
+
+        throw $r18;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.invoke.LambdaForm$BasicType: java.lang.Class basicTypeClass()>();
+
+        if r0 != $r2 goto label2;
+
+        $r16 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        if r1 == $r16 goto label2;
+
+        return;
+
+     label2:
+        $r3 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$java$lang$invoke$LambdaForm$BasicType>;
+
+        $i0 = virtualinvoke r1.<java.lang.invoke.LambdaForm$BasicType: int ordinal()>();
+
+        $i1 = $r3[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label6;
+            case 5: goto label3;
+            default: goto label8;
+        };
+
+     label3:
+        $z1 = staticinvoke <sun.invoke.util.VerifyType: boolean isNullConversion(java.lang.Class,java.lang.Class,boolean)>(class "Ljava/lang/Object;", r0, 0);
+
+        if $z1 == 0 goto label5;
+
+        $i2 = <java.lang.invoke.MethodHandleStatics: int PROFILE_LEVEL>;
+
+        if $i2 <= 0 goto label4;
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitReferenceCast(java.lang.Class,java.lang.Object)>(class "Ljava/lang/Object;", r5);
+
+     label4:
+        return;
+
+     label5:
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitReferenceCast(java.lang.Class,java.lang.Object)>(r0, r5);
+
+        return;
+
+     label6:
+        $r6 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        $z2 = staticinvoke <sun.invoke.util.VerifyType: boolean isNullConversion(java.lang.Class,java.lang.Class,boolean)>($r6, r0, 0);
+
+        if $z2 != 0 goto label7;
+
+        $r7 = virtualinvoke r1.<java.lang.invoke.LambdaForm$BasicType: sun.invoke.util.Wrapper basicTypeWrapper()>();
+
+        $r8 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>(r0);
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitPrimCast(sun.invoke.util.Wrapper,sun.invoke.util.Wrapper)>($r7, $r8);
+
+     label7:
+        return;
+
+     label8:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad implicit conversion: tc=");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.String)>($r14);
+
+        throw $r15;
+    }
+
+    private boolean assertStaticType(java.lang.Class, java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r1;
+        java.lang.Class[] $r2, $r5;
+        java.lang.invoke.LambdaForm$Name r0;
+        int $i0;
+        java.lang.Class r3, r4;
+        boolean $z0, $z1;
+
+        r1 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r4 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.lang.invoke.LambdaForm$Name;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        $r2 = r1.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses>;
+
+        r3 = $r2[$i0];
+
+        if r3 == null goto label2;
+
+        if r3 == r4 goto label1;
+
+        $z1 = virtualinvoke r4.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        if r3 == null goto label3;
+
+        $z0 = virtualinvoke r3.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r4);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        $r5 = r1.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses>;
+
+        $r5[$i0] = r4;
+
+     label4:
+        return 0;
+    }
+
+    private void emitReferenceCast(java.lang.Class, java.lang.Object)
+    {
+        java.lang.invoke.LambdaForm $r14;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        int $i0, $i1, $i2;
+        java.lang.String $r4, $r12;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.invoke.LambdaForm$Name r15, r16;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r5, $r6, $r7, $r9, $r10, $r11, $r13;
+        java.lang.Object r0;
+        java.lang.Class r1, $r8;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r15 = null;
+
+        $z0 = r0 instanceof java.lang.invoke.LambdaForm$Name;
+
+        if $z0 == 0 goto label2;
+
+        r16 = (java.lang.invoke.LambdaForm$Name) r0;
+
+        $z2 = specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: boolean assertStaticType(java.lang.Class,java.lang.invoke.LambdaForm$Name)>(r1, r16);
+
+        if $z2 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r14 = r2.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i2 = virtualinvoke $r14.<java.lang.invoke.LambdaForm: int useCount(java.lang.invoke.LambdaForm$Name)>(r16);
+
+        if $i2 <= 1 goto label2;
+
+        r15 = r16;
+
+     label2:
+        $z3 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyNameable(java.lang.Class)>(r1);
+
+        if $z3 == 0 goto label3;
+
+        $r12 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String getInternalName(java.lang.Class)>(r1);
+
+        $r13 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r13.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(192, $r12);
+
+        goto label5;
+
+     label3:
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r4 = virtualinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String constantPlaceholder(java.lang.Object)>(r1);
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r4);
+
+        $r5 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(192, "java/lang/Class");
+
+        $r6 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r6.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(95);
+
+        $r7 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(184, "java/lang/invoke/MethodHandleImpl", "castReference", "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", 0);
+
+        $r8 = class "[Ljava/lang/Object;";
+
+        $z1 = virtualinvoke $r8.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r1);
+
+        if $z1 == 0 goto label4;
+
+        $r11 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r11.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(192, "[Ljava/lang/Object;");
+
+        goto label5;
+
+     label4:
+        $i0 = <java.lang.invoke.MethodHandleStatics: int PROFILE_LEVEL>;
+
+        if $i0 <= 0 goto label5;
+
+        $r10 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r10.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(192, "java/lang/Object");
+
+     label5:
+        if r15 == null goto label6;
+
+        $r9 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r9.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(89);
+
+        $i1 = virtualinvoke r15.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitAstoreInsn(int)>($i1);
+
+     label6:
+        return;
+    }
+
+    private void emitReturnInsn(java.lang.invoke.LambdaForm$BasicType)
+    {
+        java.lang.invoke.LambdaForm$BasicType r0;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        short s2;
+        int[] $r1;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r8;
+        int $i0, $i1;
+        java.lang.InternalError $r3;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String $r7;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$BasicType;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$java$lang$invoke$LambdaForm$BasicType>;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.LambdaForm$BasicType: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        s2 = 172;
+
+        goto label8;
+
+     label2:
+        s2 = 173;
+
+        goto label8;
+
+     label3:
+        s2 = 174;
+
+        goto label8;
+
+     label4:
+        s2 = 175;
+
+        goto label8;
+
+     label5:
+        s2 = 176;
+
+        goto label8;
+
+     label6:
+        s2 = 177;
+
+        goto label8;
+
+     label7:
+        $r3 = new java.lang.InternalError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown return type: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label8:
+        $r8 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r8.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(s2);
+
+        return;
+    }
+
+    private static java.lang.String getInternalName(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.String $r1, $r2, $r4;
+        java.lang.AssertionError $r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/lang/Object;" goto label1;
+
+        return "java/lang/Object";
+
+     label1:
+        if r0 != class "[Ljava/lang/Object;" goto label2;
+
+        return "[Ljava/lang/Object;";
+
+     label2:
+        if r0 != class "Ljava/lang/Class;" goto label3;
+
+        return "java/lang/Class";
+
+     label3:
+        if r0 != class "Ljava/lang/invoke/MethodHandle;" goto label4;
+
+        return "java/lang/invoke/MethodHandle";
+
+     label4:
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label5;
+
+        $z1 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isTypeVisible(java.lang.Class,java.lang.Class)>(r0, class "Ljava/lang/Object;");
+
+        if $z1 != 0 goto label5;
+
+        $r3 = new java.lang.AssertionError;
+
+        $r4 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>($r4);
+
+        throw $r3;
+
+     label5:
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        return $r2;
+    }
+
+    static java.lang.invoke.MemberName generateCustomizedCode(java.lang.invoke.LambdaForm, java.lang.invoke.MethodType)
+    {
+        byte[] $r3;
+        java.lang.invoke.LambdaForm r1;
+        java.lang.invoke.MethodType r2;
+        java.lang.invoke.MemberName $r4;
+        java.lang.invoke.InvokerBytecodeGenerator $r0;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm;
+
+        r2 := @parameter1: java.lang.invoke.MethodType;
+
+        $r0 = new java.lang.invoke.InvokerBytecodeGenerator;
+
+        specialinvoke $r0.<java.lang.invoke.InvokerBytecodeGenerator: void <init>(java.lang.String,java.lang.invoke.LambdaForm,java.lang.invoke.MethodType)>("MH", r1, r2);
+
+        $r3 = specialinvoke $r0.<java.lang.invoke.InvokerBytecodeGenerator: byte[] generateCustomizedCodeBytes()>();
+
+        $r4 = specialinvoke $r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName loadMethod(byte[])>($r3);
+
+        return $r4;
+    }
+
+    private boolean checkActualReceiver()
+    {
+        int[] $r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r1, $r3, $r4;
+        int $i0;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r1.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(89);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i0 = $r2[0];
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>(25, $i0);
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(184, "java/lang/invoke/MethodHandleImpl", "assertSame", "(Ljava/lang/Object;Ljava/lang/Object;)V", 0);
+
+        return 1;
+    }
+
+    private byte[] generateCustomizedCodeBytes()
+    {
+        byte[] $r10;
+        java.lang.invoke.LambdaForm $r3, $r5, $r8, $r12, $r44, $r54, $r55, $r57;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.InternalError $r43;
+        java.lang.invoke.LambdaForm$BasicType $r20;
+        sun.invoke.util.Wrapper $r21;
+        java.lang.invoke.MemberName $r19;
+        java.lang.StringBuilder $r39, $r40, $r41;
+        java.lang.invoke.MethodHandle $r6, $r45;
+        java.lang.Object[] $r7, $r23, $r25, $r32, $r35;
+        java.lang.AssertionError $r24, $r26, $r30, $r34, $r38, $r51;
+        java.lang.String $r11, $r42, $r47;
+        java.lang.invoke.LambdaForm$Name[] $r13, $r56, $r58;
+        java.lang.invoke.LambdaForm$NamedFunction $r15, $r18, $r27;
+        int[] $r17, $r49;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        jdk.internal.org.objectweb.asm.ClassWriter $r9;
+        java.lang.invoke.MethodHandleImpl$Intrinsic $r16;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7;
+        java.lang.invoke.LambdaForm$Name r14, $r37, r53, $r59;
+        java.lang.invoke.MethodType $r28;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r1, $r2, $r4, $r31, $r46, $r48, $r50, $r52;
+        java.lang.Object $r22, $r33, $r36;
+        java.lang.Class $r29;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void classFilePrologue()>();
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r1.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/LambdaForm$Hidden;", 1);
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r2.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/LambdaForm$Compiled;", 1);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $z0 = $r3.<java.lang.invoke.LambdaForm: boolean forceInline>;
+
+        if $z0 == 0 goto label01;
+
+        $r52 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r52.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/ForceInline;", 1);
+
+        goto label02;
+
+     label01:
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/DontInline;", 1);
+
+     label02:
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r6 = $r5.<java.lang.invoke.LambdaForm: java.lang.invoke.MethodHandle customized>;
+
+        if $r6 == null goto label04;
+
+        $r46 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r44 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r45 = $r44.<java.lang.invoke.LambdaForm: java.lang.invoke.MethodHandle customized>;
+
+        $r47 = virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String constantPlaceholder(java.lang.Object)>($r45);
+
+        virtualinvoke $r46.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r47);
+
+        $r48 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r48.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(192, "java/lang/invoke/MethodHandle");
+
+        $z13 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z13 != 0 goto label03;
+
+        $z14 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean checkActualReceiver()>();
+
+        if $z14 != 0 goto label03;
+
+        $r51 = new java.lang.AssertionError;
+
+        specialinvoke $r51.<java.lang.AssertionError: void <init>()>();
+
+        throw $r51;
+
+     label03:
+        $r50 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r49 = r0.<java.lang.invoke.InvokerBytecodeGenerator: int[] localsMap>;
+
+        $i4 = $r49[0];
+
+        virtualinvoke $r50.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitVarInsn(int,int)>(58, $i4);
+
+     label04:
+        r53 = null;
+
+        $r54 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        i5 = $r54.<java.lang.invoke.LambdaForm: int arity>;
+
+     label05:
+        $r55 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r56 = $r55.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i6 = lengthof $r56;
+
+        if i5 >= $i6 goto label25;
+
+        $r12 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r13 = $r12.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        r14 = $r13[i5];
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitStoreResult(java.lang.invoke.LambdaForm$Name)>(r53);
+
+        r53 = r14;
+
+        $r15 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r16 = virtualinvoke $r15.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodHandleImpl$Intrinsic intrinsicName()>();
+
+        $r17 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$java$lang$invoke$MethodHandleImpl$Intrinsic>;
+
+        $i0 = virtualinvoke $r16.<java.lang.invoke.MethodHandleImpl$Intrinsic: int ordinal()>();
+
+        $i1 = $r17[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label06;
+            case 2: goto label11;
+            case 3: goto label13;
+            case 4: goto label14;
+            case 5: goto label15;
+            case 6: goto label16;
+            case 7: goto label18;
+            case 8: goto label20;
+            default: goto label21;
+        };
+
+     label06:
+        $z7 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z7 != 0 goto label07;
+
+        $z12 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean isSelectAlternative(int)>(i5);
+
+        if $z12 != 0 goto label07;
+
+        $r38 = new java.lang.AssertionError;
+
+        specialinvoke $r38.<java.lang.AssertionError: void <init>()>();
+
+        throw $r38;
+
+     label07:
+        $z8 = <java.lang.invoke.MethodHandleStatics: boolean PROFILE_GWT>;
+
+        if $z8 == 0 goto label10;
+
+        $z9 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z9 != 0 goto label09;
+
+        $r32 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $r33 = $r32[0];
+
+        $z10 = $r33 instanceof java.lang.invoke.LambdaForm$Name;
+
+        if $z10 == 0 goto label08;
+
+        $r35 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $r36 = $r35[0];
+
+        $r37 = (java.lang.invoke.LambdaForm$Name) $r36;
+
+        $z11 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean nameRefersTo(java.lang.invoke.LambdaForm$Name,java.lang.Class,java.lang.String)>($r37, class "Ljava/lang/invoke/MethodHandleImpl;", "profileBoolean");
+
+        if $z11 != 0 goto label09;
+
+     label08:
+        $r34 = new java.lang.AssertionError;
+
+        specialinvoke $r34.<java.lang.AssertionError: void <init>()>();
+
+        throw $r34;
+
+     label09:
+        $r31 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r31.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/InjectedProfile;", 1);
+
+     label10:
+        $r57 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r58 = $r57.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i7 = i5 + 1;
+
+        $r59 = $r58[$i7];
+
+        r53 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$Name emitSelectAlternative(java.lang.invoke.LambdaForm$Name,java.lang.invoke.LambdaForm$Name)>(r14, $r59);
+
+        i5 = i5 + 1;
+
+        goto label24;
+
+     label11:
+        $z5 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label12;
+
+        $z6 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean isGuardWithCatch(int)>(i5);
+
+        if $z6 != 0 goto label12;
+
+        $r30 = new java.lang.AssertionError;
+
+        specialinvoke $r30.<java.lang.AssertionError: void <init>()>();
+
+        throw $r30;
+
+     label12:
+        r53 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm$Name emitGuardWithCatch(int)>(i5);
+
+        i5 = i5 + 2;
+
+        goto label24;
+
+     label13:
+        $r27 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r28 = virtualinvoke $r27.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType methodType()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $z4 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyNameable(java.lang.Class)>($r29);
+
+        if $z4 == 0 goto label22;
+
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitNewArray(java.lang.invoke.LambdaForm$Name)>(r14);
+
+        goto label24;
+
+     label14:
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitArrayLoad(java.lang.invoke.LambdaForm$Name)>(r14);
+
+        goto label24;
+
+     label15:
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitArrayStore(java.lang.invoke.LambdaForm$Name)>(r14);
+
+        goto label24;
+
+     label16:
+        $z3 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label17;
+
+        $r25 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i3 = lengthof $r25;
+
+        if $i3 == 1 goto label17;
+
+        $r26 = new java.lang.AssertionError;
+
+        specialinvoke $r26.<java.lang.AssertionError: void <init>()>();
+
+        throw $r26;
+
+     label17:
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name)>(r14);
+
+        goto label24;
+
+     label18:
+        $z2 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label19;
+
+        $r23 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i2 = lengthof $r23;
+
+        if $i2 == 0 goto label19;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label19:
+        $r20 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        $r21 = virtualinvoke $r20.<java.lang.invoke.LambdaForm$BasicType: sun.invoke.util.Wrapper basicTypeWrapper()>();
+
+        $r22 = virtualinvoke $r21.<sun.invoke.util.Wrapper: java.lang.Object zero()>();
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitConst(java.lang.Object)>($r22);
+
+        goto label24;
+
+     label20:
+        goto label22;
+
+     label21:
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown intrinsic: ");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r43 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.String)>($r42);
+
+        throw $r43;
+
+     label22:
+        $r18 = r14.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r19 = virtualinvoke $r18.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        $z1 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyInvocable(java.lang.invoke.MemberName)>($r19);
+
+        if $z1 == 0 goto label23;
+
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitStaticInvoke(java.lang.invoke.MemberName,java.lang.invoke.LambdaForm$Name)>($r19, r14);
+
+        goto label24;
+
+     label23:
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitInvoke(java.lang.invoke.LambdaForm$Name)>(r14);
+
+     label24:
+        i5 = i5 + 1;
+
+        goto label05;
+
+     label25:
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitReturn(java.lang.invoke.LambdaForm$Name)>(r53);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void classFileEpilogue()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r7[0] = $r8;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void bogusMethod(java.lang.Object[])>($r7);
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r10 = virtualinvoke $r9.<jdk.internal.org.objectweb.asm.ClassWriter: byte[] toByteArray()>();
+
+        $r11 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String className>;
+
+        staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: void maybeDump(java.lang.String,byte[])>($r11, $r10);
+
+        return $r10;
+    }
+
+    void emitArrayLoad(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r1;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitArrayOp(java.lang.invoke.LambdaForm$Name,int)>(r1, 50);
+
+        return;
+    }
+
+    void emitArrayStore(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r1;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitArrayOp(java.lang.invoke.LambdaForm$Name,int)>(r1, 83);
+
+        return;
+    }
+
+    void emitArrayOp(java.lang.invoke.LambdaForm$Name, int)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r1;
+        java.lang.AssertionError $r4, $r5;
+        java.lang.invoke.LambdaForm$Name r0;
+        sun.invoke.util.Wrapper $r3;
+        java.lang.invoke.LambdaForm$NamedFunction $r6;
+        java.lang.invoke.MethodType $r7;
+        byte $b0;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r2;
+        int i1;
+        java.lang.Class $r8, $r9;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        i1 := @parameter1: int;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if i1 == 50 goto label1;
+
+        if i1 == 83 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r6 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r7 = virtualinvoke $r6.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType methodType()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $z2 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label2;
+
+        if $r9 != null goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        $z1 = virtualinvoke $r9.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label3;
+
+        $r3 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>($r9);
+
+        $b0 = specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: byte arrayTypeCode(sun.invoke.util.Wrapper)>($r3);
+
+        i1 = specialinvoke r1.<java.lang.invoke.InvokerBytecodeGenerator: int arrayInsnOpcode(byte,int)>($b0, i1);
+
+     label3:
+        $r2 = r1.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r2.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(i1);
+
+        return;
+    }
+
+    void emitInvoke(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.MethodHandle $r12;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        java.lang.AssertionError $r10, $r13;
+        java.lang.String $r4, $r9, $r11;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1, $r5;
+        java.lang.invoke.MethodType $r6, $r8;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r7;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: boolean isLinkerMethodInvoke(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        if $z2 == 0 goto label1;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label1:
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r12 = $r1.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodHandle resolvedHandle>;
+
+        $z1 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if $r12 != null goto label2;
+
+        $r10 = new java.lang.AssertionError;
+
+        $r11 = virtualinvoke r0.<java.lang.invoke.LambdaForm$Name: java.lang.String exprString()>();
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r10;
+
+     label2:
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r4 = virtualinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String constantPlaceholder(java.lang.Object)>($r12);
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r4);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitReferenceCast(java.lang.Class,java.lang.Object)>(class "Ljava/lang/invoke/MethodHandle;", $r12);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        $r5 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r6 = virtualinvoke $r5.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType methodType()>();
+
+        $r7 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r8 = virtualinvoke $r6.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/invoke/MethodHandle", "invokeBasic", $r9, 0);
+
+        return;
+    }
+
+    static boolean isStaticallyInvocable(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1;
+        java.lang.invoke.MemberName $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        $z0 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyInvocable(java.lang.invoke.MemberName)>($r2);
+
+        return $z0;
+    }
+
+    static boolean isStaticallyInvocable(java.lang.invoke.MemberName)
+    {
+        int i0, i1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        java.lang.Class[] $r7;
+        java.lang.invoke.MethodType $r5;
+        java.lang.invoke.MemberName r0;
+        java.lang.Class $r1, $r3, $r6, r8;
+        java.lang.ClassLoader $r2, $r4;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        if r0 != null goto label01;
+
+        return 0;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isConstructor()>();
+
+        if $z0 == 0 goto label02;
+
+        return 0;
+
+     label02:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.Class: boolean isArray()>();
+
+        if $z1 != 0 goto label03;
+
+        $z2 = virtualinvoke $r1.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z2 == 0 goto label04;
+
+     label03:
+        return 0;
+
+     label04:
+        $z3 = virtualinvoke $r1.<java.lang.Class: boolean isAnonymousClass()>();
+
+        if $z3 != 0 goto label05;
+
+        $z4 = virtualinvoke $r1.<java.lang.Class: boolean isLocalClass()>();
+
+        if $z4 == 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r3 = class "Ljava/lang/invoke/MethodHandle;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r2 == $r4 goto label07;
+
+        return 0;
+
+     label07:
+        $z5 = staticinvoke <sun.reflect.misc.ReflectUtil: boolean isVMAnonymousClass(java.lang.Class)>($r1);
+
+        if $z5 == 0 goto label08;
+
+        return 0;
+
+     label08:
+        $r5 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodOrFieldType()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $z6 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyNameable(java.lang.Class)>($r6);
+
+        if $z6 != 0 goto label09;
+
+        return 0;
+
+     label09:
+        $r7 = virtualinvoke $r5.<java.lang.invoke.MethodType: java.lang.Class[] parameterArray()>();
+
+        i0 = lengthof $r7;
+
+        i1 = 0;
+
+     label10:
+        if i1 >= i0 goto label12;
+
+        r8 = $r7[i1];
+
+        $z11 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyNameable(java.lang.Class)>(r8);
+
+        if $z11 != 0 goto label11;
+
+        return 0;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label10;
+
+     label12:
+        $z7 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isPrivate()>();
+
+        if $z7 != 0 goto label13;
+
+        $z10 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isSamePackage(java.lang.Class,java.lang.Class)>(class "Ljava/lang/invoke/MethodHandle;", $r1);
+
+        if $z10 == 0 goto label13;
+
+        return 1;
+
+     label13:
+        $z8 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isPublic()>();
+
+        if $z8 == 0 goto label14;
+
+        $z9 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyNameable(java.lang.Class)>($r1);
+
+        if $z9 == 0 goto label14;
+
+        return 1;
+
+     label14:
+        return 0;
+    }
+
+    static boolean isStaticallyNameable(java.lang.Class)
+    {
+        java.lang.Class[] r3;
+        int $i0, i1, i2;
+        java.lang.Class $r1, r4, r5;
+        java.lang.ClassLoader $r0, $r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r5 := @parameter0: java.lang.Class;
+
+        if r5 != class "Ljava/lang/Object;" goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = virtualinvoke r5.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label02;
+
+        r5 = virtualinvoke r5.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        goto label01;
+
+     label02:
+        $z1 = virtualinvoke r5.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label03;
+
+        return 1;
+
+     label03:
+        $z2 = staticinvoke <sun.reflect.misc.ReflectUtil: boolean isVMAnonymousClass(java.lang.Class)>(r5);
+
+        if $z2 == 0 goto label04;
+
+        return 0;
+
+     label04:
+        $r0 = virtualinvoke r5.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r1 = class "Ljava/lang/Object;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r0 == $r2 goto label05;
+
+        return 0;
+
+     label05:
+        $z3 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isSamePackage(java.lang.Class,java.lang.Class)>(class "Ljava/lang/invoke/MethodHandle;", r5);
+
+        if $z3 == 0 goto label06;
+
+        return 1;
+
+     label06:
+        $i0 = virtualinvoke r5.<java.lang.Class: int getModifiers()>();
+
+        $z4 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i0);
+
+        if $z4 != 0 goto label07;
+
+        return 0;
+
+     label07:
+        r3 = <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] STATICALLY_INVOCABLE_PACKAGES>;
+
+        i1 = lengthof r3;
+
+        i2 = 0;
+
+     label08:
+        if i2 >= i1 goto label10;
+
+        r4 = r3[i2];
+
+        $z5 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isSamePackage(java.lang.Class,java.lang.Class)>(r4, r5);
+
+        if $z5 == 0 goto label09;
+
+        return 1;
+
+     label09:
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label10:
+        return 0;
+    }
+
+    void emitStaticInvoke(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r1;
+        java.lang.invoke.LambdaForm$NamedFunction $r2;
+        java.lang.invoke.MemberName $r3;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r2 = r1.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r3 = virtualinvoke $r2.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        virtualinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitStaticInvoke(java.lang.invoke.MemberName,java.lang.invoke.LambdaForm$Name)>($r3, r1);
+
+        return;
+    }
+
+    void emitStaticInvoke(java.lang.invoke.MemberName, java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r4;
+        byte $b0, b3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.lang.invoke.LambdaForm$BasicType $r9, $r10;
+        java.lang.invoke.MemberName r0, $r20;
+        java.lang.AssertionError $r23, $r24, $r25;
+        int $i1, $i2, $i4;
+        java.lang.String $r2, $r3, $r7, $r15;
+        java.lang.invoke.LambdaForm$Name r5;
+        java.lang.invoke.MethodType $r11, $r14;
+        java.lang.invoke.LambdaForm$NamedFunction $r19;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r8, $r16;
+        java.lang.Class $r1, $r6, $r12, $r17, $r22;
+
+        r4 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        r5 := @parameter1: java.lang.invoke.LambdaForm$Name;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r19 = r5.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r20 = virtualinvoke $r19.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        $z7 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean equals(java.lang.invoke.MemberName)>($r20);
+
+        if $z7 != 0 goto label1;
+
+        $r23 = new java.lang.AssertionError;
+
+        specialinvoke $r23.<java.lang.AssertionError: void <init>()>();
+
+        throw $r23;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $r2 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String getInternalName(java.lang.Class)>($r1);
+
+        $r3 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        b3 = $b0;
+
+        $i4 = (int) $b0;
+
+        if $i4 != 7 goto label3;
+
+        $z5 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label2;
+
+        $z6 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean canBeStaticallyBound()>();
+
+        if $z6 != 0 goto label2;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>(java.lang.Object)>(r0);
+
+        throw $r24;
+
+     label2:
+        b3 = 5;
+
+     label3:
+        $r22 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $z8 = virtualinvoke $r22.<java.lang.Class: boolean isInterface()>();
+
+        if $z8 == 0 goto label4;
+
+        if b3 != 5 goto label4;
+
+        b3 = 9;
+
+     label4:
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        $z9 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isMethod()>();
+
+        if $z9 == 0 goto label5;
+
+        $r14 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        $r16 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i2 = virtualinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: int refKindOpcode(byte)>(b3);
+
+        $r17 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $z4 = virtualinvoke $r17.<java.lang.Class: boolean isInterface()>();
+
+        virtualinvoke $r16.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>($i2, $r2, $r3, $r15, $z4);
+
+        goto label6;
+
+     label5:
+        $r6 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+        $r7 = staticinvoke <java.lang.invoke.MethodType: java.lang.String toFieldDescriptorString(java.lang.Class)>($r6);
+
+        $r8 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i1 = virtualinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: int refKindOpcode(byte)>(b3);
+
+        virtualinvoke $r8.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitFieldInsn(int,java.lang.String,java.lang.String,java.lang.String)>($i1, $r2, $r3, $r7);
+
+     label6:
+        $r10 = r5.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        $r9 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        if $r10 != $r9 goto label8;
+
+        $r11 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getInvocationType()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $z1 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label7;
+
+        $z3 = virtualinvoke $r12.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z3 == 0 goto label7;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label7:
+        if $r12 == class "Ljava/lang/Object;" goto label8;
+
+        $z2 = virtualinvoke $r12.<java.lang.Class: boolean isInterface()>();
+
+        if $z2 != 0 goto label8;
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: boolean assertStaticType(java.lang.Class,java.lang.invoke.LambdaForm$Name)>($r12, r5);
+
+     label8:
+        return;
+    }
+
+    void emitNewArray(java.lang.invoke.LambdaForm$Name) throws java.lang.InternalError
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r6;
+        byte $b2;
+        java.lang.InternalError $r24;
+        boolean $z0, $z1, $z2, $z3;
+        sun.invoke.util.Wrapper $r8;
+        java.lang.Throwable $r23;
+        java.lang.invoke.MethodHandle $r16;
+        java.lang.Object[] $r4, $r7, $r25;
+        java.lang.AssertionError $r26, $r27, $r28;
+        int $i0, $i1, $i3, i4, i5, $i6, $i7;
+        java.lang.String $r13, $r19;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1, $r15;
+        java.lang.invoke.MethodType $r2;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r9, $r10, $r11, $r12, $r18;
+        java.lang.Class $r3, $r5, $r20;
+        java.lang.Object $r17;
+
+        r6 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType methodType()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r4 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i0 = lengthof $r4;
+
+        if $i0 != 0 goto label07;
+
+     label01:
+        $r15 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r16 = $r15.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodHandle resolvedHandle>;
+
+        $r17 = virtualinvoke $r16.<java.lang.invoke.MethodHandle: java.lang.Object invoke()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r23 := @caughtexception;
+
+        $r24 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.Throwable)>($r23);
+
+        throw $r24;
+
+     label04:
+        $z2 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label05;
+
+        $i3 = staticinvoke <java.lang.reflect.Array: int getLength(java.lang.Object)>($r17);
+
+        if $i3 == 0 goto label05;
+
+        $r26 = new java.lang.AssertionError;
+
+        specialinvoke $r26.<java.lang.AssertionError: void <init>()>();
+
+        throw $r26;
+
+     label05:
+        $z3 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label06;
+
+        $r20 = virtualinvoke $r17.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r20 == $r3 goto label06;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label06:
+        $r18 = r6.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r19 = virtualinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String constantPlaceholder(java.lang.Object)>($r17);
+
+        virtualinvoke $r18.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r19);
+
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: void emitReferenceCast(java.lang.Class,java.lang.Object)>($r3, $r17);
+
+        return;
+
+     label07:
+        $r5 = virtualinvoke $r3.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label08;
+
+        if $r5 != null goto label08;
+
+        $r28 = new java.lang.AssertionError;
+
+        specialinvoke $r28.<java.lang.AssertionError: void <init>()>();
+
+        throw $r28;
+
+     label08:
+        $r7 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i1 = lengthof $r7;
+
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i1);
+
+        i4 = 83;
+
+        $z1 = virtualinvoke $r5.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 != 0 goto label09;
+
+        $r12 = r6.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r13 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String getInternalName(java.lang.Class)>($r5);
+
+        virtualinvoke $r12.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(189, $r13);
+
+        goto label10;
+
+     label09:
+        $r8 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>($r5);
+
+        $b2 = specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: byte arrayTypeCode(sun.invoke.util.Wrapper)>($r8);
+
+        i4 = specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: int arrayInsnOpcode(byte,int)>($b2, 83);
+
+        $r9 = r6.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $i7 = (int) $b2;
+
+        virtualinvoke $r9.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitIntInsn(int,int)>(188, $i7);
+
+     label10:
+        i5 = 0;
+
+     label11:
+        $r25 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i6 = lengthof $r25;
+
+        if i5 >= $i6 goto label12;
+
+        $r10 = r6.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r10.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(89);
+
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>(i5);
+
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r0, i5);
+
+        $r11 = r6.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r11.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(i4);
+
+        i5 = i5 + 1;
+
+        goto label11;
+
+     label12:
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: boolean assertStaticType(java.lang.Class,java.lang.invoke.LambdaForm$Name)>($r3, r0);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+    }
+
+    int refKindOpcode(byte)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r5;
+        byte b0;
+        int $i1, $i2;
+        java.lang.InternalError $r7;
+        java.lang.StringBuilder $r2, $r3, $r6;
+        java.lang.String $r4;
+
+        r5 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        b0 := @parameter0: byte;
+
+        $i1 = (int) b0;
+
+        tableswitch($i1)
+        {
+            case 1: goto label5;
+            case 2: goto label7;
+            case 3: goto label6;
+            case 4: goto label8;
+            case 5: goto label1;
+            case 6: goto label2;
+            case 7: goto label3;
+            case 8: goto label9;
+            case 9: goto label4;
+            default: goto label9;
+        };
+
+     label1:
+        return 182;
+
+     label2:
+        return 184;
+
+     label3:
+        return 183;
+
+     label4:
+        return 185;
+
+     label5:
+        return 180;
+
+     label6:
+        return 181;
+
+     label7:
+        return 178;
+
+     label8:
+        return 179;
+
+     label9:
+        $r7 = new java.lang.InternalError;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("refKind=");
+
+        $i2 = (int) b0;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.InternalError: void <init>(java.lang.String)>($r4);
+
+        throw $r7;
+    }
+
+    private boolean memberRefersTo(java.lang.invoke.MemberName, java.lang.Class, java.lang.String)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r5;
+        java.lang.invoke.MemberName r0;
+        java.lang.Class $r1, r2;
+        java.lang.String $r3, r4;
+        boolean $z0, $z1;
+
+        r5 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        r2 := @parameter1: java.lang.Class;
+
+        r4 := @parameter2: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        if $r1 != r2 goto label1;
+
+        $r3 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private boolean nameRefersTo(java.lang.invoke.LambdaForm$Name, java.lang.Class, java.lang.String)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1, $r3;
+        java.lang.invoke.MemberName $r4;
+        java.lang.Class r5;
+        java.lang.String r6;
+        boolean $z0, $z1;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        r5 := @parameter1: java.lang.Class;
+
+        r6 := @parameter2: java.lang.String;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        $z0 = specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: boolean memberRefersTo(java.lang.invoke.MemberName,java.lang.Class,java.lang.String)>($r4, r5, r6);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private boolean isInvokeBasic(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.Object[] $r2;
+        java.lang.invoke.InvokerBytecodeGenerator r5;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1, $r3;
+        java.lang.invoke.MemberName $r4;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r5 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 >= 1 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        $z0 = specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: boolean memberRefersTo(java.lang.invoke.MemberName,java.lang.Class,java.lang.String)>($r4, class "Ljava/lang/invoke/MethodHandle;", "invokeBasic");
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke $r4.<java.lang.invoke.MemberName: boolean isPublic()>();
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke $r4.<java.lang.invoke.MemberName: boolean isStatic()>();
+
+        if $z2 != 0 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+    }
+
+    private boolean isLinkerMethodInvoke(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.Object[] $r2;
+        java.lang.invoke.InvokerBytecodeGenerator r7;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r1, $r3;
+        java.lang.invoke.MemberName $r4;
+        int $i0;
+        java.lang.Class $r5;
+        java.lang.String $r6;
+        boolean $z0, $z1, $z2, $z3;
+
+        r7 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 >= 1 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MemberName member()>();
+
+        if $r4 == null goto label3;
+
+        $r5 = virtualinvoke $r4.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        if $r5 != class "Ljava/lang/invoke/MethodHandle;" goto label3;
+
+        $z0 = virtualinvoke $r4.<java.lang.invoke.MemberName: boolean isPublic()>();
+
+        if $z0 != 0 goto label3;
+
+        $z1 = virtualinvoke $r4.<java.lang.invoke.MemberName: boolean isStatic()>();
+
+        if $z1 == 0 goto label3;
+
+        $r6 = virtualinvoke $r4.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("linkTo");
+
+        if $z2 == 0 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+    }
+
+    private boolean isSelectAlternative(int)
+    {
+        java.lang.invoke.LambdaForm $r1, $r3, $r6, $r9;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.LambdaForm$Name[] $r2, $r4, $r7;
+        java.lang.invoke.LambdaForm$Name r5, r8;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $i2 = i0 + 1;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r2 = $r1.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i1 = lengthof $r2;
+
+        if $i2 < $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r4 = $r3.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        r5 = $r4[i0];
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r7 = $r6.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i3 = i0 + 1;
+
+        r8 = $r7[$i3];
+
+        $z0 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean nameRefersTo(java.lang.invoke.LambdaForm$Name,java.lang.Class,java.lang.String)>(r5, class "Ljava/lang/invoke/MethodHandleImpl;", "selectAlternative");
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean isInvokeBasic(java.lang.invoke.LambdaForm$Name)>(r8);
+
+        if $z1 == 0 goto label2;
+
+        $i4 = virtualinvoke r8.<java.lang.invoke.LambdaForm$Name: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        if $i4 != 0 goto label2;
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i5 = virtualinvoke $r9.<java.lang.invoke.LambdaForm: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        $i6 = i0 + 1;
+
+        if $i5 != $i6 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private boolean isGuardWithCatch(int)
+    {
+        java.lang.invoke.LambdaForm $r1, $r3, $r6, $r9, $r12, $r13;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.invoke.LambdaForm$Name[] $r2, $r4, $r7, $r10;
+        java.lang.invoke.LambdaForm$Name r5, r8, r11;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $i2 = i0 + 2;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r2 = $r1.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i1 = lengthof $r2;
+
+        if $i2 < $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r4 = $r3.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        r5 = $r4[i0];
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r7 = $r6.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i3 = i0 + 1;
+
+        r8 = $r7[$i3];
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r10 = $r9.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i4 = i0 + 2;
+
+        r11 = $r10[$i4];
+
+        $z0 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean nameRefersTo(java.lang.invoke.LambdaForm$Name,java.lang.Class,java.lang.String)>(r8, class "Ljava/lang/invoke/MethodHandleImpl;", "guardWithCatch");
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean isInvokeBasic(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: boolean isInvokeBasic(java.lang.invoke.LambdaForm$Name)>(r11);
+
+        if $z2 == 0 goto label2;
+
+        $i5 = virtualinvoke r8.<java.lang.invoke.LambdaForm$Name: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        if $i5 != 3 goto label2;
+
+        $r12 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i6 = virtualinvoke $r12.<java.lang.invoke.LambdaForm: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r5);
+
+        $i7 = i0 + 1;
+
+        if $i6 != $i7 goto label2;
+
+        $i8 = virtualinvoke r11.<java.lang.invoke.LambdaForm$Name: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r8);
+
+        if $i8 != 1 goto label2;
+
+        $r13 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i9 = virtualinvoke $r13.<java.lang.invoke.LambdaForm: int lastUseIndex(java.lang.invoke.LambdaForm$Name)>(r8);
+
+        $i10 = i0 + 2;
+
+        if $i9 != $i10 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private java.lang.invoke.LambdaForm$Name emitSelectAlternative(java.lang.invoke.LambdaForm$Name, java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.Object[] $r1;
+        java.lang.invoke.InvokerBytecodeGenerator r5;
+        java.lang.AssertionError $r17;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.lang.Class[] $r8, $r12, $r14, $r16;
+        java.lang.invoke.LambdaForm$Name r0, r6, $r15;
+        jdk.internal.org.objectweb.asm.Label $r3, $r4;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r7, $r10, $r11, $r13;
+        java.lang.Object $r2, $r9;
+
+        r5 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r6 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        r0 := @parameter1: java.lang.invoke.LambdaForm$Name;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: boolean isStaticallyInvocable(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $r17 = new java.lang.AssertionError;
+
+        specialinvoke $r17.<java.lang.AssertionError: void <init>()>();
+
+        throw $r17;
+
+     label1:
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $r2 = $r1[0];
+
+        $r15 = (java.lang.invoke.LambdaForm$Name) $r2;
+
+        $r3 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r3.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r4 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r4.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 0);
+
+        $r7 = r5.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitJumpInsn(int,jdk.internal.org.objectweb.asm.Label)>(153, $r3);
+
+        $r8 = r5.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses>;
+
+        $r9 = virtualinvoke $r8.<java.lang.Object: java.lang.Object clone()>();
+
+        $r16 = (java.lang.Class[]) $r9;
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 1);
+
+        $i0 = virtualinvoke $r15.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitAstoreInsn(int)>($i0);
+
+        virtualinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitStaticInvoke(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        $r10 = r5.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r10.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitJumpInsn(int,jdk.internal.org.objectweb.asm.Label)>(167, $r4);
+
+        $r11 = r5.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r11.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r3);
+
+        $r12 = r5.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses>;
+
+        $i1 = lengthof $r16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r16, 0, $r12, 0, $i1);
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 2);
+
+        $i2 = virtualinvoke $r15.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitAstoreInsn(int)>($i2);
+
+        virtualinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitStaticInvoke(java.lang.invoke.LambdaForm$Name)>(r0);
+
+        $r13 = r5.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r13.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r4);
+
+        $r14 = r5.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] localClasses>;
+
+        $i3 = lengthof $r16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r16, 0, $r14, 0, $i3);
+
+        return r0;
+    }
+
+    private java.lang.invoke.LambdaForm$Name emitGuardWithCatch(int)
+    {
+        java.lang.invoke.LambdaForm $r1, $r4, $r7;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.invoke.MethodHandle $r15, $r19;
+        int i0, $i1, $i2;
+        java.lang.String $r27, $r41;
+        java.lang.invoke.LambdaForm$Name[] $r2, $r5, $r8;
+        java.lang.Class[] $r37;
+        java.lang.invoke.LambdaForm$Name r3, r6, r9;
+        jdk.internal.org.objectweb.asm.Label $r10, $r11, $r12, $r13, $r34;
+        java.lang.invoke.LambdaForm$NamedFunction $r14, $r18;
+        java.lang.invoke.MethodType $r16, $r20, $r21, $r22, $r26, $r38, $r40;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r23, $r24, $r25, $r28, $r29, $r30, $r31, $r32, $r33, $r35, $r36, $r39, $r42, $r43, $r44, $r45;
+        java.lang.Class $r17;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r2 = $r1.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        r3 = $r2[i0];
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r5 = $r4.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i1 = i0 + 1;
+
+        r6 = $r5[$i1];
+
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r8 = $r7.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $i2 = i0 + 2;
+
+        r9 = $r8[$i2];
+
+        $r10 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r10.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r11 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r11.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r12 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r12.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r13 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r13.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r14 = r9.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r15 = $r14.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodHandle resolvedHandle>;
+
+        $r16 = virtualinvoke $r15.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r18 = r3.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r19 = $r18.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodHandle resolvedHandle>;
+
+        $r20 = virtualinvoke $r19.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.invoke.MethodType: java.lang.invoke.MethodType dropParameterTypes(int,int)>(0, 1);
+
+        $r22 = virtualinvoke $r21.<java.lang.invoke.MethodType: java.lang.invoke.MethodType changeReturnType(java.lang.Class)>($r17);
+
+        $r23 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r23.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTryCatchBlock(jdk.internal.org.objectweb.asm.Label,jdk.internal.org.objectweb.asm.Label,jdk.internal.org.objectweb.asm.Label,java.lang.String)>($r10, $r11, $r12, "java/lang/Throwable");
+
+        $r24 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r24.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r10);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 0);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name,int)>(r3, 1);
+
+        $r25 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r26 = virtualinvoke $r22.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        virtualinvoke $r25.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/invoke/MethodHandle", "invokeBasic", $r27, 0);
+
+        $r28 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r28.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r11);
+
+        $r29 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r29.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitJumpInsn(int,jdk.internal.org.objectweb.asm.Label)>(167, $r13);
+
+        $r30 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r30.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r12);
+
+        $r31 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r31.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(89);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 1);
+
+        $r32 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r32.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(95);
+
+        $r33 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r33.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/Class", "isInstance", "(Ljava/lang/Object;)Z", 0);
+
+        $r34 = new jdk.internal.org.objectweb.asm.Label;
+
+        specialinvoke $r34.<jdk.internal.org.objectweb.asm.Label: void <init>()>();
+
+        $r35 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r35.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitJumpInsn(int,jdk.internal.org.objectweb.asm.Label)>(153, $r34);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r6, 2);
+
+        $r36 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r36.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(95);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name,int)>(r3, 1);
+
+        $r37 = newarray (java.lang.Class)[1];
+
+        $r37[0] = class "Ljava/lang/Throwable;";
+
+        $r38 = virtualinvoke $r22.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.lang.Class[])>(0, $r37);
+
+        $r39 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r40 = virtualinvoke $r38.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        virtualinvoke $r39.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/invoke/MethodHandle", "invokeBasic", $r41, 0);
+
+        $r42 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r42.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitJumpInsn(int,jdk.internal.org.objectweb.asm.Label)>(167, $r13);
+
+        $r43 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r43.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r34);
+
+        $r44 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r44.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(191);
+
+        $r45 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r45.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLabel(jdk.internal.org.objectweb.asm.Label)>($r13);
+
+        return r9;
+    }
+
+    private void emitPushArguments(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r1;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r1 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArguments(java.lang.invoke.LambdaForm$Name,int)>(r1, 0);
+
+        return;
+    }
+
+    private void emitPushArguments(java.lang.invoke.LambdaForm$Name, int)
+    {
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.Object[] $r1;
+        int i0, $i1, i2;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        i0 := @parameter1: int;
+
+        i2 = i0;
+
+     label1:
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        $i1 = lengthof $r1;
+
+        if i2 >= $i1 goto label2;
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.invoke.LambdaForm$Name,int)>(r0, i2);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void emitPushArgument(java.lang.invoke.LambdaForm$Name, int)
+    {
+        java.lang.Object[] $r1;
+        java.lang.invoke.InvokerBytecodeGenerator r6;
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$NamedFunction $r3;
+        java.lang.invoke.MethodType $r4;
+        int i0;
+        java.lang.Object r2;
+        java.lang.Class $r5;
+
+        r6 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.Object[] arguments>;
+
+        r2 = $r1[i0];
+
+        $r3 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$NamedFunction function>;
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType methodType()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i0);
+
+        specialinvoke r6.<java.lang.invoke.InvokerBytecodeGenerator: void emitPushArgument(java.lang.Class,java.lang.Object)>($r5, r2);
+
+        return;
+    }
+
+    private void emitPushArgument(java.lang.Class, java.lang.Object)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r5;
+        int $i0;
+        java.lang.String $r7;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.LambdaForm$BasicType $r1, $r3, $r8, $r9, $r11, $r12;
+        java.lang.invoke.LambdaForm$Name r10;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r6;
+        java.lang.Class r0, $r4;
+        java.lang.Object r2;
+
+        r5 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r1 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>(r0);
+
+        $z0 = r2 instanceof java.lang.invoke.LambdaForm$Name;
+
+        if $z0 == 0 goto label1;
+
+        r10 = (java.lang.invoke.LambdaForm$Name) r2;
+
+        $r11 = r10.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        $i0 = virtualinvoke r10.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitLoadInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r11, $i0);
+
+        $r12 = r10.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitImplicitConversion(java.lang.invoke.LambdaForm$BasicType,java.lang.Class,java.lang.Object)>($r12, r0, r10);
+
+        goto label5;
+
+     label1:
+        if r2 == null goto label2;
+
+        $z2 = r2 instanceof java.lang.String;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r3 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        if $r1 != $r3 goto label3;
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitConst(java.lang.Object)>(r2);
+
+        goto label5;
+
+     label3:
+        $r4 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z1 = staticinvoke <sun.invoke.util.Wrapper: boolean isWrapperType(java.lang.Class)>($r4);
+
+        if $z1 == 0 goto label4;
+
+        $r9 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        if $r1 == $r9 goto label4;
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitConst(java.lang.Object)>(r2);
+
+        goto label5;
+
+     label4:
+        $r6 = r5.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r7 = virtualinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String constantPlaceholder(java.lang.Object)>(r2);
+
+        virtualinvoke $r6.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r7);
+
+        $r8 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        specialinvoke r5.<java.lang.invoke.InvokerBytecodeGenerator: void emitImplicitConversion(java.lang.invoke.LambdaForm$BasicType,java.lang.Class,java.lang.Object)>($r8, r0, r2);
+
+     label5:
+        return;
+    }
+
+    private void emitStoreResult(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm$Name r0;
+        java.lang.invoke.LambdaForm$BasicType $r1, $r2, $r4;
+        int $i0;
+        java.lang.invoke.InvokerBytecodeGenerator r3;
+
+        r3 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        if r0 == null goto label1;
+
+        $r2 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        $r1 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType V_TYPE>;
+
+        if $r2 == $r1 goto label1;
+
+        $r4 = r0.<java.lang.invoke.LambdaForm$Name: java.lang.invoke.LambdaForm$BasicType type>;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.LambdaForm$Name: int index()>();
+
+        specialinvoke r3.<java.lang.invoke.InvokerBytecodeGenerator: void emitStoreInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r4, $i0);
+
+     label1:
+        return;
+    }
+
+    private void emitReturn(java.lang.invoke.LambdaForm$Name)
+    {
+        java.lang.invoke.LambdaForm $r3, $r6, $r7, $r11;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        java.lang.AssertionError $r14;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.invoke.LambdaForm$Name[] $r8;
+        java.lang.invoke.LambdaForm$BasicType $r4, $r5, $r13;
+        java.lang.invoke.LambdaForm$Name r9, r10;
+        java.lang.invoke.MethodType $r1;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r12;
+        java.lang.Class $r2;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r10 := @parameter0: java.lang.invoke.LambdaForm$Name;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$BasicType returnType()>();
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r13 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r2);
+
+        if $r4 == $r13 goto label1;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label1:
+        $r5 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType V_TYPE>;
+
+        if $r4 != $r5 goto label2;
+
+        $r12 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r12.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(177);
+
+        goto label4;
+
+     label2:
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $r8 = $r6.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$Name[] names>;
+
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i0 = $r7.<java.lang.invoke.LambdaForm: int result>;
+
+        r9 = $r8[$i0];
+
+        if r9 == r10 goto label3;
+
+        $r11 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.LambdaForm lambdaForm>;
+
+        $i1 = $r11.<java.lang.invoke.LambdaForm: int result>;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitLoadInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r4, $i1);
+
+     label3:
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitImplicitConversion(java.lang.invoke.LambdaForm$BasicType,java.lang.Class,java.lang.Object)>($r4, $r2, r9);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitReturnInsn(java.lang.invoke.LambdaForm$BasicType)>($r4);
+
+     label4:
+        return;
+    }
+
+    private void emitPrimCast(sun.invoke.util.Wrapper, sun.invoke.util.Wrapper)
+    {
+        java.lang.IllegalStateException $r6;
+        java.lang.invoke.InvokerBytecodeGenerator r4;
+        int[] $r2, $r3, $r14, $r17;
+        boolean $z0, $z1, z2;
+        sun.invoke.util.Wrapper r0, r1;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.String $r12;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r5, $r13, $r15, $r16, $r18, $r19;
+
+        r4 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: sun.invoke.util.Wrapper;
+
+        r1 := @parameter1: sun.invoke.util.Wrapper;
+
+        if r0 != r1 goto label01;
+
+        return;
+
+     label01:
+        $z0 = virtualinvoke r0.<sun.invoke.util.Wrapper: boolean isSubwordOrInt()>();
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitI2X(sun.invoke.util.Wrapper)>(r1);
+
+        goto label18;
+
+     label02:
+        $z1 = virtualinvoke r1.<sun.invoke.util.Wrapper: boolean isSubwordOrInt()>();
+
+        if $z1 == 0 goto label03;
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitX2I(sun.invoke.util.Wrapper)>(r0);
+
+        $i8 = virtualinvoke r1.<sun.invoke.util.Wrapper: int bitWidth()>();
+
+        if $i8 >= 32 goto label18;
+
+        specialinvoke r4.<java.lang.invoke.InvokerBytecodeGenerator: void emitI2X(sun.invoke.util.Wrapper)>(r1);
+
+        goto label18;
+
+     label03:
+        z2 = 0;
+
+        $r2 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i0 = virtualinvoke r0.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 6: goto label04;
+            case 7: goto label08;
+            case 8: goto label12;
+            default: goto label16;
+        };
+
+     label04:
+        $r17 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i6 = virtualinvoke r1.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i7 = $r17[$i6];
+
+        lookupswitch($i7)
+        {
+            case 7: goto label05;
+            case 8: goto label06;
+            default: goto label07;
+        };
+
+     label05:
+        $r19 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r19.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(137);
+
+        goto label17;
+
+     label06:
+        $r18 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r18.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(138);
+
+        goto label17;
+
+     label07:
+        z2 = 1;
+
+        goto label17;
+
+     label08:
+        $r14 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i4 = virtualinvoke r1.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i5 = $r14[$i4];
+
+        lookupswitch($i5)
+        {
+            case 6: goto label09;
+            case 8: goto label10;
+            default: goto label11;
+        };
+
+     label09:
+        $r16 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r16.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(140);
+
+        goto label17;
+
+     label10:
+        $r15 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r15.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(141);
+
+        goto label17;
+
+     label11:
+        z2 = 1;
+
+        goto label17;
+
+     label12:
+        $r3 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i2 = virtualinvoke r1.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i3 = $r3[$i2];
+
+        lookupswitch($i3)
+        {
+            case 6: goto label13;
+            case 7: goto label14;
+            default: goto label15;
+        };
+
+     label13:
+        $r13 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r13.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(143);
+
+        goto label17;
+
+     label14:
+        $r5 = r4.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(144);
+
+        goto label17;
+
+     label15:
+        z2 = 1;
+
+        goto label17;
+
+     label16:
+        z2 = 1;
+
+     label17:
+        if z2 == 0 goto label18;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unhandled prim cast: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r12);
+
+        throw $r6;
+
+     label18:
+        return;
+    }
+
+    private void emitI2X(sun.invoke.util.Wrapper)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        int[] $r1;
+        int $i0, $i1;
+        java.lang.InternalError $r11;
+        java.lang.String $r15;
+        sun.invoke.util.Wrapper r0;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        java.lang.StringBuilder $r12, $r13, $r14;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: sun.invoke.util.Wrapper;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i0 = virtualinvoke r0.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label08;
+            case 2: goto label01;
+            case 3: goto label03;
+            case 4: goto label02;
+            case 5: goto label04;
+            case 6: goto label05;
+            case 7: goto label06;
+            case 8: goto label07;
+            default: goto label09;
+        };
+
+     label01:
+        $r8 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r8.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(145);
+
+        goto label10;
+
+     label02:
+        $r6 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r6.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(147);
+
+        goto label10;
+
+     label03:
+        $r7 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(146);
+
+        goto label10;
+
+     label04:
+        goto label10;
+
+     label05:
+        $r5 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(133);
+
+        goto label10;
+
+     label06:
+        $r4 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(134);
+
+        goto label10;
+
+     label07:
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(135);
+
+        goto label10;
+
+     label08:
+        $r9 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r9.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(4);
+
+        $r10 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r10.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(126);
+
+        goto label10;
+
+     label09:
+        $r11 = new java.lang.InternalError;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown type: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.InternalError: void <init>(java.lang.String)>($r15);
+
+        throw $r11;
+
+     label10:
+        return;
+    }
+
+    private void emitX2I(sun.invoke.util.Wrapper)
+    {
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        sun.invoke.util.Wrapper r0;
+        int[] $r1;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r4, $r5;
+        int $i0, $i1;
+        java.lang.InternalError $r6;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r10;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: sun.invoke.util.Wrapper;
+
+        $r1 = <java.lang.invoke.InvokerBytecodeGenerator$2: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i0 = virtualinvoke r0.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 6: goto label1;
+            case 7: goto label2;
+            case 8: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r5 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(136);
+
+        goto label5;
+
+     label2:
+        $r4 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(139);
+
+        goto label5;
+
+     label3:
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(142);
+
+        goto label5;
+
+     label4:
+        $r6 = new java.lang.InternalError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown type: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.InternalError: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label5:
+        return;
+    }
+
+    static java.lang.invoke.MemberName generateLambdaFormInterpreterEntryPoint(java.lang.String)
+    {
+        byte[] $r9;
+        java.lang.invoke.LambdaForm$BasicType $r3;
+        java.lang.invoke.InvokerBytecodeGenerator $r8;
+        char $c0;
+        java.lang.AssertionError $r11;
+        java.lang.invoke.MethodType $r6, $r7;
+        java.lang.invoke.MemberName $r10;
+        java.lang.StringBuilder $r0, $r1, $r4;
+        java.lang.String r2, $r5;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.lang.invoke.LambdaForm: boolean isValidSignature(java.lang.String)>(r2);
+
+        if $z1 != 0 goto label1;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("interpret_");
+
+        $r3 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm$BasicType signatureReturn(java.lang.String)>(r2);
+
+        $c0 = virtualinvoke $r3.<java.lang.invoke.LambdaForm$BasicType: char basicTypeChar()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.invoke.MethodType signatureType(java.lang.String)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.invoke.MethodType: java.lang.invoke.MethodType changeParameterType(int,java.lang.Class)>(0, class "Ljava/lang/invoke/MethodHandle;");
+
+        $r8 = new java.lang.invoke.InvokerBytecodeGenerator;
+
+        specialinvoke $r8.<java.lang.invoke.InvokerBytecodeGenerator: void <init>(java.lang.String,java.lang.String,java.lang.invoke.MethodType)>("LFI", $r5, $r7);
+
+        $r9 = specialinvoke $r8.<java.lang.invoke.InvokerBytecodeGenerator: byte[] generateLambdaFormInterpreterEntryPointBytes()>();
+
+        $r10 = specialinvoke $r8.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName loadMethod(byte[])>($r9);
+
+        return $r10;
+    }
+
+    private byte[] generateLambdaFormInterpreterEntryPointBytes()
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r22;
+        byte[] $r23;
+        java.lang.Object[] $r20;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        int $i0, $i1, i2;
+        java.lang.String $r24;
+        boolean $z0, $z1;
+        java.lang.invoke.LambdaForm$BasicType $r16, $r19;
+        sun.invoke.util.Wrapper $r12, $r18;
+        java.lang.invoke.MethodType $r3, $r5, $r9, $r13, $r21;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r1, $r2, $r4, $r6, $r7, $r8, $r15, $r17;
+        java.lang.Class $r10, $r11, $r14;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void classFilePrologue()>();
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r1.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/LambdaForm$Hidden;", 1);
+
+        $r2 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r2.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/DontInline;", 1);
+
+        $r3 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $i0 = virtualinvoke $r3.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>($i0);
+
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitTypeInsn(int,java.lang.String)>(189, "java/lang/Object");
+
+        i2 = 0;
+
+     label1:
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $i1 = virtualinvoke $r5.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if i2 >= $i1 goto label3;
+
+        $r13 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r14 = virtualinvoke $r13.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i2);
+
+        $r15 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r15.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(89);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>(i2);
+
+        $r16 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r14);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitLoadInsn(java.lang.invoke.LambdaForm$BasicType,int)>($r16, i2);
+
+        $z1 = virtualinvoke $r14.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label2;
+
+        $r18 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>($r14);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitBoxing(sun.invoke.util.Wrapper)>($r18);
+
+     label2:
+        $r17 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r17.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(83);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitAloadInsn(int)>(0);
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r6.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitFieldInsn(int,java.lang.String,java.lang.String,java.lang.String)>(180, "java/lang/invoke/MethodHandle", "form", "Ljava/lang/invoke/LambdaForm;");
+
+        $r7 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(95);
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r8.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/invoke/LambdaForm", "interpretWithArguments", "([Ljava/lang/Object;)Ljava/lang/Object;", 0);
+
+        $r9 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r10 = virtualinvoke $r9.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $z0 = virtualinvoke $r10.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label4;
+
+        $r11 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r10 == $r11 goto label4;
+
+        $r12 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>($r10);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitUnboxing(sun.invoke.util.Wrapper)>($r12);
+
+     label4:
+        $r19 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r10);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void emitReturnInsn(java.lang.invoke.LambdaForm$BasicType)>($r19);
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void classFileEpilogue()>();
+
+        $r20 = newarray (java.lang.Object)[1];
+
+        $r21 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MethodType invokerType>;
+
+        $r20[0] = $r21;
+
+        specialinvoke r0.<java.lang.invoke.InvokerBytecodeGenerator: void bogusMethod(java.lang.Object[])>($r20);
+
+        $r22 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r23 = virtualinvoke $r22.<jdk.internal.org.objectweb.asm.ClassWriter: byte[] toByteArray()>();
+
+        $r24 = r0.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String className>;
+
+        staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: void maybeDump(java.lang.String,byte[])>($r24, $r23);
+
+        return $r23;
+    }
+
+    static java.lang.invoke.MemberName generateNamedFunctionInvoker(java.lang.invoke.MethodTypeForm)
+    {
+        byte[] $r10;
+        java.lang.invoke.InvokerBytecodeGenerator $r9;
+        java.lang.invoke.MethodType r0, $r4;
+        java.lang.invoke.MemberName $r11;
+        java.lang.StringBuilder $r1, $r2, $r7;
+        java.lang.String $r5, $r6, $r8;
+        java.lang.invoke.MethodTypeForm r3;
+
+        r3 := @parameter0: java.lang.invoke.MethodTypeForm;
+
+        r0 = <java.lang.invoke.LambdaForm$NamedFunction: java.lang.invoke.MethodType INVOKER_METHOD_TYPE>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invoke_");
+
+        $r4 = virtualinvoke r3.<java.lang.invoke.MethodTypeForm: java.lang.invoke.MethodType erasedType()>();
+
+        $r5 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.String basicTypeSignature(java.lang.invoke.MethodType)>($r4);
+
+        $r6 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.String shortenSignature(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = new java.lang.invoke.InvokerBytecodeGenerator;
+
+        specialinvoke $r9.<java.lang.invoke.InvokerBytecodeGenerator: void <init>(java.lang.String,java.lang.String,java.lang.invoke.MethodType)>("NFI", $r8, r0);
+
+        $r10 = specialinvoke $r9.<java.lang.invoke.InvokerBytecodeGenerator: byte[] generateNamedFunctionInvokerImpl(java.lang.invoke.MethodTypeForm)>(r3);
+
+        $r11 = specialinvoke $r9.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName loadMethod(byte[])>($r10);
+
+        return $r11;
+    }
+
+    private byte[] generateNamedFunctionInvokerImpl(java.lang.invoke.MethodTypeForm)
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r12;
+        byte[] $r13;
+        java.lang.Object[] $r11;
+        java.lang.invoke.InvokerBytecodeGenerator r2;
+        int $i0, i1;
+        java.lang.String $r6, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.invoke.LambdaForm$BasicType $r10;
+        sun.invoke.util.Wrapper $r16, $r21, $r22, $r23;
+        java.lang.invoke.MethodType $r1, $r5, $r19, $r20;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r3, $r4, $r7, $r15, $r17;
+        java.lang.Class $r8, $r9, $r18, $r24;
+        java.lang.invoke.MethodTypeForm r0;
+
+        r2 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r0 := @parameter0: java.lang.invoke.MethodTypeForm;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodTypeForm: java.lang.invoke.MethodType erasedType()>();
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void classFilePrologue()>();
+
+        $r3 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r3.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/LambdaForm$Hidden;", 1);
+
+        $r4 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: jdk.internal.org.objectweb.asm.AnnotationVisitor visitAnnotation(java.lang.String,boolean)>("Ljava/lang/invoke/ForceInline;", 1);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitAloadInsn(int)>(0);
+
+        i1 = 0;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if i1 >= $i0 goto label5;
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitAloadInsn(int)>(1);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitIconstInsn(int)>(i1);
+
+        $r17 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r17.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(50);
+
+        $r18 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i1);
+
+        $z2 = virtualinvoke $r18.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z2 == 0 goto label4;
+
+        $r19 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.invoke.MethodType: java.lang.invoke.MethodType wrap()>();
+
+        virtualinvoke $r20.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i1);
+
+        $r21 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forBasicType(java.lang.Class)>($r18);
+
+        $z3 = virtualinvoke $r21.<sun.invoke.util.Wrapper: boolean isSubwordOrInt()>();
+
+        if $z3 == 0 goto label2;
+
+        $r22 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper INT>;
+
+        goto label3;
+
+     label2:
+        $r22 = $r21;
+
+     label3:
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitUnboxing(sun.invoke.util.Wrapper)>($r22);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitPrimCast(sun.invoke.util.Wrapper,sun.invoke.util.Wrapper)>($r22, $r21);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label5:
+        $r5 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.invoke.MethodType: java.lang.String toMethodDescriptorString()>();
+
+        $r7 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r7.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMethodInsn(int,java.lang.String,java.lang.String,java.lang.String,boolean)>(182, "java/lang/invoke/MethodHandle", "invokeBasic", $r6, 0);
+
+        $r8 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r9 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r8 == $r9 goto label8;
+
+        $z0 = virtualinvoke $r8.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label8;
+
+        $r16 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forBasicType(java.lang.Class)>($r8);
+
+        $z1 = virtualinvoke $r16.<sun.invoke.util.Wrapper: boolean isSubwordOrInt()>();
+
+        if $z1 == 0 goto label6;
+
+        $r23 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper INT>;
+
+        goto label7;
+
+     label6:
+        $r23 = $r16;
+
+     label7:
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitPrimCast(sun.invoke.util.Wrapper,sun.invoke.util.Wrapper)>($r16, $r23);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitBoxing(sun.invoke.util.Wrapper)>($r23);
+
+     label8:
+        $r24 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r8 != $r24 goto label9;
+
+        $r15 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r15.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(1);
+
+     label9:
+        $r10 = <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType L_TYPE>;
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void emitReturnInsn(java.lang.invoke.LambdaForm$BasicType)>($r10);
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void classFileEpilogue()>();
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = $r1;
+
+        specialinvoke r2.<java.lang.invoke.InvokerBytecodeGenerator: void bogusMethod(java.lang.Object[])>($r11);
+
+        $r12 = r2.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r13 = virtualinvoke $r12.<jdk.internal.org.objectweb.asm.ClassWriter: byte[] toByteArray()>();
+
+        $r14 = r2.<java.lang.invoke.InvokerBytecodeGenerator: java.lang.String className>;
+
+        staticinvoke <java.lang.invoke.InvokerBytecodeGenerator: void maybeDump(java.lang.String,byte[])>($r14, $r13);
+
+        return $r13;
+    }
+
+    private transient void bogusMethod(java.lang.Object[])
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r1;
+        java.lang.Object[] r3;
+        java.lang.invoke.InvokerBytecodeGenerator r0;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r2, $r4, $r5, $r6, $r8, $r10;
+        int i0, i1;
+        java.lang.Object r7;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.InvokerBytecodeGenerator;
+
+        r3 := @parameter0: java.lang.Object[];
+
+        $z0 = <java.lang.invoke.MethodHandleStatics: boolean DUMP_CLASS_FILES>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.ClassWriter cw>;
+
+        $r2 = virtualinvoke $r1.<jdk.internal.org.objectweb.asm.ClassWriter: jdk.internal.org.objectweb.asm.MethodVisitor visitMethod(int,java.lang.String,java.lang.String,java.lang.String,java.lang.String[])>(8, "dummy", "()V", null, null);
+
+        r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv> = $r2;
+
+        i0 = lengthof r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r7 = r3[i1];
+
+        $r8 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        $r9 = virtualinvoke r7.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r8.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitLdcInsn(java.lang.Object)>($r9);
+
+        $r10 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r10.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(87);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r4.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitInsn(int)>(177);
+
+        $r5 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitMaxs(int,int)>(0, 0);
+
+        $r6 = r0.<java.lang.invoke.InvokerBytecodeGenerator: jdk.internal.org.objectweb.asm.MethodVisitor mv>;
+
+        virtualinvoke $r6.<jdk.internal.org.objectweb.asm.MethodVisitor: void visitEnd()>();
+
+     label3:
+        return;
+    }
+
+    static java.io.File access$000()
+    {
+        java.io.File $r0;
+
+        $r0 = <java.lang.invoke.InvokerBytecodeGenerator: java.io.File DUMP_CLASS_FILES_DIR>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r3;
+        java.lang.InternalError $r13;
+        java.lang.String $r11;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.PrintStream $r6;
+        java.lang.Class[] $r2;
+        java.io.File $r4, $r8;
+        java.lang.Exception $r12;
+        java.lang.invoke.MemberName$Factory $r1;
+        java.lang.Class $r0;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10;
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String superName> = "java/lang/Object";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String CLL_SIG> = "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LLV_SIG> = "(Ljava/lang/Object;Ljava/lang/Object;)V";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LL_SIG> = "(Ljava/lang/Object;)Ljava/lang/Object;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LFN_SIG> = "Ljava/lang/invoke/LambdaForm$Name;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LF_SIG> = "Ljava/lang/invoke/LambdaForm;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String MH_SIG> = "Ljava/lang/invoke/MethodHandle;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String OBJARY> = "[Ljava/lang/Object;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String OBJ> = "java/lang/Object";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String CLS> = "java/lang/Class";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LFN> = "java/lang/invoke/LambdaForm$Name";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String LF> = "java/lang/invoke/LambdaForm";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String MHI> = "java/lang/invoke/MethodHandleImpl";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.String MH> = "java/lang/invoke/MethodHandle";
+
+        $r0 = class "Ljava/lang/invoke/InvokerBytecodeGenerator;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        <java.lang.invoke.InvokerBytecodeGenerator: boolean $assertionsDisabled> = $z3;
+
+        $r1 = staticinvoke <java.lang.invoke.MemberName: java.lang.invoke.MemberName$Factory getFactory()>();
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.invoke.MemberName$Factory MEMBERNAME_FACTORY> = $r1;
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class HOST_CLASS> = class "Ljava/lang/invoke/LambdaForm;";
+
+        $z1 = <java.lang.invoke.MethodHandleStatics: boolean DUMP_CLASS_FILES>;
+
+        if $z1 == 0 goto label7;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.util.HashMap DUMP_CLASS_FILES_COUNTERS> = $r3;
+
+     label3:
+        $r4 = new java.io.File;
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>("DUMP_CLASS_FILES");
+
+        $z2 = virtualinvoke $r4.<java.io.File: boolean exists()>();
+
+        if $z2 != 0 goto label4;
+
+        virtualinvoke $r4.<java.io.File: boolean mkdirs()>();
+
+     label4:
+        <java.lang.invoke.InvokerBytecodeGenerator: java.io.File DUMP_CLASS_FILES_DIR> = $r4;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dumping class files to ");
+
+        $r8 = <java.lang.invoke.InvokerBytecodeGenerator: java.io.File DUMP_CLASS_FILES_DIR>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/...");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+     label5:
+        goto label8;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r13 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label7:
+        <java.lang.invoke.InvokerBytecodeGenerator: java.util.HashMap DUMP_CLASS_FILES_COUNTERS> = null;
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.io.File DUMP_CLASS_FILES_DIR> = null;
+
+     label8:
+        $r2 = newarray (java.lang.Class)[3];
+
+        $r2[0] = class "Ljava/lang/Object;";
+
+        $r2[1] = class "Ljava/util/Arrays;";
+
+        $r2[2] = class "Lsun/misc/Unsafe;";
+
+        <java.lang.invoke.InvokerBytecodeGenerator: java.lang.Class[] STATICALLY_INVOCABLE_PACKAGES> = $r2;
+
+        return;
+
+        catch java.lang.Exception from label3 to label5 with label6;
+    }
+}

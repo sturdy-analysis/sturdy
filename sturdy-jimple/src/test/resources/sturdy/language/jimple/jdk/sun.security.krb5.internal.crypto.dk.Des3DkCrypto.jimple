@@ -1,0 +1,441 @@
+public class sun.security.krb5.internal.crypto.dk.Des3DkCrypto extends sun.security.krb5.internal.crypto.dk.DkCrypto
+{
+    private static final byte[] ZERO_IV;
+
+    public void <init>()
+    {
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        specialinvoke r0.<sun.security.krb5.internal.crypto.dk.DkCrypto: void <init>()>();
+
+        return;
+    }
+
+    protected int getKeySeedLength()
+    {
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        return 168;
+    }
+
+    public byte[] stringToKey(char[]) throws java.security.GeneralSecurityException
+    {
+        java.lang.Throwable $r4;
+        byte[] $r1, $r3, r5;
+        char[] r0;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r2;
+
+        r2 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r0 := @parameter0: char[];
+
+        r5 = null;
+
+     label1:
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] charToUtf8(char[])>(r0);
+
+        r5 = $r1;
+
+        $r3 = specialinvoke r2.<sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] stringToKey(byte[],byte[])>($r1, null);
+
+     label2:
+        if $r1 == null goto label3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        if r5 == null goto label6;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>(r5, 0);
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private byte[] stringToKey(byte[], byte[]) throws java.security.GeneralSecurityException
+    {
+        byte[] r0, r2, $r3, $r4, $r5, $r6;
+        java.lang.RuntimeException $r7;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r1;
+        int $i0, $i1;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r2 := @parameter0: byte[];
+
+        r0 := @parameter1: byte[];
+
+        if r0 == null goto label1;
+
+        $i1 = lengthof r0;
+
+        if $i1 <= 0 goto label1;
+
+        $r7 = new java.lang.RuntimeException;
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>("Invalid parameter to stringToKey");
+
+        throw $r7;
+
+     label1:
+        $i0 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.Des3DkCrypto: int getKeySeedLength()>();
+
+        $r3 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] nfold(byte[],int)>(r2, $i0);
+
+        $r4 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] randomToKey(byte[])>($r3);
+
+        $r5 = <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] KERBEROS_CONSTANT>;
+
+        $r6 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] dk(byte[],byte[])>($r4, $r5);
+
+        return $r6;
+    }
+
+    public byte[] parityFix(byte[]) throws java.security.GeneralSecurityException
+    {
+        byte[] r0;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r1;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r0 := @parameter0: byte[];
+
+        staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: void setParityBit(byte[])>(r0);
+
+        return r0;
+    }
+
+    protected byte[] randomToKey(byte[])
+    {
+        byte[] r0, $r1, $r2, $r3, $r4, $r5, $r6, r7;
+        java.lang.IllegalArgumentException $r8;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r9;
+        int $i0;
+
+        r9 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 == 21 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input must be 168 bits");
+
+        throw $r8;
+
+     label1:
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] des3Expand(byte[],int,int)>(r0, 0, 7);
+
+        $r2 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] keyCorrection(byte[])>($r1);
+
+        $r3 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] des3Expand(byte[],int,int)>(r0, 7, 14);
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] keyCorrection(byte[])>($r3);
+
+        $r5 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] des3Expand(byte[],int,int)>(r0, 14, 21);
+
+        $r6 = staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] keyCorrection(byte[])>($r5);
+
+        r7 = newarray (byte)[24];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r7, 0, 8);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r7, 8, 8);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r7, 16, 8);
+
+        return r7;
+    }
+
+    private static byte[] keyCorrection(byte[])
+    {
+        byte[] r0;
+        short $s1, $s3;
+        byte $b0, $b2;
+        java.security.InvalidKeyException $r1;
+        boolean $z0;
+
+        r0 := @parameter0: byte[];
+
+     label1:
+        $z0 = staticinvoke <javax.crypto.spec.DESKeySpec: boolean isWeak(byte[],int)>(r0, 0);
+
+        if $z0 == 0 goto label2;
+
+        $b0 = r0[7];
+
+        $s3 = (short) $b0;
+
+        $s1 = $s3 ^ 240;
+
+        $b2 = (byte) $s1;
+
+        r0[7] = $b2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+     label4:
+        return r0;
+
+        catch java.security.InvalidKeyException from label1 to label2 with label3;
+    }
+
+    private static byte[] des3Expand(byte[], int, int)
+    {
+        byte[] r0, r1;
+        byte $b3, $b4, b5, b9, b10;
+        int i0, i1, $i2, $i6, $i7, $i8, i11, $i12;
+        java.lang.String $r8;
+        java.lang.IllegalArgumentException $r10;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r9;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $i2 = i0 - i1;
+
+        if $i2 == 7 goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid length of DES Key Value:");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r10;
+
+     label1:
+        r0 = newarray (byte)[8];
+
+        b9 = 0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i1, r0, 0, 7);
+
+        b10 = 0;
+
+        i11 = i1;
+
+     label2:
+        if i11 >= i0 goto label4;
+
+        $b3 = r1[i11];
+
+        $b4 = $b3 & 1;
+
+        b5 = (byte) $b4;
+
+        $i6 = b10 + 1;
+
+        b10 = (byte) $i6;
+
+        if b5 == 0 goto label3;
+
+        $i12 = (int) b5;
+
+        $i7 = $i12 << b10;
+
+        $i8 = b9 | $i7;
+
+        b9 = (byte) $i8;
+
+     label3:
+        i11 = i11 + 1;
+
+        goto label2;
+
+     label4:
+        r0[7] = b9;
+
+        staticinvoke <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: void setParityBit(byte[])>(r0);
+
+        return r0;
+    }
+
+    private static void setParityBit(byte[])
+    {
+        byte[] r0;
+        short s7, $s9;
+        byte $b1, $b5;
+        int $i0, $i2, $i3, $i4, i6, i8, $i10, $i11;
+
+        r0 := @parameter0: byte[];
+
+        i6 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i6 >= $i0 goto label2;
+
+        $b1 = r0[i6];
+
+        $s9 = (short) $b1;
+
+        s7 = $s9 & 254;
+
+        $i10 = (int) s7;
+
+        $i2 = staticinvoke <java.lang.Integer: int bitCount(int)>($i10);
+
+        $i3 = $i2 & 1;
+
+        $i4 = $i3 ^ 1;
+
+        $i11 = (int) s7;
+
+        i8 = $i11 | $i4;
+
+        $b5 = (byte) i8;
+
+        r0[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected javax.crypto.Cipher getCipher(byte[], byte[], int) throws java.security.GeneralSecurityException
+    {
+        byte[] r2, r7;
+        javax.crypto.Cipher $r4;
+        javax.crypto.spec.DESedeKeySpec $r1;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r6;
+        javax.crypto.SecretKeyFactory $r0;
+        javax.crypto.spec.IvParameterSpec $r5;
+        int $i0, i1;
+        javax.crypto.SecretKey $r3;
+
+        r6 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r2 := @parameter0: byte[];
+
+        r7 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        $r0 = staticinvoke <javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(java.lang.String)>("desede");
+
+        $r1 = new javax.crypto.spec.DESedeKeySpec;
+
+        specialinvoke $r1.<javax.crypto.spec.DESedeKeySpec: void <init>(byte[],int)>(r2, 0);
+
+        $r3 = virtualinvoke $r0.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r1);
+
+        if r7 != null goto label1;
+
+        r7 = <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] ZERO_IV>;
+
+     label1:
+        $r4 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("DESede/CBC/NoPadding");
+
+        $r5 = new javax.crypto.spec.IvParameterSpec;
+
+        $i0 = lengthof r7;
+
+        specialinvoke $r5.<javax.crypto.spec.IvParameterSpec: void <init>(byte[],int,int)>(r7, 0, $i0);
+
+        virtualinvoke $r4.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>(i1, $r3, $r5);
+
+        return $r4;
+    }
+
+    public int getChecksumLength()
+    {
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        return 20;
+    }
+
+    protected byte[] getHmac(byte[], byte[]) throws java.security.GeneralSecurityException
+    {
+        byte[] r1, r3, $r4;
+        javax.crypto.spec.SecretKeySpec $r0;
+        javax.crypto.Mac $r2;
+        sun.security.krb5.internal.crypto.dk.Des3DkCrypto r5;
+
+        r5 := @this: sun.security.krb5.internal.crypto.dk.Des3DkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        r3 := @parameter1: byte[];
+
+        $r0 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r0.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>(r1, "HmacSHA1");
+
+        $r2 = staticinvoke <javax.crypto.Mac: javax.crypto.Mac getInstance(java.lang.String)>("HmacSHA1");
+
+        virtualinvoke $r2.<javax.crypto.Mac: void init(java.security.Key)>($r0);
+
+        $r4 = virtualinvoke $r2.<javax.crypto.Mac: byte[] doFinal(byte[])>(r3);
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[8];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r0[2] = 0;
+
+        $r0[3] = 0;
+
+        $r0[4] = 0;
+
+        $r0[5] = 0;
+
+        $r0[6] = 0;
+
+        $r0[7] = 0;
+
+        <sun.security.krb5.internal.crypto.dk.Des3DkCrypto: byte[] ZERO_IV> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,1232 @@
+public class com.sun.xml.internal.stream.XMLEntityStorage extends java.lang.Object
+{
+    protected static final java.lang.String ERROR_REPORTER;
+    protected static final java.lang.String WARN_ON_DUPLICATE_ENTITYDEF;
+    protected boolean fWarnDuplicateEntityDef;
+    protected java.util.Map fEntities;
+    protected com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity;
+    private com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager;
+    protected com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter;
+    protected com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager;
+    protected boolean fInExternalSubset;
+    private static java.lang.String gUserDir;
+    private static java.lang.String gEscapedUserDir;
+    private static boolean[] gNeedEscaping;
+    private static char[] gAfterEscaping1;
+    private static char[] gAfterEscaping2;
+    private static char[] gHexChs;
+
+    public void <init>(com.sun.org.apache.xerces.internal.impl.PropertyManager)
+    {
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r2;
+        java.util.HashMap $r1;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities> = $r1;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset> = 0;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager> = r2;
+
+        return;
+    }
+
+    public void <init>(com.sun.org.apache.xerces.internal.impl.XMLEntityManager)
+    {
+        java.util.HashMap $r1;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager r2;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities> = $r1;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset> = 0;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager> = r2;
+
+        return;
+    }
+
+    public void reset(com.sun.org.apache.xerces.internal.impl.PropertyManager)
+    {
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r1;
+        java.util.Map $r4;
+        java.lang.Object $r2;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r3;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        $r2 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        $r3 = (com.sun.org.apache.xerces.internal.impl.XMLErrorReporter) $r2;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r4.<java.util.Map: void clear()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity> = null;
+
+        return;
+    }
+
+    public void reset()
+    {
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.util.Map $r1;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        $r1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r1.<java.util.Map: void clear()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity> = null;
+
+        return;
+    }
+
+    public void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager r1;
+        java.util.Map $r4;
+        java.lang.Object $r2;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager;
+
+        $z0 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/warn-on-duplicate-entitydef", 0);
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fWarnDuplicateEntityDef> = $z0;
+
+        $r2 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        $r3 = (com.sun.org.apache.xerces.internal.impl.XMLErrorReporter) $r2;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r4.<java.util.Map: void clear()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity> = null;
+
+        return;
+    }
+
+    public com.sun.xml.internal.stream.Entity getEntity(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.Entity $r4;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (com.sun.xml.internal.stream.Entity) $r3;
+
+        return $r4;
+    }
+
+    public boolean hasEntities()
+    {
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.util.Map $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        $r1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getEntitySize()
+    {
+        int $i0;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.util.Map $r1;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        $r1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Map: int size()>();
+
+        return $i0;
+    }
+
+    public java.util.Enumeration getEntityKeys()
+    {
+        java.util.Enumeration $r3;
+        java.util.Map $r1;
+        java.util.Set $r2;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        $r1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Set keySet()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Enumeration enumeration(java.util.Collection)>($r2);
+
+        return $r3;
+    }
+
+    public void addInternalEntity(java.lang.String, java.lang.String)
+    {
+        java.lang.Object[] $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r4;
+        java.util.Map $r2, $r7;
+        com.sun.xml.internal.stream.Entity$InternalEntity $r5;
+        java.lang.String r1, r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new com.sun.xml.internal.stream.Entity$InternalEntity;
+
+        $z2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset>;
+
+        specialinvoke $r5.<com.sun.xml.internal.stream.Entity$InternalEntity: void <init>(java.lang.String,java.lang.String,boolean)>(r1, r6, $z2);
+
+        $r7 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r5);
+
+        goto label2;
+
+     label1:
+        $z1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fWarnDuplicateEntityDef>;
+
+        if $z1 == 0 goto label2;
+
+        $r4 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = r1;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/1998/REC-xml-19980210", "MSG_DUPLICATE_ENTITY_DEFINITION", $r3, 0);
+
+     label2:
+        return;
+    }
+
+    public void addExternalEntity(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.stream.Entity$ExternalEntity $r15;
+        java.lang.Object[] $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r4;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r13;
+        java.util.Map $r2, $r18;
+        java.lang.String r1, r5, r6, r12, $r17;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl $r16;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier $r9, $r11;
+        com.sun.xml.internal.stream.Entity$ScannedEntity $r7, $r8, $r10, $r14;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r12 := @parameter3: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label2;
+
+        if r12 != null goto label1;
+
+        $r7 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity>;
+
+        if $r7 == null goto label1;
+
+        $r8 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity>;
+
+        $r9 = $r8.<com.sun.xml.internal.stream.Entity$ScannedEntity: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier entityLocation>;
+
+        if $r9 == null goto label1;
+
+        $r10 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity>;
+
+        $r11 = $r10.<com.sun.xml.internal.stream.Entity$ScannedEntity: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier entityLocation>;
+
+        r12 = interfaceinvoke $r11.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getExpandedSystemId()>();
+
+     label1:
+        $r13 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        $r14 = virtualinvoke $r13.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: com.sun.xml.internal.stream.Entity$ScannedEntity getCurrentEntity()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity> = $r14;
+
+        $r15 = new com.sun.xml.internal.stream.Entity$ExternalEntity;
+
+        $r16 = new com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl;
+
+        $r17 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String expandSystemId(java.lang.String,java.lang.String)>(r6, r12);
+
+        specialinvoke $r16.<com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r5, r6, r12, $r17);
+
+        $z2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset>;
+
+        specialinvoke $r15.<com.sun.xml.internal.stream.Entity$ExternalEntity: void <init>(java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier,java.lang.String,boolean)>(r1, $r16, null, $z2);
+
+        $r18 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r18.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r15);
+
+        goto label3;
+
+     label2:
+        $z1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fWarnDuplicateEntityDef>;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = r1;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/1998/REC-xml-19980210", "MSG_DUPLICATE_ENTITY_DEFINITION", $r3, 0);
+
+     label3:
+        return;
+    }
+
+    public boolean isExternalEntity(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.Entity r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.stream.Entity) $r3;
+
+        if r4 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = virtualinvoke r4.<com.sun.xml.internal.stream.Entity: boolean isExternal()>();
+
+        return $z0;
+    }
+
+    public boolean isEntityDeclInExternalSubset(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.Entity r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.stream.Entity) $r3;
+
+        if r4 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = virtualinvoke r4.<com.sun.xml.internal.stream.Entity: boolean isEntityDeclInExternalSubset()>();
+
+        return $z0;
+    }
+
+    public void addUnparsedEntity(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.stream.Entity$ExternalEntity $r7;
+        java.lang.Object[] $r5;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r6;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r1;
+        java.util.Map $r4, $r13;
+        java.lang.String r3, r9, r10, r11, r12;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl $r8;
+        com.sun.xml.internal.stream.Entity$ScannedEntity $r2;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r3 := @parameter0: java.lang.String;
+
+        r9 := @parameter1: java.lang.String;
+
+        r10 := @parameter2: java.lang.String;
+
+        r11 := @parameter3: java.lang.String;
+
+        r12 := @parameter4: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: com.sun.xml.internal.stream.Entity$ScannedEntity getCurrentEntity()>();
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.xml.internal.stream.Entity$ScannedEntity fCurrentEntity> = $r2;
+
+        $r4 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $z0 = interfaceinvoke $r4.<java.util.Map: boolean containsKey(java.lang.Object)>(r3);
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new com.sun.xml.internal.stream.Entity$ExternalEntity;
+
+        $r8 = new com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r9, r10, r11, null);
+
+        $z2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset>;
+
+        specialinvoke $r7.<com.sun.xml.internal.stream.Entity$ExternalEntity: void <init>(java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier,java.lang.String,boolean)>(r3, $r8, r12, $z2);
+
+        $r13 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r7);
+
+        goto label2;
+
+     label1:
+        $z1 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fWarnDuplicateEntityDef>;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = r3;
+
+        virtualinvoke $r6.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/1998/REC-xml-19980210", "MSG_DUPLICATE_ENTITY_DEFINITION", $r5, 0);
+
+     label2:
+        return;
+    }
+
+    public boolean isUnparsedEntity(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.Entity r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.stream.Entity) $r3;
+
+        if r4 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = virtualinvoke r4.<com.sun.xml.internal.stream.Entity: boolean isUnparsed()>();
+
+        return $z0;
+    }
+
+    public boolean isDeclaredEntity(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.Entity r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.XMLEntityStorage: java.util.Map fEntities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.stream.Entity) $r3;
+
+        if r4 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static java.lang.String expandSystemId(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String expandSystemId(java.lang.String,java.lang.String)>(r0, null);
+
+        return $r1;
+    }
+
+    private static synchronized java.lang.String getUserDir()
+    {
+        byte[] $r6;
+        byte b3;
+        java.lang.SecurityException $r17;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.UnsupportedEncodingException $r16;
+        java.lang.StringBuffer $r19;
+        int $i0, $i1, $i2, $i7, $i9, i19, i20, i21, i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34;
+        java.lang.String $r0, $r1, $r3, $r4, $r5, $r15, r18;
+        boolean[] $r7, $r12;
+        char $c4, $c5, $c6, $c8, $c10, $c11, $c12, $c13, $c14, $c15, $c16, $c17, c18;
+        char[] $r8, $r9, $r10, $r11, $r13, $r14;
+
+        r18 = "";
+
+     label01:
+        r18 = staticinvoke <com.sun.org.apache.xerces.internal.utils.SecuritySupport: java.lang.String getSystemProperty(java.lang.String)>("user.dir");
+
+     label02:
+        goto label04;
+
+     label03:
+        $r17 := @caughtexception;
+
+     label04:
+        $i0 = virtualinvoke r18.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label05;
+
+        return "";
+
+     label05:
+        $r0 = <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String gUserDir>;
+
+        $z0 = virtualinvoke r18.<java.lang.String: boolean equals(java.lang.Object)>($r0);
+
+        if $z0 == 0 goto label06;
+
+        $r15 = <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String gEscapedUserDir>;
+
+        return $r15;
+
+     label06:
+        <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String gUserDir> = r18;
+
+        c18 = <java.io.File: char separatorChar>;
+
+        $r1 = virtualinvoke r18.<java.lang.String: java.lang.String replace(char,char)>(c18, 47);
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r19 = new java.lang.StringBuffer;
+
+        $i2 = $i1 * 3;
+
+        specialinvoke $r19.<java.lang.StringBuffer: void <init>(int)>($i2);
+
+        if $i1 < 2 goto label07;
+
+        $c15 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(1);
+
+        $i23 = (int) $c15;
+
+        if $i23 != 58 goto label07;
+
+        $c16 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        $c17 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c16);
+
+        $i24 = (int) $c17;
+
+        if $i24 < 65 goto label07;
+
+        $i25 = (int) $c17;
+
+        if $i25 > 90 goto label07;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(47);
+
+     label07:
+        i19 = 0;
+
+     label08:
+        if i19 >= $i1 goto label12;
+
+        $c11 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i19);
+
+        $i26 = (int) $c11;
+
+        if $i26 < 128 goto label09;
+
+        goto label12;
+
+     label09:
+        $r12 = <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping>;
+
+        $i27 = (int) $c11;
+
+        $z3 = $r12[$i27];
+
+        if $z3 == 0 goto label10;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r13 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1>;
+
+        $i28 = (int) $c11;
+
+        $c13 = $r13[$i28];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c13);
+
+        $r14 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2>;
+
+        $i29 = (int) $c11;
+
+        $c14 = $r14[$i29];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c14);
+
+        goto label11;
+
+     label10:
+        $c12 = (char) $c11;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c12);
+
+     label11:
+        i19 = i19 + 1;
+
+        goto label08;
+
+     label12:
+        if i19 >= $i1 goto label21;
+
+     label13:
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(i19);
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+     label14:
+        goto label16;
+
+     label15:
+        $r16 := @caughtexception;
+
+        return $r1;
+
+     label16:
+        i20 = lengthof $r6;
+
+        i21 = 0;
+
+     label17:
+        if i21 >= i20 goto label21;
+
+        b3 = $r6[i21];
+
+        $i30 = (int) b3;
+
+        if $i30 >= 0 goto label18;
+
+        $i31 = (int) b3;
+
+        i22 = $i31 + 256;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r10 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $i7 = i22 >> 4;
+
+        $c8 = $r10[$i7];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+        $r11 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $i9 = i22 & 15;
+
+        $c10 = $r11[$i9];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c10);
+
+        goto label20;
+
+     label18:
+        $r7 = <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping>;
+
+        $i32 = (int) b3;
+
+        $z2 = $r7[$i32];
+
+        if $z2 == 0 goto label19;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r8 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1>;
+
+        $i33 = (int) b3;
+
+        $c5 = $r8[$i33];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        $r9 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2>;
+
+        $i34 = (int) b3;
+
+        $c6 = $r9[$i34];
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c6);
+
+        goto label20;
+
+     label19:
+        $c4 = (char) b3;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+     label20:
+        i21 = i21 + 1;
+
+        goto label17;
+
+     label21:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z1 != 0 goto label22;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(47);
+
+     label22:
+        $r3 = virtualinvoke $r19.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String gEscapedUserDir> = $r3;
+
+        $r4 = <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String gEscapedUserDir>;
+
+        return $r4;
+
+        catch java.lang.SecurityException from label01 to label02 with label03;
+        catch java.io.UnsupportedEncodingException from label13 to label14 with label15;
+    }
+
+    public static java.lang.String expandSystemId(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.URI$MalformedURIException $r4, $r15;
+        int $i0, $i1, $i2, $i4;
+        java.lang.String r0, $r3, r5, $r6, $r9, $r11, $r14, $r16, $r18, $r20;
+        boolean $z0;
+        java.lang.Exception $r2;
+        java.lang.StringBuilder $r8, $r10, $r28;
+        com.sun.org.apache.xerces.internal.util.URI r19, r22, $r24, $r25, $r26, $r27, $r29, $r30;
+
+        r0 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        if r0 == null goto label01;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        return r0;
+
+     label02:
+        $r24 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        specialinvoke $r24.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String)>(r0);
+
+     label03:
+        return r0;
+
+     label04:
+        $r15 := @caughtexception;
+
+        $r16 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String fixURI(java.lang.String)>(r0);
+
+        r19 = null;
+
+     label05:
+        if r5 == null goto label06;
+
+        $i2 = virtualinvoke r5.<java.lang.String: int length()>();
+
+        if $i2 == 0 goto label06;
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label07;
+
+     label06:
+        $r20 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String getUserDir()>();
+
+        $r25 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        specialinvoke $r25.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>("file", "", $r20, null, null);
+
+        r22 = $r25;
+
+        goto label11;
+
+     label07:
+        $r26 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        $r18 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String fixURI(java.lang.String)>(r5);
+
+        specialinvoke $r26.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String)>($r18);
+
+        r22 = $r26;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r4 := @caughtexception;
+
+        $i1 = virtualinvoke r5.<java.lang.String: int indexOf(int)>(58);
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label10;
+
+        $r27 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        $r14 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String fixURI(java.lang.String)>(r5);
+
+        specialinvoke $r27.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>("file", "", $r14, null, null);
+
+        r22 = $r27;
+
+        goto label11;
+
+     label10:
+        $r6 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String getUserDir()>();
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r9 = staticinvoke <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String fixURI(java.lang.String)>(r5);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r29 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        specialinvoke $r29.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>("file", "", $r11, null, null);
+
+        r22 = $r29;
+
+     label11:
+        $r30 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        specialinvoke $r30.<com.sun.org.apache.xerces.internal.util.URI: void <init>(com.sun.org.apache.xerces.internal.util.URI,java.lang.String)>(r22, $r16);
+
+        r19 = $r30;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r2 := @caughtexception;
+
+     label14:
+        if r19 != null goto label15;
+
+        return r0;
+
+     label15:
+        $r3 = virtualinvoke r19.<com.sun.org.apache.xerces.internal.util.URI: java.lang.String toString()>();
+
+        return $r3;
+
+        catch com.sun.org.apache.xerces.internal.util.URI$MalformedURIException from label02 to label03 with label04;
+        catch com.sun.org.apache.xerces.internal.util.URI$MalformedURIException from label07 to label08 with label09;
+        catch java.lang.Exception from label05 to label12 with label13;
+    }
+
+    protected static java.lang.String fixURI(java.lang.String)
+    {
+        int $i1, $i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r0, r7, r8;
+        char $c0, $c2, $c3, $c4, $c5;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r9, $r10;
+
+        r7 := @parameter0: java.lang.String;
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r0 = virtualinvoke r7.<java.lang.String: java.lang.String replace(char,char)>($c0, 47);
+
+        r8 = $r0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i1 < 2 goto label3;
+
+        $c2 = virtualinvoke $r0.<java.lang.String: char charAt(int)>(1);
+
+        $i6 = (int) $c2;
+
+        if $i6 != 58 goto label2;
+
+        $c4 = virtualinvoke $r0.<java.lang.String: char charAt(int)>(0);
+
+        $c5 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c4);
+
+        $i7 = (int) $c5;
+
+        if $i7 < 65 goto label1;
+
+        $i8 = (int) $c5;
+
+        if $i8 > 90 goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        goto label3;
+
+     label2:
+        $i9 = (int) $c2;
+
+        if $i9 != 47 goto label3;
+
+        $c3 = virtualinvoke $r0.<java.lang.String: char charAt(int)>(0);
+
+        $i10 = (int) $c3;
+
+        if $i10 != 47 goto label3;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file:");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        r8 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        return r8;
+    }
+
+    public void startExternalSubset()
+    {
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset> = 1;
+
+        return;
+    }
+
+    public void endExternalSubset()
+    {
+        com.sun.xml.internal.stream.XMLEntityStorage r0;
+
+        r0 := @this: com.sun.xml.internal.stream.XMLEntityStorage;
+
+        r0.<com.sun.xml.internal.stream.XMLEntityStorage: boolean fInExternalSubset> = 0;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int i0, $i2, $i6, $i8, i10, i11, $i12, $i13, $i14, $i15, $i16;
+        boolean[] $r0, $r4, $r8, $r13;
+        char c1, $c3, $c4, $c5, $c7, $c9;
+        char[] $r1, $r2, $r3, $r5, $r6, $r7, $r9, $r10, $r11, $r12, $r14, $r15, $r16, $r17;
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String WARN_ON_DUPLICATE_ENTITYDEF> = "http://apache.org/xml/features/warn-on-duplicate-entitydef";
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: java.lang.String ERROR_REPORTER> = "http://apache.org/xml/properties/internal/error-reporter";
+
+        $r0 = newarray (boolean)[128];
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping> = $r0;
+
+        $r1 = newarray (char)[128];
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1> = $r1;
+
+        $r2 = newarray (char)[128];
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2> = $r2;
+
+        $r3 = newarray (char)[16];
+
+        $r3[0] = 48;
+
+        $r3[1] = 49;
+
+        $r3[2] = 50;
+
+        $r3[3] = 51;
+
+        $r3[4] = 52;
+
+        $r3[5] = 53;
+
+        $r3[6] = 54;
+
+        $r3[7] = 55;
+
+        $r3[8] = 56;
+
+        $r3[9] = 57;
+
+        $r3[10] = 65;
+
+        $r3[11] = 66;
+
+        $r3[12] = 67;
+
+        $r3[13] = 68;
+
+        $r3[14] = 69;
+
+        $r3[15] = 70;
+
+        <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs> = $r3;
+
+        i10 = 0;
+
+     label1:
+        if i10 > 31 goto label2;
+
+        $r13 = <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping>;
+
+        $r13[i10] = 1;
+
+        $r15 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1>;
+
+        $r14 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $i6 = i10 >> 4;
+
+        $c7 = $r14[$i6];
+
+        $r15[i10] = $c7;
+
+        $r17 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2>;
+
+        $r16 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $i8 = i10 & 15;
+
+        $c9 = $r16[$i8];
+
+        $r17[i10] = $c9;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping>;
+
+        $r4[127] = 1;
+
+        $r5 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1>;
+
+        $r5[127] = 55;
+
+        $r6 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2>;
+
+        $r6[127] = 70;
+
+        $r7 = newarray (char)[15];
+
+        $r7[0] = 32;
+
+        $r7[1] = 60;
+
+        $r7[2] = 62;
+
+        $r7[3] = 35;
+
+        $r7[4] = 37;
+
+        $r7[5] = 34;
+
+        $r7[6] = 123;
+
+        $r7[7] = 125;
+
+        $r7[8] = 124;
+
+        $r7[9] = 92;
+
+        $r7[10] = 94;
+
+        $r7[11] = 126;
+
+        $r7[12] = 91;
+
+        $r7[13] = 93;
+
+        $r7[14] = 96;
+
+        i0 = lengthof $r7;
+
+        i11 = 0;
+
+     label3:
+        if i11 >= i0 goto label4;
+
+        c1 = $r7[i11];
+
+        $r8 = <com.sun.xml.internal.stream.XMLEntityStorage: boolean[] gNeedEscaping>;
+
+        $i12 = (int) c1;
+
+        $r8[$i12] = 1;
+
+        $r10 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping1>;
+
+        $r9 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $i13 = (int) c1;
+
+        $i2 = $i13 >> 4;
+
+        $c3 = $r9[$i2];
+
+        $i14 = (int) c1;
+
+        $r10[$i14] = $c3;
+
+        $r12 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gAfterEscaping2>;
+
+        $r11 = <com.sun.xml.internal.stream.XMLEntityStorage: char[] gHexChs>;
+
+        $c4 = c1 & 15;
+
+        $i15 = (int) $c4;
+
+        $c5 = $r11[$i15];
+
+        $i16 = (int) c1;
+
+        $r12[$i16] = $c5;
+
+        i11 = i11 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+}

@@ -1,0 +1,1567 @@
+final class java.util.concurrent.ForkJoinPool$WorkQueue extends java.lang.Object
+{
+    static final int INITIAL_QUEUE_CAPACITY;
+    static final int MAXIMUM_QUEUE_CAPACITY;
+    volatile int scanState;
+    int stackPred;
+    int nsteals;
+    int hint;
+    int config;
+    volatile int qlock;
+    volatile int base;
+    int top;
+    java.util.concurrent.ForkJoinTask[] array;
+    final java.util.concurrent.ForkJoinPool pool;
+    final java.util.concurrent.ForkJoinWorkerThread owner;
+    volatile java.lang.Thread parker;
+    volatile java.util.concurrent.ForkJoinTask currentJoin;
+    volatile java.util.concurrent.ForkJoinTask currentSteal;
+    private static final sun.misc.Unsafe U;
+    private static final int ABASE;
+    private static final int ASHIFT;
+    private static final long QTOP;
+    private static final long QLOCK;
+    private static final long QCURRENTSTEAL;
+
+    void <init>(java.util.concurrent.ForkJoinPool, java.util.concurrent.ForkJoinWorkerThread)
+    {
+        java.util.concurrent.ForkJoinPool r1;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        java.util.concurrent.ForkJoinWorkerThread r2;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r1 := @parameter0: java.util.concurrent.ForkJoinPool;
+
+        r2 := @parameter1: java.util.concurrent.ForkJoinWorkerThread;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinPool pool> = r1;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinWorkerThread owner> = r2;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top> = 4096;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base> = 4096;
+
+        return;
+    }
+
+    final int getPoolIndex()
+    {
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        int $i0, $i1, $i2, $i4;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int config>;
+
+        $i4 = (int) 65535;
+
+        $i1 = $i0 & $i4;
+
+        $i2 = $i1 >>> 1;
+
+        return $i2;
+    }
+
+    final int queueSize()
+    {
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        int $i0, $i1, i2, $i3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        i2 = $i1 - $i0;
+
+        if i2 < 0 goto label1;
+
+        $i3 = 0;
+
+        goto label2;
+
+     label1:
+        $i3 = neg i2;
+
+     label2:
+        return $i3;
+    }
+
+    final boolean isEmpty()
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l10, $l11, $l12;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i14;
+        boolean $z0;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i2 = $i1 - $i0;
+
+        if $i2 >= 0 goto label1;
+
+        $i14 = (int) -1;
+
+        if $i2 != $i14 goto label2;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label1;
+
+        $i3 = lengthof $r1;
+
+        $i4 = $i3 - 1;
+
+        if $i4 < 0 goto label1;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i5 = $i0 - 1;
+
+        $i7 = $i4 & $i5;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i8 = $i7 << $i6;
+
+        $l11 = (long) $i8;
+
+        $i9 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $l10 = (long) $i9;
+
+        $l12 = $l11 + $l10;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>($r1, $l12);
+
+        if $r3 != null goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    final void push(java.util.concurrent.ForkJoinTask)
+    {
+        sun.misc.Unsafe $r3, $r4;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l9, $l11;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        java.util.concurrent.ForkJoinPool$WorkQueue[] $r6;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i10, $i12;
+        java.util.concurrent.ForkJoinTask r2;
+        java.util.concurrent.ForkJoinPool $r5;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r2 := @parameter0: java.util.concurrent.ForkJoinTask;
+
+        i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label2;
+
+        $i2 = lengthof $r1;
+
+        i3 = $i2 - 1;
+
+        $r3 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i5 = i3 & i1;
+
+        $i4 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i7 = $i5 << $i4;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i8 = $i7 + $i6;
+
+        $l9 = (long) $i8;
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>($r1, $l9, r2);
+
+        $r4 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l11 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        $i10 = i1 + 1;
+
+        virtualinvoke $r4.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l11, $i10);
+
+        $i12 = i1 - i0;
+
+        if $i12 > 1 goto label1;
+
+        $r5 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinPool pool>;
+
+        if $r5 == null goto label2;
+
+        $r6 = $r5.<java.util.concurrent.ForkJoinPool: java.util.concurrent.ForkJoinPool$WorkQueue[] workQueues>;
+
+        virtualinvoke $r5.<java.util.concurrent.ForkJoinPool: void signalWork(java.util.concurrent.ForkJoinPool$WorkQueue[],java.util.concurrent.ForkJoinPool$WorkQueue)>($r6, r0);
+
+        goto label2;
+
+     label1:
+        if $i12 < i3 goto label2;
+
+        virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] growArray()>();
+
+     label2:
+        return;
+    }
+
+    final java.util.concurrent.ForkJoinTask[] growArray()
+    {
+        boolean $z0;
+        sun.misc.Unsafe $r3, $r6, $r7;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l14, $l17, $l18;
+        java.util.concurrent.ForkJoinTask[] r1, $r2;
+        java.util.concurrent.RejectedExecutionException $r8;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i15, $i16, $i19, $i20, i21;
+        java.util.concurrent.ForkJoinTask $r5;
+        java.lang.Object $r4;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if r1 == null goto label1;
+
+        $i19 = lengthof r1;
+
+        $i20 = $i19 << 1;
+
+        goto label2;
+
+     label1:
+        $i20 = 8192;
+
+     label2:
+        if $i20 <= 67108864 goto label3;
+
+        $r8 = new java.util.concurrent.RejectedExecutionException;
+
+        specialinvoke $r8.<java.util.concurrent.RejectedExecutionException: void <init>(java.lang.String)>("Queue capacity exceeded");
+
+        throw $r8;
+
+     label3:
+        $r2 = newarray (java.util.concurrent.ForkJoinTask)[$i20];
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array> = $r2;
+
+        if r1 == null goto label6;
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 < 0 goto label6;
+
+        $i2 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i3 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        i21 = $i3;
+
+        $i4 = $i2 - $i3;
+
+        if $i4 <= 0 goto label6;
+
+        i5 = $i20 - 1;
+
+     label4:
+        $i7 = i21 & $i1;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i9 = $i7 << $i6;
+
+        $i8 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i15 = $i9 + $i8;
+
+        $i11 = i21 & i5;
+
+        $i10 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i13 = $i11 << $i10;
+
+        $i12 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i16 = $i13 + $i12;
+
+        $r3 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l14 = (long) $i15;
+
+        $r4 = virtualinvoke $r3.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l14);
+
+        $r5 = (java.util.concurrent.ForkJoinTask) $r4;
+
+        if $r5 == null goto label5;
+
+        $r6 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l17 = (long) $i15;
+
+        $z0 = virtualinvoke $r6.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l17, $r5, null);
+
+        if $z0 == 0 goto label5;
+
+        $r7 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l18 = (long) $i16;
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void putObjectVolatile(java.lang.Object,long,java.lang.Object)>($r2, $l18, $r5);
+
+     label5:
+        i21 = i21 + 1;
+
+        if i21 != $i2 goto label4;
+
+     label6:
+        return $r2;
+    }
+
+    final java.util.concurrent.ForkJoinTask pop()
+    {
+        sun.misc.Unsafe $r2, $r5, $r6;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long l11, $l12;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        boolean $z0;
+        java.util.concurrent.ForkJoinTask $r4;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label4;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 < 0 goto label4;
+
+     label1:
+        $i2 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i3 = $i2 - 1;
+
+        $i4 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i5 = $i3 - $i4;
+
+        if $i5 < 0 goto label4;
+
+        $i7 = $i1 & $i3;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i9 = $i7 << $i6;
+
+        $i8 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i10 = $i9 + $i8;
+
+        l11 = (long) $i10;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>($r1, l11);
+
+        $r4 = (java.util.concurrent.ForkJoinTask) $r3;
+
+        if $r4 != null goto label2;
+
+        goto label4;
+
+     label2:
+        $r5 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z0 = virtualinvoke $r5.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, l11, $r4, null);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l12 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        virtualinvoke $r6.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l12, $i3);
+
+        return $r4;
+
+     label3:
+        goto label1;
+
+     label4:
+        return null;
+    }
+
+    final java.util.concurrent.ForkJoinTask pollAt(int)
+    {
+        sun.misc.Unsafe $r2, $r5;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l8, $l10;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, i7, $i9, $i11;
+        boolean $z0;
+        java.util.concurrent.ForkJoinTask $r4;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label1;
+
+        $i0 = lengthof $r1;
+
+        $i2 = $i0 - 1;
+
+        $i4 = $i2 & i1;
+
+        $i3 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i6 = $i4 << $i3;
+
+        $i5 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        i7 = $i6 + $i5;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l8 = (long) i7;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>($r1, $l8);
+
+        $r4 = (java.util.concurrent.ForkJoinTask) $r3;
+
+        if $r4 == null goto label1;
+
+        $i9 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        if $i9 != i1 goto label1;
+
+        $r5 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l10 = (long) i7;
+
+        $z0 = virtualinvoke $r5.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l10, $r4, null);
+
+        if $z0 == 0 goto label1;
+
+        $i11 = i1 + 1;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base> = $i11;
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    final java.util.concurrent.ForkJoinTask poll()
+    {
+        sun.misc.Unsafe $r2, $r5;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l10, $l14;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i11, $i12, $i13, $i15;
+        boolean $z0;
+        java.util.concurrent.ForkJoinTask r4;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+     label1:
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i2 = $i0 - $i1;
+
+        if $i2 >= 0 goto label4;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label4;
+
+        $i3 = lengthof $r1;
+
+        $i4 = $i3 - 1;
+
+        $i6 = $i4 & $i0;
+
+        $i5 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i8 = $i6 << $i5;
+
+        $i7 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        i9 = $i8 + $i7;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l10 = (long) i9;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>($r1, $l10);
+
+        r4 = (java.util.concurrent.ForkJoinTask) $r3;
+
+        $i11 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        if $i11 != $i0 goto label3;
+
+        if r4 == null goto label2;
+
+        $r5 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l14 = (long) i9;
+
+        $z0 = virtualinvoke $r5.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l14, r4, null);
+
+        if $z0 == 0 goto label3;
+
+        $i15 = $i0 + 1;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base> = $i15;
+
+        return r4;
+
+     label2:
+        $i13 = $i0 + 1;
+
+        $i12 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        if $i13 != $i12 goto label3;
+
+        goto label4;
+
+     label3:
+        goto label1;
+
+     label4:
+        return null;
+    }
+
+    final java.util.concurrent.ForkJoinTask nextLocalTask()
+    {
+        java.util.concurrent.ForkJoinTask $r1;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        int $i0, $i1;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int config>;
+
+        $i1 = $i0 & 65536;
+
+        if $i1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask pop()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask poll()>();
+
+     label2:
+        return $r1;
+    }
+
+    final java.util.concurrent.ForkJoinTask peek()
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l8;
+        java.util.concurrent.ForkJoinTask[] r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11;
+        java.util.concurrent.ForkJoinTask $r4;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if r1 == null goto label1;
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 >= 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $i2 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int config>;
+
+        $i3 = $i2 & 65536;
+
+        if $i3 != 0 goto label3;
+
+        $i9 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i11 = $i9 - 1;
+
+        goto label4;
+
+     label3:
+        $i11 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+     label4:
+        $i5 = $i11 & $i1;
+
+        $i4 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i7 = $i5 << $i4;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i10 = $i7 + $i6;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l8 = (long) $i10;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l8);
+
+        $r4 = (java.util.concurrent.ForkJoinTask) $r3;
+
+        return $r4;
+    }
+
+    final boolean tryUnpush(java.util.concurrent.ForkJoinTask)
+    {
+        sun.misc.Unsafe $r3, $r4;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l9, $l10;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i11, $i13;
+        boolean $z0;
+        java.util.concurrent.ForkJoinTask r2;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r2 := @parameter0: java.util.concurrent.ForkJoinTask;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label1;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        if $i0 == $i1 goto label1;
+
+        $r3 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i2 = lengthof $r1;
+
+        $i3 = $i2 - 1;
+
+        $i13 = (int) -1;
+
+        i11 = $i0 + $i13;
+
+        $i5 = $i3 & i11;
+
+        $i4 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i7 = $i5 << $i4;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i8 = $i7 + $i6;
+
+        $l9 = (long) $i8;
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l9, r2, null);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l10 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        virtualinvoke $r4.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l10, i11);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    final void cancelAll()
+    {
+        java.util.concurrent.ForkJoinTask $r1, $r2, $r3;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask currentJoin>;
+
+        if $r1 == null goto label1;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask currentJoin> = null;
+
+        staticinvoke <java.util.concurrent.ForkJoinTask: void cancelIgnoringExceptions(java.util.concurrent.ForkJoinTask)>($r1);
+
+     label1:
+        $r2 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask currentSteal>;
+
+        if $r2 == null goto label2;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask currentSteal> = null;
+
+        staticinvoke <java.util.concurrent.ForkJoinTask: void cancelIgnoringExceptions(java.util.concurrent.ForkJoinTask)>($r2);
+
+     label2:
+        $r3 = virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask poll()>();
+
+        if $r3 == null goto label3;
+
+        staticinvoke <java.util.concurrent.ForkJoinTask: void cancelIgnoringExceptions(java.util.concurrent.ForkJoinTask)>($r3);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    final void pollAndExecAll()
+    {
+        java.util.concurrent.ForkJoinTask $r1;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask poll()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.util.concurrent.ForkJoinTask: int doExec()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    final void execLocalTasks()
+    {
+        sun.misc.Unsafe $r2, $r5;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l13, $l14;
+        java.util.concurrent.ForkJoinTask[] r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i15, $i16, $i17, $i18, i19;
+        java.util.concurrent.ForkJoinTask $r4;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i2 = $i1 - 1;
+
+        i19 = $i2;
+
+        $i3 = i0 - $i2;
+
+        if $i3 > 0 goto label5;
+
+        if r1 == null goto label5;
+
+        $i4 = lengthof r1;
+
+        $i5 = $i4 - 1;
+
+        if $i5 < 0 goto label5;
+
+        $i6 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int config>;
+
+        $i7 = $i6 & 65536;
+
+        if $i7 != 0 goto label4;
+
+     label1:
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i9 = $i5 & i19;
+
+        $i8 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i11 = $i9 << $i8;
+
+        $i10 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i12 = $i11 + $i10;
+
+        $l13 = (long) $i12;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getAndSetObject(java.lang.Object,long,java.lang.Object)>(r1, $l13, null);
+
+        $r4 = (java.util.concurrent.ForkJoinTask) $r3;
+
+        if $r4 != null goto label2;
+
+        goto label3;
+
+     label2:
+        $r5 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l14 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l14, i19);
+
+        virtualinvoke $r4.<java.util.concurrent.ForkJoinTask: int doExec()>();
+
+        $i17 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i15 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i16 = $i15 - 1;
+
+        i19 = $i16;
+
+        $i18 = $i17 - $i16;
+
+        if $i18 <= 0 goto label1;
+
+        goto label3;
+
+     label3:
+        goto label5;
+
+     label4:
+        virtualinvoke r0.<java.util.concurrent.ForkJoinPool$WorkQueue: void pollAndExecAll()>();
+
+     label5:
+        return;
+    }
+
+    final void runTask(java.util.concurrent.ForkJoinTask)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.ForkJoinTask r0;
+        java.util.concurrent.ForkJoinPool$WorkQueue r1;
+        java.util.concurrent.ForkJoinWorkerThread r3;
+        long $l2;
+        java.util.concurrent.ForkJoinPool $r4;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i8;
+
+        r1 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r0 := @parameter0: java.util.concurrent.ForkJoinTask;
+
+        if r0 == null goto label2;
+
+        $i0 = r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int scanState>;
+
+        $i8 = (int) -2;
+
+        $i1 = $i0 & $i8;
+
+        r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int scanState> = $i1;
+
+        r1.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask currentSteal> = r0;
+
+        virtualinvoke r0.<java.util.concurrent.ForkJoinTask: int doExec()>();
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l2 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QCURRENTSTEAL>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r1, $l2, null);
+
+        virtualinvoke r1.<java.util.concurrent.ForkJoinPool$WorkQueue: void execLocalTasks()>();
+
+        r3 = r1.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinWorkerThread owner>;
+
+        $i3 = r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int nsteals>;
+
+        $i4 = $i3 + 1;
+
+        r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int nsteals> = $i4;
+
+        if $i4 >= 0 goto label1;
+
+        $r4 = r1.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinPool pool>;
+
+        virtualinvoke r1.<java.util.concurrent.ForkJoinPool$WorkQueue: void transferStealCount(java.util.concurrent.ForkJoinPool)>($r4);
+
+     label1:
+        $i5 = r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int scanState>;
+
+        $i6 = $i5 | 1;
+
+        r1.<java.util.concurrent.ForkJoinPool$WorkQueue: int scanState> = $i6;
+
+        if r3 == null goto label2;
+
+        virtualinvoke r3.<java.util.concurrent.ForkJoinWorkerThread: void afterTopLevelExec()>();
+
+     label2:
+        return;
+    }
+
+    final void transferStealCount(java.util.concurrent.ForkJoinPool)
+    {
+        java.util.concurrent.atomic.AtomicLong $r1;
+        java.util.concurrent.ForkJoinPool r0;
+        java.util.concurrent.ForkJoinPool$WorkQueue r2;
+        int i0, $i2;
+        long $l1;
+
+        r2 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r0 := @parameter0: java.util.concurrent.ForkJoinPool;
+
+        if r0 == null goto label3;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool: java.util.concurrent.atomic.AtomicLong stealCounter>;
+
+        if $r1 == null goto label3;
+
+        i0 = r2.<java.util.concurrent.ForkJoinPool$WorkQueue: int nsteals>;
+
+        r2.<java.util.concurrent.ForkJoinPool$WorkQueue: int nsteals> = 0;
+
+        if i0 >= 0 goto label1;
+
+        $i2 = 2147483647;
+
+        goto label2;
+
+     label1:
+        $i2 = i0;
+
+     label2:
+        $l1 = (long) $i2;
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicLong: long getAndAdd(long)>($l1);
+
+     label3:
+        return;
+    }
+
+    final boolean tryRemoveAndExec(java.util.concurrent.ForkJoinTask)
+    {
+        boolean $z0, $z1, $z2, z3;
+        sun.misc.Unsafe $r3, $r6, $r7, $r9, $r10, $r11;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long $l11, $l14, $l18;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i15, $i16, $i17, $i19, $i20, i21, i22, $i23, $i25, $i27;
+        java.util.concurrent.ForkJoinTask r2, $r5;
+        java.util.concurrent.ForkJoinPool$EmptyTask $r12;
+        java.lang.Object $r4;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r2 := @parameter0: java.util.concurrent.ForkJoinTask;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label12;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 < 0 goto label12;
+
+        if r2 == null goto label12;
+
+     label01:
+        $i2 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        i21 = $i2;
+
+        $i3 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i4 = $i2 - $i3;
+
+        i22 = $i4;
+
+        if $i4 <= 0 goto label12;
+
+     label02:
+        $i25 = (int) -1;
+
+        i21 = i21 + $i25;
+
+        $i6 = i21 & $i1;
+
+        $i5 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i8 = $i6 << $i5;
+
+        $i7 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i9 = $i8 + $i7;
+
+        $l11 = (long) $i9;
+
+        $r3 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r4 = virtualinvoke $r3.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>($r1, $l11);
+
+        $r5 = (java.util.concurrent.ForkJoinTask) $r4;
+
+        if $r5 != null goto label05;
+
+        $i20 = i21 + 1;
+
+        $i19 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        if $i20 != $i19 goto label03;
+
+        $z2 = 1;
+
+        goto label04;
+
+     label03:
+        $z2 = 0;
+
+     label04:
+        return $z2;
+
+     label05:
+        if $r5 != r2 goto label08;
+
+        z3 = 0;
+
+        $i16 = i21 + 1;
+
+        $i15 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        if $i16 != $i15 goto label06;
+
+        $r10 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z1 = virtualinvoke $r10.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l11, r2, null);
+
+        if $z1 == 0 goto label07;
+
+        $r11 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l18 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l18, i21);
+
+        z3 = 1;
+
+        goto label07;
+
+     label06:
+        $i17 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        if $i17 != $i3 goto label07;
+
+        $r9 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r12 = new java.util.concurrent.ForkJoinPool$EmptyTask;
+
+        specialinvoke $r12.<java.util.concurrent.ForkJoinPool$EmptyTask: void <init>()>();
+
+        z3 = virtualinvoke $r9.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l11, r2, $r12);
+
+     label07:
+        if z3 == 0 goto label11;
+
+        virtualinvoke r2.<java.util.concurrent.ForkJoinTask: int doExec()>();
+
+        goto label11;
+
+     label08:
+        $i10 = $r5.<java.util.concurrent.ForkJoinTask: int status>;
+
+        if $i10 >= 0 goto label09;
+
+        $i13 = i21 + 1;
+
+        $i12 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        if $i13 != $i12 goto label09;
+
+        $r6 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z0 = virtualinvoke $r6.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, $l11, $r5, null);
+
+        if $z0 == 0 goto label11;
+
+        $r7 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l14 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l14, i21);
+
+        goto label11;
+
+     label09:
+        $i27 = (int) -1;
+
+        i22 = i22 + $i27;
+
+        if i22 != 0 goto label10;
+
+        return 0;
+
+     label10:
+        goto label02;
+
+     label11:
+        $i23 = r2.<java.util.concurrent.ForkJoinTask: int status>;
+
+        if $i23 >= 0 goto label01;
+
+        return 0;
+
+     label12:
+        return 1;
+    }
+
+    final java.util.concurrent.CountedCompleter popCC(java.util.concurrent.CountedCompleter, int)
+    {
+        java.util.concurrent.CountedCompleter r4, r5, $r6, r14;
+        boolean $z0, $z1, $z2, $z3;
+        sun.misc.Unsafe $r2, $r7, $r8, $r9, $r11, $r12, $r13, $r15;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long l11, $l14, $l15, $l18, $l19, $l20;
+        java.util.concurrent.ForkJoinTask[] $r1, $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i12, $i13, $i16, $i17;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r5 := @parameter0: java.util.concurrent.CountedCompleter;
+
+        i12 := @parameter1: int;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i2 = $i1 - $i0;
+
+        if $i2 >= 0 goto label5;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 == null goto label5;
+
+        $i3 = lengthof $r1;
+
+        $i5 = $i3 - 1;
+
+        $i4 = $i0 - 1;
+
+        $i7 = $i5 & $i4;
+
+        $i6 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i9 = $i7 << $i6;
+
+        $i8 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i10 = $i9 + $i8;
+
+        l11 = (long) $i10;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>($r1, l11);
+
+        if $r3 == null goto label5;
+
+        $z0 = $r3 instanceof java.util.concurrent.CountedCompleter;
+
+        if $z0 == 0 goto label5;
+
+        r4 = (java.util.concurrent.CountedCompleter) $r3;
+
+        r14 = r4;
+
+     label1:
+        if r14 != r5 goto label4;
+
+        if i12 >= 0 goto label3;
+
+        $r9 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l15 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QLOCK>;
+
+        $z2 = virtualinvoke $r9.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l15, 0, 1);
+
+        if $z2 == 0 goto label5;
+
+        $i16 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        if $i16 != $i0 goto label2;
+
+        $r10 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r10 != $r1 goto label2;
+
+        $r11 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z3 = virtualinvoke $r11.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, l11, r4, null);
+
+        if $z3 == 0 goto label2;
+
+        $r12 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l18 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        $i17 = $i0 - 1;
+
+        virtualinvoke $r12.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l18, $i17);
+
+        $r13 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l19 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QLOCK>;
+
+        virtualinvoke $r13.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l19, 0);
+
+        return r4;
+
+     label2:
+        $r15 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l20 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QLOCK>;
+
+        virtualinvoke $r15.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l20, 1, 0);
+
+        goto label5;
+
+     label3:
+        $r7 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z1 = virtualinvoke $r7.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, l11, r4, null);
+
+        if $z1 == 0 goto label5;
+
+        $r8 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $l14 = <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP>;
+
+        $i13 = $i0 - 1;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void putOrderedInt(java.lang.Object,long,int)>(r0, $l14, $i13);
+
+        return r4;
+
+     label4:
+        $r6 = r14.<java.util.concurrent.CountedCompleter: java.util.concurrent.CountedCompleter completer>;
+
+        r14 = $r6;
+
+        if $r6 != null goto label1;
+
+        goto label5;
+
+     label5:
+        return null;
+    }
+
+    final int pollAndExecCC(java.util.concurrent.CountedCompleter)
+    {
+        sun.misc.Unsafe $r2, $r7;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        long l10;
+        java.util.concurrent.ForkJoinTask[] $r1;
+        java.util.concurrent.CountedCompleter r4, r5, $r6, r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, i13, $i15, $i17;
+        boolean $z0, $z1;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        r5 := @parameter0: java.util.concurrent.CountedCompleter;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        $i1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int top>;
+
+        $i2 = $i0 - $i1;
+
+        if $i2 >= 0 goto label1;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinTask[] array>;
+
+        if $r1 != null goto label2;
+
+     label1:
+        i13 = $i0 | -2147483648;
+
+        goto label8;
+
+     label2:
+        $i3 = lengthof $r1;
+
+        $i4 = $i3 - 1;
+
+        $i6 = $i4 & $i0;
+
+        $i5 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT>;
+
+        $i8 = $i6 << $i5;
+
+        $i7 = <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE>;
+
+        $i9 = $i8 + $i7;
+
+        l10 = (long) $i9;
+
+        $r2 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>($r1, l10);
+
+        if $r3 != null goto label3;
+
+        i13 = 2;
+
+        goto label8;
+
+     label3:
+        $z0 = $r3 instanceof java.util.concurrent.CountedCompleter;
+
+        if $z0 != 0 goto label4;
+
+        $i15 = (int) -1;
+
+        i13 = $i15;
+
+        goto label8;
+
+     label4:
+        r4 = (java.util.concurrent.CountedCompleter) $r3;
+
+        r8 = r4;
+
+     label5:
+        if r8 != r5 goto label7;
+
+        $i11 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base>;
+
+        if $i11 != $i0 goto label6;
+
+        $r7 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $z1 = virtualinvoke $r7.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r1, l10, r4, null);
+
+        if $z1 == 0 goto label6;
+
+        $i12 = $i0 + 1;
+
+        r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int base> = $i12;
+
+        virtualinvoke r4.<java.util.concurrent.CountedCompleter: int doExec()>();
+
+        i13 = 1;
+
+        goto label8;
+
+     label6:
+        i13 = 2;
+
+        goto label8;
+
+     label7:
+        $r6 = r8.<java.util.concurrent.CountedCompleter: java.util.concurrent.CountedCompleter completer>;
+
+        r8 = $r6;
+
+        if $r6 != null goto label5;
+
+        $i17 = (int) -1;
+
+        i13 = $i17;
+
+        goto label8;
+
+     label8:
+        return i13;
+    }
+
+    final boolean isApparentlyUnblocked()
+    {
+        java.lang.Thread$State $r2, $r3, $r4, $r5;
+        java.util.concurrent.ForkJoinPool$WorkQueue r0;
+        java.util.concurrent.ForkJoinWorkerThread $r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ForkJoinPool$WorkQueue;
+
+        $i0 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: int scanState>;
+
+        if $i0 < 0 goto label1;
+
+        $r1 = r0.<java.util.concurrent.ForkJoinPool$WorkQueue: java.util.concurrent.ForkJoinWorkerThread owner>;
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.Thread$State getState()>();
+
+        $r3 = <java.lang.Thread$State: java.lang.Thread$State BLOCKED>;
+
+        if $r2 == $r3 goto label1;
+
+        $r4 = <java.lang.Thread$State: java.lang.Thread$State WAITING>;
+
+        if $r2 == $r4 goto label1;
+
+        $r5 = <java.lang.Thread$State: java.lang.Thread$State TIMED_WAITING>;
+
+        if $r2 == $r5 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0, $r1, $r3, $r5, $r7, $r8;
+        java.lang.Error $r9, $r11;
+        long $l0, $l1, $l2;
+        int $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.reflect.Field $r2, $r4, $r6;
+        java.lang.Exception $r10;
+        java.lang.Class r12, r13, r14, r15;
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: int MAXIMUM_QUEUE_CAPACITY> = 67108864;
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: int INITIAL_QUEUE_CAPACITY> = 8192;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U> = $r0;
+
+        r12 = class "Ljava/util/concurrent/ForkJoinPool$WorkQueue;";
+
+        r15 = class "Ljava/util/concurrent/ForkJoinPool$WorkQueue;";
+
+        r14 = class "Ljava/util/concurrent/ForkJoinPool$WorkQueue;";
+
+        r13 = class "Ljava/util/concurrent/ForkJoinPool$WorkQueue;";
+
+        $r1 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r2 = virtualinvoke r13.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("top");
+
+        $l0 = virtualinvoke $r1.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r2);
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: long QTOP> = $l0;
+
+        $r3 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r4 = virtualinvoke r15.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("qlock");
+
+        $l1 = virtualinvoke $r3.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r4);
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: long QLOCK> = $l1;
+
+        $r5 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $r6 = virtualinvoke r14.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("currentSteal");
+
+        $l2 = virtualinvoke $r5.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r6);
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: long QCURRENTSTEAL> = $l2;
+
+        $r7 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i3 = virtualinvoke $r7.<sun.misc.Unsafe: int arrayBaseOffset(java.lang.Class)>(class "[Ljava/util/concurrent/ForkJoinTask;");
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: int ABASE> = $i3;
+
+        $r8 = <java.util.concurrent.ForkJoinPool$WorkQueue: sun.misc.Unsafe U>;
+
+        $i4 = virtualinvoke $r8.<sun.misc.Unsafe: int arrayIndexScale(java.lang.Class)>(class "[Ljava/util/concurrent/ForkJoinTask;");
+
+        $i5 = $i4 - 1;
+
+        $i6 = $i4 & $i5;
+
+        if $i6 == 0 goto label2;
+
+        $r9 = new java.lang.Error;
+
+        specialinvoke $r9.<java.lang.Error: void <init>(java.lang.String)>("data type scale not a power of two");
+
+        throw $r9;
+
+     label2:
+        $i7 = staticinvoke <java.lang.Integer: int numberOfLeadingZeros(int)>($i4);
+
+        $i8 = 31 - $i7;
+
+        <java.util.concurrent.ForkJoinPool$WorkQueue: int ASHIFT> = $i8;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.Error;
+
+        specialinvoke $r11.<java.lang.Error: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+}

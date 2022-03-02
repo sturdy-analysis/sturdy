@@ -1,0 +1,849 @@
+public final class sun.security.provider.MD2 extends sun.security.provider.DigestBase
+{
+    private int[] X;
+    private int[] C;
+    private byte[] cBytes;
+    private static final int[] S;
+    private static final byte[][] PADDING;
+
+    public void <init>()
+    {
+        byte[] $r3;
+        sun.security.provider.MD2 r0;
+        int[] $r1, $r2;
+
+        r0 := @this: sun.security.provider.MD2;
+
+        specialinvoke r0.<sun.security.provider.DigestBase: void <init>(java.lang.String,int,int)>("MD2", 16, 16);
+
+        $r1 = newarray (int)[48];
+
+        r0.<sun.security.provider.MD2: int[] X> = $r1;
+
+        $r2 = newarray (int)[16];
+
+        r0.<sun.security.provider.MD2: int[] C> = $r2;
+
+        $r3 = newarray (byte)[16];
+
+        r0.<sun.security.provider.MD2: byte[] cBytes> = $r3;
+
+        return;
+    }
+
+    public java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        byte[] $r9;
+        sun.security.provider.MD2 r0, r2;
+        int[] $r3, $r5, $r6, $r8;
+        java.lang.Object $r1, $r4, $r7;
+
+        r0 := @this: sun.security.provider.MD2;
+
+        $r1 = specialinvoke r0.<sun.security.provider.DigestBase: java.lang.Object clone()>();
+
+        r2 = (sun.security.provider.MD2) $r1;
+
+        $r3 = r2.<sun.security.provider.MD2: int[] X>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (int[]) $r4;
+
+        r2.<sun.security.provider.MD2: int[] X> = $r5;
+
+        $r6 = r2.<sun.security.provider.MD2: int[] C>;
+
+        $r7 = virtualinvoke $r6.<java.lang.Object: java.lang.Object clone()>();
+
+        $r8 = (int[]) $r7;
+
+        r2.<sun.security.provider.MD2: int[] C> = $r8;
+
+        $r9 = newarray (byte)[16];
+
+        r2.<sun.security.provider.MD2: byte[] cBytes> = $r9;
+
+        return r2;
+    }
+
+    void implReset()
+    {
+        sun.security.provider.MD2 r0;
+        int[] $r1, $r2;
+
+        r0 := @this: sun.security.provider.MD2;
+
+        $r1 = r0.<sun.security.provider.MD2: int[] X>;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r1, 0);
+
+        $r2 = r0.<sun.security.provider.MD2: int[] C>;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r2, 0);
+
+        return;
+    }
+
+    void implDigest(byte[], int)
+    {
+        byte[] $r2, $r3, r4, $r7;
+        long $l0;
+        sun.security.provider.MD2 r0;
+        byte $b6, $b9;
+        int[] $r5, $r6;
+        int $i1, $i2, i3, i4, $i5, $i7, $i8, i10, i11;
+        byte[][] $r1;
+
+        r0 := @this: sun.security.provider.MD2;
+
+        r4 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        $l0 = r0.<sun.security.provider.MD2: long bytesProcessed>;
+
+        $i1 = (int) $l0;
+
+        $i2 = $i1 & 15;
+
+        i3 = 16 - $i2;
+
+        $r1 = <sun.security.provider.MD2: byte[][] PADDING>;
+
+        $r2 = $r1[i3];
+
+        virtualinvoke r0.<sun.security.provider.MD2: void engineUpdate(byte[],int,int)>($r2, 0, i3);
+
+        i10 = 0;
+
+     label1:
+        if i10 >= 16 goto label2;
+
+        $r7 = r0.<sun.security.provider.MD2: byte[] cBytes>;
+
+        $r6 = r0.<sun.security.provider.MD2: int[] C>;
+
+        $i8 = $r6[i10];
+
+        $b9 = (byte) $i8;
+
+        $r7[i10] = $b9;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<sun.security.provider.MD2: byte[] cBytes>;
+
+        virtualinvoke r0.<sun.security.provider.MD2: void implCompress(byte[],int)>($r3, 0);
+
+        i11 = 0;
+
+     label3:
+        if i11 >= 16 goto label4;
+
+        $i7 = i4 + i11;
+
+        $r5 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i5 = $r5[i11];
+
+        $b6 = (byte) $i5;
+
+        r4[$i7] = $b6;
+
+        i11 = i11 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    void implCompress(byte[], int)
+    {
+        byte[] r7;
+        byte $b12;
+        int[] $r1, $r2, $r3, $r4, $r5, $r6, $r8, $r9, $r10;
+        sun.security.provider.MD2 r0;
+        short s18, $s24;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, $i11, $i13, $i14, $i15, $i16, i17, i19, i20, i21, i22, i23, $i25, $i26;
+
+        r0 := @this: sun.security.provider.MD2;
+
+        r7 := @parameter0: byte[];
+
+        i10 := @parameter1: int;
+
+        i17 = 0;
+
+     label1:
+        if i17 >= 16 goto label2;
+
+        $i11 = i10 + i17;
+
+        $b12 = r7[$i11];
+
+        $s24 = (short) $b12;
+
+        s18 = $s24 & 255;
+
+        $r8 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i13 = 16 + i17;
+
+        $i25 = (int) s18;
+
+        $r8[$i13] = $i25;
+
+        $r10 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i16 = 32 + i17;
+
+        $r9 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i14 = $r9[i17];
+
+        $i26 = (int) s18;
+
+        $i15 = $i26 ^ $i14;
+
+        $r10[$i16] = $i15;
+
+        i17 = i17 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<sun.security.provider.MD2: int[] C>;
+
+        i19 = $r1[15];
+
+        i20 = 0;
+
+     label3:
+        if i20 >= 16 goto label4;
+
+        $r4 = r0.<sun.security.provider.MD2: int[] C>;
+
+        $i8 = $r4[i20];
+
+        $r6 = <sun.security.provider.MD2: int[] S>;
+
+        $r5 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i4 = 16 + i20;
+
+        $i5 = $r5[$i4];
+
+        $i6 = $i5 ^ i19;
+
+        $i7 = $r6[$i6];
+
+        $i9 = $i8 ^ $i7;
+
+        $r4[i20] = $i9;
+
+        i19 = $i9;
+
+        i20 = i20 + 1;
+
+        goto label3;
+
+     label4:
+        i21 = 0;
+
+        i22 = 0;
+
+     label5:
+        if i22 >= 18 goto label8;
+
+        i23 = 0;
+
+     label6:
+        if i23 >= 48 goto label7;
+
+        $r2 = r0.<sun.security.provider.MD2: int[] X>;
+
+        $i2 = $r2[i23];
+
+        $r3 = <sun.security.provider.MD2: int[] S>;
+
+        $i1 = $r3[i21];
+
+        $i3 = $i2 ^ $i1;
+
+        $r2[i23] = $i3;
+
+        i21 = $i3;
+
+        i23 = i23 + 1;
+
+        goto label6;
+
+     label7:
+        $i0 = i21 + i22;
+
+        i21 = $i0 & 255;
+
+        i22 = i22 + 1;
+
+        goto label5;
+
+     label8:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] r2;
+        byte[][] $r1, $r3;
+        byte $b0;
+        int[] $r0;
+        int i1;
+
+        $r0 = newarray (int)[256];
+
+        $r0[0] = 41;
+
+        $r0[1] = 46;
+
+        $r0[2] = 67;
+
+        $r0[3] = 201;
+
+        $r0[4] = 162;
+
+        $r0[5] = 216;
+
+        $r0[6] = 124;
+
+        $r0[7] = 1;
+
+        $r0[8] = 61;
+
+        $r0[9] = 54;
+
+        $r0[10] = 84;
+
+        $r0[11] = 161;
+
+        $r0[12] = 236;
+
+        $r0[13] = 240;
+
+        $r0[14] = 6;
+
+        $r0[15] = 19;
+
+        $r0[16] = 98;
+
+        $r0[17] = 167;
+
+        $r0[18] = 5;
+
+        $r0[19] = 243;
+
+        $r0[20] = 192;
+
+        $r0[21] = 199;
+
+        $r0[22] = 115;
+
+        $r0[23] = 140;
+
+        $r0[24] = 152;
+
+        $r0[25] = 147;
+
+        $r0[26] = 43;
+
+        $r0[27] = 217;
+
+        $r0[28] = 188;
+
+        $r0[29] = 76;
+
+        $r0[30] = 130;
+
+        $r0[31] = 202;
+
+        $r0[32] = 30;
+
+        $r0[33] = 155;
+
+        $r0[34] = 87;
+
+        $r0[35] = 60;
+
+        $r0[36] = 253;
+
+        $r0[37] = 212;
+
+        $r0[38] = 224;
+
+        $r0[39] = 22;
+
+        $r0[40] = 103;
+
+        $r0[41] = 66;
+
+        $r0[42] = 111;
+
+        $r0[43] = 24;
+
+        $r0[44] = 138;
+
+        $r0[45] = 23;
+
+        $r0[46] = 229;
+
+        $r0[47] = 18;
+
+        $r0[48] = 190;
+
+        $r0[49] = 78;
+
+        $r0[50] = 196;
+
+        $r0[51] = 214;
+
+        $r0[52] = 218;
+
+        $r0[53] = 158;
+
+        $r0[54] = 222;
+
+        $r0[55] = 73;
+
+        $r0[56] = 160;
+
+        $r0[57] = 251;
+
+        $r0[58] = 245;
+
+        $r0[59] = 142;
+
+        $r0[60] = 187;
+
+        $r0[61] = 47;
+
+        $r0[62] = 238;
+
+        $r0[63] = 122;
+
+        $r0[64] = 169;
+
+        $r0[65] = 104;
+
+        $r0[66] = 121;
+
+        $r0[67] = 145;
+
+        $r0[68] = 21;
+
+        $r0[69] = 178;
+
+        $r0[70] = 7;
+
+        $r0[71] = 63;
+
+        $r0[72] = 148;
+
+        $r0[73] = 194;
+
+        $r0[74] = 16;
+
+        $r0[75] = 137;
+
+        $r0[76] = 11;
+
+        $r0[77] = 34;
+
+        $r0[78] = 95;
+
+        $r0[79] = 33;
+
+        $r0[80] = 128;
+
+        $r0[81] = 127;
+
+        $r0[82] = 93;
+
+        $r0[83] = 154;
+
+        $r0[84] = 90;
+
+        $r0[85] = 144;
+
+        $r0[86] = 50;
+
+        $r0[87] = 39;
+
+        $r0[88] = 53;
+
+        $r0[89] = 62;
+
+        $r0[90] = 204;
+
+        $r0[91] = 231;
+
+        $r0[92] = 191;
+
+        $r0[93] = 247;
+
+        $r0[94] = 151;
+
+        $r0[95] = 3;
+
+        $r0[96] = 255;
+
+        $r0[97] = 25;
+
+        $r0[98] = 48;
+
+        $r0[99] = 179;
+
+        $r0[100] = 72;
+
+        $r0[101] = 165;
+
+        $r0[102] = 181;
+
+        $r0[103] = 209;
+
+        $r0[104] = 215;
+
+        $r0[105] = 94;
+
+        $r0[106] = 146;
+
+        $r0[107] = 42;
+
+        $r0[108] = 172;
+
+        $r0[109] = 86;
+
+        $r0[110] = 170;
+
+        $r0[111] = 198;
+
+        $r0[112] = 79;
+
+        $r0[113] = 184;
+
+        $r0[114] = 56;
+
+        $r0[115] = 210;
+
+        $r0[116] = 150;
+
+        $r0[117] = 164;
+
+        $r0[118] = 125;
+
+        $r0[119] = 182;
+
+        $r0[120] = 118;
+
+        $r0[121] = 252;
+
+        $r0[122] = 107;
+
+        $r0[123] = 226;
+
+        $r0[124] = 156;
+
+        $r0[125] = 116;
+
+        $r0[126] = 4;
+
+        $r0[127] = 241;
+
+        $r0[128] = 69;
+
+        $r0[129] = 157;
+
+        $r0[130] = 112;
+
+        $r0[131] = 89;
+
+        $r0[132] = 100;
+
+        $r0[133] = 113;
+
+        $r0[134] = 135;
+
+        $r0[135] = 32;
+
+        $r0[136] = 134;
+
+        $r0[137] = 91;
+
+        $r0[138] = 207;
+
+        $r0[139] = 101;
+
+        $r0[140] = 230;
+
+        $r0[141] = 45;
+
+        $r0[142] = 168;
+
+        $r0[143] = 2;
+
+        $r0[144] = 27;
+
+        $r0[145] = 96;
+
+        $r0[146] = 37;
+
+        $r0[147] = 173;
+
+        $r0[148] = 174;
+
+        $r0[149] = 176;
+
+        $r0[150] = 185;
+
+        $r0[151] = 246;
+
+        $r0[152] = 28;
+
+        $r0[153] = 70;
+
+        $r0[154] = 97;
+
+        $r0[155] = 105;
+
+        $r0[156] = 52;
+
+        $r0[157] = 64;
+
+        $r0[158] = 126;
+
+        $r0[159] = 15;
+
+        $r0[160] = 85;
+
+        $r0[161] = 71;
+
+        $r0[162] = 163;
+
+        $r0[163] = 35;
+
+        $r0[164] = 221;
+
+        $r0[165] = 81;
+
+        $r0[166] = 175;
+
+        $r0[167] = 58;
+
+        $r0[168] = 195;
+
+        $r0[169] = 92;
+
+        $r0[170] = 249;
+
+        $r0[171] = 206;
+
+        $r0[172] = 186;
+
+        $r0[173] = 197;
+
+        $r0[174] = 234;
+
+        $r0[175] = 38;
+
+        $r0[176] = 44;
+
+        $r0[177] = 83;
+
+        $r0[178] = 13;
+
+        $r0[179] = 110;
+
+        $r0[180] = 133;
+
+        $r0[181] = 40;
+
+        $r0[182] = 132;
+
+        $r0[183] = 9;
+
+        $r0[184] = 211;
+
+        $r0[185] = 223;
+
+        $r0[186] = 205;
+
+        $r0[187] = 244;
+
+        $r0[188] = 65;
+
+        $r0[189] = 129;
+
+        $r0[190] = 77;
+
+        $r0[191] = 82;
+
+        $r0[192] = 106;
+
+        $r0[193] = 220;
+
+        $r0[194] = 55;
+
+        $r0[195] = 200;
+
+        $r0[196] = 108;
+
+        $r0[197] = 193;
+
+        $r0[198] = 171;
+
+        $r0[199] = 250;
+
+        $r0[200] = 36;
+
+        $r0[201] = 225;
+
+        $r0[202] = 123;
+
+        $r0[203] = 8;
+
+        $r0[204] = 12;
+
+        $r0[205] = 189;
+
+        $r0[206] = 177;
+
+        $r0[207] = 74;
+
+        $r0[208] = 120;
+
+        $r0[209] = 136;
+
+        $r0[210] = 149;
+
+        $r0[211] = 139;
+
+        $r0[212] = 227;
+
+        $r0[213] = 99;
+
+        $r0[214] = 232;
+
+        $r0[215] = 109;
+
+        $r0[216] = 233;
+
+        $r0[217] = 203;
+
+        $r0[218] = 213;
+
+        $r0[219] = 254;
+
+        $r0[220] = 59;
+
+        $r0[221] = 0;
+
+        $r0[222] = 29;
+
+        $r0[223] = 57;
+
+        $r0[224] = 242;
+
+        $r0[225] = 239;
+
+        $r0[226] = 183;
+
+        $r0[227] = 14;
+
+        $r0[228] = 102;
+
+        $r0[229] = 88;
+
+        $r0[230] = 208;
+
+        $r0[231] = 228;
+
+        $r0[232] = 166;
+
+        $r0[233] = 119;
+
+        $r0[234] = 114;
+
+        $r0[235] = 248;
+
+        $r0[236] = 235;
+
+        $r0[237] = 117;
+
+        $r0[238] = 75;
+
+        $r0[239] = 10;
+
+        $r0[240] = 49;
+
+        $r0[241] = 68;
+
+        $r0[242] = 80;
+
+        $r0[243] = 180;
+
+        $r0[244] = 143;
+
+        $r0[245] = 237;
+
+        $r0[246] = 31;
+
+        $r0[247] = 26;
+
+        $r0[248] = 219;
+
+        $r0[249] = 153;
+
+        $r0[250] = 141;
+
+        $r0[251] = 51;
+
+        $r0[252] = 159;
+
+        $r0[253] = 17;
+
+        $r0[254] = 131;
+
+        $r0[255] = 20;
+
+        <sun.security.provider.MD2: int[] S> = $r0;
+
+        $r1 = newarray (byte[])[17];
+
+        <sun.security.provider.MD2: byte[][] PADDING> = $r1;
+
+        i1 = 1;
+
+     label1:
+        if i1 >= 17 goto label2;
+
+        r2 = newarray (byte)[i1];
+
+        $b0 = (byte) i1;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>(r2, $b0);
+
+        $r3 = <sun.security.provider.MD2: byte[][] PADDING>;
+
+        $r3[i1] = r2;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+}

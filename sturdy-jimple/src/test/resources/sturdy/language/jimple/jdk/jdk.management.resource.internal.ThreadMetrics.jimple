@@ -1,0 +1,490 @@
+final class jdk.management.resource.internal.ThreadMetrics extends java.lang.Object
+{
+    static final jdk.management.resource.internal.WeakKeyConcurrentHashMap threadMetrics;
+    private long cputime;
+    private long allocatedHeap;
+
+    private void <init>()
+    {
+        jdk.management.resource.internal.ThreadMetrics r0;
+
+        r0 := @this: jdk.management.resource.internal.ThreadMetrics;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<jdk.management.resource.internal.ThreadMetrics: long cputime> = 0L;
+
+        r0.<jdk.management.resource.internal.ThreadMetrics: long allocatedHeap> = 0L;
+
+        return;
+    }
+
+    private synchronized long usedCputime(long)
+    {
+        byte $b1;
+        jdk.management.resource.internal.ThreadMetrics r0;
+        long $l0, l2, $l3, $l4;
+
+        r0 := @this: jdk.management.resource.internal.ThreadMetrics;
+
+        l2 := @parameter0: long;
+
+        $l0 = r0.<jdk.management.resource.internal.ThreadMetrics: long cputime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $l4 = 0L;
+
+        goto label2;
+
+     label1:
+        $l3 = r0.<jdk.management.resource.internal.ThreadMetrics: long cputime>;
+
+        $l4 = l2 - $l3;
+
+     label2:
+        r0.<jdk.management.resource.internal.ThreadMetrics: long cputime> = l2;
+
+        return $l4;
+    }
+
+    private synchronized long usedAllocatedHeap(long)
+    {
+        byte $b1;
+        jdk.management.resource.internal.ThreadMetrics r0;
+        long $l0, l2, $l3, $l4;
+
+        r0 := @this: jdk.management.resource.internal.ThreadMetrics;
+
+        l2 := @parameter0: long;
+
+        $l0 = r0.<jdk.management.resource.internal.ThreadMetrics: long allocatedHeap>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $l4 = 0L;
+
+        goto label2;
+
+     label1:
+        $l3 = r0.<jdk.management.resource.internal.ThreadMetrics: long allocatedHeap>;
+
+        $l4 = l2 - $l3;
+
+     label2:
+        r0.<jdk.management.resource.internal.ThreadMetrics: long allocatedHeap> = l2;
+
+        return $l4;
+    }
+
+    static void updateCurrentThreadMetrics(jdk.management.resource.ResourceContext)
+    {
+        jdk.management.resource.ResourceRequest $r2, $r4;
+        jdk.management.resource.ResourceType $r1, $r3;
+        jdk.management.resource.ResourceContext r0;
+
+        r0 := @parameter0: jdk.management.resource.ResourceContext;
+
+        $r1 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType THREAD_CPU>;
+
+        $r2 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r1);
+
+        $r3 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_ALLOCATED>;
+
+        $r4 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r3);
+
+        if $r2 != null goto label1;
+
+        if $r4 != null goto label1;
+
+        return;
+
+     label1:
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateCurrentThreadMetrics(jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceRequest)>($r2, $r4);
+
+        return;
+    }
+
+    static void updateThreadMetrics(jdk.management.resource.ResourceContext)
+    {
+        java.lang.Object[] $r7;
+        java.lang.Thread[] $r8;
+        jdk.management.resource.ResourceType $r1, $r3;
+        jdk.management.resource.ResourceContext r0;
+        java.util.stream.Stream $r5;
+        jdk.management.resource.ResourceRequest $r2, $r4;
+        int $i0;
+        java.util.function.IntFunction $r6;
+
+        r0 := @parameter0: jdk.management.resource.ResourceContext;
+
+        $r1 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType THREAD_CPU>;
+
+        $r2 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r1);
+
+        $r3 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_ALLOCATED>;
+
+        $r4 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r3);
+
+        if $r2 != null goto label1;
+
+        if $r4 != null goto label1;
+
+        return;
+
+     label1:
+        $r5 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: java.util.stream.Stream boundThreads()>();
+
+        $r6 = staticinvoke <jdk.management.resource.internal.ThreadMetrics$lambda_updateThreadMetrics_0__350: java.util.function.IntFunction bootstrap$()>();
+
+        $r7 = interfaceinvoke $r5.<java.util.stream.Stream: java.lang.Object[] toArray(java.util.function.IntFunction)>($r6);
+
+        $r8 = (java.lang.Thread[]) $r7;
+
+        $i0 = lengthof $r8;
+
+        if $i0 <= 0 goto label2;
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateThreadMetrics(java.lang.Thread[],jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceRequest)>($r8, $r2, $r4);
+
+     label2:
+        return;
+    }
+
+    static void updateThreadMetrics(jdk.management.resource.ResourceContext, java.lang.Thread)
+    {
+        jdk.management.resource.ResourceRequest $r2, $r4;
+        java.lang.Thread r6;
+        java.lang.Thread[] $r5;
+        jdk.management.resource.ResourceType $r1, $r3;
+        jdk.management.resource.ResourceContext r0;
+
+        r0 := @parameter0: jdk.management.resource.ResourceContext;
+
+        r6 := @parameter1: java.lang.Thread;
+
+        $r1 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType THREAD_CPU>;
+
+        $r2 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r1);
+
+        $r3 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_ALLOCATED>;
+
+        $r4 = interfaceinvoke r0.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r3);
+
+        if $r2 != null goto label1;
+
+        if $r4 != null goto label1;
+
+        return;
+
+     label1:
+        $r5 = newarray (java.lang.Thread)[1];
+
+        $r5[0] = r6;
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateThreadMetrics(java.lang.Thread[],jdk.management.resource.ResourceRequest,jdk.management.resource.ResourceRequest)>($r5, $r2, $r4);
+
+        return;
+    }
+
+    private static void updateCurrentThreadMetrics(jdk.management.resource.ResourceRequest, jdk.management.resource.ResourceRequest)
+    {
+        jdk.management.resource.ResourceRequest r2, r3;
+        java.lang.Thread $r0;
+        jdk.management.resource.internal.ThreadMetrics $r1;
+        long $l0, $l1, $l2;
+
+        r2 := @parameter0: jdk.management.resource.ResourceRequest;
+
+        r3 := @parameter1: jdk.management.resource.ResourceRequest;
+
+        $l0 = staticinvoke <jdk.management.resource.internal.ResourceNatives: long getCurrentThreadCPUTime()>();
+
+        $l1 = staticinvoke <jdk.management.resource.internal.ResourceNatives: long getCurrentThreadAllocatedHeap()>();
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = staticinvoke <jdk.management.resource.internal.ThreadMetrics: jdk.management.resource.internal.ThreadMetrics getThreadMetrics(java.lang.Thread)>($r0);
+
+        $l2 = virtualinvoke $r0.<java.lang.Thread: long getId()>();
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateMetrics(jdk.management.resource.internal.ThreadMetrics,long,jdk.management.resource.ResourceRequest,long,jdk.management.resource.ResourceRequest,long)>($r1, $l2, r2, $l0, r3, $l1);
+
+        return;
+    }
+
+    private static void updateThreadMetrics(java.lang.Thread[], jdk.management.resource.ResourceRequest, jdk.management.resource.ResourceRequest)
+    {
+        long $l5, $l7, $l9, $l10, $l11, $l14;
+        long[] r1, r2, r3;
+        byte $b6, $b8;
+        java.lang.Thread $r4, $r8, $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i12, i13, i15;
+        jdk.management.resource.internal.ThreadMetrics $r5;
+        java.lang.Thread[] r0;
+        jdk.management.resource.ResourceRequest r6, r7;
+
+        r0 := @parameter0: java.lang.Thread[];
+
+        r6 := @parameter1: jdk.management.resource.ResourceRequest;
+
+        r7 := @parameter2: jdk.management.resource.ResourceRequest;
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (long)[$i0];
+
+        $i1 = lengthof r0;
+
+        r2 = newarray (long)[$i1];
+
+        $i2 = lengthof r0;
+
+        r3 = newarray (long)[$i2];
+
+        i13 = 0;
+
+     label1:
+        $i3 = lengthof r0;
+
+        if i13 >= $i3 goto label4;
+
+        $i12 = i13;
+
+        $r8 = r0[i13];
+
+        if $r8 == null goto label2;
+
+        $r9 = r0[i13];
+
+        $l14 = virtualinvoke $r9.<java.lang.Thread: long getId()>();
+
+        goto label3;
+
+     label2:
+        $l14 = -9223372036854775808L;
+
+     label3:
+        r3[$i12] = $l14;
+
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label4:
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: void getThreadStats(long[],long[],long[])>(r3, r1, r2);
+
+        i15 = 0;
+
+     label5:
+        $i4 = lengthof r0;
+
+        if i15 >= $i4 goto label8;
+
+        $l5 = r1[i15];
+
+        $b6 = $l5 cmp -1L;
+
+        if $b6 == 0 goto label7;
+
+        $l7 = r2[i15];
+
+        $b8 = $l7 cmp -1L;
+
+        if $b8 != 0 goto label6;
+
+        goto label7;
+
+     label6:
+        $r4 = r0[i15];
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ThreadMetrics: jdk.management.resource.internal.ThreadMetrics getThreadMetrics(java.lang.Thread)>($r4);
+
+        $l11 = r3[i15];
+
+        $l10 = r1[i15];
+
+        $l9 = r2[i15];
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateMetrics(jdk.management.resource.internal.ThreadMetrics,long,jdk.management.resource.ResourceRequest,long,jdk.management.resource.ResourceRequest,long)>($r5, $l11, r6, $l10, r7, $l9);
+
+     label7:
+        i15 = i15 + 1;
+
+        goto label5;
+
+     label8:
+        return;
+    }
+
+    private static void updateMetrics(jdk.management.resource.internal.ThreadMetrics, long, jdk.management.resource.ResourceRequest, long, jdk.management.resource.ResourceRequest, long)
+    {
+        long l0, $l1, l3, l4, $l5;
+        byte $b2, $b6;
+        java.lang.Long $r2, $r4;
+        jdk.management.resource.internal.ThreadMetrics r0;
+        int $i7, $i8;
+        jdk.management.resource.internal.ResourceIdImpl $r5, r8;
+        java.lang.RuntimeException $r6, $r7;
+        jdk.management.resource.ResourceRequest r1, r3;
+
+        r0 := @parameter0: jdk.management.resource.internal.ThreadMetrics;
+
+        l4 := @parameter1: long;
+
+        r3 := @parameter2: jdk.management.resource.ResourceRequest;
+
+        l0 := @parameter3: long;
+
+        r1 := @parameter4: jdk.management.resource.ResourceRequest;
+
+        l3 := @parameter5: long;
+
+        $l1 = specialinvoke r0.<jdk.management.resource.internal.ThreadMetrics: long usedCputime(long)>(l0);
+
+        r8 = null;
+
+        $b2 = $l1 cmp 0L;
+
+        $i7 = (int) $b2;
+
+        if $i7 <= 0 goto label4;
+
+        if r3 == null goto label4;
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l4);
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r4);
+
+        r8 = $r5;
+
+     label1:
+        interfaceinvoke r3.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l1, $r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        $l5 = specialinvoke r0.<jdk.management.resource.internal.ThreadMetrics: long usedAllocatedHeap(long)>(l3);
+
+        $b6 = $l5 cmp 0L;
+
+        $i8 = (int) $b6;
+
+        if $i8 <= 0 goto label8;
+
+        if r1 == null goto label8;
+
+        if r8 != null goto label5;
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l4);
+
+        r8 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r2);
+
+     label5:
+        interfaceinvoke r1.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l5, r8);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+        catch java.lang.RuntimeException from label5 to label6 with label7;
+    }
+
+    private static jdk.management.resource.internal.ThreadMetrics getThreadMetrics(java.lang.Thread)
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r1;
+        java.lang.Thread r0;
+        jdk.management.resource.internal.ThreadMetrics $r4;
+        java.lang.Object $r3;
+        java.util.function.Function $r2;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $r1 = <jdk.management.resource.internal.ThreadMetrics: jdk.management.resource.internal.WeakKeyConcurrentHashMap threadMetrics>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ThreadMetrics$lambda_getThreadMetrics_1__351: java.util.function.Function bootstrap$()>();
+
+        $r3 = virtualinvoke $r1.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object computeIfAbsent(java.lang.Object,java.util.function.Function)>(r0, $r2);
+
+        $r4 = (jdk.management.resource.internal.ThreadMetrics) $r3;
+
+        return $r4;
+    }
+
+    static synchronized void init()
+    {
+        int $i0, i2;
+        long $l1;
+
+        $i0 = staticinvoke <jdk.management.resource.internal.ResourceNatives: int sampleInterval()>();
+
+        i2 = $i0;
+
+        if $i0 == 0 goto label2;
+
+        if $i0 >= 0 goto label1;
+
+        i2 = 100;
+
+     label1:
+        $l1 = (long) i2;
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: void init(long)>($l1);
+
+     label2:
+        return;
+    }
+
+    public static jdk.management.resource.internal.ThreadMetrics lambda$getThreadMetrics$1(java.lang.Thread)
+    {
+        jdk.management.resource.internal.ThreadMetrics $r0;
+        java.lang.Thread r1;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r0 = new jdk.management.resource.internal.ThreadMetrics;
+
+        specialinvoke $r0.<jdk.management.resource.internal.ThreadMetrics: void <init>()>();
+
+        return $r0;
+    }
+
+    public static java.lang.Thread[] lambda$updateThreadMetrics$0(int)
+    {
+        int i0;
+        java.lang.Thread[] $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = newarray (java.lang.Thread)[i0];
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r0;
+
+        $r0 = new jdk.management.resource.internal.WeakKeyConcurrentHashMap;
+
+        specialinvoke $r0.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: void <init>()>();
+
+        <jdk.management.resource.internal.ThreadMetrics: jdk.management.resource.internal.WeakKeyConcurrentHashMap threadMetrics> = $r0;
+
+        return;
+    }
+}

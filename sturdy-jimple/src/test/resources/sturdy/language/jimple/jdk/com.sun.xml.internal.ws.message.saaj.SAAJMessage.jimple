@@ -1,0 +1,2071 @@
+public class com.sun.xml.internal.ws.message.saaj.SAAJMessage extends com.sun.xml.internal.ws.api.message.Message
+{
+    private boolean parsedMessage;
+    private boolean accessedMessage;
+    private final javax.xml.soap.SOAPMessage sm;
+    private com.sun.xml.internal.ws.api.message.MessageHeaders headers;
+    private java.util.List bodyParts;
+    private org.w3c.dom.Element payload;
+    private java.lang.String payloadLocalName;
+    private java.lang.String payloadNamespace;
+    private com.sun.xml.internal.ws.api.SOAPVersion soapVersion;
+    private org.w3c.dom.NamedNodeMap bodyAttrs;
+    private org.w3c.dom.NamedNodeMap headerAttrs;
+    private org.w3c.dom.NamedNodeMap envelopeAttrs;
+    private static final org.xml.sax.helpers.AttributesImpl EMPTY_ATTS;
+    private static final org.xml.sax.helpers.LocatorImpl NULL_LOCATOR;
+    private javax.xml.stream.XMLStreamReader soapBodyFirstChildReader;
+    private javax.xml.soap.SOAPElement soapBodyFirstChild;
+
+    public void <init>(javax.xml.soap.SOAPMessage)
+    {
+        javax.xml.soap.SOAPMessage r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r1 := @parameter0: javax.xml.soap.SOAPMessage;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.message.Message: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm> = r1;
+
+        return;
+    }
+
+    private void <init>(com.sun.xml.internal.ws.api.message.MessageHeaders, com.sun.xml.internal.ws.api.message.AttachmentSet, javax.xml.soap.SOAPMessage, com.sun.xml.internal.ws.api.SOAPVersion)
+    {
+        com.sun.xml.internal.ws.api.message.AttachmentSet r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        com.sun.xml.internal.ws.api.SOAPVersion r4;
+        javax.xml.soap.SOAPMessage r1;
+        com.sun.xml.internal.ws.api.message.MessageHeaders r5;
+        com.sun.xml.internal.ws.api.message.HeaderList $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r5 := @parameter0: com.sun.xml.internal.ws.api.message.MessageHeaders;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.AttachmentSet;
+
+        r1 := @parameter2: javax.xml.soap.SOAPMessage;
+
+        r4 := @parameter3: com.sun.xml.internal.ws.api.SOAPVersion;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.message.Message: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm> = r1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void parse()>();
+
+        if r5 != null goto label1;
+
+        $r3 = new com.sun.xml.internal.ws.api.message.HeaderList;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.api.message.HeaderList: void <init>(com.sun.xml.internal.ws.api.SOAPVersion)>(r4);
+
+        r5 = $r3;
+
+     label1:
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers> = r5;
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet attachmentSet> = r2;
+
+        return;
+    }
+
+    private void parse()
+    {
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet $r4;
+        com.sun.xml.internal.ws.api.SOAPVersion $r13;
+        javax.xml.soap.SOAPHeaderElement $r11;
+        javax.xml.soap.SOAPException $r14;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.soap.SOAPHeader $r3;
+        org.w3c.dom.NamedNodeMap $r6;
+        boolean $z0, $z1;
+        java.util.Iterator $r7;
+        com.sun.xml.internal.ws.message.saaj.SAAJHeader $r8;
+        javax.xml.ws.WebServiceException $r15;
+        java.lang.Object $r10;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r1, $r9;
+        javax.xml.soap.SOAPMessage $r2, $r5;
+        com.sun.xml.internal.ws.api.message.HeaderList $r12;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label7;
+
+     label1:
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        if $r1 != null goto label2;
+
+        $r12 = new com.sun.xml.internal.ws.api.message.HeaderList;
+
+        $r13 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        specialinvoke $r12.<com.sun.xml.internal.ws.api.message.HeaderList: void <init>(com.sun.xml.internal.ws.api.SOAPVersion)>($r13);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers> = $r12;
+
+     label2:
+        $r2 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPHeader getSOAPHeader()>();
+
+        if $r3 == null goto label4;
+
+        $r6 = interfaceinvoke $r3.<javax.xml.soap.SOAPHeader: org.w3c.dom.NamedNodeMap getAttributes()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs> = $r6;
+
+        $r7 = interfaceinvoke $r3.<javax.xml.soap.SOAPHeader: java.util.Iterator examineAllHeaderElements()>();
+
+     label3:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r9 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        $r8 = new com.sun.xml.internal.ws.message.saaj.SAAJHeader;
+
+        $r10 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (javax.xml.soap.SOAPHeaderElement) $r10;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.message.saaj.SAAJHeader: void <init>(javax.xml.soap.SOAPHeaderElement)>($r11);
+
+        interfaceinvoke $r9.<com.sun.xml.internal.ws.api.message.MessageHeaders: boolean add(com.sun.xml.internal.ws.api.message.Header)>($r8);
+
+        goto label3;
+
+     label4:
+        $r4 = new com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet;
+
+        $r5 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet: void <init>(javax.xml.soap.SOAPMessage)>($r5);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet attachmentSet> = $r4;
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage> = 1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r14 := @caughtexception;
+
+        $r15 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r15.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r14);
+
+        throw $r15;
+
+     label7:
+        return;
+
+        catch javax.xml.soap.SOAPException from label1 to label5 with label6;
+    }
+
+    protected void access()
+    {
+        com.sun.xml.internal.ws.api.SOAPVersion $r9;
+        javax.xml.soap.SOAPException $r19;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        int $i0;
+        org.w3c.dom.NamedNodeMap $r4, $r7;
+        javax.xml.soap.SOAPBody $r6;
+        java.lang.String $r8, $r14, $r16;
+        boolean $z0;
+        java.util.List $r10, $r11, $r17;
+        javax.xml.soap.SOAPPart $r2;
+        org.w3c.dom.Element $r12, $r13, $r15, $r21;
+        javax.xml.ws.WebServiceException $r20;
+        java.lang.Object $r18;
+        javax.xml.soap.SOAPMessage $r1, $r5;
+        javax.xml.soap.SOAPEnvelope $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean accessedMessage>;
+
+        if $z0 != 0 goto label7;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r4 = interfaceinvoke $r3.<javax.xml.soap.SOAPEnvelope: org.w3c.dom.NamedNodeMap getAttributes()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs> = $r4;
+
+        $r5 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r6 = virtualinvoke $r5.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPBody getSOAPBody()>();
+
+        $r7 = interfaceinvoke $r6.<org.w3c.dom.Node: org.w3c.dom.NamedNodeMap getAttributes()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs> = $r7;
+
+        $r8 = interfaceinvoke $r6.<org.w3c.dom.Node: java.lang.String getNamespaceURI()>();
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion fromNsUri(java.lang.String)>($r8);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion> = $r9;
+
+        $r10 = staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: java.util.List getChildElements(org.w3c.dom.Node)>($r6);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts> = $r10;
+
+        $r11 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $i0 = interfaceinvoke $r11.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r17 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $r18 = interfaceinvoke $r17.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r21 = (org.w3c.dom.Element) $r18;
+
+        goto label3;
+
+     label2:
+        $r21 = null;
+
+     label3:
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload> = $r21;
+
+        $r12 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        if $r12 == null goto label4;
+
+        $r13 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        $r14 = interfaceinvoke $r13.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadLocalName> = $r14;
+
+        $r15 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        $r16 = interfaceinvoke $r15.<org.w3c.dom.Element: java.lang.String getNamespaceURI()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadNamespace> = $r16;
+
+     label4:
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean accessedMessage> = 1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r19 := @caughtexception;
+
+        $r20 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r20.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r19);
+
+        throw $r20;
+
+     label7:
+        return;
+
+        catch javax.xml.soap.SOAPException from label1 to label5 with label6;
+    }
+
+    public boolean hasHeaders()
+    {
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void parse()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        $z0 = interfaceinvoke $r1.<com.sun.xml.internal.ws.api.message.MessageHeaders: boolean hasHeaders()>();
+
+        return $z0;
+    }
+
+    public com.sun.xml.internal.ws.api.message.MessageHeaders getHeaders()
+    {
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void parse()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()
+    {
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet $r3;
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r1, $r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.soap.SOAPMessage $r4;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet attachmentSet>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet;
+
+        $r4 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.message.saaj.SAAJMessage$SAAJAttachmentSet: void <init>(javax.xml.soap.SOAPMessage)>($r4);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet attachmentSet> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet attachmentSet>;
+
+        return $r2;
+    }
+
+    protected boolean hasAttachments()
+    {
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        $z0 = interfaceinvoke $r1.<com.sun.xml.internal.ws.api.message.AttachmentSet: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public java.lang.String getPayloadLocalPart()
+    {
+        java.lang.String $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadLocalName>;
+
+        return $r1;
+    }
+
+    public java.lang.String getPayloadNamespaceURI()
+    {
+        java.lang.String $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadNamespace>;
+
+        return $r1;
+    }
+
+    public boolean hasPayload()
+    {
+        javax.xml.soap.SOAPElement $r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void addAttributes(org.w3c.dom.Element, org.w3c.dom.NamedNodeMap)
+    {
+        org.w3c.dom.Attr r4;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r16;
+        org.w3c.dom.Node $r3;
+        int $i0, i1;
+        org.w3c.dom.NamedNodeMap r0;
+        java.lang.String $r2, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r17, $r18, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        org.w3c.dom.Element r1;
+
+        r16 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r0 := @parameter1: org.w3c.dom.NamedNodeMap;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = interfaceinvoke r1.<org.w3c.dom.Element: java.lang.String getPrefix()>();
+
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: int getLength()>();
+
+        if i1 >= $i0 goto label8;
+
+        $r3 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: org.w3c.dom.Node item(int)>(i1);
+
+        r4 = (org.w3c.dom.Attr) $r3;
+
+        $r5 = "xmlns";
+
+        $r6 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label3;
+
+        $r11 = "xmlns";
+
+        $r12 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z4 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z4 == 0 goto label6;
+
+     label3:
+        if $r2 != null goto label4;
+
+        $r10 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z3 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("xmlns");
+
+        if $z3 == 0 goto label4;
+
+        goto label7;
+
+     label4:
+        if $r2 == null goto label5;
+
+        $r7 = "xmlns";
+
+        $r8 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z1 == 0 goto label5;
+
+        $r9 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z2 == 0 goto label5;
+
+        goto label7;
+
+     label5:
+        $r17 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getNamespaceURI()>();
+
+        $r18 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getName()>();
+
+        $r19 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getValue()>();
+
+        interfaceinvoke r1.<org.w3c.dom.Element: void setAttributeNS(java.lang.String,java.lang.String,java.lang.String)>($r17, $r18, $r19);
+
+        goto label7;
+
+     label6:
+        $r13 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getNamespaceURI()>();
+
+        $r14 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getName()>();
+
+        $r15 = interfaceinvoke r4.<org.w3c.dom.Attr: java.lang.String getValue()>();
+
+        interfaceinvoke r1.<org.w3c.dom.Element: void setAttributeNS(java.lang.String,java.lang.String,java.lang.String)>($r13, $r14, $r15);
+
+     label7:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label8:
+        return;
+    }
+
+    public javax.xml.transform.Source readEnvelopeAsSource()
+    {
+        javax.xml.soap.SOAPException $r29;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.soap.SOAPHeader $r13;
+        org.w3c.dom.Document $r23;
+        boolean $z0, $z1, $z2;
+        com.sun.xml.internal.ws.api.message.Header r32;
+        java.util.List $r11, $r16;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r15;
+        javax.xml.transform.dom.DOMSource $r20, $r28;
+        com.sun.xml.internal.ws.api.SOAPVersion $r1;
+        javax.xml.soap.MessageFactory $r2;
+        org.w3c.dom.Node $r24;
+        org.w3c.dom.NamedNodeMap $r6, $r10, $r14;
+        javax.xml.soap.SOAPBody $r9;
+        java.util.Iterator $r12, $r17;
+        javax.xml.soap.SOAPPart $r4, $r7, $r18, $r26;
+        javax.xml.ws.WebServiceException $r30;
+        org.w3c.dom.Element r31;
+        java.lang.Object $r21, $r22;
+        javax.xml.soap.SOAPMessage $r3, $r25;
+        javax.xml.soap.SOAPEnvelope $r5, $r8, $r19, $r27;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label3;
+
+        $r25 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r26 = virtualinvoke $r25.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r27 = virtualinvoke $r26.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r28 = new javax.xml.transform.dom.DOMSource;
+
+        specialinvoke $r28.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>($r27);
+
+     label2:
+        return $r28;
+
+     label3:
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.SOAPVersion: javax.xml.soap.MessageFactory getMessageFactory()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.MessageFactory: javax.xml.soap.SOAPMessage createMessage()>();
+
+        $r4 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r6 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r5, $r6);
+
+        $r7 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r8 = virtualinvoke $r7.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r9 = interfaceinvoke $r8.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPBody getBody()>();
+
+        $r10 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r9, $r10);
+
+        $r11 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r22 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r31 = (org.w3c.dom.Element) $r22;
+
+        $r23 = interfaceinvoke $r9.<javax.xml.soap.SOAPBody: org.w3c.dom.Document getOwnerDocument()>();
+
+        $r24 = interfaceinvoke $r23.<org.w3c.dom.Document: org.w3c.dom.Node importNode(org.w3c.dom.Node,boolean)>(r31, 1);
+
+        interfaceinvoke $r9.<javax.xml.soap.SOAPBody: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r24);
+
+        goto label4;
+
+     label5:
+        $r13 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPHeader getSOAPHeader()>();
+
+        $r14 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r13, $r14);
+
+        $r15 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        $r16 = interfaceinvoke $r15.<com.sun.xml.internal.ws.api.message.MessageHeaders: java.util.List asList()>();
+
+        $r17 = interfaceinvoke $r16.<java.util.List: java.util.Iterator iterator()>();
+
+     label6:
+        $z2 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label7;
+
+        $r21 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        r32 = (com.sun.xml.internal.ws.api.message.Header) $r21;
+
+        interfaceinvoke r32.<com.sun.xml.internal.ws.api.message.Header: void writeTo(javax.xml.soap.SOAPMessage)>($r3);
+
+        goto label6;
+
+     label7:
+        $r18 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r19 = virtualinvoke $r18.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r20 = new javax.xml.transform.dom.DOMSource;
+
+        specialinvoke $r20.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>($r19);
+
+     label8:
+        return $r20;
+
+     label9:
+        $r29 := @caughtexception;
+
+        $r30 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r30.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r29);
+
+        throw $r30;
+
+        catch javax.xml.soap.SOAPException from label1 to label2 with label9;
+        catch javax.xml.soap.SOAPException from label3 to label8 with label9;
+    }
+
+    public javax.xml.soap.SOAPMessage readAsSOAPMessage() throws javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.soap.SOAPHeader $r13;
+        org.w3c.dom.Document $r31;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.xml.internal.ws.api.message.Header r35;
+        java.util.List $r11, $r16;
+        java.lang.StringBuilder $r23, $r24, $r26, $r27;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r15;
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r18;
+        com.sun.xml.internal.ws.api.SOAPVersion $r1;
+        javax.activation.DataHandler $r22;
+        javax.xml.soap.MessageFactory $r2;
+        org.w3c.dom.Node $r32;
+        org.w3c.dom.NamedNodeMap $r6, $r10, $r14;
+        javax.xml.soap.SOAPBody $r9;
+        java.lang.String $r25, $r28;
+        java.util.Iterator $r12, $r17, $r19;
+        com.sun.xml.internal.ws.api.message.Attachment r36;
+        javax.xml.soap.SOAPPart $r4, $r7;
+        javax.xml.soap.AttachmentPart $r21;
+        org.w3c.dom.Element r34;
+        java.lang.Object $r20, $r29, $r30;
+        javax.xml.soap.SOAPMessage $r3, $r33;
+        javax.xml.soap.SOAPEnvelope $r5, $r8;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label1;
+
+        $r33 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        return $r33;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.SOAPVersion: javax.xml.soap.MessageFactory getMessageFactory()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.MessageFactory: javax.xml.soap.SOAPMessage createMessage()>();
+
+        $r4 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r6 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r5, $r6);
+
+        $r7 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r8 = virtualinvoke $r7.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r9 = interfaceinvoke $r8.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPBody getBody()>();
+
+        $r10 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r9, $r10);
+
+        $r11 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r30 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r34 = (org.w3c.dom.Element) $r30;
+
+        $r31 = interfaceinvoke $r9.<javax.xml.soap.SOAPBody: org.w3c.dom.Document getOwnerDocument()>();
+
+        $r32 = interfaceinvoke $r31.<org.w3c.dom.Document: org.w3c.dom.Node importNode(org.w3c.dom.Node,boolean)>(r34, 1);
+
+        interfaceinvoke $r9.<javax.xml.soap.SOAPBody: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r32);
+
+        goto label2;
+
+     label3:
+        $r13 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPHeader getSOAPHeader()>();
+
+        $r14 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r13, $r14);
+
+        $r15 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        $r16 = interfaceinvoke $r15.<com.sun.xml.internal.ws.api.message.MessageHeaders: java.util.List asList()>();
+
+        $r17 = interfaceinvoke $r16.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r29 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        r35 = (com.sun.xml.internal.ws.api.message.Header) $r29;
+
+        interfaceinvoke r35.<com.sun.xml.internal.ws.api.message.Header: void writeTo(javax.xml.soap.SOAPMessage)>($r3);
+
+        goto label4;
+
+     label5:
+        $r18 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        $r19 = interfaceinvoke $r18.<com.sun.xml.internal.ws.api.message.AttachmentSet: java.util.Iterator iterator()>();
+
+     label6:
+        $z3 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label7;
+
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r36 = (com.sun.xml.internal.ws.api.message.Attachment) $r20;
+
+        $r21 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.AttachmentPart createAttachmentPart()>();
+
+        $r22 = interfaceinvoke r36.<com.sun.xml.internal.ws.api.message.Attachment: javax.activation.DataHandler asDataHandler()>();
+
+        virtualinvoke $r21.<javax.xml.soap.AttachmentPart: void setDataHandler(javax.activation.DataHandler)>($r22);
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(60);
+
+        $r25 = interfaceinvoke r36.<com.sun.xml.internal.ws.api.message.Attachment: java.lang.String getContentId()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(62);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<javax.xml.soap.AttachmentPart: void setContentId(java.lang.String)>($r28);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addCustomMimeHeaders(com.sun.xml.internal.ws.api.message.Attachment,javax.xml.soap.AttachmentPart)>(r36, $r21);
+
+        virtualinvoke $r3.<javax.xml.soap.SOAPMessage: void addAttachmentPart(javax.xml.soap.AttachmentPart)>($r21);
+
+        goto label6;
+
+     label7:
+        virtualinvoke $r3.<javax.xml.soap.SOAPMessage: void saveChanges()>();
+
+        return $r3;
+    }
+
+    private void addCustomMimeHeaders(com.sun.xml.internal.ws.api.message.Attachment, javax.xml.soap.AttachmentPart)
+    {
+        java.util.Iterator $r2;
+        com.sun.xml.internal.ws.api.message.AttachmentEx$MimeHeader r4;
+        com.sun.xml.internal.ws.api.message.Attachment r0;
+        com.sun.xml.internal.ws.api.message.AttachmentEx $r1;
+        javax.xml.soap.AttachmentPart r8;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r10;
+        java.lang.Object $r3;
+        java.lang.String $r5, $r6, $r7, $r9;
+        boolean $z0, $z1, $z2, $z3;
+
+        r10 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.message.Attachment;
+
+        r8 := @parameter1: javax.xml.soap.AttachmentPart;
+
+        $z0 = r0 instanceof com.sun.xml.internal.ws.api.message.AttachmentEx;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = (com.sun.xml.internal.ws.api.message.AttachmentEx) r0;
+
+        $r2 = interfaceinvoke $r1.<com.sun.xml.internal.ws.api.message.AttachmentEx: java.util.Iterator getMimeHeaders()>();
+
+     label1:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.sun.xml.internal.ws.api.message.AttachmentEx$MimeHeader) $r3;
+
+        $r5 = interfaceinvoke r4.<com.sun.xml.internal.ws.api.message.AttachmentEx$MimeHeader: java.lang.String getName()>();
+
+        $r6 = "Content-Type";
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r5);
+
+        if $z2 != 0 goto label2;
+
+        $r7 = "Content-Id";
+
+        $z3 = virtualinvoke $r7.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r5);
+
+        if $z3 != 0 goto label2;
+
+        $r9 = interfaceinvoke r4.<com.sun.xml.internal.ws.api.message.AttachmentEx$MimeHeader: java.lang.String getValue()>();
+
+        virtualinvoke r8.<javax.xml.soap.AttachmentPart: void addMimeHeader(java.lang.String,java.lang.String)>($r5, $r9);
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public javax.xml.transform.Source readPayloadAsSource()
+    {
+        javax.xml.transform.dom.DOMSource $r3;
+        org.w3c.dom.Element $r1, $r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        if $r1 == null goto label1;
+
+        $r3 = new javax.xml.transform.dom.DOMSource;
+
+        $r2 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        specialinvoke $r3.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>($r2);
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    public java.lang.Object readPayloadAsJAXB(javax.xml.bind.Unmarshaller) throws javax.xml.bind.JAXBException
+    {
+        javax.xml.bind.Unmarshaller r2;
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r6;
+        org.w3c.dom.Element $r1, $r3;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl $r5;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r2 := @parameter0: javax.xml.bind.Unmarshaller;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        if $r1 == null goto label2;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean hasAttachments()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl;
+
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl: void <init>(com.sun.xml.internal.ws.api.message.AttachmentSet)>($r6);
+
+        interfaceinvoke r2.<javax.xml.bind.Unmarshaller: void setAttachmentUnmarshaller(javax.xml.bind.attachment.AttachmentUnmarshaller)>($r5);
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        $r4 = interfaceinvoke r2.<javax.xml.bind.Unmarshaller: java.lang.Object unmarshal(org.w3c.dom.Node)>($r3);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    public java.lang.Object readPayloadAsJAXB(com.sun.xml.internal.bind.api.Bridge) throws javax.xml.bind.JAXBException
+    {
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r5;
+        org.w3c.dom.Element $r1, $r3;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl $r6;
+        com.sun.xml.internal.bind.api.Bridge r2;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r2 := @parameter0: com.sun.xml.internal.bind.api.Bridge;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        if $r1 == null goto label3;
+
+        $r3 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean hasAttachments()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl;
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        specialinvoke $r6.<com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl: void <init>(com.sun.xml.internal.ws.api.message.AttachmentSet)>($r5);
+
+        goto label2;
+
+     label1:
+        $r6 = null;
+
+     label2:
+        $r4 = virtualinvoke r2.<com.sun.xml.internal.bind.api.Bridge: java.lang.Object unmarshal(org.w3c.dom.Node,javax.xml.bind.attachment.AttachmentUnmarshaller)>($r3, $r6);
+
+        return $r4;
+
+     label3:
+        return null;
+    }
+
+    public java.lang.Object readPayloadAsJAXB(com.sun.xml.internal.ws.spi.db.XMLBridge) throws javax.xml.bind.JAXBException
+    {
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r5;
+        org.w3c.dom.Element $r1, $r3;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl $r6;
+        java.lang.Object $r4;
+        com.sun.xml.internal.ws.spi.db.XMLBridge r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.spi.db.XMLBridge;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        if $r1 == null goto label3;
+
+        $r3 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean hasAttachments()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl;
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        specialinvoke $r6.<com.sun.xml.internal.ws.message.AttachmentUnmarshallerImpl: void <init>(com.sun.xml.internal.ws.api.message.AttachmentSet)>($r5);
+
+        goto label2;
+
+     label1:
+        $r6 = null;
+
+     label2:
+        $r4 = interfaceinvoke r2.<com.sun.xml.internal.ws.spi.db.XMLBridge: java.lang.Object unmarshal(org.w3c.dom.Node,javax.xml.bind.attachment.AttachmentUnmarshaller)>($r3, $r6);
+
+        return $r4;
+
+     label3:
+        return null;
+    }
+
+    public javax.xml.stream.XMLStreamReader readPayload() throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.stream.XMLStreamReader $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader()>();
+
+        return $r1;
+    }
+
+    public void writePayloadTo(javax.xml.stream.XMLStreamWriter) throws javax.xml.stream.XMLStreamException
+    {
+        java.util.Iterator $r2;
+        java.util.List $r1;
+        org.w3c.dom.Element r4;
+        javax.xml.ws.WebServiceException $r7;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.stream.XMLStreamException $r6;
+        java.lang.Object $r3;
+        javax.xml.stream.XMLStreamWriter r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r5 := @parameter0: javax.xml.stream.XMLStreamWriter;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void access()>();
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (org.w3c.dom.Element) $r3;
+
+        staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: void serializeNode(org.w3c.dom.Element,javax.xml.stream.XMLStreamWriter)>(r4, r5);
+
+        goto label2;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r7.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label5:
+        return;
+
+        catch javax.xml.stream.XMLStreamException from label1 to label3 with label4;
+    }
+
+    public void writeTo(javax.xml.stream.XMLStreamWriter) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.istack.internal.XMLStreamException2 $r20;
+        javax.xml.soap.SOAPException $r19;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r1;
+        javax.xml.soap.SOAPHeader $r7, $r15;
+        javax.xml.stream.XMLStreamWriter r0;
+        javax.xml.soap.SOAPBody $r6;
+        java.lang.String $r8, $r9;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r12;
+        com.sun.xml.internal.ws.api.message.Header r14;
+        java.util.List $r11;
+        javax.xml.soap.SOAPPart $r3, $r17;
+        java.lang.Object $r13;
+        javax.xml.soap.SOAPMessage $r2, $r5, $r16;
+        javax.xml.soap.SOAPEnvelope $r4, $r18;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r10;
+
+        r1 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r0 := @parameter0: javax.xml.stream.XMLStreamWriter;
+
+     label01:
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void writeStartDocument()>();
+
+        $z0 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label02;
+
+        $r16 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r17 = virtualinvoke $r16.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r18 = virtualinvoke $r17.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: void serializeNode(org.w3c.dom.Element,javax.xml.stream.XMLStreamWriter)>($r18, r0);
+
+        goto label08;
+
+     label02:
+        $r2 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r4 = virtualinvoke $r3.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: void writeTagWithAttributes(org.w3c.dom.Element,javax.xml.stream.XMLStreamWriter)>($r4, r0);
+
+        $z1 = virtualinvoke r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean hasHeaders()>();
+
+        if $z1 == 0 goto label07;
+
+        $r7 = interfaceinvoke $r4.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPHeader getHeader()>();
+
+        if $r7 == null goto label03;
+
+        $r15 = interfaceinvoke $r4.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPHeader getHeader()>();
+
+        staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: void writeTagWithAttributes(org.w3c.dom.Element,javax.xml.stream.XMLStreamWriter)>($r15, r0);
+
+        goto label04;
+
+     label03:
+        $r8 = interfaceinvoke $r4.<javax.xml.soap.SOAPEnvelope: java.lang.String getPrefix()>();
+
+        $r9 = interfaceinvoke $r4.<javax.xml.soap.SOAPEnvelope: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void writeStartElement(java.lang.String,java.lang.String,java.lang.String)>($r8, "Header", $r9);
+
+     label04:
+        $r10 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders headers>;
+
+        $r11 = interfaceinvoke $r10.<com.sun.xml.internal.ws.api.message.MessageHeaders: java.util.List asList()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z2 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label06;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (com.sun.xml.internal.ws.api.message.Header) $r13;
+
+        interfaceinvoke r14.<com.sun.xml.internal.ws.api.message.Header: void writeTo(javax.xml.stream.XMLStreamWriter)>(r0);
+
+        goto label05;
+
+     label06:
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void writeEndElement()>();
+
+     label07:
+        $r5 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r6 = virtualinvoke $r5.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPBody getSOAPBody()>();
+
+        staticinvoke <com.sun.xml.internal.ws.util.DOMUtil: void serializeNode(org.w3c.dom.Element,javax.xml.stream.XMLStreamWriter)>($r6, r0);
+
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void writeEndElement()>();
+
+     label08:
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void writeEndDocument()>();
+
+        interfaceinvoke r0.<javax.xml.stream.XMLStreamWriter: void flush()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r19 := @caughtexception;
+
+        $r20 = new com.sun.istack.internal.XMLStreamException2;
+
+        specialinvoke $r20.<com.sun.istack.internal.XMLStreamException2: void <init>(java.lang.Throwable)>($r19);
+
+        throw $r20;
+
+     label11:
+        return;
+
+        catch javax.xml.soap.SOAPException from label01 to label09 with label10;
+    }
+
+    public void writeTo(org.xml.sax.ContentHandler, org.xml.sax.ErrorHandler) throws org.xml.sax.SAXException
+    {
+        com.sun.xml.internal.ws.api.SOAPVersion $r1;
+        org.xml.sax.ErrorHandler r11;
+        org.xml.sax.helpers.LocatorImpl $r4;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        org.w3c.dom.NamedNodeMap $r5, $r6, $r8, $r9, $r12, $r13, $r14, $r15, $r20;
+        java.lang.String r2;
+        org.xml.sax.ContentHandler r3;
+        boolean $z0, $z1, $z2;
+        org.xml.sax.helpers.AttributesImpl $r7, $r10, $r16;
+        java.util.Iterator $r19;
+        com.sun.xml.internal.bind.unmarshaller.DOMScanner $r23;
+        com.sun.xml.internal.ws.api.message.Header r22;
+        java.util.List $r18;
+        javax.xml.soap.SOAPPart $r25;
+        java.lang.Object $r21;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r17;
+        javax.xml.soap.SOAPMessage $r24;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r3 := @parameter0: org.xml.sax.ContentHandler;
+
+        r11 := @parameter1: org.xml.sax.ErrorHandler;
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        r2 = $r1.<com.sun.xml.internal.ws.api.SOAPVersion: java.lang.String nsUri>;
+
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label1;
+
+        $r23 = new com.sun.xml.internal.bind.unmarshaller.DOMScanner;
+
+        specialinvoke $r23.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void <init>()>();
+
+        virtualinvoke $r23.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void setContentHandler(org.xml.sax.ContentHandler)>(r3);
+
+        $r24 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r25 = virtualinvoke $r24.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        virtualinvoke $r23.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void scan(org.w3c.dom.Document)>($r25);
+
+        goto label5;
+
+     label1:
+        $r4 = <com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.LocatorImpl NULL_LOCATOR>;
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void setDocumentLocator(org.xml.sax.Locator)>($r4);
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void startDocument()>();
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void startPrefixMapping(java.lang.String,java.lang.String)>("S", r2);
+
+        $r5 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void startPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r5, "S");
+
+        $r6 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs>;
+
+        $r7 = specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.AttributesImpl getAttributes(org.w3c.dom.NamedNodeMap)>($r6);
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r2, "Envelope", "S:Envelope", $r7);
+
+        $z1 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean hasHeaders()>();
+
+        if $z1 == 0 goto label4;
+
+        $r14 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void startPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r14, "S");
+
+        $r15 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs>;
+
+        $r16 = specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.AttributesImpl getAttributes(org.w3c.dom.NamedNodeMap)>($r15);
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r2, "Header", "S:Header", $r16);
+
+        $r17 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders getHeaders()>();
+
+        $r18 = interfaceinvoke $r17.<com.sun.xml.internal.ws.api.message.MessageHeaders: java.util.List asList()>();
+
+        $r19 = interfaceinvoke $r18.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label3;
+
+        $r21 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (com.sun.xml.internal.ws.api.message.Header) $r21;
+
+        interfaceinvoke r22.<com.sun.xml.internal.ws.api.message.Header: void writeTo(org.xml.sax.ContentHandler,org.xml.sax.ErrorHandler)>(r3, r11);
+
+        goto label2;
+
+     label3:
+        $r20 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap headerAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void endPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r20, "S");
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void endElement(java.lang.String,java.lang.String,java.lang.String)>(r2, "Header", "S:Header");
+
+     label4:
+        $r8 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void startPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r8, "S");
+
+        $r9 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        $r10 = specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.AttributesImpl getAttributes(org.w3c.dom.NamedNodeMap)>($r9);
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r2, "Body", "S:Body", $r10);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void writePayloadTo(org.xml.sax.ContentHandler,org.xml.sax.ErrorHandler,boolean)>(r3, r11, 1);
+
+        $r12 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void endPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r12, "S");
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void endElement(java.lang.String,java.lang.String,java.lang.String)>(r2, "Body", "S:Body");
+
+        $r13 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap envelopeAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void endPrefixMapping(org.xml.sax.ContentHandler,org.w3c.dom.NamedNodeMap,java.lang.String)>(r3, $r13, "S");
+
+        interfaceinvoke r3.<org.xml.sax.ContentHandler: void endElement(java.lang.String,java.lang.String,java.lang.String)>(r2, "Envelope", "S:Envelope");
+
+     label5:
+        return;
+    }
+
+    private org.xml.sax.helpers.AttributesImpl getAttributes(org.w3c.dom.NamedNodeMap)
+    {
+        org.w3c.dom.Attr r3;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r16;
+        org.w3c.dom.Node $r2;
+        int $i0, i1;
+        org.w3c.dom.TypeInfo $r12;
+        org.w3c.dom.NamedNodeMap r1;
+        java.lang.String $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r13, $r14;
+        boolean $z0, $z1;
+        org.xml.sax.helpers.AttributesImpl $r0, $r15;
+
+        r16 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r1 := @parameter0: org.w3c.dom.NamedNodeMap;
+
+        $r0 = new org.xml.sax.helpers.AttributesImpl;
+
+        specialinvoke $r0.<org.xml.sax.helpers.AttributesImpl: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r15 = <com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.AttributesImpl EMPTY_ATTS>;
+
+        return $r15;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r1.<org.w3c.dom.NamedNodeMap: int getLength()>();
+
+        if i1 >= $i0 goto label5;
+
+        $r2 = interfaceinvoke r1.<org.w3c.dom.NamedNodeMap: org.w3c.dom.Node item(int)>(i1);
+
+        r3 = (org.w3c.dom.Attr) $r2;
+
+        $r4 = "xmlns";
+
+        $r5 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label4;
+
+        $r6 = "xmlns";
+
+        $r7 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label3;
+
+        goto label4;
+
+     label3:
+        $r8 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getNamespaceURI()>();
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String fixNull(java.lang.String)>($r8);
+
+        $r10 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $r11 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getName()>();
+
+        $r12 = interfaceinvoke r3.<org.w3c.dom.Attr: org.w3c.dom.TypeInfo getSchemaTypeInfo()>();
+
+        $r13 = interfaceinvoke $r12.<org.w3c.dom.TypeInfo: java.lang.String getTypeName()>();
+
+        $r14 = interfaceinvoke r3.<org.w3c.dom.Attr: java.lang.String getValue()>();
+
+        virtualinvoke $r0.<org.xml.sax.helpers.AttributesImpl: void addAttribute(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r9, $r10, $r11, $r13, $r14);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        return $r0;
+    }
+
+    private void startPrefixMapping(org.xml.sax.ContentHandler, org.w3c.dom.NamedNodeMap, java.lang.String) throws org.xml.sax.SAXException
+    {
+        org.w3c.dom.Attr r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r14;
+        org.w3c.dom.Node $r1;
+        int $i0, i1;
+        org.w3c.dom.NamedNodeMap r0;
+        java.lang.String $r3, $r4, $r5, $r6, r7, $r9, $r10, $r11, $r12, $r13;
+        org.xml.sax.ContentHandler r8;
+        boolean $z0, $z1, $z2;
+
+        r14 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r8 := @parameter0: org.xml.sax.ContentHandler;
+
+        r0 := @parameter1: org.w3c.dom.NamedNodeMap;
+
+        r7 := @parameter2: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: int getLength()>();
+
+        if i1 >= $i0 goto label5;
+
+        $r1 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: org.w3c.dom.Node item(int)>(i1);
+
+        r2 = (org.w3c.dom.Attr) $r1;
+
+        $r3 = "xmlns";
+
+        $r4 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label3;
+
+        $r12 = "xmlns";
+
+        $r13 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        $r5 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String fixNull(java.lang.String)>($r5);
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+        if $z1 != 0 goto label4;
+
+        $r9 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $r10 = staticinvoke <com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String fixNull(java.lang.String)>($r9);
+
+        $r11 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getNamespaceURI()>();
+
+        interfaceinvoke r8.<org.xml.sax.ContentHandler: void startPrefixMapping(java.lang.String,java.lang.String)>($r10, $r11);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private void endPrefixMapping(org.xml.sax.ContentHandler, org.w3c.dom.NamedNodeMap, java.lang.String) throws org.xml.sax.SAXException
+    {
+        org.w3c.dom.Attr r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r13;
+        org.w3c.dom.Node $r1;
+        int $i0, i1;
+        org.w3c.dom.NamedNodeMap r0;
+        java.lang.String $r3, $r4, $r5, $r6, r7, $r9, $r10, $r11, $r12;
+        org.xml.sax.ContentHandler r8;
+        boolean $z0, $z1, $z2;
+
+        r13 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r8 := @parameter0: org.xml.sax.ContentHandler;
+
+        r0 := @parameter1: org.w3c.dom.NamedNodeMap;
+
+        r7 := @parameter2: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: int getLength()>();
+
+        if i1 >= $i0 goto label5;
+
+        $r1 = interfaceinvoke r0.<org.w3c.dom.NamedNodeMap: org.w3c.dom.Node item(int)>(i1);
+
+        r2 = (org.w3c.dom.Attr) $r1;
+
+        $r3 = "xmlns";
+
+        $r4 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label3;
+
+        $r11 = "xmlns";
+
+        $r12 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getLocalName()>();
+
+        $z2 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        $r5 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String fixNull(java.lang.String)>($r5);
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+        if $z1 != 0 goto label4;
+
+        $r9 = interfaceinvoke r2.<org.w3c.dom.Attr: java.lang.String getPrefix()>();
+
+        $r10 = staticinvoke <com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String fixNull(java.lang.String)>($r9);
+
+        interfaceinvoke r8.<org.xml.sax.ContentHandler: void endPrefixMapping(java.lang.String)>($r10);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private static java.lang.String fixNull(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return "";
+
+     label1:
+        return r0;
+    }
+
+    private void writePayloadTo(org.xml.sax.ContentHandler, org.xml.sax.ErrorHandler, boolean) throws org.xml.sax.SAXException
+    {
+        org.xml.sax.ErrorHandler r4;
+        org.w3c.dom.Element $r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r1;
+        com.sun.istack.internal.FragmentContentHandler $r3;
+        com.sun.xml.internal.bind.unmarshaller.DOMScanner $r0;
+        org.xml.sax.ContentHandler r5;
+        boolean z0;
+
+        r1 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r5 := @parameter0: org.xml.sax.ContentHandler;
+
+        r4 := @parameter1: org.xml.sax.ErrorHandler;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r3 = new com.sun.istack.internal.FragmentContentHandler;
+
+        specialinvoke $r3.<com.sun.istack.internal.FragmentContentHandler: void <init>(org.xml.sax.ContentHandler)>(r5);
+
+        r5 = $r3;
+
+     label1:
+        $r0 = new com.sun.xml.internal.bind.unmarshaller.DOMScanner;
+
+        specialinvoke $r0.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void <init>()>();
+
+        virtualinvoke $r0.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void setContentHandler(org.xml.sax.ContentHandler)>(r5);
+
+        $r2 = r1.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.Element payload>;
+
+        virtualinvoke $r0.<com.sun.xml.internal.bind.unmarshaller.DOMScanner: void scan(org.w3c.dom.Element)>($r2);
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.api.message.Message copy()
+    {
+        com.sun.xml.internal.ws.api.message.AttachmentSet $r12;
+        com.sun.xml.internal.ws.api.SOAPVersion $r1, $r13;
+        javax.xml.soap.SOAPException $r20;
+        javax.xml.soap.MessageFactory $r2;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0, $r10, $r18;
+        org.w3c.dom.Document $r16;
+        org.w3c.dom.Node $r17;
+        javax.xml.soap.SOAPBody $r6;
+        org.w3c.dom.NamedNodeMap $r9;
+        boolean $z0, $z1;
+        java.util.Iterator $r8;
+        java.util.List $r7;
+        javax.xml.soap.SOAPPart $r4;
+        org.w3c.dom.Element r15;
+        javax.xml.ws.WebServiceException $r21;
+        java.lang.Object $r14;
+        javax.xml.soap.SOAPMessage $r3, $r19;
+        javax.xml.soap.SOAPEnvelope $r5;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r11;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: boolean parsedMessage>;
+
+        if $z0 != 0 goto label3;
+
+        $r18 = new com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r19 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage readAsSOAPMessage()>();
+
+        specialinvoke $r18.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void <init>(javax.xml.soap.SOAPMessage)>($r19);
+
+     label2:
+        return $r18;
+
+     label3:
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.SOAPVersion: javax.xml.soap.MessageFactory getMessageFactory()>();
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.MessageFactory: javax.xml.soap.SOAPMessage createMessage()>();
+
+        $r4 = virtualinvoke $r3.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPPart getSOAPPart()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.soap.SOAPPart: javax.xml.soap.SOAPEnvelope getEnvelope()>();
+
+        $r6 = interfaceinvoke $r5.<javax.xml.soap.SOAPEnvelope: javax.xml.soap.SOAPBody getBody()>();
+
+        $r7 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.util.List bodyParts>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r14 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (org.w3c.dom.Element) $r14;
+
+        $r16 = interfaceinvoke $r6.<javax.xml.soap.SOAPBody: org.w3c.dom.Document getOwnerDocument()>();
+
+        $r17 = interfaceinvoke $r16.<org.w3c.dom.Document: org.w3c.dom.Node importNode(org.w3c.dom.Node,boolean)>(r15, 1);
+
+        interfaceinvoke $r6.<javax.xml.soap.SOAPBody: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r17);
+
+        goto label4;
+
+     label5:
+        $r9 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.w3c.dom.NamedNodeMap bodyAttrs>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void addAttributes(org.w3c.dom.Element,org.w3c.dom.NamedNodeMap)>($r6, $r9);
+
+        $r10 = new com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r11 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.MessageHeaders getHeaders()>();
+
+        $r12 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        $r13 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        specialinvoke $r10.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: void <init>(com.sun.xml.internal.ws.api.message.MessageHeaders,com.sun.xml.internal.ws.api.message.AttachmentSet,javax.xml.soap.SOAPMessage,com.sun.xml.internal.ws.api.SOAPVersion)>($r11, $r12, $r3, $r13);
+
+     label6:
+        return $r10;
+
+     label7:
+        $r20 := @caughtexception;
+
+        $r21 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r21.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r20);
+
+        throw $r21;
+
+        catch javax.xml.soap.SOAPException from label1 to label2 with label7;
+        catch javax.xml.soap.SOAPException from label3 to label6 with label7;
+    }
+
+    public com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()
+    {
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        com.sun.xml.internal.ws.api.SOAPVersion $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        return $r1;
+    }
+
+    protected javax.xml.stream.XMLStreamReader getXMLStreamReader(javax.xml.soap.SOAPElement)
+    {
+        javax.xml.soap.SOAPElement r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r1 := @parameter0: javax.xml.soap.SOAPElement;
+
+        return null;
+    }
+
+    protected javax.xml.stream.XMLStreamReader createXMLStreamReader(javax.xml.soap.SOAPElement)
+    {
+        com.sun.xml.internal.ws.streaming.DOMStreamReader $r0;
+        javax.xml.soap.SOAPElement r1;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r2;
+
+        r2 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        r1 := @parameter0: javax.xml.soap.SOAPElement;
+
+        $r0 = new com.sun.xml.internal.ws.streaming.DOMStreamReader;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.streaming.DOMStreamReader: void <init>()>();
+
+        virtualinvoke $r0.<com.sun.xml.internal.ws.streaming.DOMStreamReader: void setCurrentNode(org.w3c.dom.Node)>(r1);
+
+        return $r0;
+    }
+
+    protected javax.xml.stream.XMLStreamReader soapBodyFirstChildReader()
+    {
+        javax.xml.soap.SOAPElement $r2, $r3, $r10;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        javax.xml.stream.XMLStreamReader $r1, $r4, $r5, $r6, $r7, $r8, $r9, $r11, $r12;
+        javax.xml.stream.XMLStreamException $r13;
+        int $i0, $i1;
+        java.lang.RuntimeException $r14;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        if $r1 == null goto label1;
+
+        $r12 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        return $r12;
+
+     label1:
+        virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild()>();
+
+        $r2 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        if $r2 == null goto label7;
+
+        $r3 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader getXMLStreamReader(javax.xml.soap.SOAPElement)>($r3);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader> = $r4;
+
+        $r5 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        if $r5 != null goto label2;
+
+        $r10 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r11 = virtualinvoke r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader createXMLStreamReader(javax.xml.soap.SOAPElement)>($r10);
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader> = $r11;
+
+     label2:
+        $r6 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        $i0 = interfaceinvoke $r6.<javax.xml.stream.XMLStreamReader: int getEventType()>();
+
+        if $i0 != 7 goto label6;
+
+     label3:
+        $r8 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        $i1 = interfaceinvoke $r8.<javax.xml.stream.XMLStreamReader: int getEventType()>();
+
+        if $i1 == 1 goto label4;
+
+        $r9 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        interfaceinvoke $r9.<javax.xml.stream.XMLStreamReader: int next()>();
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.RuntimeException;
+
+        specialinvoke $r14.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label6:
+        $r7 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.stream.XMLStreamReader soapBodyFirstChildReader>;
+
+        return $r7;
+
+     label7:
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadLocalName> = null;
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadNamespace> = null;
+
+        return null;
+
+        catch javax.xml.stream.XMLStreamException from label3 to label4 with label5;
+    }
+
+    javax.xml.soap.SOAPElement soapBodyFirstChild()
+    {
+        javax.xml.soap.SOAPException $r22;
+        com.sun.xml.internal.ws.message.saaj.SAAJMessage r0;
+        boolean $z0, $z1, $z2, z3, z4, z5;
+        javax.xml.soap.SOAPElement $r1, $r4, $r9, $r10, $r12, $r14, $r15, $r16, $r18, $r20, $r21;
+        short $s0;
+        org.w3c.dom.Node r24;
+        javax.xml.soap.SOAPBody $r3, $r6;
+        java.lang.String $r11, $r13, $r17, $r19;
+        java.util.Iterator $r7;
+        java.lang.RuntimeException $r23;
+        java.lang.Object $r8;
+        javax.xml.soap.SOAPMessage $r2, $r5;
+
+        r0 := @this: com.sun.xml.internal.ws.message.saaj.SAAJMessage;
+
+        $r1 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        if $r1 == null goto label01;
+
+        $r21 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        return $r21;
+
+     label01:
+        z3 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $r2 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPBody getSOAPBody()>();
+
+        r24 = interfaceinvoke $r3.<javax.xml.soap.SOAPBody: org.w3c.dom.Node getFirstChild()>();
+
+     label02:
+        if r24 == null goto label05;
+
+        if z4 != 0 goto label05;
+
+        $s0 = interfaceinvoke r24.<org.w3c.dom.Node: short getNodeType()>();
+
+        if $s0 != 1 goto label04;
+
+        z3 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        $z2 = r24 instanceof javax.xml.soap.SOAPElement;
+
+        if $z2 == 0 goto label04;
+
+        $r15 = (javax.xml.soap.SOAPElement) r24;
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild> = $r15;
+
+        $r16 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r17 = interfaceinvoke $r16.<javax.xml.soap.SOAPElement: java.lang.String getLocalName()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadLocalName> = $r17;
+
+        $r18 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r19 = interfaceinvoke $r18.<javax.xml.soap.SOAPElement: java.lang.String getNamespaceURI()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadNamespace> = $r19;
+
+        $r20 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+     label03:
+        return $r20;
+
+     label04:
+        r24 = interfaceinvoke r24.<org.w3c.dom.Node: org.w3c.dom.Node getNextSibling()>();
+
+        goto label02;
+
+     label05:
+        if z5 == 0 goto label09;
+
+        $r5 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPMessage sm>;
+
+        $r6 = virtualinvoke $r5.<javax.xml.soap.SOAPMessage: javax.xml.soap.SOAPBody getSOAPBody()>();
+
+        $r7 = interfaceinvoke $r6.<javax.xml.soap.SOAPBody: java.util.Iterator getChildElements()>();
+
+     label06:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label09;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r8 instanceof javax.xml.soap.SOAPElement;
+
+        if $z1 == 0 goto label08;
+
+        $r9 = (javax.xml.soap.SOAPElement) $r8;
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild> = $r9;
+
+        $r10 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r11 = interfaceinvoke $r10.<javax.xml.soap.SOAPElement: java.lang.String getLocalName()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadLocalName> = $r11;
+
+        $r12 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        $r13 = interfaceinvoke $r12.<javax.xml.soap.SOAPElement: java.lang.String getNamespaceURI()>();
+
+        r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: java.lang.String payloadNamespace> = $r13;
+
+        $r14 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+     label07:
+        return $r14;
+
+     label08:
+        goto label06;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r22 := @caughtexception;
+
+        $r23 = new java.lang.RuntimeException;
+
+        specialinvoke $r23.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r22);
+
+        throw $r23;
+
+     label11:
+        $r4 = r0.<com.sun.xml.internal.ws.message.saaj.SAAJMessage: javax.xml.soap.SOAPElement soapBodyFirstChild>;
+
+        return $r4;
+
+        catch javax.xml.soap.SOAPException from label01 to label03 with label10;
+        catch javax.xml.soap.SOAPException from label04 to label07 with label10;
+        catch javax.xml.soap.SOAPException from label08 to label09 with label10;
+    }
+
+    static void <clinit>()
+    {
+        org.xml.sax.helpers.AttributesImpl $r0;
+        org.xml.sax.helpers.LocatorImpl $r1;
+
+        $r0 = new org.xml.sax.helpers.AttributesImpl;
+
+        specialinvoke $r0.<org.xml.sax.helpers.AttributesImpl: void <init>()>();
+
+        <com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.AttributesImpl EMPTY_ATTS> = $r0;
+
+        $r1 = new org.xml.sax.helpers.LocatorImpl;
+
+        specialinvoke $r1.<org.xml.sax.helpers.LocatorImpl: void <init>()>();
+
+        <com.sun.xml.internal.ws.message.saaj.SAAJMessage: org.xml.sax.helpers.LocatorImpl NULL_LOCATOR> = $r1;
+
+        return;
+    }
+}

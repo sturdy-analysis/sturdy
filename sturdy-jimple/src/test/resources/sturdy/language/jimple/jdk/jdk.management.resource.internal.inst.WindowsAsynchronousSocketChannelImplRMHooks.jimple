@@ -1,0 +1,478 @@
+public class jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks extends java.lang.Object
+{
+    protected final java.io.FileDescriptor fd;
+    protected volatile java.net.InetSocketAddress localAddress;
+
+    public void <init>()
+    {
+        jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.io.FileDescriptor fd> = null;
+
+        r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress> = null;
+
+        return;
+    }
+
+    public final void close() throws java.io.IOException
+    {
+        jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks;
+
+        return;
+    }
+
+    java.util.concurrent.Future implRead(boolean, java.nio.ByteBuffer, java.nio.ByteBuffer[], long, java.util.concurrent.TimeUnit, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.nio.ByteBuffer r5, r15;
+        java.util.concurrent.Future $r9, r20;
+        byte $b4;
+        jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks r0;
+        boolean z0, $z1;
+        java.nio.ByteBuffer[] r6;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        java.net.InetSocketAddress $r1;
+        java.lang.Exception $r16;
+        jdk.management.resource.internal.CompletionHandlerWrapper $r23;
+        long $l0, $l1, $l2, $l3, l5, $l7, $l8, $l9;
+        java.util.concurrent.CompletableFuture $r22;
+        jdk.management.resource.ResourceRequestDeniedException $r17, $r21;
+        int $i6, $i10, i11, i12, i13, i14, $i15;
+        jdk.management.resource.internal.FutureWrapper $r24;
+        java.lang.Number $r12;
+        jdk.management.resource.internal.ApproverGroup $r3;
+        java.nio.channels.CompletionHandler r19;
+        java.util.concurrent.TimeUnit r7;
+        jdk.management.resource.ResourceRequest $r4;
+        java.lang.Object r8, $r11;
+
+        r0 := @this: jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks;
+
+        z0 := @parameter0: boolean;
+
+        r5 := @parameter1: java.nio.ByteBuffer;
+
+        r6 := @parameter2: java.nio.ByteBuffer[];
+
+        l5 := @parameter3: long;
+
+        r7 := @parameter4: java.util.concurrent.TimeUnit;
+
+        r8 := @parameter5: java.lang.Object;
+
+        r19 := @parameter6: java.nio.channels.CompletionHandler;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r1);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup SOCKET_READ_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        if z0 == 0 goto label03;
+
+        i11 = 0;
+
+        i12 = lengthof r6;
+
+        i13 = 0;
+
+     label01:
+        if i13 >= i12 goto label02;
+
+        r15 = r6[i13];
+
+        $i10 = virtualinvoke r15.<java.nio.ByteBuffer: int remaining()>();
+
+        i11 = i11 + $i10;
+
+        i13 = i13 + 1;
+
+        goto label01;
+
+     label02:
+        goto label04;
+
+     label03:
+        i11 = virtualinvoke r5.<java.nio.ByteBuffer: int remaining()>();
+
+     label04:
+        $l0 = (long) i11;
+
+        $l1 = interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l0, $r2);
+
+        $l2 = staticinvoke <java.lang.Math: long max(long,long)>($l1, 0L);
+
+        $l3 = (long) i11;
+
+        $b4 = $l2 cmp $l3;
+
+        $i15 = (int) $b4;
+
+        if $i15 >= 0 goto label05;
+
+        $r21 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r21.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: insufficient bytes approved");
+
+        throw $r21;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r17 := @caughtexception;
+
+        if r19 == null goto label07;
+
+        interfaceinvoke r19.<java.nio.channels.CompletionHandler: void failed(java.lang.Throwable,java.lang.Object)>($r17, r8);
+
+        return null;
+
+     label07:
+        $r22 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r22.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        virtualinvoke $r22.<java.util.concurrent.CompletableFuture: boolean completeExceptionally(java.lang.Throwable)>($r17);
+
+        return $r22;
+
+     label08:
+        if r19 == null goto label09;
+
+        $r23 = new jdk.management.resource.internal.CompletionHandlerWrapper;
+
+        specialinvoke $r23.<jdk.management.resource.internal.CompletionHandlerWrapper: void <init>(java.nio.channels.CompletionHandler,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>(r19, $r2, $r4, $l2);
+
+        r19 = $r23;
+
+     label09:
+        $r9 = virtualinvoke r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.util.concurrent.Future implRead(boolean,java.nio.ByteBuffer,java.nio.ByteBuffer[],long,java.util.concurrent.TimeUnit,java.lang.Object,java.nio.channels.CompletionHandler)>(z0, r5, r6, l5, r7, r8, r19);
+
+        r20 = $r9;
+
+        if r19 != null goto label15;
+
+        $z1 = interfaceinvoke $r9.<java.util.concurrent.Future: boolean isDone()>();
+
+        if $z1 == 0 goto label14;
+
+        i14 = 0;
+
+     label10:
+        $r11 = interfaceinvoke $r9.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        $r12 = (java.lang.Number) $r11;
+
+        i14 = virtualinvoke $r12.<java.lang.Number: int intValue()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r16 := @caughtexception;
+
+     label13:
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>(0, i14);
+
+        $l7 = (long) $i6;
+
+        $l8 = $l2 - $l7;
+
+        $l9 = neg $l8;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l9, $r2);
+
+        goto label15;
+
+     label14:
+        $r24 = new jdk.management.resource.internal.FutureWrapper;
+
+        specialinvoke $r24.<jdk.management.resource.internal.FutureWrapper: void <init>(java.util.concurrent.Future,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>($r9, $r2, $r4, $l2);
+
+        r20 = $r24;
+
+     label15:
+        return r20;
+
+        catch jdk.management.resource.ResourceRequestDeniedException from label04 to label05 with label06;
+        catch java.lang.InterruptedException from label10 to label11 with label12;
+        catch java.util.concurrent.ExecutionException from label10 to label11 with label12;
+    }
+
+    java.util.concurrent.Future implWrite(boolean, java.nio.ByteBuffer, java.nio.ByteBuffer[], long, java.util.concurrent.TimeUnit, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.nio.ByteBuffer r5, r15;
+        java.util.concurrent.Future $r9, r20;
+        byte $b4;
+        jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks r0;
+        boolean z0, $z1;
+        java.nio.ByteBuffer[] r6;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        java.net.InetSocketAddress $r1;
+        java.lang.Exception $r16;
+        jdk.management.resource.internal.CompletionHandlerWrapper $r23;
+        long $l0, $l1, $l2, $l3, l5, $l7, $l8, $l9;
+        java.util.concurrent.CompletableFuture $r22;
+        jdk.management.resource.ResourceRequestDeniedException $r17, $r21;
+        int $i6, $i10, i11, i12, i13, i14, $i15;
+        jdk.management.resource.internal.FutureWrapper $r24;
+        java.lang.Number $r12;
+        jdk.management.resource.internal.ApproverGroup $r3;
+        java.nio.channels.CompletionHandler r19;
+        java.util.concurrent.TimeUnit r7;
+        jdk.management.resource.ResourceRequest $r4;
+        java.lang.Object r8, $r11;
+
+        r0 := @this: jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks;
+
+        z0 := @parameter0: boolean;
+
+        r5 := @parameter1: java.nio.ByteBuffer;
+
+        r6 := @parameter2: java.nio.ByteBuffer[];
+
+        l5 := @parameter3: long;
+
+        r7 := @parameter4: java.util.concurrent.TimeUnit;
+
+        r8 := @parameter5: java.lang.Object;
+
+        r19 := @parameter6: java.nio.channels.CompletionHandler;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r1);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup SOCKET_WRITE_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        if z0 == 0 goto label03;
+
+        i11 = 0;
+
+        i12 = lengthof r6;
+
+        i13 = 0;
+
+     label01:
+        if i13 >= i12 goto label02;
+
+        r15 = r6[i13];
+
+        $i10 = virtualinvoke r15.<java.nio.ByteBuffer: int remaining()>();
+
+        i11 = i11 + $i10;
+
+        i13 = i13 + 1;
+
+        goto label01;
+
+     label02:
+        goto label04;
+
+     label03:
+        i11 = virtualinvoke r5.<java.nio.ByteBuffer: int remaining()>();
+
+     label04:
+        $l0 = (long) i11;
+
+        $l1 = interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l0, $r2);
+
+        $l2 = staticinvoke <java.lang.Math: long max(long,long)>($l1, 0L);
+
+        $l3 = (long) i11;
+
+        $b4 = $l2 cmp $l3;
+
+        $i15 = (int) $b4;
+
+        if $i15 >= 0 goto label05;
+
+        $r21 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r21.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: insufficient bytes approved");
+
+        throw $r21;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r17 := @caughtexception;
+
+        if r19 == null goto label07;
+
+        interfaceinvoke r19.<java.nio.channels.CompletionHandler: void failed(java.lang.Throwable,java.lang.Object)>($r17, r8);
+
+        return null;
+
+     label07:
+        $r22 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r22.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        virtualinvoke $r22.<java.util.concurrent.CompletableFuture: boolean completeExceptionally(java.lang.Throwable)>($r17);
+
+        return $r22;
+
+     label08:
+        if r19 == null goto label09;
+
+        $r23 = new jdk.management.resource.internal.CompletionHandlerWrapper;
+
+        specialinvoke $r23.<jdk.management.resource.internal.CompletionHandlerWrapper: void <init>(java.nio.channels.CompletionHandler,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>(r19, $r2, $r4, $l2);
+
+        r19 = $r23;
+
+     label09:
+        $r9 = virtualinvoke r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.util.concurrent.Future implWrite(boolean,java.nio.ByteBuffer,java.nio.ByteBuffer[],long,java.util.concurrent.TimeUnit,java.lang.Object,java.nio.channels.CompletionHandler)>(z0, r5, r6, l5, r7, r8, r19);
+
+        r20 = $r9;
+
+        if r19 != null goto label15;
+
+        $z1 = interfaceinvoke $r9.<java.util.concurrent.Future: boolean isDone()>();
+
+        if $z1 == 0 goto label14;
+
+        i14 = 0;
+
+     label10:
+        $r11 = interfaceinvoke $r9.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        $r12 = (java.lang.Number) $r11;
+
+        i14 = virtualinvoke $r12.<java.lang.Number: int intValue()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r16 := @caughtexception;
+
+     label13:
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>(0, i14);
+
+        $l7 = (long) $i6;
+
+        $l8 = $l2 - $l7;
+
+        $l9 = neg $l8;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l9, $r2);
+
+        goto label15;
+
+     label14:
+        $r24 = new jdk.management.resource.internal.FutureWrapper;
+
+        specialinvoke $r24.<jdk.management.resource.internal.FutureWrapper: void <init>(java.util.concurrent.Future,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>($r9, $r2, $r4, $l2);
+
+        r20 = $r24;
+
+     label15:
+        return r20;
+
+        catch jdk.management.resource.ResourceRequestDeniedException from label04 to label05 with label06;
+        catch java.lang.InterruptedException from label10 to label11 with label12;
+        catch java.util.concurrent.ExecutionException from label10 to label11 with label12;
+    }
+
+    void implClose() throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks r0;
+        jdk.management.resource.internal.ApproverGroup $r6, $r9, $r17, $r20;
+        jdk.management.resource.internal.ResourceIdImpl $r2, $r5, $r13, $r16;
+        java.net.InetSocketAddress $r3, $r4, $r14, $r15;
+        jdk.management.resource.ResourceRequest $r7, $r10, $r18, $r21;
+        java.io.FileDescriptor $r1, $r8, $r12, $r19;
+
+        r0 := @this: jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks;
+
+     label1:
+        virtualinvoke r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: void implClose()>();
+
+     label2:
+        $r1 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r1);
+
+        if $r2 == null goto label3;
+
+        $r9 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r8 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r10 = virtualinvoke $r9.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r8);
+
+        interfaceinvoke $r10.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r2);
+
+     label3:
+        $r3 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        if $r3 == null goto label4;
+
+        $r4 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r4);
+
+        $r6 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup SOCKET_OPEN_GROUP>;
+
+        $r7 = virtualinvoke $r6.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        interfaceinvoke $r7.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r5);
+
+     label4:
+        goto label8;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r13 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r12);
+
+        if $r13 == null goto label6;
+
+        $r20 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r19 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r21 = virtualinvoke $r20.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r19);
+
+        interfaceinvoke $r21.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r13);
+
+     label6:
+        $r14 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        if $r14 == null goto label7;
+
+        $r15 = r0.<jdk.management.resource.internal.inst.WindowsAsynchronousSocketChannelImplRMHooks: java.net.InetSocketAddress localAddress>;
+
+        $r16 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r15);
+
+        $r17 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup SOCKET_OPEN_GROUP>;
+
+        $r18 = virtualinvoke $r17.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        interfaceinvoke $r18.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r16);
+
+     label7:
+        throw $r11;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+}

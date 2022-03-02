@@ -1,0 +1,835 @@
+public class java.util.logging.LogRecord extends java.lang.Object implements java.io.Serializable
+{
+    private static final java.util.concurrent.atomic.AtomicLong globalSequenceNumber;
+    private static final int MIN_SEQUENTIAL_THREAD_ID;
+    private static final java.util.concurrent.atomic.AtomicInteger nextThreadId;
+    private static final java.lang.ThreadLocal threadIds;
+    private java.util.logging.Level level;
+    private long sequenceNumber;
+    private java.lang.String sourceClassName;
+    private java.lang.String sourceMethodName;
+    private java.lang.String message;
+    private int threadID;
+    private long millis;
+    private java.lang.Throwable thrown;
+    private java.lang.String loggerName;
+    private java.lang.String resourceBundleName;
+    private transient boolean needToInferCaller;
+    private transient java.lang.Object[] parameters;
+    private transient java.util.ResourceBundle resourceBundle;
+    private static final long serialVersionUID;
+
+    private int defaultThreadID()
+    {
+        java.lang.ThreadLocal $r1, $r5;
+        long $l0;
+        java.util.logging.LogRecord r6;
+        java.lang.Integer $r4, r7;
+        byte $b1;
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        java.lang.Thread $r0;
+        int $i2, $i3, $i4, $i5;
+        java.lang.Object $r2;
+
+        r6 := @this: java.util.logging.LogRecord;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $l0 = virtualinvoke $r0.<java.lang.Thread: long getId()>();
+
+        $b1 = $l0 cmp 1073741823L;
+
+        $i5 = (int) $b1;
+
+        if $i5 >= 0 goto label1;
+
+        $i4 = (int) $l0;
+
+        return $i4;
+
+     label1:
+        $r1 = <java.util.logging.LogRecord: java.lang.ThreadLocal threadIds>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r7 = (java.lang.Integer) $r2;
+
+        if r7 != null goto label2;
+
+        $r3 = <java.util.logging.LogRecord: java.util.concurrent.atomic.AtomicInteger nextThreadId>;
+
+        $i3 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        r7 = $r4;
+
+        $r5 = <java.util.logging.LogRecord: java.lang.ThreadLocal threadIds>;
+
+        virtualinvoke $r5.<java.lang.ThreadLocal: void set(java.lang.Object)>($r4);
+
+     label2:
+        $i2 = virtualinvoke r7.<java.lang.Integer: int intValue()>();
+
+        return $i2;
+    }
+
+    public void <init>(java.util.logging.Level, java.lang.String)
+    {
+        java.util.concurrent.atomic.AtomicLong $r3;
+        int $i1;
+        long $l0, $l2;
+        java.lang.String r2;
+        java.util.logging.LogRecord r0;
+        java.util.logging.Level r1;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.util.logging.Level;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        r0.<java.util.logging.LogRecord: java.util.logging.Level level> = r1;
+
+        r0.<java.util.logging.LogRecord: java.lang.String message> = r2;
+
+        $r3 = <java.util.logging.LogRecord: java.util.concurrent.atomic.AtomicLong globalSequenceNumber>;
+
+        $l0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicLong: long getAndIncrement()>();
+
+        r0.<java.util.logging.LogRecord: long sequenceNumber> = $l0;
+
+        $i1 = specialinvoke r0.<java.util.logging.LogRecord: int defaultThreadID()>();
+
+        r0.<java.util.logging.LogRecord: int threadID> = $i1;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<java.util.logging.LogRecord: long millis> = $l2;
+
+        r0.<java.util.logging.LogRecord: boolean needToInferCaller> = 1;
+
+        return;
+    }
+
+    public java.lang.String getLoggerName()
+    {
+        java.lang.String $r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.String loggerName>;
+
+        return $r1;
+    }
+
+    public void setLoggerName(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.logging.LogRecord: java.lang.String loggerName> = r1;
+
+        return;
+    }
+
+    public java.util.ResourceBundle getResourceBundle()
+    {
+        java.util.logging.LogRecord r0;
+        java.util.ResourceBundle $r1;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.util.ResourceBundle resourceBundle>;
+
+        return $r1;
+    }
+
+    public void setResourceBundle(java.util.ResourceBundle)
+    {
+        java.util.logging.LogRecord r0;
+        java.util.ResourceBundle r1;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.util.ResourceBundle;
+
+        r0.<java.util.logging.LogRecord: java.util.ResourceBundle resourceBundle> = r1;
+
+        return;
+    }
+
+    public java.lang.String getResourceBundleName()
+    {
+        java.lang.String $r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.String resourceBundleName>;
+
+        return $r1;
+    }
+
+    public void setResourceBundleName(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.logging.LogRecord: java.lang.String resourceBundleName> = r1;
+
+        return;
+    }
+
+    public java.util.logging.Level getLevel()
+    {
+        java.util.logging.LogRecord r0;
+        java.util.logging.Level $r1;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.util.logging.Level level>;
+
+        return $r1;
+    }
+
+    public void setLevel(java.util.logging.Level)
+    {
+        java.util.logging.LogRecord r1;
+        java.lang.NullPointerException $r2;
+        java.util.logging.Level r0;
+
+        r1 := @this: java.util.logging.LogRecord;
+
+        r0 := @parameter0: java.util.logging.Level;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r1.<java.util.logging.LogRecord: java.util.logging.Level level> = r0;
+
+        return;
+    }
+
+    public long getSequenceNumber()
+    {
+        long $l0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $l0 = r0.<java.util.logging.LogRecord: long sequenceNumber>;
+
+        return $l0;
+    }
+
+    public void setSequenceNumber(long)
+    {
+        long l0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        l0 := @parameter0: long;
+
+        r0.<java.util.logging.LogRecord: long sequenceNumber> = l0;
+
+        return;
+    }
+
+    public java.lang.String getSourceClassName()
+    {
+        java.lang.String $r1;
+        java.util.logging.LogRecord r0;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $z0 = r0.<java.util.logging.LogRecord: boolean needToInferCaller>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.util.logging.LogRecord: void inferCaller()>();
+
+     label1:
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.String sourceClassName>;
+
+        return $r1;
+    }
+
+    public void setSourceClassName(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.logging.LogRecord: java.lang.String sourceClassName> = r1;
+
+        r0.<java.util.logging.LogRecord: boolean needToInferCaller> = 0;
+
+        return;
+    }
+
+    public java.lang.String getSourceMethodName()
+    {
+        java.lang.String $r1;
+        java.util.logging.LogRecord r0;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $z0 = r0.<java.util.logging.LogRecord: boolean needToInferCaller>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.util.logging.LogRecord: void inferCaller()>();
+
+     label1:
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.String sourceMethodName>;
+
+        return $r1;
+    }
+
+    public void setSourceMethodName(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.logging.LogRecord: java.lang.String sourceMethodName> = r1;
+
+        r0.<java.util.logging.LogRecord: boolean needToInferCaller> = 0;
+
+        return;
+    }
+
+    public java.lang.String getMessage()
+    {
+        java.lang.String $r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.String message>;
+
+        return $r1;
+    }
+
+    public void setMessage(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.logging.LogRecord: java.lang.String message> = r1;
+
+        return;
+    }
+
+    public java.lang.Object[] getParameters()
+    {
+        java.lang.Object[] $r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        return $r1;
+    }
+
+    public void setParameters(java.lang.Object[])
+    {
+        java.lang.Object[] r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.Object[];
+
+        r0.<java.util.logging.LogRecord: java.lang.Object[] parameters> = r1;
+
+        return;
+    }
+
+    public int getThreadID()
+    {
+        int $i0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $i0 = r0.<java.util.logging.LogRecord: int threadID>;
+
+        return $i0;
+    }
+
+    public void setThreadID(int)
+    {
+        int i0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        i0 := @parameter0: int;
+
+        r0.<java.util.logging.LogRecord: int threadID> = i0;
+
+        return;
+    }
+
+    public long getMillis()
+    {
+        long $l0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $l0 = r0.<java.util.logging.LogRecord: long millis>;
+
+        return $l0;
+    }
+
+    public void setMillis(long)
+    {
+        long l0;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        l0 := @parameter0: long;
+
+        r0.<java.util.logging.LogRecord: long millis> = l0;
+
+        return;
+    }
+
+    public java.lang.Throwable getThrown()
+    {
+        java.lang.Throwable $r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        $r1 = r0.<java.util.logging.LogRecord: java.lang.Throwable thrown>;
+
+        return $r1;
+    }
+
+    public void setThrown(java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        java.util.logging.LogRecord r0;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        r0.<java.util.logging.LogRecord: java.lang.Throwable thrown> = r1;
+
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Object[] $r2, $r3, $r4, $r5, $r7;
+        java.util.logging.LogRecord r1;
+        int $i0, $i1, i2, $i4;
+        java.io.ObjectOutputStream r0;
+        java.lang.Object $r6, $r8;
+        java.lang.String $r9;
+
+        r1 := @this: java.util.logging.LogRecord;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>(1);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>(0);
+
+        $r2 = r1.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        if $r2 != null goto label1;
+
+        $i4 = (int) -1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeInt(int)>($i4);
+
+        return;
+
+     label1:
+        $r3 = r1.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeInt(int)>($i0);
+
+        i2 = 0;
+
+     label2:
+        $r4 = r1.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $i1 = lengthof $r4;
+
+        if i2 >= $i1 goto label5;
+
+        $r5 = r1.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $r6 = $r5[i2];
+
+        if $r6 != null goto label3;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        goto label4;
+
+     label3:
+        $r7 = r1.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $r8 = $r7[i2];
+
+        $r9 = virtualinvoke $r8.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r9);
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        byte $b0, $b1;
+        java.util.Locale $r6;
+        java.util.MissingResourceException $r22;
+        java.util.logging.LogRecord r2;
+        java.lang.StringBuilder $r17, $r18, $r19, $r20, $r24;
+        java.lang.ClassLoader $r7;
+        java.lang.Object[] $r3, $r4, $r10, $r11, $r12;
+        java.util.ArrayList $r27;
+        java.util.ResourceBundle $r8;
+        int $i2, $i3, $i4, $i5, i6, i7, $i8, $i9, $i11, $i13;
+        java.lang.String $r5, $r21, $r23;
+        java.lang.NegativeArraySizeException $r26;
+        java.io.IOException $r25;
+        java.lang.Object $r9, $r13;
+
+        r2 := @this: java.util.logging.LogRecord;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $b0 = virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        $b1 = virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        if $b0 == 1 goto label01;
+
+        $r25 = new java.io.IOException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LogRecord: bad version: ");
+
+        $i8 = (int) $b0;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $i9 = (int) $b1;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.io.IOException: void <init>(java.lang.String)>($r21);
+
+        throw $r25;
+
+     label01:
+        $i2 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        $i11 = (int) -1;
+
+        if $i2 >= $i11 goto label02;
+
+        $r26 = new java.lang.NegativeArraySizeException;
+
+        specialinvoke $r26.<java.lang.NegativeArraySizeException: void <init>()>();
+
+        throw $r26;
+
+     label02:
+        $i13 = (int) -1;
+
+        if $i2 != $i13 goto label03;
+
+        r2.<java.util.logging.LogRecord: java.lang.Object[] parameters> = null;
+
+        goto label09;
+
+     label03:
+        if $i2 >= 255 goto label06;
+
+        $r10 = newarray (java.lang.Object)[$i2];
+
+        r2.<java.util.logging.LogRecord: java.lang.Object[] parameters> = $r10;
+
+        i6 = 0;
+
+     label04:
+        $r11 = r2.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $i5 = lengthof $r11;
+
+        if i6 >= $i5 goto label05;
+
+        $r12 = r2.<java.util.logging.LogRecord: java.lang.Object[] parameters>;
+
+        $r13 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r12[i6] = $r13;
+
+        i6 = i6 + 1;
+
+        goto label04;
+
+     label05:
+        goto label09;
+
+     label06:
+        $r27 = new java.util.ArrayList;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i2, 1024);
+
+        specialinvoke $r27.<java.util.ArrayList: void <init>(int)>($i3);
+
+        i7 = 0;
+
+     label07:
+        if i7 >= $i2 goto label08;
+
+        $r9 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        interfaceinvoke $r27.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        i7 = i7 + 1;
+
+        goto label07;
+
+     label08:
+        $i4 = interfaceinvoke $r27.<java.util.List: int size()>();
+
+        $r3 = newarray (java.lang.Object)[$i4];
+
+        $r4 = interfaceinvoke $r27.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        r2.<java.util.logging.LogRecord: java.lang.Object[] parameters> = $r4;
+
+     label09:
+        $r23 = r2.<java.util.logging.LogRecord: java.lang.String resourceBundleName>;
+
+        if $r23 == null goto label13;
+
+     label10:
+        $r5 = r2.<java.util.logging.LogRecord: java.lang.String resourceBundleName>;
+
+        $r6 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r7 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r8 = staticinvoke <java.util.ResourceBundle: java.util.ResourceBundle getBundle(java.lang.String,java.util.Locale,java.lang.ClassLoader)>($r5, $r6, $r7);
+
+        r2.<java.util.logging.LogRecord: java.util.ResourceBundle resourceBundle> = $r8;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r22 := @caughtexception;
+
+        r2.<java.util.logging.LogRecord: java.util.ResourceBundle resourceBundle> = null;
+
+     label13:
+        r2.<java.util.logging.LogRecord: boolean needToInferCaller> = 0;
+
+        return;
+
+        catch java.util.MissingResourceException from label10 to label11 with label12;
+    }
+
+    private void inferCaller()
+    {
+        java.lang.Throwable $r2;
+        sun.misc.JavaLangAccess $r1;
+        java.util.logging.LogRecord r0;
+        int $i0, i1;
+        java.lang.StackTraceElement $r3;
+        java.lang.String $r4, $r5;
+        boolean $z0, $z1, $z2, z3;
+
+        r0 := @this: java.util.logging.LogRecord;
+
+        r0.<java.util.logging.LogRecord: boolean needToInferCaller> = 0;
+
+        $r1 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaLangAccess getJavaLangAccess()>();
+
+        $r2 = new java.lang.Throwable;
+
+        specialinvoke $r2.<java.lang.Throwable: void <init>()>();
+
+        $i0 = interfaceinvoke $r1.<sun.misc.JavaLangAccess: int getStackTraceDepth(java.lang.Throwable)>($r2);
+
+        z3 = 1;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label4;
+
+        $r3 = interfaceinvoke $r1.<sun.misc.JavaLangAccess: java.lang.StackTraceElement getStackTraceElement(java.lang.Throwable,int)>($r2, i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StackTraceElement: java.lang.String getClassName()>();
+
+        $z0 = specialinvoke r0.<java.util.logging.LogRecord: boolean isLoggerImplFrame(java.lang.String)>($r4);
+
+        if z3 == 0 goto label2;
+
+        if $z0 == 0 goto label3;
+
+        z3 = 0;
+
+        goto label3;
+
+     label2:
+        if $z0 != 0 goto label3;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("java.lang.reflect.");
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("sun.reflect.");
+
+        if $z2 != 0 goto label3;
+
+        virtualinvoke r0.<java.util.logging.LogRecord: void setSourceClassName(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r3.<java.lang.StackTraceElement: java.lang.String getMethodName()>();
+
+        virtualinvoke r0.<java.util.logging.LogRecord: void setSourceMethodName(java.lang.String)>($r5);
+
+        return;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private boolean isLoggerImplFrame(java.lang.String)
+    {
+        java.lang.String r0;
+        java.util.logging.LogRecord r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.util.logging.LogRecord;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.util.logging.Logger");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("java.util.logging.LoggingProxyImpl");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("sun.util.logging.");
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicLong $r0;
+        java.lang.ThreadLocal $r2;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+
+        <java.util.logging.LogRecord: long serialVersionUID> = 5372048053134512534L;
+
+        <java.util.logging.LogRecord: int MIN_SEQUENTIAL_THREAD_ID> = 1073741823;
+
+        $r0 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(0L);
+
+        <java.util.logging.LogRecord: java.util.concurrent.atomic.AtomicLong globalSequenceNumber> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(1073741823);
+
+        <java.util.logging.LogRecord: java.util.concurrent.atomic.AtomicInteger nextThreadId> = $r1;
+
+        $r2 = new java.lang.ThreadLocal;
+
+        specialinvoke $r2.<java.lang.ThreadLocal: void <init>()>();
+
+        <java.util.logging.LogRecord: java.lang.ThreadLocal threadIds> = $r2;
+
+        return;
+    }
+}

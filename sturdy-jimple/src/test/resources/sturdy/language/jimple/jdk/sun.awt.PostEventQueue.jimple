@@ -1,0 +1,265 @@
+class sun.awt.PostEventQueue extends java.lang.Object
+{
+    private sun.awt.EventQueueItem queueHead;
+    private sun.awt.EventQueueItem queueTail;
+    private final java.awt.EventQueue eventQueue;
+    private java.lang.Thread flushThread;
+
+    void <init>(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r1;
+        sun.awt.PostEventQueue r0;
+
+        r0 := @this: sun.awt.PostEventQueue;
+
+        r1 := @parameter0: java.awt.EventQueue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead> = null;
+
+        r0.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueTail> = null;
+
+        r0.<sun.awt.PostEventQueue: java.lang.Thread flushThread> = null;
+
+        r0.<sun.awt.PostEventQueue: java.awt.EventQueue eventQueue> = r1;
+
+        return;
+    }
+
+    public void flush()
+    {
+        java.awt.EventQueue $r6;
+        java.lang.Throwable $r8, $r9, $r10, $r11;
+        sun.awt.PostEventQueue r1;
+        sun.awt.EventQueueItem $r4, r12;
+        java.awt.AWTEvent $r5;
+        java.lang.InterruptedException $r7;
+        java.lang.Thread $r0, $r2, $r3;
+
+        r1 := @this: sun.awt.PostEventQueue;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $r2 = r1.<sun.awt.PostEventQueue: java.lang.Thread flushThread>;
+
+        if $r0 != $r2 goto label04;
+
+        exitmonitor r1;
+
+     label03:
+        return;
+
+     label04:
+        $r3 = r1.<sun.awt.PostEventQueue: java.lang.Thread flushThread>;
+
+        if $r3 == null goto label05;
+
+        virtualinvoke r1.<java.lang.Object: void wait()>();
+
+        goto label04;
+
+     label05:
+        $r4 = r1.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead>;
+
+        if $r4 != null goto label07;
+
+        exitmonitor r1;
+
+     label06:
+        return;
+
+     label07:
+        r1.<sun.awt.PostEventQueue: java.lang.Thread flushThread> = $r0;
+
+        r12 = r1.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead>;
+
+        r1.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueTail> = null;
+
+        r1.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead> = null;
+
+        exitmonitor r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r11 := @caughtexception;
+
+        exitmonitor r1;
+
+     label10:
+        throw $r11;
+
+     label11:
+        if r12 == null goto label12;
+
+        $r6 = r1.<sun.awt.PostEventQueue: java.awt.EventQueue eventQueue>;
+
+        $r5 = r12.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        virtualinvoke $r6.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r5);
+
+        r12 = r12.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        goto label11;
+
+     label12:
+        entermonitor r1;
+
+     label13:
+        r1.<sun.awt.PostEventQueue: java.lang.Thread flushThread> = null;
+
+        virtualinvoke r1.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r1;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r10 := @caughtexception;
+
+        exitmonitor r1;
+
+     label16:
+        throw $r10;
+
+     label17:
+        goto label25;
+
+     label18:
+        $r9 := @caughtexception;
+
+     label19:
+        entermonitor r1;
+
+     label20:
+        r1.<sun.awt.PostEventQueue: java.lang.Thread flushThread> = null;
+
+        virtualinvoke r1.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r1;
+
+     label21:
+        goto label24;
+
+     label22:
+        $r8 := @caughtexception;
+
+        exitmonitor r1;
+
+     label23:
+        throw $r8;
+
+     label24:
+        throw $r9;
+
+     label25:
+        goto label27;
+
+     label26:
+        $r7 := @caughtexception;
+
+        virtualinvoke $r0.<java.lang.Thread: void interrupt()>();
+
+     label27:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label09;
+        catch java.lang.Throwable from label04 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.lang.Throwable from label11 to label12 with label18;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.InterruptedException from label01 to label03 with label26;
+        catch java.lang.InterruptedException from label04 to label06 with label26;
+        catch java.lang.InterruptedException from label07 to label25 with label26;
+    }
+
+    void postEvent(java.awt.AWTEvent)
+    {
+        java.awt.EventQueue $r5;
+        java.lang.Throwable $r8;
+        sun.awt.PostEventQueue r2;
+        sun.awt.EventQueueItem $r0, $r3, $r4;
+        java.awt.AWTEvent r1;
+        java.lang.Object $r6;
+        sun.awt.AWTAutoShutdown $r7;
+        boolean $z0;
+
+        r2 := @this: sun.awt.PostEventQueue;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        $r0 = new sun.awt.EventQueueItem;
+
+        specialinvoke $r0.<sun.awt.EventQueueItem: void <init>(java.awt.AWTEvent)>(r1);
+
+        entermonitor r2;
+
+     label1:
+        $r3 = r2.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead>;
+
+        if $r3 != null goto label2;
+
+        r2.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueTail> = $r0;
+
+        r2.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueHead> = $r0;
+
+        goto label3;
+
+     label2:
+        $r4 = r2.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueTail>;
+
+        $r4.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next> = $r0;
+
+        r2.<sun.awt.PostEventQueue: sun.awt.EventQueueItem queueTail> = $r0;
+
+     label3:
+        exitmonitor r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor r2;
+
+     label6:
+        throw $r8;
+
+     label7:
+        $r5 = r2.<sun.awt.PostEventQueue: java.awt.EventQueue eventQueue>;
+
+        $r6 = virtualinvoke r1.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r7 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        if $r6 != $r7 goto label8;
+
+        $z0 = 1;
+
+        goto label9;
+
+     label8:
+        $z0 = 0;
+
+     label9:
+        staticinvoke <sun.awt.SunToolkit: void wakeupEventQueue(java.awt.EventQueue,boolean)>($r5, $z0);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+}

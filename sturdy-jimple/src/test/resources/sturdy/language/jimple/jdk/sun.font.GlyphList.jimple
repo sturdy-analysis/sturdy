@@ -1,0 +1,1305 @@
+public final class sun.font.GlyphList extends java.lang.Object
+{
+    private static final int MINGRAYLENGTH;
+    private static final int MAXGRAYLENGTH;
+    private static final int DEFAULT_LENGTH;
+    int glyphindex;
+    int[] metrics;
+    byte[] graybits;
+    java.lang.Object strikelist;
+    int len;
+    int maxLen;
+    int maxPosLen;
+    int[] glyphData;
+    char[] chData;
+    long[] images;
+    float[] positions;
+    float x;
+    float y;
+    float gposx;
+    float gposy;
+    boolean usePositions;
+    boolean lcdRGBOrder;
+    boolean lcdSubPixPos;
+    private static sun.font.GlyphList reusableGL;
+    private static boolean inUse;
+
+    void ensureCapacity(int)
+    {
+        sun.font.GlyphList r0;
+        float[] $r4;
+        long[] $r3;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3, i4, $i5;
+        char[] $r2;
+        boolean $z0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        i4 := @parameter0: int;
+
+        if i4 >= 0 goto label1;
+
+        i4 = 0;
+
+     label1:
+        $z0 = r0.<sun.font.GlyphList: boolean usePositions>;
+
+        if $z0 == 0 goto label2;
+
+        $i1 = r0.<sun.font.GlyphList: int maxPosLen>;
+
+        if i4 <= $i1 goto label2;
+
+        $i2 = i4 * 2;
+
+        $i3 = $i2 + 2;
+
+        $r4 = newarray (float)[$i3];
+
+        r0.<sun.font.GlyphList: float[] positions> = $r4;
+
+        r0.<sun.font.GlyphList: int maxPosLen> = i4;
+
+     label2:
+        $i5 = r0.<sun.font.GlyphList: int maxLen>;
+
+        if $i5 == 0 goto label3;
+
+        $i0 = r0.<sun.font.GlyphList: int maxLen>;
+
+        if i4 <= $i0 goto label4;
+
+     label3:
+        $r1 = newarray (int)[i4];
+
+        r0.<sun.font.GlyphList: int[] glyphData> = $r1;
+
+        $r2 = newarray (char)[i4];
+
+        r0.<sun.font.GlyphList: char[] chData> = $r2;
+
+        $r3 = newarray (long)[i4];
+
+        r0.<sun.font.GlyphList: long[] images> = $r3;
+
+        r0.<sun.font.GlyphList: int maxLen> = i4;
+
+     label4:
+        return;
+    }
+
+    private void <init>()
+    {
+        sun.font.GlyphList r0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.font.GlyphList: int len> = 0;
+
+        r0.<sun.font.GlyphList: int maxLen> = 0;
+
+        r0.<sun.font.GlyphList: int maxPosLen> = 0;
+
+        return;
+    }
+
+    public static sun.font.GlyphList getInstance()
+    {
+        java.lang.Throwable $r3;
+        sun.font.GlyphList $r0, $r1, $r2;
+        boolean $z0, $z1;
+
+        $z0 = <sun.font.GlyphList: boolean inUse>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new sun.font.GlyphList;
+
+        specialinvoke $r2.<sun.font.GlyphList: void <init>()>();
+
+        return $r2;
+
+     label1:
+        entermonitor class "Lsun/font/GlyphList;";
+
+     label2:
+        $z1 = <sun.font.GlyphList: boolean inUse>;
+
+        if $z1 == 0 goto label4;
+
+        $r1 = new sun.font.GlyphList;
+
+        specialinvoke $r1.<sun.font.GlyphList: void <init>()>();
+
+        exitmonitor class "Lsun/font/GlyphList;";
+
+     label3:
+        return $r1;
+
+     label4:
+        <sun.font.GlyphList: boolean inUse> = 1;
+
+        $r0 = <sun.font.GlyphList: sun.font.GlyphList reusableGL>;
+
+        exitmonitor class "Lsun/font/GlyphList;";
+
+     label5:
+        return $r0;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lsun/font/GlyphList;";
+
+     label7:
+        throw $r3;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public boolean setFromString(sun.java2d.loops.FontInfo, java.lang.String, float, float)
+    {
+        sun.font.GlyphList r0;
+        sun.font.FontStrike $r2;
+        int $i0, $i1, $i2, $i3;
+        float f0, f1;
+        sun.java2d.loops.FontInfo r1;
+        char[] $r4;
+        java.lang.String r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.font.GlyphList;
+
+        r1 := @parameter0: sun.java2d.loops.FontInfo;
+
+        r3 := @parameter1: java.lang.String;
+
+        f0 := @parameter2: float;
+
+        f1 := @parameter3: float;
+
+        r0.<sun.font.GlyphList: float x> = f0;
+
+        r0.<sun.font.GlyphList: float y> = f1;
+
+        $r2 = r1.<sun.java2d.loops.FontInfo: sun.font.FontStrike fontStrike>;
+
+        r0.<sun.font.GlyphList: java.lang.Object strikelist> = $r2;
+
+        $z0 = r1.<sun.java2d.loops.FontInfo: boolean lcdRGBOrder>;
+
+        r0.<sun.font.GlyphList: boolean lcdRGBOrder> = $z0;
+
+        $z1 = r1.<sun.java2d.loops.FontInfo: boolean lcdSubPixPos>;
+
+        r0.<sun.font.GlyphList: boolean lcdSubPixPos> = $z1;
+
+        $i0 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        r0.<sun.font.GlyphList: int len> = $i0;
+
+        $i1 = r0.<sun.font.GlyphList: int len>;
+
+        virtualinvoke r0.<sun.font.GlyphList: void ensureCapacity(int)>($i1);
+
+        $i2 = r0.<sun.font.GlyphList: int len>;
+
+        $r4 = r0.<sun.font.GlyphList: char[] chData>;
+
+        virtualinvoke r3.<java.lang.String: void getChars(int,int,char[],int)>(0, $i2, $r4, 0);
+
+        $i3 = r0.<sun.font.GlyphList: int len>;
+
+        $z2 = specialinvoke r0.<sun.font.GlyphList: boolean mapChars(sun.java2d.loops.FontInfo,int)>(r1, $i3);
+
+        return $z2;
+    }
+
+    public boolean setFromChars(sun.java2d.loops.FontInfo, char[], int, int, float, float)
+    {
+        sun.font.GlyphList r0;
+        sun.font.FontStrike $r2;
+        int i0, $i1, i2, $i3, $i4;
+        float f0, f1;
+        sun.java2d.loops.FontInfo r1;
+        char[] r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.font.GlyphList;
+
+        r1 := @parameter0: sun.java2d.loops.FontInfo;
+
+        r3 := @parameter1: char[];
+
+        i2 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        f0 := @parameter4: float;
+
+        f1 := @parameter5: float;
+
+        r0.<sun.font.GlyphList: float x> = f0;
+
+        r0.<sun.font.GlyphList: float y> = f1;
+
+        $r2 = r1.<sun.java2d.loops.FontInfo: sun.font.FontStrike fontStrike>;
+
+        r0.<sun.font.GlyphList: java.lang.Object strikelist> = $r2;
+
+        $z0 = r1.<sun.java2d.loops.FontInfo: boolean lcdRGBOrder>;
+
+        r0.<sun.font.GlyphList: boolean lcdRGBOrder> = $z0;
+
+        $z1 = r1.<sun.java2d.loops.FontInfo: boolean lcdSubPixPos>;
+
+        r0.<sun.font.GlyphList: boolean lcdSubPixPos> = $z1;
+
+        r0.<sun.font.GlyphList: int len> = i0;
+
+        if i0 >= 0 goto label1;
+
+        r0.<sun.font.GlyphList: int len> = 0;
+
+        goto label2;
+
+     label1:
+        r0.<sun.font.GlyphList: int len> = i0;
+
+     label2:
+        $i1 = r0.<sun.font.GlyphList: int len>;
+
+        virtualinvoke r0.<sun.font.GlyphList: void ensureCapacity(int)>($i1);
+
+        $r4 = r0.<sun.font.GlyphList: char[] chData>;
+
+        $i3 = r0.<sun.font.GlyphList: int len>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i2, $r4, 0, $i3);
+
+        $i4 = r0.<sun.font.GlyphList: int len>;
+
+        $z2 = specialinvoke r0.<sun.font.GlyphList: boolean mapChars(sun.java2d.loops.FontInfo,int)>(r1, $i4);
+
+        return $z2;
+    }
+
+    private final boolean mapChars(sun.java2d.loops.FontInfo, int)
+    {
+        sun.font.CharToGlyphMapper $r2;
+        sun.font.GlyphList r3;
+        sun.font.FontStrike $r8;
+        sun.font.Font2D $r1;
+        long[] $r6;
+        int[] $r4, $r7;
+        int i0, $i2;
+        sun.java2d.loops.FontInfo r0;
+        char[] $r5;
+        boolean $z0;
+
+        r3 := @this: sun.font.GlyphList;
+
+        r0 := @parameter0: sun.java2d.loops.FontInfo;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<sun.java2d.loops.FontInfo: sun.font.Font2D font2D>;
+
+        $r2 = virtualinvoke $r1.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $r5 = r3.<sun.font.GlyphList: char[] chData>;
+
+        $r4 = r3.<sun.font.GlyphList: int[] glyphData>;
+
+        $z0 = virtualinvoke $r2.<sun.font.CharToGlyphMapper: boolean charsToGlyphsNS(int,char[],int[])>(i0, $r5, $r4);
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r8 = r0.<sun.java2d.loops.FontInfo: sun.font.FontStrike fontStrike>;
+
+        $r7 = r3.<sun.font.GlyphList: int[] glyphData>;
+
+        $r6 = r3.<sun.font.GlyphList: long[] images>;
+
+        virtualinvoke $r8.<sun.font.FontStrike: void getGlyphImagePtrs(int[],long[],int)>($r7, $r6, i0);
+
+        $i2 = (int) -1;
+
+        r3.<sun.font.GlyphList: int glyphindex> = $i2;
+
+        return 1;
+    }
+
+    public void setFromGlyphVector(sun.java2d.loops.FontInfo, java.awt.font.GlyphVector, float, float)
+    {
+        double[] $r4, $r5;
+        float[] $r8;
+        long[] $r6;
+        int $i0, $i1, $i3;
+        sun.java2d.loops.FontInfo r1;
+        sun.font.StandardGlyphVector $r3;
+        boolean $z0, $z1, $z2, $z3;
+        sun.font.GlyphList r0;
+        java.awt.font.GlyphVector r2;
+        float f0, f1;
+        java.lang.Object $r7;
+
+        r0 := @this: sun.font.GlyphList;
+
+        r1 := @parameter0: sun.java2d.loops.FontInfo;
+
+        r2 := @parameter1: java.awt.font.GlyphVector;
+
+        f0 := @parameter2: float;
+
+        f1 := @parameter3: float;
+
+        r0.<sun.font.GlyphList: float x> = f0;
+
+        r0.<sun.font.GlyphList: float y> = f1;
+
+        $z0 = r1.<sun.java2d.loops.FontInfo: boolean lcdRGBOrder>;
+
+        r0.<sun.font.GlyphList: boolean lcdRGBOrder> = $z0;
+
+        $z1 = r1.<sun.java2d.loops.FontInfo: boolean lcdSubPixPos>;
+
+        r0.<sun.font.GlyphList: boolean lcdSubPixPos> = $z1;
+
+        $r3 = staticinvoke <sun.font.StandardGlyphVector: sun.font.StandardGlyphVector getStandardGV(java.awt.font.GlyphVector,sun.java2d.loops.FontInfo)>(r2, r1);
+
+        $r4 = r1.<sun.java2d.loops.FontInfo: double[] devTx>;
+
+        $z2 = virtualinvoke $r3.<sun.font.StandardGlyphVector: boolean needsPositions(double[])>($r4);
+
+        r0.<sun.font.GlyphList: boolean usePositions> = $z2;
+
+        $i0 = virtualinvoke $r3.<sun.font.StandardGlyphVector: int getNumGlyphs()>();
+
+        r0.<sun.font.GlyphList: int len> = $i0;
+
+        $i1 = r0.<sun.font.GlyphList: int len>;
+
+        virtualinvoke r0.<sun.font.GlyphList: void ensureCapacity(int)>($i1);
+
+        $r6 = r0.<sun.font.GlyphList: long[] images>;
+
+        $z3 = r0.<sun.font.GlyphList: boolean usePositions>;
+
+        if $z3 == 0 goto label1;
+
+        $r8 = r0.<sun.font.GlyphList: float[] positions>;
+
+        goto label2;
+
+     label1:
+        $r8 = null;
+
+     label2:
+        $r5 = r1.<sun.java2d.loops.FontInfo: double[] devTx>;
+
+        $r7 = virtualinvoke $r3.<sun.font.StandardGlyphVector: java.lang.Object setupGlyphImages(long[],float[],double[])>($r6, $r8, $r5);
+
+        r0.<sun.font.GlyphList: java.lang.Object strikelist> = $r7;
+
+        $i3 = (int) -1;
+
+        r0.<sun.font.GlyphList: int glyphindex> = $i3;
+
+        return;
+    }
+
+    public int[] getBounds()
+    {
+        sun.font.GlyphList r0;
+        int[] $r1, $r2, $r3, $r4;
+        int $i0;
+        float $f0, $f1, $f2, $f3;
+        java.lang.InternalError $r5;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $i0 = r0.<sun.font.GlyphList: int glyphindex>;
+
+        if $i0 < 0 goto label1;
+
+        $r5 = new java.lang.InternalError;
+
+        specialinvoke $r5.<java.lang.InternalError: void <init>(java.lang.String)>("calling getBounds after setGlyphIndex");
+
+        throw $r5;
+
+     label1:
+        $r1 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        if $r1 != null goto label2;
+
+        $r4 = newarray (int)[5];
+
+        r0.<sun.font.GlyphList: int[] metrics> = $r4;
+
+     label2:
+        $f0 = r0.<sun.font.GlyphList: float x>;
+
+        $f1 = $f0 + 0.5F;
+
+        r0.<sun.font.GlyphList: float gposx> = $f1;
+
+        $f2 = r0.<sun.font.GlyphList: float y>;
+
+        $f3 = $f2 + 0.5F;
+
+        r0.<sun.font.GlyphList: float gposy> = $f3;
+
+        $r2 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        specialinvoke r0.<sun.font.GlyphList: void fillBounds(int[])>($r2);
+
+        $r3 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        return $r3;
+    }
+
+    public void setGlyphIndex(int)
+    {
+        byte $b2;
+        sun.misc.Unsafe $r3, $r5, $r9, $r11, $r13, $r16, $r19;
+        long $l1, $l4, $l5, $l6, $l8, $l9, $l10, $l14, $l15, $l16, $l18, $l19, $l20, $l22, $l23, $l24, $l27, $l28, $l29, $l32, $l33, $l34;
+        float[] $r21, $r23;
+        int[] $r6, $r7, $r14, $r17, $r20, $r22, $r24, $r25, $r26, $r27, $r28, $r29;
+        boolean $z0;
+        sun.font.GlyphList r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21;
+        long[] $r1, $r2, $r4, $r8, $r10, $r12, $r15, $r18;
+        int i0, $i3, $i7, $i11, $i12, $i13, $i17, $i21, $i26, $i31, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        char $c25, $c30, $c35;
+
+        r0 := @this: sun.font.GlyphList;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.font.GlyphList: int glyphindex> = i0;
+
+        $r1 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l1 = $r1[i0];
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r25 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $f20 = r0.<sun.font.GlyphList: float gposx>;
+
+        $i41 = (int) $f20;
+
+        $r25[0] = $i41;
+
+        $r26 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $f21 = r0.<sun.font.GlyphList: float gposy>;
+
+        $i42 = (int) $f21;
+
+        $r26[1] = $i42;
+
+        $r27 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r27[2] = 0;
+
+        $r28 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r28[3] = 0;
+
+        $r29 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r29[4] = 0;
+
+        return;
+
+     label1:
+        $r3 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r2 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l5 = $r2[i0];
+
+        $i3 = <sun.font.StrikeCache: int topLeftXOffset>;
+
+        $l4 = (long) $i3;
+
+        $l6 = $l5 + $l4;
+
+        $f0 = virtualinvoke $r3.<sun.misc.Unsafe: float getFloat(long)>($l6);
+
+        $r5 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r4 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l9 = $r4[i0];
+
+        $i7 = <sun.font.StrikeCache: int topLeftYOffset>;
+
+        $l8 = (long) $i7;
+
+        $l10 = $l9 + $l8;
+
+        $f1 = virtualinvoke $r5.<sun.misc.Unsafe: float getFloat(long)>($l10);
+
+        $z0 = r0.<sun.font.GlyphList: boolean usePositions>;
+
+        if $z0 == 0 goto label2;
+
+        $r22 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r21 = r0.<sun.font.GlyphList: float[] positions>;
+
+        $i36 = i0 << 1;
+
+        $f13 = $r21[$i36];
+
+        $f12 = r0.<sun.font.GlyphList: float gposx>;
+
+        $f14 = $f13 + $f12;
+
+        $f15 = $f14 + $f0;
+
+        $d4 = (double) $f15;
+
+        $d5 = staticinvoke <java.lang.Math: double floor(double)>($d4);
+
+        $i37 = (int) $d5;
+
+        $r22[0] = $i37;
+
+        $r24 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r23 = r0.<sun.font.GlyphList: float[] positions>;
+
+        $i38 = i0 << 1;
+
+        $i39 = $i38 + 1;
+
+        $f17 = $r23[$i39];
+
+        $f16 = r0.<sun.font.GlyphList: float gposy>;
+
+        $f18 = $f17 + $f16;
+
+        $f19 = $f18 + $f1;
+
+        $d6 = (double) $f19;
+
+        $d7 = staticinvoke <java.lang.Math: double floor(double)>($d6);
+
+        $i40 = (int) $d7;
+
+        $r24[1] = $i40;
+
+        goto label3;
+
+     label2:
+        $r6 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $f2 = r0.<sun.font.GlyphList: float gposx>;
+
+        $f3 = $f2 + $f0;
+
+        $d0 = (double) $f3;
+
+        $d1 = staticinvoke <java.lang.Math: double floor(double)>($d0);
+
+        $i11 = (int) $d1;
+
+        $r6[0] = $i11;
+
+        $r7 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $f4 = r0.<sun.font.GlyphList: float gposy>;
+
+        $f5 = $f4 + $f1;
+
+        $d2 = (double) $f5;
+
+        $d3 = staticinvoke <java.lang.Math: double floor(double)>($d2);
+
+        $i12 = (int) $d3;
+
+        $r7[1] = $i12;
+
+        $f6 = r0.<sun.font.GlyphList: float gposx>;
+
+        $r9 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r8 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l15 = $r8[i0];
+
+        $i13 = <sun.font.StrikeCache: int xAdvanceOffset>;
+
+        $l14 = (long) $i13;
+
+        $l16 = $l15 + $l14;
+
+        $f7 = virtualinvoke $r9.<sun.misc.Unsafe: float getFloat(long)>($l16);
+
+        $f8 = $f6 + $f7;
+
+        r0.<sun.font.GlyphList: float gposx> = $f8;
+
+        $f9 = r0.<sun.font.GlyphList: float gposy>;
+
+        $r11 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r10 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l19 = $r10[i0];
+
+        $i17 = <sun.font.StrikeCache: int yAdvanceOffset>;
+
+        $l18 = (long) $i17;
+
+        $l20 = $l19 + $l18;
+
+        $f10 = virtualinvoke $r11.<sun.misc.Unsafe: float getFloat(long)>($l20);
+
+        $f11 = $f9 + $f10;
+
+        r0.<sun.font.GlyphList: float gposy> = $f11;
+
+     label3:
+        $r14 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r13 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r12 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l23 = $r12[i0];
+
+        $i21 = <sun.font.StrikeCache: int widthOffset>;
+
+        $l22 = (long) $i21;
+
+        $l24 = $l23 + $l22;
+
+        $c25 = virtualinvoke $r13.<sun.misc.Unsafe: char getChar(long)>($l24);
+
+        $i43 = (int) $c25;
+
+        $r14[2] = $i43;
+
+        $r17 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r16 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r15 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l28 = $r15[i0];
+
+        $i26 = <sun.font.StrikeCache: int heightOffset>;
+
+        $l27 = (long) $i26;
+
+        $l29 = $l28 + $l27;
+
+        $c30 = virtualinvoke $r16.<sun.misc.Unsafe: char getChar(long)>($l29);
+
+        $i44 = (int) $c30;
+
+        $r17[3] = $i44;
+
+        $r20 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $r19 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r18 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l33 = $r18[i0];
+
+        $i31 = <sun.font.StrikeCache: int rowBytesOffset>;
+
+        $l32 = (long) $i31;
+
+        $l34 = $l33 + $l32;
+
+        $c35 = virtualinvoke $r19.<sun.misc.Unsafe: char getChar(long)>($l34);
+
+        $i45 = (int) $c35;
+
+        $r20[4] = $i45;
+
+        return;
+    }
+
+    public int[] getMetrics()
+    {
+        sun.font.GlyphList r0;
+        int[] $r1;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        return $r1;
+    }
+
+    public byte[] getGrayBits()
+    {
+        byte[] $r3, $r4, $r7, $r9, $r10, $r11, $r12, $r13;
+        byte $b10, $b13, $b17;
+        int[] $r1, $r2;
+        sun.font.GlyphList r0;
+        sun.misc.Unsafe $r6, $r8;
+        long $l6, $l7, $l8, $l9, $l11, $l12, $l16;
+        long[] $r5, $r14;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i14, $i15, i18;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $i1 = $r1[4];
+
+        $r2 = r0.<sun.font.GlyphList: int[] metrics>;
+
+        $i0 = $r2[3];
+
+        i2 = $i1 * $i0;
+
+        $r3 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        if $r3 != null goto label1;
+
+        $i14 = staticinvoke <java.lang.Math: int max(int,int)>(i2, 1024);
+
+        $r13 = newarray (byte)[$i14];
+
+        r0.<sun.font.GlyphList: byte[] graybits> = $r13;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        $i3 = lengthof $r4;
+
+        if i2 <= $i3 goto label2;
+
+        $r12 = newarray (byte)[i2];
+
+        r0.<sun.font.GlyphList: byte[] graybits> = $r12;
+
+     label2:
+        $r14 = r0.<sun.font.GlyphList: long[] images>;
+
+        $i15 = r0.<sun.font.GlyphList: int glyphindex>;
+
+        $l16 = $r14[$i15];
+
+        $b17 = $l16 cmp 0L;
+
+        if $b17 != 0 goto label3;
+
+        $r11 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        return $r11;
+
+     label3:
+        $r6 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r5 = r0.<sun.font.GlyphList: long[] images>;
+
+        $i4 = r0.<sun.font.GlyphList: int glyphindex>;
+
+        $l7 = $r5[$i4];
+
+        $i5 = <sun.font.StrikeCache: int pixelDataOffset>;
+
+        $l6 = (long) $i5;
+
+        $l8 = $l7 + $l6;
+
+        $l9 = virtualinvoke $r6.<sun.misc.Unsafe: long getAddress(long)>($l8);
+
+        $b10 = $l9 cmp 0L;
+
+        if $b10 != 0 goto label4;
+
+        $r10 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        return $r10;
+
+     label4:
+        i18 = 0;
+
+     label5:
+        if i18 >= i2 goto label6;
+
+        $r9 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        $r8 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $l11 = (long) i18;
+
+        $l12 = $l9 + $l11;
+
+        $b13 = virtualinvoke $r8.<sun.misc.Unsafe: byte getByte(long)>($l12);
+
+        $r9[i18] = $b13;
+
+        i18 = i18 + 1;
+
+        goto label5;
+
+     label6:
+        $r7 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        return $r7;
+    }
+
+    public long[] getImages()
+    {
+        sun.font.GlyphList r0;
+        long[] $r1;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = r0.<sun.font.GlyphList: long[] images>;
+
+        return $r1;
+    }
+
+    public boolean usePositions()
+    {
+        sun.font.GlyphList r0;
+        boolean $z0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $z0 = r0.<sun.font.GlyphList: boolean usePositions>;
+
+        return $z0;
+    }
+
+    public float[] getPositions()
+    {
+        sun.font.GlyphList r0;
+        float[] $r1;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = r0.<sun.font.GlyphList: float[] positions>;
+
+        return $r1;
+    }
+
+    public float getX()
+    {
+        sun.font.GlyphList r0;
+        float $f0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $f0 = r0.<sun.font.GlyphList: float x>;
+
+        return $f0;
+    }
+
+    public float getY()
+    {
+        sun.font.GlyphList r0;
+        float $f0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $f0 = r0.<sun.font.GlyphList: float y>;
+
+        return $f0;
+    }
+
+    public java.lang.Object getStrike()
+    {
+        sun.font.GlyphList r0;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = r0.<sun.font.GlyphList: java.lang.Object strikelist>;
+
+        return $r1;
+    }
+
+    public boolean isSubPixPos()
+    {
+        sun.font.GlyphList r0;
+        boolean $z0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $z0 = r0.<sun.font.GlyphList: boolean lcdSubPixPos>;
+
+        return $z0;
+    }
+
+    public boolean isRGBOrder()
+    {
+        sun.font.GlyphList r0;
+        boolean $z0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $z0 = r0.<sun.font.GlyphList: boolean lcdRGBOrder>;
+
+        return $z0;
+    }
+
+    public void dispose()
+    {
+        byte[] $r2, $r3;
+        int $i0;
+        sun.font.GlyphList r0, $r1;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $r1 = <sun.font.GlyphList: sun.font.GlyphList reusableGL>;
+
+        if r0 != $r1 goto label2;
+
+        $r2 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.font.GlyphList: byte[] graybits>;
+
+        $i0 = lengthof $r3;
+
+        if $i0 <= 8192 goto label1;
+
+        r0.<sun.font.GlyphList: byte[] graybits> = null;
+
+     label1:
+        r0.<sun.font.GlyphList: boolean usePositions> = 0;
+
+        r0.<sun.font.GlyphList: java.lang.Object strikelist> = null;
+
+        <sun.font.GlyphList: boolean inUse> = 0;
+
+     label2:
+        return;
+    }
+
+    public int getNumGlyphs()
+    {
+        int $i0;
+        sun.font.GlyphList r0;
+
+        r0 := @this: sun.font.GlyphList;
+
+        $i0 = r0.<sun.font.GlyphList: int len>;
+
+        return $i0;
+    }
+
+    private void fillBounds(int[])
+    {
+        byte $b13, $b34, $b35, $b36, $b37;
+        sun.misc.Unsafe $r4, $r6, $r8, $r10, $r12, $r14;
+        long $l12, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l24, $l25, $l26, $l28, $l29, $l30, $l31, $l32, $l33;
+        float[] $r15, $r16;
+        int[] r1;
+        boolean $z0;
+        sun.font.GlyphList r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, f14, f15, f16, f17, f18, f19, f20, f21;
+        long[] $r2, $r3, $r5, $r7, $r9, $r11, $r13;
+        int i0, i1, i2, i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, i38, i39, i40, $i41, $i42, $i43, $i44;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        char $c23, $c27;
+
+        r0 := @this: sun.font.GlyphList;
+
+        r1 := @parameter0: int[];
+
+        i0 = <sun.font.StrikeCache: int topLeftXOffset>;
+
+        i1 = <sun.font.StrikeCache: int topLeftYOffset>;
+
+        i2 = <sun.font.StrikeCache: int widthOffset>;
+
+        i3 = <sun.font.StrikeCache: int heightOffset>;
+
+        i4 = <sun.font.StrikeCache: int xAdvanceOffset>;
+
+        i5 = <sun.font.StrikeCache: int yAdvanceOffset>;
+
+        $i6 = r0.<sun.font.GlyphList: int len>;
+
+        if $i6 != 0 goto label01;
+
+        r1[3] = 0;
+
+        r1[2] = 0;
+
+        r1[1] = 0;
+
+        r1[0] = 0;
+
+        return;
+
+     label01:
+        f14 = #InfinityF;
+
+        f15 = #InfinityF;
+
+        f16 = #-InfinityF;
+
+        f17 = #-InfinityF;
+
+        i38 = 0;
+
+        $f0 = r0.<sun.font.GlyphList: float x>;
+
+        f18 = $f0 + 0.5F;
+
+        $f1 = r0.<sun.font.GlyphList: float y>;
+
+        f19 = $f1 + 0.5F;
+
+        i39 = 0;
+
+     label02:
+        $i7 = r0.<sun.font.GlyphList: int len>;
+
+        if i39 >= $i7 goto label10;
+
+        $r2 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l12 = $r2[i39];
+
+        $b13 = $l12 cmp 0L;
+
+        if $b13 != 0 goto label03;
+
+        goto label09;
+
+     label03:
+        $r4 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r3 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l15 = $r3[i39];
+
+        $l14 = (long) i0;
+
+        $l16 = $l15 + $l14;
+
+        $f2 = virtualinvoke $r4.<sun.misc.Unsafe: float getFloat(long)>($l16);
+
+        $r6 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r5 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l18 = $r5[i39];
+
+        $l17 = (long) i1;
+
+        $l19 = $l18 + $l17;
+
+        $f3 = virtualinvoke $r6.<sun.misc.Unsafe: float getFloat(long)>($l19);
+
+        $r8 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r7 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l21 = $r7[i39];
+
+        $l20 = (long) i2;
+
+        $l22 = $l21 + $l20;
+
+        $c23 = virtualinvoke $r8.<sun.misc.Unsafe: char getChar(long)>($l22);
+
+        $r10 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r9 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l25 = $r9[i39];
+
+        $l24 = (long) i3;
+
+        $l26 = $l25 + $l24;
+
+        $c27 = virtualinvoke $r10.<sun.misc.Unsafe: char getChar(long)>($l26);
+
+        $z0 = r0.<sun.font.GlyphList: boolean usePositions>;
+
+        if $z0 == 0 goto label04;
+
+        $r15 = r0.<sun.font.GlyphList: float[] positions>;
+
+        i40 = i38 + 1;
+
+        $f8 = $r15[i38];
+
+        $f9 = $f8 + $f2;
+
+        f20 = $f9 + f18;
+
+        $r16 = r0.<sun.font.GlyphList: float[] positions>;
+
+        i38 = i40 + 1;
+
+        $f10 = $r16[i40];
+
+        $f11 = $f10 + $f3;
+
+        f21 = $f11 + f19;
+
+        goto label05;
+
+     label04:
+        f20 = f18 + $f2;
+
+        f21 = f19 + $f3;
+
+        $r12 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r11 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l29 = $r11[i39];
+
+        $l28 = (long) i4;
+
+        $l30 = $l29 + $l28;
+
+        $f4 = virtualinvoke $r12.<sun.misc.Unsafe: float getFloat(long)>($l30);
+
+        f18 = f18 + $f4;
+
+        $r14 = <sun.font.StrikeCache: sun.misc.Unsafe unsafe>;
+
+        $r13 = r0.<sun.font.GlyphList: long[] images>;
+
+        $l32 = $r13[i39];
+
+        $l31 = (long) i5;
+
+        $l33 = $l32 + $l31;
+
+        $f5 = virtualinvoke $r14.<sun.misc.Unsafe: float getFloat(long)>($l33);
+
+        f19 = f19 + $f5;
+
+     label05:
+        $f6 = (float) $c23;
+
+        $f12 = f20 + $f6;
+
+        $f7 = (float) $c27;
+
+        $f13 = f21 + $f7;
+
+        $b34 = f15 cmpl f20;
+
+        $i41 = (int) $b34;
+
+        if $i41 <= 0 goto label06;
+
+        f15 = f20;
+
+     label06:
+        $b35 = f14 cmpl f21;
+
+        $i42 = (int) $b35;
+
+        if $i42 <= 0 goto label07;
+
+        f14 = f21;
+
+     label07:
+        $b36 = f17 cmpg $f12;
+
+        $i43 = (int) $b36;
+
+        if $i43 >= 0 goto label08;
+
+        f17 = $f12;
+
+     label08:
+        $b37 = f16 cmpg $f13;
+
+        $i44 = (int) $b37;
+
+        if $i44 >= 0 goto label09;
+
+        f16 = $f13;
+
+     label09:
+        i39 = i39 + 1;
+
+        goto label02;
+
+     label10:
+        $d0 = (double) f15;
+
+        $d1 = staticinvoke <java.lang.Math: double floor(double)>($d0);
+
+        $i8 = (int) $d1;
+
+        r1[0] = $i8;
+
+        $d2 = (double) f14;
+
+        $d3 = staticinvoke <java.lang.Math: double floor(double)>($d2);
+
+        $i9 = (int) $d3;
+
+        r1[1] = $i9;
+
+        $d4 = (double) f17;
+
+        $d5 = staticinvoke <java.lang.Math: double floor(double)>($d4);
+
+        $i10 = (int) $d5;
+
+        r1[2] = $i10;
+
+        $d6 = (double) f16;
+
+        $d7 = staticinvoke <java.lang.Math: double floor(double)>($d6);
+
+        $i11 = (int) $d7;
+
+        r1[3] = $i11;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.font.GlyphList $r0;
+
+        <sun.font.GlyphList: int DEFAULT_LENGTH> = 32;
+
+        <sun.font.GlyphList: int MAXGRAYLENGTH> = 8192;
+
+        <sun.font.GlyphList: int MINGRAYLENGTH> = 1024;
+
+        $r0 = new sun.font.GlyphList;
+
+        specialinvoke $r0.<sun.font.GlyphList: void <init>()>();
+
+        <sun.font.GlyphList: sun.font.GlyphList reusableGL> = $r0;
+
+        return;
+    }
+}

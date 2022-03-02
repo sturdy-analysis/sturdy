@@ -1,0 +1,5281 @@
+public abstract class com.sun.org.apache.xml.internal.serializer.ToStream extends com.sun.org.apache.xml.internal.serializer.SerializerBase
+{
+    private static final java.lang.String COMMENT_BEGIN;
+    private static final java.lang.String COMMENT_END;
+    protected com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates;
+    com.sun.org.apache.xml.internal.serializer.EncodingInfo m_encodingInfo;
+    java.lang.reflect.Method m_canConvertMeth;
+    boolean m_triedToGetConverter;
+    java.lang.Object m_charToByteConverter;
+    protected com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves;
+    protected boolean m_ispreserve;
+    protected boolean m_isprevtext;
+    protected int m_maxCharacter;
+    protected char[] m_lineSep;
+    protected boolean m_lineSepUse;
+    protected int m_lineSepLen;
+    protected com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo;
+    boolean m_shouldFlush;
+    protected boolean m_spaceBeforeClose;
+    boolean m_startNewLine;
+    protected boolean m_inDoctype;
+    boolean m_isUTF8;
+    protected boolean m_cdataStartCalled;
+    private boolean m_expandDTDEntities;
+    private char m_highSurrogate;
+    private boolean m_escaping;
+    java.io.OutputStream m_outputStream;
+    private boolean m_writer_set_by_user;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r2;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r1, $r3;
+        int $i0, $i1;
+        char[] $r5, $r6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r4;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void <init>()>();
+
+        $r1 = new com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack;
+
+        specialinvoke $r1.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates> = $r1;
+
+        $r2 = new com.sun.org.apache.xml.internal.serializer.EncodingInfo;
+
+        specialinvoke $r2.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: void <init>(java.lang.String,java.lang.String)>(null, null);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.EncodingInfo m_encodingInfo> = $r2;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_triedToGetConverter> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.Object m_charToByteConverter> = null;
+
+        $r3 = new com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves> = $r3;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 0;
+
+        $i0 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: int getLastPrintable()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_maxCharacter> = $i0;
+
+        $r4 = staticinvoke <com.sun.org.apache.xalan.internal.utils.SecuritySupport: java.lang.String getSystemProperty(java.lang.String)>("line.separator");
+
+        $r5 = virtualinvoke $r4.<java.lang.String: char[] toCharArray()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep> = $r5;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse> = 1;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i1 = lengthof $r6;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen> = $i1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush> = 1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_spaceBeforeClose> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isUTF8> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataStartCalled> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities> = 1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_escaping> = 1;
+
+        return;
+    }
+
+    protected void closeCDATA() throws org.xml.sax.SAXException
+    {
+        org.xml.sax.SAXException $r3;
+        java.io.Writer $r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.io.IOException $r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("]]>");
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen> = 0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new org.xml.sax.SAXException;
+
+        specialinvoke $r3.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void serialize(org.w3c.dom.Node) throws java.io.IOException
+    {
+        com.sun.org.apache.xml.internal.serializer.TreeWalker $r0;
+        com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException $r4;
+        org.w3c.dom.Node r2;
+        org.xml.sax.SAXException $r3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: org.w3c.dom.Node;
+
+     label1:
+        $r0 = new com.sun.org.apache.xml.internal.serializer.TreeWalker;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.serializer.TreeWalker: void <init>(org.xml.sax.ContentHandler)>(r1);
+
+        virtualinvoke $r0.<com.sun.org.apache.xml.internal.serializer.TreeWalker: void traverse(org.w3c.dom.Node)>(r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    static final boolean isUTF16Surrogate(char)
+    {
+        int $i2, $i4;
+        char c0, $c1;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $c1 = c0 & 64512;
+
+        $i2 = (int) $c1;
+
+        $i4 = (int) 55296;
+
+        if $i2 != $i4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected final void flushWriter() throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r4;
+        org.xml.sax.SAXException $r5;
+        java.io.Writer r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        if null == r1 goto label7;
+
+     label1:
+        $z0 = r1 instanceof com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered;
+
+        if $z0 == 0 goto label3;
+
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush>;
+
+        if $z2 == 0 goto label2;
+
+        $r3 = (com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered) r1;
+
+        virtualinvoke $r3.<com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered: void flush()>();
+
+        goto label3;
+
+     label2:
+        $r2 = (com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered) r1;
+
+        virtualinvoke $r2.<com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered: void flushBuffer()>();
+
+     label3:
+        $z3 = r1 instanceof com.sun.org.apache.xml.internal.serializer.WriterToASCI;
+
+        if $z3 == 0 goto label4;
+
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush>;
+
+        if $z1 == 0 goto label5;
+
+        virtualinvoke r1.<java.io.Writer: void flush()>();
+
+        goto label5;
+
+     label4:
+        virtualinvoke r1.<java.io.Writer: void flush()>();
+
+     label5:
+        goto label7;
+
+     label6:
+        $r4 := @caughtexception;
+
+        $r5 = new org.xml.sax.SAXException;
+
+        specialinvoke $r5.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label5 with label6;
+    }
+
+    public java.io.OutputStream getOutputStream()
+    {
+        java.io.OutputStream $r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.OutputStream m_outputStream>;
+
+        return $r1;
+    }
+
+    public void elementDecl(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r4;
+        org.xml.sax.SAXException $r5;
+        int $i0;
+        java.io.Writer r6;
+        char[] $r3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inExternalDTD>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        virtualinvoke r6.<java.io.Writer: void write(java.lang.String)>("<!ELEMENT ");
+
+        virtualinvoke r6.<java.io.Writer: void write(java.lang.String)>(r1);
+
+        virtualinvoke r6.<java.io.Writer: void write(int)>(32);
+
+        virtualinvoke r6.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        virtualinvoke r6.<java.io.Writer: void write(int)>(62);
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r6.<java.io.Writer: void write(char[],int,int)>($r3, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new org.xml.sax.SAXException;
+
+        specialinvoke $r5.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void internalEntityDecl(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        org.xml.sax.SAXException $r4;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.io.IOException $r3;
+        java.lang.String r1, r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inExternalDTD>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void outputEntityDecl(java.lang.String,java.lang.String)>(r1, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new org.xml.sax.SAXException;
+
+        specialinvoke $r4.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void outputEntityDecl(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        java.io.Writer r1;
+        int $i0;
+        char[] $r4;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("<!ENTITY ");
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>(" \"");
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>(r3);
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("\">");
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r1.<java.io.Writer: void write(char[],int,int)>($r4, 0, $i0);
+
+        return;
+    }
+
+    protected final void outputLineSep() throws java.io.IOException
+    {
+        int $i0;
+        java.io.Writer $r2;
+        char[] $r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r2.<java.io.Writer: void write(char[],int,int)>($r1, 0, $i0);
+
+        return;
+    }
+
+    void setProp(java.lang.String, java.lang.String, boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r46, r47;
+        java.lang.Exception $r43;
+        java.lang.StringBuilder $r24, $r25, $r26, $r27, $r48;
+        java.lang.Object[] $r20;
+        javax.xml.transform.TransformerException $r49, $r50;
+        java.lang.String r0, $r1, $r3, $r4, $r5, $r6, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r18, $r19, $r22, $r28, $r40, $r41, $r42, r44, r45;
+        char[] $r7, $r8;
+        javax.xml.transform.Transformer $r29;
+        com.sun.org.apache.xml.internal.serializer.utils.Messages $r21;
+        com.sun.org.apache.xml.internal.serializer.ToStream r2;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22;
+        javax.xml.transform.SourceLocator $r35, $r37, $r39;
+        java.io.Writer $r17;
+        javax.xml.transform.ErrorListener $r32;
+        int $i1, $i2, $i3;
+        java.io.OutputStream $r16;
+        java.io.PrintStream $r30, $r31, $r33, $r34;
+        char $c0;
+
+        r2 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        r44 := @parameter1: java.lang.String;
+
+        z1 := @parameter2: boolean;
+
+        if r44 == null goto label32;
+
+        $c0 = staticinvoke <com.sun.org.apache.xml.internal.serializer.ToStream: char getFirstCharLocName(java.lang.String)>(r0);
+
+        $i3 = (int) $c0;
+
+        tableswitch($i3)
+        {
+            case 99: goto label01;
+            case 100: goto label02;
+            case 101: goto label04;
+            case 102: goto label31;
+            case 103: goto label31;
+            case 104: goto label31;
+            case 105: goto label20;
+            case 106: goto label31;
+            case 107: goto label31;
+            case 108: goto label23;
+            case 109: goto label24;
+            case 110: goto label31;
+            case 111: goto label25;
+            case 112: goto label31;
+            case 113: goto label31;
+            case 114: goto label31;
+            case 115: goto label28;
+            case 116: goto label31;
+            case 117: goto label31;
+            case 118: goto label30;
+            default: goto label31;
+        };
+
+     label01:
+        $r42 = "cdata-section-elements";
+
+        $z21 = virtualinvoke $r42.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z21 == 0 goto label31;
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: void addCdataSectionElements(java.lang.String)>(r44);
+
+        goto label31;
+
+     label02:
+        $r40 = "doctype-system";
+
+        $z18 = virtualinvoke $r40.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z18 == 0 goto label03;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_doctypeSystem> = r44;
+
+        goto label31;
+
+     label03:
+        $r41 = "doctype-public";
+
+        $z19 = virtualinvoke $r41.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z19 == 0 goto label31;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_doctypePublic> = r44;
+
+        $z20 = virtualinvoke r44.<java.lang.String: boolean startsWith(java.lang.String)>("-//W3C//DTD XHTML");
+
+        if $z20 == 0 goto label31;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_spaceBeforeClose> = 1;
+
+        goto label31;
+
+     label04:
+        r45 = r44;
+
+        $r12 = "encoding";
+
+        $z12 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z12 == 0 goto label31;
+
+        $r13 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.lang.String getMimeEncoding(java.lang.String)>(r44);
+
+        if $r13 == null goto label05;
+
+        specialinvoke r2.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void setProp(java.lang.String,java.lang.String,boolean)>("mime-name", $r13, z1);
+
+     label05:
+        $r14 = virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputPropertyNonDefault(java.lang.String)>("encoding");
+
+        $r15 = virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputPropertyDefault(java.lang.String)>("encoding");
+
+        if z1 == 0 goto label06;
+
+        if $r15 == null goto label07;
+
+        $z17 = virtualinvoke $r15.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r45);
+
+        if $z17 == 0 goto label07;
+
+     label06:
+        if z1 != 0 goto label19;
+
+        if $r14 == null goto label07;
+
+        $z16 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r45);
+
+        if $z16 != 0 goto label19;
+
+     label07:
+        $r46 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: com.sun.org.apache.xml.internal.serializer.EncodingInfo getEncodingInfo(java.lang.String)>(r45);
+
+        r47 = $r46;
+
+        if r45 == null goto label15;
+
+        $r19 = $r46.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: java.lang.String name>;
+
+        if $r19 != null goto label15;
+
+        $r21 = <com.sun.org.apache.xml.internal.serializer.utils.Utils: com.sun.org.apache.xml.internal.serializer.utils.Messages messages>;
+
+        $r20 = newarray (java.lang.Object)[1];
+
+        $r20[0] = r45;
+
+        $r22 = virtualinvoke $r21.<com.sun.org.apache.xml.internal.serializer.utils.Messages: java.lang.String createMessage(java.lang.String,java.lang.Object[])>("ER_ENCODING_NOT_SUPPORTED", $r20);
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Warning: encoding \"");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r45);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" not supported, using ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UTF-8");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label08:
+        $r29 = specialinvoke r2.<com.sun.org.apache.xml.internal.serializer.SerializerBase: javax.xml.transform.Transformer getTransformer()>();
+
+        if $r29 == null goto label11;
+
+        $r32 = virtualinvoke $r29.<javax.xml.transform.Transformer: javax.xml.transform.ErrorListener getErrorListener()>();
+
+        if null == $r32 goto label09;
+
+        $r35 = r2.<com.sun.org.apache.xml.internal.serializer.ToStream: javax.xml.transform.SourceLocator m_sourceLocator>;
+
+        if $r35 == null goto label09;
+
+        $r49 = new javax.xml.transform.TransformerException;
+
+        $r37 = r2.<com.sun.org.apache.xml.internal.serializer.ToStream: javax.xml.transform.SourceLocator m_sourceLocator>;
+
+        specialinvoke $r49.<javax.xml.transform.TransformerException: void <init>(java.lang.String,javax.xml.transform.SourceLocator)>($r22, $r37);
+
+        interfaceinvoke $r32.<javax.xml.transform.ErrorListener: void warning(javax.xml.transform.TransformerException)>($r49);
+
+        $r50 = new javax.xml.transform.TransformerException;
+
+        $r39 = r2.<com.sun.org.apache.xml.internal.serializer.ToStream: javax.xml.transform.SourceLocator m_sourceLocator>;
+
+        specialinvoke $r50.<javax.xml.transform.TransformerException: void <init>(java.lang.String,javax.xml.transform.SourceLocator)>($r28, $r39);
+
+        interfaceinvoke $r32.<javax.xml.transform.ErrorListener: void warning(javax.xml.transform.TransformerException)>($r50);
+
+        goto label10;
+
+     label09:
+        $r33 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r33.<java.io.PrintStream: void println(java.lang.String)>($r22);
+
+        $r34 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r34.<java.io.PrintStream: void println(java.lang.String)>($r28);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r30 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r30.<java.io.PrintStream: void println(java.lang.String)>($r22);
+
+        $r31 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r31.<java.io.PrintStream: void println(java.lang.String)>($r28);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r43 := @caughtexception;
+
+     label14:
+        r45 = "UTF-8";
+
+        r44 = "UTF-8";
+
+        r47 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: com.sun.org.apache.xml.internal.serializer.EncodingInfo getEncodingInfo(java.lang.String)>("UTF-8");
+
+     label15:
+        if z1 == 0 goto label16;
+
+        if $r14 != null goto label19;
+
+     label16:
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.EncodingInfo m_encodingInfo> = r47;
+
+        if r45 == null goto label17;
+
+        $z15 = virtualinvoke r45.<java.lang.String: boolean equals(java.lang.Object)>("UTF-8");
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isUTF8> = $z15;
+
+     label17:
+        $r16 = virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.OutputStream getOutputStream()>();
+
+        if $r16 == null goto label19;
+
+        $r17 = virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer getWriter()>();
+
+        $r18 = virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputProperty(java.lang.String)>("encoding");
+
+        if $r17 == null goto label18;
+
+        $z14 = r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_writer_set_by_user>;
+
+        if $z14 != 0 goto label19;
+
+     label18:
+        $z13 = virtualinvoke r45.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r18);
+
+        if $z13 != 0 goto label19;
+
+        specialinvoke r2.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void setProp(java.lang.String,java.lang.String,boolean)>(r0, r44, z1);
+
+        specialinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: void setOutputStreamInternal(java.io.OutputStream,boolean)>($r16, 0);
+
+     label19:
+        goto label31;
+
+     label20:
+        $r9 = "{http://xml.apache.org/xalan}indent-amount";
+
+        $z7 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z7 == 0 goto label21;
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r44);
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: void setIndentAmount(int)>($i2);
+
+        goto label31;
+
+     label21:
+        $r10 = "indent";
+
+        $z8 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z8 == 0 goto label22;
+
+        $z11 = virtualinvoke r44.<java.lang.String: boolean endsWith(java.lang.String)>("yes");
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_doIndent> = $z11;
+
+        goto label31;
+
+     label22:
+        $r11 = "{http://www.oracle.com/xml}isStandalone";
+
+        $z9 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z9 == 0 goto label31;
+
+        $z10 = virtualinvoke r44.<java.lang.String: boolean endsWith(java.lang.String)>("yes");
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isStandalone> = $z10;
+
+        goto label31;
+
+     label23:
+        $r6 = "{http://xml.apache.org/xalan}line-separator";
+
+        $z6 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z6 == 0 goto label31;
+
+        $r7 = virtualinvoke r44.<java.lang.String: char[] toCharArray()>();
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep> = $r7;
+
+        $r8 = r2.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i1 = lengthof $r8;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen> = $i1;
+
+        goto label31;
+
+     label24:
+        $r5 = "media-type";
+
+        $z5 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z5 == 0 goto label31;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_mediatype> = r44;
+
+        goto label31;
+
+     label25:
+        $r4 = "omit-xml-declaration";
+
+        $z3 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z3 == 0 goto label31;
+
+        $z4 = virtualinvoke r44.<java.lang.String: boolean endsWith(java.lang.String)>("yes");
+
+        if $z4 == 0 goto label26;
+
+        $z22 = 1;
+
+        goto label27;
+
+     label26:
+        $z22 = 0;
+
+     label27:
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldNotWriteXMLHeader> = $z22;
+
+        goto label31;
+
+     label28:
+        $r3 = "standalone";
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z2 == 0 goto label31;
+
+        if z1 == 0 goto label29;
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: void setStandaloneInternal(java.lang.String)>(r44);
+
+        goto label31;
+
+     label29:
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_standaloneWasSpecified> = 1;
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.serializer.ToStream: void setStandaloneInternal(java.lang.String)>(r44);
+
+        goto label31;
+
+     label30:
+        $r1 = "version";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label31;
+
+        r2.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_version> = r44;
+
+        goto label31;
+
+     label31:
+        specialinvoke r2.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void setProp(java.lang.String,java.lang.String,boolean)>(r0, r44, z1);
+
+     label32:
+        return;
+
+        catch java.lang.Exception from label08 to label12 with label13;
+    }
+
+    public void setOutputFormat(java.util.Properties)
+    {
+        java.util.Properties r1;
+        java.util.Enumeration $r5;
+        com.sun.org.apache.xml.internal.serializer.CharInfo $r4;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.Object $r2, $r3, $r7, $r9;
+        java.lang.String $r6, $r8, r10, r11, r12;
+        boolean z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.util.Properties;
+
+        z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush>;
+
+        if r1 == null goto label4;
+
+        $r5 = virtualinvoke r1.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r11 = (java.lang.String) $r7;
+
+        $r8 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r11);
+
+        $r9 = virtualinvoke r1.<java.util.Properties: java.lang.Object get(java.lang.Object)>(r11);
+
+        r10 = (java.lang.String) $r9;
+
+        if r10 != null goto label2;
+
+        if $r8 == null goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setOutputPropertyDefault(java.lang.String,java.lang.String)>(r11, $r8);
+
+     label2:
+        if r10 == null goto label3;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setOutputProperty(java.lang.String,java.lang.String)>(r11, r10);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 = virtualinvoke r1.<java.util.Properties: java.lang.Object get(java.lang.Object)>("{http://xml.apache.org/xalan}entities");
+
+        $r6 = (java.lang.String) $r2;
+
+        if null == $r6 goto label5;
+
+        $r3 = virtualinvoke r1.<java.util.Properties: java.lang.Object get(java.lang.Object)>("method");
+
+        r12 = (java.lang.String) $r3;
+
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.serializer.CharInfo: com.sun.org.apache.xml.internal.serializer.CharInfo getCharInfo(java.lang.String,java.lang.String)>($r6, r12);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo> = $r4;
+
+     label5:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush> = z0;
+
+        return;
+    }
+
+    public java.util.Properties getOutputFormat()
+    {
+        java.util.Properties $r0, $r4;
+        java.util.Iterator $r3, $r6;
+        java.util.Set $r2, $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+        java.lang.Object $r7, $r9;
+        java.lang.String $r8, $r10, r11, r12;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        $r2 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.util.Set getOutputPropDefaultKeys()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r9 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.lang.String) $r9;
+
+        $r10 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputPropertyDefault(java.lang.String)>(r11);
+
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>(r11, $r10);
+
+        goto label1;
+
+     label2:
+        $r4 = new java.util.Properties;
+
+        specialinvoke $r4.<java.util.Properties: void <init>(java.util.Properties)>($r0);
+
+        $r5 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.util.Set getOutputPropKeys()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.lang.String) $r7;
+
+        $r8 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputPropertyNonDefault(java.lang.String)>(r12);
+
+        if $r8 == null goto label4;
+
+        virtualinvoke $r4.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>(r12, $r8);
+
+     label4:
+        goto label3;
+
+     label5:
+        return $r4;
+    }
+
+    public void setWriter(java.io.Writer)
+    {
+        java.io.Writer r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.Writer;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setWriterInternal(java.io.Writer,boolean)>(r1, 1);
+
+        return;
+    }
+
+    private void setWriterInternal(java.io.Writer, boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter $r3;
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r2, $r4;
+        java.io.Writer r1, $r5, r7;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.WriterChain $r6;
+        boolean z0, $z1, $z2, z3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.Writer;
+
+        z0 := @parameter1: boolean;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_writer_set_by_user> = z0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer> = r1;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r2 == null goto label4;
+
+        z3 = 1;
+
+        r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+     label1:
+        $z1 = r7 instanceof com.sun.org.apache.xml.internal.serializer.WriterChain;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = r7 instanceof com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter;
+
+        if $z2 == 0 goto label2;
+
+        z3 = 0;
+
+        goto label3;
+
+     label2:
+        $r6 = (com.sun.org.apache.xml.internal.serializer.WriterChain) r7;
+
+        r7 = interfaceinvoke $r6.<com.sun.org.apache.xml.internal.serializer.WriterChain: java.io.Writer getWriter()>();
+
+        goto label1;
+
+     label3:
+        if z3 == 0 goto label4;
+
+        $r3 = new com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter;
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter: void <init>(java.io.Writer,com.sun.org.apache.xml.internal.serializer.SerializerTrace)>($r5, $r4);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer> = $r3;
+
+     label4:
+        return;
+    }
+
+    public boolean setLineSepUse(boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        z1 := @parameter0: boolean;
+
+        z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse>;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse> = z1;
+
+        return z0;
+    }
+
+    public void setOutputStream(java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setOutputStreamInternal(java.io.OutputStream,boolean)>(r1, 1);
+
+        return;
+    }
+
+    private void setOutputStreamInternal(java.io.OutputStream, boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.WriterToASCI $r19;
+        java.io.OutputStreamWriter $r7;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r14;
+        com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered $r15;
+        boolean $z0, $z1, $z2, $z3, z4;
+        java.io.OutputStream r1;
+        java.io.PrintStream $r9;
+        java.io.Writer r20;
+        java.lang.StringBuilder $r8, $r10, $r11, $r12, $r13;
+        java.io.UnsupportedEncodingException $r16, $r17, $r18;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        z4 := @parameter1: boolean;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.OutputStream m_outputStream> = r1;
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getOutputProperty(java.lang.String)>("encoding");
+
+        $r3 = "UTF-8";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label04;
+
+     label01:
+        $r15 = new com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered;
+
+        specialinvoke $r15.<com.sun.org.apache.xml.internal.serializer.WriterToUTF8Buffered: void <init>(java.io.OutputStream)>(r1);
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setWriterInternal(java.io.Writer,boolean)>($r15, 0);
+
+     label02:
+        goto label16;
+
+     label03:
+        $r18 := @caughtexception;
+
+        virtualinvoke $r18.<java.io.UnsupportedEncodingException: void printStackTrace()>();
+
+        goto label16;
+
+     label04:
+        $r4 = "WINDOWS-1250";
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label05;
+
+        $r5 = "US-ASCII";
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z2 != 0 goto label05;
+
+        $r6 = "ASCII";
+
+        $z3 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z3 == 0 goto label06;
+
+     label05:
+        $r19 = new com.sun.org.apache.xml.internal.serializer.WriterToASCI;
+
+        specialinvoke $r19.<com.sun.org.apache.xml.internal.serializer.WriterToASCI: void <init>(java.io.OutputStream)>(r1);
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setWriterInternal(java.io.Writer,boolean)>($r19, 0);
+
+        goto label16;
+
+     label06:
+        if $r2 == null goto label15;
+
+     label07:
+        r20 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.io.Writer getWriter(java.io.OutputStream,java.lang.String)>(r1, $r2);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r17 := @caughtexception;
+
+        r20 = null;
+
+     label10:
+        if r20 != null goto label14;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Warning: encoding \"");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" not supported, using ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UTF-8");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setEncoding(java.lang.String)>("UTF-8");
+
+     label11:
+        r20 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.io.Writer getWriter(java.io.OutputStream,java.lang.String)>(r1, "UTF-8");
+
+     label12:
+        goto label14;
+
+     label13:
+        $r16 := @caughtexception;
+
+        virtualinvoke $r16.<java.io.UnsupportedEncodingException: void printStackTrace()>();
+
+     label14:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setWriterInternal(java.io.Writer,boolean)>(r20, 0);
+
+        goto label16;
+
+     label15:
+        $r7 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r7.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>(r1);
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setWriterInternal(java.io.Writer,boolean)>($r7, 0);
+
+     label16:
+        return;
+
+        catch java.io.UnsupportedEncodingException from label01 to label02 with label03;
+        catch java.io.UnsupportedEncodingException from label07 to label08 with label09;
+        catch java.io.UnsupportedEncodingException from label11 to label12 with label13;
+    }
+
+    public boolean setEscaping(boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        z1 := @parameter0: boolean;
+
+        z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_escaping>;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_escaping> = z1;
+
+        return z0;
+    }
+
+    protected void indent(int) throws java.io.IOException
+    {
+        int $i0, i1, $i2, $i3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        i1 := @parameter0: int;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_startNewLine>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void outputLineSep()>();
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_indentAmount>;
+
+        if $i0 <= 0 goto label2;
+
+        $i2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_indentAmount>;
+
+        $i3 = i1 * $i2;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void printSpace(int)>($i3);
+
+     label2:
+        return;
+    }
+
+    protected void indent() throws java.io.IOException
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i0 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent(int)>($i0);
+
+        return;
+    }
+
+    private void printSpace(int) throws java.io.IOException
+    {
+        java.io.Writer r1;
+        int i0, i1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        i0 := @parameter0: int;
+
+        r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        virtualinvoke r1.<java.io.Writer: void write(int)>(32);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void attributeDecl(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r6;
+        org.xml.sax.SAXException $r7;
+        int $i0;
+        java.io.Writer r9;
+        char[] $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2, r3, r4, r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: java.lang.String;
+
+        r8 := @parameter4: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inExternalDTD>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        virtualinvoke r9.<java.io.Writer: void write(java.lang.String)>("<!ATTLIST ");
+
+        virtualinvoke r9.<java.io.Writer: void write(java.lang.String)>(r1);
+
+        virtualinvoke r9.<java.io.Writer: void write(int)>(32);
+
+        virtualinvoke r9.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        virtualinvoke r9.<java.io.Writer: void write(int)>(32);
+
+        virtualinvoke r9.<java.io.Writer: void write(java.lang.String)>(r3);
+
+        if r4 == null goto label2;
+
+        virtualinvoke r9.<java.io.Writer: void write(int)>(32);
+
+        virtualinvoke r9.<java.io.Writer: void write(java.lang.String)>(r4);
+
+     label2:
+        virtualinvoke r9.<java.io.Writer: void write(int)>(62);
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r9.<java.io.Writer: void write(char[],int,int)>($r5, 0, $i0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = new org.xml.sax.SAXException;
+
+        specialinvoke $r7.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r6);
+
+        throw $r7;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public java.io.Writer getWriter()
+    {
+        java.io.Writer $r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        return $r1;
+    }
+
+    public void externalEntityDecl(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r13;
+        java.io.Writer $r1, $r3, $r5, $r7, $r8, $r10, $r11, $r12;
+        int $i0;
+        char[] $r9;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r2, r4, r6;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+     label1:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("<!ENTITY ");
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        if r4 == null goto label2;
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r11.<java.io.Writer: void write(java.lang.String)>(" PUBLIC \"");
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r12.<java.io.Writer: void write(java.lang.String)>(r4);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(" SYSTEM \"");
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(r6);
+
+     label3:
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("\" >");
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r10.<java.io.Writer: void write(char[],int,int)>($r9, 0, $i0);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        virtualinvoke $r13.<java.io.IOException: void printStackTrace()>();
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    protected boolean escapingNotNeeded(char)
+    {
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r1;
+        char c0;
+        int $i1, $i2, $i3, $i4, $i5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 >= 127 goto label3;
+
+        $i2 = (int) c0;
+
+        if $i2 >= 32 goto label1;
+
+        $i3 = (int) c0;
+
+        if 10 == $i3 goto label1;
+
+        $i4 = (int) c0;
+
+        if 13 == $i4 goto label1;
+
+        $i5 = (int) c0;
+
+        if 9 != $i5 goto label2;
+
+     label1:
+        z0 = 1;
+
+        goto label4;
+
+     label2:
+        z0 = 0;
+
+        goto label4;
+
+     label3:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.EncodingInfo m_encodingInfo>;
+
+        z0 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: boolean isInEncoding(char)>(c0);
+
+     label4:
+        return z0;
+    }
+
+    protected int writeUTF16Surrogate(char, char[], int, int) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        int i0, i1, $i2, $i5, i6, $i10, $i12;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r2;
+        boolean $z0, $z1;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r1;
+        char $c3, c4, c7, c8;
+        java.io.Writer $r5;
+        char[] $r3, $r4, r6;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        c4 := @parameter0: char;
+
+        r6 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $i10 = (int) -1;
+
+        i6 = $i10;
+
+        $i2 = i0 + 1;
+
+        if $i2 < i1 goto label1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate> = c4;
+
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label1:
+        $c3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate>;
+
+        if $c3 != 0 goto label2;
+
+        c7 = c4;
+
+        $i5 = i0 + 1;
+
+        c8 = r6[$i5];
+
+        i6 = 0;
+
+        goto label3;
+
+     label2:
+        c7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate>;
+
+        c8 = c4;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate> = 0;
+
+     label3:
+        $z0 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isLowUTF16Surrogate(char)>(c8);
+
+        if $z0 != 0 goto label4;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void throwIOE(char,char)>(c7, c8);
+
+     label4:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.EncodingInfo m_encodingInfo>;
+
+        $z1 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: boolean isInEncoding(char,char)>(c7, c8);
+
+        if $z1 == 0 goto label5;
+
+        $r4 = newarray (char)[2];
+
+        $r4[0] = c7;
+
+        $r4[1] = c8;
+
+        virtualinvoke $r5.<java.io.Writer: void write(char[],int,int)>($r4, 0, 2);
+
+        goto label7;
+
+     label5:
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getEncoding()>();
+
+        if $r2 == null goto label6;
+
+        i6 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int writeCharRef(java.io.Writer,char,char)>($r5, c7, c8);
+
+        goto label7;
+
+     label6:
+        $r3 = newarray (char)[2];
+
+        $r3[0] = c7;
+
+        $r3[1] = c8;
+
+        virtualinvoke $r5.<java.io.Writer: void write(char[],int,int)>($r3, 0, 2);
+
+     label7:
+        return i6;
+    }
+
+    protected int accumDefaultEntity(java.io.Writer, char, int, char[], int, boolean, boolean) throws java.io.IOException
+    {
+        int i0, $i2, $i3, i4, $i5, $i6, $i7;
+        com.sun.org.apache.xml.internal.serializer.CharInfo $r1, $r2, $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r3;
+        boolean z0, z1, $z2, $z3;
+        char c1;
+        java.io.Writer r4;
+        char[] $r6, r7;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r4 := @parameter0: java.io.Writer;
+
+        c1 := @parameter1: char;
+
+        i0 := @parameter2: int;
+
+        r7 := @parameter3: char[];
+
+        i4 := @parameter4: int;
+
+        z1 := @parameter5: boolean;
+
+        z0 := @parameter6: boolean;
+
+        if z0 != 0 goto label1;
+
+        $i5 = (int) c1;
+
+        if 10 != $i5 goto label1;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r4.<java.io.Writer: void write(char[],int,int)>($r6, 0, $i3);
+
+        goto label7;
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i6 = (int) c1;
+
+        $z3 = virtualinvoke $r5.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialTextChar(int)>($i6);
+
+        if $z3 != 0 goto label3;
+
+     label2:
+        if z1 != 0 goto label6;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i7 = (int) c1;
+
+        $z2 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialAttrChar(int)>($i7);
+
+        if $z2 == 0 goto label6;
+
+     label3:
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.serializer.CharInfo: java.lang.String getOutputStringForChar(char)>(c1);
+
+        if null == $r3 goto label4;
+
+        virtualinvoke r4.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        goto label5;
+
+     label4:
+        return i0;
+
+     label5:
+        goto label7;
+
+     label6:
+        return i0;
+
+     label7:
+        $i2 = i0 + 1;
+
+        return $i2;
+    }
+
+    void writeNormalizedChars(char[], int, int, boolean, boolean) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        int i0, i1, i2, $i4, $i5, $i7, $i9, i10, $i11, $i12, $i13, $i14, $i15;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0, $z1, $z2, z3, $z4;
+        char c3, $c6, $c8;
+        java.io.Writer r1;
+        char[] r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        z3 := @parameter4: boolean;
+
+        r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        i2 = i0 + i1;
+
+        i10 = i0;
+
+     label1:
+        if i10 >= i2 goto label8;
+
+        c3 = r2[i10];
+
+        $i11 = (int) c3;
+
+        if 10 != $i11 goto label2;
+
+        if z3 == 0 goto label2;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r1.<java.io.Writer: void write(char[],int,int)>($r3, 0, $i9);
+
+        goto label7;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $z2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>(c3);
+
+        if $z2 != 0 goto label3;
+
+        i10 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int handleEscaping(java.io.Writer,char,char[],int,int)>(r1, c3, r2, i10, i2);
+
+        goto label7;
+
+     label3:
+        if z0 == 0 goto label4;
+
+        $i4 = i2 - 2;
+
+        if i10 >= $i4 goto label4;
+
+        $i12 = (int) c3;
+
+        if 93 != $i12 goto label4;
+
+        $i5 = i10 + 1;
+
+        $c6 = r2[$i5];
+
+        $i13 = (int) $c6;
+
+        if 93 != $i13 goto label4;
+
+        $i7 = i10 + 2;
+
+        $c8 = r2[$i7];
+
+        $i14 = (int) $c8;
+
+        if 62 != $i14 goto label4;
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("]]]]><![CDATA[>");
+
+        i10 = i10 + 2;
+
+        goto label7;
+
+     label4:
+        $z4 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>(c3);
+
+        if $z4 == 0 goto label6;
+
+        if z0 == 0 goto label5;
+
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z1 != 0 goto label5;
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("<![CDATA[");
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen> = 1;
+
+     label5:
+        $i15 = (int) c3;
+
+        virtualinvoke r1.<java.io.Writer: void write(int)>($i15);
+
+        goto label7;
+
+     label6:
+        i10 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int handleEscaping(java.io.Writer,char,char[],int,int)>(r1, c3, r2, i10, i2);
+
+     label7:
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label8:
+        return;
+    }
+
+    private int handleEscaping(java.io.Writer, char, char[], int, int) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        char c0;
+        int i1, $i2, i3;
+        java.io.Writer r2;
+        char[] r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.io.Writer;
+
+        c0 := @parameter1: char;
+
+        r1 := @parameter2: char[];
+
+        i3 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $z0 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isHighUTF16Surrogate(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        $z2 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isLowUTF16Surrogate(char)>(c0);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int writeUTF16Surrogate(char,char[],int,int)>(c0, r1, i3, i1);
+
+        if $i2 < 0 goto label3;
+
+        $z1 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isHighUTF16Surrogate(char)>(c0);
+
+        if $z1 == 0 goto label3;
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void writeCharRef(java.io.Writer,char)>(r2, c0);
+
+     label3:
+        return i3;
+    }
+
+    public void endNonEscaping() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates>;
+
+        virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean pop()>();
+
+        return;
+    }
+
+    public void startNonEscaping() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates>;
+
+        virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean push(boolean)>(1);
+
+        return;
+    }
+
+    protected void cdata(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.utils.Messages $r7;
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r9;
+        int i0, i1, $i2, $i3, $i6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r8;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r4;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z8, $z9, $z10;
+        char $c4, $c5;
+        java.io.IOException $r5;
+        org.xml.sax.SAXException $r10;
+        java.io.Writer $r3;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label01:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z0 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r4.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+     label02:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 1;
+
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z1 != 0 goto label03;
+
+        $z6 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean shouldIndent()>();
+
+        if $z6 == 0 goto label03;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent()>();
+
+     label03:
+        if i1 < 1 goto label04;
+
+        $c5 = r2[i0];
+
+        $z5 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>($c5);
+
+        if $z5 == 0 goto label04;
+
+        $z10 = 1;
+
+        $z9 = 1;
+
+        goto label05;
+
+     label04:
+        $z10 = 0;
+
+        $z9 = 0;
+
+     label05:
+        z2 = $z9;
+
+        if $z10 == 0 goto label06;
+
+        $z4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z4 != 0 goto label06;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>("<![CDATA[");
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen> = 1;
+
+     label06:
+        $z8 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean isEscapingDisabled()>();
+
+        if $z8 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void charactersRaw(char[],int,int)>(r2, i0, i1);
+
+        goto label08;
+
+     label07:
+        $z3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void writeNormalizedChars(char[],int,int,boolean,boolean)>(r2, i0, i1, 1, $z3);
+
+     label08:
+        if z2 == 0 goto label09;
+
+        $i2 = i0 + i1;
+
+        $i3 = $i2 - 1;
+
+        $c4 = r2[$i3];
+
+        $i6 = (int) $c4;
+
+        if $i6 != 93 goto label09;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label09:
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r9 == null goto label10;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireCDATAEvent(char[],int,int)>(r2, i0, i1);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r5 := @caughtexception;
+
+        $r10 = new org.xml.sax.SAXException;
+
+        $r7 = <com.sun.org.apache.xml.internal.serializer.utils.Utils: com.sun.org.apache.xml.internal.serializer.utils.Messages messages>;
+
+        $r8 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.serializer.utils.Messages: java.lang.String createMessage(java.lang.String,java.lang.Object[])>("ER_OIERROR", null);
+
+        specialinvoke $r10.<org.xml.sax.SAXException: void <init>(java.lang.String,java.lang.Exception)>($r8, $r5);
+
+        throw $r10;
+
+     label12:
+        return;
+
+        catch java.io.IOException from label01 to label10 with label11;
+    }
+
+    private boolean isEscapingDisabled()
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean peekOrFalse()>();
+
+        return $z0;
+    }
+
+    protected void charactersRaw(char[], int, int) throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r5;
+        org.xml.sax.SAXException $r6;
+        int i0, i1;
+        java.io.Writer $r3;
+        char[] r2;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r4;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z1 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z1 == 0 goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r4.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+     label2:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 1;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(char[],int,int)>(r2, i0, i1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new org.xml.sax.SAXException;
+
+        specialinvoke $r6.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void characters(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r5, $r9;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r4;
+        org.xml.sax.SAXException $r18;
+        java.io.Writer $r10;
+        int i0, i1, $i2, $i3, $i6, $i7, i8, i9, i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20;
+        com.sun.org.apache.xml.internal.serializer.CharInfo $r11, $r12, $r17;
+        java.lang.String $r7, $r8;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r3, $r6, $r13, $r14;
+        char $c4, $c5, c10;
+        java.io.IOException $r15;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 == 0 goto label01;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label02;
+
+        $z15 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities>;
+
+        if $z15 != 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z1 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z1 == 0 goto label03;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r14 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r14.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+        goto label04;
+
+     label03:
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument>;
+
+        if $z2 == 0 goto label04;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startDocumentInternal()>();
+
+     label04:
+        $z16 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataStartCalled>;
+
+        if $z16 != 0 goto label05;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z3 = $r3.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_isCdataSection>;
+
+        if $z3 == 0 goto label06;
+
+     label05:
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void cdata(char[],int,int)>(r2, i1, i0);
+
+        return;
+
+     label06:
+        $z4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z4 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label07:
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates>;
+
+        $z5 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean peekOrFalse()>();
+
+        if $z5 != 0 goto label08;
+
+        $z6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_escaping>;
+
+        if $z6 != 0 goto label10;
+
+     label08:
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void charactersRaw(char[],int,int)>(r2, i1, i0);
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r5 == null goto label09;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireCharEvent(char[],int,int)>(r2, i1, i0);
+
+     label09:
+        return;
+
+     label10:
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z7 = $r6.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z7 == 0 goto label11;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r13 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r13.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+     label11:
+        $i7 = i1 + i0;
+
+        i8 = i1 - 1;
+
+        i9 = i1;
+
+     label12:
+        if i9 >= $i7 goto label16;
+
+        $c5 = r2[i9];
+
+        $i12 = (int) $c5;
+
+        if $i12 == 32 goto label14;
+
+        $i13 = (int) $c5;
+
+        if $i13 != 10 goto label13;
+
+        $z14 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse>;
+
+        if $z14 != 0 goto label14;
+
+     label13:
+        $i14 = (int) $c5;
+
+        if $i14 == 13 goto label14;
+
+        $i15 = (int) $c5;
+
+        if $i15 != 9 goto label16;
+
+     label14:
+        $r17 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i16 = (int) $c5;
+
+        $z17 = virtualinvoke $r17.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isTextASCIIClean(int)>($i16);
+
+        if $z17 != 0 goto label15;
+
+        $i6 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int processDirty(char[],int,int,char,int,boolean)>(r2, $i7, i9, $c5, i8, 1);
+
+        i8 = $i6;
+
+        i9 = $i6;
+
+     label15:
+        i9 = i9 + 1;
+
+        goto label12;
+
+     label16:
+        if i9 >= $i7 goto label17;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 1;
+
+     label17:
+        $r7 = "1.0";
+
+        $r8 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getVersion()>();
+
+        $z8 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label18:
+        if i9 >= $i7 goto label26;
+
+     label19:
+        if i9 >= $i7 goto label20;
+
+        $c4 = r2[i9];
+
+        $i17 = (int) $c4;
+
+        if $i17 >= 127 goto label20;
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i18 = (int) $c4;
+
+        $z13 = virtualinvoke $r12.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isTextASCIIClean(int)>($i18);
+
+        if $z13 == 0 goto label20;
+
+        i9 = i9 + 1;
+
+        goto label19;
+
+     label20:
+        if i9 != $i7 goto label21;
+
+        goto label26;
+
+     label21:
+        c10 = r2[i9];
+
+        $z9 = staticinvoke <com.sun.org.apache.xml.internal.serializer.ToStream: boolean isCharacterInC0orC1Range(char)>(c10);
+
+        if $z9 != 0 goto label23;
+
+        if $z8 != 0 goto label22;
+
+        $z12 = staticinvoke <com.sun.org.apache.xml.internal.serializer.ToStream: boolean isNELorLSEPCharacter(char)>(c10);
+
+        if $z12 != 0 goto label23;
+
+     label22:
+        $z10 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>(c10);
+
+        if $z10 == 0 goto label23;
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i19 = (int) c10;
+
+        $z11 = virtualinvoke $r11.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialTextChar(int)>($i19);
+
+        if $z11 == 0 goto label25;
+
+     label23:
+        $i20 = (int) c10;
+
+        if 34 != $i20 goto label24;
+
+        goto label25;
+
+     label24:
+        $i2 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int processDirty(char[],int,int,char,int,boolean)>(r2, $i7, i9, c10, i8, 1);
+
+        i8 = $i2;
+
+        i9 = $i2;
+
+     label25:
+        i9 = i9 + 1;
+
+        goto label18;
+
+     label26:
+        $i3 = i8 + 1;
+
+        if i9 <= $i3 goto label27;
+
+        i11 = i9 - $i3;
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r10.<java.io.Writer: void write(char[],int,int)>(r2, $i3, i11);
+
+     label27:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 1;
+
+     label28:
+        goto label30;
+
+     label29:
+        $r15 := @caughtexception;
+
+        $r18 = new org.xml.sax.SAXException;
+
+        specialinvoke $r18.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r15);
+
+        throw $r18;
+
+     label30:
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r9 == null goto label31;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireCharEvent(char[],int,int)>(r2, i1, i0);
+
+     label31:
+        return;
+
+        catch java.io.IOException from label11 to label28 with label29;
+    }
+
+    private static boolean isCharacterInC0orC1Range(char)
+    {
+        char c0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 == 9 goto label1;
+
+        $i2 = (int) c0;
+
+        if $i2 == 10 goto label1;
+
+        $i3 = (int) c0;
+
+        if $i3 != 13 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i4 = (int) c0;
+
+        if $i4 < 127 goto label3;
+
+        $i5 = (int) c0;
+
+        if $i5 <= 159 goto label4;
+
+     label3:
+        $i6 = (int) c0;
+
+        if $i6 < 1 goto label5;
+
+        $i7 = (int) c0;
+
+        if $i7 > 31 goto label5;
+
+     label4:
+        $z0 = 1;
+
+        goto label6;
+
+     label5:
+        $z0 = 0;
+
+     label6:
+        return $z0;
+    }
+
+    private static boolean isNELorLSEPCharacter(char)
+    {
+        int $i1, $i2;
+        char c0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 == 133 goto label1;
+
+        $i2 = (int) c0;
+
+        if $i2 != 8232 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    private int processDirty(char[], int, int, char, int, boolean) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        int i0, i2, $i3, $i4, i5, i6, i7, $i8;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0;
+        char c1;
+        java.io.Writer $r2, $r4, $r5;
+        char[] r1, $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: char[];
+
+        i2 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        c1 := @parameter3: char;
+
+        i0 := @parameter4: int;
+
+        z0 := @parameter5: boolean;
+
+        i7 = i0 + 1;
+
+        if i6 <= i7 goto label1;
+
+        i5 = i6 - i7;
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(char[],int,int)>(r1, i7, i5);
+
+     label1:
+        $i8 = (int) c1;
+
+        if 10 != $i8 goto label2;
+
+        if z0 == 0 goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(char[],int,int)>($r3, 0, $i4);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $i3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int accumDefaultEscape(java.io.Writer,char,int,char[],int,boolean,boolean)>($r2, c1, i6, r1, i2, z0, 0);
+
+        i6 = $i3 - 1;
+
+     label3:
+        return i6;
+    }
+
+    public void characters(java.lang.String) throws org.xml.sax.SAXException
+    {
+        int $i0, $i1, $i2, $i3;
+        char[] $r2, $r3, $r4, $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities>;
+
+        if $z1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_charsBuff>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+        $i2 = $i0 * 2;
+
+        $i3 = $i2 + 1;
+
+        $r5 = newarray (char)[$i3];
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_charsBuff> = $r5;
+
+     label2:
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_charsBuff>;
+
+        virtualinvoke r1.<java.lang.String: void getChars(int,int,char[],int)>(0, $i0, $r3, 0);
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_charsBuff>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void characters(char[],int,int)>($r4, 0, $i0);
+
+        return;
+    }
+
+    protected int accumDefaultEscape(java.io.Writer, char, int, char[], int, boolean, boolean) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.io.Writer r1;
+        int i1, $i2, $i4, i8, i9, i10, i11, $i12, $i13, $i14, $i15;
+        com.sun.org.apache.xml.internal.serializer.CharInfo $r5, $r6;
+        java.lang.String $r3, $r4;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r7;
+        char c0, $c3, c5, $c6, $c7;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.Writer;
+
+        c0 := @parameter1: char;
+
+        i8 := @parameter2: int;
+
+        r2 := @parameter3: char[];
+
+        i1 := @parameter4: int;
+
+        z0 := @parameter5: boolean;
+
+        z1 := @parameter6: boolean;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int accumDefaultEntity(java.io.Writer,char,int,char[],int,boolean,boolean)>(r1, c0, i8, r2, i1, z0, z1);
+
+        i9 = $i2;
+
+        if i8 != $i2 goto label12;
+
+        $c3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate>;
+
+        if $c3 == 0 goto label02;
+
+        $z10 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isLowUTF16Surrogate(char)>(c0);
+
+        if $z10 != 0 goto label01;
+
+        $c7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void throwIOE(char,char)>($c7, c0);
+
+     label01:
+        $c6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int writeCharRef(java.io.Writer,char,char)>(r1, $c6, c0);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate> = 0;
+
+        i10 = $i2 + 1;
+
+        return i10;
+
+     label02:
+        $z2 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isHighUTF16Surrogate(char)>(c0);
+
+        if $z2 == 0 goto label05;
+
+        $i4 = i8 + 1;
+
+        if $i4 < i1 goto label03;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char m_highSurrogate> = c0;
+
+        i9 = $i2 + 1;
+
+        goto label12;
+
+     label03:
+        i11 = i8 + 1;
+
+        c5 = r2[i11];
+
+        $z9 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: boolean isLowUTF16Surrogate(char)>(c5);
+
+        if $z9 != 0 goto label04;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void throwIOE(char,char)>(c0, c5);
+
+     label04:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int writeCharRef(java.io.Writer,char,char)>(r1, c0, c5);
+
+        i9 = $i2 + 2;
+
+        goto label12;
+
+     label05:
+        $z3 = staticinvoke <com.sun.org.apache.xml.internal.serializer.ToStream: boolean isCharacterInC0orC1Range(char)>(c0);
+
+        if $z3 != 0 goto label06;
+
+        $r3 = "1.1";
+
+        $r4 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getVersion()>();
+
+        $z4 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z4 == 0 goto label07;
+
+        $z8 = staticinvoke <com.sun.org.apache.xml.internal.serializer.ToStream: boolean isNELorLSEPCharacter(char)>(c0);
+
+        if $z8 == 0 goto label07;
+
+     label06:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void writeCharRef(java.io.Writer,char)>(r1, c0);
+
+        goto label11;
+
+     label07:
+        $z5 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>(c0);
+
+        if $z5 == 0 goto label09;
+
+        if z0 == 0 goto label08;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i13 = (int) c0;
+
+        $z7 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialTextChar(int)>($i13);
+
+        if $z7 != 0 goto label09;
+
+     label08:
+        if z0 != 0 goto label10;
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i14 = (int) c0;
+
+        $z6 = virtualinvoke $r5.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialAttrChar(int)>($i14);
+
+        if $z6 == 0 goto label10;
+
+     label09:
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i12 = $r7.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        if $i12 <= 0 goto label10;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void writeCharRef(java.io.Writer,char)>(r1, c0);
+
+        goto label11;
+
+     label10:
+        $i15 = (int) c0;
+
+        virtualinvoke r1.<java.io.Writer: void write(int)>($i15);
+
+     label11:
+        i9 = $i2 + 1;
+
+     label12:
+        return i9;
+    }
+
+    private void writeCharRef(java.io.Writer, char) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        java.io.Writer r1;
+        int $i1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        char c0;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.Writer;
+
+        c0 := @parameter1: char;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label1:
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("&#");
+
+        $i1 = (int) c0;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke r1.<java.io.Writer: void write(int)>(59);
+
+        return;
+    }
+
+    private int writeCharRef(java.io.Writer, char, char) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        int $i2;
+        java.io.Writer r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        char c0, c1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.io.Writer;
+
+        c0 := @parameter1: char;
+
+        c1 := @parameter2: char;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label1:
+        $i2 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: int toCodePoint(char,char)>(c0, c1);
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>("&#");
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i2);
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke r1.<java.io.Writer: void write(int)>(59);
+
+        return $i2;
+    }
+
+    private void throwIOE(char, char) throws java.io.IOException
+    {
+        java.lang.Object[] $r1;
+        com.sun.org.apache.xml.internal.serializer.utils.Messages $r3;
+        int $i2, $i3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r11;
+        java.lang.String $r4, $r7, $r9, $r10;
+        char c0, c1;
+        java.io.IOException $r13;
+        java.lang.StringBuilder $r5, $r6, $r8, $r12;
+
+        r11 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        c0 := @parameter0: char;
+
+        c1 := @parameter1: char;
+
+        $r13 = new java.io.IOException;
+
+        $r3 = <com.sun.org.apache.xml.internal.serializer.utils.Utils: com.sun.org.apache.xml.internal.serializer.utils.Messages messages>;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $i2 = (int) c0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r5 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i3 = (int) c1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i3);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[0] = $r9;
+
+        $r10 = virtualinvoke $r3.<com.sun.org.apache.xml.internal.serializer.utils.Messages: java.lang.String createMessage(java.lang.String,java.lang.Object[])>("ER_INVALID_UTF16_SURROGATE", $r1);
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>($r10);
+
+        throw $r13;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r7;
+        org.xml.sax.Attributes r3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2, r4, $r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r5, $r6, $r8, $r12;
+        java.io.IOException $r10;
+        org.xml.sax.SAXException $r11;
+        java.io.Writer $r13;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: org.xml.sax.Attributes;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument>;
+
+        if $z1 == 0 goto label02;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startDocumentInternal()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument> = 0;
+
+        goto label03;
+
+     label02:
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z2 == 0 goto label03;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label03:
+        $z5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl>;
+
+        if 1 != $z5 goto label04;
+
+        $r9 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getDoctypeSystem()>();
+
+        if null == $r9 goto label04;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void outputDocTypeDecl(java.lang.String,boolean)>(r2, 1);
+
+     label04:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl> = 0;
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z6 = $r12.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z6 == 0 goto label05;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r8.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+     label05:
+        if r1 == null goto label06;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void ensurePrefixIsDeclared(java.lang.String,java.lang.String)>(r1, r2);
+
+     label06:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 0;
+
+        $z3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean shouldIndent()>();
+
+        if $z3 == 0 goto label07;
+
+        $z4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_startNewLine>;
+
+        if $z4 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent()>();
+
+     label07:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_startNewLine> = 1;
+
+        $r13 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r13.<java.io.Writer: void write(int)>(60);
+
+        virtualinvoke $r13.<java.io.Writer: void write(java.lang.String)>(r2);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r10 := @caughtexception;
+
+        $r11 = new org.xml.sax.SAXException;
+
+        specialinvoke $r11.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r10);
+
+        throw $r11;
+
+     label10:
+        if r3 == null goto label11;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void addAttributes(org.xml.sax.Attributes)>(r3);
+
+     label11:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xml.internal.serializer.ElemContext: com.sun.org.apache.xml.internal.serializer.ElemContext push(java.lang.String,java.lang.String,java.lang.String)>(r1, r4, r2);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext> = $r6;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 0;
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r7 == null goto label12;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void firePseudoAttributes()>();
+
+     label12:
+        return;
+
+        catch java.io.IOException from label03 to label08 with label09;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2, r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r1, r2, r3, null);
+
+        return;
+    }
+
+    public void startElement(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(null, null, r1, null);
+
+        return;
+    }
+
+    void outputDocTypeDecl(java.lang.String, boolean) throws org.xml.sax.SAXException
+    {
+        char $c1;
+        java.io.IOException $r7;
+        org.xml.sax.SAXException $r9;
+        int $i2, $i3, $i4;
+        java.io.Writer $r6;
+        char[] $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, $r2, $r3;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label1:
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>("<!DOCTYPE ");
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(r1);
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getDoctypePublic()>();
+
+        if null == $r2 goto label2;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(" PUBLIC \"");
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke $r6.<java.io.Writer: void write(int)>(34);
+
+     label2:
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getDoctypeSystem()>();
+
+        if null == $r3 goto label4;
+
+        $c1 = staticinvoke <jdk.xml.internal.JdkXmlUtils: char getQuoteChar(java.lang.String)>($r3);
+
+        if null != $r2 goto label3;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(" SYSTEM");
+
+     label3:
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(" ");
+
+        $i3 = (int) $c1;
+
+        virtualinvoke $r6.<java.io.Writer: void write(int)>($i3);
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        $i4 = (int) $c1;
+
+        virtualinvoke $r6.<java.io.Writer: void write(int)>($i4);
+
+        if z1 == 0 goto label4;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(">");
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(char[],int,int)>($r5, 0, $i2);
+
+        z1 = 0;
+
+     label4:
+        goto label5;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r9 = new org.xml.sax.SAXException;
+
+        specialinvoke $r9.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r7);
+
+        throw $r9;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label5 with label6;
+    }
+
+    public void processAttributes(java.io.Writer, int) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer $r2, $r4;
+        int i0, i1;
+        java.io.Writer r6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r1, $r3, $r5;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r6 := @parameter0: java.io.Writer;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String getEncoding()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: java.lang.String getQName(int)>(i1);
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: java.lang.String getValue(int)>(i1);
+
+        virtualinvoke r6.<java.io.Writer: void write(int)>(32);
+
+        virtualinvoke r6.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        virtualinvoke r6.<java.io.Writer: void write(java.lang.String)>("=\"");
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void writeAttrString(java.io.Writer,java.lang.String,java.lang.String)>(r6, $r5, $r1);
+
+        virtualinvoke r6.<java.io.Writer: void write(int)>(34);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeAttrString(java.io.Writer, java.lang.String, java.lang.String) throws java.io.IOException, org.xml.sax.SAXException
+    {
+        int $i0, $i1, $i3, $i4, i5, $i6, $i7;
+        com.sun.org.apache.xml.internal.serializer.CharInfo $r5;
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+        java.lang.String r0, r8;
+        boolean $z0, $z1;
+        char c2;
+        java.io.Writer r4;
+        char[] $r2, $r3, $r6, $r7;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r4 := @parameter0: java.io.Writer;
+
+        r0 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r2 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_attrBuff>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label1;
+
+        $i3 = $i0 * 2;
+
+        $i4 = $i3 + 1;
+
+        $r6 = newarray (char)[$i4];
+
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_attrBuff> = $r6;
+
+     label1:
+        $r3 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_attrBuff>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(0, $i0, $r3, 0);
+
+        $r7 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_attrBuff>;
+
+        i5 = 0;
+
+     label2:
+        if i5 >= $i0 goto label5;
+
+        c2 = $r7[i5];
+
+        $z0 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean escapingNotNeeded(char)>(c2);
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.CharInfo m_charInfo>;
+
+        $i6 = (int) c2;
+
+        $z1 = virtualinvoke $r5.<com.sun.org.apache.xml.internal.serializer.CharInfo: boolean isSpecialAttrChar(int)>($i6);
+
+        if $z1 != 0 goto label3;
+
+        $i7 = (int) c2;
+
+        virtualinvoke r4.<java.io.Writer: void write(int)>($i7);
+
+        i5 = i5 + 1;
+
+        goto label4;
+
+     label3:
+        i5 = virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: int accumDefaultEscape(java.io.Writer,char,int,char[],int,boolean,boolean)>(r4, c2, i5, $r7, $i0, 0, 1);
+
+     label4:
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    public void endElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r11, $r22;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r8, $r9;
+        org.xml.sax.SAXException $r18;
+        java.io.Writer $r13, r21;
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings $r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r4, $r16, r19, r20;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r3, $r5, $r6, $r7, $r10, $r15;
+        java.io.IOException $r17;
+        com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer $r12, $r14;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r19 := @parameter0: java.lang.String;
+
+        r20 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i0 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: void popNamespaces(int,org.xml.sax.ContentHandler)>($i0, null);
+
+     label02:
+        r21 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z1 = $r3.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z1 == 0 goto label07;
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r11 == null goto label03;
+
+        $r15 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r16 = $r15.<com.sun.org.apache.xml.internal.serializer.ElemContext: java.lang.String m_elementName>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireStartElem(java.lang.String)>($r16);
+
+     label03:
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $i3 = virtualinvoke $r12.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: int getLength()>();
+
+        if $i3 <= 0 goto label04;
+
+        $r13 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void processAttributes(java.io.Writer,int)>($r13, $i3);
+
+        $r14 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        virtualinvoke $r14.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: void clear()>();
+
+     label04:
+        $z7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_spaceBeforeClose>;
+
+        if $z7 == 0 goto label05;
+
+        virtualinvoke r21.<java.io.Writer: void write(java.lang.String)>(" />");
+
+        goto label06;
+
+     label05:
+        virtualinvoke r21.<java.io.Writer: void write(java.lang.String)>("/>");
+
+     label06:
+        goto label10;
+
+     label07:
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z2 == 0 goto label08;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label08:
+        $z3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean shouldIndent()>();
+
+        if $z3 == 0 goto label09;
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i1 = $r10.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        $i2 = $i1 - 1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent(int)>($i2);
+
+     label09:
+        virtualinvoke r21.<java.io.Writer: void write(int)>(60);
+
+        virtualinvoke r21.<java.io.Writer: void write(int)>(47);
+
+        virtualinvoke r21.<java.io.Writer: void write(java.lang.String)>(r4);
+
+        virtualinvoke r21.<java.io.Writer: void write(int)>(62);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r17 := @caughtexception;
+
+        $r18 = new org.xml.sax.SAXException;
+
+        specialinvoke $r18.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r17);
+
+        throw $r18;
+
+     label12:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z4 = $r5.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z4 != 0 goto label15;
+
+        $z5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_doIndent>;
+
+        if $z5 == 0 goto label15;
+
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves>;
+
+        $z6 = virtualinvoke $r8.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean isEmpty()>();
+
+        if $z6 == 0 goto label13;
+
+        $z8 = 0;
+
+        goto label14;
+
+     label13:
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves>;
+
+        $z8 = virtualinvoke $r9.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean pop()>();
+
+     label14:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = $z8;
+
+     label15:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 0;
+
+        $r22 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r22 == null goto label16;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireEndElem(java.lang.String)>(r4);
+
+     label16:
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r7 = $r6.<com.sun.org.apache.xml.internal.serializer.ElemContext: com.sun.org.apache.xml.internal.serializer.ElemContext m_prev>;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext> = $r7;
+
+        return;
+
+        catch java.io.IOException from label02 to label10 with label11;
+    }
+
+    public void endElement(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void endElement(java.lang.String,java.lang.String,java.lang.String)>(null, null, r1);
+
+        return;
+    }
+
+    public void startPrefixMapping(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean startPrefixMapping(java.lang.String,java.lang.String,boolean)>(r1, r2, 1);
+
+        return;
+    }
+
+    public boolean startPrefixMapping(java.lang.String, java.lang.String, boolean) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings $r4;
+        int $i0, i1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r2, r3, $r5, $r6, $r10;
+        boolean z0, $z1, $z2, $z3;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r11;
+        java.lang.StringBuilder $r7, $r8, $r9;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void flushPending()>();
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i0 = $r11.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        i1 = $i0 + 1;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        i1 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+     label2:
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $z1 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: boolean pushNamespace(java.lang.String,java.lang.String,int)>(r2, r3, i1);
+
+        if $z1 == 0 goto label4;
+
+        $r5 = "";
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z2 == 0 goto label3;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean addAttributeAlways(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>("http://www.w3.org/2000/xmlns/", "xmlns", "xmlns", "CDATA", r3, 0);
+
+        goto label4;
+
+     label3:
+        $r6 = "";
+
+        $z3 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r3);
+
+        if $z3 != 0 goto label4;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xmlns:");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean addAttributeAlways(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>("http://www.w3.org/2000/xmlns/", r2, $r10, "CDATA", r3, 0);
+
+     label4:
+        return $z1;
+    }
+
+    public void comment(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r2;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, $z8, $z9;
+        org.xml.sax.SAXException $r8;
+        java.io.Writer $r7;
+        int i0, i1, $i2, $i5, i6, $i7, i8, i10, $i11, $i12, $i13;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r4;
+        char $c3, $c4, $c9;
+        java.io.IOException $r5;
+        char[] r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r3 := @parameter0: char[];
+
+        i6 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i0 = i6;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z1 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z1 == 0 goto label02;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r4.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+        goto label03;
+
+     label02:
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument>;
+
+        if $z2 == 0 goto label03;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startDocumentInternal()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument> = 0;
+
+     label03:
+        $z6 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean shouldIndent()>();
+
+        if $z6 == 0 goto label04;
+
+        $z5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isStandalone>;
+
+        if $z5 == 0 goto label04;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent()>();
+
+     label04:
+        $i7 = i6 + i1;
+
+        z7 = 0;
+
+        $z8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z8 == 0 goto label05;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label05:
+        $z3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean shouldIndent()>();
+
+        if $z3 == 0 goto label06;
+
+        $z4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isStandalone>;
+
+        if $z4 != 0 goto label06;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void indent()>();
+
+     label06:
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("<!--");
+
+        i8 = i6;
+
+     label07:
+        if i8 >= $i7 goto label11;
+
+        if z7 == 0 goto label08;
+
+        $c4 = r3[i8];
+
+        $i11 = (int) $c4;
+
+        if $i11 != 45 goto label08;
+
+        $i5 = i8 - i6;
+
+        virtualinvoke $r7.<java.io.Writer: void write(char[],int,int)>(r3, i6, $i5);
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(" -");
+
+        i6 = i8 + 1;
+
+     label08:
+        $c9 = r3[i8];
+
+        $i12 = (int) $c9;
+
+        if $i12 != 45 goto label09;
+
+        $z9 = 1;
+
+        goto label10;
+
+     label09:
+        $z9 = 0;
+
+     label10:
+        z7 = $z9;
+
+        i8 = i8 + 1;
+
+        goto label07;
+
+     label11:
+        if i1 <= 0 goto label13;
+
+        i10 = $i7 - i6;
+
+        if i10 <= 0 goto label12;
+
+        virtualinvoke $r7.<java.io.Writer: void write(char[],int,int)>(r3, i6, i10);
+
+     label12:
+        $i2 = $i7 - 1;
+
+        $c3 = r3[$i2];
+
+        $i13 = (int) $c3;
+
+        if $i13 != 45 goto label13;
+
+        virtualinvoke $r7.<java.io.Writer: void write(int)>(32);
+
+     label13:
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("-->");
+
+     label14:
+        goto label16;
+
+     label15:
+        $r5 := @caughtexception;
+
+        $r8 = new org.xml.sax.SAXException;
+
+        specialinvoke $r8.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r8;
+
+     label16:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_startNewLine> = 1;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r2 == null goto label17;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireCommentEvent(char[],int,int)>(r3, i0, i1);
+
+     label17:
+        return;
+
+        catch java.io.IOException from label03 to label14 with label15;
+    }
+
+    public void endCDATA() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+     label1:
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataStartCalled> = 0;
+
+        return;
+    }
+
+    public void endDTD() throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r5;
+        org.xml.sax.SAXException $r6;
+        int $i0;
+        java.io.Writer $r4;
+        char[] $r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r3;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+     label1:
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument>;
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return;
+
+     label3:
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl>;
+
+        if $z1 == 0 goto label4;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r3 = $r2.<com.sun.org.apache.xml.internal.serializer.ElemContext: java.lang.String m_elementName>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void outputDocTypeDecl(java.lang.String,boolean)>($r3, 0);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl> = 0;
+
+     label4:
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype>;
+
+        if $z2 != 0 goto label5;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("]>");
+
+        goto label6;
+
+     label5:
+        virtualinvoke $r4.<java.io.Writer: void write(int)>(62);
+
+     label6:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(char[],int,int)>($r1, 0, $i0);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r5 := @caughtexception;
+
+        $r6 = new org.xml.sax.SAXException;
+
+        specialinvoke $r6.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label8;
+        catch java.io.IOException from label3 to label7 with label8;
+    }
+
+    public void endPrefixMapping(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void ignorableWhitespace(char[], int, int) throws org.xml.sax.SAXException
+    {
+        int i0, i1;
+        char[] r1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if 0 != i0 goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void characters(char[],int,int)>(r1, i1, i0);
+
+        return;
+    }
+
+    public void skippedEntity(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void startCDATA() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataStartCalled> = 1;
+
+        return;
+    }
+
+    public void startEntity(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5;
+        java.lang.String r0, $r6;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("[dtd]");
+
+        if $z0 == 0 goto label1;
+
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inExternalDTD> = 1;
+
+     label1:
+        $z1 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities>;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inExternalDTD>;
+
+        if $z2 != 0 goto label2;
+
+        virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: void startNonEscaping()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("&");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(59);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: void characters(java.lang.String)>($r6);
+
+        virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: void endNonEscaping()>();
+
+     label2:
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inEntityRef> = 1;
+
+        return;
+    }
+
+    protected void closeStartTag() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r2;
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r5, $r11;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r7, $r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.IOException $r12;
+        com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer $r3, $r9;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r6;
+        org.xml.sax.SAXException $r13;
+        java.io.Writer $r4, $r8;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z0 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z0 == 0 goto label8;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r2 == null goto label2;
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r11 = $r10.<com.sun.org.apache.xml.internal.serializer.ElemContext: java.lang.String m_elementName>;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void fireStartElem(java.lang.String)>($r11);
+
+     label2:
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $i0 = virtualinvoke $r3.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: int getLength()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void processAttributes(java.io.Writer,int)>($r8, $i0);
+
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        virtualinvoke $r9.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: void clear()>();
+
+     label3:
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(int)>(62);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new org.xml.sax.SAXException;
+
+        specialinvoke $r13.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r12);
+
+        throw $r13;
+
+     label6:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections>;
+
+        if $r5 == null goto label7;
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z3 = virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean isCdataSection()>();
+
+        $r7.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_isCdataSection> = $z3;
+
+     label7:
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_doIndent>;
+
+        if $z1 == 0 goto label8;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 0;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves>;
+
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve>;
+
+        virtualinvoke $r6.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: boolean push(boolean)>($z2);
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public void startDTD(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1, r2, r3;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r4;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r3 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setDoctypeSystem(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setDoctypePublic(java.lang.String)>(r2);
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r4.<com.sun.org.apache.xml.internal.serializer.ElemContext: java.lang.String m_elementName> = r3;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype> = 1;
+
+        return;
+    }
+
+    public int getIndentAmount()
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_indentAmount>;
+
+        return $i0;
+    }
+
+    public void setIndentAmount(int)
+    {
+        int i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_indentAmount> = i0;
+
+        return;
+    }
+
+    protected boolean shouldIndent()
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_doIndent>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve>;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext>;
+
+        if $z2 != 0 goto label2;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i0 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        if $i0 > 0 goto label1;
+
+        $z3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isStandalone>;
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+    }
+
+    private void setCdataSectionElements(java.lang.String, java.util.Properties)
+    {
+        java.util.ArrayList $r8;
+        int $i0, $i1, $i3, i4, $i5, $i6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r5;
+        java.lang.String r1, $r2, $r6, $r7;
+        boolean $z0, z1;
+        java.util.Properties r0;
+        char $c2;
+        java.lang.StringBuilder $r9;
+
+        r5 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.util.Properties;
+
+        $r2 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if null == $r2 goto label8;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        z1 = 0;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i0 goto label6;
+
+        $c2 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(i4);
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c2);
+
+        if $z0 == 0 goto label2;
+
+        if z1 != 0 goto label4;
+
+        $i3 = virtualinvoke $r9.<java.lang.StringBuilder: int length()>();
+
+        if $i3 <= 0 goto label5;
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r5.<com.sun.org.apache.xml.internal.serializer.ToStream: void addCdataSectionElement(java.lang.String,java.util.List)>($r7, $r8);
+
+        virtualinvoke $r9.<java.lang.StringBuilder: void setLength(int)>(0);
+
+        goto label5;
+
+     label2:
+        $i5 = (int) $c2;
+
+        if 123 != $i5 goto label3;
+
+        z1 = 1;
+
+        goto label4;
+
+     label3:
+        $i6 = (int) $c2;
+
+        if 125 != $i6 goto label4;
+
+        z1 = 0;
+
+     label4:
+        virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+     label5:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label6:
+        $i1 = virtualinvoke $r9.<java.lang.StringBuilder: int length()>();
+
+        if $i1 <= 0 goto label7;
+
+        $r6 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r5.<com.sun.org.apache.xml.internal.serializer.ToStream: void addCdataSectionElement(java.lang.String,java.util.List)>($r6, $r8);
+
+        virtualinvoke $r9.<java.lang.StringBuilder: void setLength(int)>(0);
+
+     label7:
+        virtualinvoke r5.<com.sun.org.apache.xml.internal.serializer.ToStream: void setCdataSectionElements(java.util.List)>($r8);
+
+     label8:
+        return;
+    }
+
+    private void addCdataSectionElement(java.lang.String, java.util.List)
+    {
+        java.util.List r3;
+        java.util.StringTokenizer $r0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r4;
+        java.lang.String r1, $r2, $r5;
+        boolean $z0;
+
+        r4 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.util.List;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>(r1, "{}", 0);
+
+        $r2 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z0 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        if null != $r5 goto label3;
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>(null);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        goto label4;
+
+     label3:
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label4:
+        return;
+    }
+
+    public void setCdataSectionElements(java.util.List)
+    {
+        java.util.List r0;
+        int $i0, i1, $i2, i3;
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+        java.lang.StringBuilder $r2;
+        java.lang.Object $r4, $r5;
+        java.lang.String $r3, $r6, $r7, $r8;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.util.List;
+
+        if r0 == null goto label5;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        i1 = $i0 - 1;
+
+        if i1 <= 0 goto label5;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i1 goto label4;
+
+        if i3 == 0 goto label2;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label2:
+        $r4 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r6 = (java.lang.String) $r4;
+
+        $i2 = i3 + 1;
+
+        $r5 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>($i2);
+
+        $r7 = (java.lang.String) $r5;
+
+        if $r6 == null goto label3;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(123);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(125);
+
+     label3:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        i3 = i3 + 2;
+
+        goto label1;
+
+     label4:
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections> = $r3;
+
+     label5:
+        $r8 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections>;
+
+        virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: void initCdataElems(java.lang.String)>($r8);
+
+        return;
+    }
+
+    protected java.lang.String ensureAttributesNamespaceIsDeclared(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings $r4, $r6, $r12;
+        int $i0, $i1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r3;
+        java.lang.String r0, r1, r2, $r5, $r7, $r11, $r13, $r17, r18, $r19, r20;
+        boolean $z0;
+        java.lang.StringBuilder $r8, $r9, $r10, $r14, $r15, $r16;
+
+        r3 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        r18 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.String;
+
+        if r0 == null goto label6;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label6;
+
+        $i1 = virtualinvoke r1.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        if $i1 >= 0 goto label1;
+
+        $r19 = "";
+
+        goto label2;
+
+     label1:
+        $r19 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label2:
+        r2 = $r19;
+
+        if $i1 <= 0 goto label4;
+
+        $r12 = r3.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r13 = virtualinvoke $r12.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String lookupNamespace(java.lang.String)>($r19);
+
+        if $r13 == null goto label3;
+
+        $z0 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        return null;
+
+     label3:
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean startPrefixMapping(java.lang.String,java.lang.String,boolean)>(r2, r0, 0);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xmlns:");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: void addAttribute(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>("http://www.w3.org/2000/xmlns/", r2, $r17, "CDATA", r0, 0);
+
+        return r2;
+
+     label4:
+        $r4 = r3.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String lookupPrefix(java.lang.String)>(r0);
+
+        r20 = $r5;
+
+        if $r5 != null goto label5;
+
+        $r6 = r3.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r7 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String generateNextPrefix()>();
+
+        r20 = $r7;
+
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean startPrefixMapping(java.lang.String,java.lang.String,boolean)>($r7, r0, 0);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xmlns:");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: void addAttribute(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>("http://www.w3.org/2000/xmlns/", $r7, $r11, "CDATA", r0, 0);
+
+     label5:
+        return r20;
+
+     label6:
+        return null;
+    }
+
+    void ensurePrefixIsDeclared(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings $r4;
+        int $i0, $i1;
+        com.sun.org.apache.xml.internal.serializer.ToStream r3;
+        java.lang.String r0, r1, r2, $r5, $r9, $r10, $r11;
+        boolean z0, $z1, $z3, $z4;
+        java.lang.StringBuilder $r6, $r7, $r8;
+
+        r3 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 == null goto label10;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label10;
+
+        $i1 = virtualinvoke r1.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        if $i1 >= 0 goto label01;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label02:
+        z0 = $z4;
+
+        if $z3 == 0 goto label03;
+
+        $r9 = "";
+
+        goto label04;
+
+     label03:
+        $r9 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label04:
+        r2 = $r9;
+
+        if null == $r9 goto label10;
+
+        $r4 = r3.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String lookupNamespace(java.lang.String)>($r9);
+
+        if null == $r5 goto label05;
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label10;
+
+     label05:
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: void startPrefixMapping(java.lang.String,java.lang.String)>(r2, r0);
+
+        if z0 == 0 goto label06;
+
+        $r10 = "xmlns";
+
+        goto label07;
+
+     label06:
+        $r10 = r2;
+
+     label07:
+        if z0 == 0 goto label08;
+
+        $r11 = "xmlns";
+
+        goto label09;
+
+     label08:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xmlns:");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label09:
+        virtualinvoke r3.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean addAttributeAlways(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>("http://www.w3.org/2000/xmlns/", $r10, $r11, "CDATA", r0, 0);
+
+     label10:
+        return;
+    }
+
+    public void flushPending() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r1, $r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void startDocumentInternal()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToCallStartDocument> = 0;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $z1 = $r1.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen>;
+
+        if $z1 == 0 goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeStartTag()>();
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r2.<com.sun.org.apache.xml.internal.serializer.ElemContext: boolean m_startTagOpen> = 0;
+
+     label2:
+        $z2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen>;
+
+        if $z2 == 0 goto label3;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void closeCDATA()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataTagOpen> = 0;
+
+     label3:
+        return;
+    }
+
+    public void setContentHandler(org.xml.sax.ContentHandler)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        org.xml.sax.ContentHandler r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: org.xml.sax.ContentHandler;
+
+        return;
+    }
+
+    public boolean addAttributeAlways(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r18, $r27;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0, $z1, $z2, z3;
+        org.xml.sax.SAXException $r21;
+        java.lang.StringBuilder $r13, $r14, $r15, $r16;
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings $r7, $r11, $r17;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r2, r3, r4, r5, $r6, $r10, $r12, $r20, r22, r23, r25;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r9;
+        com.sun.org.apache.xml.internal.serializer.NamespaceMappings$MappingRecord $r8;
+        com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer $r1, $r19, $r24, $r26;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r22 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: java.lang.String;
+
+        r5 := @parameter4: java.lang.String;
+
+        z0 := @parameter5: boolean;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $i0 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: int getIndex(java.lang.String)>(r22);
+
+        if $i0 < 0 goto label3;
+
+        r23 = null;
+
+        $r18 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r18 == null goto label1;
+
+        $r19 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $r20 = virtualinvoke $r19.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: java.lang.String getValue(int)>($i0);
+
+        r23 = $r20;
+
+        $z2 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>($r20);
+
+        if $z2 == 0 goto label1;
+
+        r23 = null;
+
+     label1:
+        $r24 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        virtualinvoke $r24.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: void setValue(int,java.lang.String)>($i0, r5);
+
+        z3 = 0;
+
+        if r23 == null goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void firePseudoAttributes()>();
+
+     label2:
+        goto label9;
+
+     label3:
+        if z0 == 0 goto label8;
+
+        $i1 = virtualinvoke r22.<java.lang.String: int indexOf(int)>(58);
+
+        if $i1 <= 0 goto label5;
+
+        $r6 = virtualinvoke r22.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r8 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: com.sun.org.apache.xml.internal.serializer.NamespaceMappings$MappingRecord getMappingFromPrefix(java.lang.String)>($r6);
+
+        if $r8 == null goto label5;
+
+        $i3 = $r8.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings$MappingRecord: int m_declarationDepth>;
+
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $i2 = $r9.<com.sun.org.apache.xml.internal.serializer.ElemContext: int m_currentElemDepth>;
+
+        if $i3 != $i2 goto label5;
+
+        $r10 = $r8.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings$MappingRecord: java.lang.String m_uri>;
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 != 0 goto label5;
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String lookupPrefix(java.lang.String)>(r2);
+
+        r25 = $r12;
+
+        if $r12 != null goto label4;
+
+        $r17 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.NamespaceMappings m_prefixMap>;
+
+        r25 = virtualinvoke $r17.<com.sun.org.apache.xml.internal.serializer.NamespaceMappings: java.lang.String generateNextPrefix()>();
+
+     label4:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r25);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        r22 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label5:
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String ensureAttributesNamespaceIsDeclared(java.lang.String,java.lang.String,java.lang.String)>(r2, r3, r22);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r21 := @caughtexception;
+
+        virtualinvoke $r21.<org.xml.sax.SAXException: void printStackTrace()>();
+
+     label8:
+        $r26 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        virtualinvoke $r26.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: void addAttribute(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r2, r3, r22, r4, r5);
+
+        z3 = 1;
+
+        $r27 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r27 == null goto label9;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void firePseudoAttributes()>();
+
+     label9:
+        return z3;
+
+        catch org.xml.sax.SAXException from label5 to label6 with label7;
+    }
+
+    protected void firePseudoAttributes()
+    {
+        java.io.IOException $r10;
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r1, $r7;
+        com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer $r4;
+        java.lang.StringBuffer $r3;
+        com.sun.org.apache.xml.internal.serializer.ToStream$WritertoStringBuffer $r8;
+        org.xml.sax.SAXException $r9;
+        java.io.Writer $r2;
+        int $i0, $i1;
+        char[] $r6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r1 == null goto label6;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r2.<java.io.Writer: void flush()>();
+
+        $r3 = new java.lang.StringBuffer;
+
+        specialinvoke $r3.<java.lang.StringBuffer: void <init>()>();
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer m_attributes>;
+
+        $i0 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.serializer.AttributesImplSerializer: int getLength()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r8 = new com.sun.org.apache.xml.internal.serializer.ToStream$WritertoStringBuffer;
+
+        specialinvoke $r8.<com.sun.org.apache.xml.internal.serializer.ToStream$WritertoStringBuffer: void <init>(com.sun.org.apache.xml.internal.serializer.ToStream,java.lang.StringBuffer)>(r0, $r3);
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void processAttributes(java.io.Writer,int)>($r8, $i0);
+
+     label2:
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(62);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.String: char[] toCharArray()>();
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        $i1 = lengthof $r6;
+
+        interfaceinvoke $r7.<com.sun.org.apache.xml.internal.serializer.SerializerTrace: void fireGenerateEvent(int,char[],int,int)>(11, $r6, 0, $i1);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r10 := @caughtexception;
+
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+        catch org.xml.sax.SAXException from label1 to label3 with label5;
+    }
+
+    public void setTransformer(javax.xml.transform.Transformer)
+    {
+        javax.xml.transform.Transformer r1;
+        com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter $r4;
+        com.sun.org.apache.xml.internal.serializer.SerializerTrace $r2, $r5;
+        java.io.Writer $r3, $r6;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: javax.xml.transform.Transformer;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: void setTransformer(javax.xml.transform.Transformer)>(r1);
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $z0 = $r3 instanceof com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.SerializerTrace m_tracer>;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.serializer.SerializerTraceWriter: void <init>(java.io.Writer,com.sun.org.apache.xml.internal.serializer.SerializerTrace)>($r6, $r5);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer> = $r4;
+
+     label1:
+        return;
+    }
+
+    public boolean reset()
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        z1 = 0;
+
+        $z0 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.SerializerBase: boolean reset()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void resetToStream()>();
+
+        z1 = 1;
+
+     label1:
+        return z1;
+    }
+
+    private void resetToStream()
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack $r1, $r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_cdataStartCalled> = 0;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_disableOutputEscapingStates>;
+
+        virtualinvoke $r1.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: void clear()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_escaping> = 1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_ispreserve> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isprevtext> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_isUTF8> = 0;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack m_preserves>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xml.internal.serializer.ToStream$BoolStack: void clear()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_shouldFlush> = 1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_spaceBeforeClose> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_startNewLine> = 0;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_lineSepUse> = 1;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities> = 1;
+
+        return;
+    }
+
+    public void setEncoding(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void setOutputProperty(java.lang.String,java.lang.String)>("encoding", r1);
+
+        return;
+    }
+
+    public void notationDecl(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.io.IOException $r13;
+        java.io.Writer $r1, $r3, $r5, $r7, $r8, $r10, $r11, $r12;
+        int $i0;
+        char[] $r9;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r2, r4, r6;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+     label1:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("<!NOTATION ");
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        if r4 == null goto label2;
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r11.<java.io.Writer: void write(java.lang.String)>(" PUBLIC \"");
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r12.<java.io.Writer: void write(java.lang.String)>(r4);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(" SYSTEM \"");
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(r6);
+
+     label3:
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("\" >");
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r9 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r10.<java.io.Writer: void write(char[],int,int)>($r9, 0, $i0);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        virtualinvoke $r13.<java.io.IOException: void printStackTrace()>();
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public void unparsedEntityDecl(java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String r2, r4, r6, r9;
+        java.io.IOException $r16;
+        java.io.Writer $r1, $r3, $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r15;
+        char[] $r12;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r9 := @parameter3: java.lang.String;
+
+     label1:
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void DTDprolog()>();
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("<!ENTITY ");
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        if r4 == null goto label2;
+
+        $r14 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r14.<java.io.Writer: void write(java.lang.String)>(" PUBLIC \"");
+
+        $r15 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r15.<java.io.Writer: void write(java.lang.String)>(r4);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(" SYSTEM \"");
+
+        $r7 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(r6);
+
+     label3:
+        $r8 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("\" NDATA ");
+
+        $r10 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r10.<java.io.Writer: void write(java.lang.String)>(r9);
+
+        $r11 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        virtualinvoke $r11.<java.io.Writer: void write(java.lang.String)>(" >");
+
+        $r13 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke $r13.<java.io.Writer: void write(char[],int,int)>($r12, 0, $i0);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r16 := @caughtexception;
+
+        virtualinvoke $r16.<java.io.IOException: void printStackTrace()>();
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    private void DTDprolog() throws org.xml.sax.SAXException, java.io.IOException
+    {
+        java.io.Writer r1;
+        int $i0;
+        char[] $r2;
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+        com.sun.org.apache.xml.internal.serializer.ElemContext $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: java.io.Writer m_writer>;
+
+        $z0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: com.sun.org.apache.xml.internal.serializer.ElemContext m_elemContext>;
+
+        $r4 = $r3.<com.sun.org.apache.xml.internal.serializer.ElemContext: java.lang.String m_elementName>;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.serializer.ToStream: void outputDocTypeDecl(java.lang.String,boolean)>($r4, 0);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_needToOutputDocTypeDecl> = 0;
+
+     label1:
+        $z1 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype>;
+
+        if $z1 == 0 goto label2;
+
+        virtualinvoke r1.<java.io.Writer: void write(java.lang.String)>(" [");
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: char[] m_lineSep>;
+
+        $i0 = r0.<com.sun.org.apache.xml.internal.serializer.ToStream: int m_lineSepLen>;
+
+        virtualinvoke r1.<java.io.Writer: void write(char[],int,int)>($r2, 0, $i0);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_inDoctype> = 0;
+
+     label2:
+        return;
+    }
+
+    public void setDTDEntityExpansion(boolean)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r0;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.org.apache.xml.internal.serializer.ToStream: boolean m_expandDTDEntities> = z0;
+
+        return;
+    }
+
+    public void addCdataSectionElements(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.ToStream r1;
+        java.lang.StringBuilder $r3, $r5, $r6, $r7;
+        java.lang.String r0, $r2, $r4, $r8;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.ToStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r1.<com.sun.org.apache.xml.internal.serializer.ToStream: void initCdataElems(java.lang.String)>(r0);
+
+     label1:
+        $r2 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections>;
+
+        if $r2 != null goto label2;
+
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections> = r0;
+
+        goto label3;
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1.<com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String m_StringOfCDATASections> = $r8;
+
+     label3:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String COMMENT_END> = "-->";
+
+        <com.sun.org.apache.xml.internal.serializer.ToStream: java.lang.String COMMENT_BEGIN> = "<!--";
+
+        return;
+    }
+}

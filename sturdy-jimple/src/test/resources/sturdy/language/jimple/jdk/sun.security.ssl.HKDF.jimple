@@ -1,0 +1,265 @@
+final class sun.security.ssl.HKDF extends java.lang.Object
+{
+    private final java.lang.String hmacAlg;
+    private final javax.crypto.Mac hmacObj;
+    private final int hmacLen;
+
+    void <init>(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        javax.crypto.Mac $r8, $r9;
+        int $i0;
+        java.lang.StringBuilder $r2, $r3, $r5;
+        java.lang.String r1, $r4, $r6, $r7;
+        sun.security.ssl.HKDF r0;
+
+        r0 := @this: sun.security.ssl.HKDF;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "Must provide underlying HKDF Digest algorithm.");
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Hmac");
+
+        $r4 = virtualinvoke r1.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("-", "");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.ssl.HKDF: java.lang.String hmacAlg> = $r6;
+
+        $r7 = r0.<sun.security.ssl.HKDF: java.lang.String hmacAlg>;
+
+        $r8 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.Mac getMac(java.lang.String)>($r7);
+
+        r0.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj> = $r8;
+
+        $r9 = r0.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        $i0 = virtualinvoke $r9.<javax.crypto.Mac: int getMacLength()>();
+
+        r0.<sun.security.ssl.HKDF: int hmacLen> = $i0;
+
+        return;
+    }
+
+    javax.crypto.SecretKey extract(javax.crypto.SecretKey, javax.crypto.SecretKey, java.lang.String) throws java.security.InvalidKeyException
+    {
+        byte[] $r5, $r6, $r9;
+        javax.crypto.Mac $r1, $r4;
+        javax.crypto.spec.SecretKeySpec $r2, $r8;
+        int $i0;
+        javax.crypto.SecretKey r3, r10;
+        java.lang.String r7;
+        sun.security.ssl.HKDF r0;
+
+        r0 := @this: sun.security.ssl.HKDF;
+
+        r10 := @parameter0: javax.crypto.SecretKey;
+
+        r3 := @parameter1: javax.crypto.SecretKey;
+
+        r7 := @parameter2: java.lang.String;
+
+        if r10 != null goto label1;
+
+        $r8 = new javax.crypto.spec.SecretKeySpec;
+
+        $i0 = r0.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $r9 = newarray (byte)[$i0];
+
+        specialinvoke $r8.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r9, "HKDF-Salt");
+
+        r10 = $r8;
+
+     label1:
+        $r1 = r0.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        virtualinvoke $r1.<javax.crypto.Mac: void init(java.security.Key)>(r10);
+
+        $r2 = new javax.crypto.spec.SecretKeySpec;
+
+        $r4 = r0.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        $r5 = interfaceinvoke r3.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        $r6 = virtualinvoke $r4.<javax.crypto.Mac: byte[] doFinal(byte[])>($r5);
+
+        specialinvoke $r2.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r6, r7);
+
+        return $r2;
+    }
+
+    javax.crypto.SecretKey extract(byte[], javax.crypto.SecretKey, java.lang.String) throws java.security.InvalidKeyException
+    {
+        byte[] r5;
+        int $i0;
+        javax.crypto.spec.SecretKeySpec $r1;
+        javax.crypto.SecretKey r2, $r4;
+        java.lang.String r3;
+        sun.security.ssl.HKDF r0;
+
+        r0 := @this: sun.security.ssl.HKDF;
+
+        r5 := @parameter0: byte[];
+
+        r2 := @parameter1: javax.crypto.SecretKey;
+
+        r3 := @parameter2: java.lang.String;
+
+        if r5 != null goto label1;
+
+        $i0 = r0.<sun.security.ssl.HKDF: int hmacLen>;
+
+        r5 = newarray (byte)[$i0];
+
+     label1:
+        $r1 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r1.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>(r5, "HKDF-Salt");
+
+        $r4 = virtualinvoke r0.<sun.security.ssl.HKDF: javax.crypto.SecretKey extract(javax.crypto.SecretKey,javax.crypto.SecretKey,java.lang.String)>($r1, r2, r3);
+
+        return $r4;
+    }
+
+    javax.crypto.SecretKey expand(javax.crypto.SecretKey, byte[], int, java.lang.String) throws java.security.InvalidKeyException
+    {
+        byte[] $r9, r13;
+        javax.crypto.spec.SecretKeySpec $r3;
+        byte $b13;
+        javax.crypto.ShortBufferException $r11;
+        javax.crypto.Mac $r2, $r5, $r6, $r7, $r8;
+        javax.crypto.SecretKey r0;
+        sun.security.ssl.HKDF r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, i16, i17, i18;
+        java.lang.String r4;
+        java.lang.RuntimeException $r12;
+        java.lang.IllegalArgumentException $r10;
+
+        r1 := @this: sun.security.ssl.HKDF;
+
+        r0 := @parameter0: javax.crypto.SecretKey;
+
+        r13 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        r4 := @parameter3: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "A null PRK is not allowed.");
+
+        $i1 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i2 = 255 * $i1;
+
+        if i0 <= $i2 goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Requested output length exceeds maximum length allowed for HKDF expansion");
+
+        throw $r10;
+
+     label1:
+        $r2 = r1.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        virtualinvoke $r2.<javax.crypto.Mac: void init(java.security.Key)>(r0);
+
+        if r13 != null goto label2;
+
+        r13 = newarray (byte)[0];
+
+     label2:
+        $i3 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i4 = i0 + $i3;
+
+        $i6 = $i4 - 1;
+
+        $i5 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i15 = $i6 / $i5;
+
+        $i7 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i8 = $i15 * $i7;
+
+        $r9 = newarray (byte)[$i8];
+
+        i16 = 0;
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label3:
+        if i18 >= $i15 goto label8;
+
+     label4:
+        $r5 = r1.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        $i9 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i10 = i16 - $i9;
+
+        $i11 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i10);
+
+        virtualinvoke $r5.<javax.crypto.Mac: void update(byte[],int,int)>($r9, $i11, i17);
+
+        $r6 = r1.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        virtualinvoke $r6.<javax.crypto.Mac: void update(byte[])>(r13);
+
+        $r7 = r1.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        $i12 = i18 + 1;
+
+        $b13 = (byte) $i12;
+
+        virtualinvoke $r7.<javax.crypto.Mac: void update(byte)>($b13);
+
+        $r8 = r1.<sun.security.ssl.HKDF: javax.crypto.Mac hmacObj>;
+
+        virtualinvoke $r8.<javax.crypto.Mac: void doFinal(byte[],int)>($r9, i16);
+
+        i17 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        $i14 = r1.<sun.security.ssl.HKDF: int hmacLen>;
+
+        i16 = i16 + $i14;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.RuntimeException;
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r12;
+
+     label7:
+        i18 = i18 + 1;
+
+        goto label3;
+
+     label8:
+        $r3 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r3.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],int,int,java.lang.String)>($r9, 0, i0, r4);
+
+        return $r3;
+
+        catch javax.crypto.ShortBufferException from label4 to label5 with label6;
+    }
+}

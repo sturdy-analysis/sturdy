@@ -1,0 +1,2603 @@
+public abstract class javax.swing.DefaultRowSorter extends javax.swing.RowSorter
+{
+    private boolean sortsOnUpdates;
+    private javax.swing.DefaultRowSorter$Row[] viewToModel;
+    private int[] modelToView;
+    private java.util.Comparator[] comparators;
+    private boolean[] isSortable;
+    private javax.swing.RowSorter$SortKey[] cachedSortKeys;
+    private java.util.Comparator[] sortComparators;
+    private javax.swing.RowFilter filter;
+    private javax.swing.DefaultRowSorter$FilterEntry filterEntry;
+    private java.util.List sortKeys;
+    private boolean[] useToString;
+    private boolean sorted;
+    private int maxSortKeys;
+    private javax.swing.DefaultRowSorter$ModelWrapper modelWrapper;
+    private int modelRowCount;
+
+    public void <init>()
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.List $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        specialinvoke r0.<javax.swing.RowSorter: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys> = $r1;
+
+        r0.<javax.swing.DefaultRowSorter: int maxSortKeys> = 3;
+
+        return;
+    }
+
+    protected final void setModelWrapper(javax.swing.DefaultRowSorter$ModelWrapper)
+    {
+        javax.swing.DefaultRowSorter r1;
+        int $i0;
+        javax.swing.DefaultRowSorter$ModelWrapper r0, r2, $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        r1 := @this: javax.swing.DefaultRowSorter;
+
+        r0 := @parameter0: javax.swing.DefaultRowSorter$ModelWrapper;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("modelWrapper most be non-null");
+
+        throw $r4;
+
+     label1:
+        r2 = r1.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper modelWrapper>;
+
+        r1.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper modelWrapper> = r0;
+
+        if r2 == null goto label2;
+
+        virtualinvoke r1.<javax.swing.DefaultRowSorter: void modelStructureChanged()>();
+
+        goto label3;
+
+     label2:
+        $r3 = virtualinvoke r1.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r3.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        r1.<javax.swing.DefaultRowSorter: int modelRowCount> = $i0;
+
+     label3:
+        return;
+    }
+
+    protected final javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper modelWrapper>;
+
+        return $r1;
+    }
+
+    public final java.lang.Object getModel()
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.Object $r2;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: java.lang.Object getModel()>();
+
+        return $r2;
+    }
+
+    public void setSortable(int, boolean)
+    {
+        javax.swing.DefaultRowSorter r0;
+        boolean[] $r1, $r2, $r4, $r5, $r6;
+        int i0, $i1, $i2, i3, $i5;
+        javax.swing.DefaultRowSorter$ModelWrapper $r3;
+        boolean z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        if $r1 != null goto label2;
+
+        $r3 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i1 = virtualinvoke $r3.<javax.swing.DefaultRowSorter$ModelWrapper: int getColumnCount()>();
+
+        $r4 = newarray (boolean)[$i1];
+
+        r0.<javax.swing.DefaultRowSorter: boolean[] isSortable> = $r4;
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        $i2 = lengthof $r5;
+
+        i3 = $i2 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $r6 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        $r6[i3] = 1;
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        $r2[i0] = z0;
+
+        return;
+    }
+
+    public boolean isSortable(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        boolean[] $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.DefaultRowSorter: boolean[] isSortable>;
+
+        $z0 = $r2[i0];
+
+     label2:
+        return $z0;
+    }
+
+    public void setSortKeys(java.util.List)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.ArrayList $r7;
+        javax.swing.RowSorter$SortKey r10;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.DefaultRowSorter$Row[] $r4;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        java.lang.IllegalArgumentException $r11;
+        java.util.List r1, r2, $r3, $r8, $r12;
+        java.lang.Object $r9;
+        javax.swing.DefaultRowSorter$ModelWrapper $r5;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        r2 := @parameter0: java.util.List;
+
+        r1 = r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys>;
+
+        if r2 == null goto label5;
+
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label5;
+
+        $r5 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i1 = virtualinvoke $r5.<javax.swing.DefaultRowSorter$ModelWrapper: int getColumnCount()>();
+
+        $r6 = interfaceinvoke r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r9 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (javax.swing.RowSorter$SortKey) $r9;
+
+        if r10 == null goto label2;
+
+        $i2 = virtualinvoke r10.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        if $i2 < 0 goto label2;
+
+        $i3 = virtualinvoke r10.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        if $i3 < $i1 goto label3;
+
+     label2:
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid SortKey");
+
+        throw $r11;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>(java.util.Collection)>(r2);
+
+        $r8 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r7);
+
+        r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys> = $r8;
+
+        goto label6;
+
+     label5:
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys> = $r3;
+
+     label6:
+        $r12 = r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys>;
+
+        $z1 = interfaceinvoke $r12.<java.util.List: boolean equals(java.lang.Object)>(r1);
+
+        if $z1 != 0 goto label8;
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireSortOrderChanged()>();
+
+        $r4 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r4 != null goto label7;
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void sort()>();
+
+        goto label8;
+
+     label7:
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void sortExistingData()>();
+
+     label8:
+        return;
+    }
+
+    public java.util.List getSortKeys()
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.List $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: java.util.List sortKeys>;
+
+        return $r1;
+    }
+
+    public void setMaxSortKeys(int)
+    {
+        int i0;
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 1 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid max");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.DefaultRowSorter: int maxSortKeys> = i0;
+
+        return;
+    }
+
+    public int getMaxSortKeys()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int $i0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $i0 = r0.<javax.swing.DefaultRowSorter: int maxSortKeys>;
+
+        return $i0;
+    }
+
+    public void setSortsOnUpdates(boolean)
+    {
+        javax.swing.DefaultRowSorter r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.DefaultRowSorter: boolean sortsOnUpdates> = z0;
+
+        return;
+    }
+
+    public boolean getSortsOnUpdates()
+    {
+        javax.swing.DefaultRowSorter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $z0 = r0.<javax.swing.DefaultRowSorter: boolean sortsOnUpdates>;
+
+        return $z0;
+    }
+
+    public void setRowFilter(javax.swing.RowFilter)
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.RowFilter r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        r1 := @parameter0: javax.swing.RowFilter;
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter filter> = r1;
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void sort()>();
+
+        return;
+    }
+
+    public javax.swing.RowFilter getRowFilter()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.RowFilter $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter filter>;
+
+        return $r1;
+    }
+
+    public void toggleSortOrder(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.ArrayList $r13;
+        javax.swing.RowSorter$SortKey $r6, $r7, $r11, $r14, $r15;
+        int i0, $i1, $i2, $i3, i4, $i5, $i6, $i8, $i10;
+        boolean $z0;
+        javax.swing.SortOrder $r4, $r9;
+        java.util.List $r2, r12;
+        java.lang.Object $r5, $r10;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        $z0 = virtualinvoke r0.<javax.swing.DefaultRowSorter: boolean isSortable(int)>(i0);
+
+        if $z0 == 0 goto label8;
+
+        $r13 = new java.util.ArrayList;
+
+        $r2 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.List getSortKeys()>();
+
+        specialinvoke $r13.<java.util.ArrayList: void <init>(java.util.Collection)>($r2);
+
+        r12 = $r13;
+
+        $i1 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        i4 = $i1 - 1;
+
+     label1:
+        if i4 < 0 goto label3;
+
+        $r10 = interfaceinvoke $r13.<java.util.List: java.lang.Object get(int)>(i4);
+
+        $r11 = (javax.swing.RowSorter$SortKey) $r10;
+
+        $i3 = virtualinvoke $r11.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        if $i3 != i0 goto label2;
+
+        goto label3;
+
+     label2:
+        $i8 = (int) -1;
+
+        i4 = i4 + $i8;
+
+        goto label1;
+
+     label3:
+        $i10 = (int) -1;
+
+        if i4 != $i10 goto label4;
+
+        $r14 = new javax.swing.RowSorter$SortKey;
+
+        $r9 = <javax.swing.SortOrder: javax.swing.SortOrder ASCENDING>;
+
+        specialinvoke $r14.<javax.swing.RowSorter$SortKey: void <init>(int,javax.swing.SortOrder)>(i0, $r9);
+
+        interfaceinvoke $r13.<java.util.List: void add(int,java.lang.Object)>(0, $r14);
+
+        goto label6;
+
+     label4:
+        if i4 != 0 goto label5;
+
+        $r5 = interfaceinvoke $r13.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r6 = (javax.swing.RowSorter$SortKey) $r5;
+
+        $r7 = specialinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey toggle(javax.swing.RowSorter$SortKey)>($r6);
+
+        interfaceinvoke $r13.<java.util.List: java.lang.Object set(int,java.lang.Object)>(0, $r7);
+
+        goto label6;
+
+     label5:
+        interfaceinvoke $r13.<java.util.List: java.lang.Object remove(int)>(i4);
+
+        $r15 = new javax.swing.RowSorter$SortKey;
+
+        $r4 = <javax.swing.SortOrder: javax.swing.SortOrder ASCENDING>;
+
+        specialinvoke $r15.<javax.swing.RowSorter$SortKey: void <init>(int,javax.swing.SortOrder)>(i0, $r4);
+
+        interfaceinvoke $r13.<java.util.List: void add(int,java.lang.Object)>(0, $r15);
+
+     label6:
+        $i5 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        $i6 = virtualinvoke r0.<javax.swing.DefaultRowSorter: int getMaxSortKeys()>();
+
+        if $i5 <= $i6 goto label7;
+
+        $i2 = virtualinvoke r0.<javax.swing.DefaultRowSorter: int getMaxSortKeys()>();
+
+        r12 = interfaceinvoke $r13.<java.util.List: java.util.List subList(int,int)>(0, $i2);
+
+     label7:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void setSortKeys(java.util.List)>(r12);
+
+     label8:
+        return;
+    }
+
+    private javax.swing.RowSorter$SortKey toggle(javax.swing.RowSorter$SortKey)
+    {
+        javax.swing.DefaultRowSorter r7;
+        javax.swing.RowSorter$SortKey r0, $r3, $r5;
+        javax.swing.SortOrder $r1, $r2, $r4, $r6;
+        int $i0, $i1;
+
+        r7 := @this: javax.swing.DefaultRowSorter;
+
+        r0 := @parameter0: javax.swing.RowSorter$SortKey;
+
+        $r1 = virtualinvoke r0.<javax.swing.RowSorter$SortKey: javax.swing.SortOrder getSortOrder()>();
+
+        $r2 = <javax.swing.SortOrder: javax.swing.SortOrder ASCENDING>;
+
+        if $r1 != $r2 goto label1;
+
+        $r5 = new javax.swing.RowSorter$SortKey;
+
+        $i1 = virtualinvoke r0.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        $r6 = <javax.swing.SortOrder: javax.swing.SortOrder DESCENDING>;
+
+        specialinvoke $r5.<javax.swing.RowSorter$SortKey: void <init>(int,javax.swing.SortOrder)>($i1, $r6);
+
+        return $r5;
+
+     label1:
+        $r3 = new javax.swing.RowSorter$SortKey;
+
+        $i0 = virtualinvoke r0.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        $r4 = <javax.swing.SortOrder: javax.swing.SortOrder ASCENDING>;
+
+        specialinvoke $r3.<javax.swing.RowSorter$SortKey: void <init>(int,javax.swing.SortOrder)>($i0, $r4);
+
+        return $r3;
+    }
+
+    public int convertRowIndexToView(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r3;
+        int[] $r1, $r2;
+        int i0, $i1, $i2;
+        javax.swing.DefaultRowSorter$ModelWrapper $r4;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        if $r1 != null goto label3;
+
+        if i0 < 0 goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i2 = virtualinvoke $r4.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        if i0 < $i2 goto label2;
+
+     label1:
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid index");
+
+        throw $r3;
+
+     label2:
+        return i0;
+
+     label3:
+        $r2 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i1 = $r2[i0];
+
+        return $i1;
+    }
+
+    public int convertRowIndexToModel(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r4;
+        javax.swing.DefaultRowSorter$Row $r3;
+        int i0, $i1, $i2;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r2;
+        javax.swing.DefaultRowSorter$ModelWrapper $r5;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r1 != null goto label3;
+
+        if i0 < 0 goto label1;
+
+        $r5 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i2 = virtualinvoke $r5.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        if i0 < $i2 goto label2;
+
+     label1:
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid index");
+
+        throw $r4;
+
+     label2:
+        return i0;
+
+     label3:
+        $r2 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r3 = $r2[i0];
+
+        $i1 = $r3.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        return $i1;
+    }
+
+    private boolean isUnsorted()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.RowSorter$SortKey $r3;
+        javax.swing.SortOrder $r4, $r5;
+        java.util.List $r1;
+        int $i0;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.List getSortKeys()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 == 0 goto label1;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r3 = (javax.swing.RowSorter$SortKey) $r2;
+
+        $r4 = virtualinvoke $r3.<javax.swing.RowSorter$SortKey: javax.swing.SortOrder getSortOrder()>();
+
+        $r5 = <javax.swing.SortOrder: javax.swing.SortOrder UNSORTED>;
+
+        if $r4 != $r5 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    private void sortExistingData()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.RowFilter $r5;
+        int[] $r2, $r6, $r7, $r10;
+        int $i0, $i1, $i2, i3, i4, $i6;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r4, $r8;
+        boolean $z0;
+        javax.swing.DefaultRowSorter$Row $r9;
+        java.util.List $r3;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])>($r1);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void updateUseToString()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.List getSortKeys()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void cacheSortKeys(java.util.List)>($r3);
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean isUnsorted()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter getRowFilter()>();
+
+        if $r5 != null goto label1;
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = null;
+
+        r0.<javax.swing.DefaultRowSorter: int[] modelToView> = null;
+
+        goto label6;
+
+     label1:
+        i3 = 0;
+
+        i4 = 0;
+
+     label2:
+        $r6 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i0 = lengthof $r6;
+
+        if i4 >= $i0 goto label4;
+
+        $r7 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i1 = $r7[i4];
+
+        $i6 = (int) -1;
+
+        if $i1 == $i6 goto label3;
+
+        $r8 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r9 = $r8[i3];
+
+        $r9.<javax.swing.DefaultRowSorter$Row: int modelIndex> = i4;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r10[i4] = $i2;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r4);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(0);
+
+     label6:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireRowSorterChanged(int[])>($r2);
+
+        return;
+    }
+
+    public void sort()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.RowSorter$SortKey[] $r8;
+        javax.swing.RowFilter $r4, $r9;
+        java.util.List $r3;
+        int[] $r2;
+        int $i0, $i1;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r7, $r10;
+        javax.swing.DefaultRowSorter$ModelWrapper $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        r0.<javax.swing.DefaultRowSorter: boolean sorted> = 1;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])>($r1);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void updateUseToString()>();
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean isUnsorted()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = newarray (javax.swing.RowSorter$SortKey)[0];
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey[] cachedSortKeys> = $r8;
+
+        $r9 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter getRowFilter()>();
+
+        if $r9 != null goto label2;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r10 == null goto label1;
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = null;
+
+        r0.<javax.swing.DefaultRowSorter: int[] modelToView> = null;
+
+        goto label6;
+
+     label1:
+        return;
+
+     label2:
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void initializeFilteredMapping()>();
+
+        goto label6;
+
+     label3:
+        $r3 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.List getSortKeys()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void cacheSortKeys(java.util.List)>($r3);
+
+        $r4 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter getRowFilter()>();
+
+        if $r4 == null goto label4;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void initializeFilteredMapping()>();
+
+        goto label5;
+
+     label4:
+        $r5 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r5.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createModelToView(int)>($i0);
+
+        $r6 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i1 = virtualinvoke $r6.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createViewToModel(int)>($i1);
+
+     label5:
+        $r7 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r7);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(0);
+
+     label6:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireRowSorterChanged(int[])>($r2);
+
+        return;
+    }
+
+    private void updateUseToString()
+    {
+        javax.swing.DefaultRowSorter r0;
+        boolean[] $r2, $r3, $r4, $r5;
+        int $i0, $i1, i2, $i4, $i6;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getColumnCount()>();
+
+        $r2 = r0.<javax.swing.DefaultRowSorter: boolean[] useToString>;
+
+        if $r2 == null goto label1;
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: boolean[] useToString>;
+
+        $i1 = lengthof $r5;
+
+        if $i1 == $i0 goto label2;
+
+     label1:
+        $r3 = newarray (boolean)[$i0];
+
+        r0.<javax.swing.DefaultRowSorter: boolean[] useToString> = $r3;
+
+     label2:
+        $i4 = (int) -1;
+
+        i2 = $i0 + $i4;
+
+     label3:
+        if i2 < 0 goto label4;
+
+        $r4 = r0.<javax.swing.DefaultRowSorter: boolean[] useToString>;
+
+        $z0 = virtualinvoke r0.<javax.swing.DefaultRowSorter: boolean useToString(int)>(i2);
+
+        $r4[i2] = $z0;
+
+        $i6 = (int) -1;
+
+        i2 = i2 + $i6;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private void initializeFilteredMapping()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int[] $r2, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, i7, i8, $i10, $i12;
+        javax.swing.DefaultRowSorter$Row[] $r3;
+        boolean $z0;
+        javax.swing.DefaultRowSorter$Row $r4;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        i5 = 0;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createModelToView(int)>($i0);
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label4;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean include(int)>(i6);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i4 = i6 - i5;
+
+        $r6[i6] = $i4;
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i10 = (int) -1;
+
+        $r5[i6] = $i10;
+
+        i5 = i5 + 1;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label4:
+        $i1 = $i0 - i5;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createViewToModel(int)>($i1);
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label5:
+        if i7 >= $i0 goto label7;
+
+        $r2 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i2 = $r2[i7];
+
+        $i12 = (int) -1;
+
+        if $i2 == $i12 goto label6;
+
+        $r3 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i3 = i8;
+
+        i8 = i8 + 1;
+
+        $r4 = $r3[$i3];
+
+        $r4.<javax.swing.DefaultRowSorter$Row: int modelIndex> = i7;
+
+     label6:
+        i7 = i7 + 1;
+
+        goto label5;
+
+     label7:
+        return;
+    }
+
+    private void createModelToView(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int[] $r1, $r2, $r3;
+        int i0, $i1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i1 = lengthof $r3;
+
+        if $i1 == i0 goto label2;
+
+     label1:
+        $r2 = newarray (int)[i0];
+
+        r0.<javax.swing.DefaultRowSorter: int[] modelToView> = $r2;
+
+     label2:
+        return;
+    }
+
+    private void createViewToModel(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0, $i1, $i2, $i3, i4, i5, i6;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r2, $r4, $r5, $r7, $r8, $r9, $r10, r11;
+        javax.swing.DefaultRowSorter$Row $r3, $r6;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i4 = 0;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i1 = lengthof $r7;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        i4 = $i2;
+
+        $r8 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i3 = lengthof $r8;
+
+        if $i3 == i0 goto label2;
+
+        r11 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r9 = newarray (javax.swing.DefaultRowSorter$Row)[i0];
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = $r9;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r11, 0, $r10, 0, $i2);
+
+        goto label2;
+
+     label1:
+        $r2 = newarray (javax.swing.DefaultRowSorter$Row)[i0];
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = $r2;
+
+     label2:
+        i5 = 0;
+
+     label3:
+        if i5 >= i4 goto label4;
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r6 = $r5[i5];
+
+        $r6.<javax.swing.DefaultRowSorter$Row: int modelIndex> = i5;
+
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label4:
+        i6 = i4;
+
+     label5:
+        if i6 >= i0 goto label6;
+
+        $r4 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r3 = new javax.swing.DefaultRowSorter$Row;
+
+        specialinvoke $r3.<javax.swing.DefaultRowSorter$Row: void <init>(javax.swing.DefaultRowSorter,int)>(r0, i6);
+
+        $r4[i6] = $r3;
+
+        i6 = i6 + 1;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    private void cacheSortKeys(java.util.List)
+    {
+        javax.swing.DefaultRowSorter r1;
+        javax.swing.RowSorter$SortKey[] $r3, $r5;
+        java.lang.Object[] $r4;
+        java.util.Comparator[] $r2, $r6;
+        javax.swing.RowSorter$SortKey $r8;
+        java.util.List r0;
+        int $i0, $i1, i2;
+        java.lang.Object $r7;
+        java.util.Comparator $r9;
+
+        r1 := @this: javax.swing.DefaultRowSorter;
+
+        r0 := @parameter0: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        $r2 = newarray (java.util.Comparator)[$i0];
+
+        r1.<javax.swing.DefaultRowSorter: java.util.Comparator[] sortComparators> = $r2;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r6 = r1.<javax.swing.DefaultRowSorter: java.util.Comparator[] sortComparators>;
+
+        $r7 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r8 = (javax.swing.RowSorter$SortKey) $r7;
+
+        $i1 = virtualinvoke $r8.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        $r9 = specialinvoke r1.<javax.swing.DefaultRowSorter: java.util.Comparator getComparator0(int)>($i1);
+
+        $r6[i2] = $r9;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = newarray (javax.swing.RowSorter$SortKey)[$i0];
+
+        $r4 = interfaceinvoke r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (javax.swing.RowSorter$SortKey[]) $r4;
+
+        r1.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey[] cachedSortKeys> = $r5;
+
+        return;
+    }
+
+    protected boolean useToString(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        java.util.Comparator $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.Comparator getComparator(int)>(i0);
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void setModelToViewFromViewToModel(boolean)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int[] $r4, $r5, $r6;
+        int $i0, $i1, $i2, i3, i4, $i6, $i8, $i10;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r2;
+        boolean z0;
+        javax.swing.DefaultRowSorter$Row $r3;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label2;
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i2 = lengthof $r5;
+
+        i3 = $i2 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $r6 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i6 = (int) -1;
+
+        $r6[i3] = $i6;
+
+        $i8 = (int) -1;
+
+        i3 = i3 + $i8;
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i0 = lengthof $r1;
+
+        i4 = $i0 - 1;
+
+     label3:
+        if i4 < 0 goto label4;
+
+        $r4 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $r2 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r3 = $r2[i4];
+
+        $i1 = $r3.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        $r4[$i1] = i4;
+
+        $i10 = (int) -1;
+
+        i4 = i4 + $i10;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])
+    {
+        javax.swing.DefaultRowSorter r4;
+        javax.swing.DefaultRowSorter$Row $r3;
+        int[] $r1, r2;
+        int $i0, $i1, $i2, i3, $i5;
+        javax.swing.DefaultRowSorter$Row[] r0;
+
+        r4 := @this: javax.swing.DefaultRowSorter;
+
+        r0 := @parameter0: javax.swing.DefaultRowSorter$Row[];
+
+        if r0 == null goto label3;
+
+        $i0 = lengthof r0;
+
+        r2 = newarray (int)[$i0];
+
+        $i1 = lengthof r0;
+
+        i3 = $i1 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $r3 = r0[i3];
+
+        $i2 = $r3.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        r2[i3] = $i2;
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        goto label1;
+
+     label2:
+        return r2;
+
+     label3:
+        $r1 = newarray (int)[0];
+
+        return $r1;
+    }
+
+    public void setComparator(int, java.util.Comparator)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.Comparator[] $r1, $r3, $r5;
+        int i0, $i1;
+        java.util.Comparator r2;
+        javax.swing.DefaultRowSorter$ModelWrapper $r4;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.util.Comparator;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators>;
+
+        if $r1 != null goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i1 = virtualinvoke $r4.<javax.swing.DefaultRowSorter$ModelWrapper: int getColumnCount()>();
+
+        $r5 = newarray (java.util.Comparator)[$i1];
+
+        r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators> = $r5;
+
+     label1:
+        $r3 = r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators>;
+
+        $r3[i0] = r2;
+
+        return;
+    }
+
+    public java.util.Comparator getComparator(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        java.util.Comparator $r3;
+        java.util.Comparator[] $r1, $r2;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators>;
+
+        $r3 = $r2[i0];
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    private java.util.Comparator getComparator0(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        java.util.Comparator $r1;
+        java.text.Collator $r2;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: java.util.Comparator getComparator(int)>(i0);
+
+        if $r1 == null goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = staticinvoke <java.text.Collator: java.text.Collator getInstance()>();
+
+        return $r2;
+    }
+
+    private javax.swing.RowFilter$Entry getFilterEntry(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        javax.swing.DefaultRowSorter$FilterEntry $r1, $r2, $r3, $r4;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$FilterEntry filterEntry>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new javax.swing.DefaultRowSorter$FilterEntry;
+
+        specialinvoke $r4.<javax.swing.DefaultRowSorter$FilterEntry: void <init>(javax.swing.DefaultRowSorter,javax.swing.DefaultRowSorter$1)>(r0, null);
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$FilterEntry filterEntry> = $r4;
+
+     label1:
+        $r2 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$FilterEntry filterEntry>;
+
+        $r2.<javax.swing.DefaultRowSorter$FilterEntry: int modelIndex> = i0;
+
+        $r3 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$FilterEntry filterEntry>;
+
+        return $r3;
+    }
+
+    public int getViewRowCount()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int $i0, $i1;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r3;
+        javax.swing.DefaultRowSorter$ModelWrapper $r2;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i1 = lengthof $r3;
+
+        return $i1;
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r2.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        return $i0;
+    }
+
+    public int getModelRowCount()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int $i0;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        return $i0;
+    }
+
+    private void allChanged()
+    {
+        javax.swing.DefaultRowSorter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        r0.<javax.swing.DefaultRowSorter: int[] modelToView> = null;
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = null;
+
+        r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] comparators> = null;
+
+        r0.<javax.swing.DefaultRowSorter: boolean[] isSortable> = null;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean isUnsorted()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void sort()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void setSortKeys(java.util.List)>(null);
+
+     label2:
+        return;
+    }
+
+    public void modelStructureChanged()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int $i0;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void allChanged()>();
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        r0.<javax.swing.DefaultRowSorter: int modelRowCount> = $i0;
+
+        return;
+    }
+
+    public void allRowsChanged()
+    {
+        javax.swing.DefaultRowSorter r0;
+        int $i0;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        r0.<javax.swing.DefaultRowSorter: int modelRowCount> = $i0;
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void sort()>();
+
+        return;
+    }
+
+    public void rowsInserted(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r2;
+        int i0, i1, $i2;
+        javax.swing.DefaultRowSorter$ModelWrapper $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkAgainstModel(int,int)>(i0, i1);
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i2 = virtualinvoke $r1.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        if i1 < $i2 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid range");
+
+        throw $r2;
+
+     label1:
+        r0.<javax.swing.DefaultRowSorter: int modelRowCount> = $i2;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean shouldOptimizeChange(int,int)>(i0, i1);
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void rowsInserted0(int,int)>(i0, i1);
+
+     label2:
+        return;
+    }
+
+    public void rowsDeleted(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r1;
+        int i0, i1, $i2, $i3, $i4;
+        javax.swing.DefaultRowSorter$ModelWrapper $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkAgainstModel(int,int)>(i0, i1);
+
+        $i2 = r0.<javax.swing.DefaultRowSorter: int modelRowCount>;
+
+        if i0 >= $i2 goto label1;
+
+        $i3 = r0.<javax.swing.DefaultRowSorter: int modelRowCount>;
+
+        if i1 < $i3 goto label2;
+
+     label1:
+        $r1 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r1.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid range");
+
+        throw $r1;
+
+     label2:
+        $r2 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i4 = virtualinvoke $r2.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        r0.<javax.swing.DefaultRowSorter: int modelRowCount> = $i4;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean shouldOptimizeChange(int,int)>(i0, i1);
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void rowsDeleted0(int,int)>(i0, i1);
+
+     label3:
+        return;
+    }
+
+    public void rowsUpdated(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r1;
+        int i0, i1, $i2, $i3;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkAgainstModel(int,int)>(i0, i1);
+
+        $i2 = r0.<javax.swing.DefaultRowSorter: int modelRowCount>;
+
+        if i0 >= $i2 goto label1;
+
+        $i3 = r0.<javax.swing.DefaultRowSorter: int modelRowCount>;
+
+        if i1 < $i3 goto label2;
+
+     label1:
+        $r1 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r1.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid range");
+
+        throw $r1;
+
+     label2:
+        $z0 = virtualinvoke r0.<javax.swing.DefaultRowSorter: boolean getSortsOnUpdates()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean shouldOptimizeChange(int,int)>(i0, i1);
+
+        if $z1 == 0 goto label4;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void rowsUpdated0(int,int)>(i0, i1);
+
+        goto label4;
+
+     label3:
+        r0.<javax.swing.DefaultRowSorter: boolean sorted> = 0;
+
+     label4:
+        return;
+    }
+
+    public void rowsUpdated(int, int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0, i1, i2;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void checkColumn(int)>(i0);
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void rowsUpdated(int,int)>(i1, i2);
+
+        return;
+    }
+
+    private void checkAgainstModel(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.lang.IndexOutOfBoundsException $r1;
+        int i0, i1, $i2;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 > i1 goto label1;
+
+        if i0 < 0 goto label1;
+
+        if i1 < 0 goto label1;
+
+        $i2 = r0.<javax.swing.DefaultRowSorter: int modelRowCount>;
+
+        if i0 <= $i2 goto label2;
+
+     label1:
+        $r1 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r1.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Invalid range");
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    private boolean include(int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0;
+        javax.swing.RowFilter$Entry $r2;
+        javax.swing.RowFilter $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter getRowFilter()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter$Entry getFilterEntry(int)>(i0);
+
+        $z0 = virtualinvoke $r1.<javax.swing.RowFilter: boolean include(javax.swing.RowFilter$Entry)>($r2);
+
+        return $z0;
+
+     label1:
+        return 1;
+    }
+
+    private int compare(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.Comparator[] $r11;
+        javax.swing.RowSorter$SortKey $r3, $r5;
+        int $i0, i1, i2, $i3, $i4, i5, i6, $i8, $i10;
+        boolean $z0;
+        javax.swing.RowSorter$SortKey[] $r1, $r2, $r4;
+        boolean[] $r8;
+        javax.swing.SortOrder $r6, $r7, $r17;
+        java.lang.Object r15, r16;
+        javax.swing.DefaultRowSorter$ModelWrapper $r9, $r10, $r13, $r14;
+        java.util.Comparator $r12;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i5 = 0;
+
+     label01:
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey[] cachedSortKeys>;
+
+        $i0 = lengthof $r1;
+
+        if i5 >= $i0 goto label11;
+
+        $r2 = r0.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey[] cachedSortKeys>;
+
+        $r3 = $r2[i5];
+
+        $i4 = virtualinvoke $r3.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        $r4 = r0.<javax.swing.DefaultRowSorter: javax.swing.RowSorter$SortKey[] cachedSortKeys>;
+
+        $r5 = $r4[i5];
+
+        $r6 = virtualinvoke $r5.<javax.swing.RowSorter$SortKey: javax.swing.SortOrder getSortOrder()>();
+
+        $r7 = <javax.swing.SortOrder: javax.swing.SortOrder UNSORTED>;
+
+        if $r6 != $r7 goto label02;
+
+        i6 = i1 - i2;
+
+        goto label09;
+
+     label02:
+        $r8 = r0.<javax.swing.DefaultRowSorter: boolean[] useToString>;
+
+        $z0 = $r8[$i4];
+
+        if $z0 == 0 goto label03;
+
+        $r13 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        r15 = virtualinvoke $r13.<javax.swing.DefaultRowSorter$ModelWrapper: java.lang.String getStringValueAt(int,int)>(i1, $i4);
+
+        $r14 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        r16 = virtualinvoke $r14.<javax.swing.DefaultRowSorter$ModelWrapper: java.lang.String getStringValueAt(int,int)>(i2, $i4);
+
+        goto label04;
+
+     label03:
+        $r9 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        r15 = virtualinvoke $r9.<javax.swing.DefaultRowSorter$ModelWrapper: java.lang.Object getValueAt(int,int)>(i1, $i4);
+
+        $r10 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        r16 = virtualinvoke $r10.<javax.swing.DefaultRowSorter$ModelWrapper: java.lang.Object getValueAt(int,int)>(i2, $i4);
+
+     label04:
+        if r15 != null goto label06;
+
+        if r16 != null goto label05;
+
+        i6 = 0;
+
+        goto label08;
+
+     label05:
+        $i8 = (int) -1;
+
+        i6 = $i8;
+
+        goto label08;
+
+     label06:
+        if r16 != null goto label07;
+
+        i6 = 1;
+
+        goto label08;
+
+     label07:
+        $r11 = r0.<javax.swing.DefaultRowSorter: java.util.Comparator[] sortComparators>;
+
+        $r12 = $r11[i5];
+
+        i6 = interfaceinvoke $r12.<java.util.Comparator: int compare(java.lang.Object,java.lang.Object)>(r15, r16);
+
+     label08:
+        $r17 = <javax.swing.SortOrder: javax.swing.SortOrder DESCENDING>;
+
+        if $r6 != $r17 goto label09;
+
+        $i10 = (int) -1;
+
+        i6 = i6 * $i10;
+
+     label09:
+        if i6 == 0 goto label10;
+
+        return i6;
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label01;
+
+     label11:
+        $i3 = i1 - i2;
+
+        return $i3;
+    }
+
+    private boolean isTransformed()
+    {
+        javax.swing.DefaultRowSorter r0;
+        javax.swing.DefaultRowSorter$Row[] $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void insertInOrder(java.util.List, javax.swing.DefaultRowSorter$Row[])
+    {
+        javax.swing.DefaultRowSorter r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10, $i12;
+        javax.swing.DefaultRowSorter$Row[] r1, $r3, $r5, $r6;
+        javax.swing.DefaultRowSorter$Row $r8;
+        java.util.List r0;
+        java.lang.Object $r4, $r7;
+
+        r2 := @this: javax.swing.DefaultRowSorter;
+
+        r0 := @parameter0: java.util.List;
+
+        r1 := @parameter1: javax.swing.DefaultRowSorter$Row[];
+
+        i8 = 0;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        i9 = 0;
+
+     label1:
+        if i9 >= $i0 goto label3;
+
+        $r4 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i9);
+
+        $i4 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],java.lang.Object)>(r1, $r4);
+
+        i10 = $i4;
+
+        if $i4 >= 0 goto label2;
+
+        $i12 = (int) -1;
+
+        i10 = $i12 - $i4;
+
+     label2:
+        $r5 = r2.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i6 = i8 + i9;
+
+        $i5 = i10 - i8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i8, $r5, $i6, $i5);
+
+        $r6 = r2.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i7 = i10 + i9;
+
+        $r7 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i9);
+
+        $r8 = (javax.swing.DefaultRowSorter$Row) $r7;
+
+        $r6[$i7] = $r8;
+
+        i8 = i10;
+
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = r2.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i3 = i8 + $i0;
+
+        $i1 = lengthof r1;
+
+        $i2 = $i1 - i8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i8, $r3, $i3, $i2);
+
+        return;
+    }
+
+    private boolean shouldOptimizeChange(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0, i1, $i2, $i3, $i4;
+        javax.swing.DefaultRowSorter$Row[] $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean isTransformed()>();
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = r0.<javax.swing.DefaultRowSorter: boolean sorted>;
+
+        if $z1 == 0 goto label2;
+
+        $i4 = i0 - i1;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i2 = lengthof $r1;
+
+        $i3 = $i2 / 10;
+
+        if $i4 <= $i3 goto label3;
+
+     label2:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void sort()>();
+
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    private void rowsInserted0(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.ArrayList $r13;
+        int[] $r2, $r4, $r9;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, $i11, $i12, i13, i14, $i16, $i18;
+        javax.swing.DefaultRowSorter$Row[] $r1, r6, $r7, $r8, $r10;
+        boolean $z0;
+        javax.swing.DefaultRowSorter$Row $r11, $r14;
+        javax.swing.DefaultRowSorter$ModelWrapper $r5;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])>($r1);
+
+        $i2 = i0 - i1;
+
+        i3 = $i2 + 1;
+
+        $r13 = new java.util.ArrayList;
+
+        specialinvoke $r13.<java.util.ArrayList: void <init>(int)>(i3);
+
+        i13 = i1;
+
+     label1:
+        if i13 > i0 goto label3;
+
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean include(int)>(i13);
+
+        if $z0 == 0 goto label2;
+
+        $r14 = new javax.swing.DefaultRowSorter$Row;
+
+        specialinvoke $r14.<javax.swing.DefaultRowSorter$Row: void <init>(javax.swing.DefaultRowSorter,int)>(r0, i13);
+
+        interfaceinvoke $r13.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+     label2:
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i4 = lengthof $r4;
+
+        i14 = $i4 - 1;
+
+     label4:
+        if i14 < i1 goto label6;
+
+        $r9 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        i10 = $r9[i14];
+
+        $i16 = (int) -1;
+
+        if i10 == $i16 goto label5;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r11 = $r10[i10];
+
+        $i11 = $r11.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        $i12 = $i11 + i3;
+
+        $r11.<javax.swing.DefaultRowSorter$Row: int modelIndex> = $i12;
+
+     label5:
+        $i18 = (int) -1;
+
+        i14 = i14 + $i18;
+
+        goto label4;
+
+     label6:
+        $i5 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        if $i5 <= 0 goto label7;
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r13);
+
+        r6 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r7 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i7 = lengthof $r7;
+
+        $i8 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        $i9 = $i7 + $i8;
+
+        $r8 = newarray (javax.swing.DefaultRowSorter$Row)[$i9];
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = $r8;
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void insertInOrder(java.util.List,javax.swing.DefaultRowSorter$Row[])>($r13, r6);
+
+     label7:
+        $r5 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i6 = virtualinvoke $r5.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createModelToView(int)>($i6);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireRowSorterChanged(int[])>($r2);
+
+        return;
+    }
+
+    private void rowsDeleted0(int, int)
+    {
+        int[] $r2, $r3, $r13, $r16;
+        javax.swing.DefaultRowSorter r0;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15, i16, i17, i18, i19, i20, i21, i22, $i24, $i26, $i28;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r5, r6, $r7, $r8, $r9, $r10, $r12, $r14, $r17;
+        javax.swing.DefaultRowSorter$Row $r11, $r15;
+        javax.swing.DefaultRowSorter$ModelWrapper $r4;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])>($r1);
+
+        i15 = 0;
+
+        i16 = i0;
+
+     label01:
+        if i16 > i1 goto label03;
+
+        $r16 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        i17 = $r16[i16];
+
+        $i24 = (int) -1;
+
+        if i17 == $i24 goto label02;
+
+        i15 = i15 + 1;
+
+        $r17 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r17[i17] = null;
+
+     label02:
+        i16 = i16 + 1;
+
+        goto label01;
+
+     label03:
+        $i2 = i1 - i0;
+
+        i3 = $i2 + 1;
+
+        $r3 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i4 = lengthof $r3;
+
+        i18 = $i4 - 1;
+
+     label04:
+        if i18 <= i1 goto label06;
+
+        $r13 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        i19 = $r13[i18];
+
+        $i26 = (int) -1;
+
+        if i19 == $i26 goto label05;
+
+        $r14 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r15 = $r14[i19];
+
+        $i13 = $r15.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        $i14 = $i13 - i3;
+
+        $r15.<javax.swing.DefaultRowSorter$Row: int modelIndex> = $i14;
+
+     label05:
+        $i28 = (int) -1;
+
+        i18 = i18 + $i28;
+
+        goto label04;
+
+     label06:
+        if i15 <= 0 goto label10;
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i6 = lengthof $r5;
+
+        $i7 = $i6 - i15;
+
+        r6 = newarray (javax.swing.DefaultRowSorter$Row)[$i7];
+
+        i20 = 0;
+
+        i21 = 0;
+
+        i22 = 0;
+
+     label07:
+        $r7 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i8 = lengthof $r7;
+
+        if i22 >= $i8 goto label09;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r11 = $r10[i22];
+
+        if $r11 != null goto label08;
+
+        $r12 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i11 = i22 - i21;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r12, i21, r6, i20, $i11);
+
+        $i12 = i22 - i21;
+
+        i20 = i20 + $i12;
+
+        i21 = i22 + 1;
+
+     label08:
+        i22 = i22 + 1;
+
+        goto label07;
+
+     label09:
+        $r9 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r8 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i9 = lengthof $r8;
+
+        $i10 = $i9 - i21;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, i21, r6, i20, $i10);
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = r6;
+
+     label10:
+        $r4 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i5 = virtualinvoke $r4.<javax.swing.DefaultRowSorter$ModelWrapper: int getRowCount()>();
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void createModelToView(int)>($i5);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireRowSorterChanged(int[])>($r2);
+
+        return;
+    }
+
+    private void rowsUpdated0(int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        java.util.ArrayList $r33;
+        javax.swing.DefaultRowSorter$Row[] $r1, $r5, r6, $r7, $r8, $r9, $r10, $r13, $r17, $r21, $r22, $r24, $r26, $r29, r31, r32;
+        int[] $r2, $r12, $r15, $r16, $r19, $r28;
+        boolean $z0, $z1;
+        java.util.List $r23;
+        javax.swing.RowFilter $r3;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, $i32, $i34, $i36;
+        javax.swing.DefaultRowSorter$Row $r11, $r14, $r18, $r25, $r27, $r30, $r34;
+
+        r0 := @this: javax.swing.DefaultRowSorter;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int[] getViewToModelAsInts(javax.swing.DefaultRowSorter$Row[])>($r1);
+
+        $i2 = i0 - i1;
+
+        i3 = $i2 + 1;
+
+        $r3 = virtualinvoke r0.<javax.swing.DefaultRowSorter: javax.swing.RowFilter getRowFilter()>();
+
+        if $r3 != null goto label07;
+
+        r31 = newarray (javax.swing.DefaultRowSorter$Row)[i3];
+
+        i19 = 0;
+
+        i20 = i1;
+
+     label01:
+        if i20 > i0 goto label02;
+
+        $r29 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r28 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i18 = $r28[i20];
+
+        $r30 = $r29[$i18];
+
+        r31[i19] = $r30;
+
+        i20 = i20 + 1;
+
+        i19 = i19 + 1;
+
+        goto label01;
+
+     label02:
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>(r31);
+
+        $r21 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i14 = lengthof $r21;
+
+        $i15 = $i14 - i3;
+
+        r32 = newarray (javax.swing.DefaultRowSorter$Row)[$i15];
+
+        i21 = 0;
+
+        i22 = 0;
+
+     label03:
+        $r22 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i16 = lengthof $r22;
+
+        if i21 >= $i16 goto label06;
+
+        $r24 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r25 = $r24[i21];
+
+        i23 = $r25.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        if i23 < i1 goto label04;
+
+        if i23 <= i0 goto label05;
+
+     label04:
+        $i17 = i22;
+
+        i22 = i22 + 1;
+
+        $r26 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r27 = $r26[i21];
+
+        r32[$i17] = $r27;
+
+     label05:
+        i21 = i21 + 1;
+
+        goto label03;
+
+     label06:
+        $r23 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r31);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void insertInOrder(java.util.List,javax.swing.DefaultRowSorter$Row[])>($r23, r32);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(0);
+
+        goto label18;
+
+     label07:
+        $r33 = new java.util.ArrayList;
+
+        specialinvoke $r33.<java.util.ArrayList: void <init>(int)>(i3);
+
+        i24 = 0;
+
+        i25 = 0;
+
+        i26 = 0;
+
+        i27 = i1;
+
+     label08:
+        if i27 > i0 goto label13;
+
+        $r15 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i12 = $r15[i27];
+
+        $i32 = (int) -1;
+
+        if $i12 != $i32 goto label09;
+
+        $z1 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean include(int)>(i27);
+
+        if $z1 == 0 goto label12;
+
+        $r34 = new javax.swing.DefaultRowSorter$Row;
+
+        specialinvoke $r34.<javax.swing.DefaultRowSorter$Row: void <init>(javax.swing.DefaultRowSorter,int)>(r0, i27);
+
+        interfaceinvoke $r33.<java.util.List: boolean add(java.lang.Object)>($r34);
+
+        i24 = i24 + 1;
+
+        goto label12;
+
+     label09:
+        $z0 = specialinvoke r0.<javax.swing.DefaultRowSorter: boolean include(int)>(i27);
+
+        if $z0 != 0 goto label10;
+
+        i25 = i25 + 1;
+
+        goto label11;
+
+     label10:
+        $r17 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r16 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i13 = $r16[i27];
+
+        $r18 = $r17[$i13];
+
+        interfaceinvoke $r33.<java.util.List: boolean add(java.lang.Object)>($r18);
+
+     label11:
+        $r19 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i34 = (int) -2;
+
+        $r19[i27] = $i34;
+
+        i26 = i26 + 1;
+
+     label12:
+        i27 = i27 + 1;
+
+        goto label08;
+
+     label13:
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r33);
+
+        $r5 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i4 = lengthof $r5;
+
+        $i5 = $i4 - i26;
+
+        r6 = newarray (javax.swing.DefaultRowSorter$Row)[$i5];
+
+        i28 = 0;
+
+        i29 = 0;
+
+     label14:
+        $r7 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i6 = lengthof $r7;
+
+        if i28 >= $i6 goto label16;
+
+        $r10 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r11 = $r10[i28];
+
+        i30 = $r11.<javax.swing.DefaultRowSorter$Row: int modelIndex>;
+
+        $r12 = r0.<javax.swing.DefaultRowSorter: int[] modelToView>;
+
+        $i10 = $r12[i30];
+
+        $i36 = (int) -2;
+
+        if $i10 == $i36 goto label15;
+
+        $i11 = i29;
+
+        i29 = i29 + 1;
+
+        $r13 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $r14 = $r13[i28];
+
+        r6[$i11] = $r14;
+
+     label15:
+        i28 = i28 + 1;
+
+        goto label14;
+
+     label16:
+        if i24 == i25 goto label17;
+
+        $r8 = r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel>;
+
+        $i7 = lengthof $r8;
+
+        $i8 = $i7 + i24;
+
+        $i9 = $i8 - i25;
+
+        $r9 = newarray (javax.swing.DefaultRowSorter$Row)[$i9];
+
+        r0.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$Row[] viewToModel> = $r9;
+
+     label17:
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void insertInOrder(java.util.List,javax.swing.DefaultRowSorter$Row[])>($r33, r6);
+
+        specialinvoke r0.<javax.swing.DefaultRowSorter: void setModelToViewFromViewToModel(boolean)>(1);
+
+     label18:
+        virtualinvoke r0.<javax.swing.DefaultRowSorter: void fireRowSorterChanged(int[])>($r2);
+
+        return;
+    }
+
+    private void checkColumn(int)
+    {
+        javax.swing.DefaultRowSorter r1;
+        java.lang.IndexOutOfBoundsException $r0;
+        int i0, $i1;
+        javax.swing.DefaultRowSorter$ModelWrapper $r2;
+
+        r1 := @this: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r2 = virtualinvoke r1.<javax.swing.DefaultRowSorter: javax.swing.DefaultRowSorter$ModelWrapper getModelWrapper()>();
+
+        $i1 = virtualinvoke $r2.<javax.swing.DefaultRowSorter$ModelWrapper: int getColumnCount()>();
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        $r0 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r0.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("column beyond range of TableModel");
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+
+    static int access$100(javax.swing.DefaultRowSorter, int, int)
+    {
+        javax.swing.DefaultRowSorter r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: javax.swing.DefaultRowSorter;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = specialinvoke r0.<javax.swing.DefaultRowSorter: int compare(int,int)>(i0, i1);
+
+        return $i2;
+    }
+}

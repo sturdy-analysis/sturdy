@@ -1,0 +1,1541 @@
+public final class sun.security.provider.certpath.ldap.LDAPCertStore extends java.security.cert.CertStoreSpi
+{
+    private static final sun.security.util.Debug debug;
+    private static final boolean DEBUG;
+    private static final java.lang.String USER_CERT;
+    private static final java.lang.String CA_CERT;
+    private static final java.lang.String CROSS_CERT;
+    private static final java.lang.String CRL;
+    private static final java.lang.String ARL;
+    private static final java.lang.String DELTA_CRL;
+    private static final java.lang.String[] STRING0;
+    private static final byte[][] BB0;
+    private static final javax.naming.directory.Attributes EMPTY_ATTRIBUTES;
+    private static final int DEFAULT_CACHE_SIZE;
+    private static final int DEFAULT_CACHE_LIFETIME;
+    private static final int LIFETIME;
+    private static final java.lang.String PROP_LIFETIME;
+    private static final java.lang.String PROP_DISABLE_APP_RESOURCE_FILES;
+    private java.security.cert.CertificateFactory cf;
+    private javax.naming.directory.DirContext ctx;
+    private boolean prefetchCRLs;
+    private final sun.security.util.Cache valueCache;
+    private int cacheHits;
+    private int cacheMisses;
+    private int requests;
+    private static final sun.security.util.Cache certStoreCache;
+
+    public void <init>(java.security.cert.CertStoreParameters) throws java.security.InvalidAlgorithmParameterException
+    {
+        java.security.cert.CertificateFactory $r4;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+        java.security.cert.LDAPCertStoreParameters r2;
+        java.security.InvalidAlgorithmParameterException $r8, $r10;
+        java.security.cert.CertStoreParameters r1;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r3;
+        boolean $z0;
+        java.security.cert.CertificateException $r9;
+        sun.security.util.Cache $r5, $r6, $r7;
+
+        r0 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r1 := @parameter0: java.security.cert.CertStoreParameters;
+
+        specialinvoke r0.<java.security.cert.CertStoreSpi: void <init>(java.security.cert.CertStoreParameters)>(r1);
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: boolean prefetchCRLs> = 0;
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheHits> = 0;
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheMisses> = 0;
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int requests> = 0;
+
+        $z0 = r1 instanceof java.security.cert.LDAPCertStoreParameters;
+
+        if $z0 != 0 goto label1;
+
+        $r8 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r8.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("parameters must be LDAPCertStoreParameters");
+
+        throw $r8;
+
+     label1:
+        r2 = (java.security.cert.LDAPCertStoreParameters) r1;
+
+        $r3 = virtualinvoke r2.<java.security.cert.LDAPCertStoreParameters: java.lang.String getServerName()>();
+
+        $i0 = virtualinvoke r2.<java.security.cert.LDAPCertStoreParameters: int getPort()>();
+
+        specialinvoke r0.<sun.security.provider.certpath.ldap.LDAPCertStore: void createInitialDirContext(java.lang.String,int)>($r3, $i0);
+
+     label2:
+        $r4 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: java.security.cert.CertificateFactory cf> = $r4;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r10.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("unable to create CertificateFactory for X.509");
+
+        throw $r10;
+
+     label5:
+        $i1 = <sun.security.provider.certpath.ldap.LDAPCertStore: int LIFETIME>;
+
+        if $i1 != 0 goto label6;
+
+        $r7 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newNullCache()>();
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache valueCache> = $r7;
+
+        goto label8;
+
+     label6:
+        $i2 = <sun.security.provider.certpath.ldap.LDAPCertStore: int LIFETIME>;
+
+        if $i2 >= 0 goto label7;
+
+        $r6 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int)>(750);
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache valueCache> = $r6;
+
+        goto label8;
+
+     label7:
+        $i3 = <sun.security.provider.certpath.ldap.LDAPCertStore: int LIFETIME>;
+
+        $r5 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int,int)>(750, $i3);
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache valueCache> = $r5;
+
+     label8:
+        return;
+
+        catch java.security.cert.CertificateException from label2 to label3 with label4;
+    }
+
+    static synchronized java.security.cert.CertStore getInstance(java.security.cert.LDAPCertStoreParameters) throws java.security.NoSuchAlgorithmException, java.security.InvalidAlgorithmParameterException
+    {
+        sun.security.util.Cache $r2, $r7;
+        sun.security.util.Debug $r4, $r5;
+        java.lang.SecurityManager $r0;
+        java.security.cert.LDAPCertStoreParameters r1;
+        java.security.cert.CertStore $r6, $r9, r10;
+        int $i0;
+        java.lang.Object $r3;
+        java.lang.String $r8;
+
+        r1 := @parameter0: java.security.cert.LDAPCertStoreParameters;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r8 = virtualinvoke r1.<java.security.cert.LDAPCertStoreParameters: java.lang.String getServerName()>();
+
+        $i0 = virtualinvoke r1.<java.security.cert.LDAPCertStoreParameters: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r8, $i0);
+
+     label1:
+        $r2 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache certStoreCache>;
+
+        $r3 = virtualinvoke $r2.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r9 = (java.security.cert.CertStore) $r3;
+
+        r10 = $r9;
+
+        if $r9 != null goto label2;
+
+        $r6 = staticinvoke <java.security.cert.CertStore: java.security.cert.CertStore getInstance(java.lang.String,java.security.cert.CertStoreParameters)>("LDAP", r1);
+
+        r10 = $r6;
+
+        $r7 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache certStoreCache>;
+
+        virtualinvoke $r7.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+        goto label3;
+
+     label2:
+        $r4 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label3;
+
+        $r5 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.getInstance: cache hit");
+
+     label3:
+        return r10;
+    }
+
+    private void createInitialDirContext(java.lang.String, int) throws java.security.InvalidAlgorithmParameterException
+    {
+        sun.security.provider.certpath.ldap.LDAPCertStore r11;
+        javax.naming.NamingException $r15;
+        java.security.InvalidAlgorithmParameterException $r17, $r18;
+        javax.naming.directory.InitialDirContext $r20;
+        int i0;
+        java.lang.Boolean $r10;
+        java.lang.String r2, $r6;
+        java.util.Hashtable $r7, $r22;
+        boolean $z0;
+        javax.naming.directory.DirContext $r12, $r21;
+        sun.security.util.Debug $r13, $r14, $r16, $r19;
+        sun.security.action.GetBooleanAction $r8;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r5;
+        java.lang.Object $r9, $r23;
+
+        r11 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ldap://");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.util.Hashtable;
+
+        specialinvoke $r7.<java.util.Hashtable: void <init>()>();
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("java.naming.provider.url", $r6);
+
+        $r8 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r8.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.security.certpath.ldap.disable.app.resource.files");
+
+        $r9 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r8);
+
+        $r10 = (java.lang.Boolean) $r9;
+
+        $z0 = virtualinvoke $r10.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label2;
+
+        $r13 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r13 == null goto label1;
+
+        $r14 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore disabling app resource files");
+
+     label1:
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("com.sun.naming.disable.app.resource.files", "true");
+
+     label2:
+        $r20 = new javax.naming.directory.InitialDirContext;
+
+        specialinvoke $r20.<javax.naming.directory.InitialDirContext: void <init>(java.util.Hashtable)>($r7);
+
+        r11.<sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.DirContext ctx> = $r20;
+
+        $r21 = r11.<sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.DirContext ctx>;
+
+        $r22 = interfaceinvoke $r21.<javax.naming.directory.DirContext: java.util.Hashtable getEnvironment()>();
+
+        $r23 = virtualinvoke $r22.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.referral");
+
+        if $r23 != null goto label3;
+
+        $r12 = r11.<sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.DirContext ctx>;
+
+        interfaceinvoke $r12.<javax.naming.directory.DirContext: java.lang.Object addToEnvironment(java.lang.String,java.lang.Object)>("java.naming.referral", "throw");
+
+     label3:
+        goto label6;
+
+     label4:
+        $r15 := @caughtexception;
+
+        $r16 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r16 == null goto label5;
+
+        $r19 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r19.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.engineInit about to throw InvalidAlgorithmParameterException");
+
+        virtualinvoke $r15.<javax.naming.NamingException: void printStackTrace()>();
+
+     label5:
+        $r17 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r17.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("unable to create InitialDirContext using supplied parameters");
+
+        virtualinvoke $r17.<java.lang.Exception: java.lang.Throwable initCause(java.lang.Throwable)>($r15);
+
+        $r18 = (java.security.InvalidAlgorithmParameterException) $r17;
+
+        throw $r18;
+
+     label6:
+        return;
+
+        catch javax.naming.NamingException from label2 to label3 with label4;
+    }
+
+    private java.util.Collection getCertificates(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest, java.lang.String, java.security.cert.X509CertSelector) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate $r10;
+        byte[] $r5, $r19;
+        java.security.cert.CertificateFactory $r7;
+        sun.security.provider.certpath.ldap.LDAPCertStore r6;
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest r0;
+        javax.naming.NamingException $r24;
+        java.util.ArrayList $r3;
+        java.io.ByteArrayInputStream $r4;
+        int i0, i1;
+        java.lang.String r1, $r20, $r23;
+        sun.misc.HexDumpEncoder $r15;
+        boolean $z0;
+        java.security.cert.X509CertSelector r9;
+        java.util.Set $r11;
+        java.security.cert.CertificateException $r12;
+        sun.security.util.Debug $r13, $r14, $r17;
+        java.security.cert.CertStoreException $r25;
+        byte[][] $r2;
+        java.security.cert.Certificate $r8;
+        java.lang.StringBuilder $r16, $r18, $r21, $r22;
+
+        r6 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        r1 := @parameter1: java.lang.String;
+
+        r9 := @parameter2: java.security.cert.X509CertSelector;
+
+     label01:
+        $r2 = virtualinvoke r0.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: byte[][] getValues(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r24 := @caughtexception;
+
+        $r25 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r25.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r24);
+
+        throw $r25;
+
+     label04:
+        i0 = lengthof $r2;
+
+        if i0 != 0 goto label05;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r11;
+
+     label05:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(int)>(i0);
+
+        i1 = 0;
+
+     label06:
+        if i1 >= i0 goto label11;
+
+        $r4 = new java.io.ByteArrayInputStream;
+
+        $r5 = $r2[i1];
+
+        specialinvoke $r4.<java.io.ByteArrayInputStream: void <init>(byte[])>($r5);
+
+     label07:
+        $r7 = r6.<sun.security.provider.certpath.ldap.LDAPCertStore: java.security.cert.CertificateFactory cf>;
+
+        $r8 = virtualinvoke $r7.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r4);
+
+        $z0 = virtualinvoke r9.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>($r8);
+
+        if $z0 == 0 goto label08;
+
+        $r10 = (java.security.cert.X509Certificate) $r8;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r12 := @caughtexception;
+
+        $r13 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r13 == null goto label10;
+
+        $r14 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.getCertificates() encountered exception while parsing cert, skipping the bad data: ");
+
+        $r15 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r15.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r17 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ ");
+
+        $r19 = $r2[i1];
+
+        $r20 = virtualinvoke $r15.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r19);
+
+        $r21 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ]");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r23);
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label06;
+
+     label11:
+        return $r3;
+
+        catch javax.naming.NamingException from label01 to label02 with label03;
+        catch java.security.cert.CertificateException from label07 to label08 with label09;
+    }
+
+    private java.util.Collection getCertPairs(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest, java.lang.String) throws java.security.cert.CertStoreException
+    {
+        byte[] $r4, $r14;
+        sun.security.provider.certpath.ldap.LDAPCertStore r21;
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest r0;
+        javax.naming.NamingException $r19;
+        java.util.ArrayList $r3;
+        int i0, i1;
+        java.lang.String r1, $r15, $r18;
+        sun.misc.HexDumpEncoder $r10;
+        sun.security.provider.certpath.X509CertificatePair $r5;
+        java.util.Set $r6;
+        java.security.cert.CertificateException $r7;
+        sun.security.util.Debug $r8, $r9, $r12;
+        java.security.cert.CertStoreException $r20;
+        byte[][] $r2;
+        java.lang.StringBuilder $r11, $r13, $r16, $r17;
+
+        r21 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        r1 := @parameter1: java.lang.String;
+
+     label01:
+        $r2 = virtualinvoke r0.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: byte[][] getValues(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r19 := @caughtexception;
+
+        $r20 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r20.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r19);
+
+        throw $r20;
+
+     label04:
+        i0 = lengthof $r2;
+
+        if i0 != 0 goto label05;
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r6;
+
+     label05:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(int)>(i0);
+
+        i1 = 0;
+
+     label06:
+        if i1 >= i0 goto label11;
+
+     label07:
+        $r4 = $r2[i1];
+
+        $r5 = staticinvoke <sun.security.provider.certpath.X509CertificatePair: sun.security.provider.certpath.X509CertificatePair generateCertificatePair(byte[])>($r4);
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r7 := @caughtexception;
+
+        $r8 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label10;
+
+        $r9 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.getCertPairs() encountered exception while parsing cert, skipping the bad data: ");
+
+        $r10 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r10.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r12 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ ");
+
+        $r14 = $r2[i1];
+
+        $r15 = virtualinvoke $r10.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r14);
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ]");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>($r18);
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label06;
+
+     label11:
+        return $r3;
+
+        catch javax.naming.NamingException from label01 to label02 with label03;
+        catch java.security.cert.CertificateException from label07 to label08 with label09;
+    }
+
+    private java.util.Collection getMatchingCrossCerts(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest, java.security.cert.X509CertSelector, java.security.cert.X509CertSelector) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate $r9, $r10;
+        java.util.Iterator $r4;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+        sun.security.provider.certpath.X509CertificatePair r6;
+        java.util.Collection $r2;
+        java.security.cert.X509CertSelector r7, r8;
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest r1;
+        java.util.ArrayList $r3;
+        java.lang.Object $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r1 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        r7 := @parameter1: java.security.cert.X509CertSelector;
+
+        r8 := @parameter2: java.security.cert.X509CertSelector;
+
+        $r2 = specialinvoke r0.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCertPairs(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String)>(r1, "crossCertificatePair;binary");
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.security.provider.certpath.X509CertificatePair) $r5;
+
+        if r7 == null goto label2;
+
+        $r10 = virtualinvoke r6.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate getForward()>();
+
+        if $r10 == null goto label2;
+
+        $z2 = virtualinvoke r7.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>($r10);
+
+        if $z2 == 0 goto label2;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+     label2:
+        if r8 == null goto label3;
+
+        $r9 = virtualinvoke r6.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate getReverse()>();
+
+        if $r9 == null goto label3;
+
+        $z1 = virtualinvoke r8.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>($r9);
+
+        if $z1 == 0 goto label3;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+     label3:
+        goto label1;
+
+     label4:
+        return $r3;
+    }
+
+    public synchronized java.util.Collection engineGetCertificates(java.security.cert.CertSelector) throws java.security.cert.CertStoreException
+    {
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest $r73, $r79;
+        sun.security.util.Debug $r0, $r5, $r6, $r7, $r8, $r12, $r14, $r16, $r21, $r25, $r28, $r29, $r32, $r34, $r39, $r41, $r43, $r48, $r52, $r54, $r61, $r67;
+        java.security.cert.CertStoreException $r70, $r77, $r78;
+        java.lang.StringBuilder $r17, $r18, $r22, $r23, $r35, $r36, $r44, $r45, $r49, $r50, $r55, $r56, $r62, $r64, $r68, $r72, $r74, $r75, $r76, $r80, $r81;
+        java.lang.String $r2, $r3, $r19, $r24, $r37, $r46, $r51, $r57, $r63, $r65;
+        boolean $z0, $z1, $z2;
+        java.security.cert.X509CertSelector r1, $r69;
+        java.util.Collection $r11, $r13, $r31, $r38, $r40;
+        sun.security.provider.certpath.ldap.LDAPCertStore r10;
+        java.util.HashSet $r71;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i9, $i11, $i13;
+        java.security.cert.CertSelector r66;
+
+        r10 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r66 := @parameter0: java.security.cert.CertSelector;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r61 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() selector: ");
+
+        $r63 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r66);
+
+        $r64 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r63);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r61.<sun.security.util.Debug: void println(java.lang.String)>($r65);
+
+     label01:
+        if r66 != null goto label02;
+
+        $r69 = new java.security.cert.X509CertSelector;
+
+        specialinvoke $r69.<java.security.cert.X509CertSelector: void <init>()>();
+
+        r66 = $r69;
+
+     label02:
+        $z0 = r66 instanceof java.security.cert.X509CertSelector;
+
+        if $z0 != 0 goto label03;
+
+        $r70 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r70.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("LDAPCertStore needs an X509CertSelector to find certs");
+
+        throw $r70;
+
+     label03:
+        r1 = (java.security.cert.X509CertSelector) r66;
+
+        $i0 = virtualinvoke r1.<java.security.cert.X509CertSelector: int getBasicConstraints()>();
+
+        $r2 = virtualinvoke r1.<java.security.cert.X509CertSelector: java.lang.String getSubjectAsString()>();
+
+        $r3 = virtualinvoke r1.<java.security.cert.X509CertSelector: java.lang.String getIssuerAsString()>();
+
+        $r71 = new java.util.HashSet;
+
+        specialinvoke $r71.<java.util.HashSet: void <init>()>();
+
+        $r5 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r5 == null goto label04;
+
+        $r54 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() basicConstraints: ");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r54.<sun.security.util.Debug: void println(java.lang.String)>($r57);
+
+     label04:
+        if $r2 == null goto label11;
+
+        $r29 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r29 == null goto label05;
+
+        $r52 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r52.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.engineGetCertificates() subject is not null");
+
+     label05:
+        $r73 = new sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        specialinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void <init>(sun.security.provider.certpath.ldap.LDAPCertStore,java.lang.String)>(r10, $r2);
+
+        $i7 = (int) -2;
+
+        if $i0 <= $i7 goto label06;
+
+        virtualinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("crossCertificatePair;binary");
+
+        virtualinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("cACertificate;binary");
+
+        virtualinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("authorityRevocationList;binary");
+
+        $z2 = r10.<sun.security.provider.certpath.ldap.LDAPCertStore: boolean prefetchCRLs>;
+
+        if $z2 == 0 goto label06;
+
+        virtualinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("certificateRevocationList;binary");
+
+     label06:
+        if $i0 >= 0 goto label07;
+
+        virtualinvoke $r73.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("userCertificate;binary");
+
+     label07:
+        $i9 = (int) -2;
+
+        if $i0 <= $i9 goto label09;
+
+        $r38 = specialinvoke r10.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getMatchingCrossCerts(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.security.cert.X509CertSelector,java.security.cert.X509CertSelector)>($r73, r1, null);
+
+        virtualinvoke $r71.<java.util.HashSet: boolean addAll(java.util.Collection)>($r38);
+
+        $r39 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r39 == null goto label08;
+
+        $r48 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() after getMatchingCrossCerts(subject,xsel,null),certs.size(): ");
+
+        $i5 = virtualinvoke $r71.<java.util.HashSet: int size()>();
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r48.<sun.security.util.Debug: void println(java.lang.String)>($r51);
+
+     label08:
+        $r40 = specialinvoke r10.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCertificates(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String,java.security.cert.X509CertSelector)>($r73, "cACertificate;binary", r1);
+
+        virtualinvoke $r71.<java.util.HashSet: boolean addAll(java.util.Collection)>($r40);
+
+        $r41 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r41 == null goto label09;
+
+        $r43 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() after getCertificates(subject,CA_CERT,xsel),certs.size(): ");
+
+        $i4 = virtualinvoke $r71.<java.util.HashSet: int size()>();
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<sun.security.util.Debug: void println(java.lang.String)>($r46);
+
+     label09:
+        if $i0 >= 0 goto label10;
+
+        $r31 = specialinvoke r10.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCertificates(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String,java.security.cert.X509CertSelector)>($r73, "userCertificate;binary", r1);
+
+        virtualinvoke $r71.<java.util.HashSet: boolean addAll(java.util.Collection)>($r31);
+
+        $r32 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r32 == null goto label10;
+
+        $r34 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() after getCertificates(subject,USER_CERT, xsel),certs.size(): ");
+
+        $i3 = virtualinvoke $r71.<java.util.HashSet: int size()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r34.<sun.security.util.Debug: void println(java.lang.String)>($r37);
+
+     label10:
+        goto label14;
+
+     label11:
+        $r6 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label12;
+
+        $r28 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r28.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.engineGetCertificates() subject is null");
+
+     label12:
+        $i11 = (int) -2;
+
+        if $i0 != $i11 goto label13;
+
+        $r77 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r77.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("need subject to find EE certs");
+
+        throw $r77;
+
+     label13:
+        if $r3 != null goto label14;
+
+        $r78 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r78.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("need subject or issuer to find certs");
+
+        throw $r78;
+
+     label14:
+        $r7 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label15;
+
+        $r25 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r25.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.engineGetCertificates() about to getMatchingCrossCerts...");
+
+     label15:
+        if $r3 == null goto label18;
+
+        $i13 = (int) -2;
+
+        if $i0 <= $i13 goto label18;
+
+        $r79 = new sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        specialinvoke $r79.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void <init>(sun.security.provider.certpath.ldap.LDAPCertStore,java.lang.String)>(r10, $r3);
+
+        virtualinvoke $r79.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("crossCertificatePair;binary");
+
+        virtualinvoke $r79.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("cACertificate;binary");
+
+        virtualinvoke $r79.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("authorityRevocationList;binary");
+
+        $z1 = r10.<sun.security.provider.certpath.ldap.LDAPCertStore: boolean prefetchCRLs>;
+
+        if $z1 == 0 goto label16;
+
+        virtualinvoke $r79.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("certificateRevocationList;binary");
+
+     label16:
+        $r11 = specialinvoke r10.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getMatchingCrossCerts(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.security.cert.X509CertSelector,java.security.cert.X509CertSelector)>($r79, null, r1);
+
+        virtualinvoke $r71.<java.util.HashSet: boolean addAll(java.util.Collection)>($r11);
+
+        $r12 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r12 == null goto label17;
+
+        $r21 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r80 = new java.lang.StringBuilder;
+
+        specialinvoke $r80.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() after getMatchingCrossCerts(issuer,null,xsel),certs.size(): ");
+
+        $i2 = virtualinvoke $r71.<java.util.HashSet: int size()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r24);
+
+     label17:
+        $r13 = specialinvoke r10.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCertificates(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String,java.security.cert.X509CertSelector)>($r79, "cACertificate;binary", r1);
+
+        virtualinvoke $r71.<java.util.HashSet: boolean addAll(java.util.Collection)>($r13);
+
+        $r14 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r14 == null goto label18;
+
+        $r16 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r81 = new java.lang.StringBuilder;
+
+        specialinvoke $r81.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCertificates() after getCertificates(issuer,CA_CERT,xsel),certs.size(): ");
+
+        $i1 = virtualinvoke $r71.<java.util.HashSet: int size()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label18:
+        $r67 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r67 == null goto label19;
+
+        $r8 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.engineGetCertificates() returning certs");
+
+     label19:
+        return $r71;
+    }
+
+    private java.util.Collection getCRLs(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest, java.lang.String, java.security.cert.X509CRLSelector) throws java.security.cert.CertStoreException
+    {
+        byte[] $r6, $r19;
+        java.security.cert.CertificateFactory $r7;
+        sun.security.provider.certpath.ldap.LDAPCertStore r4;
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest r0;
+        java.security.cert.X509CRL $r10;
+        javax.naming.NamingException $r24;
+        java.util.ArrayList $r3;
+        java.io.ByteArrayInputStream $r5;
+        int i0, i1;
+        java.lang.String r1, $r20, $r23;
+        java.security.cert.CRL $r8;
+        java.security.cert.X509CRLSelector r9;
+        sun.misc.HexDumpEncoder $r15;
+        boolean $z0;
+        java.util.Set $r11;
+        sun.security.util.Debug $r13, $r14, $r17;
+        java.security.cert.CertStoreException $r25;
+        byte[][] $r2;
+        java.lang.StringBuilder $r16, $r18, $r21, $r22;
+        java.security.cert.CRLException $r12;
+
+        r4 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        r1 := @parameter1: java.lang.String;
+
+        r9 := @parameter2: java.security.cert.X509CRLSelector;
+
+     label01:
+        $r2 = virtualinvoke r0.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: byte[][] getValues(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r24 := @caughtexception;
+
+        $r25 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r25.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r24);
+
+        throw $r25;
+
+     label04:
+        i0 = lengthof $r2;
+
+        if i0 != 0 goto label05;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r11;
+
+     label05:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(int)>(i0);
+
+        i1 = 0;
+
+     label06:
+        if i1 >= i0 goto label11;
+
+     label07:
+        $r7 = r4.<sun.security.provider.certpath.ldap.LDAPCertStore: java.security.cert.CertificateFactory cf>;
+
+        $r5 = new java.io.ByteArrayInputStream;
+
+        $r6 = $r2[i1];
+
+        specialinvoke $r5.<java.io.ByteArrayInputStream: void <init>(byte[])>($r6);
+
+        $r8 = virtualinvoke $r7.<java.security.cert.CertificateFactory: java.security.cert.CRL generateCRL(java.io.InputStream)>($r5);
+
+        $z0 = virtualinvoke r9.<java.security.cert.X509CRLSelector: boolean match(java.security.cert.CRL)>($r8);
+
+        if $z0 == 0 goto label08;
+
+        $r10 = (java.security.cert.X509CRL) $r8;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r12 := @caughtexception;
+
+        $r13 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r13 == null goto label10;
+
+        $r14 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>("LDAPCertStore.getCRLs() encountered exception while parsing CRL, skipping the bad data: ");
+
+        $r15 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r15.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r17 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ ");
+
+        $r19 = $r2[i1];
+
+        $r20 = virtualinvoke $r15.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r19);
+
+        $r21 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ]");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r23);
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label06;
+
+     label11:
+        return $r3;
+
+        catch javax.naming.NamingException from label01 to label02 with label03;
+        catch java.security.cert.CRLException from label07 to label08 with label09;
+    }
+
+    public synchronized java.util.Collection engineGetCRLs(java.security.cert.CRLSelector) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate $r3;
+        byte[] $r13, $r14;
+        sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest $r45, $r47;
+        java.security.cert.X509CRLSelector r1, $r39;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.Collection $r4, $r9, $r11, r35, r37;
+        sun.security.util.Debug $r0, $r22, $r27, $r29;
+        java.security.cert.CertStoreException $r26, $r40, $r43;
+        java.lang.StringBuilder $r23, $r24, $r30, $r31, $r38, $r46;
+        javax.security.auth.x500.X500Principal $r17, $r44;
+        sun.security.provider.certpath.ldap.LDAPCertStore r8;
+        java.util.HashSet $r41, $r42;
+        java.security.cert.CRLSelector r34;
+        int $i0, $i2;
+        java.lang.String $r18, $r25, $r32, r36;
+        java.util.Iterator $r5;
+        java.lang.IllegalArgumentException $r33;
+        java.lang.Object $r6;
+
+        r8 := @this: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        r34 := @parameter0: java.security.cert.CRLSelector;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r22 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCRLs() selector: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r34);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<sun.security.util.Debug: void println(java.lang.String)>($r25);
+
+     label01:
+        if r34 != null goto label02;
+
+        $r39 = new java.security.cert.X509CRLSelector;
+
+        specialinvoke $r39.<java.security.cert.X509CRLSelector: void <init>()>();
+
+        r34 = $r39;
+
+     label02:
+        $z0 = r34 instanceof java.security.cert.X509CRLSelector;
+
+        if $z0 != 0 goto label03;
+
+        $r40 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r40.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("need X509CRLSelector to find CRLs");
+
+        throw $r40;
+
+     label03:
+        r1 = (java.security.cert.X509CRLSelector) r34;
+
+        $r41 = new java.util.HashSet;
+
+        specialinvoke $r41.<java.util.HashSet: void <init>()>();
+
+        $r3 = virtualinvoke r1.<java.security.cert.X509CRLSelector: java.security.cert.X509Certificate getCertificateChecking()>();
+
+        if $r3 == null goto label04;
+
+        $r42 = new java.util.HashSet;
+
+        specialinvoke $r42.<java.util.HashSet: void <init>()>();
+
+        r35 = $r42;
+
+        $r17 = virtualinvoke $r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r18 = virtualinvoke $r17.<javax.security.auth.x500.X500Principal: java.lang.String getName(java.lang.String)>("RFC2253");
+
+        interfaceinvoke $r42.<java.util.Collection: boolean add(java.lang.Object)>($r18);
+
+        goto label05;
+
+     label04:
+        $r4 = virtualinvoke r1.<java.security.cert.X509CRLSelector: java.util.Collection getIssuerNames()>();
+
+        r35 = $r4;
+
+        if $r4 != null goto label05;
+
+        $r43 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r43.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("need issuerNames or certChecking to find CRLs");
+
+        throw $r43;
+
+     label05:
+        $r5 = interfaceinvoke r35.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z4 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label20;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r6 instanceof byte[];
+
+        if $z1 == 0 goto label10;
+
+     label07:
+        $r44 = new javax.security.auth.x500.X500Principal;
+
+        $r13 = (byte[]) $r6;
+
+        $r14 = (byte[]) $r13;
+
+        specialinvoke $r44.<javax.security.auth.x500.X500Principal: void <init>(byte[])>($r14);
+
+        r36 = virtualinvoke $r44.<javax.security.auth.x500.X500Principal: java.lang.String getName(java.lang.String)>("RFC2253");
+
+     label08:
+        goto label11;
+
+     label09:
+        $r33 := @caughtexception;
+
+        goto label06;
+
+     label10:
+        r36 = (java.lang.String) $r6;
+
+     label11:
+        r37 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        if $r3 == null goto label12;
+
+        $i0 = virtualinvoke $r3.<java.security.cert.X509Certificate: int getBasicConstraints()>();
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label17;
+
+     label12:
+        $r45 = new sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        specialinvoke $r45.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void <init>(sun.security.provider.certpath.ldap.LDAPCertStore,java.lang.String)>(r8, r36);
+
+        virtualinvoke $r45.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("crossCertificatePair;binary");
+
+        virtualinvoke $r45.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("cACertificate;binary");
+
+        virtualinvoke $r45.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("authorityRevocationList;binary");
+
+        $z2 = r8.<sun.security.provider.certpath.ldap.LDAPCertStore: boolean prefetchCRLs>;
+
+        if $z2 == 0 goto label13;
+
+        virtualinvoke $r45.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("certificateRevocationList;binary");
+
+     label13:
+        $r9 = specialinvoke r8.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCRLs(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String,java.security.cert.X509CRLSelector)>($r45, "authorityRevocationList;binary", r1);
+
+        r37 = $r9;
+
+        $z3 = interfaceinvoke $r9.<java.util.Collection: boolean isEmpty()>();
+
+        if $z3 == 0 goto label14;
+
+        r8.<sun.security.provider.certpath.ldap.LDAPCertStore: boolean prefetchCRLs> = 1;
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r41.<java.util.HashSet: boolean addAll(java.util.Collection)>($r9);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r26 := @caughtexception;
+
+        $r27 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        if $r27 == null goto label17;
+
+        $r29 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LDAPCertStore.engineGetCRLs non-fatal error retrieving ARLs:");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r29.<sun.security.util.Debug: void println(java.lang.String)>($r32);
+
+        virtualinvoke $r26.<java.security.cert.CertStoreException: void printStackTrace()>();
+
+     label17:
+        $z5 = interfaceinvoke r37.<java.util.Collection: boolean isEmpty()>();
+
+        if $z5 != 0 goto label18;
+
+        if $r3 != null goto label19;
+
+     label18:
+        $r47 = new sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest;
+
+        specialinvoke $r47.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void <init>(sun.security.provider.certpath.ldap.LDAPCertStore,java.lang.String)>(r8, r36);
+
+        virtualinvoke $r47.<sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest: void addRequestedAttribute(java.lang.String)>("certificateRevocationList;binary");
+
+        $r11 = specialinvoke r8.<sun.security.provider.certpath.ldap.LDAPCertStore: java.util.Collection getCRLs(sun.security.provider.certpath.ldap.LDAPCertStore$LDAPRequest,java.lang.String,java.security.cert.X509CRLSelector)>($r47, "certificateRevocationList;binary", r1);
+
+        virtualinvoke $r41.<java.util.HashSet: boolean addAll(java.util.Collection)>($r11);
+
+     label19:
+        goto label06;
+
+     label20:
+        return $r41;
+
+        catch java.lang.IllegalArgumentException from label07 to label08 with label09;
+        catch java.security.cert.CertStoreException from label13 to label15 with label16;
+    }
+
+    static java.security.cert.LDAPCertStoreParameters getParameters(java.net.URI)
+    {
+        sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters $r3, $r4, $r5, $r6;
+        int $i0, $i2;
+        java.net.URI r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.net.URI;
+
+        $r1 = virtualinvoke r0.<java.net.URI: java.lang.String getHost()>();
+
+        if $r1 != null goto label1;
+
+        $r4 = new sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters;
+
+        specialinvoke $r4.<sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters: void <init>()>();
+
+        return $r4;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.net.URI: int getPort()>();
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label2;
+
+        $r5 = new sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters;
+
+        $r3 = $r5;
+
+        specialinvoke $r5.<sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters: void <init>(java.lang.String)>($r1);
+
+        goto label3;
+
+     label2:
+        $r6 = new sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters;
+
+        $r3 = $r6;
+
+        specialinvoke $r6.<sun.security.provider.certpath.ldap.LDAPCertStore$SunLDAPCertStoreParameters: void <init>(java.lang.String,int)>($r1, $i0);
+
+     label3:
+        return $r3;
+    }
+
+    static sun.security.util.Cache access$000(sun.security.provider.certpath.ldap.LDAPCertStore)
+    {
+        sun.security.util.Cache $r1;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        $r1 = r0.<sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache valueCache>;
+
+        return $r1;
+    }
+
+    static int access$108(sun.security.provider.certpath.ldap.LDAPCertStore)
+    {
+        int $i0, $i1;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        $i0 = r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheHits>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheHits> = $i1;
+
+        return $i0;
+    }
+
+    static int access$208(sun.security.provider.certpath.ldap.LDAPCertStore)
+    {
+        int $i0, $i1;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        $i0 = r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheMisses>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.security.provider.certpath.ldap.LDAPCertStore: int cacheMisses> = $i1;
+
+        return $i0;
+    }
+
+    static java.lang.String[] access$300()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String[] STRING0>;
+
+        return $r0;
+    }
+
+    static javax.naming.directory.DirContext access$400(sun.security.provider.certpath.ldap.LDAPCertStore)
+    {
+        javax.naming.directory.DirContext $r1;
+        sun.security.provider.certpath.ldap.LDAPCertStore r0;
+
+        r0 := @parameter0: sun.security.provider.certpath.ldap.LDAPCertStore;
+
+        $r1 = r0.<sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.DirContext ctx>;
+
+        return $r1;
+    }
+
+    static javax.naming.directory.Attributes access$500()
+    {
+        javax.naming.directory.Attributes $r0;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.Attributes EMPTY_ATTRIBUTES>;
+
+        return $r0;
+    }
+
+    static byte[][] access$600()
+    {
+        byte[][] $r0;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: byte[][] BB0>;
+
+        return $r0;
+    }
+
+    static sun.security.util.Debug access$700()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        javax.naming.directory.BasicAttributes $r3;
+        java.lang.String[] $r1;
+        sun.security.util.Cache $r7;
+        sun.security.util.Debug $r0;
+        sun.security.action.GetPropertyAction $r4;
+        byte[][] $r2;
+        int $i0;
+        java.lang.Object $r5;
+        java.lang.String r6;
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String PROP_DISABLE_APP_RESOURCE_FILES> = "sun.security.certpath.ldap.disable.app.resource.files";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String PROP_LIFETIME> = "sun.security.certpath.ldap.cache.lifetime";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: int DEFAULT_CACHE_LIFETIME> = 30;
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: int DEFAULT_CACHE_SIZE> = 750;
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String DELTA_CRL> = "deltaRevocationList;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String ARL> = "authorityRevocationList;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String CRL> = "certificateRevocationList;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String CROSS_CERT> = "crossCertificatePair;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String CA_CERT> = "cACertificate;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String USER_CERT> = "userCertificate;binary";
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: boolean DEBUG> = 0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Debug debug> = $r0;
+
+        $r1 = newarray (java.lang.String)[0];
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: java.lang.String[] STRING0> = $r1;
+
+        $r2 = newarray (byte[])[0];
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: byte[][] BB0> = $r2;
+
+        $r3 = new javax.naming.directory.BasicAttributes;
+
+        specialinvoke $r3.<javax.naming.directory.BasicAttributes: void <init>()>();
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: javax.naming.directory.Attributes EMPTY_ATTRIBUTES> = $r3;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.security.certpath.ldap.cache.lifetime");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r6 = (java.lang.String) $r5;
+
+        if r6 == null goto label1;
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r6);
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: int LIFETIME> = $i0;
+
+        goto label2;
+
+     label1:
+        <sun.security.provider.certpath.ldap.LDAPCertStore: int LIFETIME> = 30;
+
+     label2:
+        $r7 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int)>(185);
+
+        <sun.security.provider.certpath.ldap.LDAPCertStore: sun.security.util.Cache certStoreCache> = $r7;
+
+        return;
+    }
+}

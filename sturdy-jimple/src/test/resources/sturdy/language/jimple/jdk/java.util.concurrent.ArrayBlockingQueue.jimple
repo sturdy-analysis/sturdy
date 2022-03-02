@@ -1,0 +1,1752 @@
+public class java.util.concurrent.ArrayBlockingQueue extends java.util.AbstractQueue implements java.util.concurrent.BlockingQueue, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    final java.lang.Object[] items;
+    int takeIndex;
+    int putIndex;
+    int count;
+    final java.util.concurrent.locks.ReentrantLock lock;
+    private final java.util.concurrent.locks.Condition notEmpty;
+    private final java.util.concurrent.locks.Condition notFull;
+    transient java.util.concurrent.ArrayBlockingQueue$Itrs itrs;
+
+    final int dec(int)
+    {
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.lang.Object[] $r1;
+        int i0, $i1, $i2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        if i0 != 0 goto label1;
+
+        $r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i2 = lengthof $r1;
+
+        goto label2;
+
+     label1:
+        $i2 = i0;
+
+     label2:
+        $i1 = $i2 - 1;
+
+        return $i1;
+    }
+
+    final java.lang.Object itemAt(int)
+    {
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.lang.Object[] $r1;
+        int i0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $r2 = $r1[i0];
+
+        return $r2;
+    }
+
+    private static void checkNotNull(java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.lang.NullPointerException $r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void enqueue(java.lang.Object)
+    {
+        java.lang.Object[] r1;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object r2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        r1[$i0] = r2;
+
+        $i1 = r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex> = $i2;
+
+        $i3 = lengthof r1;
+
+        if $i2 != $i3 goto label1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex> = 0;
+
+     label1:
+        $i4 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i5 = $i4 + 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = $i5;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Condition: void signal()>();
+
+        return;
+    }
+
+    private java.lang.Object dequeue()
+    {
+        java.lang.Object[] r1;
+        java.util.concurrent.ArrayBlockingQueue$Itrs $r3, $r5;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.Object r2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        r2 = r1[$i0];
+
+        $i1 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        r1[$i1] = null;
+
+        $i2 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = $i3;
+
+        $i4 = lengthof r1;
+
+        if $i3 != $i4 goto label1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = 0;
+
+     label1:
+        $i5 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i6 = $i5 - 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = $i6;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r3 == null goto label2;
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r5.<java.util.concurrent.ArrayBlockingQueue$Itrs: void elementDequeued()>();
+
+     label2:
+        $r4 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void signal()>();
+
+        return r2;
+    }
+
+    void removeAt(int)
+    {
+        java.lang.Object[] r1;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, i14;
+        java.util.concurrent.ArrayBlockingQueue$Itrs $r2, $r3, $r5, $r6;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r7;
+        java.lang.Object $r4;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i1 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        if i0 != $i1 goto label2;
+
+        $i7 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        r1[$i7] = null;
+
+        $i8 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $i9 = $i8 + 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = $i9;
+
+        $i10 = lengthof r1;
+
+        if $i9 != $i10 goto label1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = 0;
+
+     label1:
+        $i11 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i12 = $i11 - 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = $i12;
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r5 == null goto label8;
+
+        $r6 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r6.<java.util.concurrent.ArrayBlockingQueue$Itrs: void elementDequeued()>();
+
+        goto label8;
+
+     label2:
+        i2 = r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        i13 = i0;
+
+     label3:
+        $i6 = i13 + 1;
+
+        i14 = $i6;
+
+        $i3 = lengthof r1;
+
+        if $i6 != $i3 goto label4;
+
+        i14 = 0;
+
+     label4:
+        if i14 == i2 goto label5;
+
+        $r4 = r1[i14];
+
+        r1[i13] = $r4;
+
+        i13 = i14;
+
+        goto label6;
+
+     label5:
+        r1[i13] = null;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex> = i13;
+
+        goto label7;
+
+     label6:
+        goto label3;
+
+     label7:
+        $i4 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i5 = $i4 - 1;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = $i5;
+
+        $r2 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r2 == null goto label8;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r3.<java.util.concurrent.ArrayBlockingQueue$Itrs: void removedAt(int)>(i0);
+
+     label8:
+        $r7 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Condition: void signal()>();
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        int i0;
+        java.util.concurrent.ArrayBlockingQueue r0;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.concurrent.ArrayBlockingQueue: void <init>(int,boolean)>(i0, 0);
+
+        return;
+    }
+
+    public void <init>(int, boolean)
+    {
+        java.lang.Object[] $r1;
+        java.util.concurrent.locks.ReentrantLock $r2, $r3, $r5;
+        java.lang.IllegalArgumentException $r7;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4, $r6;
+        int i0;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.util.AbstractQueue: void <init>()>();
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs> = null;
+
+        if i0 > 0 goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r1 = newarray (java.lang.Object)[i0];
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items> = $r1;
+
+        $r2 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void <init>(boolean)>(z0);
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock> = $r2;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantLock: java.util.concurrent.locks.Condition newCondition()>();
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notEmpty> = $r4;
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.locks.ReentrantLock: java.util.concurrent.locks.Condition newCondition()>();
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull> = $r6;
+
+        return;
+    }
+
+    public void <init>(int, boolean, java.util.Collection)
+    {
+        java.lang.Throwable $r6;
+        java.lang.Object[] $r5;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.Iterator $r3;
+        java.util.Collection r2;
+        java.lang.ArrayIndexOutOfBoundsException $r7;
+        java.lang.IllegalArgumentException $r8;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        int i0, $i1, i2, $i3;
+        java.lang.Object $r4;
+        boolean z0, $z1;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.util.Collection;
+
+        specialinvoke r0.<java.util.concurrent.ArrayBlockingQueue: void <init>(int,boolean)>(i0, z0);
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        i2 = 0;
+
+     label02:
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label03:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label04;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        staticinvoke <java.util.concurrent.ArrayBlockingQueue: void checkNotNull(java.lang.Object)>($r4);
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r5[$i1] = $r4;
+
+        goto label03;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r8;
+
+     label06:
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = i2;
+
+        if i2 != i0 goto label07;
+
+        $i3 = 0;
+
+        goto label08;
+
+     label07:
+        $i3 = i2;
+
+     label08:
+        r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex> = $i3;
+
+     label09:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label12;
+
+     label10:
+        $r6 := @caughtexception;
+
+     label11:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r6;
+
+     label12:
+        return;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label02 to label04 with label05;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public boolean add(java.lang.Object)
+    {
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.lang.Object r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = specialinvoke r0.<java.util.AbstractQueue: boolean add(java.lang.Object)>(r1);
+
+        return $z0;
+    }
+
+    public boolean offer(java.lang.Object)
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        java.lang.Object[] $r3;
+        java.util.concurrent.locks.ReentrantLock r2;
+        int $i0, $i1;
+        java.lang.Object r0;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        staticinvoke <java.util.concurrent.ArrayBlockingQueue: void checkNotNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $i1 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i0 = lengthof $r3;
+
+        if $i1 != $i0 goto label3;
+
+     label2:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 0;
+
+     label3:
+        specialinvoke r1.<java.util.concurrent.ArrayBlockingQueue: void enqueue(java.lang.Object)>(r0);
+
+     label4:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 1;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void put(java.lang.Object) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] $r3;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        java.util.concurrent.locks.Condition $r4;
+        int $i0, $i1;
+        java.lang.Object r0;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        staticinvoke <java.util.concurrent.ArrayBlockingQueue: void checkNotNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i1 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i0 = lengthof $r3;
+
+        if $i1 != $i0 goto label2;
+
+        $r4 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void await()>();
+
+        goto label1;
+
+     label2:
+        specialinvoke r1.<java.util.concurrent.ArrayBlockingQueue: void enqueue(java.lang.Object)>(r0);
+
+     label3:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public boolean offer(java.lang.Object, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r6;
+        java.lang.Object[] $r4;
+        java.util.concurrent.locks.ReentrantLock r3;
+        long l0, l4;
+        java.util.concurrent.TimeUnit r1;
+        java.util.concurrent.ArrayBlockingQueue r2;
+        java.util.concurrent.locks.Condition $r5;
+        byte $b3;
+        int $i1, $i2, $i5;
+        java.lang.Object r0;
+
+        r2 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        r1 := @parameter2: java.util.concurrent.TimeUnit;
+
+        staticinvoke <java.util.concurrent.ArrayBlockingQueue: void checkNotNull(java.lang.Object)>(r0);
+
+        l4 = virtualinvoke r1.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        r3 = r2.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i2 = r2.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $r4 = r2.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i1 = lengthof $r4;
+
+        if $i2 != $i1 goto label4;
+
+        $b3 = l4 cmp 0L;
+
+        $i5 = (int) $b3;
+
+        if $i5 > 0 goto label3;
+
+     label2:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 0;
+
+     label3:
+        $r5 = r2.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        l4 = interfaceinvoke $r5.<java.util.concurrent.locks.Condition: long awaitNanos(long)>(l4);
+
+        goto label1;
+
+     label4:
+        specialinvoke r2.<java.util.concurrent.ArrayBlockingQueue: void enqueue(java.lang.Object)>(r0);
+
+     label5:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 1;
+
+     label6:
+        $r6 := @caughtexception;
+
+     label7:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.lang.Object poll()
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.ReentrantLock r1;
+        int $i0;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i0 != 0 goto label2;
+
+        $r3 = null;
+
+        goto label3;
+
+     label2:
+        $r3 = specialinvoke r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object dequeue()>();
+
+     label3:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r3;
+
+     label4:
+        $r2 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public java.lang.Object take() throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r4;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r3;
+        java.util.concurrent.locks.ReentrantLock r1;
+        int $i0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i0 != 0 goto label2;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Condition: void await()>();
+
+        goto label1;
+
+     label2:
+        $r2 = specialinvoke r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object dequeue()>();
+
+     label3:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r2;
+
+     label4:
+        $r4 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public java.lang.Object poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r5;
+        java.util.concurrent.locks.ReentrantLock r2;
+        long l0, l3;
+        java.util.concurrent.TimeUnit r0;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        java.util.concurrent.locks.Condition $r4;
+        byte $b2;
+        int $i1, $i4;
+        java.lang.Object $r3;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        l3 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lockInterruptibly()>();
+
+     label1:
+        $i1 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i1 != 0 goto label4;
+
+        $b2 = l3 cmp 0L;
+
+        $i4 = (int) $b2;
+
+        if $i4 > 0 goto label3;
+
+     label2:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return null;
+
+     label3:
+        $r4 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notEmpty>;
+
+        l3 = interfaceinvoke $r4.<java.util.concurrent.locks.Condition: long awaitNanos(long)>(l3);
+
+        goto label1;
+
+     label4:
+        $r3 = specialinvoke r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object dequeue()>();
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r3;
+
+     label6:
+        $r5 := @caughtexception;
+
+     label7:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.lang.Object peek()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.ReentrantLock r1;
+        int $i0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object itemAt(int)>($i0);
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int size()
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.ReentrantLock r1;
+        int i0;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int remainingCapacity()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.lang.Object[] $r2;
+        java.util.concurrent.locks.ReentrantLock r1;
+        int $i0, $i1, i2;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i1 = lengthof $r2;
+
+        $i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        i2 = $i1 - $i0;
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return i2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean remove(java.lang.Object)
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] r2;
+        java.util.concurrent.locks.ReentrantLock r3;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        int $i0, $i1, i2, i3;
+        java.lang.Object r0, $r4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label2:
+        $i0 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i0 <= 0 goto label7;
+
+        i2 = r1.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        i3 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+     label3:
+        $r4 = r2[i3];
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke r1.<java.util.concurrent.ArrayBlockingQueue: void removeAt(int)>(i3);
+
+     label4:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 1;
+
+     label5:
+        i3 = i3 + 1;
+
+        $i1 = lengthof r2;
+
+        if i3 != $i1 goto label6;
+
+        i3 = 0;
+
+     label6:
+        if i3 != i2 goto label3;
+
+     label7:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 0;
+
+     label8:
+        $r5 := @caughtexception;
+
+     label9:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public boolean contains(java.lang.Object)
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] r2;
+        java.util.concurrent.locks.ReentrantLock r3;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        int $i0, $i1, i2, i3;
+        java.lang.Object r0, $r4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label2:
+        $i0 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i0 <= 0 goto label7;
+
+        i2 = r1.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        i3 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+     label3:
+        $r4 = r2[i3];
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 1;
+
+     label5:
+        i3 = i3 + 1;
+
+        $i1 = lengthof r2;
+
+        if i3 != $i1 goto label6;
+
+        i3 = 0;
+
+     label6:
+        if i3 != i2 goto label3;
+
+     label7:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return 0;
+
+     label8:
+        $r5 := @caughtexception;
+
+     label9:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public java.lang.Object[] toArray()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] r2, $r3, $r4, $r5, $r6;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        int i0, $i1, $i2, i3, $i4, $i5, $i6;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        r2 = newarray (java.lang.Object)[i0];
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i2 = lengthof $r3;
+
+        $i1 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        i3 = $i2 - $i1;
+
+        if i0 > i3 goto label2;
+
+        $r6 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i6 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, $i6, r2, 0, i0);
+
+        goto label3;
+
+     label2:
+        $r4 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i4 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i4, r2, 0, i3);
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i5 = i0 - i3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r2, i3, $i5);
+
+     label3:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+     label6:
+        return r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object[] toArray(java.lang.Object[])
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] r1, $r6, r8;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.lang.Class $r3, $r4;
+        java.lang.Object $r5;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r8 := @parameter0: java.lang.Object[];
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        r2 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        i1 = lengthof r8;
+
+        if i1 >= i0 goto label2;
+
+        $r3 = virtualinvoke r8.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $r5 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r4, i0);
+
+        $r6 = (java.lang.Object[]) $r5;
+
+        r8 = (java.lang.Object[]) $r6;
+
+     label2:
+        $i3 = lengthof r1;
+
+        $i2 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $i7 = $i3 - $i2;
+
+        if i0 > $i7 goto label3;
+
+        $i6 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i6, r8, 0, i0);
+
+        goto label4;
+
+     label3:
+        $i4 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i4, r8, 0, $i7);
+
+        $i5 = i0 - $i7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r8, $i7, $i5);
+
+     label4:
+        if i1 <= i0 goto label5;
+
+        r8[i0] = null;
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label8;
+
+     label6:
+        $r7 := @caughtexception;
+
+     label7:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+     label8:
+        return r8;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] r8;
+        java.util.concurrent.locks.ReentrantLock r1;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        int $i0, i1, i2, $i4;
+        java.lang.StringBuilder $r3, $r5, $r10;
+        java.lang.Object $r4, $r9;
+        java.lang.String $r6;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        i1 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if i1 != 0 goto label03;
+
+     label02:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return "[]";
+
+     label03:
+        r8 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        i2 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+     label04:
+        $r4 = r8[i2];
+
+        if $r4 != r0 goto label05;
+
+        $r9 = "(this Collection)";
+
+        goto label06;
+
+     label05:
+        $r9 = $r4;
+
+     label06:
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $i4 = (int) -1;
+
+        i1 = i1 + $i4;
+
+        if i1 != 0 goto label08;
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label07:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r6;
+
+     label08:
+        $r3 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        i2 = i2 + 1;
+
+        $i0 = lengthof r8;
+
+        if i2 != $i0 goto label09;
+
+        i2 = 0;
+
+     label09:
+        goto label04;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label07 with label10;
+        catch java.lang.Throwable from label08 to label11 with label10;
+    }
+
+    public void clear()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] r1;
+        java.util.concurrent.locks.ReentrantLock r2;
+        java.util.concurrent.ArrayBlockingQueue$Itrs $r3, $r6;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.concurrent.locks.Condition $r4, $r5;
+        int i0, $i1, i2, i3, $i5;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 = r0.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        r2 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        i2 = r0.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if i2 <= 0 goto label5;
+
+        i0 = r0.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        i3 = r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+     label2:
+        r1[i3] = null;
+
+        i3 = i3 + 1;
+
+        $i1 = lengthof r1;
+
+        if i3 != $i1 goto label3;
+
+        i3 = 0;
+
+     label3:
+        if i3 != i0 goto label2;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = i0;
+
+        r0.<java.util.concurrent.ArrayBlockingQueue: int count> = 0;
+
+        $r3 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r3 == null goto label4;
+
+        $r6 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r6.<java.util.concurrent.ArrayBlockingQueue$Itrs: void queueIsEmpty()>();
+
+     label4:
+        if i2 <= 0 goto label5;
+
+        $r4 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        $z0 = virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: boolean hasWaiters(java.util.concurrent.locks.Condition)>($r4);
+
+        if $z0 == 0 goto label5;
+
+        $r5 = r0.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Condition: void signal()>();
+
+        $i5 = (int) -1;
+
+        i2 = i2 + $i5;
+
+        goto label4;
+
+     label5:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label8;
+
+     label6:
+        $r7 := @caughtexception;
+
+     label7:
+        virtualinvoke r2.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public int drainTo(java.util.Collection)
+    {
+        int $i0;
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.Collection r1;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r1 := @parameter0: java.util.Collection;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.ArrayBlockingQueue: int drainTo(java.util.Collection,int)>(r1, 2147483647);
+
+        return $i0;
+    }
+
+    public int drainTo(java.util.Collection, int)
+    {
+        boolean $z0, $z1;
+        java.util.Collection r0;
+        java.util.concurrent.ArrayBlockingQueue$Itrs $r4, $r7, $r8, $r12, $r15, $r16;
+        java.util.concurrent.ArrayBlockingQueue r1;
+        java.lang.Throwable $r10, $r11;
+        java.lang.Object[] r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i13, $i15;
+        java.util.concurrent.locks.ReentrantLock r3;
+        java.lang.IllegalArgumentException $r18;
+        java.util.concurrent.locks.Condition $r5, $r6, $r13, $r14;
+        java.lang.Object r17;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.util.Collection;
+
+        i0 := @parameter1: int;
+
+        staticinvoke <java.util.concurrent.ArrayBlockingQueue: void checkNotNull(java.lang.Object)>(r0);
+
+        if r0 != r1 goto label01;
+
+        $r18 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r18.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r18;
+
+     label01:
+        if i0 > 0 goto label02;
+
+        return 0;
+
+     label02:
+        r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label03:
+        $i1 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        i10 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        i11 = 0;
+
+     label04:
+        if i11 >= $i2 goto label06;
+
+        r17 = r2[i10];
+
+        interfaceinvoke r0.<java.util.Collection: boolean add(java.lang.Object)>(r17);
+
+        r2[i10] = null;
+
+        i10 = i10 + 1;
+
+        $i6 = lengthof r2;
+
+        if i10 != $i6 goto label05;
+
+        i10 = 0;
+
+     label05:
+        i11 = i11 + 1;
+
+        goto label04;
+
+     label06:
+        if i11 <= 0 goto label09;
+
+        $i3 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i4 = $i3 - i11;
+
+        r1.<java.util.concurrent.ArrayBlockingQueue: int count> = $i4;
+
+        r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = i10;
+
+        $r4 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r4 == null goto label08;
+
+        $i5 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i5 != 0 goto label07;
+
+        $r8 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r8.<java.util.concurrent.ArrayBlockingQueue$Itrs: void queueIsEmpty()>();
+
+        goto label08;
+
+     label07:
+        if i11 <= i10 goto label08;
+
+        $r7 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r7.<java.util.concurrent.ArrayBlockingQueue$Itrs: void takeIndexWrapped()>();
+
+     label08:
+        if i11 <= 0 goto label09;
+
+        $r5 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        $z0 = virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: boolean hasWaiters(java.util.concurrent.locks.Condition)>($r5);
+
+        if $z0 == 0 goto label09;
+
+        $r6 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Condition: void signal()>();
+
+        $i13 = (int) -1;
+
+        i11 = i11 + $i13;
+
+        goto label08;
+
+     label09:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $i2;
+
+     label10:
+        $r11 := @caughtexception;
+
+     label11:
+        if i11 <= 0 goto label14;
+
+        $i7 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $i8 = $i7 - i11;
+
+        r1.<java.util.concurrent.ArrayBlockingQueue: int count> = $i8;
+
+        r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex> = i10;
+
+        $r12 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        if $r12 == null goto label13;
+
+        $i9 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i9 != 0 goto label12;
+
+        $r16 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r16.<java.util.concurrent.ArrayBlockingQueue$Itrs: void queueIsEmpty()>();
+
+        goto label13;
+
+     label12:
+        if i11 <= i10 goto label13;
+
+        $r15 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.ArrayBlockingQueue$Itrs itrs>;
+
+        virtualinvoke $r15.<java.util.concurrent.ArrayBlockingQueue$Itrs: void takeIndexWrapped()>();
+
+     label13:
+        if i11 <= 0 goto label14;
+
+        $r13 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        $z1 = virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: boolean hasWaiters(java.util.concurrent.locks.Condition)>($r13);
+
+        if $z1 == 0 goto label14;
+
+        $r14 = r1.<java.util.concurrent.ArrayBlockingQueue: java.util.concurrent.locks.Condition notFull>;
+
+        interfaceinvoke $r14.<java.util.concurrent.locks.Condition: void signal()>();
+
+        $i15 = (int) -1;
+
+        i11 = i11 + $i15;
+
+        goto label13;
+
+     label14:
+        throw $r11;
+
+     label15:
+        $r10 := @caughtexception;
+
+     label16:
+        virtualinvoke r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r10;
+
+        catch java.lang.Throwable from label04 to label06 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label03 to label09 with label15;
+        catch java.lang.Throwable from label10 to label16 with label15;
+    }
+
+    public java.util.Iterator iterator()
+    {
+        java.util.concurrent.ArrayBlockingQueue r1;
+        java.util.concurrent.ArrayBlockingQueue$Itr $r0;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        $r0 = new java.util.concurrent.ArrayBlockingQueue$Itr;
+
+        specialinvoke $r0.<java.util.concurrent.ArrayBlockingQueue$Itr: void <init>(java.util.concurrent.ArrayBlockingQueue)>(r1);
+
+        return $r0;
+    }
+
+    public java.util.Spliterator spliterator()
+    {
+        java.util.concurrent.ArrayBlockingQueue r0;
+        java.util.Spliterator $r1;
+
+        r0 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        $r1 = staticinvoke <java.util.Spliterators: java.util.Spliterator spliterator(java.util.Collection,int)>(r0, 4368);
+
+        return $r1;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.lang.Object[] $r2, $r3, $r4, $r5, $r6, $r7;
+        java.io.ObjectInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        java.io.InvalidObjectException $r8;
+        java.util.concurrent.ArrayBlockingQueue r1;
+
+        r1 := @this: java.util.concurrent.ArrayBlockingQueue;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 == 0 goto label1;
+
+        $i1 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        if $i1 < 0 goto label1;
+
+        $i3 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $r3 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i2 = lengthof $r3;
+
+        if $i3 >= $i2 goto label1;
+
+        $i4 = r1.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        if $i4 < 0 goto label1;
+
+        $i6 = r1.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        $r4 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i5 = lengthof $r4;
+
+        if $i6 >= $i5 goto label1;
+
+        $i7 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        if $i7 < 0 goto label1;
+
+        $i9 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $r5 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i8 = lengthof $r5;
+
+        if $i9 > $i8 goto label1;
+
+        $i11 = r1.<java.util.concurrent.ArrayBlockingQueue: int putIndex>;
+
+        $i10 = r1.<java.util.concurrent.ArrayBlockingQueue: int takeIndex>;
+
+        $i13 = $i11 - $i10;
+
+        $r6 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i12 = lengthof $r6;
+
+        $i14 = staticinvoke <java.lang.Math: int floorMod(int,int)>($i13, $i12);
+
+        $i16 = r1.<java.util.concurrent.ArrayBlockingQueue: int count>;
+
+        $r7 = r1.<java.util.concurrent.ArrayBlockingQueue: java.lang.Object[] items>;
+
+        $i15 = lengthof $r7;
+
+        $i17 = staticinvoke <java.lang.Math: int floorMod(int,int)>($i16, $i15);
+
+        if $i14 == $i17 goto label2;
+
+     label1:
+        $r8 = new java.io.InvalidObjectException;
+
+        specialinvoke $r8.<java.io.InvalidObjectException: void <init>(java.lang.String)>("invariants violated");
+
+        throw $r8;
+
+     label2:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.ArrayBlockingQueue: long serialVersionUID> = -817911632652898426L;
+
+        return;
+    }
+}

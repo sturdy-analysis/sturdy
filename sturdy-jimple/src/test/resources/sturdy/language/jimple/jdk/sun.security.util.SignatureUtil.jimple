@@ -1,0 +1,360 @@
+public class sun.security.util.SignatureUtil extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        sun.security.util.SignatureUtil r0;
+
+        r0 := @this: sun.security.util.SignatureUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static java.lang.String checkName(java.lang.String) throws java.security.ProviderException
+    {
+        int $i0, $i2;
+        java.security.Signature $r1;
+        java.security.ProviderException $r5;
+        java.lang.String r0, $r2;
+        java.lang.Exception $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>(".");
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke $r1.<java.security.Signature: java.lang.String getAlgorithm()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r5 = new java.security.ProviderException;
+
+        specialinvoke $r5.<java.security.ProviderException: void <init>(java.lang.String,java.lang.Throwable)>("Error mapping algorithm name", $r3);
+
+        throw $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static java.security.AlgorithmParameters createAlgorithmParameters(java.lang.String, byte[]) throws java.security.ProviderException
+    {
+        byte[] r2;
+        java.security.ProviderException $r4;
+        java.lang.String $r0, r5;
+        java.security.AlgorithmParameters $r1;
+        java.lang.Exception $r3;
+
+        r5 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+     label1:
+        $r0 = staticinvoke <sun.security.util.SignatureUtil: java.lang.String checkName(java.lang.String)>(r5);
+
+        $r1 = staticinvoke <java.security.AlgorithmParameters: java.security.AlgorithmParameters getInstance(java.lang.String)>($r0);
+
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(byte[])>(r2);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.ProviderException;
+
+        specialinvoke $r4.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static java.security.spec.AlgorithmParameterSpec getParamSpec(java.lang.String, java.security.AlgorithmParameters) throws java.security.ProviderException
+    {
+        byte[] $r9;
+        java.util.Locale $r1;
+        int $i0, $i1, $i2, $i4, $i6, $i8;
+        java.lang.String $r0, $r2, $r3, $r8, r14;
+        java.security.spec.AlgorithmParameterSpec r16;
+        java.security.ProviderException $r17, $r18, $r20;
+        java.io.IOException $r12;
+        java.lang.Exception $r10;
+        java.security.AlgorithmParameters r15;
+        java.lang.StringBuilder $r6, $r7, $r19;
+
+        r14 := @parameter0: java.lang.String;
+
+        r15 := @parameter1: java.security.AlgorithmParameters;
+
+        $r0 = staticinvoke <sun.security.util.SignatureUtil: java.lang.String checkName(java.lang.String)>(r14);
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r2 = virtualinvoke $r0.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r1);
+
+        r16 = null;
+
+        if r15 == null goto label10;
+
+        $r3 = virtualinvoke r15.<java.security.AlgorithmParameters: java.lang.String getAlgorithm()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>(".");
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label04;
+
+     label01:
+        $r9 = virtualinvoke r15.<java.security.AlgorithmParameters: byte[] getEncoded()>();
+
+        r15 = staticinvoke <sun.security.util.SignatureUtil: java.security.AlgorithmParameters createAlgorithmParameters(java.lang.String,byte[])>($r2, $r9);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r12 := @caughtexception;
+
+        $r17 = new java.security.ProviderException;
+
+        specialinvoke $r17.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r17;
+
+     label04:
+        $i1 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("RSA");
+
+        $i6 = (int) -1;
+
+        if $i1 == $i6 goto label05;
+
+        r16 = staticinvoke <sun.security.rsa.RSAUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(java.security.AlgorithmParameters)>(r15);
+
+        goto label10;
+
+     label05:
+        $i2 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("ECDSA");
+
+        $i8 = (int) -1;
+
+        if $i2 == $i8 goto label09;
+
+     label06:
+        r16 = virtualinvoke r15.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECParameterSpec;");
+
+     label07:
+        goto label10;
+
+     label08:
+        $r10 := @caughtexception;
+
+        $r18 = new java.security.ProviderException;
+
+        specialinvoke $r18.<java.security.ProviderException: void <init>(java.lang.String,java.lang.Throwable)>("Error handling EC parameters", $r10);
+
+        throw $r18;
+
+     label09:
+        $r20 = new java.security.ProviderException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unrecognized algorithm for signature parameters ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.security.ProviderException: void <init>(java.lang.String)>($r8);
+
+        throw $r20;
+
+     label10:
+        return r16;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Exception from label06 to label07 with label08;
+    }
+
+    public static java.security.spec.AlgorithmParameterSpec getParamSpec(java.lang.String, byte[]) throws java.security.ProviderException
+    {
+        byte[] r3;
+        java.util.Locale $r1;
+        int $i0, $i1, $i3, $i5;
+        java.lang.String $r0, $r2, $r8, r16;
+        java.security.spec.AlgorithmParameterSpec r17;
+        java.security.Signature $r9;
+        java.security.ProviderException $r18, $r19, $r21;
+        java.security.AlgorithmParameters $r13;
+        java.lang.Exception $r14;
+        java.security.Provider $r10;
+        java.security.spec.ECParameterSpec $r11;
+        java.lang.StringBuilder $r6, $r7, $r20;
+
+        r16 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: byte[];
+
+        $r0 = staticinvoke <sun.security.util.SignatureUtil: java.lang.String checkName(java.lang.String)>(r16);
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r2 = virtualinvoke $r0.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r1);
+
+        r17 = null;
+
+        if r3 == null goto label7;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("RSA");
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label1;
+
+        $r13 = staticinvoke <sun.security.util.SignatureUtil: java.security.AlgorithmParameters createAlgorithmParameters(java.lang.String,byte[])>($r2, r3);
+
+        r17 = staticinvoke <sun.security.rsa.RSAUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(java.security.AlgorithmParameters)>($r13);
+
+        goto label7;
+
+     label1:
+        $i1 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("ECDSA");
+
+        $i5 = (int) -1;
+
+        if $i1 == $i5 goto label6;
+
+     label2:
+        $r9 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r2);
+
+        $r10 = virtualinvoke $r9.<java.security.Signature: java.security.Provider getProvider()>();
+
+        $r11 = staticinvoke <sun.security.util.ECUtil: java.security.spec.ECParameterSpec getECParameterSpec(java.security.Provider,byte[])>($r10, r3);
+
+        r17 = $r11;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r14 := @caughtexception;
+
+        $r18 = new java.security.ProviderException;
+
+        specialinvoke $r18.<java.security.ProviderException: void <init>(java.lang.String,java.lang.Throwable)>("Error handling EC parameters", $r14);
+
+        throw $r18;
+
+     label5:
+        if $r11 != null goto label7;
+
+        $r19 = new java.security.ProviderException;
+
+        specialinvoke $r19.<java.security.ProviderException: void <init>(java.lang.String)>("Error handling EC parameters");
+
+        throw $r19;
+
+     label6:
+        $r21 = new java.security.ProviderException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unrecognized algorithm for signature parameters ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.security.ProviderException: void <init>(java.lang.String)>($r8);
+
+        throw $r21;
+
+     label7:
+        return r17;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public static void initVerifyWithParam(java.security.Signature, java.security.PublicKey, java.security.spec.AlgorithmParameterSpec) throws java.security.ProviderException, java.security.InvalidAlgorithmParameterException, java.security.InvalidKeyException
+    {
+        java.security.Signature r1;
+        java.security.PublicKey r2;
+        java.security.spec.AlgorithmParameterSpec r3;
+        sun.misc.JavaSecuritySignatureAccess $r0;
+
+        r1 := @parameter0: java.security.Signature;
+
+        r2 := @parameter1: java.security.PublicKey;
+
+        r3 := @parameter2: java.security.spec.AlgorithmParameterSpec;
+
+        $r0 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecuritySignatureAccess getJavaSecuritySignatureAccess()>();
+
+        interfaceinvoke $r0.<sun.misc.JavaSecuritySignatureAccess: void initVerify(java.security.Signature,java.security.PublicKey,java.security.spec.AlgorithmParameterSpec)>(r1, r2, r3);
+
+        return;
+    }
+
+    public static void initVerifyWithParam(java.security.Signature, java.security.cert.Certificate, java.security.spec.AlgorithmParameterSpec) throws java.security.ProviderException, java.security.InvalidAlgorithmParameterException, java.security.InvalidKeyException
+    {
+        java.security.cert.Certificate r2;
+        java.security.Signature r1;
+        java.security.spec.AlgorithmParameterSpec r3;
+        sun.misc.JavaSecuritySignatureAccess $r0;
+
+        r1 := @parameter0: java.security.Signature;
+
+        r2 := @parameter1: java.security.cert.Certificate;
+
+        r3 := @parameter2: java.security.spec.AlgorithmParameterSpec;
+
+        $r0 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecuritySignatureAccess getJavaSecuritySignatureAccess()>();
+
+        interfaceinvoke $r0.<sun.misc.JavaSecuritySignatureAccess: void initVerify(java.security.Signature,java.security.cert.Certificate,java.security.spec.AlgorithmParameterSpec)>(r1, r2, r3);
+
+        return;
+    }
+
+    public static void initSignWithParam(java.security.Signature, java.security.PrivateKey, java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.ProviderException, java.security.InvalidAlgorithmParameterException, java.security.InvalidKeyException
+    {
+        java.security.SecureRandom r4;
+        java.security.PrivateKey r2;
+        java.security.Signature r1;
+        java.security.spec.AlgorithmParameterSpec r3;
+        sun.misc.JavaSecuritySignatureAccess $r0;
+
+        r1 := @parameter0: java.security.Signature;
+
+        r2 := @parameter1: java.security.PrivateKey;
+
+        r3 := @parameter2: java.security.spec.AlgorithmParameterSpec;
+
+        r4 := @parameter3: java.security.SecureRandom;
+
+        $r0 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecuritySignatureAccess getJavaSecuritySignatureAccess()>();
+
+        interfaceinvoke $r0.<sun.misc.JavaSecuritySignatureAccess: void initSign(java.security.Signature,java.security.PrivateKey,java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(r1, r2, r3, r4);
+
+        return;
+    }
+}

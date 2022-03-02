@@ -1,0 +1,1159 @@
+public final class com.sun.media.sound.RIFFReader extends java.io.InputStream
+{
+    private final com.sun.media.sound.RIFFReader root;
+    private long filepointer;
+    private final java.lang.String fourcc;
+    private java.lang.String riff_type;
+    private long ckSize;
+    private java.io.InputStream stream;
+    private long avail;
+    private com.sun.media.sound.RIFFReader lastiterator;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        byte[] r2, r5;
+        long $l1, $l2, $l3;
+        byte $b0, $b4;
+        com.sun.media.sound.RIFFInvalidDataException $r12;
+        int $i5, $i7, $i8;
+        java.lang.String $r4, $r8, $r11, $r13;
+        boolean $z0, $z1, $z2;
+        com.sun.media.sound.RIFFReader r0, $r9, $r10;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<com.sun.media.sound.RIFFReader: long filepointer> = 0L;
+
+        r0.<com.sun.media.sound.RIFFReader: java.lang.String riff_type> = null;
+
+        r0.<com.sun.media.sound.RIFFReader: long ckSize> = 2147483647L;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 2147483647L;
+
+        r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator> = null;
+
+        $z0 = r1 instanceof com.sun.media.sound.RIFFReader;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (com.sun.media.sound.RIFFReader) r1;
+
+        $r10 = $r9.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader root>;
+
+        r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader root> = $r10;
+
+        goto label2;
+
+     label1:
+        r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader root> = r0;
+
+     label2:
+        r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream> = r1;
+
+     label3:
+        $i5 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i7 = (int) -1;
+
+        if $i5 != $i7 goto label4;
+
+        r0.<com.sun.media.sound.RIFFReader: java.lang.String fourcc> = "";
+
+        r0.<com.sun.media.sound.RIFFReader: java.lang.String riff_type> = null;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 0L;
+
+        return;
+
+     label4:
+        if $i5 == 0 goto label3;
+
+        goto label5;
+
+     label5:
+        r2 = newarray (byte)[4];
+
+        $b0 = (byte) $i5;
+
+        r2[0] = $b0;
+
+        virtualinvoke r0.<com.sun.media.sound.RIFFReader: void readFully(byte[],int,int)>(r2, 1, 3);
+
+        $r11 = new java.lang.String;
+
+        specialinvoke $r11.<java.lang.String: void <init>(byte[],java.lang.String)>(r2, "ascii");
+
+        r0.<com.sun.media.sound.RIFFReader: java.lang.String fourcc> = $r11;
+
+        $l1 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: long readUnsignedInt()>();
+
+        r0.<com.sun.media.sound.RIFFReader: long ckSize> = $l1;
+
+        $l2 = r0.<com.sun.media.sound.RIFFReader: long ckSize>;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = $l2;
+
+        $r4 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: java.lang.String getFormat()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("RIFF");
+
+        if $z1 != 0 goto label6;
+
+        $r8 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: java.lang.String getFormat()>();
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("LIST");
+
+        if $z2 == 0 goto label8;
+
+     label6:
+        $l3 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b4 = $l3 cmp 2147483647L;
+
+        $i8 = (int) $b4;
+
+        if $i8 <= 0 goto label7;
+
+        $r12 = new com.sun.media.sound.RIFFInvalidDataException;
+
+        specialinvoke $r12.<com.sun.media.sound.RIFFInvalidDataException: void <init>(java.lang.String)>("Chunk size too big");
+
+        throw $r12;
+
+     label7:
+        r5 = newarray (byte)[4];
+
+        virtualinvoke r0.<com.sun.media.sound.RIFFReader: void readFully(byte[])>(r5);
+
+        $r13 = new java.lang.String;
+
+        specialinvoke $r13.<java.lang.String: void <init>(byte[],java.lang.String)>(r5, "ascii");
+
+        r0.<com.sun.media.sound.RIFFReader: java.lang.String riff_type> = $r13;
+
+     label8:
+        return;
+    }
+
+    public long getFilePointer() throws java.io.IOException
+    {
+        long $l0;
+        com.sun.media.sound.RIFFReader r0, $r1;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader root>;
+
+        $l0 = $r1.<com.sun.media.sound.RIFFReader: long filepointer>;
+
+        return $l0;
+    }
+
+    public boolean hasNextChunk() throws java.io.IOException
+    {
+        byte $b1;
+        long $l0;
+        com.sun.media.sound.RIFFReader r0, $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator>;
+
+        virtualinvoke $r2.<com.sun.media.sound.RIFFReader: void finish()>();
+
+     label1:
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public com.sun.media.sound.RIFFReader nextChunk() throws java.io.IOException
+    {
+        byte $b1;
+        long $l0;
+        com.sun.media.sound.RIFFReader r0, $r1, $r2, $r3, $r4;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator>;
+
+        virtualinvoke $r4.<com.sun.media.sound.RIFFReader: void finish()>();
+
+     label1:
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = new com.sun.media.sound.RIFFReader;
+
+        specialinvoke $r2.<com.sun.media.sound.RIFFReader: void <init>(java.io.InputStream)>(r0);
+
+        r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator> = $r2;
+
+        $r3 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader lastiterator>;
+
+        return $r3;
+    }
+
+    public java.lang.String getFormat()
+    {
+        java.lang.String $r1;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: java.lang.String fourcc>;
+
+        return $r1;
+    }
+
+    public java.lang.String getType()
+    {
+        java.lang.String $r1;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: java.lang.String riff_type>;
+
+        return $r1;
+    }
+
+    public long getSize()
+    {
+        long $l0;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long ckSize>;
+
+        return $l0;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        long $l0, $l3, $l4, $l5, $l6;
+        com.sun.media.sound.RIFFReader r0;
+        byte $b1;
+        int $i2, $i8, $i10, $i12;
+        java.io.InputStream $r1;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+     label1:
+        $r1 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        $i2 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+        $i10 = (int) -1;
+
+        if $i2 != $i10 goto label2;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 0L;
+
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label2:
+        $l3 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $l4 = $l3 - 1L;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = $l4;
+
+        $l5 = r0.<com.sun.media.sound.RIFFReader: long filepointer>;
+
+        $l6 = $l5 + 1L;
+
+        r0.<com.sun.media.sound.RIFFReader: long filepointer> = $l6;
+
+        return $i2;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        long $l0, $l3, $l4, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l17, $l18, $l19;
+        byte $b1, $b5;
+        int i2, i6, $i7, $i15, $i16, $i21, $i22, $i24, $i26, $i28;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.InputStream $r2, $r3;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        r1 := @parameter0: byte[];
+
+        i6 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $i21 = (int) -1;
+
+        return $i21;
+
+     label1:
+        $l4 = (long) i2;
+
+        $l3 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b5 = $l4 cmp $l3;
+
+        $i22 = (int) $b5;
+
+        if $i22 <= 0 goto label3;
+
+        $r3 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        $l14 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $i15 = (int) $l14;
+
+        $i16 = virtualinvoke $r3.<java.io.InputStream: int read(byte[],int,int)>(r1, i6, $i15);
+
+        $i24 = (int) -1;
+
+        if $i16 == $i24 goto label2;
+
+        $l18 = r0.<com.sun.media.sound.RIFFReader: long filepointer>;
+
+        $l17 = (long) $i16;
+
+        $l19 = $l18 + $l17;
+
+        r0.<com.sun.media.sound.RIFFReader: long filepointer> = $l19;
+
+     label2:
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 0L;
+
+        return $i16;
+
+     label3:
+        $r2 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        $i7 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i6, i2);
+
+        $i26 = (int) -1;
+
+        if $i7 != $i26 goto label4;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 0L;
+
+        $i28 = (int) -1;
+
+        return $i28;
+
+     label4:
+        $l9 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $l8 = (long) $i7;
+
+        $l10 = $l9 - $l8;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = $l10;
+
+        $l12 = r0.<com.sun.media.sound.RIFFReader: long filepointer>;
+
+        $l11 = (long) $i7;
+
+        $l13 = $l12 + $l11;
+
+        r0.<com.sun.media.sound.RIFFReader: long filepointer> = $l13;
+
+        return $i7;
+    }
+
+    public final void readFully(byte[]) throws java.io.IOException
+    {
+        int $i0;
+        byte[] r1;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        virtualinvoke r0.<com.sun.media.sound.RIFFReader: void readFully(byte[],int,int)>(r1, 0, $i0);
+
+        return;
+    }
+
+    public final void readFully(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.lang.IndexOutOfBoundsException $r3;
+        int $i0, i1, i2;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r2;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if i2 >= 0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        if i2 <= 0 goto label4;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read(byte[],int,int)>(r1, i1, i2);
+
+        if $i0 >= 0 goto label2;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        if $i0 != 0 goto label3;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label3:
+        i1 = i1 + $i0;
+
+        i2 = i2 - $i0;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        long l0, $l2, $l4, $l6, $l7, $l8, $l10, $l11, $l12, $l13, l15, l16;
+        byte $b1, $b3, $b5, $b9;
+        int $i14, $i17, $i18, $i20;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.InputStream $r1, $r2;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i17 = (int) $b1;
+
+        if $i17 <= 0 goto label1;
+
+        $l2 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label2;
+
+     label1:
+        return 0L;
+
+     label2:
+        $l4 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        l15 = staticinvoke <java.lang.Math: long min(long,long)>(l0, $l4);
+
+     label3:
+        $b5 = l15 cmp 0L;
+
+        $i18 = (int) $b5;
+
+        if $i18 <= 0 goto label6;
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        $l7 = virtualinvoke $r1.<java.io.InputStream: long skip(long)>(l15);
+
+        $l8 = staticinvoke <java.lang.Math: long min(long,long)>($l7, l15);
+
+        l16 = $l8;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 != 0 goto label5;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        $r2 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        $i14 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        $i20 = (int) -1;
+
+        if $i14 != $i20 goto label4;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = 0L;
+
+        goto label6;
+
+     label4:
+        l16 = 1L;
+
+     label5:
+        l15 = l15 - l16;
+
+        $l10 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $l11 = $l10 - l16;
+
+        r0.<com.sun.media.sound.RIFFReader: long avail> = $l11;
+
+        $l12 = r0.<com.sun.media.sound.RIFFReader: long filepointer>;
+
+        $l13 = $l12 + l16;
+
+        r0.<com.sun.media.sound.RIFFReader: long filepointer> = $l13;
+
+        goto label3;
+
+     label6:
+        $l6 = l0 - l15;
+
+        return $l6;
+    }
+
+    public int available()
+    {
+        int $i1;
+        long $l0;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $i1 = (int) $l0;
+
+        return $i1;
+    }
+
+    public void finish() throws java.io.IOException
+    {
+        byte $b1;
+        long $l0, $l2;
+        com.sun.media.sound.RIFFReader r0;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $l0 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l2 = r0.<com.sun.media.sound.RIFFReader: long avail>;
+
+        virtualinvoke r0.<com.sun.media.sound.RIFFReader: long skip(long)>($l2);
+
+     label1:
+        return;
+    }
+
+    public java.lang.String readString(int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.io.IOException $r5;
+        com.sun.media.sound.RIFFReader r1;
+        byte $b2;
+        int i0, $i1, i3;
+        java.lang.String $r2, $r3;
+        java.lang.OutOfMemoryError $r4;
+
+        r1 := @this: com.sun.media.sound.RIFFReader;
+
+        i0 := @parameter0: int;
+
+     label1:
+        r0 = newarray (byte)[i0];
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Length too big", $r4);
+
+        throw $r5;
+
+     label4:
+        virtualinvoke r1.<com.sun.media.sound.RIFFReader: void readFully(byte[])>(r0);
+
+        i3 = 0;
+
+     label5:
+        $i1 = lengthof r0;
+
+        if i3 >= $i1 goto label7;
+
+        $b2 = r0[i3];
+
+        if $b2 != 0 goto label6;
+
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>(r0, 0, i3, "ascii");
+
+        return $r3;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>(byte[],java.lang.String)>(r0, "ascii");
+
+        return $r2;
+
+        catch java.lang.OutOfMemoryError from label1 to label2 with label3;
+    }
+
+    public byte readByte() throws java.io.IOException
+    {
+        byte $b1;
+        int $i0;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r1;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $b1 = (byte) $i0;
+
+        return $b1;
+    }
+
+    public short readShort() throws java.io.IOException
+    {
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r1, $r2;
+        short $s4;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        if $i1 >= 0 goto label2;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $i2 = $i1 << 8;
+
+        $i3 = $i0 | $i2;
+
+        $s4 = (short) $i3;
+
+        return $s4;
+    }
+
+    public int readInt() throws java.io.IOException
+    {
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i2 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i3 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r4 = new java.io.EOFException;
+
+        specialinvoke $r4.<java.io.EOFException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        if $i1 >= 0 goto label2;
+
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        if $i2 >= 0 goto label3;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label3:
+        if $i3 >= 0 goto label4;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label4:
+        $i4 = $i1 << 8;
+
+        $i6 = $i0 + $i4;
+
+        $i5 = $i2 << 16;
+
+        $i8 = $i6 | $i5;
+
+        $i7 = $i3 << 24;
+
+        $i9 = $i8 | $i7;
+
+        return $i9;
+    }
+
+    public long readLong() throws java.io.IOException
+    {
+        byte $b16, $b17, $b18, $b19, $b20, $b21, $b22, $b23;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16;
+        long l1, l3, l5, l7, l9, l11, l13, l15, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37;
+        int $i0, $i2, $i4, $i6, $i8, $i10, $i12, $i14, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l1 = (long) $i0;
+
+        $i2 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l3 = (long) $i2;
+
+        $i4 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l5 = (long) $i4;
+
+        $i6 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l7 = (long) $i6;
+
+        $i8 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l9 = (long) $i8;
+
+        $i10 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l11 = (long) $i10;
+
+        $i12 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l13 = (long) $i12;
+
+        $i14 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l15 = (long) $i14;
+
+        $b16 = l1 cmp 0L;
+
+        $i38 = (int) $b16;
+
+        if $i38 >= 0 goto label1;
+
+        $r9 = new java.io.EOFException;
+
+        specialinvoke $r9.<java.io.EOFException: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        $b17 = l3 cmp 0L;
+
+        $i39 = (int) $b17;
+
+        if $i39 >= 0 goto label2;
+
+        $r10 = new java.io.EOFException;
+
+        specialinvoke $r10.<java.io.EOFException: void <init>()>();
+
+        throw $r10;
+
+     label2:
+        $b18 = l5 cmp 0L;
+
+        $i40 = (int) $b18;
+
+        if $i40 >= 0 goto label3;
+
+        $r11 = new java.io.EOFException;
+
+        specialinvoke $r11.<java.io.EOFException: void <init>()>();
+
+        throw $r11;
+
+     label3:
+        $b19 = l7 cmp 0L;
+
+        $i41 = (int) $b19;
+
+        if $i41 >= 0 goto label4;
+
+        $r12 = new java.io.EOFException;
+
+        specialinvoke $r12.<java.io.EOFException: void <init>()>();
+
+        throw $r12;
+
+     label4:
+        $b20 = l9 cmp 0L;
+
+        $i42 = (int) $b20;
+
+        if $i42 >= 0 goto label5;
+
+        $r13 = new java.io.EOFException;
+
+        specialinvoke $r13.<java.io.EOFException: void <init>()>();
+
+        throw $r13;
+
+     label5:
+        $b21 = l11 cmp 0L;
+
+        $i43 = (int) $b21;
+
+        if $i43 >= 0 goto label6;
+
+        $r14 = new java.io.EOFException;
+
+        specialinvoke $r14.<java.io.EOFException: void <init>()>();
+
+        throw $r14;
+
+     label6:
+        $b22 = l13 cmp 0L;
+
+        $i44 = (int) $b22;
+
+        if $i44 >= 0 goto label7;
+
+        $r15 = new java.io.EOFException;
+
+        specialinvoke $r15.<java.io.EOFException: void <init>()>();
+
+        throw $r15;
+
+     label7:
+        $b23 = l15 cmp 0L;
+
+        $i45 = (int) $b23;
+
+        if $i45 >= 0 goto label8;
+
+        $r16 = new java.io.EOFException;
+
+        specialinvoke $r16.<java.io.EOFException: void <init>()>();
+
+        throw $r16;
+
+     label8:
+        $l24 = l3 << 8;
+
+        $l26 = l1 | $l24;
+
+        $l25 = l5 << 16;
+
+        $l28 = $l26 | $l25;
+
+        $l27 = l7 << 24;
+
+        $l30 = $l28 | $l27;
+
+        $l29 = l9 << 32;
+
+        $l32 = $l30 | $l29;
+
+        $l31 = l11 << 40;
+
+        $l34 = $l32 | $l31;
+
+        $l33 = l13 << 48;
+
+        $l36 = $l34 | $l33;
+
+        $l35 = l15 << 56;
+
+        $l37 = $l36 | $l35;
+
+        return $l37;
+    }
+
+    public int readUnsignedByte() throws java.io.IOException
+    {
+        int $i0;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r1;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return $i0;
+    }
+
+    public int readUnsignedShort() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r1, $r2;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        if $i1 >= 0 goto label2;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $i2 = $i1 << 8;
+
+        $i3 = $i0 | $i2;
+
+        return $i3;
+    }
+
+    public long readUnsignedInt() throws java.io.IOException
+    {
+        long l1, l3, l5, l7, $l12, $l13, $l14, $l15, $l16, $l17;
+        byte $b8, $b9, $b10, $b11;
+        int $i0, $i2, $i4, $i6, $i18, $i19, $i20, $i21;
+        com.sun.media.sound.RIFFReader r0;
+        java.io.EOFException $r5, $r6, $r7, $r8;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l1 = (long) $i0;
+
+        $i2 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l3 = (long) $i2;
+
+        $i4 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l5 = (long) $i4;
+
+        $i6 = virtualinvoke r0.<com.sun.media.sound.RIFFReader: int read()>();
+
+        l7 = (long) $i6;
+
+        $b8 = l1 cmp 0L;
+
+        $i18 = (int) $b8;
+
+        if $i18 >= 0 goto label1;
+
+        $r5 = new java.io.EOFException;
+
+        specialinvoke $r5.<java.io.EOFException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $b9 = l3 cmp 0L;
+
+        $i19 = (int) $b9;
+
+        if $i19 >= 0 goto label2;
+
+        $r6 = new java.io.EOFException;
+
+        specialinvoke $r6.<java.io.EOFException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $b10 = l5 cmp 0L;
+
+        $i20 = (int) $b10;
+
+        if $i20 >= 0 goto label3;
+
+        $r7 = new java.io.EOFException;
+
+        specialinvoke $r7.<java.io.EOFException: void <init>()>();
+
+        throw $r7;
+
+     label3:
+        $b11 = l7 cmp 0L;
+
+        $i21 = (int) $b11;
+
+        if $i21 >= 0 goto label4;
+
+        $r8 = new java.io.EOFException;
+
+        specialinvoke $r8.<java.io.EOFException: void <init>()>();
+
+        throw $r8;
+
+     label4:
+        $l12 = l3 << 8;
+
+        $l14 = l1 + $l12;
+
+        $l13 = l5 << 16;
+
+        $l16 = $l14 | $l13;
+
+        $l15 = l7 << 24;
+
+        $l17 = $l16 | $l15;
+
+        return $l17;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        com.sun.media.sound.RIFFReader r0, $r1;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.media.sound.RIFFReader;
+
+        virtualinvoke r0.<com.sun.media.sound.RIFFReader: void finish()>();
+
+        $r1 = r0.<com.sun.media.sound.RIFFReader: com.sun.media.sound.RIFFReader root>;
+
+        if r0 != $r1 goto label1;
+
+        $r2 = r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream>;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label1:
+        r0.<com.sun.media.sound.RIFFReader: java.io.InputStream stream> = null;
+
+        return;
+    }
+}

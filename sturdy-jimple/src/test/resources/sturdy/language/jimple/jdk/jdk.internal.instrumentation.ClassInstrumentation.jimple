@@ -1,0 +1,578 @@
+public final class jdk.internal.instrumentation.ClassInstrumentation extends java.lang.Object
+{
+    private final java.lang.Class instrumentor;
+    private final jdk.internal.instrumentation.Logger logger;
+    private final java.lang.String targetName;
+    private final java.lang.String instrumentorName;
+    private byte[] newBytes;
+    private final jdk.internal.org.objectweb.asm.ClassReader targetClassReader;
+    private final jdk.internal.org.objectweb.asm.ClassReader instrClassReader;
+    private static final java.lang.String JAVA_HOME;
+
+    public void <init>(java.lang.Class, java.lang.String, byte[], jdk.internal.instrumentation.Logger) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        byte[] r6;
+        jdk.internal.org.objectweb.asm.ClassReader $r5, $r7;
+        jdk.internal.instrumentation.Logger r4;
+        java.lang.Class r1;
+        java.lang.String $r2, r3, $r8;
+        jdk.internal.instrumentation.ClassInstrumentation r0;
+        java.io.InputStream $r9;
+
+        r0 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: byte[];
+
+        r4 := @parameter3: jdk.internal.instrumentation.Logger;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.String getName()>();
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String instrumentorName> = $r2;
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String targetName> = r3;
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.Class instrumentor> = r1;
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.instrumentation.Logger logger> = r4;
+
+        $r5 = new jdk.internal.org.objectweb.asm.ClassReader;
+
+        specialinvoke $r5.<jdk.internal.org.objectweb.asm.ClassReader: void <init>(byte[])>(r6);
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader targetClassReader> = $r5;
+
+        $r7 = new jdk.internal.org.objectweb.asm.ClassReader;
+
+        $r8 = r0.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String instrumentorName>;
+
+        $r9 = specialinvoke r0.<jdk.internal.instrumentation.ClassInstrumentation: java.io.InputStream getInstrumentationInputStream(java.lang.String)>($r8);
+
+        specialinvoke $r7.<jdk.internal.org.objectweb.asm.ClassReader: void <init>(java.io.InputStream)>($r9);
+
+        r0.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader instrClassReader> = $r7;
+
+        specialinvoke r0.<jdk.internal.instrumentation.ClassInstrumentation: void instrument()>();
+
+        specialinvoke r0.<jdk.internal.instrumentation.ClassInstrumentation: void saveGeneratedInstrumentation()>();
+
+        return;
+    }
+
+    private java.io.InputStream getInstrumentationInputStream(java.lang.String) throws java.io.IOException
+    {
+        java.security.Permission[] $r3;
+        jdk.internal.instrumentation.ClassInstrumentation$2 $r0;
+        java.io.FilePermission $r4;
+        java.lang.String r2, $r6, $r8, $r11;
+        jdk.internal.instrumentation.ClassInstrumentation r1;
+        boolean $z0;
+        java.security.PrivilegedActionException $r14;
+        java.io.IOException $r17;
+        java.lang.RuntimeException $r16;
+        java.lang.Exception $r15;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10;
+        java.lang.Object $r12;
+        java.io.InputStream $r13;
+
+        r1 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new jdk.internal.instrumentation.ClassInstrumentation$2;
+
+        specialinvoke $r0.<jdk.internal.instrumentation.ClassInstrumentation$2: void <init>(jdk.internal.instrumentation.ClassInstrumentation,java.lang.String)>(r1, r2);
+
+        $r3 = newarray (java.security.Permission)[1];
+
+        $r4 = new java.io.FilePermission;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <jdk.internal.instrumentation.ClassInstrumentation: java.lang.String JAVA_HOME>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = <java.io.File: java.lang.String separator>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>($r11, "read");
+
+        $r3[0] = $r4;
+
+        $r12 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext,java.security.Permission[])>($r0, null, $r3);
+
+        $r13 = (java.io.InputStream) $r12;
+
+     label2:
+        return $r13;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = virtualinvoke $r14.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $z0 = $r15 instanceof java.io.IOException;
+
+        if $z0 == 0 goto label4;
+
+        $r17 = (java.io.IOException) $r15;
+
+        throw $r17;
+
+     label4:
+        $r16 = (java.lang.RuntimeException) $r15;
+
+        throw $r16;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private void instrument() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        jdk.internal.org.objectweb.asm.ClassWriter $r12;
+        byte[] $r19;
+        jdk.internal.instrumentation.MaxLocalsTracker $r4;
+        java.lang.'annotation'.Annotation[] $r15;
+        java.lang.reflect.Method[] $r3;
+        java.util.ArrayList $r0;
+        jdk.internal.instrumentation.Inliner $r7;
+        jdk.internal.instrumentation.InstrumentationMethod r22;
+        int i0, i1;
+        java.lang.String $r10;
+        java.lang.reflect.Method r21;
+        jdk.internal.instrumentation.ClassInstrumentation r1;
+        jdk.internal.org.objectweb.asm.tree.ClassNode $r6;
+        jdk.internal.org.objectweb.asm.ClassReader $r5, $r9, $r11, $r18;
+        jdk.internal.instrumentation.Logger $r8, $r16;
+        jdk.internal.instrumentation.TypeMapping[] $r17;
+        java.lang.'annotation'.Annotation $r20;
+        java.lang.Class $r2, $r14;
+        jdk.internal.instrumentation.MethodMergeAdapter $r13;
+
+        r1 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r1.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.Class instrumentor>;
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method[] getDeclaredMethods()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r21 = $r3[i1];
+
+        $r20 = virtualinvoke r21.<java.lang.reflect.Method: java.lang.'annotation'.Annotation getAnnotation(java.lang.Class)>(class "Ljdk/internal/instrumentation/InstrumentationMethod;");
+
+        r22 = (jdk.internal.instrumentation.InstrumentationMethod) $r20;
+
+        if r22 == null goto label2;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r21);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = new jdk.internal.instrumentation.MaxLocalsTracker;
+
+        specialinvoke $r4.<jdk.internal.instrumentation.MaxLocalsTracker: void <init>()>();
+
+        $r5 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader instrClassReader>;
+
+        virtualinvoke $r5.<jdk.internal.org.objectweb.asm.ClassReader: void accept(jdk.internal.org.objectweb.asm.ClassVisitor,int)>($r4, 0);
+
+        $r6 = new jdk.internal.org.objectweb.asm.tree.ClassNode;
+
+        specialinvoke $r6.<jdk.internal.org.objectweb.asm.tree.ClassNode: void <init>()>();
+
+        $r7 = new jdk.internal.instrumentation.Inliner;
+
+        $r10 = r1.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String instrumentorName>;
+
+        $r9 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader targetClassReader>;
+
+        $r8 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.instrumentation.Logger logger>;
+
+        specialinvoke $r7.<jdk.internal.instrumentation.Inliner: void <init>(int,jdk.internal.org.objectweb.asm.ClassVisitor,java.lang.String,jdk.internal.org.objectweb.asm.ClassReader,java.util.List,jdk.internal.instrumentation.MaxLocalsTracker,jdk.internal.instrumentation.Logger)>(327680, $r6, $r10, $r9, $r0, $r4, $r8);
+
+        $r11 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader instrClassReader>;
+
+        virtualinvoke $r11.<jdk.internal.org.objectweb.asm.ClassReader: void accept(jdk.internal.org.objectweb.asm.ClassVisitor,int)>($r7, 8);
+
+        $r12 = new jdk.internal.org.objectweb.asm.ClassWriter;
+
+        specialinvoke $r12.<jdk.internal.org.objectweb.asm.ClassWriter: void <init>(int)>(2);
+
+        $r13 = new jdk.internal.instrumentation.MethodMergeAdapter;
+
+        $r14 = r1.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.Class instrumentor>;
+
+        $r15 = virtualinvoke $r14.<java.lang.Class: java.lang.'annotation'.Annotation[] getAnnotationsByType(java.lang.Class)>(class "Ljdk/internal/instrumentation/TypeMapping;");
+
+        $r17 = (jdk.internal.instrumentation.TypeMapping[]) $r15;
+
+        $r16 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.instrumentation.Logger logger>;
+
+        specialinvoke $r13.<jdk.internal.instrumentation.MethodMergeAdapter: void <init>(jdk.internal.org.objectweb.asm.ClassVisitor,jdk.internal.org.objectweb.asm.tree.ClassNode,java.util.List,jdk.internal.instrumentation.TypeMapping[],jdk.internal.instrumentation.Logger)>($r12, $r6, $r0, $r17, $r16);
+
+        $r18 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.org.objectweb.asm.ClassReader targetClassReader>;
+
+        virtualinvoke $r18.<jdk.internal.org.objectweb.asm.ClassReader: void accept(jdk.internal.org.objectweb.asm.ClassVisitor,int)>($r13, 8);
+
+        $r19 = virtualinvoke $r12.<jdk.internal.org.objectweb.asm.ClassWriter: byte[] toByteArray()>();
+
+        r1.<jdk.internal.instrumentation.ClassInstrumentation: byte[] newBytes> = $r19;
+
+        return;
+    }
+
+    public byte[] getNewBytes()
+    {
+        byte[] $r1, $r3;
+        java.lang.Object $r2;
+        jdk.internal.instrumentation.ClassInstrumentation r0;
+
+        r0 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        $r1 = r0.<jdk.internal.instrumentation.ClassInstrumentation: byte[] newBytes>;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        return $r3;
+    }
+
+    private void saveGeneratedInstrumentation()
+    {
+        jdk.internal.instrumentation.Logger $r5;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        jdk.internal.instrumentation.ClassInstrumentation$3 $r0;
+        jdk.internal.instrumentation.ClassInstrumentation r1;
+        java.lang.Exception $r4;
+        boolean $z0;
+
+        r1 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        $r0 = new jdk.internal.instrumentation.ClassInstrumentation$3;
+
+        specialinvoke $r0.<jdk.internal.instrumentation.ClassInstrumentation$3: void <init>(jdk.internal.instrumentation.ClassInstrumentation)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        specialinvoke r1.<jdk.internal.instrumentation.ClassInstrumentation: void writeGeneratedDebugInstrumentation()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = r1.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.instrumentation.Logger logger>;
+
+        interfaceinvoke $r5.<jdk.internal.instrumentation.Logger: void info(java.lang.String)>("Unable to create debug instrumentation");
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    private void writeGeneratedDebugInstrumentation() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        byte[] $r7, $r31;
+        java.io.PrintWriter $r28;
+        java.lang.StringBuilder $r1, $r4, $r5, $r22, $r24, $r25, $r33, $r34, $r36, $r37;
+        java.lang.Throwable $r8, $r9, $r10, $r12, $r13, $r14, $r16, $r17, $r18, r20, r27, r29;
+        java.lang.String $r3, $r6, $r23, $r26, $r35, $r38;
+        jdk.internal.instrumentation.ClassInstrumentation r2;
+        java.io.FileWriter $r21;
+        java.io.FileOutputStream $r0;
+        jdk.internal.org.objectweb.asm.ClassReader $r30;
+        jdk.internal.instrumentation.Logger $r32;
+
+        r2 := @this: jdk.internal.instrumentation.ClassInstrumentation;
+
+        $r0 = new java.io.FileOutputStream;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = r2.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String targetName>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".class");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.io.FileOutputStream: void <init>(java.lang.String)>($r6);
+
+        r20 = null;
+
+     label01:
+        $r7 = r2.<jdk.internal.instrumentation.ClassInstrumentation: byte[] newBytes>;
+
+        virtualinvoke $r0.<java.io.FileOutputStream: void write(byte[])>($r7);
+
+     label02:
+        if $r0 == null goto label12;
+
+        goto label03;
+
+     label03:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+        goto label12;
+
+     label04:
+        $r18 := @caughtexception;
+
+        r20 = $r18;
+
+        throw $r18;
+
+     label05:
+        $r17 := @caughtexception;
+
+     label06:
+        if $r0 == null goto label11;
+
+        if r20 == null goto label10;
+
+     label07:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+     label08:
+        goto label11;
+
+     label09:
+        $r16 := @caughtexception;
+
+        virtualinvoke r20.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r16);
+
+        goto label11;
+
+     label10:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+     label11:
+        throw $r17;
+
+     label12:
+        $r21 = new java.io.FileWriter;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = r2.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String targetName>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".asm");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.io.FileWriter: void <init>(java.lang.String)>($r26);
+
+        r27 = null;
+
+     label13:
+        $r28 = new java.io.PrintWriter;
+
+        specialinvoke $r28.<java.io.PrintWriter: void <init>(java.io.Writer)>($r21);
+
+        r29 = null;
+
+     label14:
+        $r30 = new jdk.internal.org.objectweb.asm.ClassReader;
+
+        $r31 = virtualinvoke r2.<jdk.internal.instrumentation.ClassInstrumentation: byte[] getNewBytes()>();
+
+        specialinvoke $r30.<jdk.internal.org.objectweb.asm.ClassReader: void <init>(byte[])>($r31);
+
+        staticinvoke <jdk.internal.org.objectweb.asm.util.CheckClassAdapter: void verify(jdk.internal.org.objectweb.asm.ClassReader,boolean,java.io.PrintWriter)>($r30, 1, $r28);
+
+     label15:
+        if $r28 == null goto label25;
+
+        goto label16;
+
+     label16:
+        virtualinvoke $r28.<java.io.PrintWriter: void close()>();
+
+        goto label25;
+
+     label17:
+        $r14 := @caughtexception;
+
+        r29 = $r14;
+
+        throw $r14;
+
+     label18:
+        $r13 := @caughtexception;
+
+     label19:
+        if $r28 == null goto label24;
+
+        if r29 == null goto label23;
+
+     label20:
+        virtualinvoke $r28.<java.io.PrintWriter: void close()>();
+
+     label21:
+        goto label24;
+
+     label22:
+        $r12 := @caughtexception;
+
+        virtualinvoke r29.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r12);
+
+        goto label24;
+
+     label23:
+        virtualinvoke $r28.<java.io.PrintWriter: void close()>();
+
+     label24:
+        throw $r13;
+
+     label25:
+        if $r21 == null goto label35;
+
+        goto label26;
+
+     label26:
+        virtualinvoke $r21.<java.io.FileWriter: void close()>();
+
+        goto label35;
+
+     label27:
+        $r10 := @caughtexception;
+
+        r27 = $r10;
+
+        throw $r10;
+
+     label28:
+        $r9 := @caughtexception;
+
+     label29:
+        if $r21 == null goto label34;
+
+        if r27 == null goto label33;
+
+     label30:
+        virtualinvoke $r21.<java.io.FileWriter: void close()>();
+
+     label31:
+        goto label34;
+
+     label32:
+        $r8 := @caughtexception;
+
+        virtualinvoke r27.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r8);
+
+        goto label34;
+
+     label33:
+        virtualinvoke $r21.<java.io.FileWriter: void close()>();
+
+     label34:
+        throw $r9;
+
+     label35:
+        $r32 = r2.<jdk.internal.instrumentation.ClassInstrumentation: jdk.internal.instrumentation.Logger logger>;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Instrumented code saved to ");
+
+        $r35 = r2.<jdk.internal.instrumentation.ClassInstrumentation: java.lang.String targetName>;
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".class and .asm");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r32.<jdk.internal.instrumentation.Logger: void info(java.lang.String)>($r38);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label04 to label06 with label05;
+        catch java.lang.Throwable from label14 to label15 with label17;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label17 to label19 with label18;
+        catch java.lang.Throwable from label13 to label25 with label27;
+        catch java.lang.Throwable from label30 to label31 with label32;
+        catch java.lang.Throwable from label27 to label29 with label28;
+    }
+
+    static void <clinit>()
+    {
+        java.security.Permission[] $r1;
+        jdk.internal.instrumentation.ClassInstrumentation$1 $r0;
+        java.lang.Object $r3;
+        java.lang.String $r4;
+        java.util.PropertyPermission $r2;
+
+        $r0 = new jdk.internal.instrumentation.ClassInstrumentation$1;
+
+        specialinvoke $r0.<jdk.internal.instrumentation.ClassInstrumentation$1: void <init>()>();
+
+        $r1 = newarray (java.security.Permission)[1];
+
+        $r2 = new java.util.PropertyPermission;
+
+        specialinvoke $r2.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>("java.home", "read");
+
+        $r1[0] = $r2;
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r0, null, $r1);
+
+        $r4 = (java.lang.String) $r3;
+
+        <jdk.internal.instrumentation.ClassInstrumentation: java.lang.String JAVA_HOME> = $r4;
+
+        return;
+    }
+}

@@ -1,0 +1,1884 @@
+public class java.lang.Thread extends java.lang.Object implements java.lang.Runnable
+{
+    private volatile java.lang.String name;
+    private int priority;
+    private java.lang.Thread threadQ;
+    private long eetop;
+    private boolean single_step;
+    private boolean daemon;
+    private boolean stillborn;
+    private java.lang.Runnable target;
+    private java.lang.ThreadGroup group;
+    private java.lang.ClassLoader contextClassLoader;
+    private java.security.AccessControlContext inheritedAccessControlContext;
+    private static int threadInitNumber;
+    java.lang.ThreadLocal$ThreadLocalMap threadLocals;
+    java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals;
+    private long stackSize;
+    private long nativeParkEventPointer;
+    private long tid;
+    private static long threadSeqNumber;
+    private volatile int threadStatus;
+    volatile java.lang.Object parkBlocker;
+    private volatile sun.nio.ch.Interruptible blocker;
+    private final java.lang.Object blockerLock;
+    public static final int MIN_PRIORITY;
+    public static final int NORM_PRIORITY;
+    public static final int MAX_PRIORITY;
+    private static final java.lang.StackTraceElement[] EMPTY_STACK_TRACE;
+    private static final java.lang.RuntimePermission SUBCLASS_IMPLEMENTATION_PERMISSION;
+    private volatile java.lang.Thread$UncaughtExceptionHandler uncaughtExceptionHandler;
+    private static volatile java.lang.Thread$UncaughtExceptionHandler defaultUncaughtExceptionHandler;
+    long threadLocalRandomSeed;
+    int threadLocalRandomProbe;
+    int threadLocalRandomSecondarySeed;
+
+    private static native void registerNatives();
+
+    private static synchronized int nextThreadNum()
+    {
+        int $i0, $i1;
+
+        $i0 = <java.lang.Thread: int threadInitNumber>;
+
+        $i1 = $i0 + 1;
+
+        <java.lang.Thread: int threadInitNumber> = $i1;
+
+        return $i0;
+    }
+
+    private static synchronized long nextThreadID()
+    {
+        long $l0, $l1;
+
+        $l0 = <java.lang.Thread: long threadSeqNumber>;
+
+        $l1 = $l0 + 1L;
+
+        <java.lang.Thread: long threadSeqNumber> = $l1;
+
+        return $l1;
+    }
+
+    void blockedOn(sun.nio.ch.Interruptible)
+    {
+        java.lang.Throwable $r3;
+        java.lang.Thread r0;
+        sun.nio.ch.Interruptible r2;
+        java.lang.Object $r1;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: sun.nio.ch.Interruptible;
+
+        $r1 = r0.<java.lang.Thread: java.lang.Object blockerLock>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<java.lang.Thread: sun.nio.ch.Interruptible blocker> = r2;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static native java.lang.Thread currentThread();
+
+    public static native void yield();
+
+    public static native void sleep(long) throws java.lang.InterruptedException;
+
+    public static void sleep(long, int) throws java.lang.InterruptedException
+    {
+        byte $b0, $b2;
+        int i1, $i4;
+        long l3;
+        java.lang.IllegalArgumentException $r2, $r3;
+
+        l3 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        $b0 = l3 cmp 0L;
+
+        $i4 = (int) $b0;
+
+        if $i4 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeout value is negative");
+
+        throw $r2;
+
+     label1:
+        if i1 < 0 goto label2;
+
+        if i1 <= 999999 goto label3;
+
+     label2:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("nanosecond timeout value out of range");
+
+        throw $r3;
+
+     label3:
+        if i1 >= 500000 goto label4;
+
+        if i1 == 0 goto label5;
+
+        $b2 = l3 cmp 0L;
+
+        if $b2 != 0 goto label5;
+
+     label4:
+        l3 = l3 + 1L;
+
+     label5:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l3);
+
+        return;
+    }
+
+    private void init(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String, long)
+    {
+        java.lang.Thread r0;
+        long l0;
+        java.lang.ThreadGroup r1;
+        java.lang.String r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.lang.Thread;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r3 := @parameter2: java.lang.String;
+
+        l0 := @parameter3: long;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long,java.security.AccessControlContext,boolean)>(r1, r2, r3, l0, null, 1);
+
+        return;
+    }
+
+    private void init(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String, long, java.security.AccessControlContext, boolean)
+    {
+        java.security.AccessControlContext r5, $r16;
+        long l1, $l3;
+        java.lang.ThreadGroup r15;
+        java.lang.Runnable r6;
+        java.lang.NullPointerException $r14;
+        java.lang.Thread r1, $r2;
+        int $i0, $i2;
+        java.lang.String r0;
+        boolean z0, $z1, $z2, $z3;
+        java.lang.ThreadLocal$ThreadLocalMap $r7, $r8, $r9;
+        java.lang.SecurityManager $r3;
+        java.lang.Class $r10, $r12;
+        java.lang.RuntimePermission $r13;
+        java.lang.ClassLoader $r4, $r11;
+
+        r1 := @this: java.lang.Thread;
+
+        r15 := @parameter0: java.lang.ThreadGroup;
+
+        r6 := @parameter1: java.lang.Runnable;
+
+        r0 := @parameter2: java.lang.String;
+
+        l1 := @parameter3: long;
+
+        r5 := @parameter4: java.security.AccessControlContext;
+
+        z0 := @parameter5: boolean;
+
+        if r0 != null goto label01;
+
+        $r14 = new java.lang.NullPointerException;
+
+        specialinvoke $r14.<java.lang.NullPointerException: void <init>(java.lang.String)>("name cannot be null");
+
+        throw $r14;
+
+     label01:
+        r1.<java.lang.Thread: java.lang.String name> = r0;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if r15 != null goto label03;
+
+        if $r3 == null goto label02;
+
+        r15 = virtualinvoke $r3.<java.lang.SecurityManager: java.lang.ThreadGroup getThreadGroup()>();
+
+     label02:
+        if r15 != null goto label03;
+
+        r15 = virtualinvoke $r2.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label03:
+        virtualinvoke r15.<java.lang.ThreadGroup: void checkAccess()>();
+
+        if $r3 == null goto label04;
+
+        $r12 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z2 = staticinvoke <java.lang.Thread: boolean isCCLOverridden(java.lang.Class)>($r12);
+
+        if $z2 == 0 goto label04;
+
+        $r13 = <java.lang.Thread: java.lang.RuntimePermission SUBCLASS_IMPLEMENTATION_PERMISSION>;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r13);
+
+     label04:
+        virtualinvoke r15.<java.lang.ThreadGroup: void addUnstarted()>();
+
+        r1.<java.lang.Thread: java.lang.ThreadGroup group> = r15;
+
+        $z3 = virtualinvoke $r2.<java.lang.Thread: boolean isDaemon()>();
+
+        r1.<java.lang.Thread: boolean daemon> = $z3;
+
+        $i2 = virtualinvoke $r2.<java.lang.Thread: int getPriority()>();
+
+        r1.<java.lang.Thread: int priority> = $i2;
+
+        if $r3 == null goto label05;
+
+        $r10 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z1 = staticinvoke <java.lang.Thread: boolean isCCLOverridden(java.lang.Class)>($r10);
+
+        if $z1 == 0 goto label06;
+
+     label05:
+        $r4 = virtualinvoke $r2.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        r1.<java.lang.Thread: java.lang.ClassLoader contextClassLoader> = $r4;
+
+        goto label07;
+
+     label06:
+        $r11 = $r2.<java.lang.Thread: java.lang.ClassLoader contextClassLoader>;
+
+        r1.<java.lang.Thread: java.lang.ClassLoader contextClassLoader> = $r11;
+
+     label07:
+        if r5 == null goto label08;
+
+        $r16 = r5;
+
+        goto label09;
+
+     label08:
+        $r16 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+     label09:
+        r1.<java.lang.Thread: java.security.AccessControlContext inheritedAccessControlContext> = $r16;
+
+        r1.<java.lang.Thread: java.lang.Runnable target> = r6;
+
+        $i0 = r1.<java.lang.Thread: int priority>;
+
+        virtualinvoke r1.<java.lang.Thread: void setPriority(int)>($i0);
+
+        if z0 == 0 goto label10;
+
+        $r7 = $r2.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals>;
+
+        if $r7 == null goto label10;
+
+        $r8 = $r2.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals>;
+
+        $r9 = staticinvoke <java.lang.ThreadLocal: java.lang.ThreadLocal$ThreadLocalMap createInheritedMap(java.lang.ThreadLocal$ThreadLocalMap)>($r8);
+
+        r1.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = $r9;
+
+     label10:
+        r1.<java.lang.Thread: long stackSize> = l1;
+
+        $l3 = staticinvoke <java.lang.Thread: long nextThreadID()>();
+
+        r1.<java.lang.Thread: long tid> = $l3;
+
+        return;
+    }
+
+    protected java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        java.lang.CloneNotSupportedException $r0;
+        java.lang.Thread r1;
+
+        r1 := @this: java.lang.Thread;
+
+        $r0 = new java.lang.CloneNotSupportedException;
+
+        specialinvoke $r0.<java.lang.CloneNotSupportedException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public void <init>()
+    {
+        java.lang.Thread r0;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: java.lang.Thread;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread-");
+
+        $i0 = staticinvoke <java.lang.Thread: int nextThreadNum()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(null, null, $r5, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.Runnable)
+    {
+        java.lang.Runnable r2;
+        java.lang.Thread r0;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread-");
+
+        $i0 = staticinvoke <java.lang.Thread: int nextThreadNum()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(null, r2, $r6, 0L);
+
+        return;
+    }
+
+    void <init>(java.lang.Runnable, java.security.AccessControlContext)
+    {
+        java.security.AccessControlContext r7;
+        java.lang.Runnable r2;
+        java.lang.Thread r0;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        r7 := @parameter1: java.security.AccessControlContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread-");
+
+        $i0 = staticinvoke <java.lang.Thread: int nextThreadNum()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long,java.security.AccessControlContext,boolean)>(null, r2, $r6, 0L, r7, 0);
+
+        return;
+    }
+
+    public void <init>(java.lang.ThreadGroup, java.lang.Runnable)
+    {
+        java.lang.ThreadGroup r2;
+        java.lang.Runnable r3;
+        java.lang.Thread r0;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String $r7;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.ThreadGroup;
+
+        r3 := @parameter1: java.lang.Runnable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread-");
+
+        $i0 = staticinvoke <java.lang.Thread: int nextThreadNum()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(r2, r3, $r7, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.Object $r1;
+        java.lang.String r2;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(null, null, r2, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.ThreadGroup, java.lang.String)
+    {
+        java.lang.Thread r0;
+        java.lang.Object $r1;
+        java.lang.ThreadGroup r2;
+        java.lang.String r3;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.ThreadGroup;
+
+        r3 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(r2, null, r3, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.Runnable, java.lang.String)
+    {
+        java.lang.Thread r0;
+        java.lang.Object $r1;
+        java.lang.String r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        r3 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(null, r2, r3, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String)
+    {
+        java.lang.Thread r0;
+        java.lang.Object $r1;
+        java.lang.ThreadGroup r2;
+        java.lang.String r4;
+        java.lang.Runnable r3;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.ThreadGroup;
+
+        r3 := @parameter1: java.lang.Runnable;
+
+        r4 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(r2, r3, r4, 0L);
+
+        return;
+    }
+
+    public void <init>(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String, long)
+    {
+        java.lang.Thread r0;
+        java.lang.Object $r1;
+        long l0;
+        java.lang.ThreadGroup r2;
+        java.lang.String r4;
+        java.lang.Runnable r3;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.ThreadGroup;
+
+        r3 := @parameter1: java.lang.Runnable;
+
+        r4 := @parameter2: java.lang.String;
+
+        l0 := @parameter3: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: boolean daemon> = 0;
+
+        r0.<java.lang.Thread: boolean stillborn> = 0;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: int threadStatus> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.Thread: java.lang.Object blockerLock> = $r1;
+
+        specialinvoke r0.<java.lang.Thread: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(r2, r3, r4, l0);
+
+        return;
+    }
+
+    public synchronized void start()
+    {
+        java.lang.IllegalThreadStateException $r3;
+        java.lang.Throwable $r4, $r5, $r7;
+        java.lang.ThreadGroup $r1, $r6;
+        java.lang.Thread r0;
+        int $i0;
+
+        r0 := @this: java.lang.Thread;
+
+        $i0 = r0.<java.lang.Thread: int threadStatus>;
+
+        if $i0 == 0 goto label01;
+
+        $r3 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r3.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r3;
+
+     label01:
+        $r1 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+        virtualinvoke $r1.<java.lang.ThreadGroup: void add(java.lang.Thread)>(r0);
+
+     label02:
+        specialinvoke r0.<java.lang.Thread: void start0()>();
+
+     label03:
+        goto label04;
+
+     label04:
+        goto label11;
+
+     label05:
+        $r7 := @caughtexception;
+
+        goto label11;
+
+     label06:
+        $r5 := @caughtexception;
+
+     label07:
+        $r6 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+        virtualinvoke $r6.<java.lang.ThreadGroup: void threadStartFailed(java.lang.Thread)>(r0);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r4 := @caughtexception;
+
+     label10:
+        throw $r5;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }
+
+    private native void start0();
+
+    public void run()
+    {
+        java.lang.Runnable $r1, $r2;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.Runnable target>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.lang.Thread: java.lang.Runnable target>;
+
+        interfaceinvoke $r2.<java.lang.Runnable: void run()>();
+
+     label1:
+        return;
+    }
+
+    private void exit()
+    {
+        java.lang.ThreadGroup $r1, $r2;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+        virtualinvoke $r2.<java.lang.ThreadGroup: void threadTerminated(java.lang.Thread)>(r0);
+
+        r0.<java.lang.Thread: java.lang.ThreadGroup group> = null;
+
+     label1:
+        r0.<java.lang.Thread: java.lang.Runnable target> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = null;
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap inheritableThreadLocals> = null;
+
+        r0.<java.lang.Thread: java.security.AccessControlContext inheritedAccessControlContext> = null;
+
+        r0.<java.lang.Thread: sun.nio.ch.Interruptible blocker> = null;
+
+        r0.<java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler uncaughtExceptionHandler> = null;
+
+        return;
+    }
+
+    public final void stop()
+    {
+        java.lang.Thread r1, $r3;
+        int $i0;
+        java.lang.RuntimePermission $r4;
+        java.lang.SecurityManager $r0;
+        java.lang.ThreadDeath $r2;
+
+        r1 := @this: java.lang.Thread;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke r1.<java.lang.Thread: void checkAccess()>();
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if r1 == $r3 goto label1;
+
+        $r4 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission STOP_THREAD_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+     label1:
+        $i0 = r1.<java.lang.Thread: int threadStatus>;
+
+        if $i0 == 0 goto label2;
+
+        virtualinvoke r1.<java.lang.Thread: void resume()>();
+
+     label2:
+        $r2 = new java.lang.ThreadDeath;
+
+        specialinvoke $r2.<java.lang.ThreadDeath: void <init>()>();
+
+        specialinvoke r1.<java.lang.Thread: void stop0(java.lang.Object)>($r2);
+
+        return;
+    }
+
+    public final synchronized void stop(java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        java.lang.UnsupportedOperationException $r0;
+        java.lang.Thread r1;
+
+        r1 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.Throwable;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public void interrupt()
+    {
+        java.lang.Throwable $r4;
+        java.lang.Thread r0, $r1;
+        sun.nio.ch.Interruptible $r3;
+        java.lang.Object $r2;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if r0 == $r1 goto label1;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+     label1:
+        $r2 = r0.<java.lang.Thread: java.lang.Object blockerLock>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = r0.<java.lang.Thread: sun.nio.ch.Interruptible blocker>;
+
+        if $r3 == null goto label4;
+
+        specialinvoke r0.<java.lang.Thread: void interrupt0()>();
+
+        interfaceinvoke $r3.<sun.nio.ch.Interruptible: void interrupt(java.lang.Thread)>(r0);
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        exitmonitor $r2;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r4;
+
+     label8:
+        specialinvoke r0.<java.lang.Thread: void interrupt0()>();
+
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public static boolean interrupted()
+    {
+        java.lang.Thread $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z0 = specialinvoke $r0.<java.lang.Thread: boolean isInterrupted(boolean)>(1);
+
+        return $z0;
+    }
+
+    public boolean isInterrupted()
+    {
+        java.lang.Thread r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.Thread;
+
+        $z0 = specialinvoke r0.<java.lang.Thread: boolean isInterrupted(boolean)>(0);
+
+        return $z0;
+    }
+
+    private native boolean isInterrupted(boolean);
+
+    public void destroy()
+    {
+        java.lang.NoSuchMethodError $r0;
+        java.lang.Thread r1;
+
+        r1 := @this: java.lang.Thread;
+
+        $r0 = new java.lang.NoSuchMethodError;
+
+        specialinvoke $r0.<java.lang.NoSuchMethodError: void <init>()>();
+
+        throw $r0;
+    }
+
+    public final native boolean isAlive();
+
+    public final void suspend()
+    {
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        specialinvoke r0.<java.lang.Thread: void suspend0()>();
+
+        return;
+    }
+
+    public final void resume()
+    {
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        specialinvoke r0.<java.lang.Thread: void resume0()>();
+
+        return;
+    }
+
+    public final void setPriority(int)
+    {
+        java.lang.Thread r0;
+        int $i0, i1;
+        java.lang.ThreadGroup $r2;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: java.lang.Thread;
+
+        i1 := @parameter0: int;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        if i1 > 10 goto label1;
+
+        if i1 >= 1 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        if $r2 == null goto label4;
+
+        $i0 = virtualinvoke $r2.<java.lang.ThreadGroup: int getMaxPriority()>();
+
+        if i1 <= $i0 goto label3;
+
+        i1 = virtualinvoke $r2.<java.lang.ThreadGroup: int getMaxPriority()>();
+
+     label3:
+        r0.<java.lang.Thread: int priority> = i1;
+
+        specialinvoke r0.<java.lang.Thread: void setPriority0(int)>(i1);
+
+     label4:
+        return;
+    }
+
+    public final int getPriority()
+    {
+        int $i0;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $i0 = r0.<java.lang.Thread: int priority>;
+
+        return $i0;
+    }
+
+    public final synchronized void setName(java.lang.String)
+    {
+        java.lang.Thread r0;
+        int $i0;
+        java.lang.String r1;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: java.lang.Thread;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("name cannot be null");
+
+        throw $r2;
+
+     label1:
+        r0.<java.lang.Thread: java.lang.String name> = r1;
+
+        $i0 = r0.<java.lang.Thread: int threadStatus>;
+
+        if $i0 == 0 goto label2;
+
+        specialinvoke r0.<java.lang.Thread: void setNativeName(java.lang.String)>(r1);
+
+     label2:
+        return;
+    }
+
+    public final java.lang.String getName()
+    {
+        java.lang.String $r1;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public final java.lang.ThreadGroup getThreadGroup()
+    {
+        java.lang.ThreadGroup $r1;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+        return $r1;
+    }
+
+    public static int activeCount()
+    {
+        int $i0;
+        java.lang.ThreadGroup $r1;
+        java.lang.Thread $r0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.ThreadGroup: int activeCount()>();
+
+        return $i0;
+    }
+
+    public static int enumerate(java.lang.Thread[])
+    {
+        java.lang.Thread $r0;
+        java.lang.Thread[] r2;
+        int $i0;
+        java.lang.ThreadGroup $r1;
+
+        r2 := @parameter0: java.lang.Thread[];
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.ThreadGroup: int enumerate(java.lang.Thread[])>(r2);
+
+        return $i0;
+    }
+
+    public native int countStackFrames();
+
+    public final synchronized void join(long) throws java.lang.InterruptedException
+    {
+        long $l0, l1, l4, $l6, l7;
+        java.lang.IllegalArgumentException $r2;
+        byte $b2, $b3, $b5;
+        java.lang.Thread r0;
+        int $i8, $i9;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.Thread;
+
+        l1 := @parameter0: long;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l7 = 0L;
+
+        $b2 = l1 cmp 0L;
+
+        $i8 = (int) $b2;
+
+        if $i8 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeout value is negative");
+
+        throw $r2;
+
+     label1:
+        $b3 = l1 cmp 0L;
+
+        if $b3 != 0 goto label3;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 == 0 goto label5;
+
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(0L);
+
+        goto label2;
+
+     label3:
+        $z0 = virtualinvoke r0.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label5;
+
+        l4 = l1 - l7;
+
+        $b5 = l4 cmp 0L;
+
+        $i9 = (int) $b5;
+
+        if $i9 > 0 goto label4;
+
+        goto label5;
+
+     label4:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(l4);
+
+        $l6 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l7 = $l6 - $l0;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    public final synchronized void join(long, int) throws java.lang.InterruptedException
+    {
+        long l3;
+        java.lang.IllegalArgumentException $r3, $r4;
+        byte $b0, $b2;
+        java.lang.Thread r1;
+        int i1, $i4;
+
+        r1 := @this: java.lang.Thread;
+
+        l3 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        $b0 = l3 cmp 0L;
+
+        $i4 = (int) $b0;
+
+        if $i4 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeout value is negative");
+
+        throw $r3;
+
+     label1:
+        if i1 < 0 goto label2;
+
+        if i1 <= 999999 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("nanosecond timeout value out of range");
+
+        throw $r4;
+
+     label3:
+        if i1 >= 500000 goto label4;
+
+        if i1 == 0 goto label5;
+
+        $b2 = l3 cmp 0L;
+
+        if $b2 != 0 goto label5;
+
+     label4:
+        l3 = l3 + 1L;
+
+     label5:
+        virtualinvoke r1.<java.lang.Thread: void join(long)>(l3);
+
+        return;
+    }
+
+    public final void join() throws java.lang.InterruptedException
+    {
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        virtualinvoke r0.<java.lang.Thread: void join(long)>(0L);
+
+        return;
+    }
+
+    public static void dumpStack()
+    {
+        java.lang.Exception $r0;
+
+        $r0 = new java.lang.Exception;
+
+        specialinvoke $r0.<java.lang.Exception: void <init>(java.lang.String)>("Stack trace");
+
+        virtualinvoke $r0.<java.lang.Exception: void printStackTrace()>();
+
+        return;
+    }
+
+    public final void setDaemon(boolean)
+    {
+        java.lang.IllegalThreadStateException $r1;
+        java.lang.Thread r0;
+        boolean $z0, z1;
+
+        r0 := @this: java.lang.Thread;
+
+        z1 := @parameter0: boolean;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        $z0 = virtualinvoke r0.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r1.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        r0.<java.lang.Thread: boolean daemon> = z1;
+
+        return;
+    }
+
+    public final boolean isDaemon()
+    {
+        java.lang.Thread r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.Thread;
+
+        $z0 = r0.<java.lang.Thread: boolean daemon>;
+
+        return $z0;
+    }
+
+    public final void checkAccess()
+    {
+        java.lang.SecurityManager $r0;
+        java.lang.Thread r1;
+
+        r1 := @this: java.lang.Thread;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkAccess(java.lang.Thread)>(r1);
+
+     label1:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.ThreadGroup $r1;
+        java.lang.Thread r0;
+        int $i0, $i1;
+        java.lang.String $r4, $r9, $r12, $r17, $r20;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r7, $r8, $r10, $r11, $r13, $r14, $r15, $r16, $r18, $r19;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = virtualinvoke r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        if $r1 == null goto label1;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread[");
+
+        $r12 = virtualinvoke r0.<java.lang.Thread: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $i1 = virtualinvoke r0.<java.lang.Thread: int getPriority()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r17 = virtualinvoke $r1.<java.lang.ThreadGroup: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r20;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Thread[");
+
+        $r4 = virtualinvoke r0.<java.lang.Thread: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $i0 = virtualinvoke r0.<java.lang.Thread: int getPriority()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    public java.lang.ClassLoader getContextClassLoader()
+    {
+        java.lang.Thread r0;
+        java.lang.Class $r5;
+        java.lang.ClassLoader $r1, $r3, $r4;
+        java.lang.SecurityManager $r2;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.ClassLoader contextClassLoader>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<java.lang.Thread: java.lang.ClassLoader contextClassLoader>;
+
+        $r5 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        staticinvoke <java.lang.ClassLoader: void checkClassLoaderPermission(java.lang.ClassLoader,java.lang.Class)>($r4, $r5);
+
+     label2:
+        $r3 = r0.<java.lang.Thread: java.lang.ClassLoader contextClassLoader>;
+
+        return $r3;
+    }
+
+    public void setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.lang.Thread r1;
+        java.lang.RuntimePermission $r3;
+        java.lang.ClassLoader r2;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("setContextClassLoader");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        r1.<java.lang.Thread: java.lang.ClassLoader contextClassLoader> = r2;
+
+        return;
+    }
+
+    public static native boolean holdsLock(java.lang.Object);
+
+    public java.lang.StackTraceElement[] getStackTrace()
+    {
+        java.lang.StackTraceElement[][] $r6;
+        java.lang.Thread[] $r5;
+        java.lang.Exception $r2;
+        java.lang.SecurityManager $r4;
+        java.lang.StackTraceElement[] $r3, $r7, r9;
+        java.lang.Thread r0, $r1;
+        java.lang.RuntimePermission $r8;
+        boolean $z0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if r0 == $r1 goto label4;
+
+        $r4 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r4 == null goto label1;
+
+        $r8 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission GET_STACK_TRACE_PERMISSION>;
+
+        virtualinvoke $r4.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r8);
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 != 0 goto label2;
+
+        $r7 = <java.lang.Thread: java.lang.StackTraceElement[] EMPTY_STACK_TRACE>;
+
+        return $r7;
+
+     label2:
+        $r5 = newarray (java.lang.Thread)[1];
+
+        $r5[0] = r0;
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.StackTraceElement[][] dumpThreads(java.lang.Thread[])>($r5);
+
+        r9 = $r6[0];
+
+        if r9 != null goto label3;
+
+        r9 = <java.lang.Thread: java.lang.StackTraceElement[] EMPTY_STACK_TRACE>;
+
+     label3:
+        return r9;
+
+     label4:
+        $r2 = new java.lang.Exception;
+
+        specialinvoke $r2.<java.lang.Exception: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Exception: java.lang.StackTraceElement[] getStackTrace()>();
+
+        return $r3;
+    }
+
+    public static java.util.Map getAllStackTraces()
+    {
+        java.lang.StackTraceElement[][] $r2;
+        java.lang.Thread[] $r1;
+        java.util.HashMap $r3;
+        java.lang.SecurityManager $r0;
+        java.lang.StackTraceElement[] r4;
+        java.lang.Thread $r5;
+        int $i0, i1, $i2;
+        java.lang.RuntimePermission $r6, $r7;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r6 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission GET_STACK_TRACE_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r6);
+
+        $r7 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREADGROUP_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r7);
+
+     label1:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread[] getThreads()>();
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.StackTraceElement[][] dumpThreads(java.lang.Thread[])>($r1);
+
+        $r3 = new java.util.HashMap;
+
+        $i0 = lengthof $r1;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>(int)>($i0);
+
+        i1 = 0;
+
+     label2:
+        $i2 = lengthof $r1;
+
+        if i1 >= $i2 goto label4;
+
+        r4 = $r2[i1];
+
+        if r4 == null goto label3;
+
+        $r5 = $r1[i1];
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, r4);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return $r3;
+    }
+
+    private static boolean isCCLOverridden(java.lang.Class)
+    {
+        java.lang.Thread$WeakClassKey $r3;
+        java.lang.ref.ReferenceQueue $r2, $r4;
+        java.util.concurrent.ConcurrentMap $r1, $r5, $r8;
+        java.lang.Boolean $r7, r9;
+        java.lang.Class r0;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/lang/Thread;" goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = <java.lang.Thread$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        $r1 = <java.lang.Thread$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        staticinvoke <java.lang.Thread: void processQueue(java.lang.ref.ReferenceQueue,java.util.concurrent.ConcurrentMap)>($r2, $r1);
+
+        $r3 = new java.lang.Thread$WeakClassKey;
+
+        $r4 = <java.lang.Thread$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        specialinvoke $r3.<java.lang.Thread$WeakClassKey: void <init>(java.lang.Class,java.lang.ref.ReferenceQueue)>(r0, $r4);
+
+        $r5 = <java.lang.Thread$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        $r6 = interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        r9 = (java.lang.Boolean) $r6;
+
+        if r9 != null goto label2;
+
+        $z1 = staticinvoke <java.lang.Thread: boolean auditSubclass(java.lang.Class)>(r0);
+
+        $r7 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        r9 = $r7;
+
+        $r8 = <java.lang.Thread$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        interfaceinvoke $r8.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r3, $r7);
+
+     label2:
+        $z0 = virtualinvoke r9.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private static boolean auditSubclass(java.lang.Class)
+    {
+        java.lang.Thread$1 $r0;
+        java.lang.Boolean r3;
+        java.lang.Class r1;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new java.lang.Thread$1;
+
+        specialinvoke $r0.<java.lang.Thread$1: void <init>(java.lang.Class)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private static native java.lang.StackTraceElement[][] dumpThreads(java.lang.Thread[]);
+
+    private static native java.lang.Thread[] getThreads();
+
+    public long getId()
+    {
+        long $l0;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $l0 = r0.<java.lang.Thread: long tid>;
+
+        return $l0;
+    }
+
+    public java.lang.Thread$State getState()
+    {
+        int $i0;
+        java.lang.Thread$State $r1;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $i0 = r0.<java.lang.Thread: int threadStatus>;
+
+        $r1 = staticinvoke <sun.misc.VM: java.lang.Thread$State toThreadState(int)>($i0);
+
+        return $r1;
+    }
+
+    public static void setDefaultUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    {
+        java.lang.RuntimePermission $r2;
+        java.lang.Thread$UncaughtExceptionHandler r1;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.lang.Thread$UncaughtExceptionHandler;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("setDefaultUncaughtExceptionHandler");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        <java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler defaultUncaughtExceptionHandler> = r1;
+
+        return;
+    }
+
+    public static java.lang.Thread$UncaughtExceptionHandler getDefaultUncaughtExceptionHandler()
+    {
+        java.lang.Thread$UncaughtExceptionHandler $r0;
+
+        $r0 = <java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler defaultUncaughtExceptionHandler>;
+
+        return $r0;
+    }
+
+    public java.lang.Thread$UncaughtExceptionHandler getUncaughtExceptionHandler()
+    {
+        java.lang.Thread$UncaughtExceptionHandler $r1, $r2;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler uncaughtExceptionHandler>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler uncaughtExceptionHandler>;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.lang.Thread: java.lang.ThreadGroup group>;
+
+     label2:
+        return $r2;
+    }
+
+    public void setUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    {
+        java.lang.Thread$UncaughtExceptionHandler r1;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        r1 := @parameter0: java.lang.Thread$UncaughtExceptionHandler;
+
+        virtualinvoke r0.<java.lang.Thread: void checkAccess()>();
+
+        r0.<java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler uncaughtExceptionHandler> = r1;
+
+        return;
+    }
+
+    private void dispatchUncaughtException(java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        java.lang.Thread$UncaughtExceptionHandler $r1;
+        java.lang.Thread r0;
+
+        r0 := @this: java.lang.Thread;
+
+        r2 := @parameter0: java.lang.Throwable;
+
+        $r1 = virtualinvoke r0.<java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler getUncaughtExceptionHandler()>();
+
+        interfaceinvoke $r1.<java.lang.Thread$UncaughtExceptionHandler: void uncaughtException(java.lang.Thread,java.lang.Throwable)>(r0, r2);
+
+        return;
+    }
+
+    static void processQueue(java.lang.ref.ReferenceQueue, java.util.concurrent.ConcurrentMap)
+    {
+        java.lang.ref.Reference $r1;
+        java.lang.ref.ReferenceQueue r0;
+        java.util.concurrent.ConcurrentMap r2;
+
+        r0 := @parameter0: java.lang.ref.ReferenceQueue;
+
+        r2 := @parameter1: java.util.concurrent.ConcurrentMap;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        if $r1 == null goto label2;
+
+        interfaceinvoke r2.<java.util.concurrent.ConcurrentMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private native void setPriority0(int);
+
+    private native void stop0(java.lang.Object);
+
+    private native void suspend0();
+
+    private native void resume0();
+
+    private native void interrupt0();
+
+    private native void setNativeName(java.lang.String);
+
+    static void <clinit>()
+    {
+        java.lang.RuntimePermission $r1;
+        java.lang.StackTraceElement[] $r0;
+
+        <java.lang.Thread: int MAX_PRIORITY> = 10;
+
+        <java.lang.Thread: int NORM_PRIORITY> = 5;
+
+        <java.lang.Thread: int MIN_PRIORITY> = 1;
+
+        staticinvoke <java.lang.Thread: void registerNatives()>();
+
+        $r0 = newarray (java.lang.StackTraceElement)[0];
+
+        <java.lang.Thread: java.lang.StackTraceElement[] EMPTY_STACK_TRACE> = $r0;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>("enableContextClassLoaderOverride");
+
+        <java.lang.Thread: java.lang.RuntimePermission SUBCLASS_IMPLEMENTATION_PERMISSION> = $r1;
+
+        return;
+    }
+}

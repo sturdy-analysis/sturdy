@@ -1,0 +1,2113 @@
+public final class java.time.zone.ZoneRules extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private static final int LAST_CACHED_YEAR;
+    private final long[] standardTransitions;
+    private final java.time.ZoneOffset[] standardOffsets;
+    private final long[] savingsInstantTransitions;
+    private final java.time.LocalDateTime[] savingsLocalTransitions;
+    private final java.time.ZoneOffset[] wallOffsets;
+    private final java.time.zone.ZoneOffsetTransitionRule[] lastRules;
+    private final transient java.util.concurrent.ConcurrentMap lastRulesCache;
+    private static final long[] EMPTY_LONG_ARRAY;
+    private static final java.time.zone.ZoneOffsetTransitionRule[] EMPTY_LASTRULES;
+    private static final java.time.LocalDateTime[] EMPTY_LDT_ARRAY;
+
+    public static java.time.zone.ZoneRules of(java.time.ZoneOffset, java.time.ZoneOffset, java.util.List, java.util.List, java.util.List)
+    {
+        java.util.List r2, r3, r4;
+        java.time.zone.ZoneRules $r5;
+        java.time.ZoneOffset r0, r1;
+
+        r0 := @parameter0: java.time.ZoneOffset;
+
+        r1 := @parameter1: java.time.ZoneOffset;
+
+        r2 := @parameter2: java.util.List;
+
+        r3 := @parameter3: java.util.List;
+
+        r4 := @parameter4: java.util.List;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "baseStandardOffset");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "baseWallOffset");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "standardOffsetTransitionList");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r3, "transitionList");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r4, "lastRules");
+
+        $r5 = new java.time.zone.ZoneRules;
+
+        specialinvoke $r5.<java.time.zone.ZoneRules: void <init>(java.time.ZoneOffset,java.time.ZoneOffset,java.util.List,java.util.List,java.util.List)>(r0, r1, r2, r3, r4);
+
+        return $r5;
+    }
+
+    public static java.time.zone.ZoneRules of(java.time.ZoneOffset)
+    {
+        java.time.ZoneOffset r0;
+        java.time.zone.ZoneRules $r1;
+
+        r0 := @parameter0: java.time.ZoneOffset;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "offset");
+
+        $r1 = new java.time.zone.ZoneRules;
+
+        specialinvoke $r1.<java.time.zone.ZoneRules: void <init>(java.time.ZoneOffset)>(r0);
+
+        return $r1;
+    }
+
+    void <init>(java.time.ZoneOffset, java.time.ZoneOffset, java.util.List, java.util.List, java.util.List)
+    {
+        java.time.ZoneOffset r5, r9, $r31, $r40;
+        boolean $z0, $z1;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.time.ZoneOffset[] $r4, $r6, $r15, $r17, $r37;
+        java.time.zone.ZoneOffsetTransition $r26, r28, $r36, $r39;
+        java.time.zone.ZoneOffsetTransitionRule[] $r20, $r22;
+        java.util.List r2, r10, r19;
+        java.lang.Object[] $r13, $r16, $r21;
+        java.time.LocalDateTime $r29, $r30, $r32, $r33;
+        long $l10, $l11;
+        java.util.ArrayList $r7, $r8;
+        long[] $r3, $r18, $r24, $r34;
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime[] $r12, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i12, i13, i14;
+        java.util.Iterator $r11;
+        java.lang.IllegalArgumentException $r23;
+        java.lang.Object $r25, $r27, $r35, $r38;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r5 := @parameter0: java.time.ZoneOffset;
+
+        r9 := @parameter1: java.time.ZoneOffset;
+
+        r2 := @parameter2: java.util.List;
+
+        r10 := @parameter3: java.util.List;
+
+        r19 := @parameter4: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.time.zone.ZoneRules: java.util.concurrent.ConcurrentMap lastRulesCache> = $r1;
+
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        $r3 = newarray (long)[$i0];
+
+        r0.<java.time.zone.ZoneRules: long[] standardTransitions> = $r3;
+
+        $i1 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        $i2 = $i1 + 1;
+
+        $r4 = newarray (java.time.ZoneOffset)[$i2];
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets> = $r4;
+
+        $r6 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r6[0] = r5;
+
+        i13 = 0;
+
+     label1:
+        $i3 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if i13 >= $i3 goto label2;
+
+        $r34 = r0.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $r35 = interfaceinvoke r2.<java.util.List: java.lang.Object get(int)>(i13);
+
+        $r36 = (java.time.zone.ZoneOffsetTransition) $r35;
+
+        $l11 = virtualinvoke $r36.<java.time.zone.ZoneOffsetTransition: long toEpochSecond()>();
+
+        $r34[i13] = $l11;
+
+        $r37 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $i12 = i13 + 1;
+
+        $r38 = interfaceinvoke r2.<java.util.List: java.lang.Object get(int)>(i13);
+
+        $r39 = (java.time.zone.ZoneOffsetTransition) $r38;
+
+        $r40 = virtualinvoke $r39.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        $r37[$i12] = $r40;
+
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label2:
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>(r9);
+
+        $r11 = interfaceinvoke r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r27 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r28 = (java.time.zone.ZoneOffsetTransition) $r27;
+
+        $z1 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: boolean isGap()>();
+
+        if $z1 == 0 goto label4;
+
+        $r32 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeBefore()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r32);
+
+        $r33 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r33);
+
+        goto label5;
+
+     label4:
+        $r29 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r29);
+
+        $r30 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeBefore()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r30);
+
+     label5:
+        $r31 = virtualinvoke r28.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r31);
+
+        goto label3;
+
+     label6:
+        $i4 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        $r12 = newarray (java.time.LocalDateTime)[$i4];
+
+        $r13 = interfaceinvoke $r7.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r12);
+
+        $r14 = (java.time.LocalDateTime[]) $r13;
+
+        r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions> = $r14;
+
+        $i5 = interfaceinvoke $r8.<java.util.List: int size()>();
+
+        $r15 = newarray (java.time.ZoneOffset)[$i5];
+
+        $r16 = interfaceinvoke $r8.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r15);
+
+        $r17 = (java.time.ZoneOffset[]) $r16;
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets> = $r17;
+
+        $i6 = interfaceinvoke r10.<java.util.List: int size()>();
+
+        $r18 = newarray (long)[$i6];
+
+        r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions> = $r18;
+
+        i14 = 0;
+
+     label7:
+        $i7 = interfaceinvoke r10.<java.util.List: int size()>();
+
+        if i14 >= $i7 goto label8;
+
+        $r24 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $r25 = interfaceinvoke r10.<java.util.List: java.lang.Object get(int)>(i14);
+
+        $r26 = (java.time.zone.ZoneOffsetTransition) $r25;
+
+        $l10 = virtualinvoke $r26.<java.time.zone.ZoneOffsetTransition: long toEpochSecond()>();
+
+        $r24[i14] = $l10;
+
+        i14 = i14 + 1;
+
+        goto label7;
+
+     label8:
+        $i8 = interfaceinvoke r19.<java.util.List: int size()>();
+
+        if $i8 <= 16 goto label9;
+
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Too many transition rules");
+
+        throw $r23;
+
+     label9:
+        $i9 = interfaceinvoke r19.<java.util.List: int size()>();
+
+        $r20 = newarray (java.time.zone.ZoneOffsetTransitionRule)[$i9];
+
+        $r21 = interfaceinvoke r19.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r20);
+
+        $r22 = (java.time.zone.ZoneOffsetTransitionRule[]) $r21;
+
+        r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules> = $r22;
+
+        return;
+    }
+
+    private void <init>(long[], java.time.ZoneOffset[], long[], java.time.ZoneOffset[], java.time.zone.ZoneOffsetTransitionRule[])
+    {
+        java.lang.Object[] $r9;
+        java.time.LocalDateTime $r14, $r15, $r16, $r17;
+        long $l4;
+        java.util.ArrayList $r7;
+        long[] r2, r4;
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime[] $r8, $r10, $r18;
+        int $i0, $i1, $i2, $i3, i5;
+        java.time.ZoneOffset r11, r12;
+        boolean $z0;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.time.ZoneOffset[] r3, r5;
+        java.time.zone.ZoneOffsetTransition $r13;
+        java.time.zone.ZoneOffsetTransitionRule[] r6;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: long[];
+
+        r3 := @parameter1: java.time.ZoneOffset[];
+
+        r4 := @parameter2: long[];
+
+        r5 := @parameter3: java.time.ZoneOffset[];
+
+        r6 := @parameter4: java.time.zone.ZoneOffsetTransitionRule[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.time.zone.ZoneRules: java.util.concurrent.ConcurrentMap lastRulesCache> = $r1;
+
+        r0.<java.time.zone.ZoneRules: long[] standardTransitions> = r2;
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets> = r3;
+
+        r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions> = r4;
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets> = r5;
+
+        r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules> = r6;
+
+        $i0 = lengthof r4;
+
+        if $i0 != 0 goto label1;
+
+        $r18 = <java.time.zone.ZoneRules: java.time.LocalDateTime[] EMPTY_LDT_ARRAY>;
+
+        r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions> = $r18;
+
+        goto label6;
+
+     label1:
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        i5 = 0;
+
+     label2:
+        $i1 = lengthof r4;
+
+        if i5 >= $i1 goto label5;
+
+        r11 = r5[i5];
+
+        $i3 = i5 + 1;
+
+        r12 = r5[$i3];
+
+        $r13 = new java.time.zone.ZoneOffsetTransition;
+
+        $l4 = r4[i5];
+
+        specialinvoke $r13.<java.time.zone.ZoneOffsetTransition: void <init>(long,java.time.ZoneOffset,java.time.ZoneOffset)>($l4, r11, r12);
+
+        $z0 = virtualinvoke $r13.<java.time.zone.ZoneOffsetTransition: boolean isGap()>();
+
+        if $z0 == 0 goto label3;
+
+        $r16 = virtualinvoke $r13.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeBefore()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r16);
+
+        $r17 = virtualinvoke $r13.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r17);
+
+        goto label4;
+
+     label3:
+        $r14 = virtualinvoke $r13.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+        $r15 = virtualinvoke $r13.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeBefore()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+     label4:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label5:
+        $i2 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        $r8 = newarray (java.time.LocalDateTime)[$i2];
+
+        $r9 = interfaceinvoke $r7.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r8);
+
+        $r10 = (java.time.LocalDateTime[]) $r9;
+
+        r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions> = $r10;
+
+     label6:
+        return;
+    }
+
+    private void <init>(java.time.ZoneOffset)
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.time.ZoneOffset[] $r2, $r4, $r8;
+        java.time.zone.ZoneOffsetTransitionRule[] $r9;
+        long[] $r5, $r6;
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime[] $r7;
+        java.time.ZoneOffset r3;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r3 := @parameter0: java.time.ZoneOffset;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.time.zone.ZoneRules: java.util.concurrent.ConcurrentMap lastRulesCache> = $r1;
+
+        $r2 = newarray (java.time.ZoneOffset)[1];
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets> = $r2;
+
+        $r4 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r4[0] = r3;
+
+        $r5 = <java.time.zone.ZoneRules: long[] EMPTY_LONG_ARRAY>;
+
+        r0.<java.time.zone.ZoneRules: long[] standardTransitions> = $r5;
+
+        $r6 = <java.time.zone.ZoneRules: long[] EMPTY_LONG_ARRAY>;
+
+        r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions> = $r6;
+
+        $r7 = <java.time.zone.ZoneRules: java.time.LocalDateTime[] EMPTY_LDT_ARRAY>;
+
+        r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions> = $r7;
+
+        $r8 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets> = $r8;
+
+        $r9 = <java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] EMPTY_LASTRULES>;
+
+        r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules> = $r9;
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.time.zone.ZoneRules r1;
+
+        r1 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.zone.ZoneRules r1;
+        java.time.zone.Ser $r0;
+
+        r1 := @this: java.time.zone.ZoneRules;
+
+        $r0 = new java.time.zone.Ser;
+
+        specialinvoke $r0.<java.time.zone.Ser: void <init>(byte,java.lang.Object)>(1, r1);
+
+        return $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        long l5, l10;
+        long[] $r2, $r3, r5, r8;
+        java.time.zone.ZoneRules r1;
+        int $i0, $i1, $i2, i3, i4, i6, i7, i8, i9, i11, i12, i13, i14;
+        java.time.ZoneOffset r7, r10;
+        java.time.zone.ZoneOffsetTransitionRule r12;
+        java.io.DataOutput r0;
+        java.time.ZoneOffset[] r6, r9;
+        java.time.zone.ZoneOffsetTransitionRule[] $r4, r11;
+
+        r1 := @this: java.time.zone.ZoneRules;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $r2 = r1.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $i0 = lengthof $r2;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        r5 = r1.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        i3 = lengthof r5;
+
+        i4 = 0;
+
+     label01:
+        if i4 >= i3 goto label02;
+
+        l5 = r5[i4];
+
+        staticinvoke <java.time.zone.Ser: void writeEpochSec(long,java.io.DataOutput)>(l5, r0);
+
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label02:
+        r6 = r1.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        i6 = lengthof r6;
+
+        i7 = 0;
+
+     label03:
+        if i7 >= i6 goto label04;
+
+        r7 = r6[i7];
+
+        staticinvoke <java.time.zone.Ser: void writeOffset(java.time.ZoneOffset,java.io.DataOutput)>(r7, r0);
+
+        i7 = i7 + 1;
+
+        goto label03;
+
+     label04:
+        $r3 = r1.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i1 = lengthof $r3;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i1);
+
+        r8 = r1.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        i8 = lengthof r8;
+
+        i9 = 0;
+
+     label05:
+        if i9 >= i8 goto label06;
+
+        l10 = r8[i9];
+
+        staticinvoke <java.time.zone.Ser: void writeEpochSec(long,java.io.DataOutput)>(l10, r0);
+
+        i9 = i9 + 1;
+
+        goto label05;
+
+     label06:
+        r9 = r1.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        i11 = lengthof r9;
+
+        i12 = 0;
+
+     label07:
+        if i12 >= i11 goto label08;
+
+        r10 = r9[i12];
+
+        staticinvoke <java.time.zone.Ser: void writeOffset(java.time.ZoneOffset,java.io.DataOutput)>(r10, r0);
+
+        i12 = i12 + 1;
+
+        goto label07;
+
+     label08:
+        $r4 = r1.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i2 = lengthof $r4;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeByte(int)>($i2);
+
+        r11 = r1.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        i13 = lengthof r11;
+
+        i14 = 0;
+
+     label09:
+        if i14 >= i13 goto label10;
+
+        r12 = r11[i14];
+
+        virtualinvoke r12.<java.time.zone.ZoneOffsetTransitionRule: void writeExternal(java.io.DataOutput)>(r0);
+
+        i14 = i14 + 1;
+
+        goto label09;
+
+     label10:
+        return;
+    }
+
+    static java.time.zone.ZoneRules readExternal(java.io.DataInput) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        byte $b6;
+        java.io.InvalidObjectException $r16, $r17, $r18;
+        java.time.zone.ZoneOffsetTransitionRule $r5;
+        java.time.ZoneOffset $r7, $r9;
+        java.time.ZoneOffset[] r12, r14;
+        java.time.zone.ZoneOffsetTransitionRule[] r3, $r15;
+        java.io.DataInput r0;
+        long $l7, $l8;
+        long[] r1, r2, $r11, $r13;
+        java.time.zone.ZoneRules $r19;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i9, i10, i11, i12, i13, $i14, $i15, $i16;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        if $i0 <= 1024 goto label01;
+
+        $r16 = new java.io.InvalidObjectException;
+
+        specialinvoke $r16.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Too many transitions");
+
+        throw $r16;
+
+     label01:
+        if $i0 != 0 goto label02;
+
+        $r11 = <java.time.zone.ZoneRules: long[] EMPTY_LONG_ARRAY>;
+
+        goto label03;
+
+     label02:
+        $r11 = newarray (long)[$i0];
+
+     label03:
+        r1 = $r11;
+
+        i9 = 0;
+
+     label04:
+        if i9 >= $i0 goto label05;
+
+        $l8 = staticinvoke <java.time.zone.Ser: long readEpochSec(java.io.DataInput)>(r0);
+
+        r1[i9] = $l8;
+
+        i9 = i9 + 1;
+
+        goto label04;
+
+     label05:
+        $i1 = $i0 + 1;
+
+        r12 = newarray (java.time.ZoneOffset)[$i1];
+
+        i10 = 0;
+
+     label06:
+        $i2 = lengthof r12;
+
+        if i10 >= $i2 goto label07;
+
+        $r9 = staticinvoke <java.time.zone.Ser: java.time.ZoneOffset readOffset(java.io.DataInput)>(r0);
+
+        r12[i10] = $r9;
+
+        i10 = i10 + 1;
+
+        goto label06;
+
+     label07:
+        $i3 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        if $i3 <= 1024 goto label08;
+
+        $r17 = new java.io.InvalidObjectException;
+
+        specialinvoke $r17.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Too many saving offsets");
+
+        throw $r17;
+
+     label08:
+        if $i3 != 0 goto label09;
+
+        $r13 = <java.time.zone.ZoneRules: long[] EMPTY_LONG_ARRAY>;
+
+        goto label10;
+
+     label09:
+        $r13 = newarray (long)[$i3];
+
+     label10:
+        r2 = $r13;
+
+        i11 = 0;
+
+     label11:
+        if i11 >= $i3 goto label12;
+
+        $l7 = staticinvoke <java.time.zone.Ser: long readEpochSec(java.io.DataInput)>(r0);
+
+        r2[i11] = $l7;
+
+        i11 = i11 + 1;
+
+        goto label11;
+
+     label12:
+        $i4 = $i3 + 1;
+
+        r14 = newarray (java.time.ZoneOffset)[$i4];
+
+        i12 = 0;
+
+     label13:
+        $i5 = lengthof r14;
+
+        if i12 >= $i5 goto label14;
+
+        $r7 = staticinvoke <java.time.zone.Ser: java.time.ZoneOffset readOffset(java.io.DataInput)>(r0);
+
+        r14[i12] = $r7;
+
+        i12 = i12 + 1;
+
+        goto label13;
+
+     label14:
+        $b6 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i14 = (int) $b6;
+
+        if $i14 <= 16 goto label15;
+
+        $r18 = new java.io.InvalidObjectException;
+
+        specialinvoke $r18.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Too many transition rules");
+
+        throw $r18;
+
+     label15:
+        if $b6 != 0 goto label16;
+
+        $r15 = <java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] EMPTY_LASTRULES>;
+
+        goto label17;
+
+     label16:
+        $i15 = (int) $b6;
+
+        $r15 = newarray (java.time.zone.ZoneOffsetTransitionRule)[$i15];
+
+     label17:
+        r3 = $r15;
+
+        i13 = 0;
+
+     label18:
+        $i16 = (int) $b6;
+
+        if i13 >= $i16 goto label19;
+
+        $r5 = staticinvoke <java.time.zone.ZoneOffsetTransitionRule: java.time.zone.ZoneOffsetTransitionRule readExternal(java.io.DataInput)>(r0);
+
+        r3[i13] = $r5;
+
+        i13 = i13 + 1;
+
+        goto label18;
+
+     label19:
+        $r19 = new java.time.zone.ZoneRules;
+
+        specialinvoke $r19.<java.time.zone.ZoneRules: void <init>(long[],java.time.ZoneOffset[],long[],java.time.ZoneOffset[],java.time.zone.ZoneOffsetTransitionRule[])>(r1, r12, r2, r14, r3);
+
+        return $r19;
+    }
+
+    public boolean isFixedOffset()
+    {
+        long[] $r1;
+        java.time.zone.ZoneRules r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.time.ZoneOffset getOffset(java.time.Instant)
+    {
+        byte $b9, $b15;
+        java.time.ZoneOffset $r6, $r11, $r13, $r14, $r16;
+        java.time.ZoneOffset[] $r5, $r9, $r10, $r15;
+        java.time.zone.ZoneOffsetTransition r17;
+        java.time.zone.ZoneOffsetTransitionRule[] $r3;
+        java.time.Instant r2;
+        long $l1, $l8, $l14;
+        long[] $r1, $r4, $r7, $r8;
+        java.time.zone.ZoneRules r0;
+        java.time.zone.ZoneOffsetTransition[] $r12;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7, $i10, $i11, $i12, $i13, i16, i17, $i18, $i19;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.Instant;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $r15 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r16 = $r15[0];
+
+        return $r16;
+
+     label1:
+        $l1 = virtualinvoke r2.<java.time.Instant: long getEpochSecond()>();
+
+        $r3 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i2 = lengthof $r3;
+
+        if $i2 <= 0 goto label5;
+
+        $r8 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $r7 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i6 = lengthof $r7;
+
+        $i7 = $i6 - 1;
+
+        $l8 = $r8[$i7];
+
+        $b9 = $l1 cmp $l8;
+
+        $i18 = (int) $b9;
+
+        if $i18 <= 0 goto label5;
+
+        $r10 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r9 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i10 = lengthof $r9;
+
+        $i11 = $i10 - 1;
+
+        $r11 = $r10[$i11];
+
+        $i12 = specialinvoke r0.<java.time.zone.ZoneRules: int findYear(long,java.time.ZoneOffset)>($l1, $r11);
+
+        $r12 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>($i12);
+
+        r17 = null;
+
+        i16 = 0;
+
+     label2:
+        $i13 = lengthof $r12;
+
+        if i16 >= $i13 goto label4;
+
+        r17 = $r12[i16];
+
+        $l14 = virtualinvoke r17.<java.time.zone.ZoneOffsetTransition: long toEpochSecond()>();
+
+        $b15 = $l1 cmp $l14;
+
+        $i19 = (int) $b15;
+
+        if $i19 >= 0 goto label3;
+
+        $r14 = virtualinvoke r17.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        return $r14;
+
+     label3:
+        i16 = i16 + 1;
+
+        goto label2;
+
+     label4:
+        $r13 = virtualinvoke r17.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        return $r13;
+
+     label5:
+        $r4 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i3 = staticinvoke <java.util.Arrays: int binarySearch(long[],long)>($r4, $l1);
+
+        i17 = $i3;
+
+        if $i3 >= 0 goto label6;
+
+        $i5 = neg $i3;
+
+        i17 = $i5 - 2;
+
+     label6:
+        $r5 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i4 = i17 + 1;
+
+        $r6 = $r5[$i4];
+
+        return $r6;
+    }
+
+    public java.time.ZoneOffset getOffset(java.time.LocalDateTime)
+    {
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime r1;
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.lang.Object $r2;
+        java.time.ZoneOffset $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.time.LocalDateTime;
+
+        $r2 = specialinvoke r0.<java.time.zone.ZoneRules: java.lang.Object getOffsetInfo(java.time.LocalDateTime)>(r1);
+
+        $z0 = $r2 instanceof java.time.zone.ZoneOffsetTransition;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (java.time.zone.ZoneOffsetTransition) $r2;
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        return $r5;
+
+     label1:
+        $r3 = (java.time.ZoneOffset) $r2;
+
+        return $r3;
+    }
+
+    public java.util.List getValidOffsets(java.time.LocalDateTime)
+    {
+        java.time.LocalDateTime r1;
+        java.time.zone.ZoneOffsetTransition $r5;
+        java.util.List $r4, $r6;
+        java.time.zone.ZoneRules r0;
+        java.lang.Object $r2;
+        java.time.ZoneOffset $r3;
+        boolean $z0;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.time.LocalDateTime;
+
+        $r2 = specialinvoke r0.<java.time.zone.ZoneRules: java.lang.Object getOffsetInfo(java.time.LocalDateTime)>(r1);
+
+        $z0 = $r2 instanceof java.time.zone.ZoneOffsetTransition;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (java.time.zone.ZoneOffsetTransition) $r2;
+
+        $r6 = virtualinvoke $r5.<java.time.zone.ZoneOffsetTransition: java.util.List getValidOffsets()>();
+
+        return $r6;
+
+     label1:
+        $r3 = (java.time.ZoneOffset) $r2;
+
+        $r4 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r3);
+
+        return $r4;
+    }
+
+    public java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)
+    {
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime r1;
+        java.time.zone.ZoneOffsetTransition $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.time.LocalDateTime;
+
+        $r2 = specialinvoke r0.<java.time.zone.ZoneRules: java.lang.Object getOffsetInfo(java.time.LocalDateTime)>(r1);
+
+        $z0 = $r2 instanceof java.time.zone.ZoneOffsetTransition;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.time.zone.ZoneOffsetTransition) $r2;
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    private java.lang.Object getOffsetInfo(java.time.LocalDateTime)
+    {
+        java.time.ZoneOffset $r7, $r19, $r26, $r28, r32, r33;
+        boolean $z0, $z1, $z2, $z3;
+        java.time.ZoneOffset[] $r6, $r10, $r11, $r18, $r27;
+        java.time.zone.ZoneOffsetTransition r24, $r34, $r35;
+        java.time.zone.ZoneOffsetTransitionRule[] $r2;
+        java.time.LocalDateTime r3, $r16, $r17, $r22, r30, r31;
+        long[] $r1;
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime[] $r4, $r5, $r8, $r9, $r14, $r15, $r20, $r21;
+        java.time.zone.ZoneOffsetTransition[] $r23;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, i19, i20, $i21, $i23;
+        java.lang.Object $r25, r29;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r3 := @parameter0: java.time.LocalDateTime;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label01;
+
+        $r27 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r28 = $r27[0];
+
+        return $r28;
+
+     label01:
+        $r2 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i1 = lengthof $r2;
+
+        if $i1 <= 0 goto label06;
+
+        $r21 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $r20 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $i15 = lengthof $r20;
+
+        $i16 = $i15 - 1;
+
+        $r22 = $r21[$i16];
+
+        $z1 = virtualinvoke r3.<java.time.LocalDateTime: boolean isAfter(java.time.chrono.ChronoLocalDateTime)>($r22);
+
+        if $z1 == 0 goto label06;
+
+        $i17 = virtualinvoke r3.<java.time.LocalDateTime: int getYear()>();
+
+        $r23 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>($i17);
+
+        r29 = null;
+
+        i18 = lengthof $r23;
+
+        i19 = 0;
+
+     label02:
+        if i19 >= i18 goto label05;
+
+        r24 = $r23[i19];
+
+        $r25 = specialinvoke r0.<java.time.zone.ZoneRules: java.lang.Object findOffsetInfo(java.time.LocalDateTime,java.time.zone.ZoneOffsetTransition)>(r3, r24);
+
+        r29 = $r25;
+
+        $z2 = $r25 instanceof java.time.zone.ZoneOffsetTransition;
+
+        if $z2 != 0 goto label03;
+
+        $r26 = virtualinvoke r24.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        $z3 = virtualinvoke $r25.<java.lang.Object: boolean equals(java.lang.Object)>($r26);
+
+        if $z3 == 0 goto label04;
+
+     label03:
+        return $r25;
+
+     label04:
+        i19 = i19 + 1;
+
+        goto label02;
+
+     label05:
+        return r29;
+
+     label06:
+        $r4 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $i2 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],java.lang.Object)>($r4, r3);
+
+        i20 = $i2;
+
+        $i23 = (int) -1;
+
+        if $i2 != $i23 goto label07;
+
+        $r18 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r19 = $r18[0];
+
+        return $r19;
+
+     label07:
+        if $i2 >= 0 goto label08;
+
+        $i14 = neg $i2;
+
+        i20 = $i14 - 2;
+
+        goto label09;
+
+     label08:
+        $r5 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $i3 = lengthof $r5;
+
+        $i4 = $i3 - 1;
+
+        if $i2 >= $i4 goto label09;
+
+        $r14 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $r17 = $r14[$i2];
+
+        $r15 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $i13 = $i2 + 1;
+
+        $r16 = $r15[$i13];
+
+        $z0 = virtualinvoke $r17.<java.time.LocalDateTime: boolean equals(java.lang.Object)>($r16);
+
+        if $z0 == 0 goto label09;
+
+        i20 = $i2 + 1;
+
+     label09:
+        $i21 = i20 & 1;
+
+        if $i21 != 0 goto label11;
+
+        $r8 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        r30 = $r8[i20];
+
+        $r9 = r0.<java.time.zone.ZoneRules: java.time.LocalDateTime[] savingsLocalTransitions>;
+
+        $i7 = i20 + 1;
+
+        r31 = $r9[$i7];
+
+        $r10 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i8 = i20 / 2;
+
+        r32 = $r10[$i8];
+
+        $r11 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i9 = i20 / 2;
+
+        $i10 = $i9 + 1;
+
+        r33 = $r11[$i10];
+
+        $i11 = virtualinvoke r33.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $i12 = virtualinvoke r32.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        if $i11 <= $i12 goto label10;
+
+        $r34 = new java.time.zone.ZoneOffsetTransition;
+
+        specialinvoke $r34.<java.time.zone.ZoneOffsetTransition: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneOffset)>(r30, r32, r33);
+
+        return $r34;
+
+     label10:
+        $r35 = new java.time.zone.ZoneOffsetTransition;
+
+        specialinvoke $r35.<java.time.zone.ZoneOffsetTransition: void <init>(java.time.LocalDateTime,java.time.ZoneOffset,java.time.ZoneOffset)>(r31, r32, r33);
+
+        return $r35;
+
+     label11:
+        $r6 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i5 = i20 / 2;
+
+        $i6 = $i5 + 1;
+
+        $r7 = $r6[$i6];
+
+        return $r7;
+    }
+
+    private java.lang.Object findOffsetInfo(java.time.LocalDateTime, java.time.zone.ZoneOffsetTransition)
+    {
+        java.time.zone.ZoneOffsetTransition r0;
+        java.time.LocalDateTime $r1, r2, $r3, $r6;
+        java.time.zone.ZoneRules r9;
+        java.time.ZoneOffset $r4, $r5, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r9 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.LocalDateTime;
+
+        r0 := @parameter1: java.time.zone.ZoneOffsetTransition;
+
+        $r1 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeBefore()>();
+
+        $z0 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: boolean isGap()>();
+
+        if $z0 == 0 goto label3;
+
+        $z3 = virtualinvoke r2.<java.time.LocalDateTime: boolean isBefore(java.time.chrono.ChronoLocalDateTime)>($r1);
+
+        if $z3 == 0 goto label1;
+
+        $r8 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        return $r8;
+
+     label1:
+        $r6 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        $z4 = virtualinvoke r2.<java.time.LocalDateTime: boolean isBefore(java.time.chrono.ChronoLocalDateTime)>($r6);
+
+        if $z4 == 0 goto label2;
+
+        return r0;
+
+     label2:
+        $r7 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        return $r7;
+
+     label3:
+        $z1 = virtualinvoke r2.<java.time.LocalDateTime: boolean isBefore(java.time.chrono.ChronoLocalDateTime)>($r1);
+
+        if $z1 != 0 goto label4;
+
+        $r5 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        return $r5;
+
+     label4:
+        $r3 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+        $z2 = virtualinvoke r2.<java.time.LocalDateTime: boolean isBefore(java.time.chrono.ChronoLocalDateTime)>($r3);
+
+        if $z2 == 0 goto label5;
+
+        $r4 = virtualinvoke r0.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        return $r4;
+
+     label5:
+        return r0;
+    }
+
+    private java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)
+    {
+        java.time.zone.ZoneOffsetTransition $r7;
+        java.time.zone.ZoneOffsetTransitionRule[] r4;
+        java.lang.Integer $r0;
+        java.util.concurrent.ConcurrentMap $r2, $r5;
+        java.time.zone.ZoneRules r1;
+        java.time.zone.ZoneOffsetTransition[] r8, r9;
+        int i0, $i1, $i2, i3;
+        java.lang.Object $r3;
+        java.time.zone.ZoneOffsetTransitionRule $r6;
+
+        r1 := @this: java.time.zone.ZoneRules;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r2 = r1.<java.time.zone.ZoneRules: java.util.concurrent.ConcurrentMap lastRulesCache>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        r8 = (java.time.zone.ZoneOffsetTransition[]) $r3;
+
+        if r8 == null goto label1;
+
+        return r8;
+
+     label1:
+        r4 = r1.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i1 = lengthof r4;
+
+        r9 = newarray (java.time.zone.ZoneOffsetTransition)[$i1];
+
+        i3 = 0;
+
+     label2:
+        $i2 = lengthof r4;
+
+        if i3 >= $i2 goto label3;
+
+        $r6 = r4[i3];
+
+        $r7 = virtualinvoke $r6.<java.time.zone.ZoneOffsetTransitionRule: java.time.zone.ZoneOffsetTransition createTransition(int)>(i0);
+
+        r9[i3] = $r7;
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        if i0 >= 2100 goto label4;
+
+        $r5 = r1.<java.time.zone.ZoneRules: java.util.concurrent.ConcurrentMap lastRulesCache>;
+
+        interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r0, r9);
+
+     label4:
+        return r9;
+    }
+
+    public java.time.ZoneOffset getStandardOffset(java.time.Instant)
+    {
+        java.time.ZoneOffset[] $r4, $r6;
+        long $l1;
+        java.time.Instant r2;
+        long[] $r1, $r3;
+        java.time.zone.ZoneRules r0;
+        int $i0, $i2, $i3, $i4, i5;
+        java.time.ZoneOffset $r5, $r7;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.Instant;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $r6 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r7 = $r6[0];
+
+        return $r7;
+
+     label1:
+        $l1 = virtualinvoke r2.<java.time.Instant: long getEpochSecond()>();
+
+        $r3 = r0.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $i2 = staticinvoke <java.util.Arrays: int binarySearch(long[],long)>($r3, $l1);
+
+        i5 = $i2;
+
+        if $i2 >= 0 goto label2;
+
+        $i4 = neg $i2;
+
+        i5 = $i4 - 2;
+
+     label2:
+        $r4 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $i3 = i5 + 1;
+
+        $r5 = $r4[$i3];
+
+        return $r5;
+    }
+
+    public java.time.Duration getDaylightSavings(java.time.Instant)
+    {
+        long $l4;
+        java.time.Instant r2;
+        long[] $r1;
+        java.time.zone.ZoneRules r0;
+        java.time.Duration $r5, $r6;
+        int $i0, $i1, $i2, $i3;
+        java.time.ZoneOffset $r3, $r4;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.Instant;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $r6 = <java.time.Duration: java.time.Duration ZERO>;
+
+        return $r6;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.time.zone.ZoneRules: java.time.ZoneOffset getStandardOffset(java.time.Instant)>(r2);
+
+        $r4 = virtualinvoke r0.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>(r2);
+
+        $i1 = virtualinvoke $r4.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $i2 = virtualinvoke $r3.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $i3 = $i1 - $i2;
+
+        $l4 = (long) $i3;
+
+        $r5 = staticinvoke <java.time.Duration: java.time.Duration ofSeconds(long)>($l4);
+
+        return $r5;
+    }
+
+    public boolean isDaylightSavings(java.time.Instant)
+    {
+        java.time.zone.ZoneRules r0;
+        java.time.ZoneOffset $r2, $r3;
+        java.time.Instant r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.time.Instant;
+
+        $r2 = virtualinvoke r0.<java.time.zone.ZoneRules: java.time.ZoneOffset getStandardOffset(java.time.Instant)>(r1);
+
+        $r3 = virtualinvoke r0.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>(r1);
+
+        $z0 = virtualinvoke $r2.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isValidOffset(java.time.LocalDateTime, java.time.ZoneOffset)
+    {
+        java.util.List $r2;
+        java.time.zone.ZoneRules r0;
+        java.time.LocalDateTime r1;
+        java.time.ZoneOffset r3;
+        boolean $z0;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.time.LocalDateTime;
+
+        r3 := @parameter1: java.time.ZoneOffset;
+
+        $r2 = virtualinvoke r0.<java.time.zone.ZoneRules: java.util.List getValidOffsets(java.time.LocalDateTime)>(r1);
+
+        $z0 = interfaceinvoke $r2.<java.util.List: boolean contains(java.lang.Object)>(r3);
+
+        return $z0;
+    }
+
+    public java.time.zone.ZoneOffsetTransition nextTransition(java.time.Instant)
+    {
+        byte $b5, $b17;
+        java.time.ZoneOffset $r10, $r11, $r15;
+        java.time.ZoneOffset[] $r8, $r9, $r13, $r14;
+        java.time.zone.ZoneOffsetTransition $r18, r19, $r20;
+        java.time.zone.ZoneOffsetTransitionRule[] $r12;
+        java.time.Instant r2;
+        long $l1, $l4, $l8, $l16;
+        long[] $r1, $r3, $r4, $r5, $r7;
+        java.time.zone.ZoneRules r0;
+        java.time.zone.ZoneOffsetTransition[] $r16, $r17;
+        int $i0, $i2, $i3, $i6, $i7, $i9, $i10, $i11, $i12, $i13, i14, $i15, i18, i19, $i20, $i21;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.Instant;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $l1 = virtualinvoke r2.<java.time.Instant: long getEpochSecond()>();
+
+        $r4 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $r3 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i2 = lengthof $r3;
+
+        $i3 = $i2 - 1;
+
+        $l4 = $r4[$i3];
+
+        $b5 = $l1 cmp $l4;
+
+        $i20 = (int) $b5;
+
+        if $i20 < 0 goto label7;
+
+        $r12 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i10 = lengthof $r12;
+
+        if $i10 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r14 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r13 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i11 = lengthof $r13;
+
+        $i12 = $i11 - 1;
+
+        $r15 = $r14[$i12];
+
+        $i13 = specialinvoke r0.<java.time.zone.ZoneRules: int findYear(long,java.time.ZoneOffset)>($l1, $r15);
+
+        $r16 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>($i13);
+
+        i14 = lengthof $r16;
+
+        i18 = 0;
+
+     label3:
+        if i18 >= i14 goto label5;
+
+        r19 = $r16[i18];
+
+        $l16 = virtualinvoke r19.<java.time.zone.ZoneOffsetTransition: long toEpochSecond()>();
+
+        $b17 = $l1 cmp $l16;
+
+        $i21 = (int) $b17;
+
+        if $i21 >= 0 goto label4;
+
+        return r19;
+
+     label4:
+        i18 = i18 + 1;
+
+        goto label3;
+
+     label5:
+        if $i13 >= 999999999 goto label6;
+
+        $i15 = $i13 + 1;
+
+        $r17 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>($i15);
+
+        $r18 = $r17[0];
+
+        return $r18;
+
+     label6:
+        return null;
+
+     label7:
+        $r5 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i6 = staticinvoke <java.util.Arrays: int binarySearch(long[],long)>($r5, $l1);
+
+        if $i6 >= 0 goto label8;
+
+        $i9 = neg $i6;
+
+        i19 = $i9 - 1;
+
+        goto label9;
+
+     label8:
+        i19 = $i6 + 1;
+
+     label9:
+        $r20 = new java.time.zone.ZoneOffsetTransition;
+
+        $r7 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $l8 = $r7[i19];
+
+        $r8 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r11 = $r8[i19];
+
+        $r9 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i7 = i19 + 1;
+
+        $r10 = $r9[$i7];
+
+        specialinvoke $r20.<java.time.zone.ZoneOffsetTransition: void <init>(long,java.time.ZoneOffset,java.time.ZoneOffset)>($l8, $r11, $r10);
+
+        return $r20;
+    }
+
+    public java.time.zone.ZoneOffsetTransition previousTransition(java.time.Instant)
+    {
+        byte $b7, $b16, $b17;
+        java.time.ZoneOffset $r7, $r8, r19;
+        java.time.ZoneOffset[] $r5, $r6, $r9, $r10;
+        java.time.zone.ZoneOffsetTransition $r13, $r14, $r15, $r21;
+        java.time.zone.ZoneOffsetTransitionRule[] $r18;
+        java.time.Instant r2;
+        long $l1, $l5, $l15, l18, $l21;
+        long[] $r1, $r4, $r16, $r17, $r20;
+        java.time.zone.ZoneRules r0;
+        java.time.zone.ZoneOffsetTransition[] $r11, $r12;
+        int $i0, $i2, $i3, $i4, $i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i19, $i20, $i22, i23, i24, $i25, i26, $i27, $i28, $i29, $i31, $i33;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r2 := @parameter0: java.time.Instant;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $l1 = virtualinvoke r2.<java.time.Instant: long getEpochSecond()>();
+
+        l18 = $l1;
+
+        $i2 = virtualinvoke r2.<java.time.Instant: int getNano()>();
+
+        if $i2 <= 0 goto label2;
+
+        $b17 = $l1 cmp 9223372036854775807L;
+
+        $i27 = (int) $b17;
+
+        if $i27 >= 0 goto label2;
+
+        l18 = $l1 + 1L;
+
+     label2:
+        $r16 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $r17 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i19 = lengthof $r17;
+
+        $i20 = $i19 - 1;
+
+        $l21 = $r16[$i20];
+
+        $r18 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i22 = lengthof $r18;
+
+        if $i22 <= 0 goto label6;
+
+        $b7 = l18 cmp $l21;
+
+        $i28 = (int) $b7;
+
+        if $i28 <= 0 goto label6;
+
+        $r10 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r9 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i8 = lengthof $r9;
+
+        $i9 = $i8 - 1;
+
+        r19 = $r10[$i9];
+
+        $i10 = specialinvoke r0.<java.time.zone.ZoneRules: int findYear(long,java.time.ZoneOffset)>(l18, r19);
+
+        $r11 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>($i10);
+
+        $i11 = lengthof $r11;
+
+        i23 = $i11 - 1;
+
+     label3:
+        if i23 < 0 goto label5;
+
+        $r14 = $r11[i23];
+
+        $l15 = virtualinvoke $r14.<java.time.zone.ZoneOffsetTransition: long toEpochSecond()>();
+
+        $b16 = l18 cmp $l15;
+
+        $i29 = (int) $b16;
+
+        if $i29 <= 0 goto label4;
+
+        $r15 = $r11[i23];
+
+        return $r15;
+
+     label4:
+        $i31 = (int) -1;
+
+        i23 = i23 + $i31;
+
+        goto label3;
+
+     label5:
+        $i12 = specialinvoke r0.<java.time.zone.ZoneRules: int findYear(long,java.time.ZoneOffset)>($l21, r19);
+
+        $i33 = (int) -1;
+
+        i24 = $i10 + $i33;
+
+        if i24 <= $i12 goto label6;
+
+        $r12 = specialinvoke r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition[] findTransitionArray(int)>(i24);
+
+        $i13 = lengthof $r12;
+
+        $i14 = $i13 - 1;
+
+        $r13 = $r12[$i14];
+
+        return $r13;
+
+     label6:
+        $r20 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i25 = staticinvoke <java.util.Arrays: int binarySearch(long[],long)>($r20, l18);
+
+        i26 = $i25;
+
+        if $i25 >= 0 goto label7;
+
+        $i6 = neg $i25;
+
+        i26 = $i6 - 1;
+
+     label7:
+        if i26 > 0 goto label8;
+
+        return null;
+
+     label8:
+        $r21 = new java.time.zone.ZoneOffsetTransition;
+
+        $r4 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i3 = i26 - 1;
+
+        $l5 = $r4[$i3];
+
+        $r5 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i4 = i26 - 1;
+
+        $r8 = $r5[$i4];
+
+        $r6 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r7 = $r6[i26];
+
+        specialinvoke $r21.<java.time.zone.ZoneOffsetTransition: void <init>(long,java.time.ZoneOffset,java.time.ZoneOffset)>($l5, $r8, $r7);
+
+        return $r21;
+    }
+
+    private int findYear(long, java.time.ZoneOffset)
+    {
+        long l0, $l2, l3, $l4;
+        java.time.zone.ZoneRules r2;
+        java.time.LocalDate $r1;
+        int $i1, $i5;
+        java.time.ZoneOffset r0;
+
+        r2 := @this: java.time.zone.ZoneRules;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.ZoneOffset;
+
+        $i1 = virtualinvoke r0.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $l2 = (long) $i1;
+
+        l3 = l0 + $l2;
+
+        $l4 = staticinvoke <java.lang.Math: long floorDiv(long,long)>(l3, 86400L);
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate ofEpochDay(long)>($l4);
+
+        $i5 = virtualinvoke $r1.<java.time.LocalDate: int getYear()>();
+
+        return $i5;
+    }
+
+    public java.util.List getTransitions()
+    {
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.time.ZoneOffset[] $r6, $r7;
+        long $l2;
+        java.util.ArrayList $r0;
+        java.util.List $r3;
+        long[] $r2, $r5;
+        java.time.zone.ZoneRules r1;
+        int $i0, $i1, i3;
+        java.time.ZoneOffset $r8, $r9;
+
+        r1 := @this: java.time.zone.ZoneRules;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $r2 = r1.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label2;
+
+        $r4 = new java.time.zone.ZoneOffsetTransition;
+
+        $r5 = r1.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $l2 = $r5[i3];
+
+        $r6 = r1.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r9 = $r6[i3];
+
+        $r7 = r1.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i1 = i3 + 1;
+
+        $r8 = $r7[$i1];
+
+        specialinvoke $r4.<java.time.zone.ZoneOffsetTransition: void <init>(long,java.time.ZoneOffset,java.time.ZoneOffset)>($l2, $r9, $r8);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r0);
+
+        return $r3;
+    }
+
+    public java.util.List getTransitionRules()
+    {
+        java.util.List $r2, $r3;
+        java.time.zone.ZoneRules r0;
+        java.time.zone.ZoneOffsetTransitionRule[] $r1;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        $r1 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r2);
+
+        return $r3;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        long[] $r3, $r4, $r7, $r8;
+        java.time.zone.ZoneRules r0, r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.time.ZoneOffset[] $r5, $r6, $r9, $r10;
+        java.time.zone.ZoneOffsetTransitionRule[] $r11, $r12;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.zone.ZoneRules;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (java.time.zone.ZoneRules) r1;
+
+        $r4 = r0.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $r3 = r2.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $z1 = staticinvoke <java.util.Arrays: boolean equals(long[],long[])>($r4, $r3);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r5 = r2.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $z2 = staticinvoke <java.util.Arrays: boolean equals(java.lang.Object[],java.lang.Object[])>($r6, $r5);
+
+        if $z2 == 0 goto label2;
+
+        $r8 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $r7 = r2.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $z3 = staticinvoke <java.util.Arrays: boolean equals(long[],long[])>($r8, $r7);
+
+        if $z3 == 0 goto label2;
+
+        $r10 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $r9 = r2.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $z4 = staticinvoke <java.util.Arrays: boolean equals(java.lang.Object[],java.lang.Object[])>($r10, $r9);
+
+        if $z4 == 0 goto label2;
+
+        $r12 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $r11 = r2.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $z5 = staticinvoke <java.util.Arrays: boolean equals(java.lang.Object[],java.lang.Object[])>($r12, $r11);
+
+        if $z5 == 0 goto label2;
+
+        $z6 = 1;
+
+        goto label3;
+
+     label2:
+        $z6 = 0;
+
+     label3:
+        return $z6;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.ZoneOffset[] $r2, $r4;
+        java.time.zone.ZoneOffsetTransitionRule[] $r5;
+        long[] $r1, $r3;
+        java.time.zone.ZoneRules r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+
+        r0 := @this: java.time.zone.ZoneRules;
+
+        $r1 = r0.<java.time.zone.ZoneRules: long[] standardTransitions>;
+
+        $i0 = staticinvoke <java.util.Arrays: int hashCode(long[])>($r1);
+
+        $r2 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $i1 = staticinvoke <java.util.Arrays: int hashCode(java.lang.Object[])>($r2);
+
+        $i2 = $i0 ^ $i1;
+
+        $r3 = r0.<java.time.zone.ZoneRules: long[] savingsInstantTransitions>;
+
+        $i3 = staticinvoke <java.util.Arrays: int hashCode(long[])>($r3);
+
+        $i4 = $i2 ^ $i3;
+
+        $r4 = r0.<java.time.zone.ZoneRules: java.time.ZoneOffset[] wallOffsets>;
+
+        $i5 = staticinvoke <java.util.Arrays: int hashCode(java.lang.Object[])>($r4);
+
+        $i6 = $i4 ^ $i5;
+
+        $r5 = r0.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] lastRules>;
+
+        $i7 = staticinvoke <java.util.Arrays: int hashCode(java.lang.Object[])>($r5);
+
+        $i8 = $i6 ^ $i7;
+
+        return $i8;
+    }
+
+    public java.lang.String toString()
+    {
+        java.time.ZoneOffset[] $r3, $r4;
+        java.time.zone.ZoneRules r2;
+        int $i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r6, $r7;
+        java.time.ZoneOffset $r5;
+        java.lang.String $r8;
+
+        r2 := @this: java.time.zone.ZoneRules;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ZoneRules[currentStandardOffset=");
+
+        $r4 = r2.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $r3 = r2.<java.time.zone.ZoneRules: java.time.ZoneOffset[] standardOffsets>;
+
+        $i0 = lengthof $r3;
+
+        $i1 = $i0 - 1;
+
+        $r5 = $r4[$i1];
+
+        $r6 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    static void <clinit>()
+    {
+        java.time.zone.ZoneOffsetTransitionRule[] $r1;
+        long[] $r0;
+        java.time.LocalDateTime[] $r2;
+
+        <java.time.zone.ZoneRules: int LAST_CACHED_YEAR> = 2100;
+
+        <java.time.zone.ZoneRules: long serialVersionUID> = 3044319355680032515L;
+
+        $r0 = newarray (long)[0];
+
+        <java.time.zone.ZoneRules: long[] EMPTY_LONG_ARRAY> = $r0;
+
+        $r1 = newarray (java.time.zone.ZoneOffsetTransitionRule)[0];
+
+        <java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransitionRule[] EMPTY_LASTRULES> = $r1;
+
+        $r2 = newarray (java.time.LocalDateTime)[0];
+
+        <java.time.zone.ZoneRules: java.time.LocalDateTime[] EMPTY_LDT_ARRAY> = $r2;
+
+        return;
+    }
+}

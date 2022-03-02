@@ -1,0 +1,543 @@
+public class sun.net.www.protocol.http.ntlm.NTLMAuthentication extends sun.net.www.protocol.http.AuthenticationInfo
+{
+    private static final long serialVersionUID;
+    private static final sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback NTLMAuthCallback;
+    private java.lang.String hostname;
+    private static java.lang.String defaultDomain;
+    private static final boolean ntlmCache;
+    private static final sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth authMode;
+    java.lang.String username;
+    java.lang.String ntdomain;
+    java.lang.String password;
+    private static java.lang.Boolean isTrustedSiteAvailable;
+
+    private void init0()
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication$2 $r7;
+        int $i0, $i2;
+        java.lang.Object $r2;
+        java.lang.String $r3, $r4, $r5, $r6;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        $r7 = new sun.net.www.protocol.http.ntlm.NTLMAuthentication$2;
+
+        specialinvoke $r7.<sun.net.www.protocol.http.ntlm.NTLMAuthentication$2: void <init>(sun.net.www.protocol.http.ntlm.NTLMAuthentication)>(r0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r3 = (java.lang.String) $r2;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String hostname> = $r3;
+
+        $r4 = r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String hostname>;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(46);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r5 = r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String hostname>;
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String hostname> = $r6;
+
+     label1:
+        return;
+    }
+
+    public void <init>(boolean, java.net.URL, java.net.PasswordAuthentication)
+    {
+        java.net.PasswordAuthentication r3;
+        java.net.URL r1;
+        sun.net.www.protocol.http.AuthScheme $r2;
+        char $c0;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        z0 := @parameter0: boolean;
+
+        r1 := @parameter1: java.net.URL;
+
+        r3 := @parameter2: java.net.PasswordAuthentication;
+
+        if z0 == 0 goto label1;
+
+        $c0 = 112;
+
+        goto label2;
+
+     label1:
+        $c0 = 115;
+
+     label2:
+        $r2 = <sun.net.www.protocol.http.AuthScheme: sun.net.www.protocol.http.AuthScheme NTLM>;
+
+        specialinvoke r0.<sun.net.www.protocol.http.AuthenticationInfo: void <init>(char,sun.net.www.protocol.http.AuthScheme,java.net.URL,java.lang.String)>($c0, $r2, r1, "");
+
+        specialinvoke r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: void init(java.net.PasswordAuthentication)>(r3);
+
+        return;
+    }
+
+    private void init(java.net.PasswordAuthentication)
+    {
+        java.net.PasswordAuthentication r1;
+        int $i0, $i1, $i3;
+        char[] $r7;
+        java.lang.String $r2, $r3, $r4, $r5, $r8, $r9;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        r1 := @parameter0: java.net.PasswordAuthentication;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.net.PasswordAuthentication pw> = r1;
+
+        if r1 == null goto label3;
+
+        $r2 = virtualinvoke r1.<java.net.PasswordAuthentication: java.lang.String getUserName()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(92);
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String username> = $r2;
+
+        $r8 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String defaultDomain>;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String ntdomain> = $r8;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toUpperCase()>();
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String ntdomain> = $r4;
+
+        $i1 = $i0 + 1;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String username> = $r5;
+
+     label2:
+        $r9 = new java.lang.String;
+
+        $r7 = virtualinvoke r1.<java.net.PasswordAuthentication: char[] getPassword()>();
+
+        specialinvoke $r9.<java.lang.String: void <init>(char[])>($r7);
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String password> = $r9;
+
+        goto label4;
+
+     label3:
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String username> = null;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String ntdomain> = null;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String password> = null;
+
+     label4:
+        specialinvoke r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: void init0()>();
+
+        return;
+    }
+
+    public void <init>(boolean, java.lang.String, int, java.net.PasswordAuthentication)
+    {
+        java.net.PasswordAuthentication r3;
+        int i0;
+        sun.net.www.protocol.http.AuthScheme $r2;
+        char $c1;
+        java.lang.String r1;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        z0 := @parameter0: boolean;
+
+        r1 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        r3 := @parameter3: java.net.PasswordAuthentication;
+
+        if z0 == 0 goto label1;
+
+        $c1 = 112;
+
+        goto label2;
+
+     label1:
+        $c1 = 115;
+
+     label2:
+        $r2 = <sun.net.www.protocol.http.AuthScheme: sun.net.www.protocol.http.AuthScheme NTLM>;
+
+        specialinvoke r0.<sun.net.www.protocol.http.AuthenticationInfo: void <init>(char,sun.net.www.protocol.http.AuthScheme,java.lang.String,int,java.lang.String)>($c1, $r2, r1, i0, "");
+
+        specialinvoke r0.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: void init(java.net.PasswordAuthentication)>(r3);
+
+        return;
+    }
+
+    protected boolean useAuthCache()
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        $z0 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: boolean ntlmCache>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.net.www.protocol.http.AuthenticationInfo: boolean useAuthCache()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean supportsPreemptiveAuthorization()
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        return 0;
+    }
+
+    public static boolean supportsTransparentAuth()
+    {
+        return 1;
+    }
+
+    public static boolean isTrustedSite(java.net.URL)
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback $r0, $r5;
+        java.net.URL r3;
+        int[] $r2;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth $r1;
+        int $i0, $i1;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r3 := @parameter0: java.net.URL;
+
+        $r0 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback NTLMAuthCallback>;
+
+        if $r0 == null goto label1;
+
+        $r5 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback NTLMAuthCallback>;
+
+        $z1 = virtualinvoke $r5.<sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback: boolean isTrustedSite(java.net.URL)>(r3);
+
+        return $z1;
+
+     label1:
+        $r2 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication$3: int[] $SwitchMap$sun$net$www$protocol$http$ntlm$NTLMAuthentication$TransparentAuth>;
+
+        $r1 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth authMode>;
+
+        $i0 = virtualinvoke $r1.<sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        $r4 = virtualinvoke r3.<java.net.URL: java.lang.String toString()>();
+
+        $z0 = staticinvoke <sun.net.www.protocol.http.ntlm.NTLMAuthentication: boolean isTrustedSite(java.lang.String)>($r4);
+
+        return $z0;
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private static native boolean isTrustedSiteAvailable0();
+
+    private static boolean isTrustedSite(java.lang.String)
+    {
+        java.lang.Boolean r1, $r2;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.Boolean isTrustedSiteAvailable>;
+
+        if r1 != null goto label3;
+
+        $z1 = staticinvoke <sun.net.www.protocol.http.ntlm.NTLMAuthentication: boolean isTrustedSiteAvailable0()>();
+
+        if $z1 == 0 goto label1;
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        goto label2;
+
+     label1:
+        $r2 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+     label2:
+        r1 = $r2;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.Boolean isTrustedSiteAvailable> = $r2;
+
+     label3:
+        $z2 = virtualinvoke r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z2 == 0 goto label4;
+
+        $z0 = staticinvoke <sun.net.www.protocol.http.ntlm.NTLMAuthentication: boolean isTrustedSite0(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label4;
+
+        $z3 = 1;
+
+        goto label5;
+
+     label4:
+        $z3 = 0;
+
+     label5:
+        return $z3;
+    }
+
+    private static native boolean isTrustedSite0(java.lang.String);
+
+    public java.lang.String getHeaderValue(java.net.URL, java.lang.String)
+    {
+        java.net.URL r2;
+        java.lang.RuntimeException $r0;
+        java.lang.String r3;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r1;
+
+        r1 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        r2 := @parameter0: java.net.URL;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r0 = new java.lang.RuntimeException;
+
+        specialinvoke $r0.<java.lang.RuntimeException: void <init>(java.lang.String)>("getHeaderValue not supported");
+
+        throw $r0;
+    }
+
+    public boolean isAuthorizationStale(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        r1 := @parameter0: java.lang.String;
+
+        return 0;
+    }
+
+    public synchronized boolean setHeaders(sun.net.www.protocol.http.HttpURLConnection, sun.net.www.HeaderParser, java.lang.String)
+    {
+        int $i0;
+        java.lang.String r4, $r5, $r7, $r9, $r12, $r13, $r14, $r18;
+        boolean $z0;
+        sun.net.www.HeaderParser r16;
+        java.io.IOException $r15;
+        sun.net.www.protocol.http.HttpURLConnection r0;
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence $r10, $r11, r17;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r2, $r3, $r6;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication r8;
+
+        r8 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthentication;
+
+        r0 := @parameter0: sun.net.www.protocol.http.HttpURLConnection;
+
+        r16 := @parameter1: sun.net.www.HeaderParser;
+
+        r4 := @parameter2: java.lang.String;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection: java.lang.Object authObj()>();
+
+        r17 = (sun.net.www.protocol.http.ntlm.NTLMAuthSequence) $r1;
+
+        if r17 != null goto label2;
+
+        $r11 = new sun.net.www.protocol.http.ntlm.NTLMAuthSequence;
+
+        $r14 = r8.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String username>;
+
+        $r13 = r8.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String password>;
+
+        $r12 = r8.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String ntdomain>;
+
+        specialinvoke $r11.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r14, $r13, $r12);
+
+        r17 = $r11;
+
+        virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection: void authObj(java.lang.Object)>($r11);
+
+     label2:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NTLM ");
+
+        $r10 = r17;
+
+        $i0 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        if $i0 <= 6 goto label3;
+
+        $r18 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int)>(5);
+
+        goto label4;
+
+     label3:
+        $r18 = null;
+
+     label4:
+        $r5 = virtualinvoke $r10.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: java.lang.String getAuthHeader(java.lang.String)>($r18);
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = virtualinvoke r8.<sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String getHeaderName()>();
+
+        virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection: void setAuthenticationProperty(java.lang.String,java.lang.String)>($r9, $r7);
+
+        $z0 = virtualinvoke r17.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: boolean isComplete()>();
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection: void authObj(java.lang.Object)>(null);
+
+     label5:
+        return 1;
+
+     label6:
+        $r15 := @caughtexception;
+
+        virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection: void authObj(java.lang.Object)>(null);
+
+        return 0;
+
+        catch java.io.IOException from label1 to label5 with label6;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r1, $r4;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth $r12, $r13, $r14;
+        java.lang.String $r3, r6, r9, $r10, $r11;
+        boolean $z0, $z1, $z2;
+        sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback $r0;
+        sun.net.www.protocol.http.ntlm.NTLMAuthentication$1 $r7;
+        java.lang.Object $r2, $r5, $r8;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: long serialVersionUID> = 100L;
+
+        $r0 = staticinvoke <sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback: sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback getNTLMAuthenticationCallback()>();
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthenticationCallback NTLMAuthCallback> = $r0;
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("http.auth.ntlm.domain", "domain");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: java.lang.String defaultDomain> = $r3;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("jdk.ntlm.cache", "true");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r6 = (java.lang.String) $r5;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>(r6);
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: boolean ntlmCache> = $z0;
+
+        $r7 = new sun.net.www.protocol.http.ntlm.NTLMAuthentication$1;
+
+        specialinvoke $r7.<sun.net.www.protocol.http.ntlm.NTLMAuthentication$1: void <init>()>();
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        r9 = (java.lang.String) $r8;
+
+        $r10 = "trustedHosts";
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r9);
+
+        if $z1 == 0 goto label1;
+
+        $r14 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth TRUSTED_HOSTS>;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth authMode> = $r14;
+
+        goto label3;
+
+     label1:
+        $r11 = "allHosts";
+
+        $z2 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r9);
+
+        if $z2 == 0 goto label2;
+
+        $r13 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth ALL_HOSTS>;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth authMode> = $r13;
+
+        goto label3;
+
+     label2:
+        $r12 = <sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth DISABLED>;
+
+        <sun.net.www.protocol.http.ntlm.NTLMAuthentication: sun.net.www.protocol.http.ntlm.NTLMAuthentication$TransparentAuth authMode> = $r12;
+
+     label3:
+        return;
+    }
+}

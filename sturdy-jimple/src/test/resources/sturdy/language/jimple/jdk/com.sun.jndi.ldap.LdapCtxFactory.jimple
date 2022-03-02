@@ -1,0 +1,645 @@
+public final class com.sun.jndi.ldap.LdapCtxFactory extends java.lang.Object implements javax.naming.spi.ObjectFactory, javax.naming.spi.InitialContextFactory
+{
+    public static final java.lang.String ADDRESS_TYPE;
+
+    public void <init>()
+    {
+        com.sun.jndi.ldap.LdapCtxFactory r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapCtxFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.Object getObjectInstance(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws java.lang.Exception
+    {
+        javax.naming.Reference $r2;
+        java.lang.String[] $r3;
+        javax.naming.Name r4;
+        com.sun.jndi.url.ldap.ldapURLContextFactory $r1;
+        java.lang.Object r0, $r7;
+        javax.naming.Context r5;
+        com.sun.jndi.ldap.LdapCtxFactory r8;
+        java.util.Hashtable r6;
+        boolean $z0;
+
+        r8 := @this: com.sun.jndi.ldap.LdapCtxFactory;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: javax.naming.Name;
+
+        r5 := @parameter2: javax.naming.Context;
+
+        r6 := @parameter3: java.util.Hashtable;
+
+        $z0 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: boolean isLdapRef(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new com.sun.jndi.url.ldap.ldapURLContextFactory;
+
+        specialinvoke $r1.<com.sun.jndi.url.ldap.ldapURLContextFactory: void <init>()>();
+
+        $r2 = (javax.naming.Reference) r0;
+
+        $r3 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: java.lang.String[] getURLs(javax.naming.Reference)>($r2);
+
+        $r7 = interfaceinvoke $r1.<javax.naming.spi.ObjectFactory: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>($r3, r4, r5, r6);
+
+        return $r7;
+    }
+
+    public javax.naming.Context getInitialContext(java.util.Hashtable) throws javax.naming.NamingException
+    {
+        java.lang.String[] $r1;
+        javax.naming.ConfigurationException $r3;
+        int $i0;
+        javax.naming.Context $r7;
+        java.lang.String $r11, $r14;
+        java.util.Hashtable r0;
+        boolean $z0;
+        com.sun.jndi.ldap.LdapReferralException $r6;
+        javax.naming.directory.DirContext $r2;
+        com.sun.jndi.ldap.LdapCtx $r4, $r8;
+        java.lang.Object $r5, $r9, $r12;
+        com.sun.jndi.ldap.LdapCtxFactory r13;
+        javax.naming.ldap.Control[] $r10, $r15;
+
+        r13 := @this: com.sun.jndi.ldap.LdapCtxFactory;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+     label01:
+        if r0 == null goto label02;
+
+        $r5 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.provider.url");
+
+        $r14 = (java.lang.String) $r5;
+
+        goto label03;
+
+     label02:
+        $r14 = null;
+
+     label03:
+        if $r14 != null goto label05;
+
+        $r4 = new com.sun.jndi.ldap.LdapCtx;
+
+        specialinvoke $r4.<com.sun.jndi.ldap.LdapCtx: void <init>(java.lang.String,java.lang.String,int,java.util.Hashtable,boolean)>("", "localhost", 389, r0, 0);
+
+     label04:
+        return $r4;
+
+     label05:
+        $r1 = staticinvoke <com.sun.jndi.ldap.LdapURL: java.lang.String[] fromList(java.lang.String)>($r14);
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label06;
+
+        $r3 = new javax.naming.ConfigurationException;
+
+        specialinvoke $r3.<javax.naming.ConfigurationException: void <init>(java.lang.String)>("java.naming.provider.url property does not contain a URL");
+
+        throw $r3;
+
+     label06:
+        $r2 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: javax.naming.directory.DirContext getLdapCtxInstance(java.lang.Object,java.util.Hashtable)>($r1, r0);
+
+     label07:
+        return $r2;
+
+     label08:
+        $r6 := @caughtexception;
+
+        if r0 == null goto label09;
+
+        $r11 = "throw";
+
+        $r12 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.referral");
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z0 == 0 goto label09;
+
+        throw $r6;
+
+     label09:
+        if r0 == null goto label10;
+
+        $r9 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.ldap.control.connect");
+
+        $r10 = (javax.naming.ldap.Control[]) $r9;
+
+        $r15 = (javax.naming.ldap.Control[]) $r10;
+
+        goto label11;
+
+     label10:
+        $r15 = null;
+
+     label11:
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: javax.naming.Context getReferralContext(java.util.Hashtable,javax.naming.ldap.Control[])>(r0, $r15);
+
+        $r8 = (com.sun.jndi.ldap.LdapCtx) $r7;
+
+        return $r8;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label01 to label04 with label08;
+        catch com.sun.jndi.ldap.LdapReferralException from label05 to label07 with label08;
+    }
+
+    private static boolean isLdapRef(java.lang.Object)
+    {
+        javax.naming.Reference r3;
+        java.lang.Object r0;
+        java.lang.Class $r1;
+        java.lang.String $r2, $r4;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof javax.naming.Reference;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = class "Lcom/sun/jndi/ldap/LdapCtxFactory;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        r3 = (javax.naming.Reference) r0;
+
+        $r4 = virtualinvoke r3.<javax.naming.Reference: java.lang.String getFactoryClassName()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        return $z1;
+    }
+
+    private static java.lang.String[] getURLs(javax.naming.Reference) throws javax.naming.NamingException
+    {
+        java.util.Enumeration $r2;
+        javax.naming.RefAddr r8;
+        java.lang.String[] r1, r9;
+        javax.naming.ConfigurationException $r3;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r5, $r7;
+        boolean $z0, $z1, $z2;
+        javax.naming.Reference r0;
+        java.lang.Object $r4, $r6;
+
+        r0 := @parameter0: javax.naming.Reference;
+
+        i3 = 0;
+
+        $i0 = virtualinvoke r0.<javax.naming.Reference: int size()>();
+
+        r1 = newarray (java.lang.String)[$i0];
+
+        $r2 = virtualinvoke r0.<javax.naming.Reference: java.util.Enumeration getAll()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r8 = (javax.naming.RefAddr) $r4;
+
+        $z1 = r8 instanceof javax.naming.StringRefAddr;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = virtualinvoke r8.<javax.naming.RefAddr: java.lang.String getType()>();
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("URL");
+
+        if $z2 == 0 goto label2;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r6 = virtualinvoke r8.<javax.naming.RefAddr: java.lang.Object getContent()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        r1[$i2] = $r7;
+
+     label2:
+        goto label1;
+
+     label3:
+        if i3 != 0 goto label4;
+
+        $r3 = new javax.naming.ConfigurationException;
+
+        specialinvoke $r3.<javax.naming.ConfigurationException: void <init>(java.lang.String)>("Reference contains no valid addresses");
+
+        throw $r3;
+
+     label4:
+        $i1 = virtualinvoke r0.<javax.naming.Reference: int size()>();
+
+        if i3 != $i1 goto label5;
+
+        return r1;
+
+     label5:
+        r9 = newarray (java.lang.String)[i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r9, 0, i3);
+
+        return r9;
+    }
+
+    public static javax.naming.directory.DirContext getLdapCtxInstance(java.lang.Object, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.directory.DirContext $r5, $r7;
+        java.lang.String[] $r2, $r4;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.Object r0;
+        java.lang.String $r6;
+        java.util.Hashtable r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.util.Hashtable;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (java.lang.String) r0;
+
+        $r7 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: javax.naming.directory.DirContext getUsingURL(java.lang.String,java.util.Hashtable)>($r6, r3);
+
+        return $r7;
+
+     label1:
+        $z1 = r0 instanceof java.lang.String[];
+
+        if $z1 == 0 goto label2;
+
+        $r2 = (java.lang.String[]) r0;
+
+        $r4 = (java.lang.String[]) $r2;
+
+        $r5 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: javax.naming.directory.DirContext getUsingURLs(java.lang.String[],java.util.Hashtable)>($r4, r3);
+
+        return $r5;
+
+     label2:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("argument must be an LDAP URL String or array of them");
+
+        throw $r1;
+    }
+
+    private static javax.naming.directory.DirContext getUsingURL(java.lang.String, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.spi.LdapDnsProviderResult $r3;
+        javax.naming.NamingException $r6, $r13, $r14, $r15, r16;
+        java.lang.String r1, r8, $r9;
+        java.util.Hashtable r2;
+        boolean $z0;
+        com.sun.jndi.ldap.LdapDnsProviderService $r0;
+        java.util.Iterator $r5;
+        com.sun.jndi.ldap.LdapCtx $r11;
+        java.lang.Exception $r12;
+        java.util.List $r4;
+        com.sun.jndi.ldap.LdapURL $r10;
+        java.lang.Object $r7;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Hashtable;
+
+     label1:
+        $r0 = staticinvoke <com.sun.jndi.ldap.LdapDnsProviderService: com.sun.jndi.ldap.LdapDnsProviderService getInstance()>();
+
+        $r3 = virtualinvoke $r0.<com.sun.jndi.ldap.LdapDnsProviderService: com.sun.jndi.ldap.spi.LdapDnsProviderResult lookupEndpoints(java.lang.String,java.util.Hashtable)>(r1, r2);
+
+        r16 = null;
+
+        $r4 = virtualinvoke $r3.<com.sun.jndi.ldap.spi.LdapDnsProviderResult: java.util.List getEndpoints()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r7 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.lang.String) $r7;
+
+     label3:
+        $r9 = virtualinvoke $r3.<com.sun.jndi.ldap.spi.LdapDnsProviderResult: java.lang.String getDomainName()>();
+
+        $r10 = new com.sun.jndi.ldap.LdapURL;
+
+        specialinvoke $r10.<com.sun.jndi.ldap.LdapURL: void <init>(java.lang.String)>(r8);
+
+        $r11 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: com.sun.jndi.ldap.LdapCtx getLdapCtxFromUrl(java.lang.String,java.lang.String,com.sun.jndi.ldap.LdapURL,java.util.Hashtable)>($r9, r1, $r10, r2);
+
+     label4:
+        return $r11;
+
+     label5:
+        $r15 := @caughtexception;
+
+        r16 = $r15;
+
+        goto label2;
+
+     label6:
+        if r16 == null goto label7;
+
+        throw r16;
+
+     label7:
+        $r6 = new javax.naming.NamingException;
+
+        specialinvoke $r6.<javax.naming.NamingException: void <init>(java.lang.String)>("Could not resolve a valid ldap host");
+
+        throw $r6;
+
+     label8:
+        $r14 := @caughtexception;
+
+        throw $r14;
+
+     label9:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.naming.NamingException;
+
+        specialinvoke $r13.<javax.naming.NamingException: void <init>()>();
+
+        virtualinvoke $r13.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+        catch javax.naming.NamingException from label3 to label4 with label5;
+        catch javax.naming.NamingException from label1 to label4 with label8;
+        catch javax.naming.NamingException from label5 to label8 with label8;
+        catch java.lang.Exception from label1 to label4 with label9;
+        catch java.lang.Exception from label5 to label8 with label9;
+    }
+
+    private static com.sun.jndi.ldap.LdapCtx getLdapCtxFromUrl(java.lang.String, java.lang.String, com.sun.jndi.ldap.LdapURL, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapCtx $r3;
+        com.sun.jndi.ldap.LdapURL r0;
+        int $i0;
+        java.lang.String $r1, $r2, r5, r6;
+        java.util.Hashtable r4;
+        boolean $z0;
+
+        r5 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: com.sun.jndi.ldap.LdapURL;
+
+        r4 := @parameter3: java.util.Hashtable;
+
+        $r1 = virtualinvoke r0.<com.sun.jndi.ldap.LdapURL: java.lang.String getDN()>();
+
+        $r2 = virtualinvoke r0.<com.sun.jndi.ldap.LdapURL: java.lang.String getHost()>();
+
+        $i0 = virtualinvoke r0.<com.sun.jndi.ldap.LdapURL: int getPort()>();
+
+        $r3 = new com.sun.jndi.ldap.LdapCtx;
+
+        $z0 = virtualinvoke r0.<com.sun.jndi.ldap.LdapURL: boolean useSsl()>();
+
+        specialinvoke $r3.<com.sun.jndi.ldap.LdapCtx: void <init>(java.lang.String,java.lang.String,int,java.util.Hashtable,boolean)>($r1, $r2, $i0, r4, $z0);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.LdapCtx: void setDomainName(java.lang.String)>(r5);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.LdapCtx: void setProviderUrl(java.lang.String)>(r6);
+
+        return $r3;
+    }
+
+    private static javax.naming.directory.DirContext getUsingURLs(java.lang.String[], java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.directory.DirContext $r3;
+        java.lang.String[] r0;
+        javax.naming.NamingException $r4, r5;
+        int i0, i1;
+        java.lang.String r1;
+        java.util.Hashtable r2;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: java.util.Hashtable;
+
+        r5 = null;
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label5;
+
+        r1 = r0[i1];
+
+     label2:
+        $r3 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: javax.naming.directory.DirContext getUsingURL(java.lang.String,java.util.Hashtable)>(r1, r2);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r4 := @caughtexception;
+
+        r5 = $r4;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label5:
+        throw r5;
+
+        catch javax.naming.NamingException from label2 to label3 with label4;
+    }
+
+    public static javax.naming.directory.Attribute createTypeNameAttr(java.lang.Class)
+    {
+        java.lang.String[] $r2, $r4;
+        javax.naming.directory.BasicAttribute $r3;
+        java.util.Vector $r0;
+        int $i0, $i1, i2;
+        java.lang.Class r1;
+        java.lang.String $r5, $r6;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>(int)>(10);
+
+        $r2 = staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: java.lang.String[] getTypeNames(java.lang.Class,java.util.Vector)>(r1, $r0);
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label3;
+
+        $r3 = new javax.naming.directory.BasicAttribute;
+
+        $r4 = <com.sun.jndi.ldap.Obj: java.lang.String[] JAVA_ATTRIBUTES>;
+
+        $r5 = $r4[6];
+
+        specialinvoke $r3.<javax.naming.directory.BasicAttribute: void <init>(java.lang.String)>($r5);
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label2;
+
+        $r6 = $r2[i2];
+
+        virtualinvoke $r3.<javax.naming.directory.BasicAttribute: boolean add(java.lang.Object)>($r6);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return $r3;
+
+     label3:
+        return null;
+    }
+
+    private static java.lang.String[] getTypeNames(java.lang.Class, java.util.Vector)
+    {
+        java.util.Iterator $r3;
+        java.lang.Class[] $r2;
+        java.lang.String[] r7;
+        java.util.Vector r1;
+        int $i0, $i1, $i2, i3, i4;
+        java.lang.Class r0, $r6;
+        java.lang.Object $r4;
+        java.lang.String r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.util.Vector;
+
+        staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: void getClassesAux(java.lang.Class,java.util.Vector)>(r0, r1);
+
+        $r2 = virtualinvoke r0.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label2;
+
+        $r6 = $r2[i3];
+
+        staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: void getClassesAux(java.lang.Class,java.util.Vector)>($r6, r1);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = virtualinvoke r1.<java.util.Vector: int size()>();
+
+        r7 = newarray (java.lang.String)[$i1];
+
+        i4 = 0;
+
+        $r3 = virtualinvoke r1.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.lang.String) $r4;
+
+        $i2 = i4;
+
+        i4 = i4 + 1;
+
+        r7[$i2] = r5;
+
+        goto label3;
+
+     label4:
+        return r7;
+    }
+
+    private static void getClassesAux(java.lang.Class, java.util.Vector)
+    {
+        java.util.Vector r0;
+        java.lang.Class r3, r4;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.util.Vector;
+
+        $r1 = virtualinvoke r3.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r0.<java.util.Vector: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = virtualinvoke r3.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke r0.<java.util.Vector: void addElement(java.lang.Object)>($r2);
+
+     label1:
+        r4 = virtualinvoke r3.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+     label2:
+        if r4 == null goto label3;
+
+        staticinvoke <com.sun.jndi.ldap.LdapCtxFactory: java.lang.String[] getTypeNames(java.lang.Class,java.util.Vector)>(r4, r0);
+
+        r4 = virtualinvoke r4.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.ldap.LdapCtxFactory: java.lang.String ADDRESS_TYPE> = "URL";
+
+        return;
+    }
+}

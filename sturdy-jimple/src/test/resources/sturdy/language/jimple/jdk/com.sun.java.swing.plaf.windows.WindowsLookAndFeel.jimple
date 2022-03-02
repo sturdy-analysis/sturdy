@@ -1,0 +1,6419 @@
+public class com.sun.java.swing.plaf.windows.WindowsLookAndFeel extends javax.swing.plaf.basic.BasicLookAndFeel
+{
+    static final java.lang.Object HI_RES_DISABLED_ICON_CLIENT_KEY;
+    private boolean updatePending;
+    private boolean useSystemFontSettings;
+    private boolean useSystemFontSizeSettings;
+    private com.sun.java.swing.plaf.windows.DesktopProperty themeActive;
+    private com.sun.java.swing.plaf.windows.DesktopProperty dllName;
+    private com.sun.java.swing.plaf.windows.DesktopProperty colorName;
+    private com.sun.java.swing.plaf.windows.DesktopProperty sizeName;
+    private com.sun.java.swing.plaf.windows.DesktopProperty aaSettings;
+    private transient javax.swing.LayoutStyle style;
+    private int baseUnitX;
+    private int baseUnitY;
+    private static boolean isMnemonicHidden;
+    private static boolean isClassicWindows;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void <init>()>();
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean updatePending> = 0;
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings> = 1;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        return "Windows";
+    }
+
+    public java.lang.String getDescription()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        return "The Microsoft Windows Look and Feel";
+    }
+
+    public java.lang.String getID()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        return "Windows";
+    }
+
+    public boolean isNativeLookAndFeel()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r2;
+        sun.awt.OSInfo$OSType $r0, $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        $r0 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$OSType getOSType()>();
+
+        $r1 = <sun.awt.OSInfo$OSType: sun.awt.OSInfo$OSType WINDOWS>;
+
+        if $r0 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isSupportedLookAndFeel()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        $z0 = virtualinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isNativeLookAndFeel()>();
+
+        return $z0;
+    }
+
+    public void initialize()
+    {
+        sun.awt.OSInfo$WindowsVersion $r1, $r2;
+        sun.security.action.GetPropertyAction $r3;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        int $i0;
+        java.lang.Boolean $r6, $r7;
+        java.lang.String $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.java.swing.plaf.windows.WindowsRootPaneUI$AltProcessor $r10;
+        java.awt.KeyboardFocusManager $r9;
+        java.lang.Object $r4, $r5;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void initialize()>();
+
+        $r1 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion getWindowsVersion()>();
+
+        $r2 = <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion WINDOWS_95>;
+
+        $i0 = virtualinvoke $r1.<sun.awt.OSInfo$WindowsVersion: int compareTo(sun.awt.OSInfo$WindowsVersion)>($r2);
+
+        if $i0 > 0 goto label1;
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isClassicWindows> = 1;
+
+        goto label2;
+
+     label1:
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isClassicWindows> = 0;
+
+        staticinvoke <com.sun.java.swing.plaf.windows.XPStyle: void invalidateStyle()>();
+
+     label2:
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("swing.useSystemFontSettings");
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r8 = (java.lang.String) $r4;
+
+        if $r8 == null goto label3;
+
+        $r7 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r8);
+
+        $z2 = virtualinvoke $r7.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        $z3 = 1;
+
+        goto label5;
+
+     label4:
+        $z3 = 0;
+
+     label5:
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings> = $z3;
+
+        $z0 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings>;
+
+        if $z0 == 0 goto label9;
+
+        $r5 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>("Application.useSystemFontSettings");
+
+        if $r5 == null goto label6;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z1 = virtualinvoke $r6.<java.lang.Boolean: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label7;
+
+     label6:
+        $z4 = 1;
+
+        goto label8;
+
+     label7:
+        $z4 = 0;
+
+     label8:
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings> = $z4;
+
+     label9:
+        $r9 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r10 = <com.sun.java.swing.plaf.windows.WindowsRootPaneUI: com.sun.java.swing.plaf.windows.WindowsRootPaneUI$AltProcessor altProcessor>;
+
+        virtualinvoke $r9.<java.awt.KeyboardFocusManager: void addKeyEventPostProcessor(java.awt.KeyEventPostProcessor)>($r10);
+
+        return;
+    }
+
+    protected void initClassDefaults(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r1;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        java.lang.Object[] $r2;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void initClassDefaults(javax.swing.UIDefaults)>(r1);
+
+        $r2 = newarray (java.lang.Object)[68];
+
+        $r2[0] = "ButtonUI";
+
+        $r2[1] = "com.sun.java.swing.plaf.windows.WindowsButtonUI";
+
+        $r2[2] = "CheckBoxUI";
+
+        $r2[3] = "com.sun.java.swing.plaf.windows.WindowsCheckBoxUI";
+
+        $r2[4] = "CheckBoxMenuItemUI";
+
+        $r2[5] = "com.sun.java.swing.plaf.windows.WindowsCheckBoxMenuItemUI";
+
+        $r2[6] = "LabelUI";
+
+        $r2[7] = "com.sun.java.swing.plaf.windows.WindowsLabelUI";
+
+        $r2[8] = "RadioButtonUI";
+
+        $r2[9] = "com.sun.java.swing.plaf.windows.WindowsRadioButtonUI";
+
+        $r2[10] = "RadioButtonMenuItemUI";
+
+        $r2[11] = "com.sun.java.swing.plaf.windows.WindowsRadioButtonMenuItemUI";
+
+        $r2[12] = "ToggleButtonUI";
+
+        $r2[13] = "com.sun.java.swing.plaf.windows.WindowsToggleButtonUI";
+
+        $r2[14] = "ProgressBarUI";
+
+        $r2[15] = "com.sun.java.swing.plaf.windows.WindowsProgressBarUI";
+
+        $r2[16] = "SliderUI";
+
+        $r2[17] = "com.sun.java.swing.plaf.windows.WindowsSliderUI";
+
+        $r2[18] = "SeparatorUI";
+
+        $r2[19] = "com.sun.java.swing.plaf.windows.WindowsSeparatorUI";
+
+        $r2[20] = "SplitPaneUI";
+
+        $r2[21] = "com.sun.java.swing.plaf.windows.WindowsSplitPaneUI";
+
+        $r2[22] = "SpinnerUI";
+
+        $r2[23] = "com.sun.java.swing.plaf.windows.WindowsSpinnerUI";
+
+        $r2[24] = "TabbedPaneUI";
+
+        $r2[25] = "com.sun.java.swing.plaf.windows.WindowsTabbedPaneUI";
+
+        $r2[26] = "TextAreaUI";
+
+        $r2[27] = "com.sun.java.swing.plaf.windows.WindowsTextAreaUI";
+
+        $r2[28] = "TextFieldUI";
+
+        $r2[29] = "com.sun.java.swing.plaf.windows.WindowsTextFieldUI";
+
+        $r2[30] = "PasswordFieldUI";
+
+        $r2[31] = "com.sun.java.swing.plaf.windows.WindowsPasswordFieldUI";
+
+        $r2[32] = "TextPaneUI";
+
+        $r2[33] = "com.sun.java.swing.plaf.windows.WindowsTextPaneUI";
+
+        $r2[34] = "EditorPaneUI";
+
+        $r2[35] = "com.sun.java.swing.plaf.windows.WindowsEditorPaneUI";
+
+        $r2[36] = "TreeUI";
+
+        $r2[37] = "com.sun.java.swing.plaf.windows.WindowsTreeUI";
+
+        $r2[38] = "ToolBarUI";
+
+        $r2[39] = "com.sun.java.swing.plaf.windows.WindowsToolBarUI";
+
+        $r2[40] = "ToolBarSeparatorUI";
+
+        $r2[41] = "com.sun.java.swing.plaf.windows.WindowsToolBarSeparatorUI";
+
+        $r2[42] = "ComboBoxUI";
+
+        $r2[43] = "com.sun.java.swing.plaf.windows.WindowsComboBoxUI";
+
+        $r2[44] = "TableHeaderUI";
+
+        $r2[45] = "com.sun.java.swing.plaf.windows.WindowsTableHeaderUI";
+
+        $r2[46] = "InternalFrameUI";
+
+        $r2[47] = "com.sun.java.swing.plaf.windows.WindowsInternalFrameUI";
+
+        $r2[48] = "DesktopPaneUI";
+
+        $r2[49] = "com.sun.java.swing.plaf.windows.WindowsDesktopPaneUI";
+
+        $r2[50] = "DesktopIconUI";
+
+        $r2[51] = "com.sun.java.swing.plaf.windows.WindowsDesktopIconUI";
+
+        $r2[52] = "FileChooserUI";
+
+        $r2[53] = "com.sun.java.swing.plaf.windows.WindowsFileChooserUI";
+
+        $r2[54] = "MenuUI";
+
+        $r2[55] = "com.sun.java.swing.plaf.windows.WindowsMenuUI";
+
+        $r2[56] = "MenuItemUI";
+
+        $r2[57] = "com.sun.java.swing.plaf.windows.WindowsMenuItemUI";
+
+        $r2[58] = "MenuBarUI";
+
+        $r2[59] = "com.sun.java.swing.plaf.windows.WindowsMenuBarUI";
+
+        $r2[60] = "PopupMenuUI";
+
+        $r2[61] = "com.sun.java.swing.plaf.windows.WindowsPopupMenuUI";
+
+        $r2[62] = "PopupMenuSeparatorUI";
+
+        $r2[63] = "com.sun.java.swing.plaf.windows.WindowsPopupMenuSeparatorUI";
+
+        $r2[64] = "ScrollBarUI";
+
+        $r2[65] = "com.sun.java.swing.plaf.windows.WindowsScrollBarUI";
+
+        $r2[66] = "RootPaneUI";
+
+        $r2[67] = "com.sun.java.swing.plaf.windows.WindowsRootPaneUI";
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r2);
+
+        return;
+    }
+
+    protected void initSystemColorDefaults(javax.swing.UIDefaults)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r1;
+        javax.swing.UIDefaults r2;
+        java.lang.String[] $r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r2 := @parameter0: javax.swing.UIDefaults;
+
+        $r0 = newarray (java.lang.String)[56];
+
+        $r0[0] = "desktop";
+
+        $r0[1] = "#005C5C";
+
+        $r0[2] = "activeCaption";
+
+        $r0[3] = "#000080";
+
+        $r0[4] = "activeCaptionText";
+
+        $r0[5] = "#FFFFFF";
+
+        $r0[6] = "activeCaptionBorder";
+
+        $r0[7] = "#C0C0C0";
+
+        $r0[8] = "inactiveCaption";
+
+        $r0[9] = "#808080";
+
+        $r0[10] = "inactiveCaptionText";
+
+        $r0[11] = "#C0C0C0";
+
+        $r0[12] = "inactiveCaptionBorder";
+
+        $r0[13] = "#C0C0C0";
+
+        $r0[14] = "window";
+
+        $r0[15] = "#FFFFFF";
+
+        $r0[16] = "windowBorder";
+
+        $r0[17] = "#000000";
+
+        $r0[18] = "windowText";
+
+        $r0[19] = "#000000";
+
+        $r0[20] = "menu";
+
+        $r0[21] = "#C0C0C0";
+
+        $r0[22] = "menuPressedItemB";
+
+        $r0[23] = "#000080";
+
+        $r0[24] = "menuPressedItemF";
+
+        $r0[25] = "#FFFFFF";
+
+        $r0[26] = "menuText";
+
+        $r0[27] = "#000000";
+
+        $r0[28] = "text";
+
+        $r0[29] = "#C0C0C0";
+
+        $r0[30] = "textText";
+
+        $r0[31] = "#000000";
+
+        $r0[32] = "textHighlight";
+
+        $r0[33] = "#000080";
+
+        $r0[34] = "textHighlightText";
+
+        $r0[35] = "#FFFFFF";
+
+        $r0[36] = "textInactiveText";
+
+        $r0[37] = "#808080";
+
+        $r0[38] = "control";
+
+        $r0[39] = "#C0C0C0";
+
+        $r0[40] = "controlText";
+
+        $r0[41] = "#000000";
+
+        $r0[42] = "controlHighlight";
+
+        $r0[43] = "#C0C0C0";
+
+        $r0[44] = "controlLtHighlight";
+
+        $r0[45] = "#FFFFFF";
+
+        $r0[46] = "controlShadow";
+
+        $r0[47] = "#808080";
+
+        $r0[48] = "controlDkShadow";
+
+        $r0[49] = "#000000";
+
+        $r0[50] = "scrollbar";
+
+        $r0[51] = "#E0E0E0";
+
+        $r0[52] = "info";
+
+        $r0[53] = "#FFFFE1";
+
+        $r0[54] = "infoText";
+
+        $r0[55] = "#000000";
+
+        $z0 = virtualinvoke r1.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isNativeLookAndFeel()>();
+
+        virtualinvoke r1.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: void loadSystemColors(javax.swing.UIDefaults,java.lang.String[],boolean)>(r2, $r0, $z0);
+
+        return;
+    }
+
+    private void initResourceBundle(javax.swing.UIDefaults)
+    {
+        javax.swing.UIDefaults r0;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r1;
+
+        r1 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r0 := @parameter0: javax.swing.UIDefaults;
+
+        virtualinvoke r0.<javax.swing.UIDefaults: void addResourceBundle(java.lang.String)>("com.sun.java.swing.plaf.windows.resources.windows");
+
+        return;
+    }
+
+    protected void initComponentDefaults(javax.swing.UIDefaults)
+    {
+        java.awt.Color $r14, $r16, $r18, $r20, $r22;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FontDesktopProperty $r327;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPDLUValue $r381;
+        java.lang.Integer $r2, $r3, $r4, $r60, $r62, $r64, $r66, $r76, $r112, $r113, $r115, $r116, $r118, $r119, $r121, $r122, $r124, $r125, $r149, $r212, $r213, $r214, $r215, $r235, $r236, $r247, $r270, $r281, $r282;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$ActiveWindowsIcon $r412, $r413;
+        sun.awt.OSInfo$WindowsVersion $r23, $r24, $r84, $r85;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue $r340, $r341, $r342, $r343, $r344, $r351, $r378, $r389, $r396, $r399, $r402, $r406;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FocusColorProperty $r321;
+        com.sun.java.swing.plaf.windows.TMSchema$State $r137, $r141;
+        java.awt.Insets $r348, $r380, $r390;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        int $i0, $i1, $i3, $i5;
+        java.lang.Boolean $r79, $r81, $r110, $r158, $r163, $r164, $r166, $r207, $r210, $r211, $r216, $r217, $r220, $r251, $r252, $r279, $r280;
+        java.lang.Class $r169, $r171, $r173, $r175, $r177, $r202, $r204;
+        sun.swing.SwingLazyValue $r290, $r291, $r292, $r293, $r359, $r376;
+        java.lang.Character $r387, $r388;
+        javax.swing.plaf.ColorUIResource $r294, $r295, $r296, $r297, $r298;
+        sun.swing.SwingUtilities2$AATextInfo $r99;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue $r322, $r352, $r353, $r358, $r407;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.UIDefaults r1;
+        javax.swing.plaf.InsetsUIResource $r397, $r398, $r400, $r401;
+        java.lang.Object[][] $r200;
+        com.sun.java.swing.plaf.windows.TMSchema$Prop $r73, $r138, $r142, $r153, $r269;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue $r360;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon $r357, $r361, $r362, $r363, $r364, $r365, $r382, $r383, $r384, $r385;
+        javax.swing.border.EmptyBorder $r349, $r350;
+        java.lang.Object[] $r6, $r8, $r10, $r12, $r28, $r30, $r32, $r109, $r127, $r130, $r144, $r148, $r168, $r201, $r206, $r209, $r219, $r222, $r229, $r231, $r238, $r240, $r242, $r244, $r246, $r249, $r260, $r262, $r264, $r272, $r274, $r286, $r288, $r289;
+        sun.awt.OSInfo$OSType $r82, $r83;
+        sun.security.action.GetPropertyAction $r335;
+        com.sun.java.swing.plaf.windows.TMSchema$Part $r74, $r136, $r140, $r152, $r155, $r268;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty $r328, $r329, $r330, $r331, $r332, $r333, $r334;
+        com.sun.java.swing.plaf.windows.DesktopProperty $r302, $r303, $r304, $r305, $r306, $r307, $r308, $r309, $r310, $r311, $r312, $r313, $r314, $r315, $r316, $r317, $r318, $r319, $r320, $r323, $r324, $r325, $r326, $r346, $r355, $r366, $r368, $r369, $r370, $r371, $r372, $r373, $r374, $r375, $r410, $r411;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty $r336, $r337, $r338, $r339;
+        javax.swing.UIDefaults$LazyInputMap $r299, $r300, $r301, $r345, $r347, $r354, $r356, $r367, $r377, $r379, $r386, $r391, $r392, $r393, $r394, $r395, $r403, $r404, $r405, $r408, $r409, $r414, $r415;
+        java.lang.Object $r34, $r36, $r38, $r40, $r42, $r44, $r46, $r48, $r50, $r52, $r54, $r56, $r58, $r68, $r70, $r87, $r100, r102, r103, r104, r105, r106, r107, r108, $r146, $r170, $r172, $r174, $r176, $r178, $r180, $r182, $r184, $r186, $r188, $r190, $r192, $r194, $r203, $r205, $r266, $r276, $r278;
+        javax.swing.Icon $r25, $r26, $r195, $r196, $r197, $r198;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r1 := @parameter0: javax.swing.UIDefaults;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void initComponentDefaults(javax.swing.UIDefaults)>(r1);
+
+        specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: void initResourceBundle(javax.swing.UIDefaults)>(r1);
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(12);
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r290 = new sun.swing.SwingLazyValue;
+
+        $r6 = newarray (java.lang.Object)[3];
+
+        $r6[0] = "Dialog";
+
+        $r6[1] = $r3;
+
+        $r6[2] = $r2;
+
+        specialinvoke $r290.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.FontUIResource", null, $r6);
+
+        $r291 = new sun.swing.SwingLazyValue;
+
+        $r8 = newarray (java.lang.Object)[3];
+
+        $r8[0] = "SansSerif";
+
+        $r8[1] = $r3;
+
+        $r8[2] = $r2;
+
+        specialinvoke $r291.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.FontUIResource", null, $r8);
+
+        $r292 = new sun.swing.SwingLazyValue;
+
+        $r10 = newarray (java.lang.Object)[3];
+
+        $r10[0] = "Monospaced";
+
+        $r10[1] = $r3;
+
+        $r10[2] = $r2;
+
+        specialinvoke $r292.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.FontUIResource", null, $r10);
+
+        $r293 = new sun.swing.SwingLazyValue;
+
+        $r12 = newarray (java.lang.Object)[3];
+
+        $r12[0] = "Dialog";
+
+        $r12[1] = $r4;
+
+        $r12[2] = $r2;
+
+        specialinvoke $r293.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("javax.swing.plaf.FontUIResource", null, $r12);
+
+        $r294 = new javax.swing.plaf.ColorUIResource;
+
+        $r14 = <java.awt.Color: java.awt.Color red>;
+
+        specialinvoke $r294.<javax.swing.plaf.ColorUIResource: void <init>(java.awt.Color)>($r14);
+
+        $r295 = new javax.swing.plaf.ColorUIResource;
+
+        $r16 = <java.awt.Color: java.awt.Color black>;
+
+        specialinvoke $r295.<javax.swing.plaf.ColorUIResource: void <init>(java.awt.Color)>($r16);
+
+        $r296 = new javax.swing.plaf.ColorUIResource;
+
+        $r18 = <java.awt.Color: java.awt.Color white>;
+
+        specialinvoke $r296.<javax.swing.plaf.ColorUIResource: void <init>(java.awt.Color)>($r18);
+
+        $r297 = new javax.swing.plaf.ColorUIResource;
+
+        $r20 = <java.awt.Color: java.awt.Color gray>;
+
+        specialinvoke $r297.<javax.swing.plaf.ColorUIResource: void <init>(java.awt.Color)>($r20);
+
+        $r298 = new javax.swing.plaf.ColorUIResource;
+
+        $r22 = <java.awt.Color: java.awt.Color darkGray>;
+
+        specialinvoke $r298.<javax.swing.plaf.ColorUIResource: void <init>(java.awt.Color)>($r22);
+
+        $r23 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion getWindowsVersion()>();
+
+        $r24 = <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion WINDOWS_95>;
+
+        $i0 = virtualinvoke $r23.<sun.awt.OSInfo$WindowsVersion: int compareTo(sun.awt.OSInfo$WindowsVersion)>($r24);
+
+        if $i0 > 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isClassicWindows> = $z3;
+
+        $r25 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsTreeUI$ExpandedIcon: javax.swing.Icon createExpandedIcon()>();
+
+        $r26 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsTreeUI$CollapsedIcon: javax.swing.Icon createCollapsedIcon()>();
+
+        $r299 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r28 = newarray (java.lang.Object)[66];
+
+        $r28[0] = "control C";
+
+        $r28[1] = "copy-to-clipboard";
+
+        $r28[2] = "control V";
+
+        $r28[3] = "paste-from-clipboard";
+
+        $r28[4] = "control X";
+
+        $r28[5] = "cut-to-clipboard";
+
+        $r28[6] = "COPY";
+
+        $r28[7] = "copy-to-clipboard";
+
+        $r28[8] = "PASTE";
+
+        $r28[9] = "paste-from-clipboard";
+
+        $r28[10] = "CUT";
+
+        $r28[11] = "cut-to-clipboard";
+
+        $r28[12] = "control INSERT";
+
+        $r28[13] = "copy-to-clipboard";
+
+        $r28[14] = "shift INSERT";
+
+        $r28[15] = "paste-from-clipboard";
+
+        $r28[16] = "shift DELETE";
+
+        $r28[17] = "cut-to-clipboard";
+
+        $r28[18] = "control A";
+
+        $r28[19] = "select-all";
+
+        $r28[20] = "control BACK_SLASH";
+
+        $r28[21] = "unselect";
+
+        $r28[22] = "shift LEFT";
+
+        $r28[23] = "selection-backward";
+
+        $r28[24] = "shift RIGHT";
+
+        $r28[25] = "selection-forward";
+
+        $r28[26] = "control LEFT";
+
+        $r28[27] = "caret-previous-word";
+
+        $r28[28] = "control RIGHT";
+
+        $r28[29] = "caret-next-word";
+
+        $r28[30] = "control shift LEFT";
+
+        $r28[31] = "selection-previous-word";
+
+        $r28[32] = "control shift RIGHT";
+
+        $r28[33] = "selection-next-word";
+
+        $r28[34] = "HOME";
+
+        $r28[35] = "caret-begin-line";
+
+        $r28[36] = "END";
+
+        $r28[37] = "caret-end-line";
+
+        $r28[38] = "shift HOME";
+
+        $r28[39] = "selection-begin-line";
+
+        $r28[40] = "shift END";
+
+        $r28[41] = "selection-end-line";
+
+        $r28[42] = "BACK_SPACE";
+
+        $r28[43] = "delete-previous";
+
+        $r28[44] = "shift BACK_SPACE";
+
+        $r28[45] = "delete-previous";
+
+        $r28[46] = "ctrl H";
+
+        $r28[47] = "delete-previous";
+
+        $r28[48] = "DELETE";
+
+        $r28[49] = "delete-next";
+
+        $r28[50] = "ctrl DELETE";
+
+        $r28[51] = "delete-next-word";
+
+        $r28[52] = "ctrl BACK_SPACE";
+
+        $r28[53] = "delete-previous-word";
+
+        $r28[54] = "RIGHT";
+
+        $r28[55] = "caret-forward";
+
+        $r28[56] = "LEFT";
+
+        $r28[57] = "caret-backward";
+
+        $r28[58] = "KP_RIGHT";
+
+        $r28[59] = "caret-forward";
+
+        $r28[60] = "KP_LEFT";
+
+        $r28[61] = "caret-backward";
+
+        $r28[62] = "ENTER";
+
+        $r28[63] = "notify-field-accept";
+
+        $r28[64] = "control shift O";
+
+        $r28[65] = "toggle-componentOrientation";
+
+        specialinvoke $r299.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r28);
+
+        $r300 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r30 = newarray (java.lang.Object)[62];
+
+        $r30[0] = "control C";
+
+        $r30[1] = "copy-to-clipboard";
+
+        $r30[2] = "control V";
+
+        $r30[3] = "paste-from-clipboard";
+
+        $r30[4] = "control X";
+
+        $r30[5] = "cut-to-clipboard";
+
+        $r30[6] = "COPY";
+
+        $r30[7] = "copy-to-clipboard";
+
+        $r30[8] = "PASTE";
+
+        $r30[9] = "paste-from-clipboard";
+
+        $r30[10] = "CUT";
+
+        $r30[11] = "cut-to-clipboard";
+
+        $r30[12] = "control INSERT";
+
+        $r30[13] = "copy-to-clipboard";
+
+        $r30[14] = "shift INSERT";
+
+        $r30[15] = "paste-from-clipboard";
+
+        $r30[16] = "shift DELETE";
+
+        $r30[17] = "cut-to-clipboard";
+
+        $r30[18] = "control A";
+
+        $r30[19] = "select-all";
+
+        $r30[20] = "control BACK_SLASH";
+
+        $r30[21] = "unselect";
+
+        $r30[22] = "shift LEFT";
+
+        $r30[23] = "selection-backward";
+
+        $r30[24] = "shift RIGHT";
+
+        $r30[25] = "selection-forward";
+
+        $r30[26] = "control LEFT";
+
+        $r30[27] = "caret-begin-line";
+
+        $r30[28] = "control RIGHT";
+
+        $r30[29] = "caret-end-line";
+
+        $r30[30] = "control shift LEFT";
+
+        $r30[31] = "selection-begin-line";
+
+        $r30[32] = "control shift RIGHT";
+
+        $r30[33] = "selection-end-line";
+
+        $r30[34] = "HOME";
+
+        $r30[35] = "caret-begin-line";
+
+        $r30[36] = "END";
+
+        $r30[37] = "caret-end-line";
+
+        $r30[38] = "shift HOME";
+
+        $r30[39] = "selection-begin-line";
+
+        $r30[40] = "shift END";
+
+        $r30[41] = "selection-end-line";
+
+        $r30[42] = "BACK_SPACE";
+
+        $r30[43] = "delete-previous";
+
+        $r30[44] = "shift BACK_SPACE";
+
+        $r30[45] = "delete-previous";
+
+        $r30[46] = "ctrl H";
+
+        $r30[47] = "delete-previous";
+
+        $r30[48] = "DELETE";
+
+        $r30[49] = "delete-next";
+
+        $r30[50] = "RIGHT";
+
+        $r30[51] = "caret-forward";
+
+        $r30[52] = "LEFT";
+
+        $r30[53] = "caret-backward";
+
+        $r30[54] = "KP_RIGHT";
+
+        $r30[55] = "caret-forward";
+
+        $r30[56] = "KP_LEFT";
+
+        $r30[57] = "caret-backward";
+
+        $r30[58] = "ENTER";
+
+        $r30[59] = "notify-field-accept";
+
+        $r30[60] = "control shift O";
+
+        $r30[61] = "toggle-componentOrientation";
+
+        specialinvoke $r300.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r30);
+
+        $r301 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r32 = newarray (java.lang.Object)[102];
+
+        $r32[0] = "control C";
+
+        $r32[1] = "copy-to-clipboard";
+
+        $r32[2] = "control V";
+
+        $r32[3] = "paste-from-clipboard";
+
+        $r32[4] = "control X";
+
+        $r32[5] = "cut-to-clipboard";
+
+        $r32[6] = "COPY";
+
+        $r32[7] = "copy-to-clipboard";
+
+        $r32[8] = "PASTE";
+
+        $r32[9] = "paste-from-clipboard";
+
+        $r32[10] = "CUT";
+
+        $r32[11] = "cut-to-clipboard";
+
+        $r32[12] = "control INSERT";
+
+        $r32[13] = "copy-to-clipboard";
+
+        $r32[14] = "shift INSERT";
+
+        $r32[15] = "paste-from-clipboard";
+
+        $r32[16] = "shift DELETE";
+
+        $r32[17] = "cut-to-clipboard";
+
+        $r32[18] = "shift LEFT";
+
+        $r32[19] = "selection-backward";
+
+        $r32[20] = "shift RIGHT";
+
+        $r32[21] = "selection-forward";
+
+        $r32[22] = "control LEFT";
+
+        $r32[23] = "caret-previous-word";
+
+        $r32[24] = "control RIGHT";
+
+        $r32[25] = "caret-next-word";
+
+        $r32[26] = "control shift LEFT";
+
+        $r32[27] = "selection-previous-word";
+
+        $r32[28] = "control shift RIGHT";
+
+        $r32[29] = "selection-next-word";
+
+        $r32[30] = "control A";
+
+        $r32[31] = "select-all";
+
+        $r32[32] = "control BACK_SLASH";
+
+        $r32[33] = "unselect";
+
+        $r32[34] = "HOME";
+
+        $r32[35] = "caret-begin-line";
+
+        $r32[36] = "END";
+
+        $r32[37] = "caret-end-line";
+
+        $r32[38] = "shift HOME";
+
+        $r32[39] = "selection-begin-line";
+
+        $r32[40] = "shift END";
+
+        $r32[41] = "selection-end-line";
+
+        $r32[42] = "control HOME";
+
+        $r32[43] = "caret-begin";
+
+        $r32[44] = "control END";
+
+        $r32[45] = "caret-end";
+
+        $r32[46] = "control shift HOME";
+
+        $r32[47] = "selection-begin";
+
+        $r32[48] = "control shift END";
+
+        $r32[49] = "selection-end";
+
+        $r32[50] = "UP";
+
+        $r32[51] = "caret-up";
+
+        $r32[52] = "DOWN";
+
+        $r32[53] = "caret-down";
+
+        $r32[54] = "BACK_SPACE";
+
+        $r32[55] = "delete-previous";
+
+        $r32[56] = "shift BACK_SPACE";
+
+        $r32[57] = "delete-previous";
+
+        $r32[58] = "ctrl H";
+
+        $r32[59] = "delete-previous";
+
+        $r32[60] = "DELETE";
+
+        $r32[61] = "delete-next";
+
+        $r32[62] = "ctrl DELETE";
+
+        $r32[63] = "delete-next-word";
+
+        $r32[64] = "ctrl BACK_SPACE";
+
+        $r32[65] = "delete-previous-word";
+
+        $r32[66] = "RIGHT";
+
+        $r32[67] = "caret-forward";
+
+        $r32[68] = "LEFT";
+
+        $r32[69] = "caret-backward";
+
+        $r32[70] = "KP_RIGHT";
+
+        $r32[71] = "caret-forward";
+
+        $r32[72] = "KP_LEFT";
+
+        $r32[73] = "caret-backward";
+
+        $r32[74] = "PAGE_UP";
+
+        $r32[75] = "page-up";
+
+        $r32[76] = "PAGE_DOWN";
+
+        $r32[77] = "page-down";
+
+        $r32[78] = "shift PAGE_UP";
+
+        $r32[79] = "selection-page-up";
+
+        $r32[80] = "shift PAGE_DOWN";
+
+        $r32[81] = "selection-page-down";
+
+        $r32[82] = "ctrl shift PAGE_UP";
+
+        $r32[83] = "selection-page-left";
+
+        $r32[84] = "ctrl shift PAGE_DOWN";
+
+        $r32[85] = "selection-page-right";
+
+        $r32[86] = "shift UP";
+
+        $r32[87] = "selection-up";
+
+        $r32[88] = "shift DOWN";
+
+        $r32[89] = "selection-down";
+
+        $r32[90] = "ENTER";
+
+        $r32[91] = "insert-break";
+
+        $r32[92] = "TAB";
+
+        $r32[93] = "insert-tab";
+
+        $r32[94] = "control T";
+
+        $r32[95] = "next-link-action";
+
+        $r32[96] = "control shift T";
+
+        $r32[97] = "previous-link-action";
+
+        $r32[98] = "control SPACE";
+
+        $r32[99] = "activate-link-action";
+
+        $r32[100] = "control shift O";
+
+        $r32[101] = "toggle-componentOrientation";
+
+        specialinvoke $r301.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r32);
+
+        $r302 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r34 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("control");
+
+        specialinvoke $r302.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.3d.backgroundColor", $r34);
+
+        $r303 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r36 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("controlHighlight");
+
+        specialinvoke $r303.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.3d.lightColor", $r36);
+
+        $r304 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r38 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("controlLtHighlight");
+
+        specialinvoke $r304.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.3d.highlightColor", $r38);
+
+        $r305 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r40 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("controlShadow");
+
+        specialinvoke $r305.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.3d.shadowColor", $r40);
+
+        $r306 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r42 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("controlDkShadow");
+
+        specialinvoke $r306.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.3d.darkShadowColor", $r42);
+
+        $r307 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r44 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("controlText");
+
+        specialinvoke $r307.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.button.textColor", $r44);
+
+        $r308 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r46 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("menu");
+
+        specialinvoke $r308.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.menu.backgroundColor", $r46);
+
+        $r309 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r48 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("menu");
+
+        specialinvoke $r309.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.menubar.backgroundColor", $r48);
+
+        $r310 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r50 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("menuText");
+
+        specialinvoke $r310.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.menu.textColor", $r50);
+
+        $r311 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r52 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("textHighlight");
+
+        specialinvoke $r311.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.item.highlightColor", $r52);
+
+        $r312 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r54 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("textHighlightText");
+
+        specialinvoke $r312.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.item.highlightTextColor", $r54);
+
+        $r313 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r56 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("window");
+
+        specialinvoke $r313.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.backgroundColor", $r56);
+
+        $r314 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r58 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("windowText");
+
+        specialinvoke $r314.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.textColor", $r58);
+
+        $r315 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r60 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        specialinvoke $r315.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.sizingBorderWidth", $r60);
+
+        $r316 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r62 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(18);
+
+        specialinvoke $r316.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.captionHeight", $r62);
+
+        $r317 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r64 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(16);
+
+        specialinvoke $r317.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.captionButtonWidth", $r64);
+
+        $r318 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r66 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(16);
+
+        specialinvoke $r318.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.captionButtonHeight", $r66);
+
+        $r319 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r68 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("textInactiveText");
+
+        specialinvoke $r319.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.text.grayedTextColor", $r68);
+
+        $r320 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r70 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("scrollbar");
+
+        specialinvoke $r320.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.scrollbar.backgroundColor", $r70);
+
+        $r321 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FocusColorProperty;
+
+        specialinvoke $r321.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FocusColorProperty: void <init>()>();
+
+        $r322 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue;
+
+        $r74 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part EP_EDIT>;
+
+        $r73 = <com.sun.java.swing.plaf.windows.TMSchema$Prop: com.sun.java.swing.plaf.windows.TMSchema$Prop FILLCOLOR>;
+
+        specialinvoke $r322.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State,com.sun.java.swing.plaf.windows.TMSchema$Prop,java.lang.Object)>($r74, null, $r73, $r313);
+
+        r102 = $r290;
+
+        r103 = $r292;
+
+        r104 = $r290;
+
+        r105 = $r290;
+
+        r106 = $r293;
+
+        r107 = $r291;
+
+        r108 = $r290;
+
+        $r323 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r76 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(16);
+
+        specialinvoke $r323.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.scrollbar.width", $r76);
+
+        $r324 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        specialinvoke $r324.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.menu.height", null);
+
+        $r325 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r79 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        specialinvoke $r325.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.item.hotTrackingOn", $r79);
+
+        $r326 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r81 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        specialinvoke $r326.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.menu.keyboardCuesOn", $r81);
+
+        $z0 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings>;
+
+        if $z0 == 0 goto label3;
+
+        r102 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.menu.font", $r290);
+
+        r103 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.ansiFixed.font", $r292);
+
+        r104 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.defaultGUI.font", $r290);
+
+        r105 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.messagebox.font", $r290);
+
+        r106 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.frame.captionFont", $r293);
+
+        r108 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.icon.font", $r290);
+
+        r107 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object getDesktopFontValue(java.lang.String,java.lang.Object)>("win.tooltip.font", $r291);
+
+        $r99 = staticinvoke <sun.swing.SwingUtilities2$AATextInfo: sun.swing.SwingUtilities2$AATextInfo getAATextInfo(boolean)>(1);
+
+        $r100 = <sun.swing.SwingUtilities2: java.lang.Object AA_TEXT_PROPERTY_KEY>;
+
+        virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>($r100, $r99);
+
+        $r327 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FontDesktopProperty;
+
+        specialinvoke $r327.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$FontDesktopProperty: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String)>(r0, "awt.font.desktophints");
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: com.sun.java.swing.plaf.windows.DesktopProperty aaSettings> = $r327;
+
+     label3:
+        $z1 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSizeSettings>;
+
+        if $z1 == 0 goto label4;
+
+        $r328 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r328.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.menu.font.height", "Dialog", 0, 12);
+
+        r102 = $r328;
+
+        $r329 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r329.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.ansiFixed.font.height", "Monospaced", 0, 12);
+
+        r103 = $r329;
+
+        $r330 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r330.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.defaultGUI.font.height", "Dialog", 0, 12);
+
+        r104 = $r330;
+
+        $r331 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r331.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.messagebox.font.height", "Dialog", 0, 12);
+
+        r105 = $r331;
+
+        $r332 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r332.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.frame.captionFont.height", "Dialog", 1, 12);
+
+        r106 = $r332;
+
+        $r333 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r333.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.tooltip.font.height", "SansSerif", 0, 12);
+
+        r107 = $r333;
+
+        $r334 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty;
+
+        specialinvoke $r334.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontSizeProperty: void <init>(java.lang.String,java.lang.String,int,int)>("win.icon.font.height", "Dialog", 0, 12);
+
+        r108 = $r334;
+
+     label4:
+        $z2 = r0 instanceof com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel;
+
+        if $z2 != 0 goto label5;
+
+        $r82 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$OSType getOSType()>();
+
+        $r83 = <sun.awt.OSInfo$OSType: sun.awt.OSInfo$OSType WINDOWS>;
+
+        if $r82 != $r83 goto label5;
+
+        $r84 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion getWindowsVersion()>();
+
+        $r85 = <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion WINDOWS_XP>;
+
+        $i1 = virtualinvoke $r84.<sun.awt.OSInfo$WindowsVersion: int compareTo(sun.awt.OSInfo$WindowsVersion)>($r85);
+
+        if $i1 < 0 goto label5;
+
+        $r335 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r335.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("swing.noxp");
+
+        $r87 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r335);
+
+        if $r87 != null goto label5;
+
+        $r336 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty;
+
+        specialinvoke $r336.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String)>(r0, "win.xpstyle.themeActive");
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: com.sun.java.swing.plaf.windows.DesktopProperty themeActive> = $r336;
+
+        $r337 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty;
+
+        specialinvoke $r337.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String)>(r0, "win.xpstyle.dllName");
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: com.sun.java.swing.plaf.windows.DesktopProperty dllName> = $r337;
+
+        $r338 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty;
+
+        specialinvoke $r338.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String)>(r0, "win.xpstyle.colorName");
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: com.sun.java.swing.plaf.windows.DesktopProperty colorName> = $r338;
+
+        $r339 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty;
+
+        specialinvoke $r339.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$TriggerDesktopProperty: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String)>(r0, "win.xpstyle.sizeName");
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: com.sun.java.swing.plaf.windows.DesktopProperty sizeName> = $r339;
+
+     label5:
+        $r109 = newarray (java.lang.Object)[764];
+
+        $r109[0] = "AuditoryCues.playList";
+
+        $r109[1] = null;
+
+        $r109[2] = "Application.useSystemFontSettings";
+
+        $z4 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings>;
+
+        $r110 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        $r109[3] = $r110;
+
+        $r109[4] = "TextField.focusInputMap";
+
+        $r109[5] = $r299;
+
+        $r109[6] = "PasswordField.focusInputMap";
+
+        $r109[7] = $r300;
+
+        $r109[8] = "TextArea.focusInputMap";
+
+        $r109[9] = $r301;
+
+        $r109[10] = "TextPane.focusInputMap";
+
+        $r109[11] = $r301;
+
+        $r109[12] = "EditorPane.focusInputMap";
+
+        $r109[13] = $r301;
+
+        $r109[14] = "Button.font";
+
+        $r109[15] = r104;
+
+        $r109[16] = "Button.background";
+
+        $r109[17] = $r302;
+
+        $r109[18] = "Button.foreground";
+
+        $r109[19] = $r307;
+
+        $r109[20] = "Button.shadow";
+
+        $r109[21] = $r305;
+
+        $r109[22] = "Button.darkShadow";
+
+        $r109[23] = $r306;
+
+        $r109[24] = "Button.light";
+
+        $r109[25] = $r303;
+
+        $r109[26] = "Button.highlight";
+
+        $r109[27] = $r304;
+
+        $r109[28] = "Button.disabledForeground";
+
+        $r109[29] = $r319;
+
+        $r109[30] = "Button.disabledShadow";
+
+        $r109[31] = $r304;
+
+        $r109[32] = "Button.focus";
+
+        $r109[33] = $r321;
+
+        $r109[34] = "Button.dashedRectGapX";
+
+        $r340 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r112 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(3);
+
+        $r113 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(5);
+
+        specialinvoke $r340.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r112, $r113);
+
+        $r109[35] = $r340;
+
+        $r109[36] = "Button.dashedRectGapY";
+
+        $r341 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r115 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(3);
+
+        $r116 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(4);
+
+        specialinvoke $r341.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r115, $r116);
+
+        $r109[37] = $r341;
+
+        $r109[38] = "Button.dashedRectGapWidth";
+
+        $r342 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r118 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(6);
+
+        $r119 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(10);
+
+        specialinvoke $r342.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r118, $r119);
+
+        $r109[39] = $r342;
+
+        $r109[40] = "Button.dashedRectGapHeight";
+
+        $r343 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r121 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(6);
+
+        $r122 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(8);
+
+        specialinvoke $r343.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r121, $r122);
+
+        $r109[41] = $r343;
+
+        $r109[42] = "Button.textShiftOffset";
+
+        $r344 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r124 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r125 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        specialinvoke $r344.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r124, $r125);
+
+        $r109[43] = $r344;
+
+        $r109[44] = "Button.showMnemonics";
+
+        $r109[45] = $r326;
+
+        $r109[46] = "Button.focusInputMap";
+
+        $r345 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r127 = newarray (java.lang.Object)[4];
+
+        $r127[0] = "SPACE";
+
+        $r127[1] = "pressed";
+
+        $r127[2] = "released SPACE";
+
+        $r127[3] = "released";
+
+        specialinvoke $r345.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r127);
+
+        $r109[47] = $r345;
+
+        $r109[48] = "Caret.width";
+
+        $r346 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        specialinvoke $r346.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.caret.width", null);
+
+        $r109[49] = $r346;
+
+        $r109[50] = "CheckBox.font";
+
+        $r109[51] = r104;
+
+        $r109[52] = "CheckBox.interiorBackground";
+
+        $r109[53] = $r313;
+
+        $r109[54] = "CheckBox.background";
+
+        $r109[55] = $r302;
+
+        $r109[56] = "CheckBox.foreground";
+
+        $r109[57] = $r314;
+
+        $r109[58] = "CheckBox.shadow";
+
+        $r109[59] = $r305;
+
+        $r109[60] = "CheckBox.darkShadow";
+
+        $r109[61] = $r306;
+
+        $r109[62] = "CheckBox.light";
+
+        $r109[63] = $r303;
+
+        $r109[64] = "CheckBox.highlight";
+
+        $r109[65] = $r304;
+
+        $r109[66] = "CheckBox.focus";
+
+        $r109[67] = $r321;
+
+        $r109[68] = "CheckBox.focusInputMap";
+
+        $r347 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r130 = newarray (java.lang.Object)[4];
+
+        $r130[0] = "SPACE";
+
+        $r130[1] = "pressed";
+
+        $r130[2] = "released SPACE";
+
+        $r130[3] = "released";
+
+        specialinvoke $r347.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r130);
+
+        $r109[69] = $r347;
+
+        $r109[70] = "CheckBox.totalInsets";
+
+        $r348 = new java.awt.Insets;
+
+        specialinvoke $r348.<java.awt.Insets: void <init>(int,int,int,int)>(4, 4, 4, 4);
+
+        $r109[71] = $r348;
+
+        $r109[72] = "CheckBoxMenuItem.font";
+
+        $r109[73] = r102;
+
+        $r109[74] = "CheckBoxMenuItem.background";
+
+        $r109[75] = $r308;
+
+        $r109[76] = "CheckBoxMenuItem.foreground";
+
+        $r109[77] = $r310;
+
+        $r109[78] = "CheckBoxMenuItem.selectionForeground";
+
+        $r109[79] = $r312;
+
+        $r109[80] = "CheckBoxMenuItem.selectionBackground";
+
+        $r109[81] = $r311;
+
+        $r109[82] = "CheckBoxMenuItem.acceleratorForeground";
+
+        $r109[83] = $r310;
+
+        $r109[84] = "CheckBoxMenuItem.acceleratorSelectionForeground";
+
+        $r109[85] = $r312;
+
+        $r109[86] = "CheckBoxMenuItem.commandSound";
+
+        $r109[87] = "win.sound.menuCommand";
+
+        $r109[88] = "ComboBox.font";
+
+        $r109[89] = r104;
+
+        $r109[90] = "ComboBox.background";
+
+        $r109[91] = $r313;
+
+        $r109[92] = "ComboBox.foreground";
+
+        $r109[93] = $r314;
+
+        $r109[94] = "ComboBox.buttonBackground";
+
+        $r109[95] = $r302;
+
+        $r109[96] = "ComboBox.buttonShadow";
+
+        $r109[97] = $r305;
+
+        $r109[98] = "ComboBox.buttonDarkShadow";
+
+        $r109[99] = $r306;
+
+        $r109[100] = "ComboBox.buttonHighlight";
+
+        $r109[101] = $r304;
+
+        $r109[102] = "ComboBox.selectionBackground";
+
+        $r109[103] = $r311;
+
+        $r109[104] = "ComboBox.selectionForeground";
+
+        $r109[105] = $r312;
+
+        $r109[106] = "ComboBox.editorBorder";
+
+        $r351 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r349 = new javax.swing.border.EmptyBorder;
+
+        specialinvoke $r349.<javax.swing.border.EmptyBorder: void <init>(int,int,int,int)>(1, 2, 1, 1);
+
+        $r350 = new javax.swing.border.EmptyBorder;
+
+        specialinvoke $r350.<javax.swing.border.EmptyBorder: void <init>(int,int,int,int)>(1, 4, 1, 4);
+
+        specialinvoke $r351.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r349, $r350);
+
+        $r109[107] = $r351;
+
+        $r109[108] = "ComboBox.disabledBackground";
+
+        $r352 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue;
+
+        $r136 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part CP_COMBOBOX>;
+
+        $r137 = <com.sun.java.swing.plaf.windows.TMSchema$State: com.sun.java.swing.plaf.windows.TMSchema$State DISABLED>;
+
+        $r138 = <com.sun.java.swing.plaf.windows.TMSchema$Prop: com.sun.java.swing.plaf.windows.TMSchema$Prop FILLCOLOR>;
+
+        specialinvoke $r352.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State,com.sun.java.swing.plaf.windows.TMSchema$Prop,java.lang.Object)>($r136, $r137, $r138, $r302);
+
+        $r109[109] = $r352;
+
+        $r109[110] = "ComboBox.disabledForeground";
+
+        $r353 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue;
+
+        $r140 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part CP_COMBOBOX>;
+
+        $r141 = <com.sun.java.swing.plaf.windows.TMSchema$State: com.sun.java.swing.plaf.windows.TMSchema$State DISABLED>;
+
+        $r142 = <com.sun.java.swing.plaf.windows.TMSchema$Prop: com.sun.java.swing.plaf.windows.TMSchema$Prop TEXTCOLOR>;
+
+        specialinvoke $r353.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State,com.sun.java.swing.plaf.windows.TMSchema$Prop,java.lang.Object)>($r140, $r141, $r142, $r319);
+
+        $r109[111] = $r353;
+
+        $r109[112] = "ComboBox.ancestorInputMap";
+
+        $r354 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r144 = newarray (java.lang.Object)[30];
+
+        $r144[0] = "ESCAPE";
+
+        $r144[1] = "hidePopup";
+
+        $r144[2] = "PAGE_UP";
+
+        $r144[3] = "pageUpPassThrough";
+
+        $r144[4] = "PAGE_DOWN";
+
+        $r144[5] = "pageDownPassThrough";
+
+        $r144[6] = "HOME";
+
+        $r144[7] = "homePassThrough";
+
+        $r144[8] = "END";
+
+        $r144[9] = "endPassThrough";
+
+        $r144[10] = "DOWN";
+
+        $r144[11] = "selectNext2";
+
+        $r144[12] = "KP_DOWN";
+
+        $r144[13] = "selectNext2";
+
+        $r144[14] = "UP";
+
+        $r144[15] = "selectPrevious2";
+
+        $r144[16] = "KP_UP";
+
+        $r144[17] = "selectPrevious2";
+
+        $r144[18] = "ENTER";
+
+        $r144[19] = "enterPressed";
+
+        $r144[20] = "F4";
+
+        $r144[21] = "togglePopup";
+
+        $r144[22] = "alt DOWN";
+
+        $r144[23] = "togglePopup";
+
+        $r144[24] = "alt KP_DOWN";
+
+        $r144[25] = "togglePopup";
+
+        $r144[26] = "alt UP";
+
+        $r144[27] = "togglePopup";
+
+        $r144[28] = "alt KP_UP";
+
+        $r144[29] = "togglePopup";
+
+        specialinvoke $r354.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r144);
+
+        $r109[113] = $r354;
+
+        $r109[114] = "Desktop.background";
+
+        $r355 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r146 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("desktop");
+
+        specialinvoke $r355.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.desktop.backgroundColor", $r146);
+
+        $r109[115] = $r355;
+
+        $r109[116] = "Desktop.ancestorInputMap";
+
+        $r356 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r148 = newarray (java.lang.Object)[42];
+
+        $r148[0] = "ctrl F5";
+
+        $r148[1] = "restore";
+
+        $r148[2] = "ctrl F4";
+
+        $r148[3] = "close";
+
+        $r148[4] = "ctrl F7";
+
+        $r148[5] = "move";
+
+        $r148[6] = "ctrl F8";
+
+        $r148[7] = "resize";
+
+        $r148[8] = "RIGHT";
+
+        $r148[9] = "right";
+
+        $r148[10] = "KP_RIGHT";
+
+        $r148[11] = "right";
+
+        $r148[12] = "LEFT";
+
+        $r148[13] = "left";
+
+        $r148[14] = "KP_LEFT";
+
+        $r148[15] = "left";
+
+        $r148[16] = "UP";
+
+        $r148[17] = "up";
+
+        $r148[18] = "KP_UP";
+
+        $r148[19] = "up";
+
+        $r148[20] = "DOWN";
+
+        $r148[21] = "down";
+
+        $r148[22] = "KP_DOWN";
+
+        $r148[23] = "down";
+
+        $r148[24] = "ESCAPE";
+
+        $r148[25] = "escape";
+
+        $r148[26] = "ctrl F9";
+
+        $r148[27] = "minimize";
+
+        $r148[28] = "ctrl F10";
+
+        $r148[29] = "maximize";
+
+        $r148[30] = "ctrl F6";
+
+        $r148[31] = "selectNextFrame";
+
+        $r148[32] = "ctrl TAB";
+
+        $r148[33] = "selectNextFrame";
+
+        $r148[34] = "ctrl alt F6";
+
+        $r148[35] = "selectNextFrame";
+
+        $r148[36] = "shift ctrl alt F6";
+
+        $r148[37] = "selectPreviousFrame";
+
+        $r148[38] = "ctrl F12";
+
+        $r148[39] = "navigateNext";
+
+        $r148[40] = "shift ctrl F12";
+
+        $r148[41] = "navigatePrevious";
+
+        specialinvoke $r356.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r148);
+
+        $r109[117] = $r356;
+
+        $r109[118] = "DesktopIcon.width";
+
+        $r149 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(160);
+
+        $r109[119] = $r149;
+
+        $r109[120] = "EditorPane.font";
+
+        $r109[121] = r104;
+
+        $r109[122] = "EditorPane.background";
+
+        $r109[123] = $r313;
+
+        $r109[124] = "EditorPane.foreground";
+
+        $r109[125] = $r314;
+
+        $r109[126] = "EditorPane.selectionBackground";
+
+        $r109[127] = $r311;
+
+        $r109[128] = "EditorPane.selectionForeground";
+
+        $r109[129] = $r312;
+
+        $r109[130] = "EditorPane.caretForeground";
+
+        $r109[131] = $r314;
+
+        $r109[132] = "EditorPane.inactiveForeground";
+
+        $r109[133] = $r319;
+
+        $r109[134] = "EditorPane.inactiveBackground";
+
+        $r109[135] = $r313;
+
+        $r109[136] = "EditorPane.disabledBackground";
+
+        $r109[137] = $r302;
+
+        $r109[138] = "FileChooser.homeFolderIcon";
+
+        $r357 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r357.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>(null, "icons/HomeFolder.gif");
+
+        $r109[139] = $r357;
+
+        $r109[140] = "FileChooser.listFont";
+
+        $r109[141] = r108;
+
+        $r109[142] = "FileChooser.listViewBackground";
+
+        $r358 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue;
+
+        $r152 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part LVP_LISTVIEW>;
+
+        $r153 = <com.sun.java.swing.plaf.windows.TMSchema$Prop: com.sun.java.swing.plaf.windows.TMSchema$Prop FILLCOLOR>;
+
+        specialinvoke $r358.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State,com.sun.java.swing.plaf.windows.TMSchema$Prop,java.lang.Object)>($r152, null, $r153, $r313);
+
+        $r109[143] = $r358;
+
+        $r109[144] = "FileChooser.listViewBorder";
+
+        $r360 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r155 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part LVP_LISTVIEW>;
+
+        $r359 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r359.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.BorderUIResource", "getLoweredBevelBorderUIResource");
+
+        specialinvoke $r360.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r155, $r359);
+
+        $r109[145] = $r360;
+
+        $r109[146] = "FileChooser.listViewIcon";
+
+        $r361 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r361.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("fileChooserIcon ListView", "icons/ListView.gif");
+
+        $r109[147] = $r361;
+
+        $r109[148] = "FileChooser.listViewWindowsStyle";
+
+        $r158 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[149] = $r158;
+
+        $r109[150] = "FileChooser.detailsViewIcon";
+
+        $r362 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r362.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("fileChooserIcon DetailsView", "icons/DetailsView.gif");
+
+        $r109[151] = $r362;
+
+        $r109[152] = "FileChooser.viewMenuIcon";
+
+        $r363 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r363.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("fileChooserIcon ViewMenu", "icons/ListView.gif");
+
+        $r109[153] = $r363;
+
+        $r109[154] = "FileChooser.upFolderIcon";
+
+        $r364 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r364.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("fileChooserIcon UpFolder", "icons/UpFolder.gif");
+
+        $r109[155] = $r364;
+
+        $r109[156] = "FileChooser.newFolderIcon";
+
+        $r365 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r365.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("fileChooserIcon NewFolder", "icons/NewFolder.gif");
+
+        $r109[157] = $r365;
+
+        $r109[158] = "FileChooser.useSystemExtensionHiding";
+
+        $r163 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[159] = $r163;
+
+        $r109[160] = "FileChooser.usesSingleFilePane";
+
+        $r164 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[161] = $r164;
+
+        $r109[162] = "FileChooser.noPlacesBar";
+
+        $r366 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r166 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r366.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.comdlg.noPlacesBar", $r166);
+
+        $r109[163] = $r366;
+
+        $r109[164] = "FileChooser.ancestorInputMap";
+
+        $r367 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r168 = newarray (java.lang.Object)[8];
+
+        $r168[0] = "ESCAPE";
+
+        $r168[1] = "cancelSelection";
+
+        $r168[2] = "F2";
+
+        $r168[3] = "editFileName";
+
+        $r168[4] = "F5";
+
+        $r168[5] = "refresh";
+
+        $r168[6] = "BACK_SPACE";
+
+        $r168[7] = "Go Up";
+
+        specialinvoke $r367.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r168);
+
+        $r109[165] = $r367;
+
+        $r109[166] = "FileView.directoryIcon";
+
+        $r169 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r170 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r169, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/Directory.gif");
+
+        $r109[167] = $r170;
+
+        $r109[168] = "FileView.fileIcon";
+
+        $r171 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r172 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r171, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/File.gif");
+
+        $r109[169] = $r172;
+
+        $r109[170] = "FileView.computerIcon";
+
+        $r173 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r174 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r173, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/Computer.gif");
+
+        $r109[171] = $r174;
+
+        $r109[172] = "FileView.hardDriveIcon";
+
+        $r175 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r176 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r175, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/HardDrive.gif");
+
+        $r109[173] = $r176;
+
+        $r109[174] = "FileView.floppyDriveIcon";
+
+        $r177 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r178 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r177, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/FloppyDrive.gif");
+
+        $r109[175] = $r178;
+
+        $r109[176] = "FormattedTextField.font";
+
+        $r109[177] = r104;
+
+        $r109[178] = "InternalFrame.titleFont";
+
+        $r109[179] = r106;
+
+        $r109[180] = "InternalFrame.titlePaneHeight";
+
+        $r109[181] = $r316;
+
+        $r109[182] = "InternalFrame.titleButtonWidth";
+
+        $r109[183] = $r317;
+
+        $r109[184] = "InternalFrame.titleButtonHeight";
+
+        $r109[185] = $r318;
+
+        $r109[186] = "InternalFrame.titleButtonToolTipsOn";
+
+        $r109[187] = $r325;
+
+        $r109[188] = "InternalFrame.borderColor";
+
+        $r109[189] = $r302;
+
+        $r109[190] = "InternalFrame.borderShadow";
+
+        $r109[191] = $r305;
+
+        $r109[192] = "InternalFrame.borderDarkShadow";
+
+        $r109[193] = $r306;
+
+        $r109[194] = "InternalFrame.borderHighlight";
+
+        $r109[195] = $r304;
+
+        $r109[196] = "InternalFrame.borderLight";
+
+        $r109[197] = $r303;
+
+        $r109[198] = "InternalFrame.borderWidth";
+
+        $r109[199] = $r315;
+
+        $r109[200] = "InternalFrame.minimizeIconBackground";
+
+        $r109[201] = $r302;
+
+        $r109[202] = "InternalFrame.resizeIconHighlight";
+
+        $r109[203] = $r303;
+
+        $r109[204] = "InternalFrame.resizeIconShadow";
+
+        $r109[205] = $r305;
+
+        $r109[206] = "InternalFrame.activeBorderColor";
+
+        $r368 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r180 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("windowBorder");
+
+        specialinvoke $r368.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.activeBorderColor", $r180);
+
+        $r109[207] = $r368;
+
+        $r109[208] = "InternalFrame.inactiveBorderColor";
+
+        $r369 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r182 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("windowBorder");
+
+        specialinvoke $r369.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.inactiveBorderColor", $r182);
+
+        $r109[209] = $r369;
+
+        $r109[210] = "InternalFrame.activeTitleBackground";
+
+        $r370 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r184 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("activeCaption");
+
+        specialinvoke $r370.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.activeCaptionColor", $r184);
+
+        $r109[211] = $r370;
+
+        $r109[212] = "InternalFrame.activeTitleGradient";
+
+        $r371 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r186 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("activeCaption");
+
+        specialinvoke $r371.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.activeCaptionGradientColor", $r186);
+
+        $r109[213] = $r371;
+
+        $r109[214] = "InternalFrame.activeTitleForeground";
+
+        $r372 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r188 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("activeCaptionText");
+
+        specialinvoke $r372.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.captionTextColor", $r188);
+
+        $r109[215] = $r372;
+
+        $r109[216] = "InternalFrame.inactiveTitleBackground";
+
+        $r373 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r190 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("inactiveCaption");
+
+        specialinvoke $r373.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.inactiveCaptionColor", $r190);
+
+        $r109[217] = $r373;
+
+        $r109[218] = "InternalFrame.inactiveTitleGradient";
+
+        $r374 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r192 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("inactiveCaption");
+
+        specialinvoke $r374.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.inactiveCaptionGradientColor", $r192);
+
+        $r109[219] = $r374;
+
+        $r109[220] = "InternalFrame.inactiveTitleForeground";
+
+        $r375 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r194 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("inactiveCaptionText");
+
+        specialinvoke $r375.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.frame.inactiveCaptionTextColor", $r194);
+
+        $r109[221] = $r375;
+
+        $r109[222] = "InternalFrame.maximizeIcon";
+
+        $r195 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsIconFactory: javax.swing.Icon createFrameMaximizeIcon()>();
+
+        $r109[223] = $r195;
+
+        $r109[224] = "InternalFrame.minimizeIcon";
+
+        $r196 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsIconFactory: javax.swing.Icon createFrameMinimizeIcon()>();
+
+        $r109[225] = $r196;
+
+        $r109[226] = "InternalFrame.iconifyIcon";
+
+        $r197 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsIconFactory: javax.swing.Icon createFrameIconifyIcon()>();
+
+        $r109[227] = $r197;
+
+        $r109[228] = "InternalFrame.closeIcon";
+
+        $r198 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsIconFactory: javax.swing.Icon createFrameCloseIcon()>();
+
+        $r109[229] = $r198;
+
+        $r109[230] = "InternalFrame.icon";
+
+        $r376 = new sun.swing.SwingLazyValue;
+
+        $r200 = newarray (java.lang.Object[])[1];
+
+        $r201 = newarray (java.lang.Object)[2];
+
+        $r202 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r203 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r202, class "Ljavax/swing/plaf/basic/BasicLookAndFeel;", "icons/JavaCup16.png");
+
+        $r201[0] = $r203;
+
+        $r204 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r205 = staticinvoke <sun.swing.SwingUtilities2: java.lang.Object makeIcon(java.lang.Class,java.lang.Class,java.lang.String)>($r204, class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;", "icons/JavaCup32.png");
+
+        $r201[1] = $r205;
+
+        $r200[0] = $r201;
+
+        specialinvoke $r376.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.Object[])>("com.sun.java.swing.plaf.windows.WindowsInternalFrameTitlePane$ScalableIconUIResource", $r200);
+
+        $r109[231] = $r376;
+
+        $r109[232] = "InternalFrame.closeSound";
+
+        $r109[233] = "win.sound.close";
+
+        $r109[234] = "InternalFrame.maximizeSound";
+
+        $r109[235] = "win.sound.maximize";
+
+        $r109[236] = "InternalFrame.minimizeSound";
+
+        $r109[237] = "win.sound.minimize";
+
+        $r109[238] = "InternalFrame.restoreDownSound";
+
+        $r109[239] = "win.sound.restoreDown";
+
+        $r109[240] = "InternalFrame.restoreUpSound";
+
+        $r109[241] = "win.sound.restoreUp";
+
+        $r109[242] = "InternalFrame.windowBindings";
+
+        $r206 = newarray (java.lang.Object)[6];
+
+        $r206[0] = "shift ESCAPE";
+
+        $r206[1] = "showSystemMenu";
+
+        $r206[2] = "ctrl SPACE";
+
+        $r206[3] = "showSystemMenu";
+
+        $r206[4] = "ESCAPE";
+
+        $r206[5] = "hideSystemMenu";
+
+        $r109[243] = $r206;
+
+        $r109[244] = "Label.font";
+
+        $r109[245] = r104;
+
+        $r109[246] = "Label.background";
+
+        $r109[247] = $r302;
+
+        $r109[248] = "Label.foreground";
+
+        $r109[249] = $r314;
+
+        $r109[250] = "Label.disabledForeground";
+
+        $r109[251] = $r319;
+
+        $r109[252] = "Label.disabledShadow";
+
+        $r109[253] = $r304;
+
+        $r109[254] = "List.font";
+
+        $r109[255] = r104;
+
+        $r109[256] = "List.background";
+
+        $r109[257] = $r313;
+
+        $r109[258] = "List.foreground";
+
+        $r109[259] = $r314;
+
+        $r109[260] = "List.selectionBackground";
+
+        $r109[261] = $r311;
+
+        $r109[262] = "List.selectionForeground";
+
+        $r109[263] = $r312;
+
+        $r109[264] = "List.lockToPositionOnScroll";
+
+        $r207 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[265] = $r207;
+
+        $r109[266] = "List.focusInputMap";
+
+        $r377 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r209 = newarray (java.lang.Object)[128];
+
+        $r209[0] = "ctrl C";
+
+        $r209[1] = "copy";
+
+        $r209[2] = "ctrl V";
+
+        $r209[3] = "paste";
+
+        $r209[4] = "ctrl X";
+
+        $r209[5] = "cut";
+
+        $r209[6] = "COPY";
+
+        $r209[7] = "copy";
+
+        $r209[8] = "PASTE";
+
+        $r209[9] = "paste";
+
+        $r209[10] = "CUT";
+
+        $r209[11] = "cut";
+
+        $r209[12] = "control INSERT";
+
+        $r209[13] = "copy";
+
+        $r209[14] = "shift INSERT";
+
+        $r209[15] = "paste";
+
+        $r209[16] = "shift DELETE";
+
+        $r209[17] = "cut";
+
+        $r209[18] = "UP";
+
+        $r209[19] = "selectPreviousRow";
+
+        $r209[20] = "KP_UP";
+
+        $r209[21] = "selectPreviousRow";
+
+        $r209[22] = "shift UP";
+
+        $r209[23] = "selectPreviousRowExtendSelection";
+
+        $r209[24] = "shift KP_UP";
+
+        $r209[25] = "selectPreviousRowExtendSelection";
+
+        $r209[26] = "ctrl shift UP";
+
+        $r209[27] = "selectPreviousRowExtendSelection";
+
+        $r209[28] = "ctrl shift KP_UP";
+
+        $r209[29] = "selectPreviousRowExtendSelection";
+
+        $r209[30] = "ctrl UP";
+
+        $r209[31] = "selectPreviousRowChangeLead";
+
+        $r209[32] = "ctrl KP_UP";
+
+        $r209[33] = "selectPreviousRowChangeLead";
+
+        $r209[34] = "DOWN";
+
+        $r209[35] = "selectNextRow";
+
+        $r209[36] = "KP_DOWN";
+
+        $r209[37] = "selectNextRow";
+
+        $r209[38] = "shift DOWN";
+
+        $r209[39] = "selectNextRowExtendSelection";
+
+        $r209[40] = "shift KP_DOWN";
+
+        $r209[41] = "selectNextRowExtendSelection";
+
+        $r209[42] = "ctrl shift DOWN";
+
+        $r209[43] = "selectNextRowExtendSelection";
+
+        $r209[44] = "ctrl shift KP_DOWN";
+
+        $r209[45] = "selectNextRowExtendSelection";
+
+        $r209[46] = "ctrl DOWN";
+
+        $r209[47] = "selectNextRowChangeLead";
+
+        $r209[48] = "ctrl KP_DOWN";
+
+        $r209[49] = "selectNextRowChangeLead";
+
+        $r209[50] = "LEFT";
+
+        $r209[51] = "selectPreviousColumn";
+
+        $r209[52] = "KP_LEFT";
+
+        $r209[53] = "selectPreviousColumn";
+
+        $r209[54] = "shift LEFT";
+
+        $r209[55] = "selectPreviousColumnExtendSelection";
+
+        $r209[56] = "shift KP_LEFT";
+
+        $r209[57] = "selectPreviousColumnExtendSelection";
+
+        $r209[58] = "ctrl shift LEFT";
+
+        $r209[59] = "selectPreviousColumnExtendSelection";
+
+        $r209[60] = "ctrl shift KP_LEFT";
+
+        $r209[61] = "selectPreviousColumnExtendSelection";
+
+        $r209[62] = "ctrl LEFT";
+
+        $r209[63] = "selectPreviousColumnChangeLead";
+
+        $r209[64] = "ctrl KP_LEFT";
+
+        $r209[65] = "selectPreviousColumnChangeLead";
+
+        $r209[66] = "RIGHT";
+
+        $r209[67] = "selectNextColumn";
+
+        $r209[68] = "KP_RIGHT";
+
+        $r209[69] = "selectNextColumn";
+
+        $r209[70] = "shift RIGHT";
+
+        $r209[71] = "selectNextColumnExtendSelection";
+
+        $r209[72] = "shift KP_RIGHT";
+
+        $r209[73] = "selectNextColumnExtendSelection";
+
+        $r209[74] = "ctrl shift RIGHT";
+
+        $r209[75] = "selectNextColumnExtendSelection";
+
+        $r209[76] = "ctrl shift KP_RIGHT";
+
+        $r209[77] = "selectNextColumnExtendSelection";
+
+        $r209[78] = "ctrl RIGHT";
+
+        $r209[79] = "selectNextColumnChangeLead";
+
+        $r209[80] = "ctrl KP_RIGHT";
+
+        $r209[81] = "selectNextColumnChangeLead";
+
+        $r209[82] = "HOME";
+
+        $r209[83] = "selectFirstRow";
+
+        $r209[84] = "shift HOME";
+
+        $r209[85] = "selectFirstRowExtendSelection";
+
+        $r209[86] = "ctrl shift HOME";
+
+        $r209[87] = "selectFirstRowExtendSelection";
+
+        $r209[88] = "ctrl HOME";
+
+        $r209[89] = "selectFirstRowChangeLead";
+
+        $r209[90] = "END";
+
+        $r209[91] = "selectLastRow";
+
+        $r209[92] = "shift END";
+
+        $r209[93] = "selectLastRowExtendSelection";
+
+        $r209[94] = "ctrl shift END";
+
+        $r209[95] = "selectLastRowExtendSelection";
+
+        $r209[96] = "ctrl END";
+
+        $r209[97] = "selectLastRowChangeLead";
+
+        $r209[98] = "PAGE_UP";
+
+        $r209[99] = "scrollUp";
+
+        $r209[100] = "shift PAGE_UP";
+
+        $r209[101] = "scrollUpExtendSelection";
+
+        $r209[102] = "ctrl shift PAGE_UP";
+
+        $r209[103] = "scrollUpExtendSelection";
+
+        $r209[104] = "ctrl PAGE_UP";
+
+        $r209[105] = "scrollUpChangeLead";
+
+        $r209[106] = "PAGE_DOWN";
+
+        $r209[107] = "scrollDown";
+
+        $r209[108] = "shift PAGE_DOWN";
+
+        $r209[109] = "scrollDownExtendSelection";
+
+        $r209[110] = "ctrl shift PAGE_DOWN";
+
+        $r209[111] = "scrollDownExtendSelection";
+
+        $r209[112] = "ctrl PAGE_DOWN";
+
+        $r209[113] = "scrollDownChangeLead";
+
+        $r209[114] = "ctrl A";
+
+        $r209[115] = "selectAll";
+
+        $r209[116] = "ctrl SLASH";
+
+        $r209[117] = "selectAll";
+
+        $r209[118] = "ctrl BACK_SLASH";
+
+        $r209[119] = "clearSelection";
+
+        $r209[120] = "SPACE";
+
+        $r209[121] = "addToSelection";
+
+        $r209[122] = "ctrl SPACE";
+
+        $r209[123] = "toggleAndAnchor";
+
+        $r209[124] = "shift SPACE";
+
+        $r209[125] = "extendTo";
+
+        $r209[126] = "ctrl shift SPACE";
+
+        $r209[127] = "moveSelectionTo";
+
+        specialinvoke $r377.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r209);
+
+        $r109[267] = $r377;
+
+        $r109[268] = "PopupMenu.font";
+
+        $r109[269] = r102;
+
+        $r109[270] = "PopupMenu.background";
+
+        $r109[271] = $r308;
+
+        $r109[272] = "PopupMenu.foreground";
+
+        $r109[273] = $r310;
+
+        $r109[274] = "PopupMenu.popupSound";
+
+        $r109[275] = "win.sound.menuPopup";
+
+        $r109[276] = "PopupMenu.consumeEventOnClose";
+
+        $r210 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[277] = $r210;
+
+        $r109[278] = "Menu.font";
+
+        $r109[279] = r102;
+
+        $r109[280] = "Menu.foreground";
+
+        $r109[281] = $r310;
+
+        $r109[282] = "Menu.background";
+
+        $r109[283] = $r308;
+
+        $r109[284] = "Menu.useMenuBarBackgroundForTopLevel";
+
+        $r211 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[285] = $r211;
+
+        $r109[286] = "Menu.selectionForeground";
+
+        $r109[287] = $r312;
+
+        $r109[288] = "Menu.selectionBackground";
+
+        $r109[289] = $r311;
+
+        $r109[290] = "Menu.acceleratorForeground";
+
+        $r109[291] = $r310;
+
+        $r109[292] = "Menu.acceleratorSelectionForeground";
+
+        $r109[293] = $r312;
+
+        $r109[294] = "Menu.menuPopupOffsetX";
+
+        $r212 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r109[295] = $r212;
+
+        $r109[296] = "Menu.menuPopupOffsetY";
+
+        $r213 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r109[297] = $r213;
+
+        $r109[298] = "Menu.submenuPopupOffsetX";
+
+        $i3 = (int) -4;
+
+        $r214 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r109[299] = $r214;
+
+        $r109[300] = "Menu.submenuPopupOffsetY";
+
+        $i5 = (int) -3;
+
+        $r215 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i5);
+
+        $r109[301] = $r215;
+
+        $r109[302] = "Menu.crossMenuMnemonic";
+
+        $r216 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r109[303] = $r216;
+
+        $r109[304] = "Menu.preserveTopLevelSelection";
+
+        $r217 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[305] = $r217;
+
+        $r109[306] = "MenuBar.font";
+
+        $r109[307] = r102;
+
+        $r109[308] = "MenuBar.background";
+
+        $r378 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r378.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r309, $r308);
+
+        $r109[309] = $r378;
+
+        $r109[310] = "MenuBar.foreground";
+
+        $r109[311] = $r310;
+
+        $r109[312] = "MenuBar.shadow";
+
+        $r109[313] = $r305;
+
+        $r109[314] = "MenuBar.highlight";
+
+        $r109[315] = $r304;
+
+        $r109[316] = "MenuBar.height";
+
+        $r109[317] = $r324;
+
+        $r109[318] = "MenuBar.rolloverEnabled";
+
+        $r109[319] = $r325;
+
+        $r109[320] = "MenuBar.windowBindings";
+
+        $r219 = newarray (java.lang.Object)[2];
+
+        $r219[0] = "F10";
+
+        $r219[1] = "takeFocus";
+
+        $r109[321] = $r219;
+
+        $r109[322] = "MenuItem.font";
+
+        $r109[323] = r102;
+
+        $r109[324] = "MenuItem.acceleratorFont";
+
+        $r109[325] = r102;
+
+        $r109[326] = "MenuItem.foreground";
+
+        $r109[327] = $r310;
+
+        $r109[328] = "MenuItem.background";
+
+        $r109[329] = $r308;
+
+        $r109[330] = "MenuItem.selectionForeground";
+
+        $r109[331] = $r312;
+
+        $r109[332] = "MenuItem.selectionBackground";
+
+        $r109[333] = $r311;
+
+        $r109[334] = "MenuItem.disabledForeground";
+
+        $r109[335] = $r319;
+
+        $r109[336] = "MenuItem.acceleratorForeground";
+
+        $r109[337] = $r310;
+
+        $r109[338] = "MenuItem.acceleratorSelectionForeground";
+
+        $r109[339] = $r312;
+
+        $r109[340] = "MenuItem.acceleratorDelimiter";
+
+        $r109[341] = "+";
+
+        $r109[342] = "MenuItem.commandSound";
+
+        $r109[343] = "win.sound.menuCommand";
+
+        $r109[344] = "MenuItem.disabledAreNavigable";
+
+        $r220 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[345] = $r220;
+
+        $r109[346] = "RadioButton.font";
+
+        $r109[347] = r104;
+
+        $r109[348] = "RadioButton.interiorBackground";
+
+        $r109[349] = $r313;
+
+        $r109[350] = "RadioButton.background";
+
+        $r109[351] = $r302;
+
+        $r109[352] = "RadioButton.foreground";
+
+        $r109[353] = $r314;
+
+        $r109[354] = "RadioButton.shadow";
+
+        $r109[355] = $r305;
+
+        $r109[356] = "RadioButton.darkShadow";
+
+        $r109[357] = $r306;
+
+        $r109[358] = "RadioButton.light";
+
+        $r109[359] = $r303;
+
+        $r109[360] = "RadioButton.highlight";
+
+        $r109[361] = $r304;
+
+        $r109[362] = "RadioButton.focus";
+
+        $r109[363] = $r321;
+
+        $r109[364] = "RadioButton.focusInputMap";
+
+        $r379 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r222 = newarray (java.lang.Object)[4];
+
+        $r222[0] = "SPACE";
+
+        $r222[1] = "pressed";
+
+        $r222[2] = "released SPACE";
+
+        $r222[3] = "released";
+
+        specialinvoke $r379.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r222);
+
+        $r109[365] = $r379;
+
+        $r109[366] = "RadioButton.totalInsets";
+
+        $r380 = new java.awt.Insets;
+
+        specialinvoke $r380.<java.awt.Insets: void <init>(int,int,int,int)>(4, 4, 4, 4);
+
+        $r109[367] = $r380;
+
+        $r109[368] = "RadioButtonMenuItem.font";
+
+        $r109[369] = r102;
+
+        $r109[370] = "RadioButtonMenuItem.foreground";
+
+        $r109[371] = $r310;
+
+        $r109[372] = "RadioButtonMenuItem.background";
+
+        $r109[373] = $r308;
+
+        $r109[374] = "RadioButtonMenuItem.selectionForeground";
+
+        $r109[375] = $r312;
+
+        $r109[376] = "RadioButtonMenuItem.selectionBackground";
+
+        $r109[377] = $r311;
+
+        $r109[378] = "RadioButtonMenuItem.disabledForeground";
+
+        $r109[379] = $r319;
+
+        $r109[380] = "RadioButtonMenuItem.acceleratorForeground";
+
+        $r109[381] = $r310;
+
+        $r109[382] = "RadioButtonMenuItem.acceleratorSelectionForeground";
+
+        $r109[383] = $r312;
+
+        $r109[384] = "RadioButtonMenuItem.commandSound";
+
+        $r109[385] = "win.sound.menuCommand";
+
+        $r109[386] = "OptionPane.font";
+
+        $r109[387] = r105;
+
+        $r109[388] = "OptionPane.messageFont";
+
+        $r109[389] = r105;
+
+        $r109[390] = "OptionPane.buttonFont";
+
+        $r109[391] = r105;
+
+        $r109[392] = "OptionPane.background";
+
+        $r109[393] = $r302;
+
+        $r109[394] = "OptionPane.foreground";
+
+        $r109[395] = $r314;
+
+        $r109[396] = "OptionPane.buttonMinimumWidth";
+
+        $r381 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPDLUValue;
+
+        specialinvoke $r381.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPDLUValue: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,int,int,int)>(r0, 50, 50, 3);
+
+        $r109[397] = $r381;
+
+        $r109[398] = "OptionPane.messageForeground";
+
+        $r109[399] = $r307;
+
+        $r109[400] = "OptionPane.errorIcon";
+
+        $r382 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r382.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("optionPaneIcon Error", "icons/Error.gif");
+
+        $r109[401] = $r382;
+
+        $r109[402] = "OptionPane.informationIcon";
+
+        $r383 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r383.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("optionPaneIcon Information", "icons/Inform.gif");
+
+        $r109[403] = $r383;
+
+        $r109[404] = "OptionPane.questionIcon";
+
+        $r384 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r384.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("optionPaneIcon Question", "icons/Question.gif");
+
+        $r109[405] = $r384;
+
+        $r109[406] = "OptionPane.warningIcon";
+
+        $r385 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon;
+
+        specialinvoke $r385.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$LazyWindowsIcon: void <init>(java.lang.String,java.lang.String)>("optionPaneIcon Warning", "icons/Warn.gif");
+
+        $r109[407] = $r385;
+
+        $r109[408] = "OptionPane.windowBindings";
+
+        $r229 = newarray (java.lang.Object)[2];
+
+        $r229[0] = "ESCAPE";
+
+        $r229[1] = "close";
+
+        $r109[409] = $r229;
+
+        $r109[410] = "OptionPane.errorSound";
+
+        $r109[411] = "win.sound.hand";
+
+        $r109[412] = "OptionPane.informationSound";
+
+        $r109[413] = "win.sound.asterisk";
+
+        $r109[414] = "OptionPane.questionSound";
+
+        $r109[415] = "win.sound.question";
+
+        $r109[416] = "OptionPane.warningSound";
+
+        $r109[417] = "win.sound.exclamation";
+
+        $r109[418] = "FormattedTextField.focusInputMap";
+
+        $r386 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r231 = newarray (java.lang.Object)[88];
+
+        $r231[0] = "ctrl C";
+
+        $r231[1] = "copy-to-clipboard";
+
+        $r231[2] = "ctrl V";
+
+        $r231[3] = "paste-from-clipboard";
+
+        $r231[4] = "ctrl X";
+
+        $r231[5] = "cut-to-clipboard";
+
+        $r231[6] = "COPY";
+
+        $r231[7] = "copy-to-clipboard";
+
+        $r231[8] = "PASTE";
+
+        $r231[9] = "paste-from-clipboard";
+
+        $r231[10] = "CUT";
+
+        $r231[11] = "cut-to-clipboard";
+
+        $r231[12] = "control INSERT";
+
+        $r231[13] = "copy-to-clipboard";
+
+        $r231[14] = "shift INSERT";
+
+        $r231[15] = "paste-from-clipboard";
+
+        $r231[16] = "shift DELETE";
+
+        $r231[17] = "cut-to-clipboard";
+
+        $r231[18] = "shift LEFT";
+
+        $r231[19] = "selection-backward";
+
+        $r231[20] = "shift KP_LEFT";
+
+        $r231[21] = "selection-backward";
+
+        $r231[22] = "shift RIGHT";
+
+        $r231[23] = "selection-forward";
+
+        $r231[24] = "shift KP_RIGHT";
+
+        $r231[25] = "selection-forward";
+
+        $r231[26] = "ctrl LEFT";
+
+        $r231[27] = "caret-previous-word";
+
+        $r231[28] = "ctrl KP_LEFT";
+
+        $r231[29] = "caret-previous-word";
+
+        $r231[30] = "ctrl RIGHT";
+
+        $r231[31] = "caret-next-word";
+
+        $r231[32] = "ctrl KP_RIGHT";
+
+        $r231[33] = "caret-next-word";
+
+        $r231[34] = "ctrl shift LEFT";
+
+        $r231[35] = "selection-previous-word";
+
+        $r231[36] = "ctrl shift KP_LEFT";
+
+        $r231[37] = "selection-previous-word";
+
+        $r231[38] = "ctrl shift RIGHT";
+
+        $r231[39] = "selection-next-word";
+
+        $r231[40] = "ctrl shift KP_RIGHT";
+
+        $r231[41] = "selection-next-word";
+
+        $r231[42] = "ctrl A";
+
+        $r231[43] = "select-all";
+
+        $r231[44] = "HOME";
+
+        $r231[45] = "caret-begin-line";
+
+        $r231[46] = "END";
+
+        $r231[47] = "caret-end-line";
+
+        $r231[48] = "shift HOME";
+
+        $r231[49] = "selection-begin-line";
+
+        $r231[50] = "shift END";
+
+        $r231[51] = "selection-end-line";
+
+        $r231[52] = "BACK_SPACE";
+
+        $r231[53] = "delete-previous";
+
+        $r231[54] = "shift BACK_SPACE";
+
+        $r231[55] = "delete-previous";
+
+        $r231[56] = "ctrl H";
+
+        $r231[57] = "delete-previous";
+
+        $r231[58] = "DELETE";
+
+        $r231[59] = "delete-next";
+
+        $r231[60] = "ctrl DELETE";
+
+        $r231[61] = "delete-next-word";
+
+        $r231[62] = "ctrl BACK_SPACE";
+
+        $r231[63] = "delete-previous-word";
+
+        $r231[64] = "RIGHT";
+
+        $r231[65] = "caret-forward";
+
+        $r231[66] = "LEFT";
+
+        $r231[67] = "caret-backward";
+
+        $r231[68] = "KP_RIGHT";
+
+        $r231[69] = "caret-forward";
+
+        $r231[70] = "KP_LEFT";
+
+        $r231[71] = "caret-backward";
+
+        $r231[72] = "ENTER";
+
+        $r231[73] = "notify-field-accept";
+
+        $r231[74] = "ctrl BACK_SLASH";
+
+        $r231[75] = "unselect";
+
+        $r231[76] = "control shift O";
+
+        $r231[77] = "toggle-componentOrientation";
+
+        $r231[78] = "ESCAPE";
+
+        $r231[79] = "reset-field-edit";
+
+        $r231[80] = "UP";
+
+        $r231[81] = "increment";
+
+        $r231[82] = "KP_UP";
+
+        $r231[83] = "increment";
+
+        $r231[84] = "DOWN";
+
+        $r231[85] = "decrement";
+
+        $r231[86] = "KP_DOWN";
+
+        $r231[87] = "decrement";
+
+        specialinvoke $r386.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r231);
+
+        $r109[419] = $r386;
+
+        $r109[420] = "FormattedTextField.inactiveBackground";
+
+        $r109[421] = $r302;
+
+        $r109[422] = "FormattedTextField.disabledBackground";
+
+        $r109[423] = $r302;
+
+        $r109[424] = "Panel.font";
+
+        $r109[425] = r104;
+
+        $r109[426] = "Panel.background";
+
+        $r109[427] = $r302;
+
+        $r109[428] = "Panel.foreground";
+
+        $r109[429] = $r314;
+
+        $r109[430] = "PasswordField.font";
+
+        $r109[431] = r104;
+
+        $r109[432] = "PasswordField.background";
+
+        $r109[433] = $r322;
+
+        $r109[434] = "PasswordField.foreground";
+
+        $r109[435] = $r314;
+
+        $r109[436] = "PasswordField.inactiveForeground";
+
+        $r109[437] = $r319;
+
+        $r109[438] = "PasswordField.inactiveBackground";
+
+        $r109[439] = $r302;
+
+        $r109[440] = "PasswordField.disabledBackground";
+
+        $r109[441] = $r302;
+
+        $r109[442] = "PasswordField.selectionBackground";
+
+        $r109[443] = $r311;
+
+        $r109[444] = "PasswordField.selectionForeground";
+
+        $r109[445] = $r312;
+
+        $r109[446] = "PasswordField.caretForeground";
+
+        $r109[447] = $r314;
+
+        $r109[448] = "PasswordField.echoChar";
+
+        $r389 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r387 = new java.lang.Character;
+
+        specialinvoke $r387.<java.lang.Character: void <init>(char)>(9679);
+
+        $r388 = new java.lang.Character;
+
+        specialinvoke $r388.<java.lang.Character: void <init>(char)>(42);
+
+        specialinvoke $r389.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r387, $r388);
+
+        $r109[449] = $r389;
+
+        $r109[450] = "ProgressBar.font";
+
+        $r109[451] = r104;
+
+        $r109[452] = "ProgressBar.foreground";
+
+        $r109[453] = $r311;
+
+        $r109[454] = "ProgressBar.background";
+
+        $r109[455] = $r302;
+
+        $r109[456] = "ProgressBar.shadow";
+
+        $r109[457] = $r305;
+
+        $r109[458] = "ProgressBar.highlight";
+
+        $r109[459] = $r304;
+
+        $r109[460] = "ProgressBar.selectionForeground";
+
+        $r109[461] = $r302;
+
+        $r109[462] = "ProgressBar.selectionBackground";
+
+        $r109[463] = $r311;
+
+        $r109[464] = "ProgressBar.cellLength";
+
+        $r235 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(7);
+
+        $r109[465] = $r235;
+
+        $r109[466] = "ProgressBar.cellSpacing";
+
+        $r236 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(2);
+
+        $r109[467] = $r236;
+
+        $r109[468] = "ProgressBar.indeterminateInsets";
+
+        $r390 = new java.awt.Insets;
+
+        specialinvoke $r390.<java.awt.Insets: void <init>(int,int,int,int)>(3, 3, 3, 3);
+
+        $r109[469] = $r390;
+
+        $r109[470] = "RootPane.defaultButtonWindowKeyBindings";
+
+        $r238 = newarray (java.lang.Object)[8];
+
+        $r238[0] = "ENTER";
+
+        $r238[1] = "press";
+
+        $r238[2] = "released ENTER";
+
+        $r238[3] = "release";
+
+        $r238[4] = "ctrl ENTER";
+
+        $r238[5] = "press";
+
+        $r238[6] = "ctrl released ENTER";
+
+        $r238[7] = "release";
+
+        $r109[471] = $r238;
+
+        $r109[472] = "ScrollBar.background";
+
+        $r109[473] = $r320;
+
+        $r109[474] = "ScrollBar.foreground";
+
+        $r109[475] = $r302;
+
+        $r109[476] = "ScrollBar.track";
+
+        $r109[477] = $r296;
+
+        $r109[478] = "ScrollBar.trackForeground";
+
+        $r109[479] = $r320;
+
+        $r109[480] = "ScrollBar.trackHighlight";
+
+        $r109[481] = $r295;
+
+        $r109[482] = "ScrollBar.trackHighlightForeground";
+
+        $r109[483] = $r298;
+
+        $r109[484] = "ScrollBar.thumb";
+
+        $r109[485] = $r302;
+
+        $r109[486] = "ScrollBar.thumbHighlight";
+
+        $r109[487] = $r304;
+
+        $r109[488] = "ScrollBar.thumbDarkShadow";
+
+        $r109[489] = $r306;
+
+        $r109[490] = "ScrollBar.thumbShadow";
+
+        $r109[491] = $r305;
+
+        $r109[492] = "ScrollBar.width";
+
+        $r109[493] = $r323;
+
+        $r109[494] = "ScrollBar.ancestorInputMap";
+
+        $r391 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r240 = newarray (java.lang.Object)[28];
+
+        $r240[0] = "RIGHT";
+
+        $r240[1] = "positiveUnitIncrement";
+
+        $r240[2] = "KP_RIGHT";
+
+        $r240[3] = "positiveUnitIncrement";
+
+        $r240[4] = "DOWN";
+
+        $r240[5] = "positiveUnitIncrement";
+
+        $r240[6] = "KP_DOWN";
+
+        $r240[7] = "positiveUnitIncrement";
+
+        $r240[8] = "PAGE_DOWN";
+
+        $r240[9] = "positiveBlockIncrement";
+
+        $r240[10] = "ctrl PAGE_DOWN";
+
+        $r240[11] = "positiveBlockIncrement";
+
+        $r240[12] = "LEFT";
+
+        $r240[13] = "negativeUnitIncrement";
+
+        $r240[14] = "KP_LEFT";
+
+        $r240[15] = "negativeUnitIncrement";
+
+        $r240[16] = "UP";
+
+        $r240[17] = "negativeUnitIncrement";
+
+        $r240[18] = "KP_UP";
+
+        $r240[19] = "negativeUnitIncrement";
+
+        $r240[20] = "PAGE_UP";
+
+        $r240[21] = "negativeBlockIncrement";
+
+        $r240[22] = "ctrl PAGE_UP";
+
+        $r240[23] = "negativeBlockIncrement";
+
+        $r240[24] = "HOME";
+
+        $r240[25] = "minScroll";
+
+        $r240[26] = "END";
+
+        $r240[27] = "maxScroll";
+
+        specialinvoke $r391.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r240);
+
+        $r109[495] = $r391;
+
+        $r109[496] = "ScrollPane.font";
+
+        $r109[497] = r104;
+
+        $r109[498] = "ScrollPane.background";
+
+        $r109[499] = $r302;
+
+        $r109[500] = "ScrollPane.foreground";
+
+        $r109[501] = $r307;
+
+        $r109[502] = "ScrollPane.ancestorInputMap";
+
+        $r392 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r242 = newarray (java.lang.Object)[28];
+
+        $r242[0] = "RIGHT";
+
+        $r242[1] = "unitScrollRight";
+
+        $r242[2] = "KP_RIGHT";
+
+        $r242[3] = "unitScrollRight";
+
+        $r242[4] = "DOWN";
+
+        $r242[5] = "unitScrollDown";
+
+        $r242[6] = "KP_DOWN";
+
+        $r242[7] = "unitScrollDown";
+
+        $r242[8] = "LEFT";
+
+        $r242[9] = "unitScrollLeft";
+
+        $r242[10] = "KP_LEFT";
+
+        $r242[11] = "unitScrollLeft";
+
+        $r242[12] = "UP";
+
+        $r242[13] = "unitScrollUp";
+
+        $r242[14] = "KP_UP";
+
+        $r242[15] = "unitScrollUp";
+
+        $r242[16] = "PAGE_UP";
+
+        $r242[17] = "scrollUp";
+
+        $r242[18] = "PAGE_DOWN";
+
+        $r242[19] = "scrollDown";
+
+        $r242[20] = "ctrl PAGE_UP";
+
+        $r242[21] = "scrollLeft";
+
+        $r242[22] = "ctrl PAGE_DOWN";
+
+        $r242[23] = "scrollRight";
+
+        $r242[24] = "ctrl HOME";
+
+        $r242[25] = "scrollHome";
+
+        $r242[26] = "ctrl END";
+
+        $r242[27] = "scrollEnd";
+
+        specialinvoke $r392.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r242);
+
+        $r109[503] = $r392;
+
+        $r109[504] = "Separator.background";
+
+        $r109[505] = $r304;
+
+        $r109[506] = "Separator.foreground";
+
+        $r109[507] = $r305;
+
+        $r109[508] = "Slider.font";
+
+        $r109[509] = r104;
+
+        $r109[510] = "Slider.foreground";
+
+        $r109[511] = $r302;
+
+        $r109[512] = "Slider.background";
+
+        $r109[513] = $r302;
+
+        $r109[514] = "Slider.highlight";
+
+        $r109[515] = $r304;
+
+        $r109[516] = "Slider.shadow";
+
+        $r109[517] = $r305;
+
+        $r109[518] = "Slider.focus";
+
+        $r109[519] = $r306;
+
+        $r109[520] = "Slider.focusInputMap";
+
+        $r393 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r244 = newarray (java.lang.Object)[24];
+
+        $r244[0] = "RIGHT";
+
+        $r244[1] = "positiveUnitIncrement";
+
+        $r244[2] = "KP_RIGHT";
+
+        $r244[3] = "positiveUnitIncrement";
+
+        $r244[4] = "DOWN";
+
+        $r244[5] = "negativeUnitIncrement";
+
+        $r244[6] = "KP_DOWN";
+
+        $r244[7] = "negativeUnitIncrement";
+
+        $r244[8] = "PAGE_DOWN";
+
+        $r244[9] = "negativeBlockIncrement";
+
+        $r244[10] = "LEFT";
+
+        $r244[11] = "negativeUnitIncrement";
+
+        $r244[12] = "KP_LEFT";
+
+        $r244[13] = "negativeUnitIncrement";
+
+        $r244[14] = "UP";
+
+        $r244[15] = "positiveUnitIncrement";
+
+        $r244[16] = "KP_UP";
+
+        $r244[17] = "positiveUnitIncrement";
+
+        $r244[18] = "PAGE_UP";
+
+        $r244[19] = "positiveBlockIncrement";
+
+        $r244[20] = "HOME";
+
+        $r244[21] = "minScroll";
+
+        $r244[22] = "END";
+
+        $r244[23] = "maxScroll";
+
+        specialinvoke $r393.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r244);
+
+        $r109[521] = $r393;
+
+        $r109[522] = "Spinner.font";
+
+        $r109[523] = r104;
+
+        $r109[524] = "Spinner.ancestorInputMap";
+
+        $r394 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r246 = newarray (java.lang.Object)[8];
+
+        $r246[0] = "UP";
+
+        $r246[1] = "increment";
+
+        $r246[2] = "KP_UP";
+
+        $r246[3] = "increment";
+
+        $r246[4] = "DOWN";
+
+        $r246[5] = "decrement";
+
+        $r246[6] = "KP_DOWN";
+
+        $r246[7] = "decrement";
+
+        specialinvoke $r394.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r246);
+
+        $r109[525] = $r394;
+
+        $r109[526] = "SplitPane.background";
+
+        $r109[527] = $r302;
+
+        $r109[528] = "SplitPane.highlight";
+
+        $r109[529] = $r304;
+
+        $r109[530] = "SplitPane.shadow";
+
+        $r109[531] = $r305;
+
+        $r109[532] = "SplitPane.darkShadow";
+
+        $r109[533] = $r306;
+
+        $r109[534] = "SplitPane.dividerSize";
+
+        $r247 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(5);
+
+        $r109[535] = $r247;
+
+        $r109[536] = "SplitPane.ancestorInputMap";
+
+        $r395 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r249 = newarray (java.lang.Object)[28];
+
+        $r249[0] = "UP";
+
+        $r249[1] = "negativeIncrement";
+
+        $r249[2] = "DOWN";
+
+        $r249[3] = "positiveIncrement";
+
+        $r249[4] = "LEFT";
+
+        $r249[5] = "negativeIncrement";
+
+        $r249[6] = "RIGHT";
+
+        $r249[7] = "positiveIncrement";
+
+        $r249[8] = "KP_UP";
+
+        $r249[9] = "negativeIncrement";
+
+        $r249[10] = "KP_DOWN";
+
+        $r249[11] = "positiveIncrement";
+
+        $r249[12] = "KP_LEFT";
+
+        $r249[13] = "negativeIncrement";
+
+        $r249[14] = "KP_RIGHT";
+
+        $r249[15] = "positiveIncrement";
+
+        $r249[16] = "HOME";
+
+        $r249[17] = "selectMin";
+
+        $r249[18] = "END";
+
+        $r249[19] = "selectMax";
+
+        $r249[20] = "F8";
+
+        $r249[21] = "startResize";
+
+        $r249[22] = "F6";
+
+        $r249[23] = "toggleFocus";
+
+        $r249[24] = "ctrl TAB";
+
+        $r249[25] = "focusOutForward";
+
+        $r249[26] = "ctrl shift TAB";
+
+        $r249[27] = "focusOutBackward";
+
+        specialinvoke $r395.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r249);
+
+        $r109[537] = $r395;
+
+        $r109[538] = "TabbedPane.tabsOverlapBorder";
+
+        $r396 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r251 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r252 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r396.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r251, $r252);
+
+        $r109[539] = $r396;
+
+        $r109[540] = "TabbedPane.tabInsets";
+
+        $r399 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r397 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r397.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(1, 4, 1, 4);
+
+        $r398 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r398.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(0, 4, 1, 4);
+
+        specialinvoke $r399.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r397, $r398);
+
+        $r109[541] = $r399;
+
+        $r109[542] = "TabbedPane.tabAreaInsets";
+
+        $r402 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r400 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r400.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(3, 2, 2, 2);
+
+        $r401 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r401.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(3, 2, 0, 2);
+
+        specialinvoke $r402.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r400, $r401);
+
+        $r109[543] = $r402;
+
+        $r109[544] = "TabbedPane.font";
+
+        $r109[545] = r104;
+
+        $r109[546] = "TabbedPane.background";
+
+        $r109[547] = $r302;
+
+        $r109[548] = "TabbedPane.foreground";
+
+        $r109[549] = $r307;
+
+        $r109[550] = "TabbedPane.highlight";
+
+        $r109[551] = $r304;
+
+        $r109[552] = "TabbedPane.light";
+
+        $r109[553] = $r303;
+
+        $r109[554] = "TabbedPane.shadow";
+
+        $r109[555] = $r305;
+
+        $r109[556] = "TabbedPane.darkShadow";
+
+        $r109[557] = $r306;
+
+        $r109[558] = "TabbedPane.focus";
+
+        $r109[559] = $r307;
+
+        $r109[560] = "TabbedPane.focusInputMap";
+
+        $r403 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r260 = newarray (java.lang.Object)[20];
+
+        $r260[0] = "RIGHT";
+
+        $r260[1] = "navigateRight";
+
+        $r260[2] = "KP_RIGHT";
+
+        $r260[3] = "navigateRight";
+
+        $r260[4] = "LEFT";
+
+        $r260[5] = "navigateLeft";
+
+        $r260[6] = "KP_LEFT";
+
+        $r260[7] = "navigateLeft";
+
+        $r260[8] = "UP";
+
+        $r260[9] = "navigateUp";
+
+        $r260[10] = "KP_UP";
+
+        $r260[11] = "navigateUp";
+
+        $r260[12] = "DOWN";
+
+        $r260[13] = "navigateDown";
+
+        $r260[14] = "KP_DOWN";
+
+        $r260[15] = "navigateDown";
+
+        $r260[16] = "ctrl DOWN";
+
+        $r260[17] = "requestFocusForVisibleComponent";
+
+        $r260[18] = "ctrl KP_DOWN";
+
+        $r260[19] = "requestFocusForVisibleComponent";
+
+        specialinvoke $r403.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r260);
+
+        $r109[561] = $r403;
+
+        $r109[562] = "TabbedPane.ancestorInputMap";
+
+        $r404 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r262 = newarray (java.lang.Object)[12];
+
+        $r262[0] = "ctrl TAB";
+
+        $r262[1] = "navigateNext";
+
+        $r262[2] = "ctrl shift TAB";
+
+        $r262[3] = "navigatePrevious";
+
+        $r262[4] = "ctrl PAGE_DOWN";
+
+        $r262[5] = "navigatePageDown";
+
+        $r262[6] = "ctrl PAGE_UP";
+
+        $r262[7] = "navigatePageUp";
+
+        $r262[8] = "ctrl UP";
+
+        $r262[9] = "requestFocus";
+
+        $r262[10] = "ctrl KP_UP";
+
+        $r262[11] = "requestFocus";
+
+        specialinvoke $r404.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r262);
+
+        $r109[563] = $r404;
+
+        $r109[564] = "Table.font";
+
+        $r109[565] = r104;
+
+        $r109[566] = "Table.foreground";
+
+        $r109[567] = $r307;
+
+        $r109[568] = "Table.background";
+
+        $r109[569] = $r313;
+
+        $r109[570] = "Table.highlight";
+
+        $r109[571] = $r304;
+
+        $r109[572] = "Table.light";
+
+        $r109[573] = $r303;
+
+        $r109[574] = "Table.shadow";
+
+        $r109[575] = $r305;
+
+        $r109[576] = "Table.darkShadow";
+
+        $r109[577] = $r306;
+
+        $r109[578] = "Table.selectionForeground";
+
+        $r109[579] = $r312;
+
+        $r109[580] = "Table.selectionBackground";
+
+        $r109[581] = $r311;
+
+        $r109[582] = "Table.gridColor";
+
+        $r109[583] = $r297;
+
+        $r109[584] = "Table.focusCellBackground";
+
+        $r109[585] = $r313;
+
+        $r109[586] = "Table.focusCellForeground";
+
+        $r109[587] = $r307;
+
+        $r109[588] = "Table.ancestorInputMap";
+
+        $r405 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r264 = newarray (java.lang.Object)[142];
+
+        $r264[0] = "ctrl C";
+
+        $r264[1] = "copy";
+
+        $r264[2] = "ctrl V";
+
+        $r264[3] = "paste";
+
+        $r264[4] = "ctrl X";
+
+        $r264[5] = "cut";
+
+        $r264[6] = "COPY";
+
+        $r264[7] = "copy";
+
+        $r264[8] = "PASTE";
+
+        $r264[9] = "paste";
+
+        $r264[10] = "CUT";
+
+        $r264[11] = "cut";
+
+        $r264[12] = "control INSERT";
+
+        $r264[13] = "copy";
+
+        $r264[14] = "shift INSERT";
+
+        $r264[15] = "paste";
+
+        $r264[16] = "shift DELETE";
+
+        $r264[17] = "cut";
+
+        $r264[18] = "RIGHT";
+
+        $r264[19] = "selectNextColumn";
+
+        $r264[20] = "KP_RIGHT";
+
+        $r264[21] = "selectNextColumn";
+
+        $r264[22] = "shift RIGHT";
+
+        $r264[23] = "selectNextColumnExtendSelection";
+
+        $r264[24] = "shift KP_RIGHT";
+
+        $r264[25] = "selectNextColumnExtendSelection";
+
+        $r264[26] = "ctrl shift RIGHT";
+
+        $r264[27] = "selectNextColumnExtendSelection";
+
+        $r264[28] = "ctrl shift KP_RIGHT";
+
+        $r264[29] = "selectNextColumnExtendSelection";
+
+        $r264[30] = "ctrl RIGHT";
+
+        $r264[31] = "selectNextColumnChangeLead";
+
+        $r264[32] = "ctrl KP_RIGHT";
+
+        $r264[33] = "selectNextColumnChangeLead";
+
+        $r264[34] = "LEFT";
+
+        $r264[35] = "selectPreviousColumn";
+
+        $r264[36] = "KP_LEFT";
+
+        $r264[37] = "selectPreviousColumn";
+
+        $r264[38] = "shift LEFT";
+
+        $r264[39] = "selectPreviousColumnExtendSelection";
+
+        $r264[40] = "shift KP_LEFT";
+
+        $r264[41] = "selectPreviousColumnExtendSelection";
+
+        $r264[42] = "ctrl shift LEFT";
+
+        $r264[43] = "selectPreviousColumnExtendSelection";
+
+        $r264[44] = "ctrl shift KP_LEFT";
+
+        $r264[45] = "selectPreviousColumnExtendSelection";
+
+        $r264[46] = "ctrl LEFT";
+
+        $r264[47] = "selectPreviousColumnChangeLead";
+
+        $r264[48] = "ctrl KP_LEFT";
+
+        $r264[49] = "selectPreviousColumnChangeLead";
+
+        $r264[50] = "DOWN";
+
+        $r264[51] = "selectNextRow";
+
+        $r264[52] = "KP_DOWN";
+
+        $r264[53] = "selectNextRow";
+
+        $r264[54] = "shift DOWN";
+
+        $r264[55] = "selectNextRowExtendSelection";
+
+        $r264[56] = "shift KP_DOWN";
+
+        $r264[57] = "selectNextRowExtendSelection";
+
+        $r264[58] = "ctrl shift DOWN";
+
+        $r264[59] = "selectNextRowExtendSelection";
+
+        $r264[60] = "ctrl shift KP_DOWN";
+
+        $r264[61] = "selectNextRowExtendSelection";
+
+        $r264[62] = "ctrl DOWN";
+
+        $r264[63] = "selectNextRowChangeLead";
+
+        $r264[64] = "ctrl KP_DOWN";
+
+        $r264[65] = "selectNextRowChangeLead";
+
+        $r264[66] = "UP";
+
+        $r264[67] = "selectPreviousRow";
+
+        $r264[68] = "KP_UP";
+
+        $r264[69] = "selectPreviousRow";
+
+        $r264[70] = "shift UP";
+
+        $r264[71] = "selectPreviousRowExtendSelection";
+
+        $r264[72] = "shift KP_UP";
+
+        $r264[73] = "selectPreviousRowExtendSelection";
+
+        $r264[74] = "ctrl shift UP";
+
+        $r264[75] = "selectPreviousRowExtendSelection";
+
+        $r264[76] = "ctrl shift KP_UP";
+
+        $r264[77] = "selectPreviousRowExtendSelection";
+
+        $r264[78] = "ctrl UP";
+
+        $r264[79] = "selectPreviousRowChangeLead";
+
+        $r264[80] = "ctrl KP_UP";
+
+        $r264[81] = "selectPreviousRowChangeLead";
+
+        $r264[82] = "HOME";
+
+        $r264[83] = "selectFirstColumn";
+
+        $r264[84] = "shift HOME";
+
+        $r264[85] = "selectFirstColumnExtendSelection";
+
+        $r264[86] = "ctrl shift HOME";
+
+        $r264[87] = "selectFirstRowExtendSelection";
+
+        $r264[88] = "ctrl HOME";
+
+        $r264[89] = "selectFirstRow";
+
+        $r264[90] = "END";
+
+        $r264[91] = "selectLastColumn";
+
+        $r264[92] = "shift END";
+
+        $r264[93] = "selectLastColumnExtendSelection";
+
+        $r264[94] = "ctrl shift END";
+
+        $r264[95] = "selectLastRowExtendSelection";
+
+        $r264[96] = "ctrl END";
+
+        $r264[97] = "selectLastRow";
+
+        $r264[98] = "PAGE_UP";
+
+        $r264[99] = "scrollUpChangeSelection";
+
+        $r264[100] = "shift PAGE_UP";
+
+        $r264[101] = "scrollUpExtendSelection";
+
+        $r264[102] = "ctrl shift PAGE_UP";
+
+        $r264[103] = "scrollLeftExtendSelection";
+
+        $r264[104] = "ctrl PAGE_UP";
+
+        $r264[105] = "scrollLeftChangeSelection";
+
+        $r264[106] = "PAGE_DOWN";
+
+        $r264[107] = "scrollDownChangeSelection";
+
+        $r264[108] = "shift PAGE_DOWN";
+
+        $r264[109] = "scrollDownExtendSelection";
+
+        $r264[110] = "ctrl shift PAGE_DOWN";
+
+        $r264[111] = "scrollRightExtendSelection";
+
+        $r264[112] = "ctrl PAGE_DOWN";
+
+        $r264[113] = "scrollRightChangeSelection";
+
+        $r264[114] = "TAB";
+
+        $r264[115] = "selectNextColumnCell";
+
+        $r264[116] = "shift TAB";
+
+        $r264[117] = "selectPreviousColumnCell";
+
+        $r264[118] = "ENTER";
+
+        $r264[119] = "selectNextRowCell";
+
+        $r264[120] = "shift ENTER";
+
+        $r264[121] = "selectPreviousRowCell";
+
+        $r264[122] = "ctrl A";
+
+        $r264[123] = "selectAll";
+
+        $r264[124] = "ctrl SLASH";
+
+        $r264[125] = "selectAll";
+
+        $r264[126] = "ctrl BACK_SLASH";
+
+        $r264[127] = "clearSelection";
+
+        $r264[128] = "ESCAPE";
+
+        $r264[129] = "cancel";
+
+        $r264[130] = "F2";
+
+        $r264[131] = "startEditing";
+
+        $r264[132] = "SPACE";
+
+        $r264[133] = "addToSelection";
+
+        $r264[134] = "ctrl SPACE";
+
+        $r264[135] = "toggleAndAnchor";
+
+        $r264[136] = "shift SPACE";
+
+        $r264[137] = "extendTo";
+
+        $r264[138] = "ctrl shift SPACE";
+
+        $r264[139] = "moveSelectionTo";
+
+        $r264[140] = "F8";
+
+        $r264[141] = "focusHeader";
+
+        specialinvoke $r405.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r264);
+
+        $r109[589] = $r405;
+
+        $r109[590] = "Table.sortIconHighlight";
+
+        $r109[591] = $r305;
+
+        $r109[592] = "Table.sortIconLight";
+
+        $r109[593] = $r296;
+
+        $r109[594] = "TableHeader.font";
+
+        $r109[595] = r104;
+
+        $r109[596] = "TableHeader.foreground";
+
+        $r109[597] = $r307;
+
+        $r109[598] = "TableHeader.background";
+
+        $r109[599] = $r302;
+
+        $r109[600] = "TableHeader.focusCellBackground";
+
+        $r406 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r266 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: java.lang.Object access$000()>();
+
+        specialinvoke $r406.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r266, $r313);
+
+        $r109[601] = $r406;
+
+        $r109[602] = "TextArea.font";
+
+        $r109[603] = r103;
+
+        $r109[604] = "TextArea.background";
+
+        $r109[605] = $r313;
+
+        $r109[606] = "TextArea.foreground";
+
+        $r109[607] = $r314;
+
+        $r109[608] = "TextArea.inactiveForeground";
+
+        $r109[609] = $r319;
+
+        $r109[610] = "TextArea.inactiveBackground";
+
+        $r109[611] = $r313;
+
+        $r109[612] = "TextArea.disabledBackground";
+
+        $r109[613] = $r302;
+
+        $r109[614] = "TextArea.selectionBackground";
+
+        $r109[615] = $r311;
+
+        $r109[616] = "TextArea.selectionForeground";
+
+        $r109[617] = $r312;
+
+        $r109[618] = "TextArea.caretForeground";
+
+        $r109[619] = $r314;
+
+        $r109[620] = "TextField.font";
+
+        $r109[621] = r104;
+
+        $r109[622] = "TextField.background";
+
+        $r109[623] = $r322;
+
+        $r109[624] = "TextField.foreground";
+
+        $r109[625] = $r314;
+
+        $r109[626] = "TextField.shadow";
+
+        $r109[627] = $r305;
+
+        $r109[628] = "TextField.darkShadow";
+
+        $r109[629] = $r306;
+
+        $r109[630] = "TextField.light";
+
+        $r109[631] = $r303;
+
+        $r109[632] = "TextField.highlight";
+
+        $r109[633] = $r304;
+
+        $r109[634] = "TextField.inactiveForeground";
+
+        $r109[635] = $r319;
+
+        $r109[636] = "TextField.inactiveBackground";
+
+        $r109[637] = $r302;
+
+        $r109[638] = "TextField.disabledBackground";
+
+        $r109[639] = $r302;
+
+        $r109[640] = "TextField.selectionBackground";
+
+        $r109[641] = $r311;
+
+        $r109[642] = "TextField.selectionForeground";
+
+        $r109[643] = $r312;
+
+        $r109[644] = "TextField.caretForeground";
+
+        $r109[645] = $r314;
+
+        $r109[646] = "TextPane.font";
+
+        $r109[647] = r104;
+
+        $r109[648] = "TextPane.background";
+
+        $r109[649] = $r313;
+
+        $r109[650] = "TextPane.foreground";
+
+        $r109[651] = $r314;
+
+        $r109[652] = "TextPane.selectionBackground";
+
+        $r109[653] = $r311;
+
+        $r109[654] = "TextPane.selectionForeground";
+
+        $r109[655] = $r312;
+
+        $r109[656] = "TextPane.inactiveBackground";
+
+        $r109[657] = $r313;
+
+        $r109[658] = "TextPane.disabledBackground";
+
+        $r109[659] = $r302;
+
+        $r109[660] = "TextPane.caretForeground";
+
+        $r109[661] = $r314;
+
+        $r109[662] = "TitledBorder.font";
+
+        $r109[663] = r104;
+
+        $r109[664] = "TitledBorder.titleColor";
+
+        $r407 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue;
+
+        $r268 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part BP_GROUPBOX>;
+
+        $r269 = <com.sun.java.swing.plaf.windows.TMSchema$Prop: com.sun.java.swing.plaf.windows.TMSchema$Prop TEXTCOLOR>;
+
+        specialinvoke $r407.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPColorValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State,com.sun.java.swing.plaf.windows.TMSchema$Prop,java.lang.Object)>($r268, null, $r269, $r314);
+
+        $r109[665] = $r407;
+
+        $r109[666] = "ToggleButton.font";
+
+        $r109[667] = r104;
+
+        $r109[668] = "ToggleButton.background";
+
+        $r109[669] = $r302;
+
+        $r109[670] = "ToggleButton.foreground";
+
+        $r109[671] = $r307;
+
+        $r109[672] = "ToggleButton.shadow";
+
+        $r109[673] = $r305;
+
+        $r109[674] = "ToggleButton.darkShadow";
+
+        $r109[675] = $r306;
+
+        $r109[676] = "ToggleButton.light";
+
+        $r109[677] = $r303;
+
+        $r109[678] = "ToggleButton.highlight";
+
+        $r109[679] = $r304;
+
+        $r109[680] = "ToggleButton.focus";
+
+        $r109[681] = $r307;
+
+        $r109[682] = "ToggleButton.textShiftOffset";
+
+        $r270 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r109[683] = $r270;
+
+        $r109[684] = "ToggleButton.focusInputMap";
+
+        $r408 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r272 = newarray (java.lang.Object)[4];
+
+        $r272[0] = "SPACE";
+
+        $r272[1] = "pressed";
+
+        $r272[2] = "released SPACE";
+
+        $r272[3] = "released";
+
+        specialinvoke $r408.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r272);
+
+        $r109[685] = $r408;
+
+        $r109[686] = "ToolBar.font";
+
+        $r109[687] = r102;
+
+        $r109[688] = "ToolBar.background";
+
+        $r109[689] = $r302;
+
+        $r109[690] = "ToolBar.foreground";
+
+        $r109[691] = $r307;
+
+        $r109[692] = "ToolBar.shadow";
+
+        $r109[693] = $r305;
+
+        $r109[694] = "ToolBar.darkShadow";
+
+        $r109[695] = $r306;
+
+        $r109[696] = "ToolBar.light";
+
+        $r109[697] = $r303;
+
+        $r109[698] = "ToolBar.highlight";
+
+        $r109[699] = $r304;
+
+        $r109[700] = "ToolBar.dockingBackground";
+
+        $r109[701] = $r302;
+
+        $r109[702] = "ToolBar.dockingForeground";
+
+        $r109[703] = $r294;
+
+        $r109[704] = "ToolBar.floatingBackground";
+
+        $r109[705] = $r302;
+
+        $r109[706] = "ToolBar.floatingForeground";
+
+        $r109[707] = $r298;
+
+        $r109[708] = "ToolBar.ancestorInputMap";
+
+        $r409 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r274 = newarray (java.lang.Object)[16];
+
+        $r274[0] = "UP";
+
+        $r274[1] = "navigateUp";
+
+        $r274[2] = "KP_UP";
+
+        $r274[3] = "navigateUp";
+
+        $r274[4] = "DOWN";
+
+        $r274[5] = "navigateDown";
+
+        $r274[6] = "KP_DOWN";
+
+        $r274[7] = "navigateDown";
+
+        $r274[8] = "LEFT";
+
+        $r274[9] = "navigateLeft";
+
+        $r274[10] = "KP_LEFT";
+
+        $r274[11] = "navigateLeft";
+
+        $r274[12] = "RIGHT";
+
+        $r274[13] = "navigateRight";
+
+        $r274[14] = "KP_RIGHT";
+
+        $r274[15] = "navigateRight";
+
+        specialinvoke $r409.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r274);
+
+        $r109[709] = $r409;
+
+        $r109[710] = "ToolBar.separatorSize";
+
+        $r109[711] = null;
+
+        $r109[712] = "ToolTip.font";
+
+        $r109[713] = r107;
+
+        $r109[714] = "ToolTip.background";
+
+        $r410 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r276 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("info");
+
+        specialinvoke $r410.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.tooltip.backgroundColor", $r276);
+
+        $r109[715] = $r410;
+
+        $r109[716] = "ToolTip.foreground";
+
+        $r411 = new com.sun.java.swing.plaf.windows.DesktopProperty;
+
+        $r278 = virtualinvoke r1.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("infoText");
+
+        specialinvoke $r411.<com.sun.java.swing.plaf.windows.DesktopProperty: void <init>(java.lang.String,java.lang.Object)>("win.tooltip.textColor", $r278);
+
+        $r109[717] = $r411;
+
+        $r109[718] = "ToolTipManager.enableToolTipMode";
+
+        $r109[719] = "activeApplication";
+
+        $r109[720] = "Tree.selectionBorderColor";
+
+        $r109[721] = $r295;
+
+        $r109[722] = "Tree.drawDashedFocusIndicator";
+
+        $r279 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[723] = $r279;
+
+        $r109[724] = "Tree.lineTypeDashed";
+
+        $r280 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r109[725] = $r280;
+
+        $r109[726] = "Tree.font";
+
+        $r109[727] = r104;
+
+        $r109[728] = "Tree.background";
+
+        $r109[729] = $r313;
+
+        $r109[730] = "Tree.foreground";
+
+        $r109[731] = $r314;
+
+        $r109[732] = "Tree.hash";
+
+        $r109[733] = $r297;
+
+        $r109[734] = "Tree.leftChildIndent";
+
+        $r281 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(8);
+
+        $r109[735] = $r281;
+
+        $r109[736] = "Tree.rightChildIndent";
+
+        $r282 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(11);
+
+        $r109[737] = $r282;
+
+        $r109[738] = "Tree.textForeground";
+
+        $r109[739] = $r314;
+
+        $r109[740] = "Tree.textBackground";
+
+        $r109[741] = $r313;
+
+        $r109[742] = "Tree.selectionForeground";
+
+        $r109[743] = $r312;
+
+        $r109[744] = "Tree.selectionBackground";
+
+        $r109[745] = $r311;
+
+        $r109[746] = "Tree.expandedIcon";
+
+        $r109[747] = $r25;
+
+        $r109[748] = "Tree.collapsedIcon";
+
+        $r109[749] = $r26;
+
+        $r109[750] = "Tree.openIcon";
+
+        $r412 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$ActiveWindowsIcon;
+
+        specialinvoke $r412.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$ActiveWindowsIcon: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String,java.lang.String,java.lang.String)>(r0, "win.icon.shellIconBPP", "shell32Icon 5", "icons/TreeOpen.gif");
+
+        $r109[751] = $r412;
+
+        $r109[752] = "Tree.closedIcon";
+
+        $r413 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$ActiveWindowsIcon;
+
+        specialinvoke $r413.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$ActiveWindowsIcon: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,java.lang.String,java.lang.String,java.lang.String)>(r0, "win.icon.shellIconBPP", "shell32Icon 4", "icons/TreeClosed.gif");
+
+        $r109[753] = $r413;
+
+        $r109[754] = "Tree.focusInputMap";
+
+        $r414 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r286 = newarray (java.lang.Object)[118];
+
+        $r286[0] = "ADD";
+
+        $r286[1] = "expand";
+
+        $r286[2] = "SUBTRACT";
+
+        $r286[3] = "collapse";
+
+        $r286[4] = "ctrl C";
+
+        $r286[5] = "copy";
+
+        $r286[6] = "ctrl V";
+
+        $r286[7] = "paste";
+
+        $r286[8] = "ctrl X";
+
+        $r286[9] = "cut";
+
+        $r286[10] = "COPY";
+
+        $r286[11] = "copy";
+
+        $r286[12] = "PASTE";
+
+        $r286[13] = "paste";
+
+        $r286[14] = "CUT";
+
+        $r286[15] = "cut";
+
+        $r286[16] = "control INSERT";
+
+        $r286[17] = "copy";
+
+        $r286[18] = "shift INSERT";
+
+        $r286[19] = "paste";
+
+        $r286[20] = "shift DELETE";
+
+        $r286[21] = "cut";
+
+        $r286[22] = "UP";
+
+        $r286[23] = "selectPrevious";
+
+        $r286[24] = "KP_UP";
+
+        $r286[25] = "selectPrevious";
+
+        $r286[26] = "shift UP";
+
+        $r286[27] = "selectPreviousExtendSelection";
+
+        $r286[28] = "shift KP_UP";
+
+        $r286[29] = "selectPreviousExtendSelection";
+
+        $r286[30] = "ctrl shift UP";
+
+        $r286[31] = "selectPreviousExtendSelection";
+
+        $r286[32] = "ctrl shift KP_UP";
+
+        $r286[33] = "selectPreviousExtendSelection";
+
+        $r286[34] = "ctrl UP";
+
+        $r286[35] = "selectPreviousChangeLead";
+
+        $r286[36] = "ctrl KP_UP";
+
+        $r286[37] = "selectPreviousChangeLead";
+
+        $r286[38] = "DOWN";
+
+        $r286[39] = "selectNext";
+
+        $r286[40] = "KP_DOWN";
+
+        $r286[41] = "selectNext";
+
+        $r286[42] = "shift DOWN";
+
+        $r286[43] = "selectNextExtendSelection";
+
+        $r286[44] = "shift KP_DOWN";
+
+        $r286[45] = "selectNextExtendSelection";
+
+        $r286[46] = "ctrl shift DOWN";
+
+        $r286[47] = "selectNextExtendSelection";
+
+        $r286[48] = "ctrl shift KP_DOWN";
+
+        $r286[49] = "selectNextExtendSelection";
+
+        $r286[50] = "ctrl DOWN";
+
+        $r286[51] = "selectNextChangeLead";
+
+        $r286[52] = "ctrl KP_DOWN";
+
+        $r286[53] = "selectNextChangeLead";
+
+        $r286[54] = "RIGHT";
+
+        $r286[55] = "selectChild";
+
+        $r286[56] = "KP_RIGHT";
+
+        $r286[57] = "selectChild";
+
+        $r286[58] = "LEFT";
+
+        $r286[59] = "selectParent";
+
+        $r286[60] = "KP_LEFT";
+
+        $r286[61] = "selectParent";
+
+        $r286[62] = "PAGE_UP";
+
+        $r286[63] = "scrollUpChangeSelection";
+
+        $r286[64] = "shift PAGE_UP";
+
+        $r286[65] = "scrollUpExtendSelection";
+
+        $r286[66] = "ctrl shift PAGE_UP";
+
+        $r286[67] = "scrollUpExtendSelection";
+
+        $r286[68] = "ctrl PAGE_UP";
+
+        $r286[69] = "scrollUpChangeLead";
+
+        $r286[70] = "PAGE_DOWN";
+
+        $r286[71] = "scrollDownChangeSelection";
+
+        $r286[72] = "shift PAGE_DOWN";
+
+        $r286[73] = "scrollDownExtendSelection";
+
+        $r286[74] = "ctrl shift PAGE_DOWN";
+
+        $r286[75] = "scrollDownExtendSelection";
+
+        $r286[76] = "ctrl PAGE_DOWN";
+
+        $r286[77] = "scrollDownChangeLead";
+
+        $r286[78] = "HOME";
+
+        $r286[79] = "selectFirst";
+
+        $r286[80] = "shift HOME";
+
+        $r286[81] = "selectFirstExtendSelection";
+
+        $r286[82] = "ctrl shift HOME";
+
+        $r286[83] = "selectFirstExtendSelection";
+
+        $r286[84] = "ctrl HOME";
+
+        $r286[85] = "selectFirstChangeLead";
+
+        $r286[86] = "END";
+
+        $r286[87] = "selectLast";
+
+        $r286[88] = "shift END";
+
+        $r286[89] = "selectLastExtendSelection";
+
+        $r286[90] = "ctrl shift END";
+
+        $r286[91] = "selectLastExtendSelection";
+
+        $r286[92] = "ctrl END";
+
+        $r286[93] = "selectLastChangeLead";
+
+        $r286[94] = "F2";
+
+        $r286[95] = "startEditing";
+
+        $r286[96] = "ctrl A";
+
+        $r286[97] = "selectAll";
+
+        $r286[98] = "ctrl SLASH";
+
+        $r286[99] = "selectAll";
+
+        $r286[100] = "ctrl BACK_SLASH";
+
+        $r286[101] = "clearSelection";
+
+        $r286[102] = "ctrl LEFT";
+
+        $r286[103] = "scrollLeft";
+
+        $r286[104] = "ctrl KP_LEFT";
+
+        $r286[105] = "scrollLeft";
+
+        $r286[106] = "ctrl RIGHT";
+
+        $r286[107] = "scrollRight";
+
+        $r286[108] = "ctrl KP_RIGHT";
+
+        $r286[109] = "scrollRight";
+
+        $r286[110] = "SPACE";
+
+        $r286[111] = "addToSelection";
+
+        $r286[112] = "ctrl SPACE";
+
+        $r286[113] = "toggleAndAnchor";
+
+        $r286[114] = "shift SPACE";
+
+        $r286[115] = "extendTo";
+
+        $r286[116] = "ctrl shift SPACE";
+
+        $r286[117] = "moveSelectionTo";
+
+        specialinvoke $r414.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r286);
+
+        $r109[755] = $r414;
+
+        $r109[756] = "Tree.ancestorInputMap";
+
+        $r415 = new javax.swing.UIDefaults$LazyInputMap;
+
+        $r288 = newarray (java.lang.Object)[2];
+
+        $r288[0] = "ESCAPE";
+
+        $r288[1] = "cancel";
+
+        specialinvoke $r415.<javax.swing.UIDefaults$LazyInputMap: void <init>(java.lang.Object[])>($r288);
+
+        $r109[757] = $r415;
+
+        $r109[758] = "Viewport.font";
+
+        $r109[759] = r104;
+
+        $r109[760] = "Viewport.background";
+
+        $r109[761] = $r302;
+
+        $r109[762] = "Viewport.foreground";
+
+        $r109[763] = $r314;
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r109);
+
+        $r289 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object[] getLazyValueDefaults()>();
+
+        virtualinvoke r1.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>($r289);
+
+        specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: void initVistaComponentDefaults(javax.swing.UIDefaults)>(r1);
+
+        return;
+    }
+
+    static boolean isOnVista()
+    {
+        sun.awt.OSInfo$WindowsVersion $r2, $r3;
+        sun.awt.OSInfo$OSType $r0, $r1;
+        int $i0;
+        boolean $z0;
+
+        $r0 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$OSType getOSType()>();
+
+        $r1 = <sun.awt.OSInfo$OSType: sun.awt.OSInfo$OSType WINDOWS>;
+
+        if $r0 != $r1 goto label1;
+
+        $r2 = staticinvoke <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion getWindowsVersion()>();
+
+        $r3 = <sun.awt.OSInfo: sun.awt.OSInfo$WindowsVersion WINDOWS_VISTA>;
+
+        $i0 = virtualinvoke $r2.<sun.awt.OSInfo$WindowsVersion: int compareTo(sun.awt.OSInfo$WindowsVersion)>($r3);
+
+        if $i0 < 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void initVistaComponentDefaults(javax.swing.UIDefaults)
+    {
+        java.awt.Color $r91;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue $r9;
+        java.lang.Integer $r5, $r6;
+        javax.swing.border.Border $r12;
+        java.lang.StringBuilder $r27, $r29, $r30, $r34, $r36, $r37, $r41, $r43, $r44, $r48, $r50, $r51, $r55, $r57, $r58, $r63, $r65, $r66, $r72, $r74, $r75, $r79, $r81, $r82, $r86, $r88, $r89, $r92, $r94, $r95;
+        java.lang.Object[] r1, $r18, $r25;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$SkinIcon $r14, $r21;
+        com.sun.java.swing.plaf.windows.TMSchema$Part $r11, $r16, $r23;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue $r13, $r20, $r33, $r40, $r47, $r54, $r61, $r69, $r78, $r85, $r98;
+        com.sun.java.swing.plaf.windows.TMSchema$State $r15, $r22;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42;
+        java.lang.Boolean $r19, $r26, $r62, $r99;
+        java.lang.Object $r32, $r39, $r46, $r53, $r60, $r68, $r77, $r84, $r97;
+        sun.swing.SwingLazyValue $r10, $r17, $r24;
+        java.lang.String $r28, $r31, $r35, $r38, $r42, $r45, $r49, $r52, $r56, $r59, $r64, $r67, $r70, $r73, $r76, $r80, $r83, $r87, $r90, $r93, $r96;
+        com.sun.java.swing.plaf.windows.WindowsIconFactory$VistaMenuItemCheckIconFactory $r3;
+        boolean $z0;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$1 $r7;
+        javax.swing.UIDefaults r2;
+        javax.swing.Icon $r71;
+        javax.swing.plaf.InsetsUIResource $r4;
+        java.lang.String[] $r0;
+
+        r8 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r2 := @parameter0: javax.swing.UIDefaults;
+
+        $z0 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isOnVista()>();
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r0 = newarray (java.lang.String)[4];
+
+        $r0[0] = "MenuItem";
+
+        $r0[1] = "Menu";
+
+        $r0[2] = "CheckBoxMenuItem";
+
+        $r0[3] = "RadioButtonMenuItem";
+
+        $i0 = lengthof $r0;
+
+        $i1 = $i0 * 2;
+
+        r1 = newarray (java.lang.Object)[$i1];
+
+        i16 = 0;
+
+        i17 = 0;
+
+     label02:
+        $i2 = lengthof $r0;
+
+        if i16 >= $i2 goto label03;
+
+        $r92 = new java.lang.StringBuilder;
+
+        specialinvoke $r92.<java.lang.StringBuilder: void <init>()>();
+
+        $r93 = $r0[i16];
+
+        $r94 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r93);
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".opaque");
+
+        $r96 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r97 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r96);
+
+        i18 = i17 + 1;
+
+        r1[i17] = $r96;
+
+        i17 = i18 + 1;
+
+        $r98 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r99 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r98.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r99, $r97);
+
+        r1[i18] = $r98;
+
+        i16 = i16 + 1;
+
+        goto label02;
+
+     label03:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        i19 = 0;
+
+        i20 = 0;
+
+     label04:
+        $i3 = lengthof $r0;
+
+        if i19 >= $i3 goto label05;
+
+        $r79 = new java.lang.StringBuilder;
+
+        specialinvoke $r79.<java.lang.StringBuilder: void <init>()>();
+
+        $r80 = $r0[i19];
+
+        $r81 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r80);
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".acceleratorSelectionForeground");
+
+        $r83 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r84 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r83);
+
+        i21 = i20 + 1;
+
+        r1[i20] = $r83;
+
+        i20 = i21 + 1;
+
+        $r85 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r86 = new java.lang.StringBuilder;
+
+        specialinvoke $r86.<java.lang.StringBuilder: void <init>()>();
+
+        $r87 = $r0[i19];
+
+        $r88 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r87);
+
+        $r89 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".acceleratorForeground");
+
+        $r90 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r91 = virtualinvoke r2.<javax.swing.UIDefaults: java.awt.Color getColor(java.lang.Object)>($r90);
+
+        specialinvoke $r85.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r91, $r84);
+
+        r1[i21] = $r85;
+
+        i19 = i19 + 1;
+
+        goto label04;
+
+     label05:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $r3 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsIconFactory: com.sun.java.swing.plaf.windows.WindowsIconFactory$VistaMenuItemCheckIconFactory getMenuItemCheckIconFactory()>();
+
+        i22 = 0;
+
+        i23 = 0;
+
+     label06:
+        $i4 = lengthof $r0;
+
+        if i22 >= $i4 goto label07;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r73 = $r0[i22];
+
+        $r74 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r73);
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".checkIconFactory");
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r77 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r76);
+
+        i24 = i23 + 1;
+
+        r1[i23] = $r76;
+
+        i23 = i24 + 1;
+
+        $r78 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r78.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r3, $r77);
+
+        r1[i24] = $r78;
+
+        i22 = i22 + 1;
+
+        goto label06;
+
+     label07:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        i25 = 0;
+
+        i26 = 0;
+
+     label08:
+        $i5 = lengthof $r0;
+
+        if i25 >= $i5 goto label09;
+
+        $r63 = new java.lang.StringBuilder;
+
+        specialinvoke $r63.<java.lang.StringBuilder: void <init>()>();
+
+        $r64 = $r0[i25];
+
+        $r65 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r64);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".checkIcon");
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r68 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r67);
+
+        i27 = i26 + 1;
+
+        r1[i26] = $r67;
+
+        i26 = i27 + 1;
+
+        $r69 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r70 = $r0[i25];
+
+        $r71 = virtualinvoke $r3.<com.sun.java.swing.plaf.windows.WindowsIconFactory$VistaMenuItemCheckIconFactory: javax.swing.Icon getIcon(java.lang.String)>($r70);
+
+        specialinvoke $r69.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r71, $r68);
+
+        r1[i27] = $r69;
+
+        i25 = i25 + 1;
+
+        goto label08;
+
+     label09:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        i28 = 0;
+
+        i29 = 0;
+
+     label10:
+        $i6 = lengthof $r0;
+
+        if i28 >= $i6 goto label11;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = $r0[i28];
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".evenHeight");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r60 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r59);
+
+        i30 = i29 + 1;
+
+        r1[i29] = $r59;
+
+        i29 = i30 + 1;
+
+        $r61 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r62 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        specialinvoke $r61.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r62, $r60);
+
+        r1[i30] = $r61;
+
+        i28 = i28 + 1;
+
+        goto label10;
+
+     label11:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $r4 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r4.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        i31 = 0;
+
+        i32 = 0;
+
+     label12:
+        $i7 = lengthof $r0;
+
+        if i31 >= $i7 goto label13;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = $r0[i31];
+
+        $r50 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".margin");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r53 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r52);
+
+        i33 = i32 + 1;
+
+        r1[i32] = $r52;
+
+        i32 = i33 + 1;
+
+        $r54 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r54.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r4, $r53);
+
+        r1[i33] = $r54;
+
+        i31 = i31 + 1;
+
+        goto label12;
+
+     label13:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        i34 = 0;
+
+        i35 = 0;
+
+     label14:
+        $i8 = lengthof $r0;
+
+        if i34 >= $i8 goto label15;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = $r0[i34];
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".checkIconOffset");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r46 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r45);
+
+        i36 = i35 + 1;
+
+        r1[i35] = $r45;
+
+        i35 = i36 + 1;
+
+        $r47 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r47.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r5, $r46);
+
+        r1[i36] = $r47;
+
+        i34 = i34 + 1;
+
+        goto label14;
+
+     label15:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $i9 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsPopupMenuUI: int getSpanBeforeGutter()>();
+
+        $i10 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsPopupMenuUI: int getGutterWidth()>();
+
+        $i11 = $i9 + $i10;
+
+        $i12 = staticinvoke <com.sun.java.swing.plaf.windows.WindowsPopupMenuUI: int getSpanAfterGutter()>();
+
+        $i13 = $i11 + $i12;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i13);
+
+        i37 = 0;
+
+        i38 = 0;
+
+     label16:
+        $i14 = lengthof $r0;
+
+        if i37 >= $i14 goto label17;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = $r0[i37];
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".afterCheckIconGap");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r39 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r38);
+
+        i39 = i38 + 1;
+
+        r1[i38] = $r38;
+
+        i38 = i39 + 1;
+
+        $r40 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r40.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r6, $r39);
+
+        r1[i39] = $r40;
+
+        i37 = i37 + 1;
+
+        goto label16;
+
+     label17:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $r7 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$1;
+
+        specialinvoke $r7.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$1: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel)>(r8);
+
+        i40 = 0;
+
+        i41 = 0;
+
+     label18:
+        $i15 = lengthof $r0;
+
+        if i40 >= $i15 goto label19;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = $r0[i40];
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".minimumTextOffset");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>($r31);
+
+        i42 = i41 + 1;
+
+        r1[i41] = $r31;
+
+        i41 = i42 + 1;
+
+        $r33 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        specialinvoke $r33.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r7, $r32);
+
+        r1[i42] = $r33;
+
+        i40 = i40 + 1;
+
+        goto label18;
+
+     label19:
+        virtualinvoke r2.<javax.swing.UIDefaults: void putDefaults(java.lang.Object[])>(r1);
+
+        $r9 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r11 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part MENU>;
+
+        $r10 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r10.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getInternalFrameBorder");
+
+        $r12 = staticinvoke <javax.swing.BorderFactory: javax.swing.border.Border createEmptyBorder(int,int,int,int)>(2, 2, 2, 2);
+
+        specialinvoke $r9.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object,javax.swing.border.Border)>($r11, $r10, $r12);
+
+        virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>("PopupMenu.border", $r9);
+
+        $r13 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r14 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$SkinIcon;
+
+        $r16 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part HP_HEADERSORTARROW>;
+
+        $r15 = <com.sun.java.swing.plaf.windows.TMSchema$State: com.sun.java.swing.plaf.windows.TMSchema$State SORTEDDOWN>;
+
+        specialinvoke $r14.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$SkinIcon: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State)>($r16, $r15);
+
+        $r17 = new sun.swing.SwingLazyValue;
+
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r19 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r18[0] = $r19;
+
+        specialinvoke $r17.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.plaf.windows.ClassicSortArrowIcon", null, $r18);
+
+        specialinvoke $r13.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r14, $r17);
+
+        virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>("Table.ascendingSortIcon", $r13);
+
+        $r20 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r21 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$SkinIcon;
+
+        $r23 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part HP_HEADERSORTARROW>;
+
+        $r22 = <com.sun.java.swing.plaf.windows.TMSchema$State: com.sun.java.swing.plaf.windows.TMSchema$State SORTEDUP>;
+
+        specialinvoke $r21.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$SkinIcon: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,com.sun.java.swing.plaf.windows.TMSchema$State)>($r23, $r22);
+
+        $r24 = new sun.swing.SwingLazyValue;
+
+        $r25 = newarray (java.lang.Object)[1];
+
+        $r26 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r25[0] = $r26;
+
+        specialinvoke $r24.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.plaf.windows.ClassicSortArrowIcon", null, $r25);
+
+        specialinvoke $r20.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r21, $r24);
+
+        virtualinvoke r2.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>("Table.descendingSortIcon", $r20);
+
+        return;
+    }
+
+    private java.lang.Object getDesktopFontValue(java.lang.String, java.lang.Object)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontProperty $r1;
+        java.lang.Object r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean useSystemFontSettings>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontProperty;
+
+        specialinvoke $r1.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsFontProperty: void <init>(java.lang.String,java.lang.Object)>(r2, r3);
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private java.lang.Object[] getLazyValueDefaults()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue $r0, $r3, $r9, $r14, $r22, $r27, $r29, $r42;
+        sun.swing.SwingLazyValue $r1, $r4, $r16, $r17, $r18, $r19, $r20, $r21, $r23, $r25, $r26, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r48, $r51, $r55, $r58;
+        com.sun.java.swing.plaf.windows.TMSchema$Part $r2, $r5, $r11, $r15, $r24, $r28, $r30, $r43;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue $r6, $r12, $r44, $r47, $r54;
+        java.awt.Dimension $r41;
+        javax.swing.border.EmptyBorder $r10;
+        javax.swing.plaf.InsetsUIResource $r7, $r8, $r13;
+        java.lang.Object[] $r40, $r49, $r52, $r56, $r59;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r61;
+        java.lang.Boolean $r45, $r46, $r50, $r53, $r57, $r60;
+
+        r61 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        $r0 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r2 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part BP_PUSHBUTTON>;
+
+        $r1 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r1.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getButtonBorder");
+
+        specialinvoke $r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r2, $r1);
+
+        $r3 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r5 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part EP_EDIT>;
+
+        $r4 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r4.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getTextFieldBorder");
+
+        specialinvoke $r3.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r5, $r4);
+
+        $r6 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r7 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r7.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(2, 2, 2, 2);
+
+        $r8 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r8.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(1, 1, 1, 1);
+
+        specialinvoke $r6.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r7, $r8);
+
+        $r9 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r11 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part EP_EDIT>;
+
+        $r10 = new javax.swing.border.EmptyBorder;
+
+        specialinvoke $r10.<javax.swing.border.EmptyBorder: void <init>(int,int,int,int)>(2, 2, 2, 2);
+
+        specialinvoke $r9.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object,javax.swing.border.Border)>($r11, $r3, $r10);
+
+        $r12 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r13 = new javax.swing.plaf.InsetsUIResource;
+
+        specialinvoke $r13.<javax.swing.plaf.InsetsUIResource: void <init>(int,int,int,int)>(1, 1, 1, 1);
+
+        specialinvoke $r12.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r13, null);
+
+        $r14 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r15 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part CP_COMBOBOX>;
+
+        specialinvoke $r14.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r15, $r3);
+
+        $r16 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r16.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsBorders", "getFocusCellHighlightBorder");
+
+        $r17 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r17.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.BorderUIResource", "getEtchedBorderUIResource");
+
+        $r18 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r18.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsBorders", "getInternalFrameBorder");
+
+        $r19 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r19.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.BorderUIResource", "getLoweredBevelBorderUIResource");
+
+        $r20 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r20.<sun.swing.SwingLazyValue: void <init>(java.lang.String)>("javax.swing.plaf.basic.BasicBorders$MarginBorder");
+
+        $r21 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r21.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getMenuBarBorder");
+
+        $r22 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r24 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part MENU>;
+
+        $r23 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r23.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getInternalFrameBorder");
+
+        specialinvoke $r22.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r24, $r23);
+
+        $r25 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r25.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsBorders", "getProgressBarBorder");
+
+        $r26 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r26.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.basic.BasicBorders", "getRadioButtonBorder");
+
+        $r27 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r28 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part LBP_LISTBOX>;
+
+        specialinvoke $r27.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r28, $r3);
+
+        $r29 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r30 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part LBP_LISTBOX>;
+
+        specialinvoke $r29.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r30, $r19);
+
+        $r31 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r31.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsBorders", "getTableHeaderBorder");
+
+        $r32 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r32.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsBorders", "getToolBarBorder");
+
+        $r33 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r33.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("javax.swing.plaf.BorderUIResource", "getBlackLineBorderUIResource");
+
+        $r34 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r34.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getCheckBoxIcon");
+
+        $r35 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r35.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getRadioButtonIcon");
+
+        $r36 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r36.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getRadioButtonMenuItemIcon");
+
+        $r37 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r37.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getMenuItemCheckIcon");
+
+        $r38 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r38.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getMenuItemArrowIcon");
+
+        $r39 = new sun.swing.SwingLazyValue;
+
+        specialinvoke $r39.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String)>("com.sun.java.swing.plaf.windows.WindowsIconFactory", "getMenuArrowIcon");
+
+        $r40 = newarray (java.lang.Object)[78];
+
+        $r40[0] = "Button.border";
+
+        $r40[1] = $r0;
+
+        $r40[2] = "CheckBox.border";
+
+        $r40[3] = $r26;
+
+        $r40[4] = "ComboBox.border";
+
+        $r40[5] = $r14;
+
+        $r40[6] = "DesktopIcon.border";
+
+        $r40[7] = $r18;
+
+        $r40[8] = "FormattedTextField.border";
+
+        $r40[9] = $r3;
+
+        $r40[10] = "FormattedTextField.margin";
+
+        $r40[11] = $r6;
+
+        $r40[12] = "InternalFrame.border";
+
+        $r40[13] = $r18;
+
+        $r40[14] = "List.focusCellHighlightBorder";
+
+        $r40[15] = $r16;
+
+        $r40[16] = "Table.focusCellHighlightBorder";
+
+        $r40[17] = $r16;
+
+        $r40[18] = "Menu.border";
+
+        $r40[19] = $r20;
+
+        $r40[20] = "MenuBar.border";
+
+        $r40[21] = $r21;
+
+        $r40[22] = "MenuItem.border";
+
+        $r40[23] = $r20;
+
+        $r40[24] = "PasswordField.border";
+
+        $r40[25] = $r3;
+
+        $r40[26] = "PasswordField.margin";
+
+        $r40[27] = $r6;
+
+        $r40[28] = "PopupMenu.border";
+
+        $r40[29] = $r22;
+
+        $r40[30] = "ProgressBar.border";
+
+        $r40[31] = $r25;
+
+        $r40[32] = "RadioButton.border";
+
+        $r40[33] = $r26;
+
+        $r40[34] = "ScrollPane.border";
+
+        $r40[35] = $r27;
+
+        $r40[36] = "Spinner.border";
+
+        $r40[37] = $r9;
+
+        $r40[38] = "Spinner.arrowButtonInsets";
+
+        $r40[39] = $r12;
+
+        $r40[40] = "Spinner.arrowButtonSize";
+
+        $r41 = new java.awt.Dimension;
+
+        specialinvoke $r41.<java.awt.Dimension: void <init>(int,int)>(17, 9);
+
+        $r40[41] = $r41;
+
+        $r40[42] = "Table.scrollPaneBorder";
+
+        $r40[43] = $r29;
+
+        $r40[44] = "TableHeader.cellBorder";
+
+        $r40[45] = $r31;
+
+        $r40[46] = "TextArea.margin";
+
+        $r40[47] = $r6;
+
+        $r40[48] = "TextField.border";
+
+        $r40[49] = $r3;
+
+        $r40[50] = "TextField.margin";
+
+        $r40[51] = $r6;
+
+        $r40[52] = "TitledBorder.border";
+
+        $r42 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue;
+
+        $r43 = <com.sun.java.swing.plaf.windows.TMSchema$Part: com.sun.java.swing.plaf.windows.TMSchema$Part BP_GROUPBOX>;
+
+        specialinvoke $r42.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPBorderValue: void <init>(com.sun.java.swing.plaf.windows.TMSchema$Part,java.lang.Object)>($r43, $r17);
+
+        $r40[53] = $r42;
+
+        $r40[54] = "ToggleButton.border";
+
+        $r40[55] = $r26;
+
+        $r40[56] = "ToolBar.border";
+
+        $r40[57] = $r32;
+
+        $r40[58] = "ToolTip.border";
+
+        $r40[59] = $r33;
+
+        $r40[60] = "CheckBox.icon";
+
+        $r40[61] = $r34;
+
+        $r40[62] = "Menu.arrowIcon";
+
+        $r40[63] = $r39;
+
+        $r40[64] = "MenuItem.checkIcon";
+
+        $r40[65] = $r37;
+
+        $r40[66] = "MenuItem.arrowIcon";
+
+        $r40[67] = $r38;
+
+        $r40[68] = "RadioButton.icon";
+
+        $r40[69] = $r35;
+
+        $r40[70] = "RadioButtonMenuItem.checkIcon";
+
+        $r40[71] = $r36;
+
+        $r40[72] = "InternalFrame.layoutTitlePaneAtOrigin";
+
+        $r44 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r46 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r45 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r44.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r46, $r45);
+
+        $r40[73] = $r44;
+
+        $r40[74] = "Table.ascendingSortIcon";
+
+        $r47 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r48 = new sun.swing.SwingLazyValue;
+
+        $r49 = newarray (java.lang.Object)[2];
+
+        $r50 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r49[0] = $r50;
+
+        $r49[1] = "Table.sortIconColor";
+
+        specialinvoke $r48.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.icon.SortArrowIcon", null, $r49);
+
+        $r51 = new sun.swing.SwingLazyValue;
+
+        $r52 = newarray (java.lang.Object)[1];
+
+        $r53 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r52[0] = $r53;
+
+        specialinvoke $r51.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.plaf.windows.ClassicSortArrowIcon", null, $r52);
+
+        specialinvoke $r47.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r48, $r51);
+
+        $r40[75] = $r47;
+
+        $r40[76] = "Table.descendingSortIcon";
+
+        $r54 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue;
+
+        $r55 = new sun.swing.SwingLazyValue;
+
+        $r56 = newarray (java.lang.Object)[2];
+
+        $r57 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r56[0] = $r57;
+
+        $r56[1] = "Table.sortIconColor";
+
+        specialinvoke $r55.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.icon.SortArrowIcon", null, $r56);
+
+        $r58 = new sun.swing.SwingLazyValue;
+
+        $r59 = newarray (java.lang.Object)[1];
+
+        $r60 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r59[0] = $r60;
+
+        specialinvoke $r58.<sun.swing.SwingLazyValue: void <init>(java.lang.String,java.lang.String,java.lang.Object[])>("sun.swing.plaf.windows.ClassicSortArrowIcon", null, $r59);
+
+        specialinvoke $r54.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$XPValue: void <init>(java.lang.Object,java.lang.Object)>($r55, $r58);
+
+        $r40[77] = $r54;
+
+        return $r40;
+    }
+
+    public void uninitialize()
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        com.sun.java.swing.plaf.windows.WindowsPopupMenuUI$MnemonicListener $r1, $r5;
+        java.awt.KeyboardFocusManager $r2;
+        javax.swing.MenuSelectionManager $r4;
+        com.sun.java.swing.plaf.windows.WindowsRootPaneUI$AltProcessor $r3;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void uninitialize()>();
+
+        $r1 = <com.sun.java.swing.plaf.windows.WindowsPopupMenuUI: com.sun.java.swing.plaf.windows.WindowsPopupMenuUI$MnemonicListener mnemonicListener>;
+
+        if $r1 == null goto label1;
+
+        $r4 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        $r5 = <com.sun.java.swing.plaf.windows.WindowsPopupMenuUI: com.sun.java.swing.plaf.windows.WindowsPopupMenuUI$MnemonicListener mnemonicListener>;
+
+        virtualinvoke $r4.<javax.swing.MenuSelectionManager: void removeChangeListener(javax.swing.event.ChangeListener)>($r5);
+
+     label1:
+        $r2 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r3 = <com.sun.java.swing.plaf.windows.WindowsRootPaneUI: com.sun.java.swing.plaf.windows.WindowsRootPaneUI$AltProcessor altProcessor>;
+
+        virtualinvoke $r2.<java.awt.KeyboardFocusManager: void removeKeyEventPostProcessor(java.awt.KeyEventPostProcessor)>($r3);
+
+        staticinvoke <com.sun.java.swing.plaf.windows.DesktopProperty: void flushUnreferencedProperties()>();
+
+        return;
+    }
+
+    public static void setMnemonicHidden(boolean)
+    {
+        boolean $z0, z1;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = staticinvoke <javax.swing.UIManager: boolean getBoolean(java.lang.Object)>("Button.showMnemonics");
+
+        if $z0 != 1 goto label1;
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isMnemonicHidden> = 0;
+
+        goto label2;
+
+     label1:
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isMnemonicHidden> = z1;
+
+     label2:
+        return;
+    }
+
+    public static boolean isMnemonicHidden()
+    {
+        boolean $z0, $z1;
+
+        $z0 = staticinvoke <javax.swing.UIManager: boolean getBoolean(java.lang.Object)>("Button.showMnemonics");
+
+        if $z0 != 1 goto label1;
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isMnemonicHidden> = 0;
+
+     label1:
+        $z1 = <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isMnemonicHidden>;
+
+        return $z1;
+    }
+
+    public static boolean isClassicWindows()
+    {
+        boolean $z0;
+
+        $z0 = <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isClassicWindows>;
+
+        return $z0;
+    }
+
+    public void provideErrorFeedback(java.awt.Component)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        java.awt.Component r1;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r1 := @parameter0: java.awt.Component;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel: void provideErrorFeedback(java.awt.Component)>(r1);
+
+        return;
+    }
+
+    public javax.swing.LayoutStyle getLayoutStyle()
+    {
+        javax.swing.LayoutStyle r2;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsLayoutStyle $r1;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r2 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: javax.swing.LayoutStyle style>;
+
+        if r2 != null goto label1;
+
+        $r1 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsLayoutStyle;
+
+        specialinvoke $r1.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$WindowsLayoutStyle: void <init>(com.sun.java.swing.plaf.windows.WindowsLookAndFeel,com.sun.java.swing.plaf.windows.WindowsLookAndFeel$1)>(r0, null);
+
+        r2 = $r1;
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: javax.swing.LayoutStyle style> = $r1;
+
+     label1:
+        return r2;
+    }
+
+    protected javax.swing.Action createAudioAction(java.lang.Object)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r5;
+        java.lang.Object r0, $r2;
+        java.lang.String r1, r3;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$AudioAction $r4;
+
+        r5 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        r1 = (java.lang.String) r0;
+
+        $r2 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (java.lang.String) $r2;
+
+        $r4 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$AudioAction;
+
+        specialinvoke $r4.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$AudioAction: void <init>(java.lang.String,java.lang.String)>(r1, r3);
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    static void repaintRootPane(java.awt.Component)
+    {
+        javax.swing.JRootPane r1;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 = null;
+
+     label1:
+        if r0 == null goto label3;
+
+        $z0 = r0 instanceof javax.swing.JRootPane;
+
+        if $z0 == 0 goto label2;
+
+        r1 = (javax.swing.JRootPane) r0;
+
+     label2:
+        r0 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label3:
+        if r1 == null goto label4;
+
+        virtualinvoke r1.<javax.swing.JRootPane: void repaint()>();
+
+        goto label5;
+
+     label4:
+        virtualinvoke r0.<java.awt.Component: void repaint()>();
+
+     label5:
+        return;
+    }
+
+    private int dluToPixels(int, int)
+    {
+        java.lang.AssertionError $r1;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean $z0;
+
+        r0 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        i2 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i0 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitX>;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: void calculateBaseUnits()>();
+
+     label1:
+        if i1 == 3 goto label2;
+
+        if i1 != 7 goto label3;
+
+     label2:
+        $i3 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitX>;
+
+        $i4 = i2 * $i3;
+
+        $i5 = $i4 / 4;
+
+        return $i5;
+
+     label3:
+        $z0 = <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        if i1 == 1 goto label4;
+
+        if i1 == 5 goto label4;
+
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+
+     label4:
+        $i6 = r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitY>;
+
+        $i7 = i2 * $i6;
+
+        $i8 = $i7 / 8;
+
+        return $i8;
+    }
+
+    private void calculateBaseUnits()
+    {
+        java.awt.Font $r1;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r3;
+        java.awt.FontMetrics $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.awt.Toolkit $r0;
+
+        r3 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = staticinvoke <javax.swing.UIManager: java.awt.Font getFont(java.lang.Object)>("Button.font");
+
+        $r2 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.FontMetrics getFontMetrics(java.awt.Font)>($r1);
+
+        $i0 = virtualinvoke $r2.<java.awt.FontMetrics: int stringWidth(java.lang.String)>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+
+        r3.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitX> = $i0;
+
+        $i1 = r3.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitX>;
+
+        $i2 = $i1 / 26;
+
+        $i3 = $i2 + 1;
+
+        $i4 = $i3 / 2;
+
+        r3.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitX> = $i4;
+
+        $i5 = virtualinvoke $r2.<java.awt.FontMetrics: int getAscent()>();
+
+        $i6 = virtualinvoke $r2.<java.awt.FontMetrics: int getDescent()>();
+
+        $i7 = $i5 + $i6;
+
+        $i8 = $i7 - 1;
+
+        r3.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int baseUnitY> = $i8;
+
+        return;
+    }
+
+    public javax.swing.Icon getDisabledIcon(javax.swing.JComponent, javax.swing.Icon)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel$RGBGrayFilter $r8;
+        java.awt.image.ImageProducer $r10;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r1;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Boolean $r4;
+        sun.swing.ImageIconUIResource $r12;
+        boolean $z0;
+        javax.swing.JComponent r2;
+        java.awt.image.BufferedImage $r6;
+        java.awt.Image $r11;
+        javax.swing.Icon r0, $r13;
+        java.awt.image.FilteredImageSource $r9;
+        java.awt.Graphics $r7;
+        java.lang.Object $r3, $r5;
+
+        r1 := @this: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r0 := @parameter1: javax.swing.Icon;
+
+        if r0 == null goto label1;
+
+        if r2 == null goto label1;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r3 = <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object HI_RES_DISABLED_ICON_CLIENT_KEY>;
+
+        $r5 = virtualinvoke r2.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>($r3);
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = interfaceinvoke r0.<javax.swing.Icon: int getIconWidth()>();
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = interfaceinvoke r0.<javax.swing.Icon: int getIconHeight()>();
+
+        if $i1 <= 0 goto label1;
+
+        $r6 = new java.awt.image.BufferedImage;
+
+        $i2 = interfaceinvoke r0.<javax.swing.Icon: int getIconWidth()>();
+
+        $i3 = interfaceinvoke r0.<javax.swing.Icon: int getIconWidth()>();
+
+        specialinvoke $r6.<java.awt.image.BufferedImage: void <init>(int,int,int)>($i2, $i3, 2);
+
+        $r7 = virtualinvoke $r6.<java.awt.image.BufferedImage: java.awt.Graphics getGraphics()>();
+
+        interfaceinvoke r0.<javax.swing.Icon: void paintIcon(java.awt.Component,java.awt.Graphics,int,int)>(r2, $r7, 0, 0);
+
+        $r8 = new com.sun.java.swing.plaf.windows.WindowsLookAndFeel$RGBGrayFilter;
+
+        specialinvoke $r8.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel$RGBGrayFilter: void <init>()>();
+
+        $r9 = new java.awt.image.FilteredImageSource;
+
+        $r10 = virtualinvoke $r6.<java.awt.image.BufferedImage: java.awt.image.ImageProducer getSource()>();
+
+        specialinvoke $r9.<java.awt.image.FilteredImageSource: void <init>(java.awt.image.ImageProducer,java.awt.image.ImageFilter)>($r10, $r8);
+
+        $r11 = virtualinvoke r2.<javax.swing.JComponent: java.awt.Image createImage(java.awt.image.ImageProducer)>($r9);
+
+        $r12 = new sun.swing.ImageIconUIResource;
+
+        specialinvoke $r12.<sun.swing.ImageIconUIResource: void <init>(java.awt.Image)>($r11);
+
+        return $r12;
+
+     label1:
+        $r13 = specialinvoke r1.<javax.swing.plaf.basic.BasicLookAndFeel: javax.swing.Icon getDisabledIcon(javax.swing.JComponent,javax.swing.Icon)>(r2, r0);
+
+        return $r13;
+    }
+
+    static javax.swing.LayoutStyle access$302(com.sun.java.swing.plaf.windows.WindowsLookAndFeel, javax.swing.LayoutStyle)
+    {
+        javax.swing.LayoutStyle r1;
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+
+        r0 := @parameter0: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        r1 := @parameter1: javax.swing.LayoutStyle;
+
+        r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: javax.swing.LayoutStyle style> = r1;
+
+        return r1;
+    }
+
+    static int access$400(com.sun.java.swing.plaf.windows.WindowsLookAndFeel, int, int)
+    {
+        com.sun.java.swing.plaf.windows.WindowsLookAndFeel r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = specialinvoke r0.<com.sun.java.swing.plaf.windows.WindowsLookAndFeel: int dluToPixels(int,int)>(i0, i1);
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        sun.swing.StringUIClientPropertyKey $r1;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/java/swing/plaf/windows/WindowsLookAndFeel;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new sun.swing.StringUIClientPropertyKey;
+
+        specialinvoke $r1.<sun.swing.StringUIClientPropertyKey: void <init>(java.lang.String)>("WindowsLookAndFeel.generateHiResDisabledIcon");
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: java.lang.Object HI_RES_DISABLED_ICON_CLIENT_KEY> = $r1;
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isMnemonicHidden> = 1;
+
+        <com.sun.java.swing.plaf.windows.WindowsLookAndFeel: boolean isClassicWindows> = 0;
+
+        return;
+    }
+}

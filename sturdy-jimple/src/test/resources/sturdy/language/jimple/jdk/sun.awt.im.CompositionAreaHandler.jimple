@@ -1,0 +1,869 @@
+class sun.awt.im.CompositionAreaHandler extends java.lang.Object implements java.awt.event.InputMethodListener, java.awt.im.InputMethodRequests
+{
+    private static sun.awt.im.CompositionArea compositionArea;
+    private static java.lang.Object compositionAreaLock;
+    private static sun.awt.im.CompositionAreaHandler compositionAreaOwner;
+    private java.text.AttributedCharacterIterator composedText;
+    private java.awt.font.TextHitInfo caret;
+    private java.lang.ref.WeakReference clientComponent;
+    private sun.awt.im.InputMethodContext inputMethodContext;
+    private static final java.text.AttributedCharacterIterator$Attribute[] IM_ATTRIBUTES;
+    private static final java.text.AttributedCharacterIterator EMPTY_TEXT;
+
+    void <init>(sun.awt.im.InputMethodContext)
+    {
+        sun.awt.im.InputMethodContext r2;
+        java.lang.ref.WeakReference $r1;
+        sun.awt.im.CompositionAreaHandler r0;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r2 := @parameter0: sun.awt.im.InputMethodContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.im.CompositionAreaHandler: java.awt.font.TextHitInfo caret> = null;
+
+        $r1 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r1.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        r0.<sun.awt.im.CompositionAreaHandler: java.lang.ref.WeakReference clientComponent> = $r1;
+
+        r0.<sun.awt.im.CompositionAreaHandler: sun.awt.im.InputMethodContext inputMethodContext> = r2;
+
+        return;
+    }
+
+    private void createCompositionArea()
+    {
+        java.lang.Throwable $r12;
+        sun.awt.im.CompositionAreaHandler $r2, r3, $r9;
+        java.awt.Component $r11;
+        sun.awt.im.InputMethodContext $r7, $r8;
+        java.awt.im.InputMethodRequests $r6;
+        java.lang.Object $r0, $r5;
+        java.lang.ref.WeakReference $r4;
+        sun.awt.im.CompositionArea $r1, $r10;
+        boolean $z0;
+
+        r3 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new sun.awt.im.CompositionArea;
+
+        specialinvoke $r1.<sun.awt.im.CompositionArea: void <init>()>();
+
+        <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea> = $r1;
+
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        if $r2 == null goto label2;
+
+        $r10 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r9 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        $r8 = r3.<sun.awt.im.CompositionAreaHandler: sun.awt.im.InputMethodContext inputMethodContext>;
+
+        virtualinvoke $r10.<sun.awt.im.CompositionArea: void setHandlerInfo(sun.awt.im.CompositionAreaHandler,sun.awt.im.InputContext)>($r9, $r8);
+
+     label2:
+        $r4 = r3.<sun.awt.im.CompositionAreaHandler: java.lang.ref.WeakReference clientComponent>;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r11 = (java.awt.Component) $r5;
+
+        if $r11 == null goto label3;
+
+        $r6 = virtualinvoke $r11.<java.awt.Component: java.awt.im.InputMethodRequests getInputMethodRequests()>();
+
+        if $r6 == null goto label3;
+
+        $r7 = r3.<sun.awt.im.CompositionAreaHandler: sun.awt.im.InputMethodContext inputMethodContext>;
+
+        $z0 = virtualinvoke $r7.<sun.awt.im.InputMethodContext: boolean useBelowTheSpotInput()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r3.<sun.awt.im.CompositionAreaHandler: void setCompositionAreaUndecorated(boolean)>(1);
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r12 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r12;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    void setClientComponent(java.awt.Component)
+    {
+        java.lang.ref.WeakReference $r1;
+        java.awt.Component r2;
+        sun.awt.im.CompositionAreaHandler r0;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r2 := @parameter0: java.awt.Component;
+
+        $r1 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r1.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r2);
+
+        r0.<sun.awt.im.CompositionAreaHandler: java.lang.ref.WeakReference clientComponent> = $r1;
+
+        return;
+    }
+
+    void grabCompositionArea(boolean)
+    {
+        java.lang.Throwable $r11;
+        sun.awt.im.CompositionAreaHandler r1, $r2;
+        sun.awt.im.InputMethodContext $r9;
+        java.text.AttributedCharacterIterator $r4, $r6;
+        java.lang.Object $r0;
+        java.awt.font.TextHitInfo $r5;
+        sun.awt.im.CompositionArea $r3, $r7, $r8, $r10, $r12;
+        boolean z0;
+
+        r1 := @this: sun.awt.im.CompositionAreaHandler;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        if $r2 == r1 goto label4;
+
+        <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner> = r1;
+
+        $r3 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r3 == null goto label2;
+
+        $r10 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r9 = r1.<sun.awt.im.CompositionAreaHandler: sun.awt.im.InputMethodContext inputMethodContext>;
+
+        virtualinvoke $r10.<sun.awt.im.CompositionArea: void setHandlerInfo(sun.awt.im.CompositionAreaHandler,sun.awt.im.InputContext)>(r1, $r9);
+
+     label2:
+        if z0 == 0 goto label4;
+
+        $r4 = r1.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText>;
+
+        if $r4 == null goto label3;
+
+        $r8 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r8 != null goto label3;
+
+        specialinvoke r1.<sun.awt.im.CompositionAreaHandler: void createCompositionArea()>();
+
+     label3:
+        $r12 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r12 == null goto label4;
+
+        $r7 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r6 = r1.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText>;
+
+        $r5 = r1.<sun.awt.im.CompositionAreaHandler: java.awt.font.TextHitInfo caret>;
+
+        virtualinvoke $r7.<sun.awt.im.CompositionArea: void setText(java.text.AttributedCharacterIterator,java.awt.font.TextHitInfo)>($r6, $r5);
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r11;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void releaseCompositionArea()
+    {
+        java.lang.Throwable $r6;
+        sun.awt.im.CompositionAreaHandler r1, $r2;
+        java.lang.Object $r0;
+        sun.awt.im.CompositionArea $r3, $r4, $r5;
+
+        r1 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        if $r2 != r1 goto label2;
+
+        <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner> = null;
+
+        $r3 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r3 == null goto label2;
+
+        $r4 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r4.<sun.awt.im.CompositionArea: void setHandlerInfo(sun.awt.im.CompositionAreaHandler,sun.awt.im.InputContext)>(null, null);
+
+        $r5 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r5.<sun.awt.im.CompositionArea: void setText(java.text.AttributedCharacterIterator,java.awt.font.TextHitInfo)>(null, null);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void closeCompositionArea()
+    {
+        java.lang.Throwable $r4;
+        java.lang.Object $r1;
+        sun.awt.im.CompositionArea $r0, $r2, $r3;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r0 == null goto label5;
+
+        $r1 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r1;
+
+     label1:
+        <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner> = null;
+
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r2.<sun.awt.im.CompositionArea: void setHandlerInfo(sun.awt.im.CompositionAreaHandler,sun.awt.im.InputContext)>(null, null);
+
+        $r3 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r3.<sun.awt.im.CompositionArea: void setText(java.text.AttributedCharacterIterator,java.awt.font.TextHitInfo)>(null, null);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean isCompositionAreaVisible()
+    {
+        sun.awt.im.CompositionAreaHandler r2;
+        sun.awt.im.CompositionArea $r0, $r1;
+        boolean $z0;
+
+        r2 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $z0 = virtualinvoke $r1.<sun.awt.im.CompositionArea: boolean isCompositionAreaVisible()>();
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    void setCompositionAreaVisible(boolean)
+    {
+        sun.awt.im.CompositionAreaHandler r2;
+        sun.awt.im.CompositionArea $r0, $r1;
+        boolean z0;
+
+        r2 := @this: sun.awt.im.CompositionAreaHandler;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r1.<sun.awt.im.CompositionArea: void setCompositionAreaVisible(boolean)>(z0);
+
+     label1:
+        return;
+    }
+
+    void processInputMethodEvent(java.awt.event.InputMethodEvent)
+    {
+        int $i0;
+        java.awt.event.InputMethodEvent r0;
+        sun.awt.im.CompositionAreaHandler r1;
+
+        r1 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r0 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.InputMethodEvent: int getID()>();
+
+        if $i0 != 1100 goto label1;
+
+        virtualinvoke r1.<sun.awt.im.CompositionAreaHandler: void inputMethodTextChanged(java.awt.event.InputMethodEvent)>(r0);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<sun.awt.im.CompositionAreaHandler: void caretPositionChanged(java.awt.event.InputMethodEvent)>(r0);
+
+     label2:
+        return;
+    }
+
+    void setCompositionAreaUndecorated(boolean)
+    {
+        sun.awt.im.CompositionAreaHandler r2;
+        sun.awt.im.CompositionArea $r0, $r1;
+        boolean z0;
+
+        r2 := @this: sun.awt.im.CompositionAreaHandler;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r1.<sun.awt.im.CompositionArea: void setCompositionAreaUndecorated(boolean)>(z0);
+
+     label1:
+        return;
+    }
+
+    public void inputMethodTextChanged(java.awt.event.InputMethodEvent)
+    {
+        java.awt.font.TextAttribute $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.awt.font.TextHitInfo $r7, $r17;
+        boolean $z0;
+        java.awt.Font $r15;
+        sun.awt.im.CompositionAreaHandler r2;
+        java.text.AttributedString $r11;
+        java.awt.Component $r5;
+        sun.awt.im.InputMethodContext $r3;
+        java.awt.event.InputMethodEvent r0;
+        java.text.AttributedCharacterIterator $r1, $r8, $r16;
+        java.lang.Object $r4;
+        java.text.AttributedCharacterIterator$Attribute[] $r12;
+        sun.awt.im.CompositionArea $r6, $r9, $r10, $r13, $r18;
+
+        r2 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r0 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.InputMethodEvent: java.text.AttributedCharacterIterator getText()>();
+
+        $i0 = virtualinvoke r0.<java.awt.event.InputMethodEvent: int getCommittedCharacterCount()>();
+
+        r2.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText> = null;
+
+        r2.<sun.awt.im.CompositionAreaHandler: java.awt.font.TextHitInfo caret> = null;
+
+        if $r1 == null goto label2;
+
+        $i1 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $i2 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $i3 = $i1 - $i2;
+
+        if $i0 >= $i3 goto label2;
+
+        $r10 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r10 != null goto label1;
+
+        specialinvoke r2.<sun.awt.im.CompositionAreaHandler: void createCompositionArea()>();
+
+     label1:
+        $r11 = new java.text.AttributedString;
+
+        $i4 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $i5 = $i4 + $i0;
+
+        $i6 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $r12 = <sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator$Attribute[] IM_ATTRIBUTES>;
+
+        specialinvoke $r11.<java.text.AttributedString: void <init>(java.text.AttributedCharacterIterator,int,int,java.text.AttributedCharacterIterator$Attribute[])>($r1, $i5, $i6, $r12);
+
+        $r14 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FONT>;
+
+        $r13 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r15 = virtualinvoke $r13.<sun.awt.im.CompositionArea: java.awt.Font getFont()>();
+
+        virtualinvoke $r11.<java.text.AttributedString: void addAttribute(java.text.AttributedCharacterIterator$Attribute,java.lang.Object)>($r14, $r15);
+
+        $r16 = virtualinvoke $r11.<java.text.AttributedString: java.text.AttributedCharacterIterator getIterator()>();
+
+        r2.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText> = $r16;
+
+        $r17 = virtualinvoke r0.<java.awt.event.InputMethodEvent: java.awt.font.TextHitInfo getCaret()>();
+
+        r2.<sun.awt.im.CompositionAreaHandler: java.awt.font.TextHitInfo caret> = $r17;
+
+     label2:
+        $r18 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r18 == null goto label3;
+
+        $r9 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r8 = r2.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText>;
+
+        $r7 = r2.<sun.awt.im.CompositionAreaHandler: java.awt.font.TextHitInfo caret>;
+
+        virtualinvoke $r9.<sun.awt.im.CompositionArea: void setText(java.text.AttributedCharacterIterator,java.awt.font.TextHitInfo)>($r8, $r7);
+
+     label3:
+        if $i0 <= 0 goto label4;
+
+        $r3 = r2.<sun.awt.im.CompositionAreaHandler: sun.awt.im.InputMethodContext inputMethodContext>;
+
+        $r4 = virtualinvoke r0.<java.awt.event.InputMethodEvent: java.lang.Object getSource()>();
+
+        $r5 = (java.awt.Component) $r4;
+
+        virtualinvoke $r3.<sun.awt.im.InputMethodContext: void dispatchCommittedText(java.awt.Component,java.text.AttributedCharacterIterator,int)>($r5, $r1, $i0);
+
+        $z0 = virtualinvoke r2.<sun.awt.im.CompositionAreaHandler: boolean isCompositionAreaVisible()>();
+
+        if $z0 == 0 goto label4;
+
+        $r6 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        virtualinvoke $r6.<sun.awt.im.CompositionArea: void updateWindowLocation()>();
+
+     label4:
+        virtualinvoke r0.<java.awt.event.InputMethodEvent: void consume()>();
+
+        return;
+    }
+
+    public void caretPositionChanged(java.awt.event.InputMethodEvent)
+    {
+        java.awt.event.InputMethodEvent r1;
+        sun.awt.im.CompositionAreaHandler r4;
+        java.awt.font.TextHitInfo $r3;
+        sun.awt.im.CompositionArea $r0, $r2;
+
+        r4 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r1 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        if $r0 == null goto label1;
+
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r3 = virtualinvoke r1.<java.awt.event.InputMethodEvent: java.awt.font.TextHitInfo getCaret()>();
+
+        virtualinvoke $r2.<sun.awt.im.CompositionArea: void setCaret(java.awt.font.TextHitInfo)>($r3);
+
+     label1:
+        virtualinvoke r1.<java.awt.event.InputMethodEvent: void consume()>();
+
+        return;
+    }
+
+    java.awt.im.InputMethodRequests getClientInputMethodRequests()
+    {
+        sun.awt.im.CompositionAreaHandler r0;
+        java.awt.im.InputMethodRequests $r4;
+        java.lang.Object $r2;
+        java.lang.ref.WeakReference $r1;
+        java.awt.Component r3;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r1 = r0.<sun.awt.im.CompositionAreaHandler: java.lang.ref.WeakReference clientComponent>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r3 = (java.awt.Component) $r2;
+
+        if r3 == null goto label1;
+
+        $r4 = virtualinvoke r3.<java.awt.Component: java.awt.im.InputMethodRequests getInputMethodRequests()>();
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)
+    {
+        java.lang.Throwable $r11;
+        java.awt.Rectangle $r5, $r7, $r8, $r10;
+        sun.awt.im.CompositionAreaHandler r1, $r2;
+        java.text.AttributedCharacterIterator $r3;
+        java.awt.im.InputMethodRequests $r4;
+        java.lang.Object $r0;
+        java.awt.font.TextHitInfo r6;
+        boolean $z0;
+        sun.awt.im.CompositionArea $r9;
+
+        r1 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r6 := @parameter0: java.awt.font.TextHitInfo;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        if $r2 != r1 goto label03;
+
+        $z0 = virtualinvoke r1.<sun.awt.im.CompositionAreaHandler: boolean isCompositionAreaVisible()>();
+
+        if $z0 == 0 goto label03;
+
+        $r9 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r10 = virtualinvoke $r9.<sun.awt.im.CompositionArea: java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)>(r6);
+
+        exitmonitor $r0;
+
+     label02:
+        return $r10;
+
+     label03:
+        $r3 = r1.<sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator composedText>;
+
+        if $r3 == null goto label05;
+
+        $r8 = new java.awt.Rectangle;
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 10);
+
+        exitmonitor $r0;
+
+     label04:
+        return $r8;
+
+     label05:
+        $r4 = virtualinvoke r1.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r4 == null goto label07;
+
+        $r7 = interfaceinvoke $r4.<java.awt.im.InputMethodRequests: java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)>(r6);
+
+        exitmonitor $r0;
+
+     label06:
+        return $r7;
+
+     label07:
+        $r5 = new java.awt.Rectangle;
+
+        specialinvoke $r5.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 10);
+
+        exitmonitor $r0;
+
+     label08:
+        return $r5;
+
+     label09:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label10:
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public java.awt.font.TextHitInfo getLocationOffset(int, int)
+    {
+        java.lang.Throwable $r5;
+        sun.awt.im.CompositionAreaHandler r1, $r2;
+        int i0, i1;
+        java.lang.Object $r0;
+        java.awt.font.TextHitInfo $r4;
+        boolean $z0;
+        sun.awt.im.CompositionArea $r3;
+
+        r1 := @this: sun.awt.im.CompositionAreaHandler;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionAreaHandler compositionAreaOwner>;
+
+        if $r2 != r1 goto label3;
+
+        $z0 = virtualinvoke r1.<sun.awt.im.CompositionAreaHandler: boolean isCompositionAreaVisible()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = <sun.awt.im.CompositionAreaHandler: sun.awt.im.CompositionArea compositionArea>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo getLocationOffset(int,int)>(i0, i1);
+
+        exitmonitor $r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return null;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int getInsertPositionOffset()
+    {
+        java.awt.im.InputMethodRequests $r1;
+        int $i0;
+        sun.awt.im.CompositionAreaHandler r0;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r1 = virtualinvoke r0.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r1 == null goto label1;
+
+        $i0 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: int getInsertPositionOffset()>();
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+
+    public java.text.AttributedCharacterIterator getCommittedText(int, int, java.text.AttributedCharacterIterator$Attribute[])
+    {
+        java.text.AttributedCharacterIterator $r2, $r4;
+        sun.awt.im.CompositionAreaHandler r0;
+        java.awt.im.InputMethodRequests $r1;
+        int i0, i1;
+        java.text.AttributedCharacterIterator$Attribute[] r3;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r3 := @parameter2: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r1 = virtualinvoke r0.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r1 == null goto label1;
+
+        $r4 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator getCommittedText(int,int,java.text.AttributedCharacterIterator$Attribute[])>(i0, i1, r3);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator EMPTY_TEXT>;
+
+        return $r2;
+    }
+
+    public int getCommittedTextLength()
+    {
+        java.awt.im.InputMethodRequests $r1;
+        int $i0;
+        sun.awt.im.CompositionAreaHandler r0;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        $r1 = virtualinvoke r0.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r1 == null goto label1;
+
+        $i0 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: int getCommittedTextLength()>();
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+
+    public java.text.AttributedCharacterIterator cancelLatestCommittedText(java.text.AttributedCharacterIterator$Attribute[])
+    {
+        java.text.AttributedCharacterIterator $r3;
+        sun.awt.im.CompositionAreaHandler r0;
+        java.awt.im.InputMethodRequests $r1;
+        java.text.AttributedCharacterIterator$Attribute[] r2;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r2 := @parameter0: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r1 = virtualinvoke r0.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r1 == null goto label1;
+
+        $r3 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator cancelLatestCommittedText(java.text.AttributedCharacterIterator$Attribute[])>(r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public java.text.AttributedCharacterIterator getSelectedText(java.text.AttributedCharacterIterator$Attribute[])
+    {
+        java.text.AttributedCharacterIterator $r2, $r4;
+        sun.awt.im.CompositionAreaHandler r0;
+        java.awt.im.InputMethodRequests $r1;
+        java.text.AttributedCharacterIterator$Attribute[] r3;
+
+        r0 := @this: sun.awt.im.CompositionAreaHandler;
+
+        r3 := @parameter0: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r1 = virtualinvoke r0.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r1 == null goto label1;
+
+        $r4 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator getSelectedText(java.text.AttributedCharacterIterator$Attribute[])>(r3);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator EMPTY_TEXT>;
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.text.AttributedCharacterIterator $r4;
+        java.awt.font.TextAttribute $r2;
+        java.lang.Object $r0;
+        java.text.AttributedString $r3;
+        java.text.AttributedCharacterIterator$Attribute[] $r1;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <sun.awt.im.CompositionAreaHandler: java.lang.Object compositionAreaLock> = $r0;
+
+        $r1 = newarray (java.text.AttributedCharacterIterator$Attribute)[1];
+
+        $r2 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute INPUT_METHOD_HIGHLIGHT>;
+
+        $r1[0] = $r2;
+
+        <sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator$Attribute[] IM_ATTRIBUTES> = $r1;
+
+        $r3 = new java.text.AttributedString;
+
+        specialinvoke $r3.<java.text.AttributedString: void <init>(java.lang.String)>("");
+
+        $r4 = virtualinvoke $r3.<java.text.AttributedString: java.text.AttributedCharacterIterator getIterator()>();
+
+        <sun.awt.im.CompositionAreaHandler: java.text.AttributedCharacterIterator EMPTY_TEXT> = $r4;
+
+        return;
+    }
+}

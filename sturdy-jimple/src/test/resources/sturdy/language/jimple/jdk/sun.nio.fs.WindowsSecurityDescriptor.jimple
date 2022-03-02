@@ -1,0 +1,1022 @@
+class sun.nio.fs.WindowsSecurityDescriptor extends java.lang.Object
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final short SIZEOF_ACL;
+    private static final short SIZEOF_ACCESS_ALLOWED_ACE;
+    private static final short SIZEOF_ACCESS_DENIED_ACE;
+    private static final short SIZEOF_SECURITY_DESCRIPTOR;
+    private static final short OFFSETOF_TYPE;
+    private static final short OFFSETOF_FLAGS;
+    private static final short OFFSETOF_ACCESS_MASK;
+    private static final short OFFSETOF_SID;
+    private static final sun.nio.fs.WindowsSecurityDescriptor NULL_DESCRIPTOR;
+    private final java.util.List sidList;
+    private final sun.nio.fs.NativeBuffer aclBuffer;
+    private final sun.nio.fs.NativeBuffer sdBuffer;
+
+    private void <init>()
+    {
+        sun.nio.fs.WindowsSecurityDescriptor r0;
+
+        r0 := @this: sun.nio.fs.WindowsSecurityDescriptor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList> = null;
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer> = null;
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer> = null;
+
+        return;
+    }
+
+    private void <init>(java.util.List) throws java.io.IOException
+    {
+        java.lang.Long $r13, $r20;
+        boolean $z0, $z1;
+        java.util.List $r11, $r19, r43;
+        java.lang.StringBuilder $r28, $r29, $r31, $r35, $r36, $r38, $r39, $r41;
+        sun.nio.fs.WindowsSecurityDescriptor r0;
+        java.lang.Throwable $r22;
+        java.nio.file.ProviderMismatchException $r21;
+        long $l1, $l3, $l4, $l5, $l6, $l7, $l8;
+        java.util.ArrayList $r1, $r2;
+        java.nio.file.attribute.UserPrincipal $r16;
+        int $i0, $i2, $i9, $i10, $i11, i12, i13;
+        sun.nio.fs.WindowsException $r23, $r26, $r33;
+        java.lang.String $r18, $r25, $r30, $r32, $r37, $r40, $r42;
+        java.util.Iterator $r3;
+        java.io.IOException $r24, $r27, $r34;
+        java.nio.file.attribute.AclEntry r44, r45;
+        sun.nio.fs.NativeBuffer $r4, $r5, $r6, $r7, $r8, $r9, $r14;
+        sun.nio.fs.WindowsUserPrincipals$User $r17;
+        java.lang.Object $r10, $r12, $r15;
+
+        r0 := @this: sun.nio.fs.WindowsSecurityDescriptor;
+
+        r43 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(java.util.Collection)>(r43);
+
+        $r2 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList> = $r2;
+
+     label01:
+        i12 = 8;
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r15 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r44 = (java.nio.file.attribute.AclEntry) $r15;
+
+        $r16 = virtualinvoke r44.<java.nio.file.attribute.AclEntry: java.nio.file.attribute.UserPrincipal principal()>();
+
+        $z1 = $r16 instanceof sun.nio.fs.WindowsUserPrincipals$User;
+
+        if $z1 != 0 goto label03;
+
+        $r21 = new java.nio.file.ProviderMismatchException;
+
+        specialinvoke $r21.<java.nio.file.ProviderMismatchException: void <init>()>();
+
+        throw $r21;
+
+     label03:
+        $r17 = (sun.nio.fs.WindowsUserPrincipals$User) $r16;
+
+        $r18 = virtualinvoke $r17.<sun.nio.fs.WindowsUserPrincipals$User: java.lang.String sidString()>();
+
+     label04:
+        $l8 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long ConvertStringSidToSid(java.lang.String)>($r18);
+
+        $r19 = r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList>;
+
+        $r20 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l8);
+
+        interfaceinvoke $r19.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        $i9 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: int GetLengthSid(long)>($l8);
+
+        $i10 = staticinvoke <java.lang.Math: int max(int,int)>(12, 12);
+
+        $i11 = $i9 + $i10;
+
+        i12 = i12 + $i11;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r33 := @caughtexception;
+
+        $r34 = new java.io.IOException;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to get SID for ");
+
+        $r37 = interfaceinvoke $r16.<java.nio.file.attribute.UserPrincipal: java.lang.String getName()>();
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r40 = virtualinvoke $r33.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.io.IOException: void <init>(java.lang.String)>($r42);
+
+        throw $r34;
+
+     label07:
+        goto label02;
+
+     label08:
+        $r4 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(i12);
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer> = $r4;
+
+        $r5 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(20);
+
+        r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer> = $r5;
+
+        $r6 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer>;
+
+        $l1 = virtualinvoke $r6.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void InitializeAcl(long,int)>($l1, i12);
+
+        i13 = 0;
+
+     label09:
+        $i2 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i13 >= $i2 goto label14;
+
+        $r10 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i13);
+
+        r45 = (java.nio.file.attribute.AclEntry) $r10;
+
+        $r11 = r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList>;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.lang.Object get(int)>(i13);
+
+        $r13 = (java.lang.Long) $r12;
+
+        $l6 = virtualinvoke $r13.<java.lang.Long: long longValue()>();
+
+     label10:
+        $r14 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer>;
+
+        $l7 = virtualinvoke $r14.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsSecurityDescriptor: void encode(java.nio.file.attribute.AclEntry,long,long)>(r45, $l6, $l7);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r26 := @caughtexception;
+
+        $r27 = new java.io.IOException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to encode ACE: ");
+
+        $r30 = virtualinvoke $r26.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.io.IOException: void <init>(java.lang.String)>($r32);
+
+        throw $r27;
+
+     label13:
+        i13 = i13 + 1;
+
+        goto label09;
+
+     label14:
+        $r7 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        $l3 = virtualinvoke $r7.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void InitializeSecurityDescriptor(long)>($l3);
+
+        $r8 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        $l4 = virtualinvoke $r8.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $r9 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer>;
+
+        $l5 = virtualinvoke $r9.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void SetSecurityDescriptorDacl(long,long)>($l4, $l5);
+
+     label15:
+        goto label19;
+
+     label16:
+        $r23 := @caughtexception;
+
+        $r24 = new java.io.IOException;
+
+        $r25 = virtualinvoke $r23.<sun.nio.fs.WindowsException: java.lang.String getMessage()>();
+
+        specialinvoke $r24.<java.io.IOException: void <init>(java.lang.String)>($r25);
+
+        throw $r24;
+
+     label17:
+        $r22 := @caughtexception;
+
+     label18:
+        virtualinvoke r0.<sun.nio.fs.WindowsSecurityDescriptor: void release()>();
+
+        throw $r22;
+
+     label19:
+        return;
+
+        catch sun.nio.fs.WindowsException from label04 to label05 with label06;
+        catch sun.nio.fs.WindowsException from label10 to label11 with label12;
+        catch sun.nio.fs.WindowsException from label01 to label15 with label16;
+        catch java.lang.Throwable from label01 to label15 with label17;
+        catch java.lang.Throwable from label16 to label18 with label17;
+    }
+
+    void release()
+    {
+        java.util.Iterator $r5;
+        long $l0;
+        sun.nio.fs.NativeBuffer $r1, $r2, $r8, $r9;
+        java.util.List $r3, $r4;
+        java.lang.Long r7;
+        java.lang.Object $r6;
+        sun.nio.fs.WindowsSecurityDescriptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsSecurityDescriptor;
+
+        $r1 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        virtualinvoke $r9.<sun.nio.fs.NativeBuffer: void release()>();
+
+     label1:
+        $r2 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer>;
+
+        if $r2 == null goto label2;
+
+        $r8 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer aclBuffer>;
+
+        virtualinvoke $r8.<sun.nio.fs.NativeBuffer: void release()>();
+
+     label2:
+        $r3 = r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList>;
+
+        if $r3 == null goto label4;
+
+        $r4 = r0.<sun.nio.fs.WindowsSecurityDescriptor: java.util.List sidList>;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.Long) $r6;
+
+        $l0 = virtualinvoke r7.<java.lang.Long: long longValue()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void LocalFree(long)>($l0);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    long address()
+    {
+        long $l0;
+        sun.nio.fs.NativeBuffer $r1, $r2;
+        sun.nio.fs.WindowsSecurityDescriptor r0;
+
+        r0 := @this: sun.nio.fs.WindowsSecurityDescriptor;
+
+        $r1 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        if $r1 != null goto label1;
+
+        $l0 = 0L;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.NativeBuffer sdBuffer>;
+
+        $l0 = virtualinvoke $r2.<sun.nio.fs.NativeBuffer: long address()>();
+
+     label2:
+        return $l0;
+    }
+
+    private static java.nio.file.attribute.AclEntry decode(long) throws java.io.IOException
+    {
+        java.nio.file.attribute.AclEntry$Builder $r6, $r7, $r8, $r9, $r10;
+        byte $b2, $b4, $b5, $b6, $b7, $b8;
+        java.nio.file.attribute.AclEntryFlag $r26, $r27, $r28, $r29;
+        java.util.EnumSet $r2, $r4;
+        sun.misc.Unsafe $r0, $r1, $r3;
+        java.nio.file.attribute.AclEntryPermission $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        long l0, $l1, $l3, $l9, $l25;
+        java.nio.file.attribute.UserPrincipal $r5;
+        int $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24;
+        java.nio.file.attribute.AclEntry $r11;
+        java.nio.file.attribute.AclEntryType r30;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.nio.fs.WindowsSecurityDescriptor: sun.misc.Unsafe unsafe>;
+
+        $l1 = l0 + 0L;
+
+        $b2 = virtualinvoke $r0.<sun.misc.Unsafe: byte getByte(long)>($l1);
+
+        if $b2 == 0 goto label01;
+
+        if $b2 == 1 goto label01;
+
+        return null;
+
+     label01:
+        if $b2 != 0 goto label02;
+
+        r30 = <java.nio.file.attribute.AclEntryType: java.nio.file.attribute.AclEntryType ALLOW>;
+
+        goto label03;
+
+     label02:
+        r30 = <java.nio.file.attribute.AclEntryType: java.nio.file.attribute.AclEntryType DENY>;
+
+     label03:
+        $r1 = <sun.nio.fs.WindowsSecurityDescriptor: sun.misc.Unsafe unsafe>;
+
+        $l3 = l0 + 1L;
+
+        $b4 = virtualinvoke $r1.<sun.misc.Unsafe: byte getByte(long)>($l3);
+
+        $r2 = staticinvoke <java.util.EnumSet: java.util.EnumSet noneOf(java.lang.Class)>(class "Ljava/nio/file/attribute/AclEntryFlag;");
+
+        $b5 = $b4 & 1;
+
+        if $b5 == 0 goto label04;
+
+        $r29 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag FILE_INHERIT>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r29);
+
+     label04:
+        $b6 = $b4 & 2;
+
+        if $b6 == 0 goto label05;
+
+        $r28 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag DIRECTORY_INHERIT>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r28);
+
+     label05:
+        $b7 = $b4 & 4;
+
+        if $b7 == 0 goto label06;
+
+        $r27 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag NO_PROPAGATE_INHERIT>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r27);
+
+     label06:
+        $b8 = $b4 & 8;
+
+        if $b8 == 0 goto label07;
+
+        $r26 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag INHERIT_ONLY>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r26);
+
+     label07:
+        $r3 = <sun.nio.fs.WindowsSecurityDescriptor: sun.misc.Unsafe unsafe>;
+
+        $l9 = l0 + 4L;
+
+        $i10 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(long)>($l9);
+
+        $r4 = staticinvoke <java.util.EnumSet: java.util.EnumSet noneOf(java.lang.Class)>(class "Ljava/nio/file/attribute/AclEntryPermission;");
+
+        $i11 = $i10 & 1;
+
+        if $i11 <= 0 goto label08;
+
+        $r25 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_DATA>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r25);
+
+     label08:
+        $i12 = $i10 & 2;
+
+        if $i12 <= 0 goto label09;
+
+        $r24 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_DATA>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r24);
+
+     label09:
+        $i13 = $i10 & 4;
+
+        if $i13 <= 0 goto label10;
+
+        $r23 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission APPEND_DATA>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r23);
+
+     label10:
+        $i14 = $i10 & 8;
+
+        if $i14 <= 0 goto label11;
+
+        $r22 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_NAMED_ATTRS>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r22);
+
+     label11:
+        $i15 = $i10 & 16;
+
+        if $i15 <= 0 goto label12;
+
+        $r21 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_NAMED_ATTRS>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r21);
+
+     label12:
+        $i16 = $i10 & 32;
+
+        if $i16 <= 0 goto label13;
+
+        $r20 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission EXECUTE>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r20);
+
+     label13:
+        $i17 = $i10 & 64;
+
+        if $i17 <= 0 goto label14;
+
+        $r19 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission DELETE_CHILD>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r19);
+
+     label14:
+        $i18 = $i10 & 128;
+
+        if $i18 <= 0 goto label15;
+
+        $r18 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_ATTRIBUTES>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r18);
+
+     label15:
+        $i19 = $i10 & 256;
+
+        if $i19 <= 0 goto label16;
+
+        $r17 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_ATTRIBUTES>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r17);
+
+     label16:
+        $i20 = $i10 & 65536;
+
+        if $i20 <= 0 goto label17;
+
+        $r16 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission DELETE>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r16);
+
+     label17:
+        $i21 = $i10 & 131072;
+
+        if $i21 <= 0 goto label18;
+
+        $r15 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_ACL>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r15);
+
+     label18:
+        $i22 = $i10 & 262144;
+
+        if $i22 <= 0 goto label19;
+
+        $r14 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_ACL>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r14);
+
+     label19:
+        $i23 = $i10 & 524288;
+
+        if $i23 <= 0 goto label20;
+
+        $r13 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_OWNER>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r13);
+
+     label20:
+        $i24 = $i10 & 1048576;
+
+        if $i24 <= 0 goto label21;
+
+        $r12 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission SYNCHRONIZE>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+     label21:
+        $l25 = l0 + 8L;
+
+        $r5 = staticinvoke <sun.nio.fs.WindowsUserPrincipals: java.nio.file.attribute.UserPrincipal fromSid(long)>($l25);
+
+        $r6 = staticinvoke <java.nio.file.attribute.AclEntry: java.nio.file.attribute.AclEntry$Builder newBuilder()>();
+
+        $r7 = virtualinvoke $r6.<java.nio.file.attribute.AclEntry$Builder: java.nio.file.attribute.AclEntry$Builder setType(java.nio.file.attribute.AclEntryType)>(r30);
+
+        $r8 = virtualinvoke $r7.<java.nio.file.attribute.AclEntry$Builder: java.nio.file.attribute.AclEntry$Builder setPrincipal(java.nio.file.attribute.UserPrincipal)>($r5);
+
+        $r9 = virtualinvoke $r8.<java.nio.file.attribute.AclEntry$Builder: java.nio.file.attribute.AclEntry$Builder setFlags(java.util.Set)>($r2);
+
+        $r10 = virtualinvoke $r9.<java.nio.file.attribute.AclEntry$Builder: java.nio.file.attribute.AclEntry$Builder setPermissions(java.util.Set)>($r4);
+
+        $r11 = virtualinvoke $r10.<java.nio.file.attribute.AclEntry$Builder: java.nio.file.attribute.AclEntry build()>();
+
+        return $r11;
+    }
+
+    private static void encode(java.nio.file.attribute.AclEntry, long, long) throws sun.nio.fs.WindowsException
+    {
+        byte $b2, $b3, $b4, b6;
+        java.nio.file.attribute.AclEntryFlag $r21, $r22, $r23, $r24;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19;
+        java.util.Set $r5, $r20;
+        java.nio.file.attribute.AclEntryPermission $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19;
+        long l0, l1;
+        int i5;
+        java.nio.file.attribute.AclEntry r0;
+        java.nio.file.attribute.AclEntryType $r1, $r2, $r3, $r4, $r25, $r26;
+
+        r0 := @parameter0: java.nio.file.attribute.AclEntry;
+
+        l1 := @parameter1: long;
+
+        l0 := @parameter2: long;
+
+        $r1 = virtualinvoke r0.<java.nio.file.attribute.AclEntry: java.nio.file.attribute.AclEntryType type()>();
+
+        $r2 = <java.nio.file.attribute.AclEntryType: java.nio.file.attribute.AclEntryType ALLOW>;
+
+        if $r1 == $r2 goto label01;
+
+        $r25 = virtualinvoke r0.<java.nio.file.attribute.AclEntry: java.nio.file.attribute.AclEntryType type()>();
+
+        $r26 = <java.nio.file.attribute.AclEntryType: java.nio.file.attribute.AclEntryType DENY>;
+
+        if $r25 == $r26 goto label01;
+
+        return;
+
+     label01:
+        $r3 = virtualinvoke r0.<java.nio.file.attribute.AclEntry: java.nio.file.attribute.AclEntryType type()>();
+
+        $r4 = <java.nio.file.attribute.AclEntryType: java.nio.file.attribute.AclEntryType ALLOW>;
+
+        if $r3 != $r4 goto label02;
+
+        $z19 = 1;
+
+        goto label03;
+
+     label02:
+        $z19 = 0;
+
+     label03:
+        z0 = $z19;
+
+        $r5 = virtualinvoke r0.<java.nio.file.attribute.AclEntry: java.util.Set permissions()>();
+
+        i5 = 0;
+
+        $r6 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_DATA>;
+
+        $z1 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label04;
+
+        i5 = 1;
+
+     label04:
+        $r7 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_DATA>;
+
+        $z2 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r7);
+
+        if $z2 == 0 goto label05;
+
+        i5 = i5 | 2;
+
+     label05:
+        $r8 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission APPEND_DATA>;
+
+        $z3 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r8);
+
+        if $z3 == 0 goto label06;
+
+        i5 = i5 | 4;
+
+     label06:
+        $r9 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_NAMED_ATTRS>;
+
+        $z4 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r9);
+
+        if $z4 == 0 goto label07;
+
+        i5 = i5 | 8;
+
+     label07:
+        $r10 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_NAMED_ATTRS>;
+
+        $z5 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+        if $z5 == 0 goto label08;
+
+        i5 = i5 | 16;
+
+     label08:
+        $r11 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission EXECUTE>;
+
+        $z6 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r11);
+
+        if $z6 == 0 goto label09;
+
+        i5 = i5 | 32;
+
+     label09:
+        $r12 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission DELETE_CHILD>;
+
+        $z7 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r12);
+
+        if $z7 == 0 goto label10;
+
+        i5 = i5 | 64;
+
+     label10:
+        $r13 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_ATTRIBUTES>;
+
+        $z8 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r13);
+
+        if $z8 == 0 goto label11;
+
+        i5 = i5 | 128;
+
+     label11:
+        $r14 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_ATTRIBUTES>;
+
+        $z9 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r14);
+
+        if $z9 == 0 goto label12;
+
+        i5 = i5 | 256;
+
+     label12:
+        $r15 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission DELETE>;
+
+        $z10 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r15);
+
+        if $z10 == 0 goto label13;
+
+        i5 = i5 | 65536;
+
+     label13:
+        $r16 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission READ_ACL>;
+
+        $z11 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r16);
+
+        if $z11 == 0 goto label14;
+
+        i5 = i5 | 131072;
+
+     label14:
+        $r17 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_ACL>;
+
+        $z12 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r17);
+
+        if $z12 == 0 goto label15;
+
+        i5 = i5 | 262144;
+
+     label15:
+        $r18 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission WRITE_OWNER>;
+
+        $z13 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r18);
+
+        if $z13 == 0 goto label16;
+
+        i5 = i5 | 524288;
+
+     label16:
+        $r19 = <java.nio.file.attribute.AclEntryPermission: java.nio.file.attribute.AclEntryPermission SYNCHRONIZE>;
+
+        $z14 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r19);
+
+        if $z14 == 0 goto label17;
+
+        i5 = i5 | 1048576;
+
+     label17:
+        $r20 = virtualinvoke r0.<java.nio.file.attribute.AclEntry: java.util.Set flags()>();
+
+        b6 = 0;
+
+        $r21 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag FILE_INHERIT>;
+
+        $z15 = interfaceinvoke $r20.<java.util.Set: boolean contains(java.lang.Object)>($r21);
+
+        if $z15 == 0 goto label18;
+
+        b6 = (byte) 1;
+
+     label18:
+        $r22 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag DIRECTORY_INHERIT>;
+
+        $z16 = interfaceinvoke $r20.<java.util.Set: boolean contains(java.lang.Object)>($r22);
+
+        if $z16 == 0 goto label19;
+
+        $b4 = b6 | 2;
+
+        b6 = (byte) $b4;
+
+     label19:
+        $r23 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag NO_PROPAGATE_INHERIT>;
+
+        $z17 = interfaceinvoke $r20.<java.util.Set: boolean contains(java.lang.Object)>($r23);
+
+        if $z17 == 0 goto label20;
+
+        $b3 = b6 | 4;
+
+        b6 = (byte) $b3;
+
+     label20:
+        $r24 = <java.nio.file.attribute.AclEntryFlag: java.nio.file.attribute.AclEntryFlag INHERIT_ONLY>;
+
+        $z18 = interfaceinvoke $r20.<java.util.Set: boolean contains(java.lang.Object)>($r24);
+
+        if $z18 == 0 goto label21;
+
+        $b2 = b6 | 8;
+
+        b6 = (byte) $b2;
+
+     label21:
+        if z0 == 0 goto label22;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void AddAccessAllowedAceEx(long,int,int,long)>(l0, b6, i5, l1);
+
+        goto label23;
+
+     label22:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void AddAccessDeniedAceEx(long,int,int,long)>(l0, b6, i5, l1);
+
+     label23:
+        return;
+    }
+
+    static sun.nio.fs.WindowsSecurityDescriptor create(java.util.List) throws java.io.IOException
+    {
+        java.util.List r1;
+        sun.nio.fs.WindowsSecurityDescriptor $r0;
+
+        r1 := @parameter0: java.util.List;
+
+        $r0 = new sun.nio.fs.WindowsSecurityDescriptor;
+
+        specialinvoke $r0.<sun.nio.fs.WindowsSecurityDescriptor: void <init>(java.util.List)>(r1);
+
+        return $r0;
+    }
+
+    static transient sun.nio.fs.WindowsSecurityDescriptor fromAttribute(java.nio.file.attribute.FileAttribute[]) throws java.io.IOException
+    {
+        java.lang.NullPointerException $r14;
+        java.nio.file.attribute.FileAttribute[] r0;
+        int i0, i1;
+        java.lang.String $r3, $r7, $r10;
+        boolean $z0;
+        java.lang.UnsupportedOperationException $r4;
+        java.nio.file.attribute.FileAttribute r1;
+        java.util.List r12;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9;
+        java.lang.Object $r11;
+        sun.nio.fs.WindowsSecurityDescriptor $r2, $r13, r15;
+
+        r0 := @parameter0: java.nio.file.attribute.FileAttribute[];
+
+        r15 = <sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.WindowsSecurityDescriptor NULL_DESCRIPTOR>;
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label6;
+
+        r1 = r0[i1];
+
+        $r2 = <sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.WindowsSecurityDescriptor NULL_DESCRIPTOR>;
+
+        if r15 == $r2 goto label2;
+
+        virtualinvoke r15.<sun.nio.fs.WindowsSecurityDescriptor: void release()>();
+
+     label2:
+        if r1 != null goto label3;
+
+        $r14 = new java.lang.NullPointerException;
+
+        specialinvoke $r14.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r14;
+
+     label3:
+        $r3 = interfaceinvoke r1.<java.nio.file.attribute.FileAttribute: java.lang.String name()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("acl:acl");
+
+        if $z0 == 0 goto label4;
+
+        $r11 = interfaceinvoke r1.<java.nio.file.attribute.FileAttribute: java.lang.Object value()>();
+
+        r12 = (java.util.List) $r11;
+
+        $r13 = new sun.nio.fs.WindowsSecurityDescriptor;
+
+        specialinvoke $r13.<sun.nio.fs.WindowsSecurityDescriptor: void <init>(java.util.List)>(r12);
+
+        r15 = $r13;
+
+        goto label5;
+
+     label4:
+        $r4 = new java.lang.UnsupportedOperationException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r7 = interfaceinvoke r1.<java.nio.file.attribute.FileAttribute: java.lang.String name()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' not supported as initial attribute");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r10);
+
+        throw $r4;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        return r15;
+    }
+
+    static java.util.List getAcl(long) throws java.io.IOException
+    {
+        long l0, $l1, $l3;
+        java.nio.file.attribute.AclEntry $r2;
+        sun.nio.fs.WindowsNativeDispatcher$AclInformation $r0;
+        java.util.ArrayList $r1;
+        byte $b2;
+        int i4, i5;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long GetSecurityDescriptorDacl(long)>(l0);
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        i4 = 0;
+
+        goto label2;
+
+     label1:
+        $r0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$AclInformation GetAclInformation(long)>($l1);
+
+        i4 = virtualinvoke $r0.<sun.nio.fs.WindowsNativeDispatcher$AclInformation: int aceCount()>();
+
+     label2:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>(i4);
+
+        i5 = 0;
+
+     label3:
+        if i5 >= i4 goto label5;
+
+        $l3 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long GetAce(long,int)>($l1, i5);
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsSecurityDescriptor: java.nio.file.attribute.AclEntry decode(long)>($l3);
+
+        if $r2 == null goto label4;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+     label4:
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label5:
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0;
+        sun.nio.fs.WindowsSecurityDescriptor $r1;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short OFFSETOF_SID> = 8;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short OFFSETOF_ACCESS_MASK> = 4;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short OFFSETOF_FLAGS> = 1;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short OFFSETOF_TYPE> = 0;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short SIZEOF_SECURITY_DESCRIPTOR> = 20;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short SIZEOF_ACCESS_DENIED_ACE> = 12;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short SIZEOF_ACCESS_ALLOWED_ACE> = 12;
+
+        <sun.nio.fs.WindowsSecurityDescriptor: short SIZEOF_ACL> = 8;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.fs.WindowsSecurityDescriptor: sun.misc.Unsafe unsafe> = $r0;
+
+        $r1 = new sun.nio.fs.WindowsSecurityDescriptor;
+
+        specialinvoke $r1.<sun.nio.fs.WindowsSecurityDescriptor: void <init>()>();
+
+        <sun.nio.fs.WindowsSecurityDescriptor: sun.nio.fs.WindowsSecurityDescriptor NULL_DESCRIPTOR> = $r1;
+
+        return;
+    }
+}

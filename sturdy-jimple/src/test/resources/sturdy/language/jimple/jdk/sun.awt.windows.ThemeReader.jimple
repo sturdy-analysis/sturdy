@@ -1,0 +1,1003 @@
+public final class sun.awt.windows.ThemeReader extends java.lang.Object
+{
+    private static final java.util.Map widgetToTheme;
+    private static final java.util.concurrent.locks.ReadWriteLock readWriteLock;
+    private static final java.util.concurrent.locks.Lock readLock;
+    private static final java.util.concurrent.locks.Lock writeLock;
+    private static volatile boolean valid;
+    private static volatile boolean isThemed;
+    static volatile boolean xpStyleEnabled;
+
+    public void <init>()
+    {
+        sun.awt.windows.ThemeReader r0;
+
+        r0 := @this: sun.awt.windows.ThemeReader;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void flush()
+    {
+        <sun.awt.windows.ThemeReader: boolean valid> = 0;
+
+        return;
+    }
+
+    private static native boolean initThemes();
+
+    public static boolean isThemed()
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.locks.Lock $r0, $r1, $r3;
+        boolean $z0, z1;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $z0 = staticinvoke <sun.awt.windows.ThemeReader: boolean initThemes()>();
+
+        <sun.awt.windows.ThemeReader: boolean isThemed> = $z0;
+
+        z1 = <sun.awt.windows.ThemeReader: boolean isThemed>;
+
+     label2:
+        $r1 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return z1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static boolean isXPStyleEnabled()
+    {
+        boolean $z0;
+
+        $z0 = <sun.awt.windows.ThemeReader: boolean xpStyleEnabled>;
+
+        return $z0;
+    }
+
+    private static java.lang.Long getThemeImpl(java.lang.String)
+    {
+        long $l1, $l3;
+        java.lang.Long r6;
+        java.util.Map $r1, $r3;
+        int $i0, $i2;
+        java.lang.Object $r2;
+        java.lang.String r0, $r4, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r6 = (java.lang.Long) $r2;
+
+        if r6 != null goto label3;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>("::");
+
+        if $i0 <= 0 goto label1;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        staticinvoke <sun.awt.windows.ThemeReader: void setWindowTheme(java.lang.String)>($r4);
+
+        $i2 = $i0 + 2;
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $l3 = staticinvoke <sun.awt.windows.ThemeReader: long openTheme(java.lang.String)>($r5);
+
+        r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        staticinvoke <sun.awt.windows.ThemeReader: void setWindowTheme(java.lang.String)>(null);
+
+        goto label2;
+
+     label1:
+        $l1 = staticinvoke <sun.awt.windows.ThemeReader: long openTheme(java.lang.String)>(r0);
+
+        r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r6);
+
+     label3:
+        return r6;
+    }
+
+    private static java.lang.Long getTheme(java.lang.String)
+    {
+        java.lang.Throwable $r19, $r22;
+        java.lang.IllegalStateException $r18;
+        long $l0;
+        java.lang.Long $r11, r17, r25;
+        java.util.Map $r1, $r12, $r15;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r14;
+        java.util.Collection $r13;
+        java.util.concurrent.locks.Lock $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r20, $r21, $r23, $r24;
+        java.lang.Object $r2, $r16;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <sun.awt.windows.ThemeReader: boolean isThemed>;
+
+        if $z0 != 0 goto label01;
+
+        $r18 = new java.lang.IllegalStateException;
+
+        specialinvoke $r18.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Themes are not loaded");
+
+        throw $r18;
+
+     label01:
+        $z1 = <sun.awt.windows.ThemeReader: boolean valid>;
+
+        if $z1 != 0 goto label07;
+
+        $r7 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        $r8 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label02:
+        $z2 = <sun.awt.windows.ThemeReader: boolean valid>;
+
+        if $z2 != 0 goto label05;
+
+        $r12 = <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.util.Collection values()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label03:
+        $z3 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label04;
+
+        $r16 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (java.lang.Long) $r16;
+
+        $l0 = virtualinvoke r17.<java.lang.Long: long longValue()>();
+
+        staticinvoke <sun.awt.windows.ThemeReader: void closeTheme(long)>($l0);
+
+        goto label03;
+
+     label04:
+        $r15 = <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme>;
+
+        interfaceinvoke $r15.<java.util.Map: void clear()>();
+
+        <sun.awt.windows.ThemeReader: boolean valid> = 1;
+
+     label05:
+        $r9 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r10 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r10.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label07;
+
+     label06:
+        $r22 := @caughtexception;
+
+        $r23 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r23.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r24 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r24.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r22;
+
+     label07:
+        $r1 = <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r11 = (java.lang.Long) $r2;
+
+        r25 = $r11;
+
+        if $r11 != null goto label12;
+
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label08:
+        r25 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getThemeImpl(java.lang.String)>(r0);
+
+     label09:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label12;
+
+     label10:
+        $r19 := @caughtexception;
+
+     label11:
+        $r20 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r20.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r21 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock>;
+
+        interfaceinvoke $r21.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r19;
+
+     label12:
+        return r25;
+
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private static native void paintBackground(int[], long, int, int, int, int, int, int, int);
+
+    public static void paintBackground(int[], java.lang.String, int, int, int, int, int, int, int)
+    {
+        java.lang.Throwable $r5;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        int[] r1;
+        java.lang.Long $r3;
+        int i1, i2, i3, i4, i5, i6, i7;
+        java.lang.String r2;
+
+        r1 := @parameter0: int[];
+
+        r2 := @parameter1: java.lang.String;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        i5 := @parameter6: int;
+
+        i6 := @parameter7: int;
+
+        i7 := @parameter8: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r2);
+
+        $l0 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        staticinvoke <sun.awt.windows.ThemeReader: void paintBackground(int[],long,int,int,int,int,int,int,int)>(r1, $l0, i1, i2, i3, i4, i5, i6, i7);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native java.awt.Insets getThemeMargins(long, int, int, int);
+
+    public static java.awt.Insets getThemeMargins(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r5;
+        java.awt.Insets $r3;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.lang.Long $r2;
+        int i1, i2, i3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Insets getThemeMargins(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native boolean isThemePartDefined(long, int, int);
+
+    public static boolean isThemePartDefined(java.lang.String, int, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1, i2;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $z0 = staticinvoke <sun.awt.windows.ThemeReader: boolean isThemePartDefined(long,int,int)>($l0, i1, i2);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native java.awt.Color getColor(long, int, int, int);
+
+    public static java.awt.Color getColor(java.lang.String, int, int, int)
+    {
+        java.awt.Color $r3;
+        java.lang.Throwable $r5;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.lang.Long $r2;
+        int i1, i2, i3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Color getColor(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native int getInt(long, int, int, int);
+
+    public static int getInt(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1, i2, i3, $i4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $i4 = staticinvoke <sun.awt.windows.ThemeReader: int getInt(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $i4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native int getEnum(long, int, int, int);
+
+    public static int getEnum(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1, i2, i3, $i4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $i4 = staticinvoke <sun.awt.windows.ThemeReader: int getEnum(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $i4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native boolean getBoolean(long, int, int, int);
+
+    public static boolean getBoolean(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1, i2, i3;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $z0 = staticinvoke <sun.awt.windows.ThemeReader: boolean getBoolean(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native boolean getSysBoolean(long, int);
+
+    public static boolean getSysBoolean(java.lang.String, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $z0 = staticinvoke <sun.awt.windows.ThemeReader: boolean getSysBoolean(long,int)>($l0, i1);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private static native java.awt.Point getPoint(long, int, int, int);
+
+    public static java.awt.Point getPoint(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r5;
+        long $l0;
+        java.awt.Point $r3;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.lang.Long $r2;
+        int i1, i2, i3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Point getPoint(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native java.awt.Dimension getPosition(long, int, int, int);
+
+    public static java.awt.Dimension getPosition(java.lang.String, int, int, int)
+    {
+        java.lang.Throwable $r5;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.awt.Dimension $r3;
+        java.lang.Long $r2;
+        int i1, i2, i3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Dimension getPosition(long,int,int,int)>($l0, i1, i2, i3);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native java.awt.Dimension getPartSize(long, int, int);
+
+    public static java.awt.Dimension getPartSize(java.lang.String, int, int)
+    {
+        java.lang.Throwable $r5;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.awt.Dimension $r3;
+        java.lang.Long $r2;
+        int i1, i2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Dimension getPartSize(long,int,int)>($l0, i1, i2);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native long openTheme(java.lang.String);
+
+    private static native void closeTheme(long);
+
+    private static native void setWindowTheme(java.lang.String);
+
+    private static native long getThemeTransitionDuration(long, int, int, int, int);
+
+    public static long getThemeTransitionDuration(java.lang.String, int, int, int, int)
+    {
+        java.lang.Throwable $r4;
+        long $l0, $l5;
+        java.util.concurrent.locks.Lock $r0, $r3, $r5;
+        java.lang.Long $r2;
+        int i1, i2, i3, i4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $l5 = staticinvoke <sun.awt.windows.ThemeReader: long getThemeTransitionDuration(long,int,int,int,int)>($l0, i1, i2, i3, i4);
+
+     label2:
+        $r3 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $l5;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r5 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static native boolean isGetThemeTransitionDurationDefined();
+
+    private static native java.awt.Insets getThemeBackgroundContentMargins(long, int, int, int, int);
+
+    public static java.awt.Insets getThemeBackgroundContentMargins(java.lang.String, int, int, int, int)
+    {
+        java.lang.Throwable $r5;
+        java.awt.Insets $r3;
+        long $l0;
+        java.util.concurrent.locks.Lock $r0, $r4, $r6;
+        java.lang.Long $r2;
+        int i1, i2, i3, i4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        $r0 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <sun.awt.windows.ThemeReader: java.lang.Long getTheme(java.lang.String)>(r1);
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        $r3 = staticinvoke <sun.awt.windows.ThemeReader: java.awt.Insets getThemeBackgroundContentMargins(long,int,int,int,int)>($l0, i1, i2, i3, i4);
+
+     label2:
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.locks.Lock $r3, $r5;
+        java.util.HashMap $r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock $r1;
+        java.util.concurrent.locks.ReadWriteLock $r2, $r4;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <sun.awt.windows.ThemeReader: java.util.Map widgetToTheme> = $r0;
+
+        $r1 = new java.util.concurrent.locks.ReentrantReadWriteLock;
+
+        specialinvoke $r1.<java.util.concurrent.locks.ReentrantReadWriteLock: void <init>()>();
+
+        <sun.awt.windows.ThemeReader: java.util.concurrent.locks.ReadWriteLock readWriteLock> = $r1;
+
+        $r2 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.ReadWriteLock readWriteLock>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock readLock> = $r3;
+
+        $r4 = <sun.awt.windows.ThemeReader: java.util.concurrent.locks.ReadWriteLock readWriteLock>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        <sun.awt.windows.ThemeReader: java.util.concurrent.locks.Lock writeLock> = $r5;
+
+        <sun.awt.windows.ThemeReader: boolean valid> = 0;
+
+        return;
+    }
+}

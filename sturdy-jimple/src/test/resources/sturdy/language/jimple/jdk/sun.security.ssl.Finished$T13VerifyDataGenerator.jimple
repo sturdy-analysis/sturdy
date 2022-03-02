@@ -1,0 +1,148 @@
+final class sun.security.ssl.Finished$T13VerifyDataGenerator extends java.lang.Object implements sun.security.ssl.Finished$VerifyDataGenerator
+{
+    private static final byte[] hkdfLabel;
+    private static final byte[] hkdfContext;
+
+    private void <init>()
+    {
+        sun.security.ssl.Finished$T13VerifyDataGenerator r0;
+
+        r0 := @this: sun.security.ssl.Finished$T13VerifyDataGenerator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] createVerifyData(sun.security.ssl.HandshakeContext, boolean) throws java.io.IOException
+    {
+        byte[] $r4, $r5, $r17, $r18;
+        sun.security.ssl.SSLBasicKeyDerivation $r3;
+        sun.security.ssl.Finished$T13VerifyDataGenerator r21;
+        sun.security.ssl.CipherSuite$HashAlg r2;
+        java.security.GeneralSecurityException $r19;
+        int $i0, $i1;
+        java.lang.String $r6, $r11, $r12, $r14;
+        sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec $r7;
+        boolean z0;
+        javax.crypto.Mac $r15;
+        java.security.ProviderException $r20;
+        sun.security.ssl.HandshakeHash $r16;
+        java.lang.StringBuilder $r9, $r10, $r13;
+        sun.security.ssl.CipherSuite $r1;
+        javax.crypto.SecretKey $r8, $r22;
+        sun.security.ssl.HandshakeContext r0;
+
+        r21 := @this: sun.security.ssl.Finished$T13VerifyDataGenerator;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        r2 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        if z0 == 0 goto label1;
+
+        $r22 = r0.<sun.security.ssl.HandshakeContext: javax.crypto.SecretKey baseReadSecret>;
+
+        goto label2;
+
+     label1:
+        $r22 = r0.<sun.security.ssl.HandshakeContext: javax.crypto.SecretKey baseWriteSecret>;
+
+     label2:
+        $r3 = new sun.security.ssl.SSLBasicKeyDerivation;
+
+        $r6 = r2.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $r5 = <sun.security.ssl.Finished$T13VerifyDataGenerator: byte[] hkdfLabel>;
+
+        $r4 = <sun.security.ssl.Finished$T13VerifyDataGenerator: byte[] hkdfContext>;
+
+        $i0 = r2.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        specialinvoke $r3.<sun.security.ssl.SSLBasicKeyDerivation: void <init>(javax.crypto.SecretKey,java.lang.String,byte[],byte[],int)>($r22, $r6, $r5, $r4, $i0);
+
+        $r7 = new sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec;
+
+        $i1 = r2.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        specialinvoke $r7.<sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec: void <init>(int)>($i1);
+
+        $r8 = virtualinvoke $r3.<sun.security.ssl.SSLBasicKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsFinishedSecret", $r7);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Hmac");
+
+        $r11 = r2.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $r12 = virtualinvoke $r11.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("-", "");
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        $r15 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.Mac getMac(java.lang.String)>($r14);
+
+        virtualinvoke $r15.<javax.crypto.Mac: void init(java.security.Key)>($r8);
+
+        $r16 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r17 = virtualinvoke $r16.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r18 = virtualinvoke $r15.<javax.crypto.Mac: byte[] doFinal(byte[])>($r17);
+
+     label4:
+        return $r18;
+
+     label5:
+        $r19 := @caughtexception;
+
+        $r20 = new java.security.ProviderException;
+
+        specialinvoke $r20.<java.security.ProviderException: void <init>(java.lang.String,java.lang.Throwable)>("Failed to generate verify_data", $r19);
+
+        throw $r20;
+
+        catch java.security.NoSuchAlgorithmException from label3 to label4 with label5;
+        catch java.security.InvalidKeyException from label3 to label4 with label5;
+    }
+
+    void <init>(sun.security.ssl.Finished$1)
+    {
+        sun.security.ssl.Finished$T13VerifyDataGenerator r0;
+        sun.security.ssl.Finished$1 r1;
+
+        r0 := @this: sun.security.ssl.Finished$T13VerifyDataGenerator;
+
+        r1 := @parameter0: sun.security.ssl.Finished$1;
+
+        specialinvoke r0.<sun.security.ssl.Finished$T13VerifyDataGenerator: void <init>()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r1, $r2;
+        java.lang.String $r0;
+
+        $r0 = "tls13 finished";
+
+        $r1 = virtualinvoke $r0.<java.lang.String: byte[] getBytes()>();
+
+        <sun.security.ssl.Finished$T13VerifyDataGenerator: byte[] hkdfLabel> = $r1;
+
+        $r2 = newarray (byte)[0];
+
+        <sun.security.ssl.Finished$T13VerifyDataGenerator: byte[] hkdfContext> = $r2;
+
+        return;
+    }
+}

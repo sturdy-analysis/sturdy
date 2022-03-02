@@ -1,0 +1,729 @@
+public final class sun.security.provider.MD4 extends sun.security.provider.DigestBase
+{
+    private int[] state;
+    private int[] x;
+    private static final int S11;
+    private static final int S12;
+    private static final int S13;
+    private static final int S14;
+    private static final int S21;
+    private static final int S22;
+    private static final int S23;
+    private static final int S24;
+    private static final int S31;
+    private static final int S32;
+    private static final int S33;
+    private static final int S34;
+    private static final java.security.Provider md4Provider;
+
+    public static java.security.MessageDigest getInstance()
+    {
+        java.security.MessageDigest $r1;
+        java.security.NoSuchAlgorithmException $r2;
+        java.security.ProviderException $r3;
+        java.security.Provider $r0;
+
+     label1:
+        $r0 = <sun.security.provider.MD4: java.security.Provider md4Provider>;
+
+        $r1 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String,java.security.Provider)>("MD4", $r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.security.ProviderException;
+
+        specialinvoke $r3.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    public void <init>()
+    {
+        sun.security.provider.MD4 r0;
+        int[] $r1, $r2;
+
+        r0 := @this: sun.security.provider.MD4;
+
+        specialinvoke r0.<sun.security.provider.DigestBase: void <init>(java.lang.String,int,int)>("MD4", 16, 64);
+
+        $r1 = newarray (int)[4];
+
+        r0.<sun.security.provider.MD4: int[] state> = $r1;
+
+        $r2 = newarray (int)[16];
+
+        r0.<sun.security.provider.MD4: int[] x> = $r2;
+
+        specialinvoke r0.<sun.security.provider.MD4: void resetHashes()>();
+
+        return;
+    }
+
+    public java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        sun.security.provider.MD4 r0, r2;
+        int[] $r3, $r5, $r6;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: sun.security.provider.MD4;
+
+        $r1 = specialinvoke r0.<sun.security.provider.DigestBase: java.lang.Object clone()>();
+
+        r2 = (sun.security.provider.MD4) $r1;
+
+        $r3 = r2.<sun.security.provider.MD4: int[] state>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (int[]) $r4;
+
+        r2.<sun.security.provider.MD4: int[] state> = $r5;
+
+        $r6 = newarray (int)[16];
+
+        r2.<sun.security.provider.MD4: int[] x> = $r6;
+
+        return r2;
+    }
+
+    void implReset()
+    {
+        sun.security.provider.MD4 r0;
+        int[] $r1;
+
+        r0 := @this: sun.security.provider.MD4;
+
+        specialinvoke r0.<sun.security.provider.MD4: void resetHashes()>();
+
+        $r1 = r0.<sun.security.provider.MD4: int[] x>;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r1, 0);
+
+        return;
+    }
+
+    private void resetHashes()
+    {
+        sun.security.provider.MD4 r0;
+        int[] $r1, $r2, $r3, $r4;
+
+        r0 := @this: sun.security.provider.MD4;
+
+        $r1 = r0.<sun.security.provider.MD4: int[] state>;
+
+        $r1[0] = 1732584193;
+
+        $r2 = r0.<sun.security.provider.MD4: int[] state>;
+
+        $r2[1] = -271733879;
+
+        $r3 = r0.<sun.security.provider.MD4: int[] state>;
+
+        $r3[2] = -1732584194;
+
+        $r4 = r0.<sun.security.provider.MD4: int[] state>;
+
+        $r4[3] = 271733878;
+
+        return;
+    }
+
+    void implDigest(byte[], int)
+    {
+        byte[] $r1, $r2, $r3, $r4, r5;
+        long $l0, l1, $l2, $l6;
+        sun.security.provider.MD4 r0;
+        int[] $r6;
+        int $i3, i4, $i5, $i7, i8, $i9;
+
+        r0 := @this: sun.security.provider.MD4;
+
+        r5 := @parameter0: byte[];
+
+        i8 := @parameter1: int;
+
+        $l0 = r0.<sun.security.provider.MD4: long bytesProcessed>;
+
+        l1 = $l0 << 3;
+
+        $l2 = r0.<sun.security.provider.MD4: long bytesProcessed>;
+
+        $i3 = (int) $l2;
+
+        i4 = $i3 & 63;
+
+        if i4 >= 56 goto label1;
+
+        $i9 = 56 - i4;
+
+        goto label2;
+
+     label1:
+        $i9 = 120 - i4;
+
+     label2:
+        $r1 = <sun.security.provider.MD4: byte[] padding>;
+
+        virtualinvoke r0.<sun.security.provider.MD4: void engineUpdate(byte[],int,int)>($r1, 0, $i9);
+
+        $i5 = (int) l1;
+
+        $r2 = r0.<sun.security.provider.MD4: byte[] buffer>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bLittle4(int,byte[],int)>($i5, $r2, 56);
+
+        $l6 = l1 >>> 32;
+
+        $i7 = (int) $l6;
+
+        $r3 = r0.<sun.security.provider.MD4: byte[] buffer>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bLittle4(int,byte[],int)>($i7, $r3, 60);
+
+        $r4 = r0.<sun.security.provider.MD4: byte[] buffer>;
+
+        virtualinvoke r0.<sun.security.provider.MD4: void implCompress(byte[],int)>($r4, 0);
+
+        $r6 = r0.<sun.security.provider.MD4: int[] state>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bLittle(int[],int,byte[],int,int)>($r6, 0, r5, i8, 16);
+
+        return;
+    }
+
+    private static int FF(int, int, int, int, int, int)
+    {
+        int i0, i1, i2, $i3, $i4, $i5, i6, $i7, $i8, i9, $i10, $i11, $i12, $i13, i14, i15, $i17;
+
+        i14 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i6 := @parameter4: int;
+
+        i9 := @parameter5: int;
+
+        $i5 = i0 & i1;
+
+        $i17 = (int) -1;
+
+        $i3 = i0 ^ $i17;
+
+        $i4 = $i3 & i2;
+
+        $i7 = $i5 | $i4;
+
+        $i8 = $i7 + i6;
+
+        i15 = i14 + $i8;
+
+        $i12 = i15 << i9;
+
+        $i10 = 32 - i9;
+
+        $i11 = i15 >>> $i10;
+
+        $i13 = $i12 | $i11;
+
+        return $i13;
+    }
+
+    private static int GG(int, int, int, int, int, int)
+    {
+        int i0, i1, i2, $i3, $i4, $i5, $i6, i7, $i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, i16, i17;
+
+        i16 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i7 := @parameter4: int;
+
+        i11 := @parameter5: int;
+
+        $i4 = i0 & i1;
+
+        $i3 = i0 & i2;
+
+        $i6 = $i4 | $i3;
+
+        $i5 = i1 & i2;
+
+        $i8 = $i6 | $i5;
+
+        $i9 = $i8 + i7;
+
+        $i10 = $i9 + 1518500249;
+
+        i17 = i16 + $i10;
+
+        $i14 = i17 << i11;
+
+        $i12 = 32 - i11;
+
+        $i13 = i17 >>> $i12;
+
+        $i15 = $i14 | $i13;
+
+        return $i15;
+    }
+
+    private static int HH(int, int, int, int, int, int)
+    {
+        int i0, i1, i2, $i3, i4, $i5, $i6, $i7, i8, $i9, $i10, $i11, $i12, i13, i14;
+
+        i13 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i8 := @parameter5: int;
+
+        $i3 = i0 ^ i1;
+
+        $i5 = $i3 ^ i2;
+
+        $i6 = $i5 + i4;
+
+        $i7 = $i6 + 1859775393;
+
+        i14 = i13 + $i7;
+
+        $i11 = i14 << i8;
+
+        $i9 = 32 - i8;
+
+        $i10 = i14 >>> $i9;
+
+        $i12 = $i11 | $i10;
+
+        return $i12;
+    }
+
+    void implCompress(byte[], int)
+    {
+        byte[] r0;
+        int[] $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58;
+        sun.security.provider.MD4 r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, i105, i106, i107, i108;
+
+        r1 := @this: sun.security.provider.MD4;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $r2 = r1.<sun.security.provider.MD4: int[] x>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void b2iLittle64(byte[],int,int[])>(r0, i0, $r2);
+
+        $r3 = r1.<sun.security.provider.MD4: int[] state>;
+
+        i105 = $r3[0];
+
+        $r4 = r1.<sun.security.provider.MD4: int[] state>;
+
+        i106 = $r4[1];
+
+        $r5 = r1.<sun.security.provider.MD4: int[] state>;
+
+        i107 = $r5[2];
+
+        $r6 = r1.<sun.security.provider.MD4: int[] state>;
+
+        i108 = $r6[3];
+
+        $r7 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i1 = $r7[0];
+
+        $i2 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>(i105, i106, i107, i108, $i1, 3);
+
+        $r8 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i3 = $r8[1];
+
+        $i4 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>(i108, $i2, i106, i107, $i3, 7);
+
+        $r9 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i5 = $r9[2];
+
+        $i6 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>(i107, $i4, $i2, i106, $i5, 11);
+
+        $r10 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i7 = $r10[3];
+
+        $i8 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>(i106, $i6, $i4, $i2, $i7, 19);
+
+        $r11 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i9 = $r11[4];
+
+        $i10 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i2, $i8, $i6, $i4, $i9, 3);
+
+        $r12 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i11 = $r12[5];
+
+        $i12 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i4, $i10, $i8, $i6, $i11, 7);
+
+        $r13 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i13 = $r13[6];
+
+        $i14 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i6, $i12, $i10, $i8, $i13, 11);
+
+        $r14 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i15 = $r14[7];
+
+        $i16 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i8, $i14, $i12, $i10, $i15, 19);
+
+        $r15 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i17 = $r15[8];
+
+        $i18 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i10, $i16, $i14, $i12, $i17, 3);
+
+        $r16 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i19 = $r16[9];
+
+        $i20 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i12, $i18, $i16, $i14, $i19, 7);
+
+        $r17 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i21 = $r17[10];
+
+        $i22 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i14, $i20, $i18, $i16, $i21, 11);
+
+        $r18 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i23 = $r18[11];
+
+        $i24 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i16, $i22, $i20, $i18, $i23, 19);
+
+        $r19 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i25 = $r19[12];
+
+        $i26 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i18, $i24, $i22, $i20, $i25, 3);
+
+        $r20 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i27 = $r20[13];
+
+        $i28 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i20, $i26, $i24, $i22, $i27, 7);
+
+        $r21 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i29 = $r21[14];
+
+        $i30 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i22, $i28, $i26, $i24, $i29, 11);
+
+        $r22 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i31 = $r22[15];
+
+        $i32 = staticinvoke <sun.security.provider.MD4: int FF(int,int,int,int,int,int)>($i24, $i30, $i28, $i26, $i31, 19);
+
+        $r23 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i33 = $r23[0];
+
+        $i34 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i26, $i32, $i30, $i28, $i33, 3);
+
+        $r24 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i35 = $r24[4];
+
+        $i36 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i28, $i34, $i32, $i30, $i35, 5);
+
+        $r25 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i37 = $r25[8];
+
+        $i38 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i30, $i36, $i34, $i32, $i37, 9);
+
+        $r26 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i39 = $r26[12];
+
+        $i40 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i32, $i38, $i36, $i34, $i39, 13);
+
+        $r27 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i41 = $r27[1];
+
+        $i42 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i34, $i40, $i38, $i36, $i41, 3);
+
+        $r28 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i43 = $r28[5];
+
+        $i44 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i36, $i42, $i40, $i38, $i43, 5);
+
+        $r29 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i45 = $r29[9];
+
+        $i46 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i38, $i44, $i42, $i40, $i45, 9);
+
+        $r30 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i47 = $r30[13];
+
+        $i48 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i40, $i46, $i44, $i42, $i47, 13);
+
+        $r31 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i49 = $r31[2];
+
+        $i50 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i42, $i48, $i46, $i44, $i49, 3);
+
+        $r32 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i51 = $r32[6];
+
+        $i52 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i44, $i50, $i48, $i46, $i51, 5);
+
+        $r33 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i53 = $r33[10];
+
+        $i54 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i46, $i52, $i50, $i48, $i53, 9);
+
+        $r34 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i55 = $r34[14];
+
+        $i56 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i48, $i54, $i52, $i50, $i55, 13);
+
+        $r35 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i57 = $r35[3];
+
+        $i58 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i50, $i56, $i54, $i52, $i57, 3);
+
+        $r36 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i59 = $r36[7];
+
+        $i60 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i52, $i58, $i56, $i54, $i59, 5);
+
+        $r37 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i61 = $r37[11];
+
+        $i62 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i54, $i60, $i58, $i56, $i61, 9);
+
+        $r38 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i63 = $r38[15];
+
+        $i64 = staticinvoke <sun.security.provider.MD4: int GG(int,int,int,int,int,int)>($i56, $i62, $i60, $i58, $i63, 13);
+
+        $r39 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i65 = $r39[0];
+
+        $i66 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i58, $i64, $i62, $i60, $i65, 3);
+
+        $r40 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i67 = $r40[8];
+
+        $i68 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i60, $i66, $i64, $i62, $i67, 9);
+
+        $r41 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i69 = $r41[4];
+
+        $i70 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i62, $i68, $i66, $i64, $i69, 11);
+
+        $r42 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i71 = $r42[12];
+
+        $i72 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i64, $i70, $i68, $i66, $i71, 15);
+
+        $r43 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i73 = $r43[2];
+
+        $i74 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i66, $i72, $i70, $i68, $i73, 3);
+
+        $r44 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i75 = $r44[10];
+
+        $i76 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i68, $i74, $i72, $i70, $i75, 9);
+
+        $r45 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i77 = $r45[6];
+
+        $i78 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i70, $i76, $i74, $i72, $i77, 11);
+
+        $r46 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i79 = $r46[14];
+
+        $i80 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i72, $i78, $i76, $i74, $i79, 15);
+
+        $r47 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i81 = $r47[1];
+
+        $i82 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i74, $i80, $i78, $i76, $i81, 3);
+
+        $r48 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i83 = $r48[9];
+
+        $i84 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i76, $i82, $i80, $i78, $i83, 9);
+
+        $r49 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i85 = $r49[5];
+
+        $i86 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i78, $i84, $i82, $i80, $i85, 11);
+
+        $r50 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i87 = $r50[13];
+
+        $i88 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i80, $i86, $i84, $i82, $i87, 15);
+
+        $r51 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i89 = $r51[3];
+
+        $i90 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i82, $i88, $i86, $i84, $i89, 3);
+
+        $r52 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i91 = $r52[11];
+
+        $i92 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i84, $i90, $i88, $i86, $i91, 9);
+
+        $r53 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i93 = $r53[7];
+
+        $i94 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i86, $i92, $i90, $i88, $i93, 11);
+
+        $r54 = r1.<sun.security.provider.MD4: int[] x>;
+
+        $i95 = $r54[15];
+
+        $i96 = staticinvoke <sun.security.provider.MD4: int HH(int,int,int,int,int,int)>($i88, $i94, $i92, $i90, $i95, 15);
+
+        $r55 = r1.<sun.security.provider.MD4: int[] state>;
+
+        $i97 = $r55[0];
+
+        $i98 = $i97 + $i90;
+
+        $r55[0] = $i98;
+
+        $r56 = r1.<sun.security.provider.MD4: int[] state>;
+
+        $i99 = $r56[1];
+
+        $i100 = $i99 + $i96;
+
+        $r56[1] = $i100;
+
+        $r57 = r1.<sun.security.provider.MD4: int[] state>;
+
+        $i101 = $r57[2];
+
+        $i102 = $i101 + $i94;
+
+        $r57[2] = $i102;
+
+        $r58 = r1.<sun.security.provider.MD4: int[] state>;
+
+        $i103 = $r58[3];
+
+        $i104 = $i103 + $i92;
+
+        $r58[3] = $i104;
+
+        return;
+    }
+
+    static java.security.Provider access$000()
+    {
+        java.security.Provider $r0;
+
+        $r0 = <sun.security.provider.MD4: java.security.Provider md4Provider>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.provider.MD4$1 $r0;
+        sun.security.provider.MD4$2 $r1;
+
+        <sun.security.provider.MD4: int S34> = 15;
+
+        <sun.security.provider.MD4: int S33> = 11;
+
+        <sun.security.provider.MD4: int S32> = 9;
+
+        <sun.security.provider.MD4: int S31> = 3;
+
+        <sun.security.provider.MD4: int S24> = 13;
+
+        <sun.security.provider.MD4: int S23> = 9;
+
+        <sun.security.provider.MD4: int S22> = 5;
+
+        <sun.security.provider.MD4: int S21> = 3;
+
+        <sun.security.provider.MD4: int S14> = 19;
+
+        <sun.security.provider.MD4: int S13> = 11;
+
+        <sun.security.provider.MD4: int S12> = 7;
+
+        <sun.security.provider.MD4: int S11> = 3;
+
+        $r0 = new sun.security.provider.MD4$1;
+
+        specialinvoke $r0.<sun.security.provider.MD4$1: void <init>(java.lang.String,double,java.lang.String)>("MD4Provider", 1.8, "MD4 MessageDigest");
+
+        <sun.security.provider.MD4: java.security.Provider md4Provider> = $r0;
+
+        $r1 = new sun.security.provider.MD4$2;
+
+        specialinvoke $r1.<sun.security.provider.MD4$2: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+}

@@ -1,0 +1,367 @@
+final class sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher extends sun.security.ssl.SSLCipher$SSLWriteCipher
+{
+    private final javax.crypto.Cipher cipher;
+    private final int tagSize;
+    private final java.security.Key key;
+    private final byte[] fixedIv;
+    private final int recordIvSize;
+    private final java.security.SecureRandom random;
+
+    void <init>(sun.security.ssl.Authenticator, sun.security.ssl.ProtocolVersion, sun.security.ssl.SSLCipher, java.lang.String, java.security.Key, java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.GeneralSecurityException
+    {
+        byte[] $r9;
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+        sun.security.ssl.ProtocolVersion r2;
+        javax.crypto.Cipher $r4;
+        sun.security.ssl.SSLCipher r5;
+        java.security.Key r6;
+        java.security.SecureRandom r10;
+        sun.security.ssl.Authenticator r1;
+        javax.crypto.spec.IvParameterSpec $r8;
+        int $i0, $i1, $i2;
+        java.lang.String r3;
+        java.security.spec.AlgorithmParameterSpec r7;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        r1 := @parameter0: sun.security.ssl.Authenticator;
+
+        r2 := @parameter1: sun.security.ssl.ProtocolVersion;
+
+        r5 := @parameter2: sun.security.ssl.SSLCipher;
+
+        r3 := @parameter3: java.lang.String;
+
+        r6 := @parameter4: java.security.Key;
+
+        r7 := @parameter5: java.security.spec.AlgorithmParameterSpec;
+
+        r10 := @parameter6: java.security.SecureRandom;
+
+        specialinvoke r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: void <init>(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion)>(r1, r2);
+
+        $r4 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.Cipher getCipher(java.lang.String)>(r3);
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher> = $r4;
+
+        virtualinvoke r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int tagSize> = 16;
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: java.security.Key key> = r6;
+
+        $r8 = (javax.crypto.spec.IvParameterSpec) r7;
+
+        $r9 = virtualinvoke $r8.<javax.crypto.spec.IvParameterSpec: byte[] getIV()>();
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: byte[] fixedIv> = $r9;
+
+        $i1 = r5.<sun.security.ssl.SSLCipher: int ivSize>;
+
+        $i0 = r5.<sun.security.ssl.SSLCipher: int fixedIvSize>;
+
+        $i2 = $i1 - $i0;
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int recordIvSize> = $i2;
+
+        r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: java.security.SecureRandom random> = r10;
+
+        return;
+    }
+
+    public int encrypt(byte, java.nio.ByteBuffer)
+    {
+        byte[] $r2, $r3, $r4, $r5, $r6, $r13;
+        java.nio.ByteBuffer r11, $r25, $r37;
+        java.security.SecureRandom $r8;
+        java.security.GeneralSecurityException $r26, $r35;
+        byte b7;
+        boolean $z0, $z1;
+        java.security.Provider $r20, $r31;
+        java.security.Key $r9;
+        java.lang.StringBuilder $r17, $r18, $r22, $r28, $r29, $r33;
+        javax.crypto.spec.GCMParameterSpec $r7;
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+        java.lang.Object[] $r24;
+        javax.crypto.Cipher $r10, $r14, $r15, $r19, $r30, $r38;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        java.lang.String $r21, $r23, $r32, $r34;
+        java.lang.RuntimeException $r16, $r27, $r36;
+        sun.security.ssl.Authenticator $r1, $r12;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        b7 := @parameter0: byte;
+
+        r11 := @parameter1: java.nio.ByteBuffer;
+
+        $r1 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $r2 = virtualinvoke $r1.<sun.security.ssl.Authenticator: byte[] sequenceNumber()>();
+
+        $r4 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: byte[] fixedIv>;
+
+        $r3 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: byte[] fixedIv>;
+
+        $i1 = lengthof $r3;
+
+        $i0 = lengthof $r2;
+
+        $i2 = $i1 + $i0;
+
+        $r5 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r4, $i2);
+
+        $r6 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: byte[] fixedIv>;
+
+        $i4 = lengthof $r6;
+
+        $i3 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r5, $i4, $i3);
+
+        $r7 = new javax.crypto.spec.GCMParameterSpec;
+
+        $i5 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int tagSize>;
+
+        $i6 = $i5 * 8;
+
+        specialinvoke $r7.<javax.crypto.spec.GCMParameterSpec: void <init>(int,byte[])>($i6, $r5);
+
+     label01:
+        $r10 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        $r9 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: java.security.Key key>;
+
+        $r8 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: java.security.SecureRandom random>;
+
+        virtualinvoke $r10.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(1, $r9, $r7, $r8);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r35 := @caughtexception;
+
+        $r36 = new java.lang.RuntimeException;
+
+        specialinvoke $r36.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("invalid key or spec in GCM mode", $r35);
+
+        throw $r36;
+
+     label04:
+        $r12 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $i8 = virtualinvoke r11.<java.nio.ByteBuffer: int remaining()>();
+
+        $r13 = virtualinvoke $r12.<sun.security.ssl.Authenticator: byte[] acquireAuthenticationBytes(byte,int,byte[])>(b7, $i8, null);
+
+        $r14 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r14.<javax.crypto.Cipher: void updateAAD(byte[])>($r13);
+
+        $i9 = virtualinvoke r11.<java.nio.ByteBuffer: int position()>();
+
+        $i10 = lengthof $r2;
+
+        $i11 = $i9 - $i10;
+
+        virtualinvoke r11.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i11);
+
+        virtualinvoke r11.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>($r2);
+
+        $i12 = virtualinvoke r11.<java.nio.ByteBuffer: int position()>();
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label05;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("plaintext");
+
+        if $z1 == 0 goto label05;
+
+        $r24 = newarray (java.lang.Object)[1];
+
+        $r25 = virtualinvoke r11.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+        $r24[0] = $r25;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Plaintext before ENCRYPTION", $r24);
+
+     label05:
+        $r37 = virtualinvoke r11.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+        $r38 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i17 = virtualinvoke $r37.<java.nio.ByteBuffer: int remaining()>();
+
+        $i18 = virtualinvoke $r38.<javax.crypto.Cipher: int getOutputSize(int)>($i17);
+
+        $i19 = virtualinvoke r11.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i18 <= $i19 goto label06;
+
+        $i16 = $i12 + $i18;
+
+        virtualinvoke r11.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i16);
+
+     label06:
+        $r15 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i13 = virtualinvoke $r15.<javax.crypto.Cipher: int doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer)>($r37, r11);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r26 := @caughtexception;
+
+        $r27 = new java.lang.RuntimeException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cipher error in AEAD mode in JCE provider ");
+
+        $r30 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        $r31 = virtualinvoke $r30.<javax.crypto.Cipher: java.security.Provider getProvider()>();
+
+        $r32 = virtualinvoke $r31.<java.security.Provider: java.lang.String getName()>();
+
+        $r33 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r34, $r26);
+
+        throw $r27;
+
+     label09:
+        if $i13 == $i18 goto label10;
+
+        $r16 = new java.lang.RuntimeException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cipher buffering error in JCE provider ");
+
+        $r19 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        $r20 = virtualinvoke $r19.<javax.crypto.Cipher: java.security.Provider getProvider()>();
+
+        $r21 = virtualinvoke $r20.<java.security.Provider: java.lang.String getName()>();
+
+        $r22 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.RuntimeException: void <init>(java.lang.String)>($r23);
+
+        throw $r16;
+
+     label10:
+        $i14 = lengthof $r2;
+
+        $i15 = $i13 + $i14;
+
+        return $i15;
+
+        catch java.security.InvalidKeyException from label01 to label02 with label03;
+        catch java.security.InvalidAlgorithmParameterException from label01 to label02 with label03;
+        catch javax.crypto.IllegalBlockSizeException from label06 to label07 with label08;
+        catch javax.crypto.BadPaddingException from label06 to label07 with label08;
+        catch javax.crypto.ShortBufferException from label06 to label07 with label08;
+    }
+
+    void dispose()
+    {
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+        javax.crypto.Cipher $r1, $r2;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        $r1 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r2.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    int getExplicitNonceSize()
+    {
+        int $i0;
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        $i0 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int recordIvSize>;
+
+        return $i0;
+    }
+
+    int calculateFragmentSize(int, int)
+    {
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = i0 - i1;
+
+        $i2 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int recordIvSize>;
+
+        $i5 = $i3 - $i2;
+
+        $i4 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int tagSize>;
+
+        $i6 = $i5 - $i4;
+
+        return $i6;
+    }
+
+    int calculatePacketSize(int, int)
+    {
+        sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = i0 + i1;
+
+        $i2 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int recordIvSize>;
+
+        $i5 = $i3 + $i2;
+
+        $i4 = r0.<sun.security.ssl.SSLCipher$T12GcmWriteCipherGenerator$GcmWriteCipher: int tagSize>;
+
+        $i6 = $i5 + $i4;
+
+        return $i6;
+    }
+}

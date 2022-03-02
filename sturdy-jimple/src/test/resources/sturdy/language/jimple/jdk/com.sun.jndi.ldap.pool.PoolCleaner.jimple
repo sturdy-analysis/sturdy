@@ -1,0 +1,112 @@
+public final class com.sun.jndi.ldap.pool.PoolCleaner extends java.lang.Object implements java.lang.Runnable
+{
+    private final com.sun.jndi.ldap.pool.Pool[] pools;
+    private final long period;
+
+    public void <init>(long, com.sun.jndi.ldap.pool.Pool[])
+    {
+        com.sun.jndi.ldap.pool.PoolCleaner r0;
+        com.sun.jndi.ldap.pool.Pool[] r1, $r3;
+        long l0;
+        java.lang.Object $r2;
+
+        r0 := @this: com.sun.jndi.ldap.pool.PoolCleaner;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: com.sun.jndi.ldap.pool.Pool[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.pool.PoolCleaner: long period> = l0;
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (com.sun.jndi.ldap.pool.Pool[]) $r2;
+
+        r0.<com.sun.jndi.ldap.pool.PoolCleaner: com.sun.jndi.ldap.pool.Pool[] pools> = $r3;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r5;
+        com.sun.jndi.ldap.pool.PoolCleaner r0;
+        com.sun.jndi.ldap.pool.Pool[] $r1, $r3, $r7;
+        long $l0, $l1, $l2, $l3;
+        com.sun.jndi.ldap.pool.Pool $r2, $r4;
+        java.lang.InterruptedException $r6;
+        int i4, $i5;
+
+        r0 := @this: com.sun.jndi.ldap.pool.PoolCleaner;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $l0 = r0.<com.sun.jndi.ldap.pool.PoolCleaner: long period>;
+
+        virtualinvoke r0.<java.lang.Object: void wait(long)>($l0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r6 := @caughtexception;
+
+     label05:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = r0.<com.sun.jndi.ldap.pool.PoolCleaner: long period>;
+
+        $l3 = $l1 - $l2;
+
+        i4 = 0;
+
+     label06:
+        $r7 = r0.<com.sun.jndi.ldap.pool.PoolCleaner: com.sun.jndi.ldap.pool.Pool[] pools>;
+
+        $i5 = lengthof $r7;
+
+        if i4 >= $i5 goto label08;
+
+        $r1 = r0.<com.sun.jndi.ldap.pool.PoolCleaner: com.sun.jndi.ldap.pool.Pool[] pools>;
+
+        $r2 = $r1[i4];
+
+        if $r2 == null goto label07;
+
+        $r3 = r0.<com.sun.jndi.ldap.pool.PoolCleaner: com.sun.jndi.ldap.pool.Pool[] pools>;
+
+        $r4 = $r3[i4];
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.pool.Pool: void expire(long)>($l3);
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r5;
+
+     label12:
+        goto label01;
+
+        catch java.lang.InterruptedException from label02 to label03 with label04;
+        catch java.lang.Throwable from label02 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+}

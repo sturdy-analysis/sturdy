@@ -1,0 +1,3693 @@
+public class com.sun.corba.se.impl.oa.poa.POAImpl extends com.sun.corba.se.spi.oa.ObjectAdapterBase implements org.omg.PortableServer.POA
+{
+    private boolean debug;
+    private static final int STATE_START;
+    private static final int STATE_INIT;
+    private static final int STATE_INIT_DONE;
+    private static final int STATE_RUN;
+    private static final int STATE_DESTROYING;
+    private static final int STATE_DESTROYED;
+    private int state;
+    private com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator;
+    private int numLevels;
+    private com.sun.corba.se.spi.ior.ObjectAdapterId poaId;
+    private java.lang.String name;
+    private com.sun.corba.se.impl.oa.poa.POAManagerImpl manager;
+    private int uniquePOAId;
+    private com.sun.corba.se.impl.oa.poa.POAImpl parent;
+    private java.util.Map children;
+    private org.omg.PortableServer.AdapterActivator activator;
+    private int invocationCount;
+    com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex;
+    private com.sun.corba.se.impl.orbutil.concurrent.CondVar adapterActivatorCV;
+    private com.sun.corba.se.impl.orbutil.concurrent.CondVar invokeCV;
+    private com.sun.corba.se.impl.orbutil.concurrent.CondVar beingDestroyedCV;
+    protected java.lang.ThreadLocal isDestroying;
+
+    private java.lang.String stateToString()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        tableswitch($i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            case 5: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        return "START";
+
+     label2:
+        return "INIT";
+
+     label3:
+        return "INIT_DONE";
+
+     label4:
+        return "RUN";
+
+     label5:
+        return "DESTROYING";
+
+     label6:
+        return "DESTROYED";
+
+     label7:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UNKNOWN(");
+
+        $i1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    public java.lang.String toString()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        int $i0, $i1;
+        java.lang.String $r4, $r9, $r14;
+        com.sun.corba.se.spi.ior.ObjectAdapterId $r3;
+        java.lang.StringBuilder $r0, $r1, $r5, $r6, $r7, $r8, $r10, $r11, $r12, $r13;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("POA[");
+
+        $r3 = r2.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.ior.ObjectAdapterId poaId>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uniquePOAId=");
+
+        $i0 = r2.<com.sun.corba.se.impl.oa.poa.POAImpl: int uniquePOAId>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", state=");
+
+        $r9 = specialinvoke r2.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String stateToString()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", invocationCount=");
+
+        $i1 = r2.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r14;
+    }
+
+    boolean getDebug()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        return $z0;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAFactory getPOAFactory(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.spi.oa.ObjectAdapterFactory $r2;
+        com.sun.corba.se.spi.orb.ORB r0;
+        com.sun.corba.se.impl.oa.poa.POAFactory $r3;
+        com.sun.corba.se.spi.protocol.RequestDispatcherRegistry $r1;
+
+        r0 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.RequestDispatcherRegistry getRequestDispatcherRegistry()>();
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.RequestDispatcherRegistry: com.sun.corba.se.spi.oa.ObjectAdapterFactory getObjectAdapterFactory(int)>(32);
+
+        $r3 = (com.sun.corba.se.impl.oa.poa.POAFactory) $r2;
+
+        return $r3;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAImpl makeRootPOA(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.oa.poa.Policies $r5;
+        com.sun.corba.se.spi.protocol.PIHandler $r3;
+        com.sun.corba.se.impl.oa.poa.POAImpl $r4;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.impl.oa.poa.POAFactory $r2;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.POAManagerImpl;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAFactory getPOAFactory(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $r3 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: void <init>(com.sun.corba.se.impl.oa.poa.POAFactory,com.sun.corba.se.spi.protocol.PIHandler)>($r2, $r3);
+
+        $r4 = new com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.oa.poa.POAImpl: void <init>(java.lang.String,com.sun.corba.se.impl.oa.poa.POAImpl,com.sun.corba.se.spi.orb.ORB,int)>("RootPOA", null, r1, 0);
+
+        $r5 = <com.sun.corba.se.impl.oa.poa.Policies: com.sun.corba.se.impl.oa.poa.Policies rootPOAPolicies>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.oa.poa.POAImpl: void initialize(com.sun.corba.se.impl.oa.poa.POAManagerImpl,com.sun.corba.se.impl.oa.poa.Policies)>($r0, $r5);
+
+        return $r4;
+    }
+
+    int getPOAId()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int uniquePOAId>;
+
+        return $i0;
+    }
+
+    void lock()
+    {
+        com.sun.corba.se.impl.orbutil.concurrent.Sync $r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex>;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.concurrent.SyncUtil: void acquire(com.sun.corba.se.impl.orbutil.concurrent.Sync)>($r1);
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("LOCKED poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label1:
+        return;
+    }
+
+    void unlock()
+    {
+        com.sun.corba.se.impl.orbutil.concurrent.Sync $r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UNLOCKED poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex>;
+
+        interfaceinvoke $r1.<com.sun.corba.se.impl.orbutil.concurrent.Sync: void release()>();
+
+        return;
+    }
+
+    com.sun.corba.se.impl.oa.poa.Policies getPolicies()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.oa.poa.Policies $r2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: com.sun.corba.se.impl.oa.poa.Policies getPolicies()>();
+
+        return $r2;
+    }
+
+    private void <init>(java.lang.String, com.sun.corba.se.impl.oa.poa.POAImpl, com.sun.corba.se.spi.orb.ORB, int)
+    {
+        com.sun.corba.se.impl.ior.ObjectAdapterIdArray $r27;
+        java.util.Map $r6;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r29, $r30, $r31;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.impl.oa.poa.POAImpl$1 $r32;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22, $r25;
+        com.sun.corba.se.impl.oa.poa.POAFactory $r5;
+        java.lang.String[] $r17;
+        java.util.HashMap $r26;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, r3, r24;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i9;
+        java.lang.String r2, $r16, $r23;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.impl.orbutil.concurrent.Sync $r10, $r12, $r14;
+        com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex $r28;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter2: com.sun.corba.se.spi.orb.ORB;
+
+        i0 := @parameter3: int;
+
+        specialinvoke r0.<com.sun.corba.se.spi.oa.ObjectAdapterBase: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $z0 = r1.<com.sun.corba.se.spi.orb.ORB: boolean poaDebugFlag>;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug> = $z0;
+
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label1;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Creating POA with name=");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" parent=");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r23);
+
+     label1:
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state> = i0;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String name> = r2;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAImpl parent> = r3;
+
+        $r26 = new java.util.HashMap;
+
+        specialinvoke $r26.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children> = $r26;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableServer.AdapterActivator activator> = null;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAFactory getPOAFactory(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $i1 = virtualinvoke $r5.<com.sun.corba.se.impl.oa.poa.POAFactory: int newPOAId()>();
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int uniquePOAId> = $i1;
+
+        if r3 != null goto label2;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int numLevels> = 1;
+
+        goto label3;
+
+     label2:
+        $i2 = r3.<com.sun.corba.se.impl.oa.poa.POAImpl: int numLevels>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int numLevels> = $i3;
+
+        $r6 = r3.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, r0);
+
+     label3:
+        $i4 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int numLevels>;
+
+        $r17 = newarray (java.lang.String)[$i4];
+
+        r24 = r0;
+
+        $i5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int numLevels>;
+
+        i7 = $i5 - 1;
+
+     label4:
+        if r24 == null goto label5;
+
+        $i6 = i7;
+
+        $i9 = (int) -1;
+
+        i7 = i7 + $i9;
+
+        $r16 = r24.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String name>;
+
+        $r17[$i6] = $r16;
+
+        r24 = r24.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAImpl parent>;
+
+        goto label4;
+
+     label5:
+        $r27 = new com.sun.corba.se.impl.ior.ObjectAdapterIdArray;
+
+        specialinvoke $r27.<com.sun.corba.se.impl.ior.ObjectAdapterIdArray: void <init>(java.lang.String[])>($r17);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.ior.ObjectAdapterId poaId> = $r27;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount> = 0;
+
+        $r28 = new com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex;
+
+        $z2 = r1.<com.sun.corba.se.spi.orb.ORB: boolean poaConcurrencyDebugFlag>;
+
+        specialinvoke $r28.<com.sun.corba.se.impl.orbutil.concurrent.ReentrantMutex: void <init>(boolean)>($z2);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex> = $r28;
+
+        $r29 = new com.sun.corba.se.impl.orbutil.concurrent.CondVar;
+
+        $r10 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex>;
+
+        $z3 = r1.<com.sun.corba.se.spi.orb.ORB: boolean poaConcurrencyDebugFlag>;
+
+        specialinvoke $r29.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void <init>(com.sun.corba.se.impl.orbutil.concurrent.Sync,boolean)>($r10, $z3);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar adapterActivatorCV> = $r29;
+
+        $r30 = new com.sun.corba.se.impl.orbutil.concurrent.CondVar;
+
+        $r12 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex>;
+
+        $z4 = r1.<com.sun.corba.se.spi.orb.ORB: boolean poaConcurrencyDebugFlag>;
+
+        specialinvoke $r30.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void <init>(com.sun.corba.se.impl.orbutil.concurrent.Sync,boolean)>($r12, $z4);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar invokeCV> = $r30;
+
+        $r31 = new com.sun.corba.se.impl.orbutil.concurrent.CondVar;
+
+        $r14 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.Sync poaMutex>;
+
+        $z5 = r1.<com.sun.corba.se.spi.orb.ORB: boolean poaConcurrencyDebugFlag>;
+
+        specialinvoke $r31.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void <init>(com.sun.corba.se.impl.orbutil.concurrent.Sync,boolean)>($r14, $z5);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar beingDestroyedCV> = $r31;
+
+        $r32 = new com.sun.corba.se.impl.oa.poa.POAImpl$1;
+
+        specialinvoke $r32.<com.sun.corba.se.impl.oa.poa.POAImpl$1: void <init>(com.sun.corba.se.impl.oa.poa.POAImpl)>(r0);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.ThreadLocal isDestroying> = $r32;
+
+        return;
+    }
+
+    private void initialize(com.sun.corba.se.impl.oa.poa.POAManagerImpl, com.sun.corba.se.impl.oa.poa.Policies)
+    {
+        org.omg.CORBA.INTERNAL $r14;
+        com.sun.corba.se.impl.oa.poa.Policies r2;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl r1;
+        boolean $z0, $z1;
+        com.sun.corba.se.impl.ior.POAObjectKeyTemplate $r9;
+        java.lang.StringBuilder $r15, $r16, $r17, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r8, $r18, $r26;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r3, $r4, $r5;
+        com.sun.corba.se.impl.logging.POASystemException $r13;
+        com.sun.corba.se.spi.ior.ObjectAdapterId $r11, $r12;
+        com.sun.corba.se.spi.orb.ORB $r6, $r10;
+        com.sun.corba.se.spi.orb.ORBData $r7;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: com.sun.corba.se.impl.oa.poa.POAManagerImpl;
+
+        r2 := @parameter1: com.sun.corba.se.impl.oa.poa.Policies;
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Initializing poa ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with POAManager=");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" policies=");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r26);
+
+     label1:
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager> = r1;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: void addPOA(org.omg.PortableServer.POA)>(r0);
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.oa.poa.POAPolicyMediatorFactory: com.sun.corba.se.impl.oa.poa.POAPolicyMediator create(com.sun.corba.se.impl.oa.poa.Policies,com.sun.corba.se.impl.oa.poa.POAImpl)>(r2, r0);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator> = $r3;
+
+        $r4 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $i0 = interfaceinvoke $r4.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: int getServerId()>();
+
+        $r5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $i1 = interfaceinvoke $r5.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: int getScid()>();
+
+        $r6 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r8 = interfaceinvoke $r7.<com.sun.corba.se.spi.orb.ORBData: java.lang.String getORBId()>();
+
+        $r9 = new com.sun.corba.se.impl.ior.POAObjectKeyTemplate;
+
+        $r10 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $r11 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.ior.ObjectAdapterId poaId>;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.ior.POAObjectKeyTemplate: void <init>(com.sun.corba.se.spi.orb.ORB,int,int,java.lang.String,com.sun.corba.se.spi.ior.ObjectAdapterId)>($r10, $i1, $i0, $r8, $r11);
+
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label2;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Initializing poa: oktemp=");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r18);
+
+     label2:
+        $r12 = interfaceinvoke $r9.<com.sun.corba.se.spi.ior.ObjectKeyTemplate: com.sun.corba.se.spi.ior.ObjectAdapterId getObjectAdapterId()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void initializeTemplate(com.sun.corba.se.spi.ior.ObjectKeyTemplate,boolean,com.sun.corba.se.impl.oa.poa.Policies,java.lang.String,java.lang.String,com.sun.corba.se.spi.ior.ObjectAdapterId)>($r9, 1, r2, null, null, $r12);
+
+        $i2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i2 != 0 goto label3;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state> = 3;
+
+        goto label5;
+
+     label3:
+        $i3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i3 != 1 goto label4;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state> = 2;
+
+        goto label5;
+
+     label4:
+        $r13 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL illegalPoaStateTrans()>();
+
+        throw $r14;
+
+     label5:
+        return;
+    }
+
+    private boolean waitUntilRunning()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1;
+        java.lang.String $r4, $r9;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r5;
+        boolean $z0, $z1, $z2;
+        java.lang.InterruptedException $r10;
+        java.lang.StringBuilder $r1, $r2, $r3, $r6, $r7, $r8;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling waitUntilRunning on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label1:
+        $i1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i1 >= 3 goto label5;
+
+     label2:
+        $r5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar adapterActivatorCV>;
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void await()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r10 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label6;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting waitUntilRunning on poa ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r4);
+
+     label6:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 != 3 goto label7;
+
+        $z2 = 1;
+
+        goto label8;
+
+     label7:
+        $z2 = 0;
+
+     label8:
+        return $z2;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    private boolean destroyIfNotInitDone()
+    {
+        java.lang.Throwable $r11;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        java.lang.String $r6, $r10, $r16;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r2, $r12;
+        boolean $z0, z1, $z2, $z3, $z4, $z6, $z7;
+        com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread $r1;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7, $r8, $r9, $r13, $r14, $r15;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling destroyIfNotInitDone on poa ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r10);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 != 2 goto label3;
+
+        $z7 = 1;
+
+        $z6 = 1;
+
+        goto label4;
+
+     label3:
+        $z7 = 0;
+
+        $z6 = 0;
+
+     label4:
+        z1 = $z7;
+
+        if $z6 == 0 goto label5;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state> = 3;
+
+        goto label6;
+
+     label5:
+        $r1 = new com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread;
+
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        specialinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread: void <init>(boolean,boolean)>(0, $z2);
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread: void doIt(com.sun.corba.se.impl.oa.poa.POAImpl,boolean)>(r0, 1);
+
+     label6:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar adapterActivatorCV>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void broadcast()>();
+
+        $z3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z3 == 0 goto label7;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting destroyIfNotInitDone on poa ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r6);
+
+     label7:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return z1;
+
+     label8:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar adapterActivatorCV>;
+
+        virtualinvoke $r12.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void broadcast()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z4 == 0 goto label9;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting destroyIfNotInitDone on poa ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r16);
+
+     label9:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label6 with label8;
+    }
+
+    private byte[] internalReferenceToId(org.omg.CORBA.Object) throws org.omg.PortableServer.POAPackage.WrongAdapter
+    {
+        org.omg.CORBA.INTERNAL $r13;
+        com.sun.corba.se.spi.ior.ObjectId $r10;
+        byte[] $r11;
+        com.sun.corba.se.spi.ior.IORTemplateList $r2, $r5;
+        com.sun.corba.se.impl.oa.poa.POAImpl r3;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        com.sun.corba.se.spi.ior.IOR $r1;
+        org.omg.PortableServer.POAPackage.WrongAdapter $r14;
+        com.sun.corba.se.impl.logging.POASystemException $r12;
+        org.omg.PortableInterceptor.ObjectReferenceFactory $r4;
+        org.omg.CORBA.Object r0;
+        java.lang.Object $r7;
+        com.sun.corba.se.spi.ior.TaggedProfile $r8, r9;
+
+        r3 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r0 := @parameter0: org.omg.CORBA.Object;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: com.sun.corba.se.spi.ior.IOR getIOR(org.omg.CORBA.Object)>(r0);
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.ior.IOR: com.sun.corba.se.spi.ior.IORTemplateList getIORTemplates()>();
+
+        $r4 = virtualinvoke r3.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableInterceptor.ObjectReferenceFactory getCurrentFactory()>();
+
+        $r5 = staticinvoke <com.sun.corba.se.spi.ior.IORFactories: com.sun.corba.se.spi.ior.IORTemplateList getIORTemplateList(org.omg.PortableInterceptor.ObjectReferenceFactory)>($r4);
+
+        $z0 = interfaceinvoke $r5.<com.sun.corba.se.spi.ior.IORTemplateList: boolean isEquivalent(com.sun.corba.se.spi.ior.IORFactory)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r14 = new org.omg.PortableServer.POAPackage.WrongAdapter;
+
+        specialinvoke $r14.<org.omg.PortableServer.POAPackage.WrongAdapter: void <init>()>();
+
+        throw $r14;
+
+     label1:
+        $r6 = interfaceinvoke $r1.<com.sun.corba.se.spi.ior.IOR: java.util.Iterator iterator()>();
+
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 != 0 goto label2;
+
+        $r12 = virtualinvoke r3.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException iorWrapper()>();
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL noProfilesInIor()>();
+
+        throw $r13;
+
+     label2:
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (com.sun.corba.se.spi.ior.TaggedProfile) $r7;
+
+        r9 = (com.sun.corba.se.spi.ior.TaggedProfile) $r8;
+
+        $r10 = interfaceinvoke r9.<com.sun.corba.se.spi.ior.TaggedProfile: com.sun.corba.se.spi.ior.ObjectId getObjectId()>();
+
+        $r11 = interfaceinvoke $r10.<com.sun.corba.se.spi.ior.ObjectId: byte[] getId()>();
+
+        return $r11;
+    }
+
+    void etherealizeAll()
+    {
+        java.lang.Throwable $r10;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r5, $r9, $r14;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r6, $r7, $r8, $r11, $r12, $r13;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling etheralizeAll on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label2:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void etherealizeAll()>();
+
+     label3:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label4;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting etheralizeAll on poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label6;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting etheralizeAll on poa ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r14);
+
+     label6:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r10;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+
+    public org.omg.PortableServer.POA create_POA(java.lang.String, org.omg.PortableServer.POAManager, org.omg.CORBA.Policy[]) throws org.omg.PortableServer.POAPackage.AdapterAlreadyExists, org.omg.PortableServer.POAPackage.InvalidPolicy
+    {
+        com.sun.corba.se.impl.oa.poa.Policies $r8;
+        com.sun.corba.se.impl.logging.OMGSystemException $r23;
+        org.omg.PortableServer.POAManager r5;
+        java.util.Map $r2;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r10, $r11, $r13, $r15, r38;
+        boolean $z0, $z1;
+        org.omg.PortableServer.POAPackage.AdapterAlreadyExists $r16;
+        org.omg.CORBA.Policy[] r9;
+        java.lang.StringBuilder $r17, $r18, $r19, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33;
+        com.sun.corba.se.impl.oa.poa.POAFactory $r12;
+        java.lang.Throwable $r35, $r36;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, $r4, $r21, r37;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r1, $r20, $r34;
+        com.sun.corba.se.spi.protocol.PIHandler $r14;
+        com.sun.corba.se.spi.orb.ORB $r6, $r22;
+        org.omg.CORBA.BAD_INV_ORDER $r24;
+        com.sun.corba.se.spi.copyobject.CopierManager $r7;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: org.omg.PortableServer.POAManager;
+
+        r9 := @parameter2: org.omg.CORBA.Policy[];
+
+     label01:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling create_POA(name=");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" theManager=");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" policies=");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r34);
+
+     label02:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 <= 3 goto label03;
+
+        $r23 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.OMGSystemException omgLifecycleWrapper()>();
+
+        $r24 = virtualinvoke $r23.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_INV_ORDER createPoaDestroy()>();
+
+        throw $r24;
+
+     label03:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (com.sun.corba.se.impl.oa.poa.POAImpl) $r3;
+
+        r37 = (com.sun.corba.se.impl.oa.poa.POAImpl) $r4;
+
+        if r37 != null goto label04;
+
+        $r21 = new com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r22 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        specialinvoke $r21.<com.sun.corba.se.impl.oa.poa.POAImpl: void <init>(java.lang.String,com.sun.corba.se.impl.oa.poa.POAImpl,com.sun.corba.se.spi.orb.ORB,int)>(r1, r0, $r22, 0);
+
+        r37 = $r21;
+
+     label04:
+        virtualinvoke r37.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label05;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling create_POA: new poa is ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r37);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r20);
+
+     label05:
+        $i1 = r37.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i1 == 0 goto label06;
+
+        $i3 = r37.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i3 == 1 goto label06;
+
+        $r16 = new org.omg.PortableServer.POAPackage.AdapterAlreadyExists;
+
+        specialinvoke $r16.<org.omg.PortableServer.POAPackage.AdapterAlreadyExists: void <init>()>();
+
+        throw $r16;
+
+     label06:
+        $r15 = (com.sun.corba.se.impl.oa.poa.POAManagerImpl) r5;
+
+        r38 = $r15;
+
+        if $r15 != null goto label07;
+
+        $r10 = new com.sun.corba.se.impl.oa.poa.POAManagerImpl;
+
+        $r11 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: com.sun.corba.se.impl.oa.poa.POAFactory getFactory()>();
+
+        $r13 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: com.sun.corba.se.spi.protocol.PIHandler getPIHandler()>();
+
+        specialinvoke $r10.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: void <init>(com.sun.corba.se.impl.oa.poa.POAFactory,com.sun.corba.se.spi.protocol.PIHandler)>($r12, $r14);
+
+        r38 = $r10;
+
+     label07:
+        $r6 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.copyobject.CopierManager getCopierManager()>();
+
+        $i2 = interfaceinvoke $r7.<com.sun.corba.se.spi.copyobject.CopierManager: int getDefaultId()>();
+
+        $r8 = new com.sun.corba.se.impl.oa.poa.Policies;
+
+        specialinvoke $r8.<com.sun.corba.se.impl.oa.poa.Policies: void <init>(org.omg.CORBA.Policy[],int)>(r9, $i2);
+
+        specialinvoke r37.<com.sun.corba.se.impl.oa.poa.POAImpl: void initialize(com.sun.corba.se.impl.oa.poa.POAManagerImpl,com.sun.corba.se.impl.oa.poa.Policies)>(r38, $r8);
+
+     label08:
+        virtualinvoke r37.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+     label09:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r37;
+
+     label10:
+        $r36 := @caughtexception;
+
+     label11:
+        virtualinvoke r37.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r36;
+
+     label12:
+        $r35 := @caughtexception;
+
+     label13:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r35;
+
+        catch java.lang.Throwable from label04 to label08 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label01 to label09 with label12;
+        catch java.lang.Throwable from label10 to label13 with label12;
+    }
+
+    public org.omg.PortableServer.POA find_POA(java.lang.String, boolean) throws org.omg.PortableServer.POAPackage.AdapterNonExistent
+    {
+        com.sun.corba.se.impl.logging.OMGSystemException $r9, $r17, $r38;
+        org.omg.CORBA.SystemException $r37;
+        org.omg.PortableServer.POAPackage.AdapterNonExistent $r4, $r8;
+        org.omg.PortableServer.AdapterActivator $r5, r45, r47;
+        java.util.Map $r2;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, z9, z10;
+        java.lang.ThreadDeath $r36;
+        java.lang.StringBuilder $r13, $r14, $r15, $r19, $r20, $r21, $r23, $r24, $r25, $r26, $r27, $r28, $r29;
+        org.omg.CORBA.OBJ_ADAPTER $r12, $r41;
+        java.lang.Throwable $r32, $r33, $r42, $r43, $r44;
+        org.omg.CORBA.TRANSIENT $r18;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, $r6, $r31, r46;
+        java.lang.String r1, $r11, $r16, $r22, $r30, $r35, $r40;
+        com.sun.corba.se.impl.logging.POASystemException $r34;
+        com.sun.corba.se.spi.ior.ObjectAdapterId $r10, $r39;
+        com.sun.corba.se.spi.orb.ORB $r7;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+        r45 = null;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label01;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling find_POA(name=");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" activate=");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r30);
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r31 = (com.sun.corba.se.impl.oa.poa.POAImpl) $r3;
+
+        r46 = $r31;
+
+        if $r31 == null goto label07;
+
+        $z6 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z6 == 0 goto label02;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling find_POA: found poa ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r31);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r22);
+
+     label02:
+        virtualinvoke $r31.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        $z7 = specialinvoke $r31.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean waitUntilRunning()>();
+
+        if $z7 != 0 goto label03;
+
+        $r17 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.OMGSystemException omgLifecycleWrapper()>();
+
+        $r18 = virtualinvoke $r17.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.TRANSIENT poaDestroyed()>();
+
+        throw $r18;
+
+     label03:
+        virtualinvoke $r31.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label06;
+
+     label04:
+        $r44 := @caughtexception;
+
+     label05:
+        virtualinvoke $r31.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r44;
+
+     label06:
+        goto label14;
+
+     label07:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label08;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, "Calling find_POA: no poa found");
+
+     label08:
+        if z2 == 0 goto label10;
+
+        $r5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableServer.AdapterActivator activator>;
+
+        if $r5 == null goto label10;
+
+        $r6 = new com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        specialinvoke $r6.<com.sun.corba.se.impl.oa.poa.POAImpl: void <init>(java.lang.String,com.sun.corba.se.impl.oa.poa.POAImpl,com.sun.corba.se.spi.orb.ORB,int)>(r1, r0, $r7, 1);
+
+        r46 = $r6;
+
+        $z3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z3 == 0 goto label09;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling find_POA: created poa ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r16);
+
+     label09:
+        r45 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableServer.AdapterActivator activator>;
+
+        goto label11;
+
+     label10:
+        $r4 = new org.omg.PortableServer.POAPackage.AdapterNonExistent;
+
+        specialinvoke $r4.<org.omg.PortableServer.POAPackage.AdapterNonExistent: void <init>()>();
+
+        throw $r4;
+
+     label11:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label14;
+
+     label12:
+        $r43 := @caughtexception;
+
+     label13:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r43;
+
+     label14:
+        if r45 == null goto label29;
+
+        z9 = 0;
+
+        $z4 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z4 == 0 goto label15;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, "Calling find_POA: calling AdapterActivator");
+
+     label15:
+        r47 = r45;
+
+        entermonitor r45;
+
+     label16:
+        z9 = interfaceinvoke r45.<org.omg.PortableServer.AdapterActivator: boolean unknown_adapter(org.omg.PortableServer.POA,java.lang.String)>(r0, r1);
+
+        exitmonitor r45;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r42 := @caughtexception;
+
+        exitmonitor r47;
+
+     label19:
+        throw $r42;
+
+     label20:
+        z10 = specialinvoke r46.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean destroyIfNotInitDone()>();
+
+        goto label26;
+
+     label21:
+        $r37 := @caughtexception;
+
+        $r38 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.OMGSystemException omgLifecycleWrapper()>();
+
+        $r39 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.ior.ObjectAdapterId poaId>;
+
+        $r40 = virtualinvoke $r39.<java.lang.Object: java.lang.String toString()>();
+
+        $r41 = virtualinvoke $r38.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.OBJ_ADAPTER adapterActivatorException(java.lang.Throwable,java.lang.Object,java.lang.Object)>($r37, r1, $r40);
+
+        throw $r41;
+
+     label22:
+        $r33 := @caughtexception;
+
+        $r34 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r35 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String toString()>();
+
+        virtualinvoke $r34.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL unexpectedException(java.lang.Throwable,java.lang.Object)>($r33, $r35);
+
+        $z8 = $r33 instanceof java.lang.ThreadDeath;
+
+        if $z8 == 0 goto label23;
+
+        $r36 = (java.lang.ThreadDeath) $r33;
+
+        throw $r36;
+
+     label23:
+        z10 = specialinvoke r46.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean destroyIfNotInitDone()>();
+
+        goto label26;
+
+     label24:
+        $r32 := @caughtexception;
+
+     label25:
+        specialinvoke r46.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean destroyIfNotInitDone()>();
+
+        throw $r32;
+
+     label26:
+        if z9 == 0 goto label27;
+
+        if z10 != 0 goto label29;
+
+        $r9 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.OMGSystemException omgLifecycleWrapper()>();
+
+        $r10 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.ior.ObjectAdapterId poaId>;
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.OBJ_ADAPTER adapterActivatorException(java.lang.Object,java.lang.Object)>(r1, $r11);
+
+        throw $r12;
+
+     label27:
+        $z5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z5 == 0 goto label28;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, "Calling find_POA: AdapterActivator returned false");
+
+     label28:
+        $r8 = new org.omg.PortableServer.POAPackage.AdapterNonExistent;
+
+        specialinvoke $r8.<org.omg.PortableServer.POAPackage.AdapterNonExistent: void <init>()>();
+
+        throw $r8;
+
+     label29:
+        return r46;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch org.omg.CORBA.SystemException from label15 to label20 with label21;
+        catch java.lang.Throwable from label15 to label20 with label22;
+        catch java.lang.Throwable from label21 to label23 with label24;
+        catch java.lang.Throwable from label24 to label25 with label24;
+    }
+
+    public void destroy(boolean, boolean)
+    {
+        com.sun.corba.se.impl.logging.POASystemException $r3;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        org.omg.CORBA.BAD_INV_ORDER $r4;
+        com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread $r0;
+        com.sun.corba.se.impl.oa.poa.POAImpl r1;
+        boolean z0, z1, $z2, $z3;
+
+        r1 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        z1 := @parameter0: boolean;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $z3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: boolean isDuringDispatch()>();
+
+        if $z3 == 0 goto label1;
+
+        $r3 = virtualinvoke r1.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.BAD_INV_ORDER destroyDeadlock()>();
+
+        throw $r4;
+
+     label1:
+        $r0 = new com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread;
+
+        $z2 = r1.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread: void <init>(boolean,boolean)>(z1, $z2);
+
+        virtualinvoke $r0.<com.sun.corba.se.impl.oa.poa.POAImpl$DestroyThread: void doIt(com.sun.corba.se.impl.oa.poa.POAImpl,boolean)>(r1, z0);
+
+        return;
+    }
+
+    public org.omg.PortableServer.ThreadPolicy create_thread_policy(org.omg.PortableServer.ThreadPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        com.sun.corba.se.impl.oa.poa.ThreadPolicyImpl $r0;
+        org.omg.PortableServer.ThreadPolicyValue r1;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.ThreadPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.ThreadPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.ThreadPolicyImpl: void <init>(org.omg.PortableServer.ThreadPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.LifespanPolicy create_lifespan_policy(org.omg.PortableServer.LifespanPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        com.sun.corba.se.impl.oa.poa.LifespanPolicyImpl $r0;
+        org.omg.PortableServer.LifespanPolicyValue r1;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.LifespanPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.LifespanPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.LifespanPolicyImpl: void <init>(org.omg.PortableServer.LifespanPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.IdUniquenessPolicy create_id_uniqueness_policy(org.omg.PortableServer.IdUniquenessPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        org.omg.PortableServer.IdUniquenessPolicyValue r1;
+        com.sun.corba.se.impl.oa.poa.IdUniquenessPolicyImpl $r0;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.IdUniquenessPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.IdUniquenessPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.IdUniquenessPolicyImpl: void <init>(org.omg.PortableServer.IdUniquenessPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.IdAssignmentPolicy create_id_assignment_policy(org.omg.PortableServer.IdAssignmentPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        com.sun.corba.se.impl.oa.poa.IdAssignmentPolicyImpl $r0;
+        org.omg.PortableServer.IdAssignmentPolicyValue r1;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.IdAssignmentPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.IdAssignmentPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.IdAssignmentPolicyImpl: void <init>(org.omg.PortableServer.IdAssignmentPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.ImplicitActivationPolicy create_implicit_activation_policy(org.omg.PortableServer.ImplicitActivationPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.ImplicitActivationPolicyImpl $r0;
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        org.omg.PortableServer.ImplicitActivationPolicyValue r1;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.ImplicitActivationPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.ImplicitActivationPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.ImplicitActivationPolicyImpl: void <init>(org.omg.PortableServer.ImplicitActivationPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.ServantRetentionPolicy create_servant_retention_policy(org.omg.PortableServer.ServantRetentionPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        com.sun.corba.se.impl.oa.poa.ServantRetentionPolicyImpl $r0;
+        org.omg.PortableServer.ServantRetentionPolicyValue r1;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.ServantRetentionPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.ServantRetentionPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.ServantRetentionPolicyImpl: void <init>(org.omg.PortableServer.ServantRetentionPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public org.omg.PortableServer.RequestProcessingPolicy create_request_processing_policy(org.omg.PortableServer.RequestProcessingPolicyValue)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        org.omg.PortableServer.RequestProcessingPolicyValue r1;
+        com.sun.corba.se.impl.oa.poa.RequestProcessingPolicyImpl $r0;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.RequestProcessingPolicyValue;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.RequestProcessingPolicyImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.RequestProcessingPolicyImpl: void <init>(org.omg.PortableServer.RequestProcessingPolicyValue)>(r1);
+
+        return $r0;
+    }
+
+    public java.lang.String the_name()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.Throwable $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String name>;
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public org.omg.PortableServer.POA the_parent()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAImpl parent>;
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public org.omg.PortableServer.POA[] the_children()
+    {
+        java.lang.Throwable $r7;
+        java.util.Iterator $r4;
+        java.util.Collection $r2;
+        org.omg.PortableServer.POA $r6, r8;
+        org.omg.PortableServer.POA[] r3;
+        java.util.Map $r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.Collection: int size()>();
+
+        r3 = newarray (org.omg.PortableServer.POA)[$i0];
+
+        i2 = 0;
+
+        $r4 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (org.omg.PortableServer.POA) $r5;
+
+        r8 = (org.omg.PortableServer.POA) $r6;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        r3[$i1] = r8;
+
+        goto label2;
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r3;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public org.omg.PortableServer.POAManager the_POAManager()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public org.omg.PortableServer.AdapterActivator the_activator()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.Throwable $r2;
+        org.omg.PortableServer.AdapterActivator r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableServer.AdapterActivator activator>;
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void the_activator(org.omg.PortableServer.AdapterActivator)
+    {
+        java.lang.Throwable $r8;
+        org.omg.PortableServer.AdapterActivator r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6;
+        java.lang.String $r7;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.AdapterActivator;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling the_activator on poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" activator=");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r7);
+
+     label2:
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.PortableServer.AdapterActivator activator> = r1;
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public org.omg.PortableServer.ServantManager get_servant_manager() throws org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r3;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        org.omg.PortableServer.ServantManager $r2;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.ServantManager getServantManager()>();
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void set_servant_manager(org.omg.PortableServer.ServantManager) throws org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r9;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        org.omg.PortableServer.ServantManager r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r7;
+        java.lang.String $r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.ServantManager;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling set_servant_manager on poa ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" servantManager=");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r8);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void setServantManager(org.omg.PortableServer.ServantManager)>(r1);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r9;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public org.omg.PortableServer.Servant get_servant() throws org.omg.PortableServer.POAPackage.NoServant, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r3;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        org.omg.PortableServer.Servant $r2;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.Servant getDefaultServant()>();
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void set_servant(org.omg.PortableServer.Servant) throws org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r9;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        org.omg.PortableServer.Servant r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r7;
+        java.lang.String $r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.Servant;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling set_servant on poa ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" defaultServant=");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r8);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void setDefaultServant(org.omg.PortableServer.Servant)>(r1);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r9;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public byte[] activate_object(org.omg.PortableServer.Servant) throws org.omg.PortableServer.POAPackage.ServantAlreadyActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r16;
+        byte[] $r2;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r8, $r15, $r20;
+        boolean $z0, $z1, $z2;
+        org.omg.PortableServer.POAPackage.ObjectAlreadyActive $r21;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1, $r4;
+        org.omg.PortableServer.Servant r3;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r14, $r17, $r18, $r19;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r3 := @parameter0: org.omg.PortableServer.Servant;
+
+     label01:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling activate_object on poa ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (servant=");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r15);
+
+     label02:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: byte[] newSystemId()>();
+
+     label03:
+        $r4 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r4.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void activateObject(byte[],org.omg.PortableServer.Servant)>($r2, r3);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r21 := @caughtexception;
+
+     label06:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label07;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting activate_object on poa ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r8);
+
+     label07:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r2;
+
+     label08:
+        $r16 := @caughtexception;
+
+     label09:
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label10;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting activate_object on poa ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r20);
+
+     label10:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r16;
+
+        catch org.omg.PortableServer.POAPackage.ObjectAlreadyActive from label03 to label04 with label05;
+        catch java.lang.Throwable from label01 to label06 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void activate_object_with_id(byte[], org.omg.PortableServer.Servant) throws org.omg.PortableServer.POAPackage.ObjectAlreadyActive, org.omg.PortableServer.POAPackage.ServantAlreadyActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r20;
+        byte[] r1, $r3, $r19;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r9, $r18, $r24;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r5;
+        org.omg.PortableServer.Servant r4;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r21, $r22, $r23;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+        r4 := @parameter1: org.omg.PortableServer.Servant;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling activate_object_with_id on poa ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (servant=");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r18);
+
+     label2:
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        $r19 = (byte[]) $r3;
+
+        $r5 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r5.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void activateObject(byte[],org.omg.PortableServer.Servant)>($r19, r4);
+
+     label3:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label4;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting activate_object_with_id on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label8;
+
+     label5:
+        $r20 := @caughtexception;
+
+     label6:
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label7;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting activate_object_with_id on poa ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r24);
+
+     label7:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r20;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void deactivate_object(byte[]) throws org.omg.PortableServer.POAPackage.ObjectNotActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r14;
+        byte[] r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r6, $r13, $r18;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7, $r8, $r9, $r10, $r11, $r12, $r15, $r16, $r17;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling deactivate_object on poa ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (id=");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r13);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.Servant deactivateObject(byte[])>(r1);
+
+     label3:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label4;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting deactivate_object on poa ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r6);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r14 := @caughtexception;
+
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label6;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting deactivate_object on poa ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r18);
+
+     label6:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r14;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+
+    public org.omg.CORBA.Object create_reference(java.lang.String) throws org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r11;
+        byte[] $r3;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        org.omg.CORBA.Object $r4;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9;
+        java.lang.String r1, $r10;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling create_reference(repId=");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r10);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: byte[] newSystemId()>();
+
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.CORBA.Object makeObject(java.lang.String,byte[])>(r1, $r3);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r4;
+
+     label4:
+        $r11 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public org.omg.CORBA.Object create_reference_with_id(byte[], java.lang.String)
+    {
+        java.lang.Throwable $r15;
+        byte[] r1, $r3, $r14;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String r4, $r13;
+        boolean $z0;
+        org.omg.CORBA.Object $r5;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+        r4 := @parameter1: java.lang.String;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling create_reference_with_id(oid=");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" repId=");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r13);
+
+     label2:
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        $r14 = (byte[]) $r3;
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.CORBA.Object makeObject(java.lang.String,byte[])>(r4, $r14);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r5;
+
+     label4:
+        $r15 := @caughtexception;
+
+     label5:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r15;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public byte[] servant_to_id(org.omg.PortableServer.Servant) throws org.omg.PortableServer.POAPackage.ServantNotActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r10;
+        byte[] $r3;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        org.omg.PortableServer.Servant r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.Servant;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling servant_to_id(servant=");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: byte[] servantToId(org.omg.PortableServer.Servant)>(r1);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r3;
+
+     label4:
+        $r10 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public org.omg.CORBA.Object servant_to_reference(org.omg.PortableServer.Servant) throws org.omg.PortableServer.POAPackage.ServantNotActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r13;
+        byte[] $r3;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        java.lang.String[] $r4;
+        org.omg.PortableServer.Servant r1;
+        org.omg.CORBA.Object $r5;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10;
+        java.lang.String $r11, $r12;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.PortableServer.Servant;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling servant_to_reference(servant=");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r11);
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: byte[] servantToId(org.omg.PortableServer.Servant)>(r1);
+
+        $r4 = virtualinvoke r1.<org.omg.PortableServer.Servant: java.lang.String[] _all_interfaces(org.omg.PortableServer.POA,byte[])>(r0, $r3);
+
+        $r12 = $r4[0];
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.CORBA.Object create_reference_with_id(byte[],java.lang.String)>($r3, $r12);
+
+     label3:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r5;
+
+     label4:
+        $r13 := @caughtexception;
+
+     label5:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r13;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public org.omg.PortableServer.Servant reference_to_servant(org.omg.CORBA.Object) throws org.omg.PortableServer.POAPackage.ObjectNotActive, org.omg.PortableServer.POAPackage.WrongPolicy, org.omg.PortableServer.POAPackage.WrongAdapter
+    {
+        java.lang.Throwable $r13;
+        byte[] $r2;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        java.lang.String $r12;
+        boolean $z0;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r3;
+        com.sun.corba.se.impl.logging.POASystemException $r5;
+        org.omg.PortableServer.Servant $r4;
+        org.omg.CORBA.Object r1;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r6;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.CORBA.Object;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling reference_to_servant(reference=");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r12);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 < 4 goto label3;
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJECT_NOT_EXIST adapterDestroyed()>();
+
+        throw $r6;
+
+     label3:
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: byte[] internalReferenceToId(org.omg.CORBA.Object)>(r1);
+
+        $r3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.Servant idToServant(byte[])>($r2);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r4;
+
+     label5:
+        $r13 := @caughtexception;
+
+     label6:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r13;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public byte[] reference_to_id(org.omg.CORBA.Object) throws org.omg.PortableServer.POAPackage.WrongAdapter, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r11;
+        byte[] $r2;
+        com.sun.corba.se.impl.logging.POASystemException $r3;
+        org.omg.CORBA.Object r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r4;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: org.omg.CORBA.Object;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling reference_to_id(reference=");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r10);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 < 4 goto label3;
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJECT_NOT_EXIST adapterDestroyed()>();
+
+        throw $r4;
+
+     label3:
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: byte[] internalReferenceToId(org.omg.CORBA.Object)>(r1);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r2;
+
+     label5:
+        $r11 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public org.omg.PortableServer.Servant id_to_servant(byte[]) throws org.omg.PortableServer.POAPackage.ObjectNotActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r12;
+        byte[] r1;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        com.sun.corba.se.impl.logging.POASystemException $r4;
+        org.omg.PortableServer.Servant $r3;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r5;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10;
+        java.lang.String $r11;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling id_to_servant(id=");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r11);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 < 4 goto label3;
+
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJECT_NOT_EXIST adapterDestroyed()>();
+
+        throw $r5;
+
+     label3:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.Servant idToServant(byte[])>(r1);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r3;
+
+     label5:
+        $r12 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r12;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public org.omg.CORBA.Object id_to_reference(byte[]) throws org.omg.PortableServer.POAPackage.ObjectNotActive, org.omg.PortableServer.POAPackage.WrongPolicy
+    {
+        java.lang.Throwable $r15;
+        byte[] r1;
+        java.lang.String[] $r4;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        java.lang.String r5, $r14;
+        boolean $z0;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        com.sun.corba.se.impl.logging.POASystemException $r7;
+        org.omg.PortableServer.Servant $r3;
+        org.omg.CORBA.Object $r6;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r8;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r13;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling id_to_reference(id=");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") on poa ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r14);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i0 < 4 goto label3;
+
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.logging.POASystemException lifecycleWrapper()>();
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJECT_NOT_EXIST adapterDestroyed()>();
+
+        throw $r8;
+
+     label3:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: org.omg.PortableServer.Servant idToServant(byte[])>(r1);
+
+        $r4 = virtualinvoke $r3.<org.omg.PortableServer.Servant: java.lang.String[] _all_interfaces(org.omg.PortableServer.POA,byte[])>(r0, r1);
+
+        r5 = $r4[0];
+
+        $r6 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: org.omg.CORBA.Object makeObject(java.lang.String,byte[])>(r5, r1);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r6;
+
+     label5:
+        $r15 := @caughtexception;
+
+     label6:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r15;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public byte[] id()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.Throwable $r2;
+        byte[] $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: byte[] getAdapterId()>();
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public org.omg.CORBA.Policy getEffectivePolicy(int)
+    {
+        com.sun.corba.se.impl.oa.poa.Policies $r2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        org.omg.CORBA.Policy $r3;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: com.sun.corba.se.impl.oa.poa.Policies getPolicies()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.oa.poa.Policies: org.omg.CORBA.Policy get_effective_policy(int)>(i0);
+
+        return $r3;
+    }
+
+    public int getManagerId()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: int getManagerId()>();
+
+        return $i0;
+    }
+
+    public short getState()
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r1;
+        short $s0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        $s0 = virtualinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: short getORTState()>();
+
+        return $s0;
+    }
+
+    public java.lang.String[] getInterfaces(java.lang.Object, byte[])
+    {
+        byte[] r3;
+        org.omg.PortableServer.Servant r1;
+        com.sun.corba.se.impl.oa.poa.POAImpl r2;
+        java.lang.Object r0;
+        java.lang.String[] $r4;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: byte[];
+
+        r1 = (org.omg.PortableServer.Servant) r0;
+
+        $r4 = virtualinvoke r1.<org.omg.PortableServer.Servant: java.lang.String[] _all_interfaces(org.omg.PortableServer.POA,byte[])>(r2, r3);
+
+        return $r4;
+    }
+
+    protected com.sun.corba.se.spi.copyobject.ObjectCopierFactory getObjectCopierFactory()
+    {
+        com.sun.corba.se.impl.oa.poa.Policies $r2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        com.sun.corba.se.spi.copyobject.CopierManager $r4;
+        com.sun.corba.se.spi.copyobject.ObjectCopierFactory $r5;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+        com.sun.corba.se.spi.orb.ORB $r3;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: com.sun.corba.se.impl.oa.poa.Policies getPolicies()>();
+
+        $i0 = virtualinvoke $r2.<com.sun.corba.se.impl.oa.poa.Policies: int getCopierId()>();
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.copyobject.CopierManager getCopierManager()>();
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.copyobject.CopierManager: com.sun.corba.se.spi.copyobject.ObjectCopierFactory getObjectCopierFactory(int)>($i0);
+
+        return $r5;
+    }
+
+    public void enter() throws com.sun.corba.se.spi.oa.OADestroyed
+    {
+        java.lang.Throwable $r15;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1, $i2;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r1;
+        java.lang.Boolean $r9;
+        java.lang.String $r5, $r14, $r19;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.ThreadLocal $r7;
+        com.sun.corba.se.spi.oa.OADestroyed $r6;
+        java.lang.InterruptedException $r20;
+        java.lang.StringBuilder $r2, $r3, $r4, $r11, $r12, $r13, $r16, $r17, $r18;
+        java.lang.Object $r8;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label01:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling enter on poa ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r14);
+
+     label02:
+        $i2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i2 != 4 goto label06;
+
+        $r7 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.ThreadLocal isDestroying>;
+
+        $r8 = virtualinvoke $r7.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r9 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        if $r8 != $r9 goto label06;
+
+     label03:
+        $r10 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar beingDestroyedCV>;
+
+        virtualinvoke $r10.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void await()>();
+
+     label04:
+        goto label02;
+
+     label05:
+        $r20 := @caughtexception;
+
+        goto label02;
+
+     label06:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean waitUntilRunning()>();
+
+        if $z1 != 0 goto label07;
+
+        $r6 = new com.sun.corba.se.spi.oa.OADestroyed;
+
+        specialinvoke $r6.<com.sun.corba.se.spi.oa.OADestroyed: void <init>()>();
+
+        throw $r6;
+
+     label07:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount> = $i1;
+
+     label08:
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label09;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting enter on poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label09:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label12;
+
+     label10:
+        $r15 := @caughtexception;
+
+        $z3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z3 == 0 goto label11;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting enter on poa ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r19);
+
+     label11:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r15;
+
+     label12:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: void enter()>();
+
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+        catch java.lang.Throwable from label01 to label08 with label10;
+    }
+
+    public void exit()
+    {
+        java.lang.Throwable $r11;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0, $i1, $i2, $i3;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r1;
+        java.lang.String $r5, $r10, $r15;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r6;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r2, $r3, $r4, $r7, $r8, $r9, $r12, $r13, $r14;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling exit on poa ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r10);
+
+     label2:
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount> = $i1;
+
+        $i2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount>;
+
+        if $i2 != 0 goto label3;
+
+        $i3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        if $i3 != 4 goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar invokeCV>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.orbutil.concurrent.CondVar: void broadcast()>();
+
+     label3:
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label4;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting exit on poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label6;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting exit on poa ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r15);
+
+     label6:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r11;
+
+     label7:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAManagerImpl: void exit()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+
+    public void getInvocationServant(com.sun.corba.se.spi.oa.OAInvocationInfo)
+    {
+        java.lang.Throwable $r14;
+        byte[] $r3;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r4, $r9, $r13, $r18;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r2;
+        com.sun.corba.se.spi.protocol.ForwardException $r20;
+        com.sun.corba.se.spi.orb.ORB $r21;
+        org.omg.CORBA.Object $r22;
+        org.omg.PortableServer.ForwardRequest $r19;
+        com.sun.corba.se.spi.oa.OAInvocationInfo r1;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r11, $r12, $r15, $r16, $r17;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.oa.OAInvocationInfo;
+
+     label01:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling getInvocationServant on poa ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r13);
+
+     label02:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        $r3 = virtualinvoke r1.<com.sun.corba.se.spi.oa.OAInvocationInfo: byte[] id()>();
+
+        $r4 = virtualinvoke r1.<com.sun.corba.se.spi.oa.OAInvocationInfo: java.lang.String getOperation()>();
+
+        $r5 = interfaceinvoke $r2.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: java.lang.Object getInvocationServant(byte[],java.lang.String)>($r3, $r4);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r19 := @caughtexception;
+
+        $r20 = new com.sun.corba.se.spi.protocol.ForwardException;
+
+        $r21 = virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        $r22 = $r19.<org.omg.PortableServer.ForwardRequest: org.omg.CORBA.Object forward_reference>;
+
+        specialinvoke $r20.<com.sun.corba.se.spi.protocol.ForwardException: void <init>(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.Object)>($r21, $r22);
+
+        throw $r20;
+
+     label05:
+        virtualinvoke r1.<com.sun.corba.se.spi.oa.OAInvocationInfo: void setServant(java.lang.Object)>($r5);
+
+     label06:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label07;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting getInvocationServant on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label07:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label11;
+
+     label08:
+        $r14 := @caughtexception;
+
+     label09:
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label10;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting getInvocationServant on poa ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r18);
+
+     label10:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r14;
+
+     label11:
+        return;
+
+        catch org.omg.PortableServer.ForwardRequest from label02 to label03 with label04;
+        catch java.lang.Throwable from label01 to label06 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public org.omg.CORBA.Object getLocalServant(byte[])
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        byte[] r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter0: byte[];
+
+        return null;
+    }
+
+    public void returnServant()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r2, $r3, $r4, $r6, $r7, $r8, $r11, $r12, $r13, $r16, $r17, $r18, $r22, $r23, $r24, $r25, $r26;
+        java.lang.Throwable $r10, $r15;
+        java.lang.Error $r21;
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r5, $r9, $r14, $r19, $r27;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+        java.lang.RuntimeException $r20;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+     label01:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void lock()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Calling returnServant on poa ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r9);
+
+     label02:
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        interfaceinvoke $r1.<com.sun.corba.se.impl.oa.poa.POAPolicyMediator: void returnServant()>();
+
+     label03:
+        $z1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z1 == 0 goto label04;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting returnServant on poa ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r5);
+
+     label04:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label12;
+
+     label05:
+        $r15 := @caughtexception;
+
+        $z3 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z3 == 0 goto label06;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in returnServant on poa ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r27);
+
+     label06:
+        $z4 = $r15 instanceof java.lang.Error;
+
+        if $z4 == 0 goto label07;
+
+        $r21 = (java.lang.Error) $r15;
+
+        throw $r21;
+
+     label07:
+        $z5 = $r15 instanceof java.lang.RuntimeException;
+
+        if $z5 == 0 goto label08;
+
+        $r20 = (java.lang.RuntimeException) $r15;
+
+        throw $r20;
+
+     label08:
+        $z6 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z6 == 0 goto label09;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting returnServant on poa ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r19);
+
+     label09:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        goto label12;
+
+     label10:
+        $r10 := @caughtexception;
+
+        $z2 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: boolean debug>;
+
+        if $z2 == 0 goto label11;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exiting returnServant on poa ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.Object,java.lang.String)>(r0, $r14);
+
+     label11:
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAImpl: void unlock()>();
+
+        throw $r10;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label05;
+        catch java.lang.Throwable from label05 to label08 with label10;
+    }
+
+    static int access$000(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state>;
+
+        return $i0;
+    }
+
+    static int access$002(com.sun.corba.se.impl.oa.poa.POAImpl, int)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int i0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        i0 := @parameter1: int;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int state> = i0;
+
+        return i0;
+    }
+
+    static com.sun.corba.se.impl.orbutil.concurrent.CondVar access$100(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar beingDestroyedCV>;
+
+        return $r1;
+    }
+
+    static java.util.Map access$200(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.util.Map children>;
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAImpl access$300(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAImpl parent>;
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAManagerImpl access$400(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.oa.poa.POAManagerImpl $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAManagerImpl manager>;
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAImpl access$302(com.sun.corba.se.impl.oa.poa.POAImpl, com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0, r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r1 := @parameter1: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAImpl parent> = r1;
+
+        return r1;
+    }
+
+    static int access$500(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        int $i0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: int invocationCount>;
+
+        return $i0;
+    }
+
+    static com.sun.corba.se.impl.orbutil.concurrent.CondVar access$600(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.orbutil.concurrent.CondVar $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.orbutil.concurrent.CondVar invokeCV>;
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.impl.oa.poa.POAPolicyMediator access$700(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        com.sun.corba.se.impl.oa.poa.POAPolicyMediator $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: com.sun.corba.se.impl.oa.poa.POAPolicyMediator mediator>;
+
+        return $r1;
+    }
+
+    static java.lang.String access$800(com.sun.corba.se.impl.oa.poa.POAImpl)
+    {
+        com.sun.corba.se.impl.oa.poa.POAImpl r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAImpl: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_DESTROYED> = 5;
+
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_DESTROYING> = 4;
+
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_RUN> = 3;
+
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_INIT_DONE> = 2;
+
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_INIT> = 1;
+
+        <com.sun.corba.se.impl.oa.poa.POAImpl: int STATE_START> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,2183 @@
+final class com.sun.jndi.ldap.Filter extends java.lang.Object
+{
+    private static final boolean dbg;
+    private static int dbgIndent;
+    static final int LDAP_FILTER_AND;
+    static final int LDAP_FILTER_OR;
+    static final int LDAP_FILTER_NOT;
+    static final int LDAP_FILTER_EQUALITY;
+    static final int LDAP_FILTER_SUBSTRINGS;
+    static final int LDAP_FILTER_GE;
+    static final int LDAP_FILTER_LE;
+    static final int LDAP_FILTER_PRESENT;
+    static final int LDAP_FILTER_APPROX;
+    static final int LDAP_FILTER_EXT;
+    static final int LDAP_FILTER_EXT_RULE;
+    static final int LDAP_FILTER_EXT_TYPE;
+    static final int LDAP_FILTER_EXT_VAL;
+    static final int LDAP_FILTER_EXT_DN;
+    static final int LDAP_SUBSTRING_INITIAL;
+    static final int LDAP_SUBSTRING_ANY;
+    static final int LDAP_SUBSTRING_FINAL;
+
+    void <init>()
+    {
+        com.sun.jndi.ldap.Filter r0;
+
+        r0 := @this: com.sun.jndi.ldap.Filter;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void encodeFilterString(com.sun.jndi.ldap.BerEncoder, java.lang.String, boolean) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r3;
+        javax.naming.directory.InvalidSearchFilterException $r1;
+        int $i0;
+        java.lang.String r0;
+        com.sun.jndi.ldap.BerEncoder r2;
+        boolean $z0, z1;
+
+        r2 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r0 := @parameter1: java.lang.String;
+
+        z1 := @parameter2: boolean;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r1 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r1.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Empty filter");
+
+        throw $r1;
+
+     label2:
+        if z1 == 0 goto label3;
+
+        r3 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        goto label4;
+
+     label3:
+        r3 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+     label4:
+        $i0 = lengthof r3;
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int)>(r2, r3, 0, $i0);
+
+        return;
+    }
+
+    private static void encodeFilter(com.sun.jndi.ldap.BerEncoder, byte[], int, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r2;
+        byte $b5, $b11, $b14, $b15, $b23;
+        int[] r0;
+        boolean z0, z1, z2;
+        javax.naming.directory.InvalidSearchFilterException $r7, $r8, $r9, $r10;
+        com.sun.jndi.ldap.BerEncoder r3;
+        int i0, i1, $i2, $i3, $i4, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i16, $i17, $i18, i19, i20, i21, i22, $i24, $i25, $i27, $i29, $i31, $i32, $i33, $i35, $i36, $i38, $i40;
+
+        r3 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r2 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $i2 = i0 - i1;
+
+        if $i2 > 0 goto label01;
+
+        $r7 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r7.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Empty filter");
+
+        throw $r7;
+
+     label01:
+        i19 = 0;
+
+        r0 = newarray (int)[1];
+
+        r0[0] = i1;
+
+     label02:
+        $i3 = r0[0];
+
+        if $i3 >= i0 goto label19;
+
+        $i4 = r0[0];
+
+        $b5 = r2[$i4];
+
+        $i24 = (int) $b5;
+
+        lookupswitch($i24)
+        {
+            case 32: goto label16;
+            case 40: goto label03;
+            case 41: goto label15;
+            default: goto label17;
+        };
+
+     label03:
+        $i8 = r0[0];
+
+        $i9 = $i8 + 1;
+
+        r0[0] = $i9;
+
+        i20 = i19 + 1;
+
+        $i10 = r0[0];
+
+        $b11 = r2[$i10];
+
+        $i25 = (int) $b11;
+
+        lookupswitch($i25)
+        {
+            case 33: goto label06;
+            case 38: goto label04;
+            case 124: goto label05;
+            default: goto label07;
+        };
+
+     label04:
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeComplexFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int[],int)>(r3, r2, 160, r0, i0);
+
+        $i27 = (int) -1;
+
+        i19 = i20 + $i27;
+
+        goto label18;
+
+     label05:
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeComplexFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int[],int)>(r3, r2, 161, r0, i0);
+
+        $i29 = (int) -1;
+
+        i19 = i20 + $i29;
+
+        goto label18;
+
+     label06:
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeComplexFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int[],int)>(r3, r2, 162, r0, i0);
+
+        $i31 = (int) -1;
+
+        i19 = i20 + $i31;
+
+        goto label18;
+
+     label07:
+        i21 = 1;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        i22 = r0[0];
+
+     label08:
+        if i22 >= i0 goto label13;
+
+        if i21 <= 0 goto label13;
+
+        if z2 != 0 goto label10;
+
+        $b14 = r2[i22];
+
+        $i32 = (int) $b14;
+
+        if $i32 != 40 goto label09;
+
+        i21 = i21 + 1;
+
+        goto label10;
+
+     label09:
+        $b15 = r2[i22];
+
+        $i33 = (int) $b15;
+
+        if $i33 != 41 goto label10;
+
+        $i35 = (int) -1;
+
+        i21 = i21 + $i35;
+
+     label10:
+        $b23 = r2[i22];
+
+        $i36 = (int) $b23;
+
+        if $i36 != 92 goto label11;
+
+        if z1 != 0 goto label11;
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        goto label12;
+
+     label11:
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+     label12:
+        if i21 <= 0 goto label08;
+
+        i22 = i22 + 1;
+
+        goto label08;
+
+     label13:
+        if i21 == 0 goto label14;
+
+        $r8 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r8.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Unbalanced parenthesis");
+
+        throw $r8;
+
+     label14:
+        $i12 = r0[0];
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeSimpleFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int)>(r3, r2, $i12, i22);
+
+        $i13 = i22 + 1;
+
+        r0[0] = $i13;
+
+        $i38 = (int) -1;
+
+        i19 = i20 + $i38;
+
+        goto label18;
+
+     label15:
+        virtualinvoke r3.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $i6 = r0[0];
+
+        $i7 = $i6 + 1;
+
+        r0[0] = $i7;
+
+        $i40 = (int) -1;
+
+        i19 = i19 + $i40;
+
+        goto label18;
+
+     label16:
+        $i16 = r0[0];
+
+        $i17 = $i16 + 1;
+
+        r0[0] = $i17;
+
+        goto label18;
+
+     label17:
+        $i18 = r0[0];
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeSimpleFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int)>(r3, r2, $i18, i0);
+
+        r0[0] = i0;
+
+     label18:
+        if i19 >= 0 goto label02;
+
+        $r9 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r9.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Unbalanced parenthesis");
+
+        throw $r9;
+
+     label19:
+        if i19 == 0 goto label20;
+
+        $r10 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r10.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Unbalanced parenthesis");
+
+        throw $r10;
+
+     label20:
+        return;
+    }
+
+    private static int hexchar2int(byte)
+    {
+        byte b0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i16;
+
+        b0 := @parameter0: byte;
+
+        $i6 = (int) b0;
+
+        if $i6 < 48 goto label1;
+
+        $i7 = (int) b0;
+
+        if $i7 > 57 goto label1;
+
+        $i8 = (int) b0;
+
+        $i5 = $i8 - 48;
+
+        return $i5;
+
+     label1:
+        $i9 = (int) b0;
+
+        if $i9 < 65 goto label2;
+
+        $i10 = (int) b0;
+
+        if $i10 > 70 goto label2;
+
+        $i11 = (int) b0;
+
+        $i3 = $i11 - 65;
+
+        $i4 = $i3 + 10;
+
+        return $i4;
+
+     label2:
+        $i12 = (int) b0;
+
+        if $i12 < 97 goto label3;
+
+        $i13 = (int) b0;
+
+        if $i13 > 102 goto label3;
+
+        $i14 = (int) b0;
+
+        $i1 = $i14 - 97;
+
+        $i2 = $i1 + 10;
+
+        return $i2;
+
+     label3:
+        $i16 = (int) -1;
+
+        return $i16;
+    }
+
+    static byte[] unescapeFilterValue(byte[], int, int) throws javax.naming.NamingException
+    {
+        byte[] r0, r1, r7;
+        byte b3, $b7, $b8, $b9, $b10, $b12;
+        int i0, i1, i2, $i4, $i5, $i6, $i11, $i13, i14, i15, $i16;
+        java.lang.String $r6;
+        boolean z0, z1, z2, z3;
+        javax.naming.directory.InvalidSearchFilterException $r9;
+        java.lang.StringBuilder $r4, $r5, $r8;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        i2 = i0 - i1;
+
+        r0 = newarray (byte)[i2];
+
+        i14 = 0;
+
+        i15 = i1;
+
+     label1:
+        if i15 >= i0 goto label8;
+
+        b3 = r1[i15];
+
+        if z0 == 0 goto label5;
+
+        $i5 = staticinvoke <com.sun.jndi.ldap.Filter: int hexchar2int(byte)>(b3);
+
+        if $i5 >= 0 goto label3;
+
+        if z3 == 0 goto label2;
+
+        z0 = 0;
+
+        $i13 = i14;
+
+        i14 = i14 + 1;
+
+        r0[$i13] = b3;
+
+        goto label7;
+
+     label2:
+        $r9 = new javax.naming.directory.InvalidSearchFilterException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid escape sequence: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>($r6);
+
+        throw $r9;
+
+     label3:
+        if z2 == 0 goto label4;
+
+        $i11 = $i5 << 4;
+
+        $b12 = (byte) $i11;
+
+        r0[i14] = $b12;
+
+        z1 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        goto label7;
+
+     label4:
+        $i6 = i14;
+
+        i14 = i14 + 1;
+
+        $b8 = r0[$i6];
+
+        $b7 = (byte) $i5;
+
+        $b9 = $b8 | $b7;
+
+        $b10 = (byte) $b9;
+
+        r0[$i6] = $b10;
+
+        z0 = 0;
+
+        goto label7;
+
+     label5:
+        $i16 = (int) b3;
+
+        if $i16 == 92 goto label6;
+
+        $i4 = i14;
+
+        i14 = i14 + 1;
+
+        r0[$i4] = b3;
+
+        z0 = 0;
+
+        goto label7;
+
+     label6:
+        z0 = 1;
+
+        z1 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label7:
+        i15 = i15 + 1;
+
+        goto label1;
+
+     label8:
+        r7 = newarray (byte)[i14];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r7, 0, i14);
+
+        return r7;
+    }
+
+    private static int indexOf(byte[], char, int, int)
+    {
+        byte[] r0;
+        char c2;
+        byte $b3;
+        int i0, i1, i4, $i5, $i6, $i8;
+
+        r0 := @parameter0: byte[];
+
+        c2 := @parameter1: char;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i4 = i0;
+
+     label1:
+        if i4 >= i1 goto label3;
+
+        $b3 = r0[i4];
+
+        $i5 = (int) $b3;
+
+        $i6 = (int) c2;
+
+        if $i5 != $i6 goto label2;
+
+        return i4;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        $i8 = (int) -1;
+
+        return $i8;
+    }
+
+    private static int indexOf(byte[], java.lang.String, int, int)
+    {
+        byte[] r0;
+        char $c0, $c7;
+        byte $b6;
+        int i1, i2, $i3, $i4, $i5, i8, $i9, $i10, $i12;
+        java.lang.String r1;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: java.lang.String;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $c0 = virtualinvoke r1.<java.lang.String: char charAt(int)>(0);
+
+        $i3 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],char,int,int)>(r0, $c0, i1, i2);
+
+        if $i3 < 0 goto label3;
+
+        i8 = 1;
+
+     label1:
+        $i4 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i8 >= $i4 goto label3;
+
+        $i5 = $i3 + i8;
+
+        $b6 = r0[$i5];
+
+        $c7 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i8);
+
+        $i9 = (int) $b6;
+
+        $i10 = (int) $c7;
+
+        if $i9 == $i10 goto label2;
+
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label2:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label3:
+        return $i3;
+    }
+
+    private static int findUnescaped(byte[], char, int, int)
+    {
+        byte[] r0;
+        char c1;
+        byte $b4;
+        int i0, $i2, $i3, i5, i6, i7, $i8, $i10, $i12, $i14;
+
+        r0 := @parameter0: byte[];
+
+        c1 := @parameter1: char;
+
+        i5 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+     label1:
+        if i5 >= i0 goto label6;
+
+        $i2 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],char,int,int)>(r0, c1, i5, i0);
+
+        i6 = 0;
+
+        i7 = $i2 - 1;
+
+     label2:
+        if i7 < i5 goto label3;
+
+        $b4 = r0[i7];
+
+        $i8 = (int) $b4;
+
+        if $i8 != 92 goto label3;
+
+        $i10 = (int) -1;
+
+        i7 = i7 + $i10;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        if $i2 == i5 goto label4;
+
+        $i12 = (int) -1;
+
+        if $i2 == $i12 goto label4;
+
+        $i3 = i6 % 2;
+
+        if $i3 != 0 goto label5;
+
+     label4:
+        return $i2;
+
+     label5:
+        i5 = $i2 + 1;
+
+        goto label1;
+
+     label6:
+        $i14 = (int) -1;
+
+        return $i14;
+    }
+
+    private static void encodeSimpleFilter(com.sun.jndi.ldap.BerEncoder, byte[], int, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r0, $r3;
+        byte $b5, $b6, $b7, $b8, $b10, $b12, $b14, $b18, $b20, $b21, $b22, $b23, $b24, $b25, $b26, $b27, $b28, $b29, $b30, $b31, $b32, $b33, $b34, $b35, $b36, $b37, $b39, $b41, $b42, $b43, $b44, $b45, $b46, $b47, $b48, $b49, $b50, $b51, $b52, $b53, $b54, $b56, $b58, $b59, $b60, $b61, $b62, $b63, $b64, $b65, $b66, $b67, $b68, $b69, $b70, $b71, $b72, $b73, $b75, $b77, $b79, $b80, $b81, $b82, $b87, $b88, $b92;
+        short s83, s95, s96, s97, s98, s99, s100, s101;
+        javax.naming.directory.InvalidSearchFilterException $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34;
+        com.sun.jndi.ldap.BerEncoder r2;
+        int i0, i1, $i2, i3, $i4, $i9, $i11, $i13, $i15, $i16, $i17, $i19, $i38, $i40, $i55, $i57, $i74, $i76, $i78, i84, i85, i86, i89, i90, i91, i93, i94, $i103, $i104, $i106, $i108, $i109, $i110, $i111, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, $i153, $i154, $i155, $i156, $i157, $i158, $i159, $i160, $i161, $i162, $i163, $i164, $i165, $i166, $i167, $i168, $i169, $i170, $i171, $i172, $i173, $i175, $i176;
+        boolean z0, $z1, z2, z3, $z4;
+
+        r2 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r0 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $i2 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],char,int,int)>(r0, 61, i0, i1);
+
+        $i103 = (int) -1;
+
+        if $i2 != $i103 goto label01;
+
+        $r19 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r19.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Missing \'equals\'");
+
+        throw $r19;
+
+     label01:
+        i3 = $i2 + 1;
+
+        $i4 = $i2 - 1;
+
+        $b5 = r0[$i4];
+
+        $i104 = (int) $b5;
+
+        lookupswitch($i104)
+        {
+            case 58: goto label05;
+            case 60: goto label02;
+            case 62: goto label03;
+            case 126: goto label04;
+            default: goto label06;
+        };
+
+     label02:
+        s83 = 166;
+
+        s101 = 166;
+
+        s100 = 166;
+
+        s99 = 166;
+
+        s98 = 166;
+
+        s97 = 166;
+
+        s96 = 166;
+
+        s95 = 166;
+
+        i84 = $i2 - 1;
+
+        goto label07;
+
+     label03:
+        s83 = 165;
+
+        s101 = 165;
+
+        s100 = 165;
+
+        s99 = 165;
+
+        s98 = 165;
+
+        s97 = 165;
+
+        s96 = 165;
+
+        s95 = 165;
+
+        i84 = $i2 - 1;
+
+        goto label07;
+
+     label04:
+        s83 = 168;
+
+        s101 = 168;
+
+        s100 = 168;
+
+        s99 = 168;
+
+        s98 = 168;
+
+        s97 = 168;
+
+        s96 = 168;
+
+        s95 = 168;
+
+        i84 = $i2 - 1;
+
+        goto label07;
+
+     label05:
+        s83 = 169;
+
+        s101 = 169;
+
+        s100 = 169;
+
+        s99 = 169;
+
+        s98 = 169;
+
+        s97 = 169;
+
+        s96 = 169;
+
+        s95 = 169;
+
+        i84 = $i2 - 1;
+
+        goto label07;
+
+     label06:
+        i84 = $i2;
+
+        s83 = 0;
+
+        s101 = 0;
+
+        s100 = 0;
+
+        s99 = 0;
+
+        s98 = 0;
+
+        s97 = 0;
+
+        s96 = 0;
+
+        s95 = 0;
+
+     label07:
+        $i106 = (int) -1;
+
+        i85 = $i106;
+
+        $i108 = (int) -1;
+
+        i86 = $i108;
+
+        $b87 = r0[i0];
+
+        $i109 = (int) $b87;
+
+        if $i109 < 48 goto label08;
+
+        $b82 = r0[i0];
+
+        $i110 = (int) $b82;
+
+        if $i110 <= 57 goto label10;
+
+     label08:
+        $b6 = r0[i0];
+
+        $i111 = (int) $b6;
+
+        if $i111 < 65 goto label09;
+
+        $b81 = r0[i0];
+
+        $i112 = (int) $b81;
+
+        if $i112 <= 90 goto label10;
+
+     label09:
+        $b7 = r0[i0];
+
+        $i113 = (int) $b7;
+
+        if $i113 < 97 goto label26;
+
+        $b59 = r0[i0];
+
+        $i114 = (int) $b59;
+
+        if $i114 > 122 goto label26;
+
+     label10:
+        $b88 = r0[i0];
+
+        $i115 = (int) $b88;
+
+        if $i115 < 48 goto label11;
+
+        $b80 = r0[i0];
+
+        $i116 = (int) $b80;
+
+        if $i116 > 57 goto label11;
+
+        $z1 = 1;
+
+        goto label12;
+
+     label11:
+        $z1 = 0;
+
+     label12:
+        z2 = $z1;
+
+        i89 = i0 + 1;
+
+     label13:
+        if i89 >= i84 goto label25;
+
+        $b60 = r0[i89];
+
+        $i117 = (int) $b60;
+
+        if $i117 != 59 goto label15;
+
+        if z2 == 0 goto label14;
+
+        $i78 = i89 - 1;
+
+        $b79 = r0[$i78];
+
+        $i118 = (int) $b79;
+
+        if $i118 != 46 goto label14;
+
+        $r20 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r20.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r20;
+
+     label14:
+        i85 = i89;
+
+        goto label25;
+
+     label15:
+        $b61 = r0[i89];
+
+        $i119 = (int) $b61;
+
+        if $i119 != 58 goto label17;
+
+        if s96 != 169 goto label17;
+
+        if z2 == 0 goto label16;
+
+        $i76 = i89 - 1;
+
+        $b77 = r0[$i76];
+
+        $i120 = (int) $b77;
+
+        if $i120 != 46 goto label16;
+
+        $r21 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r21.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r21;
+
+     label16:
+        i86 = i89;
+
+        goto label25;
+
+     label17:
+        if z2 == 0 goto label20;
+
+        $b70 = r0[i89];
+
+        $i121 = (int) $b70;
+
+        if $i121 != 46 goto label18;
+
+        $i74 = i89 - 1;
+
+        $b75 = r0[$i74];
+
+        $i122 = (int) $b75;
+
+        if $i122 == 46 goto label19;
+
+     label18:
+        $b71 = r0[i89];
+
+        $i123 = (int) $b71;
+
+        if $i123 == 46 goto label24;
+
+        $b72 = r0[i89];
+
+        $i124 = (int) $b72;
+
+        if $i124 < 48 goto label19;
+
+        $b73 = r0[i89];
+
+        $i125 = (int) $b73;
+
+        if $i125 <= 57 goto label24;
+
+     label19:
+        $r22 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r22.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r22;
+
+     label20:
+        $b62 = r0[i89];
+
+        $i126 = (int) $b62;
+
+        if $i126 == 45 goto label24;
+
+        $b63 = r0[i89];
+
+        $i127 = (int) $b63;
+
+        if $i127 == 95 goto label24;
+
+        $b64 = r0[i89];
+
+        $i128 = (int) $b64;
+
+        if $i128 < 48 goto label21;
+
+        $b69 = r0[i89];
+
+        $i129 = (int) $b69;
+
+        if $i129 <= 57 goto label24;
+
+     label21:
+        $b65 = r0[i89];
+
+        $i130 = (int) $b65;
+
+        if $i130 < 65 goto label22;
+
+        $b68 = r0[i89];
+
+        $i131 = (int) $b68;
+
+        if $i131 <= 90 goto label24;
+
+     label22:
+        $b66 = r0[i89];
+
+        $i132 = (int) $b66;
+
+        if $i132 < 97 goto label23;
+
+        $b67 = r0[i89];
+
+        $i133 = (int) $b67;
+
+        if $i133 <= 122 goto label24;
+
+     label23:
+        $r23 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r23.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r23;
+
+     label24:
+        i89 = i89 + 1;
+
+        goto label13;
+
+     label25:
+        goto label28;
+
+     label26:
+        if s99 != 169 goto label27;
+
+        $b8 = r0[i0];
+
+        $i134 = (int) $b8;
+
+        if $i134 != 58 goto label27;
+
+        i86 = i0;
+
+        goto label28;
+
+     label27:
+        $r24 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r24.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r24;
+
+     label28:
+        if i85 <= 0 goto label37;
+
+        i90 = i85 + 1;
+
+     label29:
+        if i90 >= i84 goto label37;
+
+        $b45 = r0[i90];
+
+        $i135 = (int) $b45;
+
+        if $i135 != 59 goto label30;
+
+        $i57 = i90 - 1;
+
+        $b58 = r0[$i57];
+
+        $i136 = (int) $b58;
+
+        if $i136 != 59 goto label36;
+
+        $r25 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r25.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r25;
+
+     label30:
+        $b46 = r0[i90];
+
+        $i137 = (int) $b46;
+
+        if $i137 != 58 goto label32;
+
+        if s97 != 169 goto label32;
+
+        $i55 = i90 - 1;
+
+        $b56 = r0[$i55];
+
+        $i138 = (int) $b56;
+
+        if $i138 != 59 goto label31;
+
+        $r26 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r26.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r26;
+
+     label31:
+        i86 = i90;
+
+        goto label37;
+
+     label32:
+        $b47 = r0[i90];
+
+        $i139 = (int) $b47;
+
+        if $i139 == 45 goto label36;
+
+        $b48 = r0[i90];
+
+        $i140 = (int) $b48;
+
+        if $i140 == 95 goto label36;
+
+        $b49 = r0[i90];
+
+        $i141 = (int) $b49;
+
+        if $i141 < 48 goto label33;
+
+        $b54 = r0[i90];
+
+        $i142 = (int) $b54;
+
+        if $i142 <= 57 goto label36;
+
+     label33:
+        $b50 = r0[i90];
+
+        $i143 = (int) $b50;
+
+        if $i143 < 65 goto label34;
+
+        $b53 = r0[i90];
+
+        $i144 = (int) $b53;
+
+        if $i144 <= 90 goto label36;
+
+     label34:
+        $b51 = r0[i90];
+
+        $i145 = (int) $b51;
+
+        if $i145 < 97 goto label35;
+
+        $b52 = r0[i90];
+
+        $i146 = (int) $b52;
+
+        if $i146 <= 122 goto label36;
+
+     label35:
+        $r27 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r27.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r27;
+
+     label36:
+        i90 = i90 + 1;
+
+        goto label29;
+
+     label37:
+        if i86 <= 0 goto label59;
+
+        z3 = 0;
+
+        i91 = i86 + 1;
+
+     label38:
+        if i91 >= i84 goto label59;
+
+        $b20 = r0[i91];
+
+        $i147 = (int) $b20;
+
+        if $i147 != 58 goto label39;
+
+        $r28 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r28.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r28;
+
+     label39:
+        $b21 = r0[i91];
+
+        $i148 = (int) $b21;
+
+        if $i148 < 48 goto label40;
+
+        $b44 = r0[i91];
+
+        $i149 = (int) $b44;
+
+        if $i149 <= 57 goto label42;
+
+     label40:
+        $b22 = r0[i91];
+
+        $i150 = (int) $b22;
+
+        if $i150 < 65 goto label41;
+
+        $b43 = r0[i91];
+
+        $i151 = (int) $b43;
+
+        if $i151 <= 90 goto label42;
+
+     label41:
+        $b23 = r0[i91];
+
+        $i152 = (int) $b23;
+
+        if $i152 < 97 goto label57;
+
+        $b24 = r0[i91];
+
+        $i153 = (int) $b24;
+
+        if $i153 > 122 goto label57;
+
+     label42:
+        $b92 = r0[i91];
+
+        $i154 = (int) $b92;
+
+        if $i154 < 48 goto label43;
+
+        $b42 = r0[i91];
+
+        $i155 = (int) $b42;
+
+        if $i155 > 57 goto label43;
+
+        $z4 = 1;
+
+        goto label44;
+
+     label43:
+        $z4 = 0;
+
+     label44:
+        z0 = $z4;
+
+        i93 = i91 + 1;
+
+        i94 = i93;
+
+     label45:
+        if i94 >= i84 goto label56;
+
+        $b25 = r0[i94];
+
+        $i156 = (int) $b25;
+
+        if $i156 != 58 goto label48;
+
+        if z3 == 0 goto label46;
+
+        $r29 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r29.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r29;
+
+     label46:
+        if z0 == 0 goto label47;
+
+        $i40 = i94 - 1;
+
+        $b41 = r0[$i40];
+
+        $i157 = (int) $b41;
+
+        if $i157 != 46 goto label47;
+
+        $r30 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r30.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r30;
+
+     label47:
+        z3 = 1;
+
+        goto label56;
+
+     label48:
+        if z0 == 0 goto label51;
+
+        $b34 = r0[i94];
+
+        $i158 = (int) $b34;
+
+        if $i158 != 46 goto label49;
+
+        $i38 = i94 - 1;
+
+        $b39 = r0[$i38];
+
+        $i159 = (int) $b39;
+
+        if $i159 == 46 goto label50;
+
+     label49:
+        $b35 = r0[i94];
+
+        $i160 = (int) $b35;
+
+        if $i160 == 46 goto label55;
+
+        $b36 = r0[i94];
+
+        $i161 = (int) $b36;
+
+        if $i161 < 48 goto label50;
+
+        $b37 = r0[i94];
+
+        $i162 = (int) $b37;
+
+        if $i162 <= 57 goto label55;
+
+     label50:
+        $r31 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r31.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r31;
+
+     label51:
+        $b26 = r0[i94];
+
+        $i163 = (int) $b26;
+
+        if $i163 == 45 goto label55;
+
+        $b27 = r0[i94];
+
+        $i164 = (int) $b27;
+
+        if $i164 == 95 goto label55;
+
+        $b28 = r0[i94];
+
+        $i165 = (int) $b28;
+
+        if $i165 < 48 goto label52;
+
+        $b33 = r0[i94];
+
+        $i166 = (int) $b33;
+
+        if $i166 <= 57 goto label55;
+
+     label52:
+        $b29 = r0[i94];
+
+        $i167 = (int) $b29;
+
+        if $i167 < 65 goto label53;
+
+        $b32 = r0[i94];
+
+        $i168 = (int) $b32;
+
+        if $i168 <= 90 goto label55;
+
+     label53:
+        $b30 = r0[i94];
+
+        $i169 = (int) $b30;
+
+        if $i169 < 97 goto label54;
+
+        $b31 = r0[i94];
+
+        $i170 = (int) $b31;
+
+        if $i170 <= 122 goto label55;
+
+     label54:
+        $r32 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r32.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r32;
+
+     label55:
+        i94 = i94 + 1;
+
+        i93 = i93 + 1;
+
+        goto label45;
+
+     label56:
+        goto label58;
+
+     label57:
+        $r33 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r33.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r33;
+
+     label58:
+        i91 = i93 + 1;
+
+        goto label38;
+
+     label59:
+        $i9 = i84 - 1;
+
+        $b10 = r0[$i9];
+
+        $i171 = (int) $b10;
+
+        if $i171 == 46 goto label60;
+
+        $i11 = i84 - 1;
+
+        $b12 = r0[$i11];
+
+        $i172 = (int) $b12;
+
+        if $i172 == 59 goto label60;
+
+        $i13 = i84 - 1;
+
+        $b14 = r0[$i13];
+
+        $i173 = (int) $b14;
+
+        if $i173 != 58 goto label61;
+
+     label60:
+        $r34 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r34.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("invalid attribute description");
+
+        throw $r34;
+
+     label61:
+        if i84 != $i2 goto label64;
+
+        $i17 = staticinvoke <com.sun.jndi.ldap.Filter: int findUnescaped(byte[],char,int,int)>(r0, 42, i3, i1);
+
+        $i175 = (int) -1;
+
+        if $i17 != $i175 goto label62;
+
+        s83 = 163;
+
+        s101 = 163;
+
+        s100 = 163;
+
+        s98 = 163;
+
+        s95 = 163;
+
+        goto label64;
+
+     label62:
+        $b18 = r0[i3];
+
+        $i176 = (int) $b18;
+
+        if $i176 != 42 goto label63;
+
+        $i19 = i1 - 1;
+
+        if i3 != $i19 goto label63;
+
+        s83 = 135;
+
+        s101 = 135;
+
+        s100 = 135;
+
+        s98 = 135;
+
+        s95 = 135;
+
+        goto label64;
+
+     label63:
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeSubstringFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int,int,int)>(r2, r0, i0, i84, i3, i1);
+
+        return;
+
+     label64:
+        if s98 != 135 goto label65;
+
+        $i16 = i84 - i0;
+
+        virtualinvoke r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r0, s100, i0, $i16);
+
+        goto label67;
+
+     label65:
+        if s101 != 169 goto label66;
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeExtensibleMatch(com.sun.jndi.ldap.BerEncoder,byte[],int,int,int,int)>(r2, r0, i0, i84, i3, i1);
+
+        goto label67;
+
+     label66:
+        virtualinvoke r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(s95);
+
+        $i15 = i84 - i0;
+
+        virtualinvoke r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r0, 4, i0, $i15);
+
+        $r3 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>(r0, i3, i1);
+
+        virtualinvoke r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r3, 4);
+
+        virtualinvoke r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+     label67:
+        return;
+    }
+
+    private static void encodeSubstringFilter(com.sun.jndi.ldap.BerEncoder, byte[], int, int, int, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r1, $r2, $r3, $r4;
+        int i0, i1, $i2, i3, i4, $i5, i6, $i8;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(164);
+
+        $i2 = i1 - i0;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 4, i0, $i2);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        i6 = i3;
+
+     label1:
+        $i5 = staticinvoke <com.sun.jndi.ldap.Filter: int findUnescaped(byte[],char,int,int)>(r1, 42, i6, i4);
+
+        $i8 = (int) -1;
+
+        if $i5 == $i8 goto label4;
+
+        if i6 != i3 goto label2;
+
+        if i6 >= $i5 goto label3;
+
+        $r4 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>(r1, i6, $i5);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r4, 128);
+
+        goto label3;
+
+     label2:
+        if i6 >= $i5 goto label3;
+
+        $r3 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>(r1, i6, $i5);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r3, 129);
+
+     label3:
+        i6 = $i5 + 1;
+
+        goto label1;
+
+     label4:
+        if i6 >= i4 goto label5;
+
+        $r2 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>(r1, i6, i4);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r2, 130);
+
+     label5:
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        return;
+    }
+
+    private static void encodeComplexFilter(com.sun.jndi.ldap.BerEncoder, byte[], int, int[], int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r2;
+        int[] r0, $r3;
+        int $i0, $i1, i2, i3, $i4, $i5;
+        com.sun.jndi.ldap.BerEncoder r1;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r2 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        r0 := @parameter3: int[];
+
+        i3 := @parameter4: int;
+
+        $i0 = r0[0];
+
+        $i1 = $i0 + 1;
+
+        r0[0] = $i1;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(i2);
+
+        $r3 = staticinvoke <com.sun.jndi.ldap.Filter: int[] findRightParen(byte[],int[],int)>(r2, r0, i3);
+
+        $i5 = $r3[0];
+
+        $i4 = $r3[1];
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeFilterList(com.sun.jndi.ldap.BerEncoder,byte[],int,int,int)>(r1, r2, i2, $i5, $i4);
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        return;
+    }
+
+    private static int[] findRightParen(byte[], int[], int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r3;
+        byte $b3, $b4, $b7;
+        int[] r0, $r1;
+        int i0, $i1, $i2, i5, i6, $i8, $i9, $i11, $i12;
+        boolean z0, z1, z2;
+        javax.naming.directory.InvalidSearchFilterException $r4;
+
+        r3 := @parameter0: byte[];
+
+        r0 := @parameter1: int[];
+
+        i0 := @parameter2: int;
+
+        i5 = 1;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        i6 = r0[0];
+
+     label1:
+        if i6 >= i0 goto label6;
+
+        if i5 <= 0 goto label6;
+
+        if z1 != 0 goto label3;
+
+        $b3 = r3[i6];
+
+        $i8 = (int) $b3;
+
+        if $i8 != 40 goto label2;
+
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label2:
+        $b4 = r3[i6];
+
+        $i9 = (int) $b4;
+
+        if $i9 != 41 goto label3;
+
+        $i11 = (int) -1;
+
+        i5 = i5 + $i11;
+
+     label3:
+        $b7 = r3[i6];
+
+        $i12 = (int) $b7;
+
+        if $i12 != 92 goto label4;
+
+        if z2 != 0 goto label4;
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        goto label5;
+
+     label4:
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+     label5:
+        if i5 <= 0 goto label1;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label6:
+        if i5 == 0 goto label7;
+
+        $r4 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r4.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Unbalanced parenthesis");
+
+        throw $r4;
+
+     label7:
+        $r1 = newarray (int)[2];
+
+        $i1 = r0[0];
+
+        $r1[0] = $i1;
+
+        $r1[1] = i6;
+
+        $i2 = i6 + 1;
+
+        r0[0] = $i2;
+
+        return $r1;
+    }
+
+    private static void encodeFilterList(com.sun.jndi.ldap.BerEncoder, byte[], int, int, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r1, r3;
+        byte $b4, $b8;
+        int[] r0, $r2;
+        int i0, i1, $i2, $i3, i6, $i7, $i9, $i10, i11, $i12, $i13, $i14, $i15, i16, $i17, $i18, $i19;
+        boolean $z0;
+        char $c5;
+        javax.naming.directory.InvalidSearchFilterException $r6;
+        com.sun.jndi.ldap.BerEncoder r4;
+
+        r4 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter1: byte[];
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        r0 = newarray (int)[1];
+
+        i16 = 0;
+
+        r0[0] = i0;
+
+     label1:
+        $i2 = r0[0];
+
+        if $i2 >= i1 goto label6;
+
+        $i3 = r0[0];
+
+        $b4 = r1[$i3];
+
+        $c5 = (char) $b4;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isSpaceChar(char)>($c5);
+
+        if $z0 == 0 goto label2;
+
+        goto label5;
+
+     label2:
+        if i6 != 162 goto label3;
+
+        if i16 <= 0 goto label3;
+
+        $r6 = new javax.naming.directory.InvalidSearchFilterException;
+
+        specialinvoke $r6.<javax.naming.directory.InvalidSearchFilterException: void <init>(java.lang.String)>("Filter (!) cannot be followed by more than one filters");
+
+        throw $r6;
+
+     label3:
+        $i7 = r0[0];
+
+        $b8 = r1[$i7];
+
+        $i19 = (int) $b8;
+
+        if $i19 != 40 goto label4;
+
+        goto label5;
+
+     label4:
+        $r2 = staticinvoke <com.sun.jndi.ldap.Filter: int[] findRightParen(byte[],int[],int)>(r1, r0, i1);
+
+        $i10 = $r2[1];
+
+        $i9 = $r2[0];
+
+        i11 = $i10 - $i9;
+
+        $i12 = i11 + 2;
+
+        r3 = newarray (byte)[$i12];
+
+        $i13 = $r2[0];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i13, r3, 1, i11);
+
+        r3[0] = 40;
+
+        $i14 = i11 + 1;
+
+        r3[$i14] = 41;
+
+        $i15 = lengthof r3;
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeFilter(com.sun.jndi.ldap.BerEncoder,byte[],int,int)>(r4, r3, 0, $i15);
+
+        i16 = i16 + 1;
+
+     label5:
+        $i17 = r0[0];
+
+        $i18 = $i17 + 1;
+
+        r0[0] = $i18;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    private static void encodeExtensibleMatch(com.sun.jndi.ldap.BerEncoder, byte[], int, int, int, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r1, $r2;
+        int i0, i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i20;
+        boolean z0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        z0 = 0;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(169);
+
+        $i2 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],char,int,int)>(r1, 58, i0, i1);
+
+        if $i2 < 0 goto label6;
+
+        $i6 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],java.lang.String,int,int)>(r1, ":dn", $i2, i1);
+
+        if $i6 < 0 goto label1;
+
+        z0 = 1;
+
+     label1:
+        $i7 = $i2 + 1;
+
+        $i8 = staticinvoke <com.sun.jndi.ldap.Filter: int indexOf(byte[],char,int,int)>(r1, 58, $i7, i1);
+
+        if $i8 >= 0 goto label2;
+
+        $i20 = (int) -1;
+
+        if $i6 != $i20 goto label5;
+
+     label2:
+        if $i6 != $i2 goto label3;
+
+        $i18 = $i8 + 1;
+
+        $i16 = $i8 + 1;
+
+        $i17 = i1 - $i16;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 129, $i18, $i17);
+
+        goto label5;
+
+     label3:
+        if $i6 != $i8 goto label4;
+
+        if $i6 < 0 goto label4;
+
+        $i15 = $i2 + 1;
+
+        $i13 = $i2 + 1;
+
+        $i14 = $i8 - $i13;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 129, $i15, $i14);
+
+        goto label5;
+
+     label4:
+        $i11 = $i2 + 1;
+
+        $i9 = $i2 + 1;
+
+        $i10 = i1 - $i9;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 129, $i11, $i10);
+
+     label5:
+        if $i2 <= i0 goto label7;
+
+        $i12 = $i2 - i0;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 130, i0, $i12);
+
+        goto label7;
+
+     label6:
+        $i3 = i1 - i0;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, 130, i0, $i3);
+
+     label7:
+        $r2 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>(r1, i4, i5);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r2, 131);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeBoolean(boolean,int)>(z0, 132);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        return;
+    }
+
+    private static void dprint(java.lang.String)
+    {
+        byte[] $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = newarray (byte)[0];
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void dprint(java.lang.String,byte[],int,int)>(r0, $r1, 0, 0);
+
+        return;
+    }
+
+    private static void dprint(java.lang.String, byte[])
+    {
+        int $i0;
+        byte[] r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: byte[];
+
+        $i0 = lengthof r1;
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void dprint(java.lang.String,byte[],int,int)>(r0, r1, 0, $i0);
+
+        return;
+    }
+
+    private static void dprint(java.lang.String, byte[], int, int)
+    {
+        byte[] r7;
+        byte $b3;
+        int $i0, i1, i2, i5, i6, $i8;
+        java.lang.String r2, $r4, r12;
+        java.io.PrintStream $r5, $r6, $r8;
+        char $c4;
+        java.lang.StringBuilder $r1, $r3, $r10, $r11, $r13, $r14;
+
+        r2 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r12 = "  ";
+
+        i5 = <com.sun.jndi.ldap.Filter: int dbgIndent>;
+
+     label1:
+        $i0 = i5;
+
+        $i8 = (int) -1;
+
+        i5 = i5 + $i8;
+
+        if $i0 <= 0 goto label2;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r12);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label2:
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r12);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r4);
+
+        i6 = i1;
+
+     label3:
+        if i6 >= i2 goto label4;
+
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+        $b3 = r7[i6];
+
+        $c4 = (char) $b3;
+
+        virtualinvoke $r8.<java.io.PrintStream: void print(char)>($c4);
+
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label4:
+        $r6 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.jndi.ldap.Filter: int LDAP_SUBSTRING_FINAL> = 130;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_SUBSTRING_ANY> = 129;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_SUBSTRING_INITIAL> = 128;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EXT_DN> = 132;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EXT_VAL> = 131;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EXT_TYPE> = 130;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EXT_RULE> = 129;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EXT> = 169;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_APPROX> = 168;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_PRESENT> = 135;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_LE> = 166;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_GE> = 165;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_SUBSTRINGS> = 164;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_EQUALITY> = 163;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_NOT> = 162;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_OR> = 161;
+
+        <com.sun.jndi.ldap.Filter: int LDAP_FILTER_AND> = 160;
+
+        <com.sun.jndi.ldap.Filter: boolean dbg> = 0;
+
+        <com.sun.jndi.ldap.Filter: int dbgIndent> = 0;
+
+        return;
+    }
+}

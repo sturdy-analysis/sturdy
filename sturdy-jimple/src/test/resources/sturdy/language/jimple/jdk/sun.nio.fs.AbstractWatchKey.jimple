@@ -1,0 +1,465 @@
+abstract class sun.nio.fs.AbstractWatchKey extends java.lang.Object implements java.nio.file.WatchKey
+{
+    static final int MAX_EVENT_LIST_SIZE;
+    static final sun.nio.fs.AbstractWatchKey$Event OVERFLOW_EVENT;
+    private final sun.nio.fs.AbstractWatchService watcher;
+    private final java.nio.file.Path dir;
+    private sun.nio.fs.AbstractWatchKey$State state;
+    private java.util.List events;
+    private java.util.Map lastModifyEvents;
+    static final boolean $assertionsDisabled;
+
+    protected void <init>(java.nio.file.Path, sun.nio.fs.AbstractWatchService)
+    {
+        sun.nio.fs.AbstractWatchService r1;
+        sun.nio.fs.AbstractWatchKey r0;
+        java.util.HashMap $r5;
+        java.nio.file.Path r2;
+        sun.nio.fs.AbstractWatchKey$State $r3;
+        java.util.ArrayList $r4;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        r2 := @parameter0: java.nio.file.Path;
+
+        r1 := @parameter1: sun.nio.fs.AbstractWatchService;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchService watcher> = r1;
+
+        r0.<sun.nio.fs.AbstractWatchKey: java.nio.file.Path dir> = r2;
+
+        $r3 = <sun.nio.fs.AbstractWatchKey$State: sun.nio.fs.AbstractWatchKey$State READY>;
+
+        r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$State state> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.nio.fs.AbstractWatchKey: java.util.List events> = $r4;
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents> = $r5;
+
+        return;
+    }
+
+    final sun.nio.fs.AbstractWatchService watcher()
+    {
+        sun.nio.fs.AbstractWatchService $r1;
+        sun.nio.fs.AbstractWatchKey r0;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        $r1 = r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchService watcher>;
+
+        return $r1;
+    }
+
+    public java.nio.file.Path watchable()
+    {
+        sun.nio.fs.AbstractWatchKey r0;
+        java.nio.file.Path $r1;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        $r1 = r0.<sun.nio.fs.AbstractWatchKey: java.nio.file.Path dir>;
+
+        return $r1;
+    }
+
+    final void signal()
+    {
+        java.lang.Throwable $r5;
+        sun.nio.fs.AbstractWatchService $r4;
+        sun.nio.fs.AbstractWatchKey r0;
+        sun.nio.fs.AbstractWatchKey$State $r1, $r2, $r3;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$State state>;
+
+        $r1 = <sun.nio.fs.AbstractWatchKey$State: sun.nio.fs.AbstractWatchKey$State READY>;
+
+        if $r2 != $r1 goto label2;
+
+        $r3 = <sun.nio.fs.AbstractWatchKey$State: sun.nio.fs.AbstractWatchKey$State SIGNALLED>;
+
+        r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$State state> = $r3;
+
+        $r4 = r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchService watcher>;
+
+        virtualinvoke $r4.<sun.nio.fs.AbstractWatchService: void enqueueKey(java.nio.file.WatchKey)>(r0);
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void signalEvent(java.nio.file.WatchEvent$Kind, java.lang.Object)
+    {
+        java.nio.file.WatchEvent$Kind $r0, $r3, $r9, $r10, $r12, $r19, $r20, r24;
+        java.util.Map $r5, $r6, $r13, $r14, $r15;
+        boolean $z0, $z1, $z2, $z3, z4;
+        sun.nio.fs.AbstractWatchKey r1;
+        sun.nio.fs.AbstractWatchKey$Event $r11, $r18, $r27;
+        java.util.List $r2, $r4, $r7, $r28;
+        java.lang.Throwable $r23;
+        java.lang.AssertionError $r21;
+        int $i0, $i1;
+        java.nio.file.WatchEvent r17, r26;
+        java.lang.Object $r8, $r16, $r22, r25;
+
+        r1 := @this: sun.nio.fs.AbstractWatchKey;
+
+        r24 := @parameter0: java.nio.file.WatchEvent$Kind;
+
+        r25 := @parameter1: java.lang.Object;
+
+        $r0 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind ENTRY_MODIFY>;
+
+        if r24 != $r0 goto label01;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+     label02:
+        z4 = $z3;
+
+        entermonitor r1;
+
+     label03:
+        $r2 = r1.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label12;
+
+        $r7 = r1.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        $i1 = $i0 - 1;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>($i1);
+
+        r26 = (java.nio.file.WatchEvent) $r8;
+
+        $r9 = interfaceinvoke r26.<java.nio.file.WatchEvent: java.nio.file.WatchEvent$Kind kind()>();
+
+        $r10 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind OVERFLOW>;
+
+        if $r9 == $r10 goto label04;
+
+        $r12 = interfaceinvoke r26.<java.nio.file.WatchEvent: java.nio.file.WatchEvent$Kind kind()>();
+
+        if r24 != $r12 goto label06;
+
+        $r22 = interfaceinvoke r26.<java.nio.file.WatchEvent: java.lang.Object context()>();
+
+        $z2 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>(r25, $r22);
+
+        if $z2 == 0 goto label06;
+
+     label04:
+        $r11 = (sun.nio.fs.AbstractWatchKey$Event) r26;
+
+        virtualinvoke $r11.<sun.nio.fs.AbstractWatchKey$Event: void increment()>();
+
+        exitmonitor r1;
+
+     label05:
+        return;
+
+     label06:
+        $r13 = r1.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        $z0 = interfaceinvoke $r13.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 != 0 goto label11;
+
+        if z4 == 0 goto label10;
+
+        $r15 = r1.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        $r16 = interfaceinvoke $r15.<java.util.Map: java.lang.Object get(java.lang.Object)>(r25);
+
+        r17 = (java.nio.file.WatchEvent) $r16;
+
+        if r17 == null goto label09;
+
+        $z1 = <sun.nio.fs.AbstractWatchKey: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label07;
+
+        $r19 = interfaceinvoke r17.<java.nio.file.WatchEvent: java.nio.file.WatchEvent$Kind kind()>();
+
+        $r20 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind ENTRY_MODIFY>;
+
+        if $r19 == $r20 goto label07;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label07:
+        $r18 = (sun.nio.fs.AbstractWatchKey$Event) r17;
+
+        virtualinvoke $r18.<sun.nio.fs.AbstractWatchKey$Event: void increment()>();
+
+        exitmonitor r1;
+
+     label08:
+        return;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r14 = r1.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r25);
+
+     label11:
+        if $i0 < 512 goto label12;
+
+        r24 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind OVERFLOW>;
+
+        z4 = 0;
+
+        r25 = null;
+
+     label12:
+        $r27 = new sun.nio.fs.AbstractWatchKey$Event;
+
+        specialinvoke $r27.<sun.nio.fs.AbstractWatchKey$Event: void <init>(java.nio.file.WatchEvent$Kind,java.lang.Object)>(r24, r25);
+
+        if z4 == 0 goto label13;
+
+        $r6 = r1.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r25, $r27);
+
+        goto label14;
+
+     label13:
+        $r3 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind OVERFLOW>;
+
+        if r24 != $r3 goto label14;
+
+        $r4 = r1.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        interfaceinvoke $r4.<java.util.List: void clear()>();
+
+        $r5 = r1.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        interfaceinvoke $r5.<java.util.Map: void clear()>();
+
+     label14:
+        $r28 = r1.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        interfaceinvoke $r28.<java.util.List: boolean add(java.lang.Object)>($r27);
+
+        virtualinvoke r1.<sun.nio.fs.AbstractWatchKey: void signal()>();
+
+        exitmonitor r1;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r23 := @caughtexception;
+
+        exitmonitor r1;
+
+     label17:
+        throw $r23;
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label03 to label05 with label16;
+        catch java.lang.Throwable from label06 to label08 with label16;
+        catch java.lang.Throwable from label09 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public final java.util.List pollEvents()
+    {
+        java.lang.Throwable $r4;
+        sun.nio.fs.AbstractWatchKey r0;
+        java.util.List r1;
+        java.util.Map $r3;
+        java.util.ArrayList $r2;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        entermonitor r0;
+
+     label1:
+        r1 = r0.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.nio.fs.AbstractWatchKey: java.util.List events> = $r2;
+
+        $r3 = r0.<sun.nio.fs.AbstractWatchKey: java.util.Map lastModifyEvents>;
+
+        interfaceinvoke $r3.<java.util.Map: void clear()>();
+
+        exitmonitor r0;
+
+     label2:
+        return r1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final boolean reset()
+    {
+        java.lang.Throwable $r6;
+        sun.nio.fs.AbstractWatchService $r4;
+        sun.nio.fs.AbstractWatchKey r0;
+        sun.nio.fs.AbstractWatchKey$State $r1, $r2, $r5;
+        java.util.List $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$State state>;
+
+        $r1 = <sun.nio.fs.AbstractWatchKey$State: sun.nio.fs.AbstractWatchKey$State SIGNALLED>;
+
+        if $r2 != $r1 goto label3;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.AbstractWatchKey: boolean isValid()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<sun.nio.fs.AbstractWatchKey: java.util.List events>;
+
+        $z1 = interfaceinvoke $r3.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label2;
+
+        $r5 = <sun.nio.fs.AbstractWatchKey$State: sun.nio.fs.AbstractWatchKey$State READY>;
+
+        r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$State state> = $r5;
+
+        goto label3;
+
+     label2:
+        $r4 = r0.<sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchService watcher>;
+
+        virtualinvoke $r4.<sun.nio.fs.AbstractWatchService: void enqueueKey(java.nio.file.WatchKey)>(r0);
+
+     label3:
+        $z2 = virtualinvoke r0.<sun.nio.fs.AbstractWatchKey: boolean isValid()>();
+
+        exitmonitor r0;
+
+     label4:
+        return $z2;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public volatile java.nio.file.Watchable watchable()
+    {
+        sun.nio.fs.AbstractWatchKey r0;
+        java.nio.file.Path $r1;
+
+        r0 := @this: sun.nio.fs.AbstractWatchKey;
+
+        $r1 = virtualinvoke r0.<sun.nio.fs.AbstractWatchKey: java.nio.file.Path watchable()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        sun.nio.fs.AbstractWatchKey$Event $r1;
+        java.nio.file.WatchEvent$Kind $r2;
+        boolean $z0, $z1;
+
+        <sun.nio.fs.AbstractWatchKey: int MAX_EVENT_LIST_SIZE> = 512;
+
+        $r0 = class "Lsun/nio/fs/AbstractWatchKey;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.fs.AbstractWatchKey: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new sun.nio.fs.AbstractWatchKey$Event;
+
+        $r2 = <java.nio.file.StandardWatchEventKinds: java.nio.file.WatchEvent$Kind OVERFLOW>;
+
+        specialinvoke $r1.<sun.nio.fs.AbstractWatchKey$Event: void <init>(java.nio.file.WatchEvent$Kind,java.lang.Object)>($r2, null);
+
+        <sun.nio.fs.AbstractWatchKey: sun.nio.fs.AbstractWatchKey$Event OVERFLOW_EVENT> = $r1;
+
+        return;
+    }
+}

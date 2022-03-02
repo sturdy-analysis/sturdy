@@ -1,0 +1,1120 @@
+public class sun.security.krb5.internal.crypto.dk.AesDkCrypto extends sun.security.krb5.internal.crypto.dk.DkCrypto
+{
+    private static final boolean debug;
+    private static final int BLOCK_SIZE;
+    private static final int DEFAULT_ITERATION_COUNT;
+    private static final byte[] ZERO_IV;
+    private static final int hashSize;
+    private final int keyLength;
+
+    public void <init>(int)
+    {
+        int i0;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.security.krb5.internal.crypto.dk.DkCrypto: void <init>()>();
+
+        r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int keyLength> = i0;
+
+        return;
+    }
+
+    protected int getKeySeedLength()
+    {
+        int $i0;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        $i0 = r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int keyLength>;
+
+        return $i0;
+    }
+
+    public byte[] stringToKey(char[], java.lang.String, byte[]) throws java.security.GeneralSecurityException
+    {
+        java.lang.Throwable $r6;
+        byte[] $r1, r4, $r5, r8;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r2;
+        java.lang.Exception $r7;
+        char[] r3;
+        java.lang.String r0;
+
+        r2 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r3 := @parameter0: char[];
+
+        r0 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: byte[];
+
+        r8 = null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        r8 = $r1;
+
+        $r5 = specialinvoke r2.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] stringToKey(char[],byte[],byte[])>(r3, $r1, r4);
+
+     label2:
+        if $r1 == null goto label3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+     label3:
+        return $r5;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        if r8 == null goto label6;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>(r8, 0);
+
+     label6:
+        return null;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        if r8 == null goto label9;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>(r8, 0);
+
+     label9:
+        throw $r6;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label5 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private byte[] stringToKey(char[], byte[], byte[]) throws java.security.GeneralSecurityException
+    {
+        byte[] r0, r3, $r4, $r5, $r6, $r7;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r1;
+        java.lang.RuntimeException $r8;
+        int $i0, $i1, i2;
+        char[] r2;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r2 := @parameter0: char[];
+
+        r3 := @parameter1: byte[];
+
+        r0 := @parameter2: byte[];
+
+        i2 = 4096;
+
+        if r0 == null goto label2;
+
+        $i1 = lengthof r0;
+
+        if $i1 == 4 goto label1;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String)>("Invalid parameter to stringToKey");
+
+        throw $r8;
+
+     label1:
+        i2 = staticinvoke <sun.security.krb5.internal.crypto.dk.AesDkCrypto: int readBigEndian(byte[],int,int)>(r0, 0, 4);
+
+     label2:
+        $i0 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int getKeySeedLength()>();
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] PBKDF2(char[],byte[],int,int)>(r2, r3, i2, $i0);
+
+        $r5 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] randomToKey(byte[])>($r4);
+
+        $r6 = <sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] KERBEROS_CONSTANT>;
+
+        $r7 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>($r5, $r6);
+
+        return $r7;
+    }
+
+    protected byte[] randomToKey(byte[])
+    {
+        byte[] r0;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r1;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r0 := @parameter0: byte[];
+
+        return r0;
+    }
+
+    protected javax.crypto.Cipher getCipher(byte[], byte[], int) throws java.security.GeneralSecurityException
+    {
+        byte[] r1, r5;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r4;
+        javax.crypto.spec.SecretKeySpec $r0;
+        javax.crypto.Cipher $r2;
+        javax.crypto.spec.IvParameterSpec $r3;
+        int $i0, i1;
+
+        r4 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        r5 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        if r5 != null goto label1;
+
+        r5 = <sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] ZERO_IV>;
+
+     label1:
+        $r0 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r0.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>(r1, "AES");
+
+        $r2 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("AES/CBC/NoPadding");
+
+        $r3 = new javax.crypto.spec.IvParameterSpec;
+
+        $i0 = lengthof r5;
+
+        specialinvoke $r3.<javax.crypto.spec.IvParameterSpec: void <init>(byte[],int,int)>(r5, 0, $i0);
+
+        virtualinvoke $r2.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>(i1, $r0, $r3);
+
+        return $r2;
+    }
+
+    public int getChecksumLength()
+    {
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        return 12;
+    }
+
+    protected byte[] getHmac(byte[], byte[]) throws java.security.GeneralSecurityException
+    {
+        byte[] r1, r3, $r4, r5;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r6;
+        javax.crypto.spec.SecretKeySpec $r0;
+        javax.crypto.Mac $r2;
+
+        r6 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        r3 := @parameter1: byte[];
+
+        $r0 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r0.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>(r1, "HMAC");
+
+        $r2 = staticinvoke <javax.crypto.Mac: javax.crypto.Mac getInstance(java.lang.String)>("HmacSHA1");
+
+        virtualinvoke $r2.<javax.crypto.Mac: void init(java.security.Key)>($r0);
+
+        $r4 = virtualinvoke $r2.<javax.crypto.Mac: byte[] doFinal(byte[])>(r3);
+
+        r5 = newarray (byte)[12];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r5, 0, 12);
+
+        return r5;
+    }
+
+    public byte[] calculateChecksum(byte[], int, byte[], int, int) throws java.security.GeneralSecurityException
+    {
+        byte[] r0, r2, $r3, r4, $r5, r19;
+        java.security.GeneralSecurityException $r6, $r13;
+        byte $b3, $b6, $b9, $b11;
+        boolean $z0;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r14, $r15, $r16;
+        java.lang.Throwable $r18;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r1;
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, i23, i24;
+        java.lang.String $r12, $r17;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r4 := @parameter2: byte[];
+
+        i23 := @parameter3: int;
+
+        i24 := @parameter4: int;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.KeyUsage: boolean isValid(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r13 = new java.security.GeneralSecurityException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid key usage number: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r17);
+
+        throw $r13;
+
+     label1:
+        r0 = newarray (byte)[5];
+
+        $i1 = i0 >> 24;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[0] = $b3;
+
+        $i4 = i0 >> 16;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        r0[1] = $b6;
+
+        $i7 = i0 >> 8;
+
+        $i8 = $i7 & 255;
+
+        $b9 = (byte) $i8;
+
+        r0[2] = $b9;
+
+        $i10 = i0 & 255;
+
+        $b11 = (byte) $i10;
+
+        r0[3] = $b11;
+
+        r0[4] = -103;
+
+        $r3 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>(r2, r0);
+
+     label2:
+        $r5 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] getHmac(byte[],byte[])>($r3, r4);
+
+        $i12 = lengthof $r5;
+
+        $i13 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int getChecksumLength()>();
+
+        if $i12 != $i13 goto label4;
+
+     label3:
+        $i21 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i21, 0);
+
+        return $r5;
+
+     label4:
+        $i14 = lengthof $r5;
+
+        $i15 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int getChecksumLength()>();
+
+        if $i14 <= $i15 goto label6;
+
+        $i18 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int getChecksumLength()>();
+
+        r19 = newarray (byte)[$i18];
+
+        $i19 = lengthof r19;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r19, 0, $i19);
+
+     label5:
+        $i20 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i20, 0);
+
+        return r19;
+
+     label6:
+        $r6 = new java.security.GeneralSecurityException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("checksum size too short: ");
+
+        $i16 = lengthof $r5;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i16);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; expecting : ");
+
+        $i17 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: int getChecksumLength()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r12);
+
+        throw $r6;
+
+     label7:
+        $r18 := @caughtexception;
+
+     label8:
+        $i22 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i22, 0);
+
+        throw $r18;
+
+        catch java.lang.Throwable from label2 to label3 with label7;
+        catch java.lang.Throwable from label4 to label5 with label7;
+        catch java.lang.Throwable from label6 to label8 with label7;
+    }
+
+    public byte[] encrypt(byte[], int, byte[], byte[], byte[], int, int) throws java.security.GeneralSecurityException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r1, r2, r3, r4, $r5;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+        java.security.GeneralSecurityException $r6;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        r4 := @parameter4: byte[];
+
+        i1 := @parameter5: int;
+
+        i2 := @parameter6: int;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.KeyUsage: boolean isValid(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.security.GeneralSecurityException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid key usage number: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label1:
+        $r5 = specialinvoke r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] encryptCTS(byte[],int,byte[],byte[],byte[],int,int,boolean)>(r1, i0, r2, r3, r4, i1, i2, 1);
+
+        return $r5;
+    }
+
+    public byte[] encryptRaw(byte[], int, byte[], byte[], int, int) throws java.security.GeneralSecurityException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r1, r2, r3, $r4;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+        java.security.GeneralSecurityException $r5;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.KeyUsage: boolean isValid(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.security.GeneralSecurityException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid key usage number: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        $r4 = specialinvoke r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] encryptCTS(byte[],int,byte[],byte[],byte[],int,int,boolean)>(r1, i0, r2, null, r3, i1, i2, 0);
+
+        return $r4;
+    }
+
+    public byte[] decrypt(byte[], int, byte[], byte[], int, int) throws java.security.GeneralSecurityException
+    {
+        byte[] r1, r2, r3, $r4;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+        java.security.GeneralSecurityException $r5;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.KeyUsage: boolean isValid(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.security.GeneralSecurityException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid key usage number: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        $r4 = specialinvoke r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] decryptCTS(byte[],int,byte[],byte[],int,int,boolean)>(r1, i0, r2, r3, i1, i2, 1);
+
+        return $r4;
+    }
+
+    public byte[] decryptRaw(byte[], int, byte[], byte[], int, int) throws java.security.GeneralSecurityException
+    {
+        byte[] r1, r2, r3, $r4;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r0;
+        java.security.GeneralSecurityException $r5;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.KeyUsage: boolean isValid(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.security.GeneralSecurityException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid key usage number: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.GeneralSecurityException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        $r4 = specialinvoke r0.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] decryptCTS(byte[],int,byte[],byte[],int,int,boolean)>(r1, i0, r2, r3, i1, i2, 0);
+
+        return $r4;
+    }
+
+    private byte[] encryptCTS(byte[], int, byte[], byte[], byte[], int, int, boolean) throws java.security.GeneralSecurityException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r0, r2, $r3, r4, r8, $r9, $r10, $r11, $r12, r14, r15, r16, r17;
+        javax.crypto.spec.SecretKeySpec $r6;
+        byte $b3, $b6, $b9, $b11;
+        boolean z0;
+        java.lang.Throwable $r13;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r1;
+        javax.crypto.Cipher $r5;
+        javax.crypto.spec.IvParameterSpec $r7;
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10, i12, i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r8 := @parameter2: byte[];
+
+        r14 := @parameter3: byte[];
+
+        r4 := @parameter4: byte[];
+
+        i13 := @parameter5: int;
+
+        i12 := @parameter6: int;
+
+        z0 := @parameter7: boolean;
+
+        r15 = null;
+
+        r16 = null;
+
+     label01:
+        r0 = newarray (byte)[5];
+
+        $i1 = i0 >> 24;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[0] = $b3;
+
+        $i4 = i0 >> 16;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        r0[1] = $b6;
+
+        $i7 = i0 >> 8;
+
+        $i8 = $i7 & 255;
+
+        $b9 = (byte) $i8;
+
+        r0[2] = $b9;
+
+        $i10 = i0 & 255;
+
+        $b11 = (byte) $i10;
+
+        r0[3] = $b11;
+
+        r0[4] = -86;
+
+        $r3 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>(r2, r0);
+
+        r15 = $r3;
+
+        if z0 == 0 goto label02;
+
+        $r11 = staticinvoke <sun.security.krb5.Confounder: byte[] bytes(int)>(16);
+
+        $i22 = lengthof $r11;
+
+        $i23 = $i22 + i12;
+
+        r17 = newarray (byte)[$i23];
+
+        $i24 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r11, 0, r17, 0, $i24);
+
+        $i25 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, i13, r17, $i25, i12);
+
+        goto label03;
+
+     label02:
+        r17 = newarray (byte)[i12];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, i13, r17, 0, i12);
+
+     label03:
+        $i14 = lengthof r17;
+
+        $i15 = $i14 + 12;
+
+        $r12 = newarray (byte)[$i15];
+
+        $r5 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("AES/CTS/NoPadding");
+
+        $r6 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r6.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r3, "AES");
+
+        $r7 = new javax.crypto.spec.IvParameterSpec;
+
+        $i16 = lengthof r8;
+
+        specialinvoke $r7.<javax.crypto.spec.IvParameterSpec: void <init>(byte[],int,int)>(r8, 0, $i16);
+
+        virtualinvoke $r5.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>(1, $r6, $r7);
+
+        $i17 = lengthof r17;
+
+        virtualinvoke $r5.<javax.crypto.Cipher: int doFinal(byte[],int,int,byte[])>(r17, 0, $i17, $r12);
+
+        r0[4] = 85;
+
+        $r9 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>(r2, r0);
+
+        r16 = $r9;
+
+        $r10 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] getHmac(byte[],byte[])>($r9, r17);
+
+        $i19 = lengthof r17;
+
+        $i18 = lengthof $r10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, $r12, $i19, $i18);
+
+     label04:
+        if $r3 == null goto label05;
+
+        $i21 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i21, 0);
+
+     label05:
+        if $r9 == null goto label06;
+
+        $i20 = lengthof $r9;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r9, 0, $i20, 0);
+
+     label06:
+        return $r12;
+
+     label07:
+        $r13 := @caughtexception;
+
+     label08:
+        if r15 == null goto label09;
+
+        $i27 = lengthof r15;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r15, 0, $i27, 0);
+
+     label09:
+        if r16 == null goto label10;
+
+        $i26 = lengthof r16;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r16, 0, $i26, 0);
+
+     label10:
+        throw $r13;
+
+        catch java.lang.Throwable from label01 to label04 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    private byte[] decryptCTS(byte[], int, byte[], byte[], int, int, boolean) throws java.security.GeneralSecurityException
+    {
+        byte[] r0, r2, $r3, r7, r8, $r9, $r10, $r11, r14, r15, r16;
+        javax.crypto.spec.SecretKeySpec $r17;
+        java.security.GeneralSecurityException $r19;
+        byte $b3, $b6, $b9, $b11, $b27, $b28;
+        boolean z0, z1;
+        java.lang.Throwable $r13;
+        sun.security.krb5.internal.crypto.dk.AesDkCrypto r1;
+        javax.crypto.Cipher $r4;
+        javax.crypto.spec.IvParameterSpec $r18;
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10, $i12, i13, i14, $i15, $i16, i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i29, $i30, i31, $i32, $i33;
+
+        r1 := @this: sun.security.krb5.internal.crypto.dk.AesDkCrypto;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r7 := @parameter2: byte[];
+
+        r8 := @parameter3: byte[];
+
+        i13 := @parameter4: int;
+
+        i14 := @parameter5: int;
+
+        z0 := @parameter6: boolean;
+
+        r14 = null;
+
+        r15 = null;
+
+     label01:
+        r0 = newarray (byte)[5];
+
+        $i1 = i0 >> 24;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[0] = $b3;
+
+        $i4 = i0 >> 16;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        r0[1] = $b6;
+
+        $i7 = i0 >> 8;
+
+        $i8 = $i7 & 255;
+
+        $b9 = (byte) $i8;
+
+        r0[2] = $b9;
+
+        $i10 = i0 & 255;
+
+        $b11 = (byte) $i10;
+
+        r0[3] = $b11;
+
+        r0[4] = -86;
+
+        $r3 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>(r2, r0);
+
+        r14 = $r3;
+
+        $r4 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("AES/CTS/NoPadding");
+
+        $r17 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r17.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r3, "AES");
+
+        $r18 = new javax.crypto.spec.IvParameterSpec;
+
+        $i12 = lengthof r7;
+
+        specialinvoke $r18.<javax.crypto.spec.IvParameterSpec: void <init>(byte[],int,int)>(r7, 0, $i12);
+
+        virtualinvoke $r4.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>(2, $r17, $r18);
+
+        $i15 = i14 - 12;
+
+        $r9 = virtualinvoke $r4.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r8, i13, $i15);
+
+        r0[4] = 85;
+
+        $r10 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] dk(byte[],byte[])>(r2, r0);
+
+        r15 = $r10;
+
+        $r11 = virtualinvoke r1.<sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] getHmac(byte[],byte[])>($r10, $r9);
+
+        $i16 = i13 + i14;
+
+        i17 = $i16 - 12;
+
+        z1 = 0;
+
+        $i18 = lengthof $r11;
+
+        if $i18 < 12 goto label04;
+
+        i31 = 0;
+
+     label02:
+        if i31 >= 12 goto label04;
+
+        $b28 = $r11[i31];
+
+        $i26 = i17 + i31;
+
+        $b27 = r8[$i26];
+
+        $i32 = (int) $b28;
+
+        $i33 = (int) $b27;
+
+        if $i32 == $i33 goto label03;
+
+        z1 = 1;
+
+        goto label04;
+
+     label03:
+        i31 = i31 + 1;
+
+        goto label02;
+
+     label04:
+        if z1 == 0 goto label05;
+
+        $r19 = new java.security.GeneralSecurityException;
+
+        specialinvoke $r19.<java.security.GeneralSecurityException: void <init>(java.lang.String)>("Checksum failed");
+
+        throw $r19;
+
+     label05:
+        if z0 == 0 goto label09;
+
+        $i21 = lengthof $r9;
+
+        $i22 = $i21 - 16;
+
+        r16 = newarray (byte)[$i22];
+
+        $i23 = lengthof r16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 16, r16, 0, $i23);
+
+     label06:
+        if $r3 == null goto label07;
+
+        $i25 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i25, 0);
+
+     label07:
+        if $r10 == null goto label08;
+
+        $i24 = lengthof $r10;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r10, 0, $i24, 0);
+
+     label08:
+        return r16;
+
+     label09:
+        if $r3 == null goto label10;
+
+        $i20 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r3, 0, $i20, 0);
+
+     label10:
+        if $r10 == null goto label11;
+
+        $i19 = lengthof $r10;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r10, 0, $i19, 0);
+
+     label11:
+        return $r9;
+
+     label12:
+        $r13 := @caughtexception;
+
+     label13:
+        if r14 == null goto label14;
+
+        $i30 = lengthof r14;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r14, 0, $i30, 0);
+
+     label14:
+        if r15 == null goto label15;
+
+        $i29 = lengthof r15;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r15, 0, $i29, 0);
+
+     label15:
+        throw $r13;
+
+        catch java.lang.Throwable from label01 to label06 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    private static byte[] PBKDF2(char[], byte[], int, int) throws java.security.GeneralSecurityException
+    {
+        byte[] r2, $r5;
+        javax.crypto.SecretKeyFactory $r3;
+        javax.crypto.spec.PBEKeySpec $r0;
+        int i0, i1;
+        char[] r1;
+        javax.crypto.SecretKey $r4;
+
+        r1 := @parameter0: char[];
+
+        r2 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = new javax.crypto.spec.PBEKeySpec;
+
+        specialinvoke $r0.<javax.crypto.spec.PBEKeySpec: void <init>(char[],byte[],int,int)>(r1, r2, i0, i1);
+
+        $r3 = staticinvoke <javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(java.lang.String)>("PBKDF2WithHmacSHA1");
+
+        $r4 = virtualinvoke $r3.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r0);
+
+        $r5 = interfaceinvoke $r4.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        return $r5;
+    }
+
+    public static final int readBigEndian(byte[], int, int)
+    {
+        byte[] r0;
+        short $s2, $s8;
+        byte $b1;
+        int $i0, $i3, i4, i5, i6, i7, $i9, $i11, $i13;
+
+        r0 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i6 = 0;
+
+        $i0 = i5 - 1;
+
+        i7 = $i0 * 8;
+
+     label1:
+        if i5 <= 0 goto label2;
+
+        $b1 = r0[i4];
+
+        $s8 = (short) $b1;
+
+        $s2 = $s8 & 255;
+
+        $i9 = (int) $s2;
+
+        $i3 = $i9 << i7;
+
+        i6 = i6 + $i3;
+
+        $i11 = (int) -8;
+
+        i7 = i7 + $i11;
+
+        i4 = i4 + 1;
+
+        $i13 = (int) -1;
+
+        i5 = i5 + $i13;
+
+        goto label1;
+
+     label2:
+        return i6;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        <sun.security.krb5.internal.crypto.dk.AesDkCrypto: int hashSize> = 12;
+
+        <sun.security.krb5.internal.crypto.dk.AesDkCrypto: int DEFAULT_ITERATION_COUNT> = 4096;
+
+        <sun.security.krb5.internal.crypto.dk.AesDkCrypto: int BLOCK_SIZE> = 16;
+
+        <sun.security.krb5.internal.crypto.dk.AesDkCrypto: boolean debug> = 0;
+
+        $r0 = newarray (byte)[16];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r0[2] = 0;
+
+        $r0[3] = 0;
+
+        $r0[4] = 0;
+
+        $r0[5] = 0;
+
+        $r0[6] = 0;
+
+        $r0[7] = 0;
+
+        $r0[8] = 0;
+
+        $r0[9] = 0;
+
+        $r0[10] = 0;
+
+        $r0[11] = 0;
+
+        $r0[12] = 0;
+
+        $r0[13] = 0;
+
+        $r0[14] = 0;
+
+        $r0[15] = 0;
+
+        <sun.security.krb5.internal.crypto.dk.AesDkCrypto: byte[] ZERO_IV> = $r0;
+
+        return;
+    }
+}

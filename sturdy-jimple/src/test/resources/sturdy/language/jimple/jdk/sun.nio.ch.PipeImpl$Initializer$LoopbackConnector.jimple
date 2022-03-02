@@ -1,0 +1,301 @@
+class sun.nio.ch.PipeImpl$Initializer$LoopbackConnector extends java.lang.Object implements java.lang.Runnable
+{
+    static final boolean $assertionsDisabled;
+    final sun.nio.ch.PipeImpl$Initializer this$1;
+
+    private void <init>(sun.nio.ch.PipeImpl$Initializer)
+    {
+        sun.nio.ch.PipeImpl$Initializer r1;
+        sun.nio.ch.PipeImpl$Initializer$LoopbackConnector r0;
+
+        r0 := @this: sun.nio.ch.PipeImpl$Initializer$LoopbackConnector;
+
+        r1 := @parameter0: sun.nio.ch.PipeImpl$Initializer;
+
+        r0.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void run()
+    {
+        byte[] $r34;
+        java.util.Random $r33;
+        sun.nio.ch.PipeImpl$Initializer$LoopbackConnector r9;
+        java.nio.ByteBuffer $r0, $r1;
+        java.net.InetAddress $r2;
+        java.net.ServerSocket $r4, $r7;
+        java.nio.channels.spi.SelectorProvider $r14, $r19;
+        java.nio.channels.SocketChannel $r8, r29, r30, $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.net.InetSocketAddress $r5, $r6, r31;
+        sun.nio.ch.PipeImpl$Initializer $r10, $r12, $r15, $r17, $r25;
+        java.lang.Throwable $r22;
+        sun.nio.ch.SinkChannelImpl $r16;
+        java.lang.AssertionError $r20;
+        int $i0;
+        sun.nio.ch.SourceChannelImpl $r11;
+        java.io.IOException $r21, $r23, $r24, $r26, $r27;
+        java.nio.channels.ServerSocketChannel $r3, r28;
+        sun.nio.ch.PipeImpl $r13, $r18;
+
+        r9 := @this: sun.nio.ch.PipeImpl$Initializer$LoopbackConnector;
+
+        r28 = null;
+
+        r29 = null;
+
+        r30 = null;
+
+     label01:
+        $r0 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(16);
+
+        $r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(16);
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>("127.0.0.1");
+
+        $z0 = <sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label02;
+
+        $z4 = virtualinvoke $r2.<java.net.InetAddress: boolean isLoopbackAddress()>();
+
+        if $z4 != 0 goto label02;
+
+        $r20 = new java.lang.AssertionError;
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>()>();
+
+        throw $r20;
+
+     label02:
+        r31 = null;
+
+     label03:
+        if r28 == null goto label04;
+
+        $z3 = virtualinvoke r28.<java.nio.channels.ServerSocketChannel: boolean isOpen()>();
+
+        if $z3 != 0 goto label05;
+
+     label04:
+        $r3 = staticinvoke <java.nio.channels.ServerSocketChannel: java.nio.channels.ServerSocketChannel open()>();
+
+        r28 = $r3;
+
+        $r4 = virtualinvoke $r3.<java.nio.channels.ServerSocketChannel: java.net.ServerSocket socket()>();
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, 0);
+
+        virtualinvoke $r4.<java.net.ServerSocket: void bind(java.net.SocketAddress)>($r5);
+
+        $r6 = new java.net.InetSocketAddress;
+
+        $r7 = virtualinvoke $r3.<java.nio.channels.ServerSocketChannel: java.net.ServerSocket socket()>();
+
+        $i0 = virtualinvoke $r7.<java.net.ServerSocket: int getLocalPort()>();
+
+        specialinvoke $r6.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, $i0);
+
+        r31 = $r6;
+
+     label05:
+        $r32 = staticinvoke <java.nio.channels.SocketChannel: java.nio.channels.SocketChannel open(java.net.SocketAddress)>(r31);
+
+        r29 = $r32;
+
+        $r33 = staticinvoke <sun.nio.ch.PipeImpl: java.util.Random access$100()>();
+
+        $r34 = virtualinvoke $r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        virtualinvoke $r33.<java.util.Random: void nextBytes(byte[])>($r34);
+
+     label06:
+        virtualinvoke $r32.<java.nio.channels.SocketChannel: int write(java.nio.ByteBuffer)>($r0);
+
+        $z5 = virtualinvoke $r0.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z5 != 0 goto label06;
+
+        virtualinvoke $r0.<java.nio.ByteBuffer: java.nio.Buffer rewind()>();
+
+        $r8 = virtualinvoke r28.<java.nio.channels.ServerSocketChannel: java.nio.channels.SocketChannel accept()>();
+
+        r30 = $r8;
+
+     label07:
+        virtualinvoke $r8.<java.nio.channels.SocketChannel: int read(java.nio.ByteBuffer)>($r1);
+
+        $z1 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z1 != 0 goto label07;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer rewind()>();
+
+        $z2 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean equals(java.lang.Object)>($r0);
+
+        if $z2 == 0 goto label08;
+
+        goto label09;
+
+     label08:
+        virtualinvoke $r8.<java.nio.channels.SocketChannel: void close()>();
+
+        virtualinvoke $r32.<java.nio.channels.SocketChannel: void close()>();
+
+        goto label03;
+
+     label09:
+        $r10 = r9.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1>;
+
+        $r13 = $r10.<sun.nio.ch.PipeImpl$Initializer: sun.nio.ch.PipeImpl this$0>;
+
+        $r11 = new sun.nio.ch.SourceChannelImpl;
+
+        $r12 = r9.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1>;
+
+        $r14 = staticinvoke <sun.nio.ch.PipeImpl$Initializer: java.nio.channels.spi.SelectorProvider access$300(sun.nio.ch.PipeImpl$Initializer)>($r12);
+
+        specialinvoke $r11.<sun.nio.ch.SourceChannelImpl: void <init>(java.nio.channels.spi.SelectorProvider,java.nio.channels.SocketChannel)>($r14, $r32);
+
+        staticinvoke <sun.nio.ch.PipeImpl: java.nio.channels.Pipe$SourceChannel access$202(sun.nio.ch.PipeImpl,java.nio.channels.Pipe$SourceChannel)>($r13, $r11);
+
+        $r15 = r9.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1>;
+
+        $r18 = $r15.<sun.nio.ch.PipeImpl$Initializer: sun.nio.ch.PipeImpl this$0>;
+
+        $r16 = new sun.nio.ch.SinkChannelImpl;
+
+        $r17 = r9.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1>;
+
+        $r19 = staticinvoke <sun.nio.ch.PipeImpl$Initializer: java.nio.channels.spi.SelectorProvider access$300(sun.nio.ch.PipeImpl$Initializer)>($r17);
+
+        specialinvoke $r16.<sun.nio.ch.SinkChannelImpl: void <init>(java.nio.channels.spi.SelectorProvider,java.nio.channels.SocketChannel)>($r19, $r8);
+
+        staticinvoke <sun.nio.ch.PipeImpl: java.nio.channels.Pipe$SinkChannel access$402(sun.nio.ch.PipeImpl,java.nio.channels.Pipe$SinkChannel)>($r18, $r16);
+
+     label10:
+        if r28 == null goto label11;
+
+        virtualinvoke r28.<java.nio.channels.ServerSocketChannel: void close()>();
+
+     label11:
+        goto label27;
+
+     label12:
+        $r27 := @caughtexception;
+
+        goto label27;
+
+     label13:
+        $r26 := @caughtexception;
+
+     label14:
+        if r29 == null goto label15;
+
+        virtualinvoke r29.<java.nio.channels.SocketChannel: void close()>();
+
+     label15:
+        if r30 == null goto label16;
+
+        virtualinvoke r30.<java.nio.channels.SocketChannel: void close()>();
+
+     label16:
+        goto label18;
+
+     label17:
+        $r24 := @caughtexception;
+
+     label18:
+        $r25 = r9.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: sun.nio.ch.PipeImpl$Initializer this$1>;
+
+        staticinvoke <sun.nio.ch.PipeImpl$Initializer: java.io.IOException access$502(sun.nio.ch.PipeImpl$Initializer,java.io.IOException)>($r25, $r26);
+
+     label19:
+        if r28 == null goto label20;
+
+        virtualinvoke r28.<java.nio.channels.ServerSocketChannel: void close()>();
+
+     label20:
+        goto label27;
+
+     label21:
+        $r23 := @caughtexception;
+
+        goto label27;
+
+     label22:
+        $r22 := @caughtexception;
+
+     label23:
+        if r28 == null goto label24;
+
+        virtualinvoke r28.<java.nio.channels.ServerSocketChannel: void close()>();
+
+     label24:
+        goto label26;
+
+     label25:
+        $r21 := @caughtexception;
+
+     label26:
+        throw $r22;
+
+     label27:
+        return;
+
+        catch java.io.IOException from label10 to label11 with label12;
+        catch java.io.IOException from label01 to label10 with label13;
+        catch java.io.IOException from label14 to label16 with label17;
+        catch java.io.IOException from label19 to label20 with label21;
+        catch java.lang.Throwable from label01 to label10 with label22;
+        catch java.lang.Throwable from label13 to label19 with label22;
+        catch java.io.IOException from label23 to label24 with label25;
+        catch java.lang.Throwable from label22 to label23 with label22;
+    }
+
+    void <init>(sun.nio.ch.PipeImpl$Initializer, sun.nio.ch.PipeImpl$1)
+    {
+        sun.nio.ch.PipeImpl$Initializer r1;
+        sun.nio.ch.PipeImpl$1 r2;
+        sun.nio.ch.PipeImpl$Initializer$LoopbackConnector r0;
+
+        r0 := @this: sun.nio.ch.PipeImpl$Initializer$LoopbackConnector;
+
+        r1 := @parameter0: sun.nio.ch.PipeImpl$Initializer;
+
+        r2 := @parameter1: sun.nio.ch.PipeImpl$1;
+
+        specialinvoke r0.<sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: void <init>(sun.nio.ch.PipeImpl$Initializer)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/PipeImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.PipeImpl$Initializer$LoopbackConnector: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

@@ -1,0 +1,1878 @@
+public class sun.rmi.log.ReliableLog extends java.lang.Object
+{
+    public static final int PreferredMajorVersion;
+    public static final int PreferredMinorVersion;
+    private boolean Debug;
+    private static java.lang.String snapshotPrefix;
+    private static java.lang.String logfilePrefix;
+    private static java.lang.String versionFile;
+    private static java.lang.String newVersionFile;
+    private static int intBytes;
+    private static long diskPageSize;
+    private java.io.File dir;
+    private int version;
+    private java.lang.String logName;
+    private sun.rmi.log.ReliableLog$LogFile log;
+    private long snapshotBytes;
+    private long logBytes;
+    private int logEntries;
+    private long lastSnapshot;
+    private long lastLog;
+    private sun.rmi.log.LogHandler handler;
+    private final byte[] intBuf;
+    private int majorFormatVersion;
+    private int minorFormatVersion;
+    private static final java.lang.reflect.Constructor logClassConstructor;
+
+    public void <init>(java.lang.String, sun.rmi.log.LogHandler, boolean) throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.rmi.log.LogHandler r9;
+        int $i0;
+        java.lang.Boolean $r4;
+        java.lang.String r6, $r15, $r22;
+        boolean $z0, $z1, $z2, $z3, z4;
+        java.io.IOException $r11, $r18, $r23;
+        java.io.File $r5, $r7, $r8, $r16;
+        java.lang.Exception $r17;
+        sun.rmi.log.ReliableLog r0;
+        sun.security.action.GetBooleanAction $r2;
+        java.lang.Object $r3, $r10;
+        java.lang.StringBuilder $r12, $r13, $r14, $r19, $r20, $r21;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r6 := @parameter0: java.lang.String;
+
+        r9 := @parameter1: sun.rmi.log.LogHandler;
+
+        z4 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.rmi.log.ReliableLog: boolean Debug> = 0;
+
+        r0.<sun.rmi.log.ReliableLog: int version> = 0;
+
+        r0.<sun.rmi.log.ReliableLog: java.lang.String logName> = null;
+
+        r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log> = null;
+
+        r0.<sun.rmi.log.ReliableLog: long snapshotBytes> = 0L;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = 0L;
+
+        r0.<sun.rmi.log.ReliableLog: int logEntries> = 0;
+
+        r0.<sun.rmi.log.ReliableLog: long lastSnapshot> = 0L;
+
+        r0.<sun.rmi.log.ReliableLog: long lastLog> = 0L;
+
+        $r1 = newarray (byte)[4];
+
+        r0.<sun.rmi.log.ReliableLog: byte[] intBuf> = $r1;
+
+        r0.<sun.rmi.log.ReliableLog: int majorFormatVersion> = 0;
+
+        r0.<sun.rmi.log.ReliableLog: int minorFormatVersion> = 0;
+
+        $r2 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r2.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.rmi.log.debug");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        r0.<sun.rmi.log.ReliableLog: boolean Debug> = $z0;
+
+        $r5 = new java.io.File;
+
+        specialinvoke $r5.<java.io.File: void <init>(java.lang.String)>(r6);
+
+        r0.<sun.rmi.log.ReliableLog: java.io.File dir> = $r5;
+
+        $r7 = r0.<sun.rmi.log.ReliableLog: java.io.File dir>;
+
+        $z1 = virtualinvoke $r7.<java.io.File: boolean exists()>();
+
+        if $z1 == 0 goto label1;
+
+        $r16 = r0.<sun.rmi.log.ReliableLog: java.io.File dir>;
+
+        $z3 = virtualinvoke $r16.<java.io.File: boolean isDirectory()>();
+
+        if $z3 != 0 goto label2;
+
+     label1:
+        $r8 = r0.<sun.rmi.log.ReliableLog: java.io.File dir>;
+
+        $z2 = virtualinvoke $r8.<java.io.File: boolean mkdir()>();
+
+        if $z2 != 0 goto label2;
+
+        $r11 = new java.io.IOException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("could not create directory for log: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.io.IOException: void <init>(java.lang.String)>($r15);
+
+        throw $r11;
+
+     label2:
+        r0.<sun.rmi.log.ReliableLog: sun.rmi.log.LogHandler handler> = r9;
+
+        r0.<sun.rmi.log.ReliableLog: long lastSnapshot> = 0L;
+
+        r0.<sun.rmi.log.ReliableLog: long lastLog> = 0L;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void getVersion()>();
+
+        $i0 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        if $i0 != 0 goto label7;
+
+     label3:
+        $r10 = virtualinvoke r9.<sun.rmi.log.LogHandler: java.lang.Object initialSnapshot()>();
+
+        virtualinvoke r0.<sun.rmi.log.ReliableLog: void snapshot(java.lang.Object)>($r10);
+
+     label4:
+        goto label7;
+
+     label5:
+        $r23 := @caughtexception;
+
+        throw $r23;
+
+     label6:
+        $r17 := @caughtexception;
+
+        $r18 = new java.io.IOException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("initial snapshot failed with exception: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>($r22);
+
+        throw $r18;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label3 to label4 with label5;
+        catch java.lang.Exception from label3 to label4 with label6;
+    }
+
+    public void <init>(java.lang.String, sun.rmi.log.LogHandler) throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        java.lang.String r1;
+        sun.rmi.log.LogHandler r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: sun.rmi.log.LogHandler;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void <init>(java.lang.String,sun.rmi.log.LogHandler,boolean)>(r1, r2, 0);
+
+        return;
+    }
+
+    public synchronized java.lang.Object recover() throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r4;
+        sun.rmi.log.LogHandler $r6;
+        boolean $z0, $z1, $z2;
+        java.lang.Exception $r16;
+        sun.rmi.log.ReliableLog r0;
+        java.lang.StringBuilder $r9, $r11, $r12, $r18, $r19, $r20, $r22, $r24, $r25;
+        java.lang.Throwable $r15;
+        long $l1;
+        int $i0;
+        java.lang.String $r1, $r2, $r13, $r21, $r26;
+        java.io.PrintStream $r10, $r14, $r23;
+        java.io.IOException $r17, $r27;
+        java.io.FileInputStream $r5;
+        java.io.File $r3;
+        java.lang.Object $r7, $r8;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $z0 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z0 == 0 goto label01;
+
+        $r14 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r14.<java.io.PrintStream: void println(java.lang.String)>("log.debug: recover()");
+
+     label01:
+        $i0 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        if $i0 != 0 goto label02;
+
+        return null;
+
+     label02:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String snapshotPrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String)>($r1);
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r4 = new java.io.BufferedInputStream;
+
+        $r5 = new java.io.FileInputStream;
+
+        specialinvoke $r5.<java.io.FileInputStream: void <init>(java.io.File)>($r3);
+
+        specialinvoke $r4.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r5);
+
+        $z1 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z1 == 0 goto label03;
+
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: recovering from ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label03:
+        $r6 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.LogHandler handler>;
+
+        $r7 = virtualinvoke $r6.<sun.rmi.log.LogHandler: java.lang.Object recover(java.io.InputStream)>($r4);
+
+     label04:
+        goto label08;
+
+     label05:
+        $r27 := @caughtexception;
+
+        throw $r27;
+
+     label06:
+        $r16 := @caughtexception;
+
+        $z2 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z2 == 0 goto label07;
+
+        $r23 = <java.lang.System: java.io.PrintStream err>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: recovery failed: ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<java.io.PrintStream: void println(java.lang.String)>($r26);
+
+     label07:
+        $r17 = new java.io.IOException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log recover failed with exception: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>($r21);
+
+        throw $r17;
+
+     label08:
+        $l1 = virtualinvoke $r3.<java.io.File: long length()>();
+
+        r0.<sun.rmi.log.ReliableLog: long snapshotBytes> = $l1;
+
+     label09:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        goto label12;
+
+     label10:
+        $r15 := @caughtexception;
+
+     label11:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        throw $r15;
+
+     label12:
+        $r8 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.Object recoverUpdates(java.lang.Object)>($r7);
+
+        return $r8;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.lang.Exception from label03 to label04 with label06;
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public synchronized void update(java.lang.Object) throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        java.lang.Object r1;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r1 := @parameter0: java.lang.Object;
+
+        virtualinvoke r0.<sun.rmi.log.ReliableLog: void update(java.lang.Object,boolean)>(r1, 1);
+
+        return;
+    }
+
+    public synchronized void update(java.lang.Object, boolean) throws java.io.IOException
+    {
+        sun.rmi.log.LogHandler $r7;
+        boolean $z0, z1;
+        sun.rmi.log.LogOutputStream $r5;
+        java.lang.Exception $r21;
+        sun.rmi.log.ReliableLog r0;
+        java.lang.Throwable $r23;
+        long $l0, $l1, $l3, $l4, $l5, $l7;
+        sun.rmi.log.ReliableLog$LogFile $r1, $r2, $r3, $r4, $r6, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19;
+        int $i2, i6, $i8, $i9, $i10, $i11, $i12;
+        java.io.IOException $r20, $r22, $r24, $r25;
+        java.lang.Object r8;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r8 := @parameter0: java.lang.Object;
+
+        z1 := @parameter1: boolean;
+
+        $r1 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        if $r1 != null goto label01;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("log is inaccessible, it may have been corrupted or closed");
+
+        throw $r20;
+
+     label01:
+        $r2 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $l0 = virtualinvoke $r2.<sun.rmi.log.ReliableLog$LogFile: long getFilePointer()>();
+
+        $r3 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $z0 = virtualinvoke $r3.<sun.rmi.log.ReliableLog$LogFile: boolean checkSpansBoundary(long)>($l0);
+
+        $r4 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        if $z0 == 0 goto label02;
+
+        $i12 = -2147483648;
+
+        goto label03;
+
+     label02:
+        $i12 = 0;
+
+     label03:
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r4, $i12);
+
+     label04:
+        $r7 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.LogHandler handler>;
+
+        $r5 = new sun.rmi.log.LogOutputStream;
+
+        $r6 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        specialinvoke $r5.<sun.rmi.log.LogOutputStream: void <init>(java.io.RandomAccessFile)>($r6);
+
+        virtualinvoke $r7.<sun.rmi.log.LogHandler: void writeUpdate(sun.rmi.log.LogOutputStream,java.lang.Object)>($r5, r8);
+
+     label05:
+        goto label08;
+
+     label06:
+        $r25 := @caughtexception;
+
+        throw $r25;
+
+     label07:
+        $r21 := @caughtexception;
+
+        $r22 = new java.io.IOException;
+
+        specialinvoke $r22.<java.io.IOException: void <init>(java.lang.String)>("write update failed");
+
+        $r23 = virtualinvoke $r22.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r21);
+
+        $r24 = (java.io.IOException) $r23;
+
+        throw $r24;
+
+     label08:
+        $r9 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r9.<sun.rmi.log.ReliableLog$LogFile: void sync()>();
+
+        $r10 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $l1 = virtualinvoke $r10.<sun.rmi.log.ReliableLog$LogFile: long getFilePointer()>();
+
+        $l4 = $l1 - $l0;
+
+        $i2 = <sun.rmi.log.ReliableLog: int intBytes>;
+
+        $l3 = (long) $i2;
+
+        $l5 = $l4 - $l3;
+
+        i6 = (int) $l5;
+
+        $r11 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r11.<sun.rmi.log.ReliableLog$LogFile: void seek(long)>($l0);
+
+        if $z0 == 0 goto label09;
+
+        $r15 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $i10 = i6 | -2147483648;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r15, $i10);
+
+        $r16 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r16.<sun.rmi.log.ReliableLog$LogFile: void sync()>();
+
+        $r17 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r17.<sun.rmi.log.ReliableLog$LogFile: void seek(long)>($l0);
+
+        $r18 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $i11 = i6 >> 24;
+
+        virtualinvoke $r18.<sun.rmi.log.ReliableLog$LogFile: void writeByte(int)>($i11);
+
+        $r19 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r19.<sun.rmi.log.ReliableLog$LogFile: void sync()>();
+
+        goto label10;
+
+     label09:
+        $r12 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r12, i6);
+
+        $r13 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r13.<sun.rmi.log.ReliableLog$LogFile: void sync()>();
+
+     label10:
+        $r14 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r14.<sun.rmi.log.ReliableLog$LogFile: void seek(long)>($l1);
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = $l1;
+
+        $l7 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.rmi.log.ReliableLog: long lastLog> = $l7;
+
+        $i8 = r0.<sun.rmi.log.ReliableLog: int logEntries>;
+
+        $i9 = $i8 + 1;
+
+        r0.<sun.rmi.log.ReliableLog: int logEntries> = $i9;
+
+        return;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.lang.Exception from label04 to label05 with label07;
+    }
+
+    private static java.lang.reflect.Constructor getLogClassConstructor()
+    {
+        java.io.PrintStream $r10;
+        java.lang.Class[] $r7;
+        sun.rmi.log.ReliableLog$1 $r3;
+        java.lang.reflect.Constructor $r8;
+        sun.security.action.GetPropertyAction $r0;
+        java.lang.Exception $r9;
+        java.lang.Object $r1, $r4;
+        java.lang.Class $r5, $r6;
+        java.lang.String r2;
+        java.lang.ClassLoader r11;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.log.class");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label4;
+
+     label1:
+        $r3 = new sun.rmi.log.ReliableLog$1;
+
+        specialinvoke $r3.<sun.rmi.log.ReliableLog$1: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r11 = (java.lang.ClassLoader) $r4;
+
+        $r5 = virtualinvoke r11.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(class "Lsun/rmi/log/ReliableLog$LogFile;");
+
+        $r7 = newarray (java.lang.Class)[2];
+
+        $r7[0] = class "Ljava/lang/String;";
+
+        $r7[1] = class "Ljava/lang/String;";
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r7);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("Exception occurred:");
+
+        virtualinvoke $r9.<java.lang.Exception: void printStackTrace()>();
+
+     label4:
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public synchronized void snapshot(java.lang.Object) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        sun.rmi.log.LogHandler $r6;
+        java.io.FileOutputStream $r4;
+        long $l1, $l2, $l3;
+        java.io.IOException $r9, $r10;
+        java.io.File $r3;
+        java.lang.Exception $r8;
+        sun.rmi.log.ReliableLog r0;
+        int i0;
+        java.lang.Object r5;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r5 := @parameter0: java.lang.Object;
+
+        i0 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void incrVersion()>();
+
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String snapshotPrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String)>($r1);
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r4 = new java.io.FileOutputStream;
+
+        specialinvoke $r4.<java.io.FileOutputStream: void <init>(java.io.File)>($r3);
+
+     label1:
+        $r6 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.LogHandler handler>;
+
+        virtualinvoke $r6.<sun.rmi.log.LogHandler: void snapshot(java.io.OutputStream,java.lang.Object)>($r4, r5);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r10 := @caughtexception;
+
+        throw $r10;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("snapshot failed", $r8);
+
+        throw $r9;
+
+     label5:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.rmi.log.ReliableLog: long lastSnapshot> = $l1;
+
+     label6:
+        virtualinvoke $r4.<java.io.FileOutputStream: void close()>();
+
+        $l2 = virtualinvoke $r3.<java.io.File: long length()>();
+
+        r0.<sun.rmi.log.ReliableLog: long snapshotBytes> = $l2;
+
+        goto label9;
+
+     label7:
+        $r7 := @caughtexception;
+
+     label8:
+        virtualinvoke $r4.<java.io.FileOutputStream: void close()>();
+
+        $l3 = virtualinvoke $r3.<java.io.File: long length()>();
+
+        r0.<sun.rmi.log.ReliableLog: long snapshotBytes> = $l3;
+
+        throw $r7;
+
+     label9:
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void openLogFile(boolean)>(1);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeVersionFile(boolean)>(1);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void commitToNewVersion()>();
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteSnapshot(int)>(i0);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteLogFile(int)>(i0);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        java.lang.Throwable $r3;
+        sun.rmi.log.ReliableLog$LogFile $r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $r1 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r2.<sun.rmi.log.ReliableLog$LogFile: void close()>();
+
+     label2:
+        r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log> = null;
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log> = null;
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public long snapshotSize()
+    {
+        sun.rmi.log.ReliableLog r0;
+        long $l0;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $l0 = r0.<sun.rmi.log.ReliableLog: long snapshotBytes>;
+
+        return $l0;
+    }
+
+    public long logSize()
+    {
+        sun.rmi.log.ReliableLog r0;
+        long $l0;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $l0 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        return $l0;
+    }
+
+    private void writeInt(java.io.DataOutput, int) throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r3, $r4, $r6;
+        java.io.DataOutput r5;
+        sun.rmi.log.ReliableLog r0;
+        byte $b2, $b4, $b6, $b7;
+        int i0, $i1, $i3, $i5;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r5 := @parameter0: java.io.DataOutput;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<sun.rmi.log.ReliableLog: byte[] intBuf>;
+
+        $i1 = i0 >> 24;
+
+        $b2 = (byte) $i1;
+
+        $r1[0] = $b2;
+
+        $r2 = r0.<sun.rmi.log.ReliableLog: byte[] intBuf>;
+
+        $i3 = i0 >> 16;
+
+        $b4 = (byte) $i3;
+
+        $r2[1] = $b4;
+
+        $r3 = r0.<sun.rmi.log.ReliableLog: byte[] intBuf>;
+
+        $i5 = i0 >> 8;
+
+        $b6 = (byte) $i5;
+
+        $r3[2] = $b6;
+
+        $r4 = r0.<sun.rmi.log.ReliableLog: byte[] intBuf>;
+
+        $b7 = (byte) i0;
+
+        $r4[3] = $b7;
+
+        $r6 = r0.<sun.rmi.log.ReliableLog: byte[] intBuf>;
+
+        interfaceinvoke r5.<java.io.DataOutput: void write(byte[])>($r6);
+
+        return;
+    }
+
+    private java.lang.String fName(java.lang.String)
+    {
+        java.io.File $r2;
+        sun.rmi.log.ReliableLog r1;
+        java.lang.StringBuilder $r0, $r4, $r6, $r8;
+        java.lang.String $r3, $r5, r7, $r9;
+
+        r1 := @this: sun.rmi.log.ReliableLog;
+
+        r7 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<sun.rmi.log.ReliableLog: java.io.File dir>;
+
+        $r3 = virtualinvoke $r2.<java.io.File: java.lang.String getPath()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = <java.io.File: java.lang.String separator>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    private java.lang.String versionName(java.lang.String)
+    {
+        sun.rmi.log.ReliableLog r0;
+        java.lang.String r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String,int)>(r1, 0);
+
+        return $r2;
+    }
+
+    private java.lang.String versionName(java.lang.String, int)
+    {
+        sun.rmi.log.ReliableLog r1;
+        int i0, $i1;
+        java.lang.StringBuilder $r0, $r4, $r6;
+        java.lang.String r2, $r3, $r5, $r7;
+
+        r1 := @this: sun.rmi.log.ReliableLog;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        if i0 != 0 goto label1;
+
+        $i1 = r1.<sun.rmi.log.ReliableLog: int version>;
+
+        goto label2;
+
+     label1:
+        $i1 = i0;
+
+     label2:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = specialinvoke r1.<sun.rmi.log.ReliableLog: java.lang.String fName(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i1);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    private void incrVersion()
+    {
+        sun.rmi.log.ReliableLog r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+     label1:
+        $i0 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.log.ReliableLog: int version> = $i1;
+
+        $i2 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        if $i2 == 0 goto label1;
+
+        return;
+    }
+
+    private void deleteFile(java.lang.String) throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        java.io.File $r0;
+        sun.rmi.log.ReliableLog r7;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String r1, $r6;
+        boolean $z0;
+
+        r7 := @this: sun.rmi.log.ReliableLog;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.io.File;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>(r1);
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("couldn\'t remove file: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private void deleteNewVersionFile() throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String newVersionFile>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String fName(java.lang.String)>($r1);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteFile(java.lang.String)>($r2);
+
+        return;
+    }
+
+    private void deleteSnapshot(int) throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        int i0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        i0 := @parameter0: int;
+
+        if i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String snapshotPrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String,int)>($r1, i0);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteFile(java.lang.String)>($r2);
+
+        return;
+    }
+
+    private void deleteLogFile(int) throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        int i0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        i0 := @parameter0: int;
+
+        if i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String logfilePrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String,int)>($r1, i0);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteFile(java.lang.String)>($r2);
+
+        return;
+    }
+
+    private void openLogFile(boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        java.lang.Object[] $r4;
+        java.lang.reflect.Constructor $r3, $r6;
+        sun.rmi.log.ReliableLog$LogFile $r14;
+        java.lang.String $r1, $r2, $r5, $r8;
+        boolean z0;
+        java.io.IOException $r10, $r12, $r13;
+        java.lang.Exception $r9;
+        sun.rmi.log.ReliableLog r0;
+        java.lang.Object $r7;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        z0 := @parameter0: boolean;
+
+     label01:
+        virtualinvoke r0.<sun.rmi.log.ReliableLog: void close()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r13 := @caughtexception;
+
+     label04:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String logfilePrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String)>($r1);
+
+        r0.<sun.rmi.log.ReliableLog: java.lang.String logName> = $r2;
+
+     label05:
+        $r3 = <sun.rmi.log.ReliableLog: java.lang.reflect.Constructor logClassConstructor>;
+
+        if $r3 != null goto label06;
+
+        $r14 = new sun.rmi.log.ReliableLog$LogFile;
+
+        $r8 = r0.<sun.rmi.log.ReliableLog: java.lang.String logName>;
+
+        specialinvoke $r14.<sun.rmi.log.ReliableLog$LogFile: void <init>(java.lang.String,java.lang.String)>($r8, "rw");
+
+        goto label07;
+
+     label06:
+        $r6 = <sun.rmi.log.ReliableLog: java.lang.reflect.Constructor logClassConstructor>;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $r5 = r0.<sun.rmi.log.ReliableLog: java.lang.String logName>;
+
+        $r4[0] = $r5;
+
+        $r4[1] = "rw";
+
+        $r7 = virtualinvoke $r6.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r4);
+
+        $r14 = (sun.rmi.log.ReliableLog$LogFile) $r7;
+
+     label07:
+        r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log> = $r14;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r9 := @caughtexception;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("unable to construct LogFile instance");
+
+        $r11 = virtualinvoke $r10.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        $r12 = (java.io.IOException) $r11;
+
+        throw $r12;
+
+     label10:
+        if z0 == 0 goto label11;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void initializeLogFile()>();
+
+     label11:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Exception from label05 to label08 with label09;
+    }
+
+    private void initializeLogFile() throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+        int $i0, $i1;
+        long $l2;
+        sun.rmi.log.ReliableLog$LogFile $r1, $r2, $r3;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        $r1 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        virtualinvoke $r1.<sun.rmi.log.ReliableLog$LogFile: void setLength(long)>(0L);
+
+        r0.<sun.rmi.log.ReliableLog: int majorFormatVersion> = 0;
+
+        $r2 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r2, 0);
+
+        r0.<sun.rmi.log.ReliableLog: int minorFormatVersion> = 2;
+
+        $r3 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r3, 2);
+
+        $i0 = <sun.rmi.log.ReliableLog: int intBytes>;
+
+        $i1 = $i0 * 2;
+
+        $l2 = (long) $i1;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = $l2;
+
+        r0.<sun.rmi.log.ReliableLog: int logEntries> = 0;
+
+        return;
+    }
+
+    private void writeVersionFile(boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5, $r6, $r8, $r9, $r10, r13, r14;
+        java.io.FileOutputStream $r0;
+        sun.rmi.log.ReliableLog r1;
+        java.io.DataOutputStream $r3;
+        int $i0;
+        java.lang.String $r2, r12;
+        boolean z0;
+
+        r1 := @this: sun.rmi.log.ReliableLog;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label01;
+
+        r12 = <sun.rmi.log.ReliableLog: java.lang.String newVersionFile>;
+
+        goto label02;
+
+     label01:
+        r12 = <sun.rmi.log.ReliableLog: java.lang.String versionFile>;
+
+     label02:
+        $r0 = new java.io.FileOutputStream;
+
+        $r2 = specialinvoke r1.<sun.rmi.log.ReliableLog: java.lang.String fName(java.lang.String)>(r12);
+
+        specialinvoke $r0.<java.io.FileOutputStream: void <init>(java.lang.String)>($r2);
+
+        r13 = null;
+
+     label03:
+        $r3 = new java.io.DataOutputStream;
+
+        specialinvoke $r3.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r0);
+
+        r14 = null;
+
+     label04:
+        $i0 = r1.<sun.rmi.log.ReliableLog: int version>;
+
+        specialinvoke r1.<sun.rmi.log.ReliableLog: void writeInt(java.io.DataOutput,int)>($r3, $i0);
+
+     label05:
+        if $r3 == null goto label15;
+
+        goto label06;
+
+     label06:
+        virtualinvoke $r3.<java.io.DataOutputStream: void close()>();
+
+        goto label15;
+
+     label07:
+        $r10 := @caughtexception;
+
+        r14 = $r10;
+
+        throw $r10;
+
+     label08:
+        $r9 := @caughtexception;
+
+     label09:
+        if $r3 == null goto label14;
+
+        if r14 == null goto label13;
+
+     label10:
+        virtualinvoke $r3.<java.io.DataOutputStream: void close()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r8 := @caughtexception;
+
+        virtualinvoke r14.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r8);
+
+        goto label14;
+
+     label13:
+        virtualinvoke $r3.<java.io.DataOutputStream: void close()>();
+
+     label14:
+        throw $r9;
+
+     label15:
+        if $r0 == null goto label25;
+
+        goto label16;
+
+     label16:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+        goto label25;
+
+     label17:
+        $r6 := @caughtexception;
+
+        r13 = $r6;
+
+        throw $r6;
+
+     label18:
+        $r5 := @caughtexception;
+
+     label19:
+        if $r0 == null goto label24;
+
+        if r13 == null goto label23;
+
+     label20:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+     label21:
+        goto label24;
+
+     label22:
+        $r4 := @caughtexception;
+
+        virtualinvoke r13.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r4);
+
+        goto label24;
+
+     label23:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+     label24:
+        throw $r5;
+
+     label25:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label07;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Throwable from label03 to label15 with label17;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label17 to label19 with label18;
+    }
+
+    private void createFirstVersion() throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r0.<sun.rmi.log.ReliableLog: int version> = 0;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeVersionFile(boolean)>(0);
+
+        return;
+    }
+
+    private void commitToNewVersion() throws java.io.IOException
+    {
+        sun.rmi.log.ReliableLog r0;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void writeVersionFile(boolean)>(0);
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteNewVersionFile()>();
+
+        return;
+    }
+
+    private int readVersion(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r3, $r4, $r5, r8;
+        java.io.DataInputStream $r0;
+        java.io.FileInputStream $r1;
+        sun.rmi.log.ReliableLog r7;
+        int $i0;
+        java.lang.String r2;
+
+        r7 := @this: sun.rmi.log.ReliableLog;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.io.DataInputStream;
+
+        $r1 = new java.io.FileInputStream;
+
+        specialinvoke $r1.<java.io.FileInputStream: void <init>(java.lang.String)>(r2);
+
+        specialinvoke $r0.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r1);
+
+        r8 = null;
+
+     label01:
+        $i0 = virtualinvoke $r0.<java.io.DataInputStream: int readInt()>();
+
+     label02:
+        if $r0 == null goto label04;
+
+        goto label03;
+
+     label03:
+        virtualinvoke $r0.<java.io.DataInputStream: void close()>();
+
+     label04:
+        return $i0;
+
+     label05:
+        $r5 := @caughtexception;
+
+        r8 = $r5;
+
+        throw $r5;
+
+     label06:
+        $r4 := @caughtexception;
+
+     label07:
+        if $r0 == null goto label12;
+
+        if r8 == null goto label11;
+
+     label08:
+        virtualinvoke $r0.<java.io.DataInputStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r3 := @caughtexception;
+
+        virtualinvoke r8.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r3);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r0.<java.io.DataInputStream: void close()>();
+
+     label12:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+    }
+
+    private void getVersion() throws java.io.IOException
+    {
+        java.io.IOException $r3, $r4, $r7;
+        sun.rmi.log.ReliableLog r0;
+        int $i0, $i1;
+        java.lang.String $r1, $r2, $r5, $r6;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+     label01:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String newVersionFile>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String fName(java.lang.String)>($r1);
+
+        $i0 = specialinvoke r0.<sun.rmi.log.ReliableLog: int readVersion(java.lang.String)>($r2);
+
+        r0.<sun.rmi.log.ReliableLog: int version> = $i0;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void commitToNewVersion()>();
+
+     label02:
+        goto label10;
+
+     label03:
+        $r7 := @caughtexception;
+
+     label04:
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void deleteNewVersionFile()>();
+
+     label05:
+        goto label07;
+
+     label06:
+        $r4 := @caughtexception;
+
+     label07:
+        $r5 = <sun.rmi.log.ReliableLog: java.lang.String versionFile>;
+
+        $r6 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String fName(java.lang.String)>($r5);
+
+        $i1 = specialinvoke r0.<sun.rmi.log.ReliableLog: int readVersion(java.lang.String)>($r6);
+
+        r0.<sun.rmi.log.ReliableLog: int version> = $i1;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void createFirstVersion()>();
+
+     label10:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.io.IOException from label07 to label08 with label09;
+    }
+
+    private java.lang.Object recoverUpdates(java.lang.Object) throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r3, r67;
+        java.lang.Exception $r56;
+        java.lang.StringBuilder $r10, $r12, $r13, $r17, $r19, $r20, $r23, $r25, $r27, $r30, $r31, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r43, $r45, $r46, $r47, $r48, $r50, $r52, $r53, $r58, $r59, $r60;
+        java.lang.Throwable $r55;
+        long $l3, $l4, $l5, $l8, $l9, $l10, $l12, $l13, $l19, $l20, $l21;
+        java.lang.String $r1, $r2, $r14, $r21, $r26, $r28, $r32, $r42, $r49, $r54, $r61;
+        java.io.IOException $r9, $r29, $r57, $r62;
+        sun.rmi.log.LogHandler $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.io.EOFException $r63, $r65;
+        sun.rmi.log.ReliableLog r0;
+        sun.rmi.log.LogInputStream $r15;
+        java.io.DataInputStream $r5;
+        sun.rmi.log.ReliableLog$LogFile $r6, $r7, $r8;
+        int $i0, $i1, $i2, $i6, $i7, $i11, $i14, $i15, $i16, $i17, $i18, $i22, $i23, $i24, $i25, $i26, $i27;
+        java.io.PrintStream $r11, $r18, $r22, $r24, $r44, $r51, $r64;
+        java.io.FileInputStream $r4;
+        java.lang.Object r66;
+
+        r0 := @this: sun.rmi.log.ReliableLog;
+
+        r66 := @parameter0: java.lang.Object;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = 0L;
+
+        r0.<sun.rmi.log.ReliableLog: int logEntries> = 0;
+
+        $i0 = r0.<sun.rmi.log.ReliableLog: int version>;
+
+        if $i0 != 0 goto label01;
+
+        return r66;
+
+     label01:
+        $r1 = <sun.rmi.log.ReliableLog: java.lang.String logfilePrefix>;
+
+        $r2 = specialinvoke r0.<sun.rmi.log.ReliableLog: java.lang.String versionName(java.lang.String)>($r1);
+
+        $r3 = new java.io.BufferedInputStream;
+
+        $r4 = new java.io.FileInputStream;
+
+        specialinvoke $r4.<java.io.FileInputStream: void <init>(java.lang.String)>($r2);
+
+        specialinvoke $r3.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r4);
+
+        r67 = $r3;
+
+        $r5 = new java.io.DataInputStream;
+
+        specialinvoke $r5.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r3);
+
+        $z0 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z0 == 0 goto label02;
+
+        $r51 = <java.lang.System: java.io.PrintStream err>;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: reading updates from ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r51.<java.io.PrintStream: void println(java.lang.String)>($r54);
+
+     label02:
+        $i1 = virtualinvoke $r5.<java.io.DataInputStream: int readInt()>();
+
+        r0.<sun.rmi.log.ReliableLog: int majorFormatVersion> = $i1;
+
+        $l4 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        $i2 = <sun.rmi.log.ReliableLog: int intBytes>;
+
+        $l3 = (long) $i2;
+
+        $l5 = $l4 + $l3;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = $l5;
+
+        $i6 = virtualinvoke $r5.<java.io.DataInputStream: int readInt()>();
+
+        r0.<sun.rmi.log.ReliableLog: int minorFormatVersion> = $i6;
+
+        $l9 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        $i7 = <sun.rmi.log.ReliableLog: int intBytes>;
+
+        $l8 = (long) $i7;
+
+        $l10 = $l9 + $l8;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = $l10;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r65 := @caughtexception;
+
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void openLogFile(boolean)>(1);
+
+        r67 = null;
+
+     label05:
+        $i11 = r0.<sun.rmi.log.ReliableLog: int majorFormatVersion>;
+
+        if $i11 == 0 goto label07;
+
+        $z5 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z5 == 0 goto label06;
+
+        $r44 = <java.lang.System: java.io.PrintStream err>;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: major version mismatch: ");
+
+        $i26 = r0.<sun.rmi.log.ReliableLog: int majorFormatVersion>;
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i26);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $i27 = r0.<sun.rmi.log.ReliableLog: int minorFormatVersion>;
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i27);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r44.<java.io.PrintStream: void println(java.lang.String)>($r49);
+
+     label06:
+        $r29 = new java.io.IOException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Log file ");
+
+        $r32 = r0.<sun.rmi.log.ReliableLog: java.lang.String logName>;
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has a version ");
+
+        $i24 = r0.<sun.rmi.log.ReliableLog: int majorFormatVersion>;
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i24);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $i25 = r0.<sun.rmi.log.ReliableLog: int minorFormatVersion>;
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i25);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" format, and this implementation  understands only version ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(0);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(2);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.io.IOException: void <init>(java.lang.String)>($r42);
+
+        throw $r29;
+
+     label07:
+        if r67 == null goto label20;
+
+     label08:
+        $i15 = virtualinvoke $r5.<java.io.DataInputStream: int readInt()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r63 := @caughtexception;
+
+        $z6 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z6 == 0 goto label11;
+
+        $r64 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r64.<java.io.PrintStream: void println(java.lang.String)>("log.debug: log was sync\'d cleanly");
+
+     label11:
+        goto label20;
+
+     label12:
+        if $i15 > 0 goto label13;
+
+        $z4 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z4 == 0 goto label20;
+
+        $r24 = <java.lang.System: java.io.PrintStream err>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: last update incomplete, updateLen = 0x");
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i15);
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<java.io.PrintStream: void println(java.lang.String)>($r28);
+
+        goto label20;
+
+     label13:
+        $i16 = virtualinvoke r67.<java.io.InputStream: int available()>();
+
+        if $i16 >= $i15 goto label14;
+
+        $z3 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z3 == 0 goto label20;
+
+        $r22 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r22.<java.io.PrintStream: void println(java.lang.String)>("log.debug: log was truncated");
+
+        goto label20;
+
+     label14:
+        $z2 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z2 == 0 goto label15;
+
+        $r18 = <java.lang.System: java.io.PrintStream err>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: rdUpdate size ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>($r21);
+
+     label15:
+        $r16 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.LogHandler handler>;
+
+        $r15 = new sun.rmi.log.LogInputStream;
+
+        specialinvoke $r15.<sun.rmi.log.LogInputStream: void <init>(java.io.InputStream,int)>(r67, $i15);
+
+        r66 = virtualinvoke $r16.<sun.rmi.log.LogHandler: java.lang.Object readUpdate(sun.rmi.log.LogInputStream,java.lang.Object)>($r15, r66);
+
+     label16:
+        goto label19;
+
+     label17:
+        $r62 := @caughtexception;
+
+        throw $r62;
+
+     label18:
+        $r56 := @caughtexception;
+
+        virtualinvoke $r56.<java.lang.Exception: void printStackTrace()>();
+
+        $r57 = new java.io.IOException;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("read update failed with exception: ");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r56);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r57.<java.io.IOException: void <init>(java.lang.String)>($r61);
+
+        throw $r57;
+
+     label19:
+        $l20 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        $i17 = <sun.rmi.log.ReliableLog: int intBytes>;
+
+        $i18 = $i17 + $i15;
+
+        $l19 = (long) $i18;
+
+        $l21 = $l20 + $l19;
+
+        r0.<sun.rmi.log.ReliableLog: long logBytes> = $l21;
+
+        $i22 = r0.<sun.rmi.log.ReliableLog: int logEntries>;
+
+        $i23 = $i22 + 1;
+
+        r0.<sun.rmi.log.ReliableLog: int logEntries> = $i23;
+
+        goto label07;
+
+     label20:
+        if r67 == null goto label24;
+
+        virtualinvoke r67.<java.io.InputStream: void close()>();
+
+        goto label24;
+
+     label21:
+        $r55 := @caughtexception;
+
+     label22:
+        if r67 == null goto label23;
+
+        virtualinvoke r67.<java.io.InputStream: void close()>();
+
+     label23:
+        throw $r55;
+
+     label24:
+        $z1 = r0.<sun.rmi.log.ReliableLog: boolean Debug>;
+
+        if $z1 == 0 goto label25;
+
+        $r11 = <java.lang.System: java.io.PrintStream err>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("log.debug: recovered updates: ");
+
+        $i14 = r0.<sun.rmi.log.ReliableLog: int logEntries>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+     label25:
+        specialinvoke r0.<sun.rmi.log.ReliableLog: void openLogFile(boolean)>(0);
+
+        $r6 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        if $r6 != null goto label26;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("rmid\'s log is inaccessible, it may have been corrupted or closed");
+
+        throw $r9;
+
+     label26:
+        $r7 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $l12 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        virtualinvoke $r7.<sun.rmi.log.ReliableLog$LogFile: void seek(long)>($l12);
+
+        $r8 = r0.<sun.rmi.log.ReliableLog: sun.rmi.log.ReliableLog$LogFile log>;
+
+        $l13 = r0.<sun.rmi.log.ReliableLog: long logBytes>;
+
+        virtualinvoke $r8.<sun.rmi.log.ReliableLog$LogFile: void setLength(long)>($l13);
+
+        return r66;
+
+        catch java.io.EOFException from label02 to label03 with label04;
+        catch java.io.EOFException from label08 to label09 with label10;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.lang.Exception from label15 to label16 with label18;
+        catch java.lang.Throwable from label07 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.reflect.Constructor $r0;
+
+        <sun.rmi.log.ReliableLog: int PreferredMinorVersion> = 2;
+
+        <sun.rmi.log.ReliableLog: int PreferredMajorVersion> = 0;
+
+        <sun.rmi.log.ReliableLog: java.lang.String snapshotPrefix> = "Snapshot.";
+
+        <sun.rmi.log.ReliableLog: java.lang.String logfilePrefix> = "Logfile.";
+
+        <sun.rmi.log.ReliableLog: java.lang.String versionFile> = "Version_Number";
+
+        <sun.rmi.log.ReliableLog: java.lang.String newVersionFile> = "New_Version_Number";
+
+        <sun.rmi.log.ReliableLog: int intBytes> = 4;
+
+        <sun.rmi.log.ReliableLog: long diskPageSize> = 512L;
+
+        $r0 = staticinvoke <sun.rmi.log.ReliableLog: java.lang.reflect.Constructor getLogClassConstructor()>();
+
+        <sun.rmi.log.ReliableLog: java.lang.reflect.Constructor logClassConstructor> = $r0;
+
+        return;
+    }
+}

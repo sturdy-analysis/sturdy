@@ -1,0 +1,264 @@
+abstract class sun.awt.windows.TranslucentWindowPainter extends java.lang.Object
+{
+    protected java.awt.Window window;
+    protected sun.awt.windows.WWindowPeer peer;
+    private static final boolean forceOpt;
+    private static final boolean forceSW;
+
+    public static sun.awt.windows.TranslucentWindowPainter createInstance(sun.awt.windows.WWindowPeer)
+    {
+        sun.awt.windows.TranslucentWindowPainter$VIOptD3DWindowPainter $r7;
+        sun.awt.windows.TranslucentWindowPainter$BIWindowPainter $r8;
+        int $i0, $i1;
+        java.lang.String $r3;
+        sun.awt.windows.WWindowPeer r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.GraphicsConfiguration $r1;
+        sun.awt.windows.TranslucentWindowPainter$VIOptWGLWindowPainter $r6;
+        sun.java2d.pipe.hw.ContextCapabilities $r5;
+        sun.java2d.pipe.hw.AccelGraphicsConfig r4;
+        java.lang.Class $r2;
+
+        r0 := @parameter0: sun.awt.windows.WWindowPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WWindowPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $z0 = <sun.awt.windows.TranslucentWindowPainter: boolean forceSW>;
+
+        if $z0 != 0 goto label3;
+
+        $z1 = $r1 instanceof sun.java2d.pipe.hw.AccelGraphicsConfig;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        r4 = (sun.java2d.pipe.hw.AccelGraphicsConfig) $r1;
+
+        $r5 = interfaceinvoke r4.<sun.java2d.pipe.hw.AccelGraphicsConfig: sun.java2d.pipe.hw.ContextCapabilities getContextCapabilities()>();
+
+        $i0 = virtualinvoke $r5.<sun.java2d.pipe.hw.ContextCapabilities: int getCaps()>();
+
+        $i1 = $i0 & 256;
+
+        if $i1 != 0 goto label1;
+
+        $z5 = <sun.awt.windows.TranslucentWindowPainter: boolean forceOpt>;
+
+        if $z5 == 0 goto label3;
+
+     label1:
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("D3D");
+
+        if $z2 == 0 goto label2;
+
+        $r7 = new sun.awt.windows.TranslucentWindowPainter$VIOptD3DWindowPainter;
+
+        specialinvoke $r7.<sun.awt.windows.TranslucentWindowPainter$VIOptD3DWindowPainter: void <init>(sun.awt.windows.WWindowPeer)>(r0);
+
+        return $r7;
+
+     label2:
+        $z3 = <sun.awt.windows.TranslucentWindowPainter: boolean forceOpt>;
+
+        if $z3 == 0 goto label3;
+
+        $z4 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("WGL");
+
+        if $z4 == 0 goto label3;
+
+        $r6 = new sun.awt.windows.TranslucentWindowPainter$VIOptWGLWindowPainter;
+
+        specialinvoke $r6.<sun.awt.windows.TranslucentWindowPainter$VIOptWGLWindowPainter: void <init>(sun.awt.windows.WWindowPeer)>(r0);
+
+        return $r6;
+
+     label3:
+        $r8 = new sun.awt.windows.TranslucentWindowPainter$BIWindowPainter;
+
+        specialinvoke $r8.<sun.awt.windows.TranslucentWindowPainter$BIWindowPainter: void <init>(sun.awt.windows.WWindowPeer)>(r0);
+
+        return $r8;
+    }
+
+    protected void <init>(sun.awt.windows.WWindowPeer)
+    {
+        java.awt.Window $r3;
+        java.lang.Object $r2;
+        sun.awt.windows.WWindowPeer r1;
+        sun.awt.windows.TranslucentWindowPainter r0;
+
+        r0 := @this: sun.awt.windows.TranslucentWindowPainter;
+
+        r1 := @parameter0: sun.awt.windows.WWindowPeer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.windows.TranslucentWindowPainter: sun.awt.windows.WWindowPeer peer> = r1;
+
+        $r2 = virtualinvoke r1.<sun.awt.windows.WWindowPeer: java.lang.Object getTarget()>();
+
+        $r3 = (java.awt.Window) $r2;
+
+        r0.<sun.awt.windows.TranslucentWindowPainter: java.awt.Window window> = $r3;
+
+        return;
+    }
+
+    protected abstract java.awt.Image getBackBuffer(boolean);
+
+    protected abstract boolean update(java.awt.Image);
+
+    public abstract void flush();
+
+    public void updateWindow(boolean)
+    {
+        java.lang.Throwable $r4;
+        java.awt.Image r5;
+        java.awt.Window $r3;
+        java.awt.Graphics2D r2;
+        java.awt.Graphics $r1;
+        sun.awt.windows.TranslucentWindowPainter r0;
+        boolean $z0, z1, z2;
+
+        r0 := @this: sun.awt.windows.TranslucentWindowPainter;
+
+        z1 := @parameter0: boolean;
+
+        z2 = 0;
+
+        r5 = virtualinvoke r0.<sun.awt.windows.TranslucentWindowPainter: java.awt.Image getBackBuffer(boolean)>(z1);
+
+     label1:
+        if z2 != 0 goto label7;
+
+        if z1 == 0 goto label6;
+
+        $r1 = virtualinvoke r5.<java.awt.Image: java.awt.Graphics getGraphics()>();
+
+        r2 = (java.awt.Graphics2D) $r1;
+
+     label2:
+        $r3 = r0.<sun.awt.windows.TranslucentWindowPainter: java.awt.Window window>;
+
+        virtualinvoke $r3.<java.awt.Window: void paintAll(java.awt.Graphics)>(r2);
+
+     label3:
+        virtualinvoke r2.<java.awt.Graphics2D: void dispose()>();
+
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        virtualinvoke r2.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r4;
+
+     label6:
+        $z0 = virtualinvoke r0.<sun.awt.windows.TranslucentWindowPainter: boolean update(java.awt.Image)>(r5);
+
+        z2 = $z0;
+
+        if $z0 != 0 goto label1;
+
+        z1 = 1;
+
+        r5 = virtualinvoke r0.<sun.awt.windows.TranslucentWindowPainter: java.awt.Image getBackBuffer(boolean)>(1);
+
+        goto label1;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static final java.awt.Image clearImage(java.awt.Image)
+    {
+        java.awt.Color $r4;
+        java.awt.AlphaComposite $r3;
+        java.awt.Image r0;
+        java.awt.Graphics2D r2;
+        java.awt.Graphics $r1;
+        int $i0, $i1;
+
+        r0 := @parameter0: java.awt.Image;
+
+        $r1 = virtualinvoke r0.<java.awt.Image: java.awt.Graphics getGraphics()>();
+
+        r2 = (java.awt.Graphics2D) $r1;
+
+        $i0 = virtualinvoke r0.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>(null);
+
+        $i1 = virtualinvoke r0.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>(null);
+
+        $r3 = <java.awt.AlphaComposite: java.awt.AlphaComposite Src>;
+
+        virtualinvoke r2.<java.awt.Graphics2D: void setComposite(java.awt.Composite)>($r3);
+
+        $r4 = new java.awt.Color;
+
+        specialinvoke $r4.<java.awt.Color: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        virtualinvoke r2.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r4);
+
+        virtualinvoke r2.<java.awt.Graphics2D: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        return r0;
+    }
+
+    static java.awt.Image access$000(java.awt.Image)
+    {
+        java.awt.Image r0, $r1;
+
+        r0 := @parameter0: java.awt.Image;
+
+        $r1 = staticinvoke <sun.awt.windows.TranslucentWindowPainter: java.awt.Image clearImage(java.awt.Image)>(r0);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r0, $r4;
+        java.lang.Boolean $r3, $r7;
+        java.lang.Object $r1, $r5;
+        java.lang.String $r2, $r6;
+        boolean $z0, $z1;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.java2d.twp.forceopt", "false");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r2);
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.awt.windows.TranslucentWindowPainter: boolean forceOpt> = $z0;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.java2d.twp.forcesw", "false");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.String) $r5;
+
+        $r7 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r6);
+
+        $z1 = virtualinvoke $r7.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.awt.windows.TranslucentWindowPainter: boolean forceSW> = $z1;
+
+        return;
+    }
+}

@@ -1,0 +1,329 @@
+public class java.util.concurrent.atomic.LongAdder extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+
+    public void <init>()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        specialinvoke r0.<java.util.concurrent.atomic.Striped64: void <init>()>();
+
+        return;
+    }
+
+    public void add(long)
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] $r1;
+        java.util.concurrent.atomic.LongAdder r0;
+        long l0, $l5, $l6, $l7, $l8;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        int $i1, $i2, $i3, $i4;
+        boolean $z0, $z1, z2;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.util.concurrent.atomic.LongAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r1 != null goto label1;
+
+        $l7 = r0.<java.util.concurrent.atomic.LongAdder: long base>;
+
+        $l8 = $l7 + l0;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: boolean casBase(long,long)>($l7, $l8);
+
+        if $z1 != 0 goto label3;
+
+     label1:
+        z2 = 1;
+
+        if $r1 == null goto label2;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i1 - 1;
+
+        if $i2 < 0 goto label2;
+
+        $i3 = staticinvoke <java.util.concurrent.atomic.LongAdder: int getProbe()>();
+
+        $i4 = $i3 & $i2;
+
+        $r2 = $r1[$i4];
+
+        if $r2 == null goto label2;
+
+        $l5 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $l6 = $l5 + l0;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l5, $l6);
+
+        z2 = $z0;
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: void longAccumulate(long,java.util.function.LongBinaryOperator,boolean)>(l0, null, z2);
+
+     label3:
+        return;
+    }
+
+    public void increment()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: void add(long)>(1L);
+
+        return;
+    }
+
+    public void decrement()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: void add(long)>(-1L);
+
+        return;
+    }
+
+    public long sum()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.LongAdder r0;
+        int $i0, i3;
+        long $l1, l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        l2 = r0.<java.util.concurrent.atomic.LongAdder: long base>;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $l1 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        l2 = l2 + $l1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return l2;
+    }
+
+    public void reset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.LongAdder r0;
+        int $i0, i1;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        r0.<java.util.concurrent.atomic.LongAdder: long base> = 0L;
+
+        if r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = r1[i1];
+
+        if $r2 == null goto label2;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = 0L;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public long sumThenReset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.LongAdder r0;
+        int $i0, i3;
+        long $l1, l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        l2 = r0.<java.util.concurrent.atomic.LongAdder: long base>;
+
+        r0.<java.util.concurrent.atomic.LongAdder: long base> = 0L;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $l1 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        l2 = l2 + $l1;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = 0L;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return l2;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+        long $l0;
+        java.lang.String $r1;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: long sum()>();
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        return $r1;
+    }
+
+    public long longValue()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+        long $l0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: long sum()>();
+
+        return $l0;
+    }
+
+    public int intValue()
+    {
+        int $i1;
+        java.util.concurrent.atomic.LongAdder r0;
+        long $l0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: long sum()>();
+
+        $i1 = (int) $l0;
+
+        return $i1;
+    }
+
+    public float floatValue()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+        float $f0;
+        long $l0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: long sum()>();
+
+        $f0 = (float) $l0;
+
+        return $f0;
+    }
+
+    public double doubleValue()
+    {
+        java.util.concurrent.atomic.LongAdder r0;
+        long $l0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAdder: long sum()>();
+
+        $d0 = (double) $l0;
+
+        return $d0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.util.concurrent.atomic.LongAdder$SerializationProxy $r0;
+        java.util.concurrent.atomic.LongAdder r1;
+
+        r1 := @this: java.util.concurrent.atomic.LongAdder;
+
+        $r0 = new java.util.concurrent.atomic.LongAdder$SerializationProxy;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.LongAdder$SerializationProxy: void <init>(java.util.concurrent.atomic.LongAdder)>(r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.util.concurrent.atomic.LongAdder r1;
+
+        r1 := @this: java.util.concurrent.atomic.LongAdder;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Proxy required");
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.atomic.LongAdder: long serialVersionUID> = 7249069246863182397L;
+
+        return;
+    }
+}

@@ -1,0 +1,305 @@
+public class com.sun.imageio.plugins.common.LZWCompressor extends java.lang.Object
+{
+    int codeSize;
+    int clearCode;
+    int endOfInfo;
+    int numBits;
+    int limit;
+    short prefix;
+    com.sun.imageio.plugins.common.BitFile bf;
+    com.sun.imageio.plugins.common.LZWStringTable lzss;
+    boolean tiffFudge;
+
+    public void <init>(javax.imageio.stream.ImageOutputStream, int, boolean) throws java.io.IOException
+    {
+        short $s13;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        com.sun.imageio.plugins.common.LZWStringTable $r4, $r7;
+        boolean z0, $z1, $z2;
+        com.sun.imageio.plugins.common.LZWCompressor r0;
+        com.sun.imageio.plugins.common.BitFile $r5, $r6;
+        javax.imageio.stream.ImageOutputStream r2;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWCompressor;
+
+        r2 := @parameter0: javax.imageio.stream.ImageOutputStream;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r6 = new com.sun.imageio.plugins.common.BitFile;
+
+        if z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        specialinvoke $r6.<com.sun.imageio.plugins.common.BitFile: void <init>(javax.imageio.stream.ImageOutputStream,boolean)>(r2, $z2);
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf> = $r6;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int codeSize> = i0;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: boolean tiffFudge> = z0;
+
+        $i1 = 1 << i0;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int clearCode> = $i1;
+
+        $i2 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int clearCode>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int endOfInfo> = $i3;
+
+        $i4 = i0 + 1;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int numBits> = $i4;
+
+        $i5 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        $i6 = 1 << $i5;
+
+        $i7 = $i6 - 1;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int limit> = $i7;
+
+        $z1 = r0.<com.sun.imageio.plugins.common.LZWCompressor: boolean tiffFudge>;
+
+        if $z1 == 0 goto label3;
+
+        $i10 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int limit>;
+
+        $i11 = $i10 - 1;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: int limit> = $i11;
+
+     label3:
+        $s13 = (short) -1;
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: short prefix> = $s13;
+
+        $r7 = new com.sun.imageio.plugins.common.LZWStringTable;
+
+        specialinvoke $r7.<com.sun.imageio.plugins.common.LZWStringTable: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss> = $r7;
+
+        $r4 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss>;
+
+        virtualinvoke $r4.<com.sun.imageio.plugins.common.LZWStringTable: void clearTable(int)>(i0);
+
+        $r5 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        $i9 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int clearCode>;
+
+        $i8 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        virtualinvoke $r5.<com.sun.imageio.plugins.common.BitFile: void writeBits(int,int)>($i9, $i8);
+
+        return;
+    }
+
+    public void compress(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        byte b3;
+        com.sun.imageio.plugins.common.LZWStringTable $r2, $r4, $r6;
+        boolean $z0;
+        com.sun.imageio.plugins.common.LZWCompressor r1;
+        com.sun.imageio.plugins.common.BitFile $r3, $r5;
+        short $s4, $s5, $s7, $s8, $s25, $s26, $s27;
+        int i0, i1, i2, $i6, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, $i28, $i30, $i31;
+
+        r1 := @this: com.sun.imageio.plugins.common.LZWCompressor;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 = i0 + i1;
+
+        i24 = i0;
+
+     label1:
+        if i24 >= i2 goto label7;
+
+        b3 = r0[i24];
+
+        $r2 = r1.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss>;
+
+        $s4 = r1.<com.sun.imageio.plugins.common.LZWCompressor: short prefix>;
+
+        $s5 = virtualinvoke $r2.<com.sun.imageio.plugins.common.LZWStringTable: short findCharString(short,byte)>($s4, b3);
+
+        $i28 = (int) $s5;
+
+        $i30 = (int) -1;
+
+        if $i28 == $i30 goto label2;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: short prefix> = $s5;
+
+        goto label6;
+
+     label2:
+        $r3 = r1.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        $s7 = r1.<com.sun.imageio.plugins.common.LZWCompressor: short prefix>;
+
+        $i6 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        $i31 = (int) $s7;
+
+        virtualinvoke $r3.<com.sun.imageio.plugins.common.BitFile: void writeBits(int,int)>($i31, $i6);
+
+        $r4 = r1.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss>;
+
+        $s8 = r1.<com.sun.imageio.plugins.common.LZWCompressor: short prefix>;
+
+        $i9 = virtualinvoke $r4.<com.sun.imageio.plugins.common.LZWStringTable: int addCharString(short,byte)>($s8, b3);
+
+        $i10 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int limit>;
+
+        if $i9 <= $i10 goto label5;
+
+        $i11 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        if $i11 != 12 goto label3;
+
+        $r5 = r1.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        $i20 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int clearCode>;
+
+        $i19 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        virtualinvoke $r5.<com.sun.imageio.plugins.common.BitFile: void writeBits(int,int)>($i20, $i19);
+
+        $r6 = r1.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss>;
+
+        $i21 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int codeSize>;
+
+        virtualinvoke $r6.<com.sun.imageio.plugins.common.LZWStringTable: void clearTable(int)>($i21);
+
+        $i22 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int codeSize>;
+
+        $i23 = $i22 + 1;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits> = $i23;
+
+        goto label4;
+
+     label3:
+        $i12 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        $i13 = $i12 + 1;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits> = $i13;
+
+     label4:
+        $i14 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        $i15 = 1 << $i14;
+
+        $i16 = $i15 - 1;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: int limit> = $i16;
+
+        $z0 = r1.<com.sun.imageio.plugins.common.LZWCompressor: boolean tiffFudge>;
+
+        if $z0 == 0 goto label5;
+
+        $i17 = r1.<com.sun.imageio.plugins.common.LZWCompressor: int limit>;
+
+        $i18 = $i17 - 1;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: int limit> = $i18;
+
+     label5:
+        $s25 = (short) b3;
+
+        $s26 = $s25 & 255;
+
+        $s27 = (short) $s26;
+
+        r1.<com.sun.imageio.plugins.common.LZWCompressor: short prefix> = $s27;
+
+     label6:
+        i24 = i24 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.common.LZWCompressor r0;
+        com.sun.imageio.plugins.common.BitFile $r1, $r2, $r3;
+        short $s0, $s4;
+        int $i1, $i2, $i3, $i5, $i7, $i8;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWCompressor;
+
+        $s0 = r0.<com.sun.imageio.plugins.common.LZWCompressor: short prefix>;
+
+        $i5 = (int) $s0;
+
+        $i7 = (int) -1;
+
+        if $i5 == $i7 goto label1;
+
+        $r3 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        $s4 = r0.<com.sun.imageio.plugins.common.LZWCompressor: short prefix>;
+
+        $i3 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        $i8 = (int) $s4;
+
+        virtualinvoke $r3.<com.sun.imageio.plugins.common.BitFile: void writeBits(int,int)>($i8, $i3);
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        $i2 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int endOfInfo>;
+
+        $i1 = r0.<com.sun.imageio.plugins.common.LZWCompressor: int numBits>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.common.BitFile: void writeBits(int,int)>($i2, $i1);
+
+        $r2 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.BitFile bf>;
+
+        virtualinvoke $r2.<com.sun.imageio.plugins.common.BitFile: void flush()>();
+
+        return;
+    }
+
+    public void dump(java.io.PrintStream)
+    {
+        java.io.PrintStream r1;
+        com.sun.imageio.plugins.common.LZWCompressor r0;
+        com.sun.imageio.plugins.common.LZWStringTable $r2;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWCompressor;
+
+        r1 := @parameter0: java.io.PrintStream;
+
+        $r2 = r0.<com.sun.imageio.plugins.common.LZWCompressor: com.sun.imageio.plugins.common.LZWStringTable lzss>;
+
+        virtualinvoke $r2.<com.sun.imageio.plugins.common.LZWStringTable: void dump(java.io.PrintStream)>(r1);
+
+        return;
+    }
+}

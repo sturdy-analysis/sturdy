@@ -1,0 +1,1769 @@
+class com.sun.corba.se.impl.transport.SelectorImpl extends java.lang.Thread implements com.sun.corba.se.pept.transport.Selector
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private java.nio.channels.Selector selector;
+    private long timeout;
+    private java.util.List deferredRegistrations;
+    private java.util.List interestOpsList;
+    private java.util.HashMap listenerThreads;
+    private java.util.Map readerThreads;
+    private boolean selectorStarted;
+    private volatile boolean closed;
+    private com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r7;
+        java.util.HashMap $r4, $r5;
+        com.sun.corba.se.spi.orb.ORB r1;
+        java.util.ArrayList $r2, $r3;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.util.Map $r6;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector> = null;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean selectorStarted> = 0;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout> = 60000L;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList> = $r3;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.HashMap listenerThreads> = $r4;
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r5);
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.Map readerThreads> = $r6;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean closed> = 0;
+
+        $r7 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.transport");
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r7;
+
+        return;
+    }
+
+    public void setTimeout(long)
+    {
+        long l0;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        l0 := @parameter0: long;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout> = l0;
+
+        return;
+    }
+
+    public long getTimeout()
+    {
+        long $l0;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout>;
+
+        return $l0;
+    }
+
+    public void registerInterestOps(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        java.lang.Throwable $r20, $r22;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4;
+        java.nio.channels.Selector $r14, $r15;
+        int $i0;
+        java.lang.String $r5, $r10, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        java.nio.channels.SelectionKey $r3;
+        com.sun.corba.se.spi.orb.ORB $r1, $r6, $r21, $r23;
+        com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp $r11;
+        java.util.List $r12, $r13;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.StringBuilder $r7, $r8, $r9, $r16, $r17, $r18;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".registerInterestOps:-> ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r19);
+
+     label01:
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: java.nio.channels.SelectionKey getSelectionKey()>();
+
+        $z1 = virtualinvoke $r3.<java.nio.channels.SelectionKey: boolean isValid()>();
+
+        if $z1 == 0 goto label10;
+
+        $i0 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: int getInterestOps()>();
+
+        $r11 = new com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp;
+
+        specialinvoke $r11.<com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp: void <init>(com.sun.corba.se.impl.transport.SelectorImpl,java.nio.channels.SelectionKey,int)>(r0, $r3, $i0);
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        entermonitor $r12;
+
+     label02:
+        $r13 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        interfaceinvoke $r13.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        exitmonitor $r12;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r22 := @caughtexception;
+
+        exitmonitor $r12;
+
+     label05:
+        throw $r22;
+
+     label06:
+        $r14 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        if $r14 == null goto label07;
+
+        $r15 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        virtualinvoke $r15.<java.nio.channels.Selector: java.nio.channels.Selector wakeup()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r20 := @caughtexception;
+
+        $r21 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r21.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label09;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".registerInterestOps: selector.wakeup: ", $r20);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r5 = virtualinvoke r2.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE selectionKeyInvalid(java.lang.Object)>($r5);
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label11;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".registerInterestOps: EventHandler SelectionKey not valid ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r10);
+
+     label11:
+        $r23 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r23.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label12;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".registerInterestOps:<- ");
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label06 to label07 with label08;
+    }
+
+    public void registerForEvent(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        java.lang.Throwable $r21;
+        java.nio.channels.Selector $r11;
+        int $i0;
+        java.lang.String $r8, $r16, $r20;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        java.lang.RuntimeException $r4;
+        com.sun.corba.se.spi.orb.ORB $r1, $r3, $r12;
+        java.util.List $r9, $r10;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.StringBuilder $r5, $r6, $r7, $r13, $r14, $r15, $r17, $r18, $r19;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".registerForEvent: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r20);
+
+     label01:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean isClosed()>();
+
+        if $z1 == 0 goto label03;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r12.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label02;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".registerForEvent: closed: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r16);
+
+     label02:
+        return;
+
+     label03:
+        $z2 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: boolean shouldUseSelectThreadToWait()>();
+
+        if $z2 == 0 goto label10;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        entermonitor $r9;
+
+     label04:
+        $r10 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r9;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r21 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label07:
+        throw $r21;
+
+     label08:
+        $z4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean selectorStarted>;
+
+        if $z4 != 0 goto label09;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void startSelector()>();
+
+     label09:
+        $r11 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        virtualinvoke $r11.<java.nio.channels.Selector: java.nio.channels.Selector wakeup()>();
+
+        return;
+
+     label10:
+        $i0 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: int getInterestOps()>();
+
+        lookupswitch($i0)
+        {
+            case 1: goto label12;
+            case 16: goto label11;
+            default: goto label13;
+        };
+
+     label11:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void createListenerThread(com.sun.corba.se.pept.transport.EventHandler)>(r2);
+
+        goto label15;
+
+     label12:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void createReaderThread(com.sun.corba.se.pept.transport.EventHandler)>(r2);
+
+        goto label15;
+
+     label13:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r3.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label14;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".registerForEvent: default: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r8);
+
+     label14:
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("SelectorImpl.registerForEvent: unknown interest ops");
+
+        throw $r4;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    public void unregisterForEvent(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        java.lang.Throwable $r22;
+        java.nio.channels.Selector $r11, $r12;
+        int $i0;
+        java.lang.String $r8, $r17, $r21;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        java.nio.channels.SelectionKey $r10;
+        java.lang.RuntimeException $r4;
+        com.sun.corba.se.spi.orb.ORB $r1, $r3, $r13;
+        java.util.List $r9;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.StringBuilder $r5, $r6, $r7, $r14, $r15, $r16, $r18, $r19, $r20;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".unregisterForEvent: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r21);
+
+     label01:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean isClosed()>();
+
+        if $z1 == 0 goto label03;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r13.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label02;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".unregisterForEvent: closed: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r17);
+
+     label02:
+        return;
+
+     label03:
+        $z2 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: boolean shouldUseSelectThreadToWait()>();
+
+        if $z2 == 0 goto label11;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        entermonitor $r9;
+
+     label04:
+        $r10 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: java.nio.channels.SelectionKey getSelectionKey()>();
+
+        exitmonitor $r9;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r22 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label07:
+        throw $r22;
+
+     label08:
+        if $r10 == null goto label09;
+
+        virtualinvoke $r10.<java.nio.channels.SelectionKey: void cancel()>();
+
+     label09:
+        $r11 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        if $r11 == null goto label10;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        virtualinvoke $r12.<java.nio.channels.Selector: java.nio.channels.Selector wakeup()>();
+
+     label10:
+        return;
+
+     label11:
+        $i0 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: int getInterestOps()>();
+
+        lookupswitch($i0)
+        {
+            case 1: goto label13;
+            case 16: goto label12;
+            default: goto label14;
+        };
+
+     label12:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void destroyListenerThread(com.sun.corba.se.pept.transport.EventHandler)>(r2);
+
+        goto label16;
+
+     label13:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void destroyReaderThread(com.sun.corba.se.pept.transport.EventHandler)>(r2);
+
+        goto label16;
+
+     label14:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r3.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label15;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".unregisterForEvent: default: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r8);
+
+     label15:
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("SelectorImpl.uregisterForEvent: unknown interest ops");
+
+        throw $r4;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    public void close()
+    {
+        java.lang.Throwable $r13;
+        java.nio.channels.Selector $r8, $r9;
+        java.util.HashMap $r2;
+        java.util.Map $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.pept.transport.ReaderThread r16;
+        java.util.Iterator $r4, $r7;
+        java.util.Collection $r3, $r6;
+        com.sun.corba.se.spi.orb.ORB $r1, $r12, $r14;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.Object $r10, $r11;
+        com.sun.corba.se.pept.transport.ListenerThread r15;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".close");
+
+     label01:
+        $z1 = specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean isClosed()>();
+
+        if $z1 == 0 goto label03;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r12.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label02;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".close: already closed");
+
+     label02:
+        return;
+
+     label03:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void setClosed(boolean)>(1);
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.HashMap listenerThreads>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.util.Collection values()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z2 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label05;
+
+        $r11 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (com.sun.corba.se.pept.transport.ListenerThread) $r11;
+
+        interfaceinvoke r15.<com.sun.corba.se.pept.transport.ListenerThread: void close()>();
+
+        goto label04;
+
+     label05:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.Map readerThreads>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Collection values()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z3 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label07;
+
+        $r10 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (com.sun.corba.se.pept.transport.ReaderThread) $r10;
+
+        interfaceinvoke r16.<com.sun.corba.se.pept.transport.ReaderThread: void close()>();
+
+        goto label06;
+
+     label07:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void clearDeferredRegistrations()>();
+
+     label08:
+        $r8 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        if $r8 == null goto label09;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        virtualinvoke $r9.<java.nio.channels.Selector: java.nio.channels.Selector wakeup()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r13 := @caughtexception;
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label11;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".close: selector.wakeup: ", $r13);
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+
+    public void run()
+    {
+        byte $b1, $b3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        com.sun.corba.se.pept.transport.EventHandler r11;
+        java.util.Set $r4;
+        java.lang.StringBuilder $r12, $r13, $r14;
+        java.lang.Throwable $r17, $r19, $r21;
+        java.nio.channels.Selector $r2, $r3, $r27, $r28;
+        long $l0, $l2, $l5;
+        int i4;
+        java.lang.String $r15;
+        java.util.Iterator $r5;
+        java.nio.channels.SelectionKey r9;
+        java.io.IOException $r25;
+        com.sun.corba.se.spi.orb.ORB $r1, $r6, $r7, $r16, $r18, $r20, $r22, $r24, $r26;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.nio.channels.ClosedSelectorException $r23;
+        java.lang.Object $r8, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void setName(java.lang.String)>("SelectorThread");
+
+     label01:
+        $z11 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean closed>;
+
+        if $z11 != 0 goto label22;
+
+     label02:
+        i4 = 0;
+
+        $l0 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label03;
+
+        $r16 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r16.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label03;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".run: Beginning of selection cycle");
+
+     label03:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void handleDeferredRegistrations()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void enableInterestOps()>();
+
+     label04:
+        $r27 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        $l5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout>;
+
+        i4 = virtualinvoke $r27.<java.nio.channels.Selector: int select(long)>($l5);
+
+     label05:
+        goto label10;
+
+     label06:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z10 = $r26.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z10 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".run: selector.select: ", $r25);
+
+     label07:
+        goto label10;
+
+     label08:
+        $r23 := @caughtexception;
+
+        $r24 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z9 = $r24.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z9 == 0 goto label09;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".run: selector.select: ", $r23);
+
+     label09:
+        goto label22;
+
+     label10:
+        $z1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean closed>;
+
+        if $z1 == 0 goto label12;
+
+     label11:
+        goto label22;
+
+     label12:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        $r4 = virtualinvoke $r3.<java.nio.channels.Selector: java.util.Set selectedKeys()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label13;
+
+        $z4 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label13;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".run: n = ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r15);
+
+     label13:
+        $z12 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label18;
+
+        $r8 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.nio.channels.SelectionKey) $r8;
+
+        interfaceinvoke $r5.<java.util.Iterator: void remove()>();
+
+        $r10 = virtualinvoke r9.<java.nio.channels.SelectionKey: java.lang.Object attachment()>();
+
+        r11 = (com.sun.corba.se.pept.transport.EventHandler) $r10;
+
+     label14:
+        interfaceinvoke r11.<com.sun.corba.se.pept.transport.EventHandler: void handleEvent()>();
+
+     label15:
+        goto label17;
+
+     label16:
+        $r21 := @caughtexception;
+
+        $r22 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r22.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label17;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".run: eventHandler.handleEvent", $r21);
+
+     label17:
+        goto label13;
+
+     label18:
+        $l2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: long timeout>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label19;
+
+        $r7 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r7.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label19;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".run: End of selection cycle");
+
+     label19:
+        goto label01;
+
+     label20:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r20.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label21;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".run: ignoring", $r19);
+
+     label21:
+        goto label01;
+
+     label22:
+        $r28 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        if $r28 == null goto label24;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label23;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".run: selector.close ");
+
+     label23:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        virtualinvoke $r2.<java.nio.channels.Selector: void close()>();
+
+     label24:
+        goto label26;
+
+     label25:
+        $r17 := @caughtexception;
+
+        $r18 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r18.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label26;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".run: selector.close: ", $r17);
+
+     label26:
+        return;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.nio.channels.ClosedSelectorException from label04 to label05 with label08;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label02 to label09 with label20;
+        catch java.lang.Throwable from label10 to label11 with label20;
+        catch java.lang.Throwable from label12 to label19 with label20;
+        catch java.lang.Throwable from label22 to label24 with label25;
+    }
+
+    private void clearDeferredRegistrations()
+    {
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.pept.transport.EventHandler r7;
+        java.util.List $r1, $r2, $r4, $r5;
+        java.lang.StringBuilder $r12, $r13, $r14, $r16, $r17, $r20, $r22, $r23, $r24, $r26, $r27, $r28;
+        java.lang.Throwable $r30;
+        int $i0, i1;
+        java.lang.String $r15, $r19, $r21, $r25, $r29;
+        java.nio.channels.SelectionKey $r11;
+        java.io.IOException $r31;
+        com.sun.corba.se.spi.orb.ORB $r3, $r8, $r10, $r32;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.nio.channels.SelectableChannel $r9;
+        java.lang.Object $r6;
+        java.lang.Class $r18;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r3.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".clearDeferredRegistrations:deferred list size == ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r29);
+
+     label02:
+        i1 = 0;
+
+     label03:
+        if i1 >= $i0 goto label10;
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r7 = (com.sun.corba.se.pept.transport.EventHandler) $r6;
+
+        $r8 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label04;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".clearDeferredRegistrations: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r25);
+
+     label04:
+        $r9 = interfaceinvoke r7.<com.sun.corba.se.pept.transport.EventHandler: java.nio.channels.SelectableChannel getChannel()>();
+
+     label05:
+        $r10 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r10.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label06;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".clearDeferredRegistrations:close channel == ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r15);
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".clearDeferredRegistrations:close channel class == ");
+
+        $r18 = virtualinvoke $r9.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.Class: java.lang.String getName()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r21);
+
+     label06:
+        virtualinvoke $r9.<java.nio.channels.SelectableChannel: void close()>();
+
+        $r11 = interfaceinvoke r7.<com.sun.corba.se.pept.transport.EventHandler: java.nio.channels.SelectionKey getSelectionKey()>();
+
+        if $r11 == null goto label07;
+
+        virtualinvoke $r11.<java.nio.channels.SelectionKey: void cancel()>();
+
+        virtualinvoke $r11.<java.nio.channels.SelectionKey: java.lang.Object attach(java.lang.Object)>(null);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r31 := @caughtexception;
+
+        $r32 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r32.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label09;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".clearDeferredRegistrations: ", $r31);
+
+     label09:
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label10:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        interfaceinvoke $r4.<java.util.List: void clear()>();
+
+        exitmonitor $r1;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r30 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label13:
+        throw $r30;
+
+     label14:
+        return;
+
+        catch java.io.IOException from label05 to label07 with label08;
+        catch java.lang.Throwable from label01 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    private synchronized boolean isClosed()
+    {
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean closed>;
+
+        return $z0;
+    }
+
+    private synchronized void setClosed(boolean)
+    {
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean closed> = z0;
+
+        return;
+    }
+
+    private void startSelector()
+    {
+        java.nio.channels.Selector $r1;
+        java.io.IOException $r3;
+        java.lang.RuntimeException $r5;
+        com.sun.corba.se.spi.orb.ORB $r2, $r4;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+     label1:
+        $r1 = staticinvoke <java.nio.channels.Selector: java.nio.channels.Selector open()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector> = $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r4.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label4;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".startSelector: Selector.open: IOException: ", $r3);
+
+     label4:
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String)>(".startSelector: Selector.open exception");
+
+        virtualinvoke $r5.<java.lang.RuntimeException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r5;
+
+     label5:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void setDaemon(boolean)>(1);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void start()>();
+
+        r0.<com.sun.corba.se.impl.transport.SelectorImpl: boolean selectorStarted> = 1;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r2.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".startSelector: selector.start completed.");
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void handleDeferredRegistrations()
+    {
+        java.lang.Throwable $r14;
+        java.nio.channels.Selector $r9;
+        int $i0, $i1, i2;
+        java.lang.String $r13;
+        boolean $z0, $z1;
+        com.sun.corba.se.pept.transport.EventHandler r6;
+        java.nio.channels.ClosedChannelException $r15;
+        java.nio.channels.SelectionKey r17;
+        com.sun.corba.se.spi.orb.ORB $r7, $r16;
+        java.util.List $r1, $r2, $r3, $r4;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.nio.channels.SelectableChannel $r8;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r10, $r11, $r12;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        i2 = 0;
+
+     label02:
+        if i2 >= $i0 goto label08;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r6 = (com.sun.corba.se.pept.transport.EventHandler) $r5;
+
+        $r7 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r7.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label03;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handleDeferredRegistrations: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r13);
+
+     label03:
+        $r8 = interfaceinvoke r6.<com.sun.corba.se.pept.transport.EventHandler: java.nio.channels.SelectableChannel getChannel()>();
+
+        r17 = null;
+
+     label04:
+        $r9 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.nio.channels.Selector selector>;
+
+        $i1 = interfaceinvoke r6.<com.sun.corba.se.pept.transport.EventHandler: int getInterestOps()>();
+
+        r17 = virtualinvoke $r8.<java.nio.channels.SelectableChannel: java.nio.channels.SelectionKey register(java.nio.channels.Selector,int,java.lang.Object)>($r9, $i1, r6);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r15 := @caughtexception;
+
+        $r16 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r16.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label07;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String,java.lang.Throwable)>(".handleDeferredRegistrations: ", $r15);
+
+     label07:
+        interfaceinvoke r6.<com.sun.corba.se.pept.transport.EventHandler: void setSelectionKey(java.nio.channels.SelectionKey)>(r17);
+
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label08:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List deferredRegistrations>;
+
+        interfaceinvoke $r3.<java.util.List: void clear()>();
+
+        exitmonitor $r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r14;
+
+     label12:
+        return;
+
+        catch java.nio.channels.ClosedChannelException from label04 to label05 with label06;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private void enableInterestOps()
+    {
+        java.lang.Throwable $r13;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r12;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.channels.SelectionKey r15;
+        com.sun.corba.se.spi.orb.ORB $r3, $r5, $r8;
+        com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp r14;
+        java.util.List $r1, $r2, $r4, $r6;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.Object $r7;
+        java.lang.StringBuilder $r9, $r10, $r11;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label07;
+
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r3.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".enableInterestOps:->");
+
+     label02:
+        i4 = 0;
+
+     label03:
+        if i4 >= $i0 goto label06;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>(i4);
+
+        r14 = (com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp) $r7;
+
+        r15 = r14.<com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp: java.nio.channels.SelectionKey selectionKey>;
+
+        $z2 = virtualinvoke r15.<java.nio.channels.SelectionKey: boolean isValid()>();
+
+        if $z2 == 0 goto label05;
+
+        $r8 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label04;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".enableInterestOps: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r14);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r12);
+
+     label04:
+        $i3 = r14.<com.sun.corba.se.impl.transport.SelectorImpl$SelectionKeyAndOp: int keyOp>;
+
+        $i1 = virtualinvoke r15.<java.nio.channels.SelectionKey: int interestOps()>();
+
+        $i2 = $i1 | $i3;
+
+        virtualinvoke r15.<java.nio.channels.SelectionKey: java.nio.channels.SelectionKey interestOps(int)>($i2);
+
+     label05:
+        i4 = i4 + 1;
+
+        goto label03;
+
+     label06:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.List interestOpsList>;
+
+        interfaceinvoke $r4.<java.util.List: void clear()>();
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r5.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label07;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".enableInterestOps:<-");
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r13 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r13;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private void createListenerThread(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r9;
+        java.util.HashMap $r6;
+        com.sun.corba.se.pept.transport.Acceptor $r3;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException $r19;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager $r8;
+        java.lang.String $r13, $r17;
+        boolean $z0;
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        com.sun.corba.se.spi.orbutil.threadpool.Work $r11;
+        com.sun.corba.se.impl.transport.ListenerThreadImpl $r4;
+        java.lang.RuntimeException $r12;
+        com.sun.corba.se.spi.orb.ORB $r1, $r5, $r7;
+        java.lang.Exception r20;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r10;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException $r18;
+        java.lang.StringBuilder $r14, $r15, $r16;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".createListenerThread: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r17);
+
+     label1:
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: com.sun.corba.se.pept.transport.Acceptor getAcceptor()>();
+
+        $r4 = new com.sun.corba.se.impl.transport.ListenerThreadImpl;
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.transport.ListenerThreadImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.pept.transport.Acceptor,com.sun.corba.se.pept.transport.Selector)>($r5, $r3, r0);
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.HashMap listenerThreads>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r4);
+
+        r20 = null;
+
+     label2:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager getThreadPoolManager()>();
+
+        $r9 = interfaceinvoke $r8.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool(int)>(0);
+
+        $r10 = interfaceinvoke $r9.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPool: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue getWorkQueue(int)>(0);
+
+        $r11 = (com.sun.corba.se.spi.orbutil.threadpool.Work) $r4;
+
+        interfaceinvoke $r10.<com.sun.corba.se.spi.orbutil.threadpool.WorkQueue: void addWork(com.sun.corba.se.spi.orbutil.threadpool.Work)>($r11);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r19 := @caughtexception;
+
+        r20 = $r19;
+
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+        r20 = $r18;
+
+     label6:
+        if r20 == null goto label7;
+
+        $r12 = new java.lang.RuntimeException;
+
+        $r13 = virtualinvoke r20.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.String)>($r13);
+
+        virtualinvoke $r12.<java.lang.RuntimeException: java.lang.Throwable initCause(java.lang.Throwable)>(r20);
+
+        throw $r12;
+
+     label7:
+        return;
+
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException from label2 to label3 with label4;
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException from label2 to label3 with label5;
+    }
+
+    private void destroyListenerThread(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        java.util.HashMap $r3, $r5;
+        com.sun.corba.se.spi.orb.ORB $r1, $r6;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+        com.sun.corba.se.pept.transport.ListenerThread $r11;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".destroyListenerThread: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r10);
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.HashMap listenerThreads>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r11 = (com.sun.corba.se.pept.transport.ListenerThread) $r4;
+
+        if $r11 != null goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".destroyListenerThread: cannot find ListenerThread - ignoring.");
+
+     label2:
+        return;
+
+     label3:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.HashMap listenerThreads>;
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r2);
+
+        interfaceinvoke $r11.<com.sun.corba.se.pept.transport.ListenerThread: void close()>();
+
+        return;
+    }
+
+    private void createReaderThread(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r9;
+        com.sun.corba.se.impl.transport.ReaderThreadImpl $r4;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException $r19;
+        com.sun.corba.se.pept.transport.Connection $r3;
+        java.util.Map $r6;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager $r8;
+        java.lang.String $r13, $r17;
+        boolean $z0;
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        com.sun.corba.se.spi.orbutil.threadpool.Work $r11;
+        java.lang.RuntimeException $r12;
+        com.sun.corba.se.spi.orb.ORB $r1, $r5, $r7;
+        java.lang.Exception r20;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r10;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException $r18;
+        java.lang.StringBuilder $r14, $r15, $r16;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".createReaderThread: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r17);
+
+     label1:
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.pept.transport.EventHandler: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        $r4 = new com.sun.corba.se.impl.transport.ReaderThreadImpl;
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.transport.ReaderThreadImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.pept.transport.Connection,com.sun.corba.se.pept.transport.Selector)>($r5, $r3, r0);
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.Map readerThreads>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r4);
+
+        r20 = null;
+
+     label2:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager getThreadPoolManager()>();
+
+        $r9 = interfaceinvoke $r8.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool(int)>(0);
+
+        $r10 = interfaceinvoke $r9.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPool: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue getWorkQueue(int)>(0);
+
+        $r11 = (com.sun.corba.se.spi.orbutil.threadpool.Work) $r4;
+
+        interfaceinvoke $r10.<com.sun.corba.se.spi.orbutil.threadpool.WorkQueue: void addWork(com.sun.corba.se.spi.orbutil.threadpool.Work)>($r11);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r19 := @caughtexception;
+
+        r20 = $r19;
+
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+        r20 = $r18;
+
+     label6:
+        if r20 == null goto label7;
+
+        $r12 = new java.lang.RuntimeException;
+
+        $r13 = virtualinvoke r20.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.String)>($r13);
+
+        virtualinvoke $r12.<java.lang.RuntimeException: java.lang.Throwable initCause(java.lang.Throwable)>(r20);
+
+        throw $r12;
+
+     label7:
+        return;
+
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException from label2 to label3 with label4;
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException from label2 to label3 with label5;
+    }
+
+    private void destroyReaderThread(com.sun.corba.se.pept.transport.EventHandler)
+    {
+        com.sun.corba.se.pept.transport.EventHandler r2;
+        com.sun.corba.se.pept.transport.ReaderThread $r11;
+        com.sun.corba.se.spi.orb.ORB $r1, $r6;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.util.Map $r3, $r5;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.transport.EventHandler;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".destroyReaderThread: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>($r10);
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.Map readerThreads>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r11 = (com.sun.corba.se.pept.transport.ReaderThread) $r4;
+
+        if $r11 != null goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(".destroyReaderThread: cannot find ReaderThread - ignoring.");
+
+     label2:
+        return;
+
+     label3:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SelectorImpl: java.util.Map readerThreads>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r2);
+
+        interfaceinvoke $r11.<com.sun.corba.se.pept.transport.ReaderThread: void close()>();
+
+        return;
+    }
+
+    private void dprint(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.corba.se.impl.transport.SelectorImpl r1;
+
+        r1 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.String,java.lang.String)>("SelectorImpl", r0);
+
+        return;
+    }
+
+    protected void dprint(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        java.io.PrintStream $r3;
+        com.sun.corba.se.impl.transport.SelectorImpl r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SelectorImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SelectorImpl: void dprint(java.lang.String)>(r1);
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke r2.<java.lang.Throwable: void printStackTrace(java.io.PrintStream)>($r3);
+
+        return;
+    }
+}

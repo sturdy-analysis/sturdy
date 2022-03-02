@@ -1,0 +1,435 @@
+public class sun.misc.UCEncoder extends sun.misc.CharacterEncoder
+{
+    private static final byte[] map_array;
+    private int sequence;
+    private byte[] tmp;
+    private sun.misc.CRC16 crc;
+
+    public void <init>()
+    {
+        byte[] $r1;
+        sun.misc.UCEncoder r0;
+        sun.misc.CRC16 $r2;
+
+        r0 := @this: sun.misc.UCEncoder;
+
+        specialinvoke r0.<sun.misc.CharacterEncoder: void <init>()>();
+
+        $r1 = newarray (byte)[2];
+
+        r0.<sun.misc.UCEncoder: byte[] tmp> = $r1;
+
+        $r2 = new sun.misc.CRC16;
+
+        specialinvoke $r2.<sun.misc.CRC16: void <init>()>();
+
+        r0.<sun.misc.UCEncoder: sun.misc.CRC16 crc> = $r2;
+
+        return;
+    }
+
+    protected int bytesPerAtom()
+    {
+        sun.misc.UCEncoder r0;
+
+        r0 := @this: sun.misc.UCEncoder;
+
+        return 2;
+    }
+
+    protected int bytesPerLine()
+    {
+        sun.misc.UCEncoder r0;
+
+        r0 := @this: sun.misc.UCEncoder;
+
+        return 48;
+    }
+
+    protected void encodeAtom(java.io.OutputStream, byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0, $r4, $r5, $r6;
+        byte b1, $b8, $b11, $b13, $b14, $b16, b20;
+        int i0, i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i12, $i15, $i17, $i18, $i19, i21, i22, i23, i24, i25, $i26, $i27, $i28, $i29, $i30, $i31;
+        java.io.OutputStream r3;
+        sun.misc.CRC16 $r2, $r7;
+        sun.misc.UCEncoder r1;
+
+        r1 := @this: sun.misc.UCEncoder;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        r0 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        b1 = r0[i0];
+
+        if i2 != 2 goto label1;
+
+        $i19 = i0 + 1;
+
+        b20 = r0[$i19];
+
+        goto label2;
+
+     label1:
+        b20 = 0;
+
+     label2:
+        $r2 = r1.<sun.misc.UCEncoder: sun.misc.CRC16 crc>;
+
+        virtualinvoke $r2.<sun.misc.CRC16: void update(byte)>(b1);
+
+        if i2 != 2 goto label3;
+
+        $r7 = r1.<sun.misc.UCEncoder: sun.misc.CRC16 crc>;
+
+        virtualinvoke $r7.<sun.misc.CRC16: void update(byte)>(b20);
+
+     label3:
+        $r4 = <sun.misc.UCEncoder: byte[] map_array>;
+
+        $i26 = (int) b1;
+
+        $i3 = $i26 >>> 2;
+
+        $i6 = $i3 & 56;
+
+        $i4 = b20 >>> 5;
+
+        $i5 = $i4 & 7;
+
+        $i7 = $i6 + $i5;
+
+        $b8 = $r4[$i7];
+
+        $i27 = (int) $b8;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(int)>($i27);
+
+        i21 = 0;
+
+        i22 = 0;
+
+        i23 = 1;
+
+     label4:
+        if i23 >= 256 goto label7;
+
+        $i28 = (int) b1;
+
+        $i17 = $i28 & i23;
+
+        if $i17 == 0 goto label5;
+
+        i21 = i21 + 1;
+
+     label5:
+        $i18 = b20 & i23;
+
+        if $i18 == 0 goto label6;
+
+        i22 = i22 + 1;
+
+     label6:
+        i23 = i23 * 2;
+
+        goto label4;
+
+     label7:
+        $i9 = i21 & 1;
+
+        i24 = $i9 * 32;
+
+        $i10 = i22 & 1;
+
+        i25 = $i10 * 32;
+
+        $r5 = <sun.misc.UCEncoder: byte[] map_array>;
+
+        $b11 = b1 & 31;
+
+        $i29 = (int) $b11;
+
+        $i12 = $i29 + i24;
+
+        $b13 = $r5[$i12];
+
+        $i30 = (int) $b13;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(int)>($i30);
+
+        $r6 = <sun.misc.UCEncoder: byte[] map_array>;
+
+        $b14 = b20 & 31;
+
+        $i15 = $b14 + i25;
+
+        $b16 = $r6[$i15];
+
+        $i31 = (int) $b16;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(int)>($i31);
+
+        return;
+    }
+
+    protected void encodeLinePrefix(java.io.OutputStream, int) throws java.io.IOException
+    {
+        java.io.OutputStream r0;
+        byte[] $r3, $r4, $r5;
+        byte $b1, $b3;
+        sun.misc.CRC16 $r2;
+        int i0, $i2, $i4, $i5, $i6;
+        sun.misc.UCEncoder r1;
+
+        r1 := @this: sun.misc.UCEncoder;
+
+        r0 := @parameter0: java.io.OutputStream;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>(42);
+
+        $r2 = r1.<sun.misc.UCEncoder: sun.misc.CRC16 crc>;
+
+        $r2.<sun.misc.CRC16: int value> = 0;
+
+        $r3 = r1.<sun.misc.UCEncoder: byte[] tmp>;
+
+        $b1 = (byte) i0;
+
+        $r3[0] = $b1;
+
+        $r4 = r1.<sun.misc.UCEncoder: byte[] tmp>;
+
+        $i2 = r1.<sun.misc.UCEncoder: int sequence>;
+
+        $b3 = (byte) $i2;
+
+        $r4[1] = $b3;
+
+        $i4 = r1.<sun.misc.UCEncoder: int sequence>;
+
+        $i5 = $i4 + 1;
+
+        $i6 = $i5 & 255;
+
+        r1.<sun.misc.UCEncoder: int sequence> = $i6;
+
+        $r5 = r1.<sun.misc.UCEncoder: byte[] tmp>;
+
+        virtualinvoke r1.<sun.misc.UCEncoder: void encodeAtom(java.io.OutputStream,byte[],int,int)>(r0, $r5, 0, 2);
+
+        return;
+    }
+
+    protected void encodeLineSuffix(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r5;
+        java.io.PrintStream $r7;
+        byte[] $r2, $r4, $r6;
+        byte $b3, $b6;
+        sun.misc.CRC16 $r1, $r3;
+        int $i0, $i1, $i2, $i4, $i5;
+        sun.misc.UCEncoder r0;
+
+        r0 := @this: sun.misc.UCEncoder;
+
+        r5 := @parameter0: java.io.OutputStream;
+
+        $r2 = r0.<sun.misc.UCEncoder: byte[] tmp>;
+
+        $r1 = r0.<sun.misc.UCEncoder: sun.misc.CRC16 crc>;
+
+        $i0 = $r1.<sun.misc.CRC16: int value>;
+
+        $i1 = $i0 >>> 8;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r2[0] = $b3;
+
+        $r4 = r0.<sun.misc.UCEncoder: byte[] tmp>;
+
+        $r3 = r0.<sun.misc.UCEncoder: sun.misc.CRC16 crc>;
+
+        $i4 = $r3.<sun.misc.CRC16: int value>;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        $r4[1] = $b6;
+
+        $r6 = r0.<sun.misc.UCEncoder: byte[] tmp>;
+
+        virtualinvoke r0.<sun.misc.UCEncoder: void encodeAtom(java.io.OutputStream,byte[],int,int)>(r5, $r6, 0, 2);
+
+        $r7 = r0.<sun.misc.CharacterEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println()>();
+
+        return;
+    }
+
+    protected void encodeBufferPrefix(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        sun.misc.UCEncoder r0;
+
+        r0 := @this: sun.misc.UCEncoder;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r0.<sun.misc.UCEncoder: int sequence> = 0;
+
+        specialinvoke r0.<sun.misc.CharacterEncoder: void encodeBufferPrefix(java.io.OutputStream)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[64];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 65;
+
+        $r0[11] = 66;
+
+        $r0[12] = 67;
+
+        $r0[13] = 68;
+
+        $r0[14] = 69;
+
+        $r0[15] = 70;
+
+        $r0[16] = 71;
+
+        $r0[17] = 72;
+
+        $r0[18] = 73;
+
+        $r0[19] = 74;
+
+        $r0[20] = 75;
+
+        $r0[21] = 76;
+
+        $r0[22] = 77;
+
+        $r0[23] = 78;
+
+        $r0[24] = 79;
+
+        $r0[25] = 80;
+
+        $r0[26] = 81;
+
+        $r0[27] = 82;
+
+        $r0[28] = 83;
+
+        $r0[29] = 84;
+
+        $r0[30] = 85;
+
+        $r0[31] = 86;
+
+        $r0[32] = 87;
+
+        $r0[33] = 88;
+
+        $r0[34] = 89;
+
+        $r0[35] = 90;
+
+        $r0[36] = 97;
+
+        $r0[37] = 98;
+
+        $r0[38] = 99;
+
+        $r0[39] = 100;
+
+        $r0[40] = 101;
+
+        $r0[41] = 102;
+
+        $r0[42] = 103;
+
+        $r0[43] = 104;
+
+        $r0[44] = 105;
+
+        $r0[45] = 106;
+
+        $r0[46] = 107;
+
+        $r0[47] = 108;
+
+        $r0[48] = 109;
+
+        $r0[49] = 110;
+
+        $r0[50] = 111;
+
+        $r0[51] = 112;
+
+        $r0[52] = 113;
+
+        $r0[53] = 114;
+
+        $r0[54] = 115;
+
+        $r0[55] = 116;
+
+        $r0[56] = 117;
+
+        $r0[57] = 118;
+
+        $r0[58] = 119;
+
+        $r0[59] = 120;
+
+        $r0[60] = 121;
+
+        $r0[61] = 122;
+
+        $r0[62] = 40;
+
+        $r0[63] = 41;
+
+        <sun.misc.UCEncoder: byte[] map_array> = $r0;
+
+        return;
+    }
+}

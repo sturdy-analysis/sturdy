@@ -1,0 +1,938 @@
+public class javax.naming.spi.NamingManager extends java.lang.Object
+{
+    static final com.sun.naming.internal.VersionHelper helper;
+    private static javax.naming.spi.ObjectFactoryBuilder object_factory_builder;
+    private static final java.lang.String defaultPkgPrefix;
+    private static javax.naming.spi.InitialContextFactoryBuilder initctx_factory_builder;
+    public static final java.lang.String CPE;
+
+    void <init>()
+    {
+        javax.naming.spi.NamingManager r0;
+
+        r0 := @this: javax.naming.spi.NamingManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized void setObjectFactoryBuilder(javax.naming.spi.ObjectFactoryBuilder) throws javax.naming.NamingException
+    {
+        java.lang.IllegalStateException $r3;
+        javax.naming.spi.ObjectFactoryBuilder $r0, r2;
+        java.lang.SecurityManager $r1;
+
+        r2 := @parameter0: javax.naming.spi.ObjectFactoryBuilder;
+
+        $r0 = <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactoryBuilder object_factory_builder>;
+
+        if $r0 == null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("ObjectFactoryBuilder already set");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label2:
+        <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactoryBuilder object_factory_builder> = r2;
+
+        return;
+    }
+
+    static synchronized javax.naming.spi.ObjectFactoryBuilder getObjectFactoryBuilder()
+    {
+        javax.naming.spi.ObjectFactoryBuilder $r0;
+
+        $r0 = <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactoryBuilder object_factory_builder>;
+
+        return $r0;
+    }
+
+    static javax.naming.spi.ObjectFactory getObjectFactoryFromReference(javax.naming.Reference, java.lang.String) throws java.lang.IllegalAccessException, java.lang.InstantiationException, java.net.MalformedURLException
+    {
+        javax.naming.Reference r4;
+        com.sun.naming.internal.VersionHelper $r1, $r6;
+        javax.naming.spi.ObjectFactory $r11;
+        java.lang.Class $r2, $r7, r10;
+        java.lang.Object $r3;
+        java.lang.ClassNotFoundException $r8, $r9;
+        java.lang.String r0, $r5;
+        boolean $z0, $z1;
+
+        r4 := @parameter0: javax.naming.Reference;
+
+        r0 := @parameter1: java.lang.String;
+
+        r10 = null;
+
+     label01:
+        $r1 = <javax.naming.spi.NamingManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.naming.internal.VersionHelper: java.lang.Class loadClassWithoutInit(java.lang.String)>(r0);
+
+        r10 = $r2;
+
+        $z0 = staticinvoke <com.sun.naming.internal.ObjectFactoriesFilter: boolean canInstantiateObjectsFactory(java.lang.Class)>($r2);
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r9 := @caughtexception;
+
+     label05:
+        if r10 != null goto label10;
+
+        $r5 = virtualinvoke r4.<javax.naming.Reference: java.lang.String getFactoryClassLocation()>();
+
+        if $r5 == null goto label10;
+
+     label06:
+        $r6 = <javax.naming.spi.NamingManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.naming.internal.VersionHelper: java.lang.Class loadClass(java.lang.String,java.lang.String)>(r0, $r5);
+
+        r10 = $r7;
+
+        if $r7 == null goto label07;
+
+        $z1 = staticinvoke <com.sun.naming.internal.ObjectFactoriesFilter: boolean canInstantiateObjectsFactory(java.lang.Class)>($r7);
+
+        if $z1 != 0 goto label08;
+
+     label07:
+        return null;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+     label10:
+        if r10 == null goto label11;
+
+        $r3 = virtualinvoke r10.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r11 = (javax.naming.spi.ObjectFactory) $r3;
+
+        goto label12;
+
+     label11:
+        $r11 = null;
+
+     label12:
+        return $r11;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label04;
+        catch java.lang.ClassNotFoundException from label06 to label07 with label09;
+    }
+
+    private static java.lang.Object createObjectFromFactories(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws java.lang.Exception
+    {
+        javax.naming.Name r6;
+        com.sun.naming.internal.FactoryEnumeration $r2;
+        javax.naming.spi.ObjectFactory r4;
+        java.lang.Object $r3, r5, r7;
+        javax.naming.Context r1;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r5 := @parameter0: java.lang.Object;
+
+        r6 := @parameter1: javax.naming.Name;
+
+        r1 := @parameter2: javax.naming.Context;
+
+        r0 := @parameter3: java.util.Hashtable;
+
+        $r2 = staticinvoke <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.FactoryEnumeration getFactories(java.lang.String,java.util.Hashtable,javax.naming.Context)>("java.naming.factory.object", r0, r1);
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        r7 = null;
+
+     label2:
+        if r7 != null goto label3;
+
+        $z0 = virtualinvoke $r2.<com.sun.naming.internal.FactoryEnumeration: boolean hasMore()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = virtualinvoke $r2.<com.sun.naming.internal.FactoryEnumeration: java.lang.Object next()>();
+
+        r4 = (javax.naming.spi.ObjectFactory) $r3;
+
+        r7 = interfaceinvoke r4.<javax.naming.spi.ObjectFactory: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r5, r6, r1, r0);
+
+        goto label2;
+
+     label3:
+        return r7;
+    }
+
+    private static java.lang.String getURLScheme(java.lang.String)
+    {
+        int $i0, $i1, $i3;
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        $i1 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(47);
+
+        if $i0 <= 0 goto label2;
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label1;
+
+        if $i0 >= $i1 goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    public static java.lang.Object getObjectInstance(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws java.lang.Exception
+    {
+        javax.naming.Referenceable $r10, $r11;
+        javax.naming.spi.ObjectFactory $r8, $r12;
+        javax.naming.spi.ObjectFactoryBuilder $r0;
+        javax.naming.Context r3;
+        java.lang.String $r6;
+        java.util.Hashtable r4;
+        boolean $z0, $z1;
+        javax.naming.Reference r14;
+        javax.naming.Name r2;
+        java.lang.Object r1, $r5, $r7, $r9, $r13, $r15;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: javax.naming.Name;
+
+        r3 := @parameter2: javax.naming.Context;
+
+        r4 := @parameter3: java.util.Hashtable;
+
+        $r0 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactoryBuilder getObjectFactoryBuilder()>();
+
+        if $r0 == null goto label1;
+
+        $r12 = interfaceinvoke $r0.<javax.naming.spi.ObjectFactoryBuilder: javax.naming.spi.ObjectFactory createObjectFactory(java.lang.Object,java.util.Hashtable)>(r1, r4);
+
+        $r13 = interfaceinvoke $r12.<javax.naming.spi.ObjectFactory: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r1, r2, r3, r4);
+
+        return $r13;
+
+     label1:
+        r14 = null;
+
+        $z0 = r1 instanceof javax.naming.Reference;
+
+        if $z0 == 0 goto label2;
+
+        r14 = (javax.naming.Reference) r1;
+
+        goto label3;
+
+     label2:
+        $z1 = r1 instanceof javax.naming.Referenceable;
+
+        if $z1 == 0 goto label3;
+
+        $r10 = (javax.naming.Referenceable) r1;
+
+        $r11 = (javax.naming.Referenceable) $r10;
+
+        r14 = interfaceinvoke $r11.<javax.naming.Referenceable: javax.naming.Reference getReference()>();
+
+     label3:
+        if r14 == null goto label6;
+
+        $r6 = virtualinvoke r14.<javax.naming.Reference: java.lang.String getFactoryClassName()>();
+
+        if $r6 == null goto label5;
+
+        $r8 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactory getObjectFactoryFromReference(javax.naming.Reference,java.lang.String)>(r14, $r6);
+
+        if $r8 == null goto label4;
+
+        $r9 = interfaceinvoke $r8.<javax.naming.spi.ObjectFactory: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r14, r2, r3, r4);
+
+        return $r9;
+
+     label4:
+        return r1;
+
+     label5:
+        $r7 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object processURLAddrs(javax.naming.Reference,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r14, r2, r3, r4);
+
+        if $r7 == null goto label6;
+
+        return $r7;
+
+     label6:
+        $r5 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object createObjectFromFactories(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r1, r2, r3, r4);
+
+        if $r5 == null goto label7;
+
+        $r15 = $r5;
+
+        goto label8;
+
+     label7:
+        $r15 = r1;
+
+     label8:
+        return $r15;
+    }
+
+    static java.lang.Object processURLAddrs(javax.naming.Reference, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.Reference r0;
+        javax.naming.RefAddr $r1;
+        javax.naming.Name r5;
+        int $i0, i1;
+        java.lang.Object $r3, $r8;
+        java.lang.String $r2, r4;
+        javax.naming.Context r6;
+        java.util.Hashtable r7;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.naming.Reference;
+
+        r5 := @parameter1: javax.naming.Name;
+
+        r6 := @parameter2: javax.naming.Context;
+
+        r7 := @parameter3: java.util.Hashtable;
+
+        i1 = 0;
+
+     label1:
+        $i0 = virtualinvoke r0.<javax.naming.Reference: int size()>();
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = virtualinvoke r0.<javax.naming.Reference: javax.naming.RefAddr get(int)>(i1);
+
+        $z0 = $r1 instanceof javax.naming.StringRefAddr;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<javax.naming.RefAddr: java.lang.String getType()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("URL");
+
+        if $z1 == 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<javax.naming.RefAddr: java.lang.Object getContent()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $r8 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object processURL(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r4, r5, r6, r7);
+
+        if $r8 == null goto label2;
+
+        return $r8;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private static java.lang.Object processURL(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        java.lang.String[] $r1, r11;
+        int $i0, i1;
+        java.lang.String $r2, $r3, $r8, r10;
+        javax.naming.Context r5;
+        java.util.Hashtable r6;
+        boolean $z0, $z1;
+        javax.naming.Name r4;
+        java.lang.Object r0, $r7, $r9;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: javax.naming.Name;
+
+        r5 := @parameter2: javax.naming.Context;
+
+        r6 := @parameter3: java.util.Hashtable;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        r10 = (java.lang.String) r0;
+
+        $r8 = staticinvoke <javax.naming.spi.NamingManager: java.lang.String getURLScheme(java.lang.String)>(r10);
+
+        if $r8 == null goto label1;
+
+        $r9 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getURLObject(java.lang.String,java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>($r8, r0, r4, r5, r6);
+
+        if $r9 == null goto label1;
+
+        return $r9;
+
+     label1:
+        $z1 = r0 instanceof java.lang.String[];
+
+        if $z1 == 0 goto label4;
+
+        $r1 = (java.lang.String[]) r0;
+
+        r11 = (java.lang.String[]) $r1;
+
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof r11;
+
+        if i1 >= $i0 goto label4;
+
+        $r2 = r11[i1];
+
+        $r3 = staticinvoke <javax.naming.spi.NamingManager: java.lang.String getURLScheme(java.lang.String)>($r2);
+
+        if $r3 == null goto label3;
+
+        $r7 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getURLObject(java.lang.String,java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>($r3, r0, r4, r5, r6);
+
+        if $r7 == null goto label3;
+
+        return $r7;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    static javax.naming.Context getContext(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.Name r1;
+        javax.naming.NamingException $r7, $r8;
+        java.lang.Exception $r6;
+        java.lang.Object r0, $r4;
+        javax.naming.Context r2, $r5, $r9;
+        java.util.Hashtable r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: javax.naming.Name;
+
+        r2 := @parameter2: javax.naming.Context;
+
+        r3 := @parameter3: java.util.Hashtable;
+
+        $z0 = r0 instanceof javax.naming.Context;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (javax.naming.Context) r0;
+
+        return $r5;
+
+     label1:
+        $r4 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r0, r1, r2, r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r8 := @caughtexception;
+
+        throw $r8;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.naming.NamingException;
+
+        specialinvoke $r7.<javax.naming.NamingException: void <init>()>();
+
+        virtualinvoke $r7.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label5:
+        $z1 = $r4 instanceof javax.naming.Context;
+
+        if $z1 == 0 goto label6;
+
+        $r9 = (javax.naming.Context) $r4;
+
+        goto label7;
+
+     label6:
+        $r9 = null;
+
+     label7:
+        return $r9;
+
+        catch javax.naming.NamingException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    static javax.naming.spi.Resolver getResolver(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.Name r1;
+        javax.naming.NamingException $r7, $r8;
+        java.lang.Exception $r6;
+        javax.naming.spi.Resolver $r5, $r9;
+        java.lang.Object r0, $r4;
+        javax.naming.Context r2;
+        java.util.Hashtable r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: javax.naming.Name;
+
+        r2 := @parameter2: javax.naming.Context;
+
+        r3 := @parameter3: java.util.Hashtable;
+
+        $z0 = r0 instanceof javax.naming.spi.Resolver;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (javax.naming.spi.Resolver) r0;
+
+        return $r5;
+
+     label1:
+        $r4 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r0, r1, r2, r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r8 := @caughtexception;
+
+        throw $r8;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.naming.NamingException;
+
+        specialinvoke $r7.<javax.naming.NamingException: void <init>()>();
+
+        virtualinvoke $r7.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label5:
+        $z1 = $r4 instanceof javax.naming.spi.Resolver;
+
+        if $z1 == 0 goto label6;
+
+        $r9 = (javax.naming.spi.Resolver) $r4;
+
+        goto label7;
+
+     label6:
+        $r9 = null;
+
+     label7:
+        return $r9;
+
+        catch javax.naming.NamingException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    public static javax.naming.Context getURLContext(java.lang.String, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        java.lang.Object $r2;
+        java.lang.String r0;
+        javax.naming.Context $r3;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Hashtable;
+
+        $r2 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getURLObject(java.lang.String,java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r0, null, null, null, r1);
+
+        $z0 = $r2 instanceof javax.naming.Context;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (javax.naming.Context) $r2;
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    private static java.lang.Object getURLObject(java.lang.String, java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r16, $r17;
+        javax.naming.spi.ObjectFactory r11;
+        javax.naming.Context r1;
+        java.lang.String r4, $r9;
+        java.util.Hashtable r0;
+        javax.naming.Name r13;
+        java.lang.Exception $r15;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r7, $r8;
+        java.lang.Object $r10, r12, $r14;
+
+        r4 := @parameter0: java.lang.String;
+
+        r12 := @parameter1: java.lang.Object;
+
+        r13 := @parameter2: javax.naming.Name;
+
+        r1 := @parameter3: javax.naming.Context;
+
+        r0 := @parameter4: java.util.Hashtable;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URLContextFactory");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <com.sun.naming.internal.ResourceManager: java.lang.Object getFactory(java.lang.String,java.util.Hashtable,javax.naming.Context,java.lang.String,java.lang.String)>("java.naming.factory.url.pkgs", r0, r1, $r9, "com.sun.jndi.url");
+
+        r11 = (javax.naming.spi.ObjectFactory) $r10;
+
+        if r11 != null goto label1;
+
+        return null;
+
+     label1:
+        $r14 = interfaceinvoke r11.<javax.naming.spi.ObjectFactory: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r12, r13, r1, r0);
+
+     label2:
+        return $r14;
+
+     label3:
+        $r17 := @caughtexception;
+
+        throw $r17;
+
+     label4:
+        $r15 := @caughtexception;
+
+        $r16 = new javax.naming.NamingException;
+
+        specialinvoke $r16.<javax.naming.NamingException: void <init>()>();
+
+        virtualinvoke $r16.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r15);
+
+        throw $r16;
+
+        catch javax.naming.NamingException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    private static synchronized javax.naming.spi.InitialContextFactoryBuilder getInitialContextFactoryBuilder()
+    {
+        javax.naming.spi.InitialContextFactoryBuilder $r0;
+
+        $r0 = <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder initctx_factory_builder>;
+
+        return $r0;
+    }
+
+    public static javax.naming.Context getInitialContext(java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.NoInitialContextException $r7, $r10;
+        javax.naming.spi.InitialContextFactory r16;
+        javax.naming.spi.InitialContextFactoryBuilder $r0;
+        javax.naming.Context $r2;
+        java.lang.String r3, $r14, $r15;
+        java.util.Hashtable r1;
+        com.sun.naming.internal.VersionHelper $r4;
+        java.lang.Exception $r9;
+        java.lang.Class $r5;
+        java.lang.Object $r6, $r8;
+        java.lang.StringBuilder $r11, $r12, $r13;
+
+        r1 := @parameter0: java.util.Hashtable;
+
+        $r0 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder getInitialContextFactoryBuilder()>();
+
+        if $r0 != null goto label7;
+
+        if r1 == null goto label1;
+
+        $r8 = virtualinvoke r1.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.factory.initial");
+
+        $r15 = (java.lang.String) $r8;
+
+        goto label2;
+
+     label1:
+        $r15 = null;
+
+     label2:
+        r3 = $r15;
+
+        if $r15 != null goto label3;
+
+        $r7 = new javax.naming.NoInitialContextException;
+
+        specialinvoke $r7.<javax.naming.NoInitialContextException: void <init>(java.lang.String)>("Need to specify class name in environment or system property, or as an applet parameter, or in an application resource file:  java.naming.factory.initial");
+
+        throw $r7;
+
+     label3:
+        $r4 = <javax.naming.spi.NamingManager: com.sun.naming.internal.VersionHelper helper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.naming.internal.VersionHelper: java.lang.Class loadClass(java.lang.String)>($r15);
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Object newInstance()>();
+
+        r16 = (javax.naming.spi.InitialContextFactory) $r6;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.naming.NoInitialContextException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot instantiate class: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<javax.naming.NoInitialContextException: void <init>(java.lang.String)>($r14);
+
+        virtualinvoke $r10.<javax.naming.NoInitialContextException: void setRootCause(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label6:
+        goto label8;
+
+     label7:
+        r16 = interfaceinvoke $r0.<javax.naming.spi.InitialContextFactoryBuilder: javax.naming.spi.InitialContextFactory createInitialContextFactory(java.util.Hashtable)>(r1);
+
+     label8:
+        $r2 = interfaceinvoke r16.<javax.naming.spi.InitialContextFactory: javax.naming.Context getInitialContext(java.util.Hashtable)>(r1);
+
+        return $r2;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public static synchronized void setInitialContextFactoryBuilder(javax.naming.spi.InitialContextFactoryBuilder) throws javax.naming.NamingException
+    {
+        java.lang.IllegalStateException $r3;
+        javax.naming.spi.InitialContextFactoryBuilder $r0, r2;
+        java.lang.SecurityManager $r1;
+
+        r2 := @parameter0: javax.naming.spi.InitialContextFactoryBuilder;
+
+        $r0 = <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder initctx_factory_builder>;
+
+        if $r0 == null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("InitialContextFactoryBuilder already set");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label2:
+        <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder initctx_factory_builder> = r2;
+
+        return;
+    }
+
+    public static boolean hasInitialContextFactoryBuilder()
+    {
+        javax.naming.spi.InitialContextFactoryBuilder $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder getInitialContextFactoryBuilder()>();
+
+        if $r0 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static javax.naming.Context getContinuationContext(javax.naming.CannotProceedException) throws javax.naming.NamingException
+    {
+        javax.naming.CannotProceedException r0;
+        java.lang.Object $r2;
+        javax.naming.Context $r4;
+        javax.naming.spi.ContinuationContext $r3;
+        java.util.Hashtable $r1, $r5, r6;
+
+        r0 := @parameter0: javax.naming.CannotProceedException;
+
+        $r1 = virtualinvoke r0.<javax.naming.CannotProceedException: java.util.Hashtable getEnvironment()>();
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.util.Hashtable;
+
+        specialinvoke $r5.<java.util.Hashtable: void <init>(int)>(7);
+
+        r6 = $r5;
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.util.Hashtable: java.lang.Object clone()>();
+
+        r6 = (java.util.Hashtable) $r2;
+
+     label2:
+        virtualinvoke r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("java.naming.spi.CannotProceedException", r0);
+
+        $r3 = new javax.naming.spi.ContinuationContext;
+
+        specialinvoke $r3.<javax.naming.spi.ContinuationContext: void <init>(javax.naming.CannotProceedException,java.util.Hashtable)>(r0, r6);
+
+        $r4 = virtualinvoke $r3.<javax.naming.spi.ContinuationContext: javax.naming.Context getTargetContext()>();
+
+        return $r4;
+    }
+
+    public static java.lang.Object getStateToBind(java.lang.Object, javax.naming.Name, javax.naming.Context, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        javax.naming.Name r6;
+        com.sun.naming.internal.FactoryEnumeration $r2;
+        javax.naming.spi.StateFactory r5;
+        java.lang.Object r3, $r4, r7, $r8;
+        javax.naming.Context r1;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r6 := @parameter1: javax.naming.Name;
+
+        r1 := @parameter2: javax.naming.Context;
+
+        r0 := @parameter3: java.util.Hashtable;
+
+        $r2 = staticinvoke <com.sun.naming.internal.ResourceManager: com.sun.naming.internal.FactoryEnumeration getFactories(java.lang.String,java.util.Hashtable,javax.naming.Context)>("java.naming.factory.state", r0, r1);
+
+        if $r2 != null goto label1;
+
+        return r3;
+
+     label1:
+        r7 = null;
+
+     label2:
+        if r7 != null goto label3;
+
+        $z0 = virtualinvoke $r2.<com.sun.naming.internal.FactoryEnumeration: boolean hasMore()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke $r2.<com.sun.naming.internal.FactoryEnumeration: java.lang.Object next()>();
+
+        r5 = (javax.naming.spi.StateFactory) $r4;
+
+        r7 = interfaceinvoke r5.<javax.naming.spi.StateFactory: java.lang.Object getStateToBind(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>(r3, r6, r1, r0);
+
+        goto label2;
+
+     label3:
+        if r7 == null goto label4;
+
+        $r8 = r7;
+
+        goto label5;
+
+     label4:
+        $r8 = r3;
+
+     label5:
+        return $r8;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.naming.internal.VersionHelper $r0;
+
+        <javax.naming.spi.NamingManager: java.lang.String CPE> = "java.naming.spi.CannotProceedException";
+
+        <javax.naming.spi.NamingManager: java.lang.String defaultPkgPrefix> = "com.sun.jndi.url";
+
+        $r0 = staticinvoke <com.sun.naming.internal.VersionHelper: com.sun.naming.internal.VersionHelper getVersionHelper()>();
+
+        <javax.naming.spi.NamingManager: com.sun.naming.internal.VersionHelper helper> = $r0;
+
+        <javax.naming.spi.NamingManager: javax.naming.spi.ObjectFactoryBuilder object_factory_builder> = null;
+
+        <javax.naming.spi.NamingManager: javax.naming.spi.InitialContextFactoryBuilder initctx_factory_builder> = null;
+
+        return;
+    }
+}

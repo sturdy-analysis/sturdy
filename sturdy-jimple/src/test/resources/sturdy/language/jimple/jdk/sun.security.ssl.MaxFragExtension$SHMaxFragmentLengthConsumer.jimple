@@ -1,0 +1,144 @@
+final class sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer extends java.lang.Object implements sun.security.ssl.SSLExtension$ExtensionConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer r0;
+
+        r0 := @this: sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r25;
+        java.nio.ByteBuffer r7;
+        byte $b0, $b1, $b2;
+        sun.security.ssl.MaxFragExtension$MaxFragLenSpec r5, $r26;
+        java.util.Map $r3, $r10;
+        javax.net.ssl.SSLException $r13, $r16, $r19, $r23;
+        sun.security.ssl.MaxFragExtension$MaxFragLenEnum $r8;
+        sun.security.ssl.ConnectionContext r0;
+        sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer r24;
+        int $i3, $i4, $i5;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r9;
+        java.io.IOException $r20;
+        sun.security.ssl.TransportContext $r12, $r15, $r18, $r22;
+        sun.security.ssl.Alert $r11, $r14, $r17, $r21;
+        java.lang.Object $r4;
+
+        r24 := @this: sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r25 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r7 := @parameter2: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_MAX_FRAGMENT_LENGTH>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (sun.security.ssl.MaxFragExtension$MaxFragLenSpec) $r4;
+
+        if r5 != null goto label1;
+
+        $r18 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r17 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r19 = virtualinvoke $r18.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r17, "Unexpected max_fragment_length extension in ServerHello");
+
+        throw $r19;
+
+     label1:
+        $r26 = new sun.security.ssl.MaxFragExtension$MaxFragLenSpec;
+
+        specialinvoke $r26.<sun.security.ssl.MaxFragExtension$MaxFragLenSpec: void <init>(java.nio.ByteBuffer,sun.security.ssl.MaxFragExtension$1)>(r7, null);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r20 := @caughtexception;
+
+        $r22 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r21 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r23 = virtualinvoke $r22.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r21, $r20);
+
+        throw $r23;
+
+     label4:
+        $b1 = $r26.<sun.security.ssl.MaxFragExtension$MaxFragLenSpec: byte id>;
+
+        $b0 = r5.<sun.security.ssl.MaxFragExtension$MaxFragLenSpec: byte id>;
+
+        $i4 = (int) $b1;
+
+        $i5 = (int) $b0;
+
+        if $i4 == $i5 goto label5;
+
+        $r15 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r14 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r16 = virtualinvoke $r15.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r14, "The maximum fragment length response is not requested");
+
+        throw $r16;
+
+     label5:
+        $b2 = $r26.<sun.security.ssl.MaxFragExtension$MaxFragLenSpec: byte id>;
+
+        $r8 = staticinvoke <sun.security.ssl.MaxFragExtension$MaxFragLenEnum: sun.security.ssl.MaxFragExtension$MaxFragLenEnum access$1200(byte)>($b2);
+
+        if $r8 != null goto label6;
+
+        $r12 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r13 = virtualinvoke $r12.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r11, "the requested maximum fragment length is other than the allowed values");
+
+        throw $r13;
+
+     label6:
+        $i3 = $r8.<sun.security.ssl.MaxFragExtension$MaxFragLenEnum: int fragmentSize>;
+
+        r1.<sun.security.ssl.ClientHandshakeContext: int maxFragmentLength> = $i3;
+
+        $r10 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r9 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension SH_MAX_FRAGMENT_LENGTH>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r26);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void <init>(sun.security.ssl.MaxFragExtension$1)
+    {
+        sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer r0;
+        sun.security.ssl.MaxFragExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer;
+
+        r1 := @parameter0: sun.security.ssl.MaxFragExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.MaxFragExtension$SHMaxFragmentLengthConsumer: void <init>()>();
+
+        return;
+    }
+}

@@ -1,0 +1,1485 @@
+public final class java.awt.font.TextMeasurer extends java.lang.Object implements java.lang.Cloneable
+{
+    private static float EST_LINES;
+    private java.awt.font.FontRenderContext fFrc;
+    private int fStart;
+    private char[] fChars;
+    private java.text.Bidi fBidi;
+    private byte[] fLevels;
+    private sun.font.TextLineComponent[] fComponents;
+    private int fComponentStart;
+    private int fComponentLimit;
+    private boolean haveLayoutWindow;
+    private java.text.BreakIterator fLineBreak;
+    private java.awt.font.CharArrayIterator charIter;
+    int layoutCount;
+    int layoutCharCount;
+    private java.awt.font.StyledParagraph fParagraph;
+    private boolean fIsDirectionLTR;
+    private byte fBaseline;
+    private float[] fBaselineOffsets;
+    private float fJustifyRatio;
+    private int formattedChars;
+    private static boolean wantStats;
+    private boolean collectStats;
+
+    public void <init>(java.text.AttributedCharacterIterator, java.awt.font.FontRenderContext)
+    {
+        java.awt.font.TextMeasurer r0;
+        java.awt.font.FontRenderContext r1;
+        java.text.AttributedCharacterIterator r2;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        r2 := @parameter0: java.text.AttributedCharacterIterator;
+
+        r1 := @parameter1: java.awt.font.FontRenderContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak> = null;
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.CharArrayIterator charIter> = null;
+
+        r0.<java.awt.font.TextMeasurer: int layoutCount> = 0;
+
+        r0.<java.awt.font.TextMeasurer: int layoutCharCount> = 0;
+
+        r0.<java.awt.font.TextMeasurer: float fJustifyRatio> = 1.0F;
+
+        r0.<java.awt.font.TextMeasurer: int formattedChars> = 0;
+
+        r0.<java.awt.font.TextMeasurer: boolean collectStats> = 0;
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.FontRenderContext fFrc> = r1;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void initAll(java.text.AttributedCharacterIterator)>(r2);
+
+        return;
+    }
+
+    protected java.lang.Object clone()
+    {
+        java.awt.font.TextMeasurer r0, r2;
+        java.lang.Error $r8;
+        sun.font.TextLineComponent[] $r3, $r4, $r6;
+        java.lang.CloneNotSupportedException $r7;
+        java.lang.Object $r1, $r5;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+     label1:
+        $r1 = specialinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        r2 = (java.awt.font.TextMeasurer) $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.Error;
+
+        specialinvoke $r8.<java.lang.Error: void <init>()>();
+
+        throw $r8;
+
+     label4:
+        $r3 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Object clone()>();
+
+        $r6 = (sun.font.TextLineComponent[]) $r5;
+
+        r2.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents> = $r6;
+
+     label5:
+        return r2;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+    }
+
+    private void invalidateComponents()
+    {
+        java.awt.font.TextMeasurer r0;
+        int $i0;
+        char[] $r1;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        $r1 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i0 = lengthof $r1;
+
+        r0.<java.awt.font.TextMeasurer: int fComponentLimit> = $i0;
+
+        r0.<java.awt.font.TextMeasurer: int fComponentStart> = $i0;
+
+        r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents> = null;
+
+        r0.<java.awt.font.TextMeasurer: boolean haveLayoutWindow> = 0;
+
+        return;
+    }
+
+    private void initAll(java.text.AttributedCharacterIterator)
+    {
+        java.awt.font.TextMeasurer r0;
+        java.text.Bidi $r4, $r27;
+        byte $b4, $b5, $b10;
+        java.util.Map $r5;
+        boolean $z0, $z1;
+        java.awt.font.LineMetrics $r14, $r21;
+        java.awt.Font $r18, $r30;
+        java.text.AttributedCharacterIterator r1;
+        float $f0;
+        java.awt.font.TextAttribute $r9;
+        float[] $r15, $r16, $r17, $r22;
+        java.awt.font.GraphicAttribute r26;
+        int $i0, $i1, $i2, $i3, $i6, $i7, $i8, $i9, $i11, $i12, i13, i15, $i16, $i18;
+        java.util.Hashtable $r29;
+        java.awt.font.NumericShaper $r6;
+        char c14;
+        java.awt.font.FontRenderContext $r13, $r19;
+        java.awt.font.StyledParagraph $r28;
+        char[] $r2, $r8, $r20, $r23, $r24, $r25;
+        java.lang.Object $r10;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        $i0 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        r0.<java.awt.font.TextMeasurer: int fStart> = $i0;
+
+        $i1 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $i2 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i3 = $i1 - $i2;
+
+        $r2 = newarray (char)[$i3];
+
+        r0.<java.awt.font.TextMeasurer: char[] fChars> = $r2;
+
+        i13 = 0;
+
+        c14 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: char first()>();
+
+     label1:
+        $i16 = (int) c14;
+
+        $i18 = (int) 65535;
+
+        if $i16 == $i18 goto label2;
+
+        $r25 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i12 = i13;
+
+        i13 = i13 + 1;
+
+        $r25[$i12] = c14;
+
+        c14 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: char next()>();
+
+        goto label1;
+
+     label2:
+        interfaceinvoke r1.<java.text.AttributedCharacterIterator: char first()>();
+
+        $r27 = new java.text.Bidi;
+
+        specialinvoke $r27.<java.text.Bidi: void <init>(java.text.AttributedCharacterIterator)>(r1);
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = $r27;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $z0 = virtualinvoke $r4.<java.text.Bidi: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label3;
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = null;
+
+     label3:
+        interfaceinvoke r1.<java.text.AttributedCharacterIterator: char first()>();
+
+        $r5 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: java.util.Map getAttributes()>();
+
+        $r6 = staticinvoke <sun.font.AttributeValues: java.awt.font.NumericShaper getNumericShaping(java.util.Map)>($r5);
+
+        if $r6 == null goto label4;
+
+        $r24 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $r23 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i11 = lengthof $r23;
+
+        virtualinvoke $r6.<java.awt.font.NumericShaper: void shape(char[],int,int)>($r24, 0, $i11);
+
+     label4:
+        $r28 = new java.awt.font.StyledParagraph;
+
+        $r8 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        specialinvoke $r28.<java.awt.font.StyledParagraph: void <init>(java.text.AttributedCharacterIterator,char[])>(r1, $r8);
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph> = $r28;
+
+        $f0 = staticinvoke <sun.font.AttributeValues: float getJustification(java.util.Map)>($r5);
+
+        r0.<java.awt.font.TextMeasurer: float fJustifyRatio> = $f0;
+
+        $z1 = staticinvoke <java.awt.font.TextLine: boolean advanceToFirstFont(java.text.AttributedCharacterIterator)>(r1);
+
+        if $z1 == 0 goto label5;
+
+        $r18 = staticinvoke <java.awt.font.TextLine: java.awt.Font getFontAtCurrentPos(java.text.AttributedCharacterIterator)>(r1);
+
+        $i6 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getIndex()>();
+
+        $i7 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        i15 = $i6 - $i7;
+
+        $r20 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i8 = i15 + 1;
+
+        $r19 = r0.<java.awt.font.TextMeasurer: java.awt.font.FontRenderContext fFrc>;
+
+        $r21 = virtualinvoke $r18.<java.awt.Font: java.awt.font.LineMetrics getLineMetrics(char[],int,int,java.awt.font.FontRenderContext)>($r20, i15, $i8, $r19);
+
+        $i9 = virtualinvoke $r21.<java.awt.font.LineMetrics: int getBaselineIndex()>();
+
+        $b10 = (byte) $i9;
+
+        r0.<java.awt.font.TextMeasurer: byte fBaseline> = $b10;
+
+        $r22 = virtualinvoke $r21.<java.awt.font.LineMetrics: float[] getBaselineOffsets()>();
+
+        r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets> = $r22;
+
+        goto label6;
+
+     label5:
+        $r9 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute CHAR_REPLACEMENT>;
+
+        $r10 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r9);
+
+        r26 = (java.awt.font.GraphicAttribute) $r10;
+
+        $b4 = staticinvoke <java.awt.font.TextLayout: byte getBaselineFromGraphic(java.awt.font.GraphicAttribute)>(r26);
+
+        r0.<java.awt.font.TextMeasurer: byte fBaseline> = $b4;
+
+        $r29 = new java.util.Hashtable;
+
+        specialinvoke $r29.<java.util.Hashtable: void <init>(int,float)>(5, 0.9F);
+
+        $r30 = new java.awt.Font;
+
+        specialinvoke $r30.<java.awt.Font: void <init>(java.util.Map)>($r29);
+
+        $r13 = r0.<java.awt.font.TextMeasurer: java.awt.font.FontRenderContext fFrc>;
+
+        $r14 = virtualinvoke $r30.<java.awt.Font: java.awt.font.LineMetrics getLineMetrics(java.lang.String,int,int,java.awt.font.FontRenderContext)>(" ", 0, 1, $r13);
+
+        $r15 = virtualinvoke $r14.<java.awt.font.LineMetrics: float[] getBaselineOffsets()>();
+
+        r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets> = $r15;
+
+     label6:
+        $r16 = r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets>;
+
+        $b5 = r0.<java.awt.font.TextMeasurer: byte fBaseline>;
+
+        $r17 = staticinvoke <java.awt.font.TextLine: float[] getNormalizedOffsets(float[],byte)>($r16, $b5);
+
+        r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets> = $r17;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void invalidateComponents()>();
+
+        return;
+    }
+
+    private void generateComponents(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        byte[] $r6, $r11, $r12;
+        java.text.Bidi $r2, $r5, $r10, $r14;
+        int[] $r13, r28;
+        sun.font.TextLabelFactory $r1;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r16, $r18, $r19, $r20, $r21, $r23, $r25, $r26;
+        sun.font.TextLineComponent[] $r9;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r22, $r27;
+        java.io.PrintStream $r17, $r24;
+        java.lang.IllegalArgumentException $r15;
+        java.awt.font.FontRenderContext $r4;
+        java.awt.font.StyledParagraph $r8;
+        char[] $r3, $r7;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean collectStats>;
+
+        if $z0 == 0 goto label1;
+
+        $i3 = r0.<java.awt.font.TextMeasurer: int formattedChars>;
+
+        $i2 = i1 - i0;
+
+        $i4 = $i3 + $i2;
+
+        r0.<java.awt.font.TextMeasurer: int formattedChars> = $i4;
+
+     label1:
+        $r1 = new sun.font.TextLabelFactory;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: java.awt.font.FontRenderContext fFrc>;
+
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        specialinvoke $r1.<sun.font.TextLabelFactory: void <init>(java.awt.font.FontRenderContext,char[],java.text.Bidi,int)>($r4, $r3, $r2, 0);
+
+        r28 = null;
+
+        $r5 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        if $r5 == null goto label2;
+
+        $r10 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $r11 = staticinvoke <sun.font.BidiUtils: byte[] getLevels(java.text.Bidi)>($r10);
+
+        r0.<java.awt.font.TextMeasurer: byte[] fLevels> = $r11;
+
+        $r12 = r0.<java.awt.font.TextMeasurer: byte[] fLevels>;
+
+        $r13 = staticinvoke <sun.font.BidiUtils: int[] createVisualToLogicalMap(byte[])>($r12);
+
+        r28 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r13);
+
+        $r14 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $z1 = virtualinvoke $r14.<java.text.Bidi: boolean baseIsLeftToRight()>();
+
+        r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR> = $z1;
+
+        goto label3;
+
+     label2:
+        r0.<java.awt.font.TextMeasurer: byte[] fLevels> = null;
+
+        r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR> = 1;
+
+     label3:
+        $r8 = r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph>;
+
+        $r7 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $r6 = r0.<java.awt.font.TextMeasurer: byte[] fLevels>;
+
+        $r9 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] getComponents(java.awt.font.StyledParagraph,char[],int,int,int[],byte[],sun.font.TextLabelFactory)>($r8, $r7, i0, i1, r28, $r6, $r1);
+
+        r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents> = $r9;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r17 = <java.lang.System: java.io.PrintStream out>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("startingAt=");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; endingAt=");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<java.io.PrintStream: void println(java.lang.String)>($r22);
+
+        $r24 = <java.lang.System: java.io.PrintStream out>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("fComponentLimit=");
+
+        $i5 = r0.<java.awt.font.TextMeasurer: int fComponentLimit>;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<java.io.PrintStream: void println(java.lang.String)>($r27);
+
+        throw $r15;
+
+     label6:
+        r0.<java.awt.font.TextMeasurer: int fComponentStart> = i0;
+
+        r0.<java.awt.font.TextMeasurer: int fComponentLimit> = i1;
+
+        return;
+
+        catch java.lang.IllegalArgumentException from label3 to label4 with label5;
+    }
+
+    private int calcLineBreak(int, float)
+    {
+        java.awt.font.TextMeasurer r0;
+        float f0, $f1, f2;
+        sun.font.TextLineComponent[] $r1, $r5, $r6, $r7, $r9;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15, i16, i17, $i18;
+        sun.font.TextLineComponent $r8, r10;
+        char[] $r2, $r3, $r4;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        i14 = i0;
+
+        f2 = f0;
+
+        i15 = r0.<java.awt.font.TextMeasurer: int fComponentStart>;
+
+        i16 = 0;
+
+     label1:
+        $r1 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r1;
+
+        if i16 >= $i1 goto label3;
+
+        $r7 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r8 = $r7[i16];
+
+        $i13 = interfaceinvoke $r8.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i17 = i15 + $i13;
+
+        if i17 <= i0 goto label2;
+
+        goto label3;
+
+     label2:
+        i15 = i17;
+
+        i16 = i16 + 1;
+
+        goto label1;
+
+     label3:
+        $r9 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $i18 = lengthof $r9;
+
+        if i16 >= $i18 goto label6;
+
+        $r5 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        r10 = $r5[i16];
+
+        $i7 = interfaceinvoke r10.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        $i8 = i14 - i15;
+
+        $i9 = interfaceinvoke r10.<sun.font.TextLineComponent: int getLineBreakIndex(int,float)>($i8, f2);
+
+        if $i9 != $i7 goto label4;
+
+        $r6 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $i11 = lengthof $r6;
+
+        if i16 >= $i11 goto label4;
+
+        $i12 = i14 - i15;
+
+        $f1 = interfaceinvoke r10.<sun.font.TextLineComponent: float getAdvanceBetween(int,int)>($i12, $i9);
+
+        f2 = f2 - $f1;
+
+        i15 = i15 + $i7;
+
+        i14 = i15;
+
+        goto label5;
+
+     label4:
+        $i10 = i15 + $i9;
+
+        return $i10;
+
+     label5:
+        i16 = i16 + 1;
+
+        goto label3;
+
+     label6:
+        $i3 = r0.<java.awt.font.TextMeasurer: int fComponentLimit>;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i2 = lengthof $r2;
+
+        if $i3 >= $i2 goto label7;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i5 = lengthof $r4;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void generateComponents(int,int)>(i0, $i5);
+
+        $i6 = specialinvoke r0.<java.awt.font.TextMeasurer: int calcLineBreak(int,float)>(i0, f0);
+
+        return $i6;
+
+     label7:
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i4 = lengthof $r3;
+
+        return $i4;
+    }
+
+    private int trailingCdWhitespaceStart(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        byte[] $r1, $r2;
+        byte $b2, $b5, $b6;
+        int i0, i1, $i3, i7, i8, $i10, $i11, $i12, $i13;
+        boolean $z0, $z1;
+        char $c4;
+        char[] $r3;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<java.awt.font.TextMeasurer: byte[] fLevels>;
+
+        if $r1 == null goto label5;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 0;
+
+        goto label2;
+
+     label1:
+        $z1 = 1;
+
+     label2:
+        $b6 = (byte) $z1;
+
+        i7 = i1;
+
+     label3:
+        $i10 = (int) -1;
+
+        i7 = i7 + $i10;
+
+        if i7 < i0 goto label5;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: byte[] fLevels>;
+
+        $b2 = $r2[i7];
+
+        $i11 = (int) $b2;
+
+        $i3 = $i11 % 2;
+
+        $i12 = (int) $b6;
+
+        if $i3 == $i12 goto label4;
+
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $c4 = $r3[i7];
+
+        $b5 = staticinvoke <java.lang.Character: byte getDirectionality(char)>($c4);
+
+        $i13 = (int) $b5;
+
+        if $i13 == 12 goto label3;
+
+     label4:
+        i8 = i7 + 1;
+
+        return i8;
+
+     label5:
+        return i0;
+    }
+
+    private sun.font.TextLineComponent[] makeComponentsOnRange(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        byte $b26, b27, $b28;
+        boolean $z0, $z1, z2, z3;
+        sun.font.TextLineComponent[] $r1, $r2, $r4, $r7, $r8, $r10;
+        int i0, i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25;
+        sun.font.TextLineComponent $r3, $r5, $r6, $r9, $r11;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i2 = specialinvoke r0.<java.awt.font.TextMeasurer: int trailingCdWhitespaceStart(int,int)>(i0, i1);
+
+        i16 = r0.<java.awt.font.TextMeasurer: int fComponentStart>;
+
+        i17 = 0;
+
+     label01:
+        $r1 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $i3 = lengthof $r1;
+
+        if i17 >= $i3 goto label03;
+
+        $r10 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r11 = $r10[i17];
+
+        $i15 = interfaceinvoke $r11.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i18 = i16 + $i15;
+
+        if i18 <= i0 goto label02;
+
+        goto label03;
+
+     label02:
+        i16 = i18;
+
+        i17 = i17 + 1;
+
+        goto label01;
+
+     label03:
+        z2 = 0;
+
+        i19 = i16;
+
+        i20 = i17;
+
+        z3 = 1;
+
+     label04:
+        if z3 == 0 goto label08;
+
+        $r8 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r9 = $r8[i20];
+
+        $i12 = interfaceinvoke $r9.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i21 = i19 + $i12;
+
+        $i13 = staticinvoke <java.lang.Math: int max(int,int)>(i19, i0);
+
+        if $i2 <= $i13 goto label05;
+
+        $i14 = staticinvoke <java.lang.Math: int min(int,int)>(i21, i1);
+
+        if $i2 >= $i14 goto label05;
+
+        z2 = 1;
+
+     label05:
+        if i21 < i1 goto label06;
+
+        z3 = 0;
+
+        goto label07;
+
+     label06:
+        i19 = i21;
+
+     label07:
+        i20 = i20 + 1;
+
+        goto label04;
+
+     label08:
+        i22 = i20 - i17;
+
+        if z2 == 0 goto label09;
+
+        i22 = i22 + 1;
+
+     label09:
+        $r7 = newarray (sun.font.TextLineComponent)[i22];
+
+        i23 = 0;
+
+        i24 = i0;
+
+        i25 = $i2;
+
+        if $i2 != i0 goto label12;
+
+        $z1 = r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR>;
+
+        if $z1 == 0 goto label10;
+
+        $b26 = 0;
+
+        goto label11;
+
+     label10:
+        $b26 = 1;
+
+     label11:
+        b27 = $b26;
+
+        i25 = i1;
+
+        goto label13;
+
+     label12:
+        b27 = 2;
+
+     label13:
+        if i24 >= i1 goto label18;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r3 = $r2[i17];
+
+        $i4 = interfaceinvoke $r3.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i5 = i16 + $i4;
+
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>(i24, i16);
+
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>(i25, i5);
+
+        $i8 = i23;
+
+        i23 = i23 + 1;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] fComponents>;
+
+        $r5 = $r4[i17];
+
+        $i10 = $i6 - i16;
+
+        $i9 = $i7 - i16;
+
+        $r6 = interfaceinvoke $r5.<sun.font.TextLineComponent: sun.font.TextLineComponent getSubset(int,int,int)>($i10, $i9, b27);
+
+        $r7[$i8] = $r6;
+
+        $i11 = $i7 - $i6;
+
+        i24 = i24 + $i11;
+
+        if i24 != i25 goto label16;
+
+        i25 = i1;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR>;
+
+        if $z0 == 0 goto label14;
+
+        $b28 = 0;
+
+        goto label15;
+
+     label14:
+        $b28 = 1;
+
+     label15:
+        b27 = $b28;
+
+     label16:
+        if i24 != i5 goto label17;
+
+        i17 = i17 + 1;
+
+        i16 = i5;
+
+     label17:
+        goto label13;
+
+     label18:
+        return $r7;
+    }
+
+    private java.awt.font.TextLine makeTextLineOnRange(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        byte[] $r9, r12;
+        float[] $r5;
+        sun.font.TextLineComponent[] $r2;
+        java.text.Bidi $r1, $r7, $r8;
+        int[] $r10, r11;
+        int i0, i1;
+        java.awt.font.TextLine $r3;
+        boolean $z0;
+        java.awt.font.FontRenderContext $r6;
+        char[] $r4;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r11 = null;
+
+        r12 = null;
+
+        $r1 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $r8 = virtualinvoke $r7.<java.text.Bidi: java.text.Bidi createLineBidi(int,int)>(i0, i1);
+
+        $r9 = staticinvoke <sun.font.BidiUtils: byte[] getLevels(java.text.Bidi)>($r8);
+
+        r12 = $r9;
+
+        $r10 = staticinvoke <sun.font.BidiUtils: int[] createVisualToLogicalMap(byte[])>($r9);
+
+        r11 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r10);
+
+     label1:
+        $r2 = specialinvoke r0.<java.awt.font.TextMeasurer: sun.font.TextLineComponent[] makeComponentsOnRange(int,int)>(i0, i1);
+
+        $r3 = new java.awt.font.TextLine;
+
+        $r6 = r0.<java.awt.font.TextMeasurer: java.awt.font.FontRenderContext fFrc>;
+
+        $r5 = r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets>;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean fIsDirectionLTR>;
+
+        specialinvoke $r3.<java.awt.font.TextLine: void <init>(java.awt.font.FontRenderContext,sun.font.TextLineComponent[],float[],char[],int,int,int[],byte[],boolean)>($r6, $r2, $r5, $r4, i0, i1, r11, r12, $z0);
+
+        return $r3;
+    }
+
+    private void ensureComponents(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        int i0, $i1, i2, $i3;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $i1 = r0.<java.awt.font.TextMeasurer: int fComponentStart>;
+
+        if i0 < $i1 goto label1;
+
+        $i3 = r0.<java.awt.font.TextMeasurer: int fComponentLimit>;
+
+        if i2 <= $i3 goto label2;
+
+     label1:
+        specialinvoke r0.<java.awt.font.TextMeasurer: void generateComponents(int,int)>(i0, i2);
+
+     label2:
+        return;
+    }
+
+    private void makeLayoutWindow(int)
+    {
+        java.awt.font.TextMeasurer r0;
+        boolean $z0, $z1, $z2;
+        float f0, $f1, $f2;
+        java.awt.font.CharArrayIterator $r2, $r4, $r6, $r13;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12;
+        java.text.BreakIterator $r5, $r7, $r8, $r9, $r10, $r11, $r12;
+        char[] $r1, $r3, $r14, $r15, $r16, $r17;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i10 = i0;
+
+        $r1 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        i11 = lengthof $r1;
+
+        $i1 = r0.<java.awt.font.TextMeasurer: int layoutCount>;
+
+        if $i1 <= 0 goto label1;
+
+        $z2 = r0.<java.awt.font.TextMeasurer: boolean haveLayoutWindow>;
+
+        if $z2 != 0 goto label1;
+
+        $i4 = r0.<java.awt.font.TextMeasurer: int layoutCharCount>;
+
+        $i3 = r0.<java.awt.font.TextMeasurer: int layoutCount>;
+
+        $i5 = $i4 / $i3;
+
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>($i5, 1);
+
+        f0 = (float) $i6;
+
+        $f1 = <java.awt.font.TextMeasurer: float EST_LINES>;
+
+        $f2 = f0 * $f1;
+
+        $i7 = (int) $f2;
+
+        $i9 = i0 + $i7;
+
+        $r16 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i8 = lengthof $r16;
+
+        i11 = staticinvoke <java.lang.Math: int min(int,int)>($i9, $i8);
+
+     label1:
+        if i0 > 0 goto label2;
+
+        $r15 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i2 = lengthof $r15;
+
+        if i11 >= $i2 goto label7;
+
+     label2:
+        $r2 = r0.<java.awt.font.TextMeasurer: java.awt.font.CharArrayIterator charIter>;
+
+        if $r2 != null goto label3;
+
+        $r13 = new java.awt.font.CharArrayIterator;
+
+        $r14 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        specialinvoke $r13.<java.awt.font.CharArrayIterator: void <init>(char[])>($r14);
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.CharArrayIterator charIter> = $r13;
+
+        goto label4;
+
+     label3:
+        $r4 = r0.<java.awt.font.TextMeasurer: java.awt.font.CharArrayIterator charIter>;
+
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        virtualinvoke $r4.<java.awt.font.CharArrayIterator: void reset(char[])>($r3);
+
+     label4:
+        $r5 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        if $r5 != null goto label5;
+
+        $r12 = staticinvoke <java.text.BreakIterator: java.text.BreakIterator getLineInstance()>();
+
+        r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak> = $r12;
+
+     label5:
+        $r7 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        $r6 = r0.<java.awt.font.TextMeasurer: java.awt.font.CharArrayIterator charIter>;
+
+        virtualinvoke $r7.<java.text.BreakIterator: void setText(java.text.CharacterIterator)>($r6);
+
+        if i0 <= 0 goto label6;
+
+        $r10 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        $z1 = virtualinvoke $r10.<java.text.BreakIterator: boolean isBoundary(int)>(i0);
+
+        if $z1 != 0 goto label6;
+
+        $r11 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        i10 = virtualinvoke $r11.<java.text.BreakIterator: int preceding(int)>(i0);
+
+     label6:
+        $r17 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i12 = lengthof $r17;
+
+        if i11 >= $i12 goto label7;
+
+        $r8 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        $z0 = virtualinvoke $r8.<java.text.BreakIterator: boolean isBoundary(int)>(i11);
+
+        if $z0 != 0 goto label7;
+
+        $r9 = r0.<java.awt.font.TextMeasurer: java.text.BreakIterator fLineBreak>;
+
+        i11 = virtualinvoke $r9.<java.text.BreakIterator: int following(int)>(i11);
+
+     label7:
+        specialinvoke r0.<java.awt.font.TextMeasurer: void ensureComponents(int,int)>(i10, i11);
+
+        r0.<java.awt.font.TextMeasurer: boolean haveLayoutWindow> = 1;
+
+        return;
+    }
+
+    public int getLineBreakIndex(int, float)
+    {
+        java.awt.font.TextMeasurer r0;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7;
+        float f0;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $i1 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        i2 = i0 - $i1;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean haveLayoutWindow>;
+
+        if $z0 == 0 goto label1;
+
+        $i3 = r0.<java.awt.font.TextMeasurer: int fComponentStart>;
+
+        if i2 < $i3 goto label1;
+
+        $i4 = r0.<java.awt.font.TextMeasurer: int fComponentLimit>;
+
+        if i2 < $i4 goto label2;
+
+     label1:
+        specialinvoke r0.<java.awt.font.TextMeasurer: void makeLayoutWindow(int)>(i2);
+
+     label2:
+        $i5 = specialinvoke r0.<java.awt.font.TextMeasurer: int calcLineBreak(int,float)>(i2, f0);
+
+        $i6 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i7 = $i5 + $i6;
+
+        return $i7;
+    }
+
+    public float getAdvanceBetween(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        int i0, $i1, i2, i3, $i4, i5;
+        java.awt.font.TextLine $r1;
+        float $f0;
+        java.awt.font.TextLine$TextLineMetrics $r2;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $i1 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        i2 = i0 - $i1;
+
+        $i4 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        i5 = i3 - $i4;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void ensureComponents(int,int)>(i2, i5);
+
+        $r1 = specialinvoke r0.<java.awt.font.TextMeasurer: java.awt.font.TextLine makeTextLineOnRange(int,int)>(i2, i5);
+
+        $r2 = virtualinvoke $r1.<java.awt.font.TextLine: java.awt.font.TextLine$TextLineMetrics getMetrics()>();
+
+        $f0 = $r2.<java.awt.font.TextLine$TextLineMetrics: float advance>;
+
+        return $f0;
+    }
+
+    public java.awt.font.TextLayout getLayout(int, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        java.awt.font.TextLayout $r3;
+        float[] $r4;
+        byte $b7;
+        int i0, $i1, i2, i3, $i4, i5, $i6, $i8, $i9, $i10, $i11, $i12;
+        java.awt.font.TextLine $r1;
+        char[] $r2;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $i1 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        i2 = i0 - $i1;
+
+        $i4 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        i5 = i3 - $i4;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void ensureComponents(int,int)>(i2, i5);
+
+        $r1 = specialinvoke r0.<java.awt.font.TextMeasurer: java.awt.font.TextLine makeTextLineOnRange(int,int)>(i2, i5);
+
+        $r2 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i6 = lengthof $r2;
+
+        if i5 >= $i6 goto label1;
+
+        $i9 = r0.<java.awt.font.TextMeasurer: int layoutCharCount>;
+
+        $i8 = i3 - i0;
+
+        $i10 = $i9 + $i8;
+
+        r0.<java.awt.font.TextMeasurer: int layoutCharCount> = $i10;
+
+        $i11 = r0.<java.awt.font.TextMeasurer: int layoutCount>;
+
+        $i12 = $i11 + 1;
+
+        r0.<java.awt.font.TextMeasurer: int layoutCount> = $i12;
+
+     label1:
+        $r3 = new java.awt.font.TextLayout;
+
+        $b7 = r0.<java.awt.font.TextMeasurer: byte fBaseline>;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: float[] fBaselineOffsets>;
+
+        $f0 = r0.<java.awt.font.TextMeasurer: float fJustifyRatio>;
+
+        specialinvoke $r3.<java.awt.font.TextLayout: void <init>(java.awt.font.TextLine,byte,float[],float)>($r1, $b7, $r4, $f0);
+
+        return $r3;
+    }
+
+    private void printStats()
+    {
+        java.io.PrintStream $r1;
+        java.awt.font.TextMeasurer r3;
+        int $i0;
+        java.lang.StringBuilder $r0, $r2, $r4;
+        java.lang.String $r5;
+
+        r3 := @this: java.awt.font.TextMeasurer;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("formattedChars: ");
+
+        $i0 = r3.<java.awt.font.TextMeasurer: int formattedChars>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        r3.<java.awt.font.TextMeasurer: boolean collectStats> = 0;
+
+        return;
+    }
+
+    public void insertChar(java.text.AttributedCharacterIterator, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        java.text.Bidi $r5, $r9, $r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.text.AttributedCharacterIterator r1;
+        java.awt.font.TextAttribute $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, $i11, $i12, $i13, $i14, $i15;
+        char $c10;
+        java.awt.font.StyledParagraph $r12, $r13;
+        char[] $r2, $r3, $r4, $r8, $r11;
+        java.lang.Object $r7;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        i8 := @parameter1: int;
+
+        $z0 = r0.<java.awt.font.TextMeasurer: boolean collectStats>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void printStats()>();
+
+     label1:
+        $z1 = <java.awt.font.TextMeasurer: boolean wantStats>;
+
+        if $z1 == 0 goto label2;
+
+        r0.<java.awt.font.TextMeasurer: boolean collectStats> = 1;
+
+     label2:
+        $i0 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        r0.<java.awt.font.TextMeasurer: int fStart> = $i0;
+
+        $i1 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $i2 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i5 = $i1 - $i2;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i3 = lengthof $r2;
+
+        $i4 = $i3 + 1;
+
+        if $i5 == $i4 goto label3;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void initAll(java.text.AttributedCharacterIterator)>(r1);
+
+     label3:
+        $i6 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i7 = $i1 - $i6;
+
+        $r8 = newarray (char)[$i7];
+
+        $i9 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i15 = i8 - $i9;
+
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r8, 0, $i15);
+
+        $c10 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: char setIndex(int)>(i8);
+
+        $r8[$i15] = $c10;
+
+        $r4 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i13 = $i15 + 1;
+
+        $i11 = $i1 - i8;
+
+        $i12 = $i11 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i15, $r8, $i13, $i12);
+
+        r0.<java.awt.font.TextMeasurer: char[] fChars> = $r8;
+
+        $r5 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        if $r5 != null goto label4;
+
+        $i14 = $i15 + 1;
+
+        $z2 = staticinvoke <java.text.Bidi: boolean requiresBidi(char[],int,int)>($r8, $i15, $i14);
+
+        if $z2 != 0 goto label4;
+
+        $r6 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute BIDI_EMBEDDING>;
+
+        $r7 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r6);
+
+        if $r7 == null goto label5;
+
+     label4:
+        $r9 = new java.text.Bidi;
+
+        specialinvoke $r9.<java.text.Bidi: void <init>(java.text.AttributedCharacterIterator)>(r1);
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = $r9;
+
+        $r10 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $z3 = virtualinvoke $r10.<java.text.Bidi: boolean isLeftToRight()>();
+
+        if $z3 == 0 goto label5;
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = null;
+
+     label5:
+        $r11 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $r12 = r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph>;
+
+        $r13 = staticinvoke <java.awt.font.StyledParagraph: java.awt.font.StyledParagraph insertChar(java.text.AttributedCharacterIterator,char[],int,java.awt.font.StyledParagraph)>(r1, $r11, i8, $r12);
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph> = $r13;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void invalidateComponents()>();
+
+        return;
+    }
+
+    public void deleteChar(java.text.AttributedCharacterIterator, int)
+    {
+        java.awt.font.TextMeasurer r0;
+        java.text.Bidi $r5, $r6, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        boolean $z0;
+        java.text.AttributedCharacterIterator r1;
+        java.awt.font.StyledParagraph $r10, $r11;
+        char[] $r2, $r3, $r4, $r8, $r9;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        i8 := @parameter1: int;
+
+        $i0 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        r0.<java.awt.font.TextMeasurer: int fStart> = $i0;
+
+        $i1 = interfaceinvoke r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $i2 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i5 = $i1 - $i2;
+
+        $r2 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i3 = lengthof $r2;
+
+        $i4 = $i3 - 1;
+
+        if $i5 == $i4 goto label1;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void initAll(java.text.AttributedCharacterIterator)>(r1);
+
+     label1:
+        $i6 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i7 = $i1 - $i6;
+
+        $r8 = newarray (char)[$i7];
+
+        $i9 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i14 = i8 - $i9;
+
+        $r3 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i10 = r0.<java.awt.font.TextMeasurer: int fStart>;
+
+        $i11 = i8 - $i10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r8, 0, $i11);
+
+        $r4 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $i13 = $i14 + 1;
+
+        $i12 = $i1 - i8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i13, $r8, $i14, $i12);
+
+        r0.<java.awt.font.TextMeasurer: char[] fChars> = $r8;
+
+        $r5 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        if $r5 == null goto label2;
+
+        $r6 = new java.text.Bidi;
+
+        specialinvoke $r6.<java.text.Bidi: void <init>(java.text.AttributedCharacterIterator)>(r1);
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = $r6;
+
+        $r7 = r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi>;
+
+        $z0 = virtualinvoke $r7.<java.text.Bidi: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label2;
+
+        r0.<java.awt.font.TextMeasurer: java.text.Bidi fBidi> = null;
+
+     label2:
+        $r9 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        $r10 = r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph>;
+
+        $r11 = staticinvoke <java.awt.font.StyledParagraph: java.awt.font.StyledParagraph deleteChar(java.text.AttributedCharacterIterator,char[],int,java.awt.font.StyledParagraph)>(r1, $r9, i8, $r10);
+
+        r0.<java.awt.font.TextMeasurer: java.awt.font.StyledParagraph fParagraph> = $r11;
+
+        specialinvoke r0.<java.awt.font.TextMeasurer: void invalidateComponents()>();
+
+        return;
+    }
+
+    char[] getChars()
+    {
+        java.awt.font.TextMeasurer r0;
+        char[] $r1;
+
+        r0 := @this: java.awt.font.TextMeasurer;
+
+        $r1 = r0.<java.awt.font.TextMeasurer: char[] fChars>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <java.awt.font.TextMeasurer: float EST_LINES> = 2.1F;
+
+        <java.awt.font.TextMeasurer: boolean wantStats> = 0;
+
+        return;
+    }
+}

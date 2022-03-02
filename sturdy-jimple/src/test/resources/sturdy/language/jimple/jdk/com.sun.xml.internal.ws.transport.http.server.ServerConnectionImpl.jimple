@@ -1,0 +1,820 @@
+final class com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl extends com.sun.xml.internal.ws.transport.http.WSHTTPConnection implements com.sun.xml.internal.ws.api.server.WebServiceContextDelegate
+{
+    private final com.sun.net.httpserver.HttpExchange httpExchange;
+    private int status;
+    private final com.sun.xml.internal.ws.transport.http.HttpAdapter adapter;
+    private com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream in;
+    private java.io.OutputStream out;
+    private static final com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model;
+
+    public void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter, com.sun.net.httpserver.HttpExchange)
+    {
+        com.sun.net.httpserver.HttpExchange r2;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r2 := @parameter1: com.sun.net.httpserver.HttpExchange;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter> = r1;
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange> = r2;
+
+        return;
+    }
+
+    public java.util.Map getRequestHeaders()
+    {
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getRequestHeader(java.lang.String)
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String r3, $r4;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        $r4 = virtualinvoke $r2.<com.sun.net.httpserver.Headers: java.lang.String getFirst(java.lang.String)>(r3);
+
+        return $r4;
+    }
+
+    public void setResponseHeaders(java.util.Map)
+    {
+        java.util.ArrayList $r14;
+        java.util.Map r3;
+        com.sun.net.httpserver.Headers $r2;
+        java.lang.String r9, $r12, $r13;
+        boolean $z0, $z1, $z2;
+        java.util.Map$Entry r7;
+        java.util.Iterator $r5;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        java.util.Set $r4;
+        java.util.List r11;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.Object $r6, $r8, $r10;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: java.util.Map;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        virtualinvoke $r2.<com.sun.net.httpserver.Headers: void clear()>();
+
+        $r4 = interfaceinvoke r3.<java.util.Map: java.util.Set entrySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r6;
+
+        $r8 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r9 = (java.lang.String) $r8;
+
+        $r10 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r11 = (java.util.List) $r10;
+
+        $r12 = "Content-Length";
+
+        $z1 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r9);
+
+        if $z1 != 0 goto label2;
+
+        $r13 = "Content-Type";
+
+        $z2 = virtualinvoke $r13.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r9);
+
+        if $z2 != 0 goto label2;
+
+        $r14 = new java.util.ArrayList;
+
+        specialinvoke $r14.<java.util.ArrayList: void <init>(java.util.Collection)>(r11);
+
+        virtualinvoke $r2.<com.sun.net.httpserver.Headers: java.util.List put(java.lang.String,java.util.List)>(r9, $r14);
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void setResponseHeader(java.lang.String, java.util.List)
+    {
+        java.util.List r4;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.List;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        virtualinvoke $r2.<com.sun.net.httpserver.Headers: java.util.List put(java.lang.String,java.util.List)>(r3, r4);
+
+        return;
+    }
+
+    public java.util.Set getRequestHeaderNames()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        java.util.Set $r3;
+        com.sun.net.httpserver.HttpExchange $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.net.httpserver.Headers: java.util.Set keySet()>();
+
+        return $r3;
+    }
+
+    public java.util.List getRequestHeaderValues(java.lang.String)
+    {
+        java.util.List $r4;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        $r4 = virtualinvoke $r2.<com.sun.net.httpserver.Headers: java.util.List get(java.lang.Object)>(r3);
+
+        return $r4;
+    }
+
+    public java.util.Map getResponseHeaders()
+    {
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        return $r2;
+    }
+
+    public void setContentTypeResponseHeader(java.lang.String)
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        virtualinvoke $r2.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("Content-Type", r3);
+
+        return;
+    }
+
+    public void setStatus(int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: int status> = i0;
+
+        return;
+    }
+
+    public int getStatus()
+    {
+        int $i0;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $i0 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: int status>;
+
+        return $i0;
+    }
+
+    public java.io.InputStream getInput()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream $r1, $r2, $r3;
+        com.sun.net.httpserver.HttpExchange $r4;
+        java.io.InputStream $r5;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream in>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r5 = virtualinvoke $r4.<com.sun.net.httpserver.HttpExchange: java.io.InputStream getRequestBody()>();
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream: void <init>(java.io.InputStream)>($r5);
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream in> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream in>;
+
+        return $r2;
+    }
+
+    public java.io.OutputStream getOutput() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r8, $r9;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        long $l1;
+        com.sun.net.httpserver.Headers $r3;
+        int $i0, $i2;
+        com.sun.net.httpserver.HttpExchange $r2, $r5, $r7;
+        java.lang.String $r4;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$1 $r6;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: java.io.OutputStream out>;
+
+        if $r1 != null goto label3;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r3 = virtualinvoke $r2.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        $r4 = virtualinvoke $r3.<com.sun.net.httpserver.Headers: java.lang.String getFirst(java.lang.String)>("Content-Length");
+
+        if $r4 == null goto label1;
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r4);
+
+        goto label2;
+
+     label1:
+        $i2 = 0;
+
+     label2:
+        $r5 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $i0 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: int getStatus()>();
+
+        $l1 = (long) $i2;
+
+        virtualinvoke $r5.<com.sun.net.httpserver.HttpExchange: void sendResponseHeaders(int,long)>($i0, $l1);
+
+        $r6 = new com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$1;
+
+        $r7 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r8 = virtualinvoke $r7.<com.sun.net.httpserver.HttpExchange: java.io.OutputStream getResponseBody()>();
+
+        specialinvoke $r6.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$1: void <init>(com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl,java.io.OutputStream)>(r0, $r8);
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: java.io.OutputStream out> = $r6;
+
+     label3:
+        $r9 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: java.io.OutputStream out>;
+
+        return $r9;
+    }
+
+    public com.sun.xml.internal.ws.api.server.WebServiceContextDelegate getWebServiceContextDelegate()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        return r0;
+    }
+
+    public java.security.Principal getUserPrincipal(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.xml.internal.ws.api.message.Packet r3;
+        com.sun.net.httpserver.HttpExchange $r1;
+        com.sun.net.httpserver.HttpPrincipal $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.HttpPrincipal getPrincipal()>();
+
+        return $r2;
+    }
+
+    public boolean isUserInRole(com.sun.xml.internal.ws.api.message.Packet, java.lang.String)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        java.lang.String r2;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: java.lang.String;
+
+        return 0;
+    }
+
+    public java.lang.String getEPRAddress(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r4;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapterList $r2;
+        javax.xml.ws.WebServiceException $r11;
+        com.sun.xml.internal.ws.api.message.Packet r14;
+        com.sun.xml.internal.ws.api.server.PortAddressResolver $r6;
+        java.lang.Class $r5;
+        java.lang.String $r3, $r9, $r10, $r13;
+        javax.xml.namespace.QName $r7, $r8, $r12;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r14 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r4 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter>;
+
+        $r2 = $r1.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapterList owner>;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: java.lang.String getBaseAddress()>();
+
+        $r5 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: java.lang.Class getImplementationClass()>();
+
+        $r6 = virtualinvoke $r2.<com.sun.xml.internal.ws.transport.http.HttpAdapterList: com.sun.xml.internal.ws.api.server.PortAddressResolver createPortAddressResolver(java.lang.String,java.lang.Class)>($r3, $r5);
+
+        $r7 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getServiceName()>();
+
+        $r8 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r9 = virtualinvoke $r8.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r10 = virtualinvoke $r6.<com.sun.xml.internal.ws.api.server.PortAddressResolver: java.lang.String getAddressFor(javax.xml.namespace.QName,java.lang.String)>($r7, $r9);
+
+        if $r10 != null goto label1;
+
+        $r11 = new javax.xml.ws.WebServiceException;
+
+        $r12 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r13 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_NO_ADDRESS_AVAILABLE(java.lang.Object)>($r12);
+
+        specialinvoke $r11.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r13);
+
+        throw $r11;
+
+     label1:
+        return $r10;
+    }
+
+    public java.lang.String getWSDLAddress(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r2, $r5;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r6;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r3, $r10;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter $r4;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: java.lang.String getEPRAddress(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.server.WSEndpoint)>(r1, r2);
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPort()>();
+
+        if $r6 == null goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?wsdl");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+
+     label1:
+        return null;
+    }
+
+    public boolean isSecure()
+    {
+        com.sun.net.httpserver.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $z0 = $r1 instanceof com.sun.net.httpserver.HttpsExchange;
+
+        return $z0;
+    }
+
+    public java.lang.String getRequestMethod()
+    {
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String $r2;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.lang.String getRequestMethod()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getQueryString()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.net.URI $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.net.URI getRequestURI()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URI: java.lang.String getQuery()>();
+
+        if $r3 == null goto label1;
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public java.lang.String getPathInfo()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.HttpContext $r5;
+        int $i0, $i1, $i2;
+        com.sun.net.httpserver.HttpExchange $r1, $r4;
+        java.net.URI $r2;
+        java.lang.String $r3, $r6, $r7;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.net.URI getRequestURI()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URI: java.lang.String getPath()>();
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r5 = virtualinvoke $r4.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.HttpContext getHttpContext()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.net.httpserver.HttpContext: java.lang.String getPath()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i0 <= $i1 goto label1;
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        return $r7;
+
+     label1:
+        return null;
+    }
+
+    public com.sun.net.httpserver.HttpExchange getExchange()
+    {
+        com.sun.net.httpserver.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        return $r1;
+    }
+
+    public java.lang.String getBaseAddress()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r1;
+        java.net.InetSocketAddress $r7, $r10;
+        com.sun.net.httpserver.Headers $r4;
+        int $i0;
+        java.lang.StringBuilder $r0;
+        com.sun.net.httpserver.HttpExchange $r2, $r3, $r6, $r9;
+        java.lang.String $r5, $r8, $r11, $r12;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $z0 = $r2 instanceof com.sun.net.httpserver.HttpsExchange;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = "https";
+
+        goto label2;
+
+     label1:
+        $r12 = "http";
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+        $r3 = r1.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r4 = virtualinvoke $r3.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.net.httpserver.Headers: java.lang.String getFirst(java.lang.String)>("Host");
+
+        if $r5 == null goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        goto label4;
+
+     label3:
+        $r6 = r1.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r7 = virtualinvoke $r6.<com.sun.net.httpserver.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $r8 = virtualinvoke $r7.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r9 = r1.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r10 = virtualinvoke $r9.<com.sun.net.httpserver.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke $r10.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+     label4:
+        $r11 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    public java.lang.String getProtocol()
+    {
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String $r2;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.lang.String getProtocol()>();
+
+        return $r2;
+    }
+
+    public void setContentLengthResponseHeader(int)
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.Headers $r2;
+        int i0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("Content-Length", $r6);
+
+        return;
+    }
+
+    public java.lang.String getRequestURI()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.net.URI $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.net.URI getRequestURI()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URI: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public java.lang.String getRequestScheme()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $z0 = $r1 instanceof com.sun.net.httpserver.HttpsExchange;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = "https";
+
+        goto label2;
+
+     label1:
+        $r2 = "http";
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.String getServerName()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.lang.String $r3;
+        java.net.InetSocketAddress $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $r3 = virtualinvoke $r2.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        return $r3;
+    }
+
+    public int getServerPort()
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        int $i0;
+        com.sun.net.httpserver.HttpExchange $r1;
+        java.net.InetSocketAddress $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.net.httpserver.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke $r2.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i0;
+    }
+
+    protected com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap getPropertyMap()
+    {
+        com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap $r0;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r1;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r0 = <com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model>;
+
+        return $r0;
+    }
+
+    static com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream access$000(com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl)
+    {
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl r0;
+        com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl$LWHSInputStream in>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap $r0;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap parse(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/transport/http/server/ServerConnectionImpl;");
+
+        <com.sun.xml.internal.ws.transport.http.server.ServerConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model> = $r0;
+
+        return;
+    }
+}

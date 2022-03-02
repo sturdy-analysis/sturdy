@@ -1,0 +1,542 @@
+public class com.sun.corba.se.impl.oa.poa.POAFactory extends java.lang.Object implements com.sun.corba.se.spi.oa.ObjectAdapterFactory
+{
+    private java.util.Map exportedServantsToPOA;
+    private java.util.Set poaManagers;
+    private int poaManagerId;
+    private int poaId;
+    private com.sun.corba.se.impl.oa.poa.POAImpl rootPOA;
+    private com.sun.corba.se.impl.oa.poa.DelegateImpl delegateImpl;
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private com.sun.corba.se.impl.logging.POASystemException wrapper;
+    private com.sun.corba.se.impl.logging.OMGSystemException omgWrapper;
+    private boolean isShuttingDown;
+
+    public com.sun.corba.se.impl.logging.POASystemException getWrapper()
+    {
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        com.sun.corba.se.impl.logging.POASystemException $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        return $r1;
+    }
+
+    public void <init>()
+    {
+        java.util.HashSet $r2;
+        java.util.Set $r3;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        java.util.WeakHashMap $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.WeakHashMap;
+
+        specialinvoke $r1.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Map exportedServantsToPOA> = $r1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: boolean isShuttingDown> = 0;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>(int)>(4);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r2);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Set poaManagers> = $r3;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaManagerId> = 0;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaId> = 0;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.POAImpl rootPOA> = null;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.DelegateImpl delegateImpl> = null;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb> = null;
+
+        return;
+    }
+
+    public synchronized org.omg.PortableServer.POA lookupPOA(org.omg.PortableServer.Servant)
+    {
+        org.omg.PortableServer.Servant r1;
+        java.util.Map $r2;
+        org.omg.PortableServer.POA $r4;
+        java.lang.Object $r3;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r1 := @parameter0: org.omg.PortableServer.Servant;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Map exportedServantsToPOA>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (org.omg.PortableServer.POA) $r3;
+
+        return $r4;
+    }
+
+    public synchronized void registerPOAForServant(org.omg.PortableServer.POA, org.omg.PortableServer.Servant)
+    {
+        org.omg.PortableServer.Servant r1;
+        org.omg.PortableServer.POA r2;
+        java.util.Map $r3;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r2 := @parameter0: org.omg.PortableServer.POA;
+
+        r1 := @parameter1: org.omg.PortableServer.Servant;
+
+        $r3 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Map exportedServantsToPOA>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    public synchronized void unregisterPOAForServant(org.omg.PortableServer.POA, org.omg.PortableServer.Servant)
+    {
+        org.omg.PortableServer.Servant r1;
+        java.util.Map $r2;
+        org.omg.PortableServer.POA r3;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r3 := @parameter0: org.omg.PortableServer.POA;
+
+        r1 := @parameter1: org.omg.PortableServer.Servant;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Map exportedServantsToPOA>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public void init(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.logging.OMGSystemException $r3;
+        com.sun.corba.se.impl.logging.POASystemException $r2;
+        com.sun.corba.se.impl.oa.poa.DelegateImpl $r4;
+        com.sun.corba.se.spi.resolver.LocalResolver $r6;
+        com.sun.corba.se.impl.oa.poa.POACurrent $r5;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.spi.orbutil.closure.Closure $r7;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.POASystemException: com.sun.corba.se.impl.logging.POASystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "oa.lifecycle");
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper> = $r2;
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.logging.OMGSystemException: com.sun.corba.se.impl.logging.OMGSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "oa.lifecycle");
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper> = $r3;
+
+        $r4 = new com.sun.corba.se.impl.oa.poa.DelegateImpl;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.oa.poa.DelegateImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.impl.oa.poa.POAFactory)>(r1, r0);
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.DelegateImpl delegateImpl> = $r4;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.oa.poa.POAFactory: void registerRootPOA()>();
+
+        $r5 = new com.sun.corba.se.impl.oa.poa.POACurrent;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.oa.poa.POACurrent: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $r6 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r7 = staticinvoke <com.sun.corba.se.spi.orbutil.closure.ClosureFactory: com.sun.corba.se.spi.orbutil.closure.Closure makeConstant(java.lang.Object)>($r5);
+
+        interfaceinvoke $r6.<com.sun.corba.se.spi.resolver.LocalResolver: void register(java.lang.String,com.sun.corba.se.spi.orbutil.closure.Closure)>("POACurrent", $r7);
+
+        return;
+    }
+
+    public com.sun.corba.se.spi.oa.ObjectAdapter find(com.sun.corba.se.spi.ior.ObjectAdapterId)
+    {
+        org.omg.CORBA.OBJ_ADAPTER $r5, $r13;
+        org.omg.CORBA.INTERNAL $r10;
+        org.omg.CORBA.TRANSIENT $r14;
+        com.sun.corba.se.impl.logging.OMGSystemException $r17;
+        org.omg.PortableServer.POAPackage.AdapterNonExistent $r16;
+        java.lang.String $r7, r8;
+        boolean $z0, $z1, z2;
+        java.util.Iterator $r1;
+        com.sun.corba.se.impl.logging.POASystemException $r4, $r9, $r12;
+        org.omg.PortableServer.POA r19;
+        com.sun.corba.se.spi.ior.ObjectAdapterId r0;
+        com.sun.corba.se.spi.oa.ObjectAdapter $r3;
+        java.lang.Exception $r11;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r15, $r18;
+        java.lang.Object $r6;
+        com.sun.corba.se.impl.oa.poa.POAFactory r2;
+
+        r2 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r0 := @parameter0: com.sun.corba.se.spi.ior.ObjectAdapterId;
+
+     label01:
+        z2 = 1;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.ior.ObjectAdapterId: java.util.Iterator iterator()>();
+
+        r19 = virtualinvoke r2.<com.sun.corba.se.impl.oa.poa.POAFactory: org.omg.PortableServer.POA getRootPOA()>();
+
+     label02:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label06;
+
+        $r6 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        r8 = (java.lang.String) $r7;
+
+        if z2 == 0 goto label04;
+
+        $z1 = virtualinvoke r8.<java.lang.String: boolean equals(java.lang.Object)>("RootPOA");
+
+        if $z1 != 0 goto label03;
+
+        $r9 = r2.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL makeFactoryNotPoa(java.lang.Object)>(r8);
+
+        throw $r10;
+
+     label03:
+        z2 = 0;
+
+        goto label05;
+
+     label04:
+        r19 = interfaceinvoke r19.<org.omg.PortableServer.POA: org.omg.PortableServer.POA find_POA(java.lang.String,boolean)>(r8, 1);
+
+     label05:
+        goto label02;
+
+     label06:
+        goto label11;
+
+     label07:
+        $r16 := @caughtexception;
+
+        $r17 = r2.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r18 = virtualinvoke $r17.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.OBJECT_NOT_EXIST noObjectAdaptor(java.lang.Throwable)>($r16);
+
+        throw $r18;
+
+     label08:
+        $r15 := @caughtexception;
+
+        throw $r15;
+
+     label09:
+        $r14 := @caughtexception;
+
+        throw $r14;
+
+     label10:
+        $r11 := @caughtexception;
+
+        $r12 = r2.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJ_ADAPTER poaLookupError(java.lang.Throwable)>($r11);
+
+        throw $r13;
+
+     label11:
+        if r19 != null goto label12;
+
+        $r4 = r2.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJ_ADAPTER poaLookupError()>();
+
+        throw $r5;
+
+     label12:
+        $r3 = (com.sun.corba.se.spi.oa.ObjectAdapter) r19;
+
+        return $r3;
+
+        catch org.omg.PortableServer.POAPackage.AdapterNonExistent from label01 to label06 with label07;
+        catch org.omg.CORBA.OBJECT_NOT_EXIST from label01 to label06 with label08;
+        catch org.omg.CORBA.TRANSIENT from label01 to label06 with label09;
+        catch java.lang.Exception from label01 to label06 with label10;
+    }
+
+    public void shutdown(boolean)
+    {
+        java.lang.Throwable $r7;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        org.omg.PortableServer.POAManager $r5;
+        org.omg.PortableServer.POAManagerPackage.AdapterInactive $r6;
+        java.util.HashSet $r1;
+        java.lang.Object $r4;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        boolean z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        z0 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label1:
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: boolean isShuttingDown> = 1;
+
+        $r1 = new java.util.HashSet;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Set poaManagers>;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.util.HashSet: java.util.Iterator iterator()>();
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r7;
+
+     label5:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label9;
+
+     label6:
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (org.omg.PortableServer.POAManager) $r4;
+
+        interfaceinvoke $r5.<org.omg.PortableServer.POAManager: void deactivate(boolean,boolean)>(1, z0);
+
+     label7:
+        goto label5;
+
+     label8:
+        $r6 := @caughtexception;
+
+        goto label5;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+        catch org.omg.PortableServer.POAManagerPackage.AdapterInactive from label6 to label7 with label8;
+    }
+
+    public synchronized void removePoaManager(org.omg.PortableServer.POAManager)
+    {
+        java.util.Set $r2;
+        org.omg.PortableServer.POAManager r1;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r1 := @parameter0: org.omg.PortableServer.POAManager;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Set poaManagers>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized void addPoaManager(org.omg.PortableServer.POAManager)
+    {
+        java.util.Set $r2;
+        org.omg.PortableServer.POAManager r1;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        r1 := @parameter0: org.omg.PortableServer.POAManager;
+
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: java.util.Set poaManagers>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized int newPOAManagerId()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaManagerId>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaManagerId> = $i1;
+
+        return $i0;
+    }
+
+    public void registerRootPOA()
+    {
+        com.sun.corba.se.spi.orbutil.closure.Closure $r4;
+        com.sun.corba.se.spi.resolver.LocalResolver $r3;
+        com.sun.corba.se.impl.oa.poa.POAFactory r1;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        com.sun.corba.se.impl.oa.poa.POAFactory$1 $r0;
+
+        r1 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r0 = new com.sun.corba.se.impl.oa.poa.POAFactory$1;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.oa.poa.POAFactory$1: void <init>(com.sun.corba.se.impl.oa.poa.POAFactory)>(r1);
+
+        $r2 = r1.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r4 = staticinvoke <com.sun.corba.se.spi.orbutil.closure.ClosureFactory: com.sun.corba.se.spi.orbutil.closure.Closure makeFuture(com.sun.corba.se.spi.orbutil.closure.Closure)>($r0);
+
+        interfaceinvoke $r3.<com.sun.corba.se.spi.resolver.LocalResolver: void register(java.lang.String,com.sun.corba.se.spi.orbutil.closure.Closure)>("RootPOA", $r4);
+
+        return;
+    }
+
+    public synchronized org.omg.PortableServer.POA getRootPOA()
+    {
+        org.omg.CORBA.INTERNAL $r10;
+        com.sun.corba.se.impl.logging.OMGSystemException $r6;
+        com.sun.corba.se.impl.logging.POASystemException $r9;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        org.omg.CORBA.Object $r4;
+        com.sun.corba.se.impl.oa.poa.POAImpl $r1, $r2, $r5;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r7;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        org.omg.CORBA.ORBPackage.InvalidName $r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.POAImpl rootPOA>;
+
+        if $r1 != null goto label4;
+
+        $z0 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: boolean isShuttingDown>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.OBJECT_NOT_EXIST noObjectAdaptor()>();
+
+        throw $r7;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Object resolve_initial_references(java.lang.String)>("RootPOA");
+
+        $r5 = (com.sun.corba.se.impl.oa.poa.POAImpl) $r4;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.POAImpl rootPOA> = $r5;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL cantResolveRootPoa(java.lang.Throwable)>($r8);
+
+        throw $r10;
+
+     label4:
+        $r2 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.POAImpl rootPOA>;
+
+        return $r2;
+
+        catch org.omg.CORBA.ORBPackage.InvalidName from label1 to label2 with label3;
+    }
+
+    public org.omg.PortableServer.portable.Delegate getDelegateImpl()
+    {
+        com.sun.corba.se.impl.oa.poa.DelegateImpl $r1;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.impl.oa.poa.DelegateImpl delegateImpl>;
+
+        return $r1;
+    }
+
+    public synchronized int newPOAId()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $i0 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaId>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.oa.poa.POAFactory: int poaId> = $i1;
+
+        return $i0;
+    }
+
+    public com.sun.corba.se.spi.orb.ORB getORB()
+    {
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.spi.orb.ORB access$000(com.sun.corba.se.impl.oa.poa.POAFactory)
+    {
+        com.sun.corba.se.impl.oa.poa.POAFactory r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.oa.poa.POAFactory;
+
+        $r1 = r0.<com.sun.corba.se.impl.oa.poa.POAFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        return $r1;
+    }
+}

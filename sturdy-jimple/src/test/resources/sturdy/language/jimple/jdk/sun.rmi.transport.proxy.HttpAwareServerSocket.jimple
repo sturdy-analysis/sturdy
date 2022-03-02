@@ -1,0 +1,161 @@
+class sun.rmi.transport.proxy.HttpAwareServerSocket extends java.net.ServerSocket
+{
+
+    public void <init>(int) throws java.io.IOException
+    {
+        int i0;
+        sun.rmi.transport.proxy.HttpAwareServerSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpAwareServerSocket;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.net.ServerSocket: void <init>(int)>(i0);
+
+        return;
+    }
+
+    public void <init>(int, int) throws java.io.IOException
+    {
+        int i0, i1;
+        sun.rmi.transport.proxy.HttpAwareServerSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpAwareServerSocket;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.net.ServerSocket: void <init>(int,int)>(i0, i1);
+
+        return;
+    }
+
+    public java.net.Socket accept() throws java.io.IOException
+    {
+        java.net.Socket $r1;
+        java.io.BufferedInputStream $r2;
+        java.util.logging.Level $r4, $r8, $r11;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r12;
+        boolean z0, $z2, $z3, $z4;
+        sun.rmi.transport.proxy.HttpAwareServerSocket r0;
+        sun.rmi.transport.proxy.WrappedSocket $r6;
+        sun.rmi.runtime.Log $r5, $r9, $r10;
+        sun.rmi.transport.proxy.HttpReceiveSocket $r7;
+        java.io.InputStream $r3;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpAwareServerSocket;
+
+        $r1 = specialinvoke r0.<java.net.ServerSocket: java.net.Socket accept()>();
+
+        $r2 = new java.io.BufferedInputStream;
+
+        $r3 = virtualinvoke $r1.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r3);
+
+        $r5 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r4 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r5.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r4, "socket accepted (checking for POST)");
+
+        virtualinvoke $r2.<java.io.BufferedInputStream: void mark(int)>(4);
+
+        $i0 = virtualinvoke $r2.<java.io.BufferedInputStream: int read()>();
+
+        if $i0 != 80 goto label1;
+
+        $i1 = virtualinvoke $r2.<java.io.BufferedInputStream: int read()>();
+
+        if $i1 != 79 goto label1;
+
+        $i2 = virtualinvoke $r2.<java.io.BufferedInputStream: int read()>();
+
+        if $i2 != 83 goto label1;
+
+        $i3 = virtualinvoke $r2.<java.io.BufferedInputStream: int read()>();
+
+        if $i3 != 84 goto label1;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label2:
+        z0 = $z3;
+
+        virtualinvoke $r2.<java.io.BufferedInputStream: void reset()>();
+
+        $r10 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r11 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z2 = virtualinvoke $r10.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r11);
+
+        if $z2 == 0 goto label5;
+
+        $r9 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r8 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        if $z4 == 0 goto label3;
+
+        $r12 = "POST found, HTTP socket returned";
+
+        goto label4;
+
+     label3:
+        $r12 = "POST not found, direct socket returned";
+
+     label4:
+        virtualinvoke $r9.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r8, $r12);
+
+     label5:
+        if z0 == 0 goto label6;
+
+        $r7 = new sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        specialinvoke $r7.<sun.rmi.transport.proxy.HttpReceiveSocket: void <init>(java.net.Socket,java.io.InputStream,java.io.OutputStream)>($r1, $r2, null);
+
+        return $r7;
+
+     label6:
+        $r6 = new sun.rmi.transport.proxy.WrappedSocket;
+
+        specialinvoke $r6.<sun.rmi.transport.proxy.WrappedSocket: void <init>(java.net.Socket,java.io.InputStream,java.io.OutputStream)>($r1, $r2, null);
+
+        return $r6;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.rmi.transport.proxy.HttpAwareServerSocket r2;
+        java.lang.StringBuilder $r0, $r1, $r4;
+        java.lang.String $r3, $r5;
+
+        r2 := @this: sun.rmi.transport.proxy.HttpAwareServerSocket;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HttpAware");
+
+        $r3 = specialinvoke r2.<java.net.ServerSocket: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+}

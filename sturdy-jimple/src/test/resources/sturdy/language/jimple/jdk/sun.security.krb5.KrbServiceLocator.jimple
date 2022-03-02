@@ -1,0 +1,584 @@
+class sun.security.krb5.KrbServiceLocator extends java.lang.Object
+{
+    private static final java.lang.String SRV_RR;
+    private static final java.lang.String[] SRV_RR_ATTR;
+    private static final java.lang.String SRV_TXT;
+    private static final java.lang.String[] SRV_TXT_ATTR;
+    private static final java.util.Random random;
+    private static final boolean DEBUG;
+
+    private void <init>()
+    {
+        sun.security.krb5.KrbServiceLocator r0;
+
+        r0 := @this: sun.security.krb5.KrbServiceLocator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static java.lang.String[] getKerberosService(java.lang.String)
+    {
+        java.security.Permission[] $r8;
+        java.lang.Throwable $r18;
+        java.lang.String[] r12, r20, r22;
+        javax.naming.NamingException $r15, $r19;
+        javax.naming.directory.Attribute $r11;
+        int $i0, i1, i2;
+        java.lang.String r2, $r4, $r14;
+        javax.naming.Context $r6;
+        java.net.SocketPermission $r9;
+        java.util.Hashtable $r5;
+        boolean $z0;
+        java.security.PrivilegedActionException $r17;
+        java.security.PrivilegedExceptionAction $r7;
+        java.lang.Exception $r16;
+        javax.naming.directory.Attributes r21;
+        java.lang.StringBuilder $r0, $r1, $r3;
+        java.lang.Object $r10, $r13;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("dns:///_kerberos.");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r20 = null;
+
+     label01:
+        $r5 = new java.util.Hashtable;
+
+        specialinvoke $r5.<java.util.Hashtable: void <init>(int)>(0);
+
+        $r6 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.Context getURLContext(java.lang.String,java.util.Hashtable)>("dns", $r5);
+
+        $z0 = $r6 instanceof javax.naming.directory.DirContext;
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r7 = staticinvoke <sun.security.krb5.KrbServiceLocator$lambda_getKerberosService_0__421: java.security.PrivilegedExceptionAction bootstrap$(javax.naming.Context,java.lang.String)>($r6, $r4);
+
+        $r8 = newarray (java.security.Permission)[1];
+
+        $r9 = new java.net.SocketPermission;
+
+        specialinvoke $r9.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>("*", "connect,accept");
+
+        $r8[0] = $r9;
+
+        $r10 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext,java.security.Permission[])>($r7, null, $r8);
+
+        r21 = (javax.naming.directory.Attributes) $r10;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r17 := @caughtexception;
+
+        $r18 = virtualinvoke $r17.<java.security.PrivilegedActionException: java.lang.Throwable getCause()>();
+
+        $r19 = (javax.naming.NamingException) $r18;
+
+        throw $r19;
+
+     label06:
+        if r21 == null goto label14;
+
+        $r11 = interfaceinvoke r21.<javax.naming.directory.Attributes: javax.naming.directory.Attribute get(java.lang.String)>("TXT");
+
+        if $r11 == null goto label14;
+
+        $i0 = interfaceinvoke $r11.<javax.naming.directory.Attribute: int size()>();
+
+        r12 = newarray (java.lang.String)[$i0];
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label07:
+        if i1 >= $i0 goto label12;
+
+     label08:
+        $r13 = interfaceinvoke $r11.<javax.naming.directory.Attribute: java.lang.Object get(int)>(i1);
+
+        $r14 = (java.lang.String) $r13;
+
+        r12[i2] = $r14;
+
+        i2 = i2 + 1;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r16 := @caughtexception;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label07;
+
+     label12:
+        if i2 >= $i0 goto label13;
+
+        r22 = newarray (java.lang.String)[i2];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r12, 0, r22, 0, i2);
+
+        r20 = r22;
+
+        goto label14;
+
+     label13:
+        r20 = r12;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r15 := @caughtexception;
+
+     label16:
+        return r20;
+
+        catch java.security.PrivilegedActionException from label03 to label04 with label05;
+        catch java.lang.Exception from label08 to label09 with label10;
+        catch javax.naming.NamingException from label01 to label02 with label15;
+        catch javax.naming.NamingException from label03 to label14 with label15;
+    }
+
+    static java.lang.String[] getKerberosService(java.lang.String, java.lang.String)
+    {
+        java.security.Permission[] $r11;
+        javax.naming.NamingException $r18, $r22;
+        javax.naming.directory.Attribute $r14;
+        java.net.SocketPermission $r12;
+        boolean $z0;
+        java.security.PrivilegedExceptionAction $r10;
+        java.lang.Exception $r19;
+        javax.naming.directory.Attributes r24;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r6;
+        java.lang.Throwable $r21;
+        sun.security.krb5.KrbServiceLocator$SrvRecord $r15;
+        java.lang.String[] r23;
+        sun.security.krb5.KrbServiceLocator$SrvRecord[] r25, r26;
+        int $i0, i1, i2, i3;
+        java.lang.String r2, r5, $r7, $r17;
+        javax.naming.Context $r9;
+        java.util.Hashtable $r8;
+        java.security.PrivilegedActionException $r20;
+        java.lang.Object $r13, $r16;
+
+        r5 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("dns:///_kerberos.");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r23 = null;
+
+     label01:
+        $r8 = new java.util.Hashtable;
+
+        specialinvoke $r8.<java.util.Hashtable: void <init>(int)>(0);
+
+        $r9 = staticinvoke <javax.naming.spi.NamingManager: javax.naming.Context getURLContext(java.lang.String,java.util.Hashtable)>("dns", $r8);
+
+        $z0 = $r9 instanceof javax.naming.directory.DirContext;
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r10 = staticinvoke <sun.security.krb5.KrbServiceLocator$lambda_getKerberosService_1__422: java.security.PrivilegedExceptionAction bootstrap$(javax.naming.Context,java.lang.String)>($r9, $r7);
+
+        $r11 = newarray (java.security.Permission)[1];
+
+        $r12 = new java.net.SocketPermission;
+
+        specialinvoke $r12.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>("*", "connect,accept");
+
+        $r11[0] = $r12;
+
+        $r13 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext,java.security.Permission[])>($r10, null, $r11);
+
+        r24 = (javax.naming.directory.Attributes) $r13;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r20 := @caughtexception;
+
+        $r21 = virtualinvoke $r20.<java.security.PrivilegedActionException: java.lang.Throwable getCause()>();
+
+        $r22 = (javax.naming.NamingException) $r21;
+
+        throw $r22;
+
+     label06:
+        if r24 == null goto label15;
+
+        $r14 = interfaceinvoke r24.<javax.naming.directory.Attributes: javax.naming.directory.Attribute get(java.lang.String)>("SRV");
+
+        if $r14 == null goto label15;
+
+        $i0 = interfaceinvoke $r14.<javax.naming.directory.Attribute: int size()>();
+
+        r25 = newarray (sun.security.krb5.KrbServiceLocator$SrvRecord)[$i0];
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label07:
+        if i1 >= $i0 goto label12;
+
+     label08:
+        $r15 = new sun.security.krb5.KrbServiceLocator$SrvRecord;
+
+        $r16 = interfaceinvoke $r14.<javax.naming.directory.Attribute: java.lang.Object get(int)>(i1);
+
+        $r17 = (java.lang.String) $r16;
+
+        specialinvoke $r15.<sun.security.krb5.KrbServiceLocator$SrvRecord: void <init>(java.lang.String)>($r17);
+
+        r25[i2] = $r15;
+
+        i2 = i2 + 1;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r19 := @caughtexception;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label07;
+
+     label12:
+        i3 = i2;
+
+        if i2 >= $i0 goto label13;
+
+        r26 = newarray (sun.security.krb5.KrbServiceLocator$SrvRecord)[i2];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r25, 0, r26, 0, i2);
+
+        r25 = r26;
+
+     label13:
+        if i3 <= 1 goto label14;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>(r25);
+
+     label14:
+        r23 = staticinvoke <sun.security.krb5.KrbServiceLocator: java.lang.String[] extractHostports(sun.security.krb5.KrbServiceLocator$SrvRecord[])>(r25);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r18 := @caughtexception;
+
+     label17:
+        return r23;
+
+        catch java.security.PrivilegedActionException from label03 to label04 with label05;
+        catch java.lang.Exception from label08 to label09 with label10;
+        catch javax.naming.NamingException from label01 to label02 with label16;
+        catch javax.naming.NamingException from label03 to label15 with label16;
+    }
+
+    private static java.lang.String[] extractHostports(sun.security.krb5.KrbServiceLocator$SrvRecord[])
+    {
+        sun.security.krb5.KrbServiceLocator$SrvRecord $r2, $r3;
+        java.lang.String[] r4;
+        sun.security.krb5.KrbServiceLocator$SrvRecord[] r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10, $i11, $i12, i13, i14;
+        java.lang.String $r1;
+
+        r0 := @parameter0: sun.security.krb5.KrbServiceLocator$SrvRecord[];
+
+        r4 = null;
+
+        i8 = 0;
+
+        i9 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i9 >= $i0 goto label7;
+
+        if r4 != null goto label2;
+
+        $i7 = lengthof r0;
+
+        r4 = newarray (java.lang.String)[$i7];
+
+     label2:
+        i10 = i9;
+
+     label3:
+        $i11 = lengthof r0;
+
+        $i12 = $i11 - 1;
+
+        if i9 >= $i12 goto label4;
+
+        $r2 = r0[i9];
+
+        $i5 = $r2.<sun.security.krb5.KrbServiceLocator$SrvRecord: int priority>;
+
+        $i3 = i9 + 1;
+
+        $r3 = r0[$i3];
+
+        $i4 = $r3.<sun.security.krb5.KrbServiceLocator$SrvRecord: int priority>;
+
+        if $i5 != $i4 goto label4;
+
+        i9 = i9 + 1;
+
+        goto label3;
+
+     label4:
+        i13 = i9;
+
+        $i1 = i9 - i10;
+
+        $i6 = $i1 + 1;
+
+        i14 = 0;
+
+     label5:
+        if i14 >= $i6 goto label6;
+
+        $i2 = i8;
+
+        i8 = i8 + 1;
+
+        $r1 = staticinvoke <sun.security.krb5.KrbServiceLocator: java.lang.String selectHostport(sun.security.krb5.KrbServiceLocator$SrvRecord[],int,int)>(r0, i10, i13);
+
+        r4[$i2] = $r1;
+
+        i14 = i14 + 1;
+
+        goto label5;
+
+     label6:
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label7:
+        return r4;
+    }
+
+    private static java.lang.String selectHostport(sun.security.krb5.KrbServiceLocator$SrvRecord[], int, int)
+    {
+        sun.security.krb5.KrbServiceLocator$SrvRecord $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        java.util.Random $r0;
+        sun.security.krb5.KrbServiceLocator$SrvRecord[] r1;
+        int i0, i1, $i2, i3, $i4, $i5, i6, i7, $i8, i9;
+        java.lang.String $r9, r10;
+
+        r1 := @parameter0: sun.security.krb5.KrbServiceLocator$SrvRecord[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if i0 != i1 goto label1;
+
+        $r8 = r1[i0];
+
+        $r9 = $r8.<sun.security.krb5.KrbServiceLocator$SrvRecord: java.lang.String hostport>;
+
+        return $r9;
+
+     label1:
+        i6 = 0;
+
+        i7 = i0;
+
+     label2:
+        if i7 > i1 goto label4;
+
+        $r5 = r1[i7];
+
+        if $r5 == null goto label3;
+
+        $r6 = r1[i7];
+
+        $i5 = $r6.<sun.security.krb5.KrbServiceLocator$SrvRecord: int weight>;
+
+        i6 = i6 + $i5;
+
+        $r7 = r1[i7];
+
+        $r7.<sun.security.krb5.KrbServiceLocator$SrvRecord: int sum> = i6;
+
+     label3:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label4:
+        r10 = null;
+
+        if i6 != 0 goto label5;
+
+        $i8 = 0;
+
+        goto label6;
+
+     label5:
+        $r0 = <sun.security.krb5.KrbServiceLocator: java.util.Random random>;
+
+        $i2 = i6 + 1;
+
+        $i8 = virtualinvoke $r0.<java.util.Random: int nextInt(int)>($i2);
+
+     label6:
+        i3 = $i8;
+
+        i9 = i0;
+
+     label7:
+        if i9 > i1 goto label9;
+
+        $r2 = r1[i9];
+
+        if $r2 == null goto label8;
+
+        $r3 = r1[i9];
+
+        $i4 = $r3.<sun.security.krb5.KrbServiceLocator$SrvRecord: int sum>;
+
+        if $i4 < i3 goto label8;
+
+        $r4 = r1[i9];
+
+        r10 = $r4.<sun.security.krb5.KrbServiceLocator$SrvRecord: java.lang.String hostport>;
+
+        r1[i9] = null;
+
+        goto label9;
+
+     label8:
+        i9 = i9 + 1;
+
+        goto label7;
+
+     label9:
+        return r10;
+    }
+
+    public static javax.naming.directory.Attributes lambda$getKerberosService$1(javax.naming.Context, java.lang.String) throws java.lang.Exception
+    {
+        javax.naming.directory.Attributes $r4;
+        javax.naming.directory.DirContext $r3;
+        java.lang.String[] $r2;
+        javax.naming.Context r0;
+        java.lang.String r1;
+
+        r0 := @parameter0: javax.naming.Context;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r3 = (javax.naming.directory.DirContext) r0;
+
+        $r2 = <sun.security.krb5.KrbServiceLocator: java.lang.String[] SRV_RR_ATTR>;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.directory.Attributes getAttributes(java.lang.String,java.lang.String[])>(r1, $r2);
+
+        return $r4;
+    }
+
+    public static javax.naming.directory.Attributes lambda$getKerberosService$0(javax.naming.Context, java.lang.String) throws java.lang.Exception
+    {
+        javax.naming.directory.Attributes $r4;
+        javax.naming.directory.DirContext $r3;
+        java.lang.String[] $r2;
+        javax.naming.Context r0;
+        java.lang.String r1;
+
+        r0 := @parameter0: javax.naming.Context;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r3 = (javax.naming.directory.DirContext) r0;
+
+        $r2 = <sun.security.krb5.KrbServiceLocator: java.lang.String[] SRV_TXT_ATTR>;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.directory.Attributes getAttributes(java.lang.String,java.lang.String[])>(r1, $r2);
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r1;
+        java.util.Random $r2;
+        boolean $z0;
+
+        <sun.security.krb5.KrbServiceLocator: java.lang.String SRV_TXT> = "TXT";
+
+        <sun.security.krb5.KrbServiceLocator: java.lang.String SRV_RR> = "SRV";
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = "SRV";
+
+        <sun.security.krb5.KrbServiceLocator: java.lang.String[] SRV_RR_ATTR> = $r0;
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = "TXT";
+
+        <sun.security.krb5.KrbServiceLocator: java.lang.String[] SRV_TXT_ATTR> = $r1;
+
+        $r2 = new java.util.Random;
+
+        specialinvoke $r2.<java.util.Random: void <init>()>();
+
+        <sun.security.krb5.KrbServiceLocator: java.util.Random random> = $r2;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.KrbServiceLocator: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

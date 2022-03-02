@@ -1,0 +1,3630 @@
+final class java.lang.invoke.MemberName extends java.lang.Object implements java.lang.reflect.Member, java.lang.Cloneable
+{
+    private java.lang.Class clazz;
+    private java.lang.String name;
+    private java.lang.Object type;
+    private int flags;
+    private java.lang.Object resolution;
+    private static final int MH_INVOKE_MODS;
+    static final int BRIDGE;
+    static final int VARARGS;
+    static final int SYNTHETIC;
+    static final int ANNOTATION;
+    static final int ENUM;
+    static final java.lang.String CONSTRUCTOR_NAME;
+    static final int RECOGNIZED_MODIFIERS;
+    static final int IS_METHOD;
+    static final int IS_CONSTRUCTOR;
+    static final int IS_FIELD;
+    static final int IS_TYPE;
+    static final int CALLER_SENSITIVE;
+    static final int ALL_ACCESS;
+    static final int ALL_KINDS;
+    static final int IS_INVOCABLE;
+    static final int IS_FIELD_OR_METHOD;
+    static final int SEARCH_ALL_SUPERS;
+    static final boolean $assertionsDisabled;
+
+    public java.lang.Class getDeclaringClass()
+    {
+        java.lang.Class $r1;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        return $r1;
+    }
+
+    public java.lang.ClassLoader getClassLoader()
+    {
+        java.lang.Class $r1;
+        java.lang.ClassLoader $r2;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.invoke.MemberName r0;
+        java.lang.String $r1, $r2, $r3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void expandFromVM()>();
+
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        if $r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        return $r2;
+    }
+
+    public java.lang.invoke.MethodType getMethodOrFieldType()
+    {
+        java.lang.invoke.MethodType $r8, $r10, $r11;
+        java.lang.invoke.MemberName r0;
+        java.lang.InternalError $r1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.Class $r6, $r7, $r9;
+        java.lang.String $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        return $r11;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isGetter()>();
+
+        if $z1 == 0 goto label2;
+
+        $r9 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+        $r10 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class)>($r9);
+
+        return $r10;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isSetter()>();
+
+        if $z2 == 0 goto label3;
+
+        $r6 = <java.lang.Void: java.lang.Class TYPE>;
+
+        $r7 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+        $r8 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class,java.lang.Class)>($r6, $r7);
+
+        return $r8;
+
+     label3:
+        $r1 = new java.lang.InternalError;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("not a method or field: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.InternalError: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public java.lang.invoke.MethodType getMethodType()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.invoke.MemberName r0;
+        java.lang.StringBuilder $r8, $r9, $r11;
+        java.lang.ClassLoader $r21;
+        java.lang.Throwable $r26;
+        java.lang.Object[] $r14, r29;
+        java.lang.AssertionError $r7;
+        java.lang.String $r12, r28;
+        java.lang.Class[] $r16, r30;
+        java.lang.RuntimeException $r24;
+        java.lang.invoke.MethodType $r5, $r19, $r22, $r23;
+        java.lang.Object $r1, $r2, $r3, $r4, $r6, $r10, $r13, $r15, $r17, $r20, $r25, r27;
+        java.lang.Class r18;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r1 != null goto label01;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void expandFromVM()>();
+
+        $r25 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r25 != null goto label01;
+
+        return null;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 != 0 goto label02;
+
+        $r24 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("not invocable, no method type");
+
+        throw $r24;
+
+     label02:
+        r27 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z1 = r27 instanceof java.lang.invoke.MethodType;
+
+        if $z1 == 0 goto label03;
+
+        $r23 = (java.lang.invoke.MethodType) r27;
+
+        return $r23;
+
+     label03:
+        entermonitor r0;
+
+     label04:
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z2 = $r2 instanceof java.lang.String;
+
+        if $z2 == 0 goto label05;
+
+        $r20 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        r28 = (java.lang.String) $r20;
+
+        $r21 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.ClassLoader getClassLoader()>();
+
+        $r22 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType fromMethodDescriptorString(java.lang.String,java.lang.ClassLoader)>(r28, $r21);
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r22;
+
+        goto label06;
+
+     label05:
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z3 = $r3 instanceof java.lang.Object[];
+
+        if $z3 == 0 goto label06;
+
+        $r13 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r14 = (java.lang.Object[]) $r13;
+
+        r29 = (java.lang.Object[]) $r14;
+
+        $r15 = r29[1];
+
+        $r16 = (java.lang.Class[]) $r15;
+
+        r30 = (java.lang.Class[]) $r16;
+
+        $r17 = r29[0];
+
+        r18 = (java.lang.Class) $r17;
+
+        $r19 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class,java.lang.Class[])>(r18, r30);
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r19;
+
+     label06:
+        $z5 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label07;
+
+        $r6 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z4 = $r6 instanceof java.lang.invoke.MethodType;
+
+        if $z4 != 0 goto label07;
+
+        $r7 = new java.lang.AssertionError;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad method type ");
+
+        $r10 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>(java.lang.Object)>($r12);
+
+        throw $r7;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r26 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r26;
+
+     label11:
+        $r4 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r5 = (java.lang.invoke.MethodType) $r4;
+
+        return $r5;
+
+        catch java.lang.Throwable from label04 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public java.lang.invoke.MethodType getInvocationType()
+    {
+        java.lang.Class[] $r2;
+        java.lang.invoke.MethodType $r1, $r4, $r6;
+        byte $b0;
+        java.lang.invoke.MemberName r0;
+        int $i1;
+        java.lang.Class $r3, $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodOrFieldType()>();
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isConstructor()>();
+
+        if $z0 == 0 goto label1;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i1 = (int) $b0;
+
+        if $i1 != 8 goto label1;
+
+        $r5 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r6 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType changeReturnType(java.lang.Class)>($r5);
+
+        return $r6;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isStatic()>();
+
+        if $z1 != 0 goto label2;
+
+        $r2 = newarray (java.lang.Class)[1];
+
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r2[0] = $r3;
+
+        $r4 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.lang.Class[])>(0, $r2);
+
+        return $r4;
+
+     label2:
+        return $r1;
+    }
+
+    public java.lang.Class[] getParameterTypes()
+    {
+        java.lang.Class[] $r2;
+        java.lang.invoke.MethodType $r1;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class[] parameterArray()>();
+
+        return $r2;
+    }
+
+    public java.lang.Class getReturnType()
+    {
+        java.lang.Class $r2;
+        java.lang.invoke.MethodType $r1;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        return $r2;
+    }
+
+    public java.lang.Class getFieldType()
+    {
+        java.lang.Throwable $r24;
+        java.lang.AssertionError $r6;
+        java.lang.String $r11, r13, $r17;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.RuntimeException $r22;
+        java.lang.invoke.MethodType $r19;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object $r1, $r2, $r3, $r5, $r9, $r12, $r23, r25;
+        java.lang.Class $r4, $r20, $r21;
+        java.lang.StringBuilder $r7, $r8, $r10, $r14, $r15, $r16;
+        java.lang.ClassLoader $r18;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r1 != null goto label01;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void expandFromVM()>();
+
+        $r23 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r23 != null goto label01;
+
+        return null;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 == 0 goto label02;
+
+        $r22 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("not a field or nested class, no simple type");
+
+        throw $r22;
+
+     label02:
+        r25 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z1 = r25 instanceof java.lang.Class;
+
+        if $z1 == 0 goto label03;
+
+        $r21 = (java.lang.Class) r25;
+
+        return $r21;
+
+     label03:
+        entermonitor r0;
+
+     label04:
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z2 = $r2 instanceof java.lang.String;
+
+        if $z2 == 0 goto label05;
+
+        $r12 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        r13 = (java.lang.String) $r12;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("()");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.ClassLoader getClassLoader()>();
+
+        $r19 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType fromMethodDescriptorString(java.lang.String,java.lang.ClassLoader)>($r17, $r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r20;
+
+     label05:
+        $z3 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label06;
+
+        $r5 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z4 = $r5 instanceof java.lang.Class;
+
+        if $z4 != 0 goto label06;
+
+        $r6 = new java.lang.AssertionError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad field type ");
+
+        $r9 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r6;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r24 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r24;
+
+     label10:
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r4 = (java.lang.Class) $r3;
+
+        return $r4;
+
+        catch java.lang.Throwable from label04 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public java.lang.Object getType()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+        java.io.Serializable $r1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.lang.String getSignature()
+    {
+        java.lang.invoke.MethodType $r4;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object $r1, $r6;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void expandFromVM()>();
+
+        $r6 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r6 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        $r5 = staticinvoke <sun.invoke.util.BytecodeDescriptor: java.lang.String unparse(java.lang.invoke.MethodType)>($r4);
+
+        return $r5;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+        $r3 = staticinvoke <sun.invoke.util.BytecodeDescriptor: java.lang.String unparse(java.lang.Class)>($r2);
+
+        return $r3;
+    }
+
+    public int getModifiers()
+    {
+        java.lang.invoke.MemberName r0;
+        int $i0, $i1, $i3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $i3 = (int) 65535;
+
+        $i1 = $i0 & $i3;
+
+        return $i1;
+    }
+
+    public byte getReferenceKind()
+    {
+        byte $b3;
+        java.lang.invoke.MemberName r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $i1 = $i0 >>> 24;
+
+        $i2 = $i1 & 15;
+
+        $b3 = (byte) $i2;
+
+        return $b3;
+    }
+
+    private boolean referenceKindIsConsistent()
+    {
+        byte $b0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16;
+        java.lang.invoke.MemberName r0;
+        java.lang.AssertionError $r9, $r10, $r11, $r12, $r13, $r14, $r15;
+        int $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.Class $r2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        if $b0 != 0 goto label1;
+
+        $z16 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isType()>();
+
+        return $z16;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isField()>();
+
+        if $z0 == 0 goto label3;
+
+        $z12 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z12 != 0 goto label2;
+
+        $z15 = specialinvoke r0.<java.lang.invoke.MemberName: boolean staticIsConsistent()>();
+
+        if $z15 != 0 goto label2;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label2:
+        $z13 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z13 != 0 goto label9;
+
+        $z14 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsField(byte)>($b0);
+
+        if $z14 != 0 goto label9;
+
+        $r10 = new java.lang.AssertionError;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>()>();
+
+        throw $r10;
+
+     label3:
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isConstructor()>();
+
+        if $z1 == 0 goto label4;
+
+        $z11 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z11 != 0 goto label9;
+
+        $i1 = (int) $b0;
+
+        if $i1 == 8 goto label9;
+
+        $i2 = (int) $b0;
+
+        if $i2 == 7 goto label9;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label4:
+        $z2 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isMethod()>();
+
+        if $z2 == 0 goto label8;
+
+        $z4 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label5;
+
+        $z10 = specialinvoke r0.<java.lang.invoke.MemberName: boolean staticIsConsistent()>();
+
+        if $z10 != 0 goto label5;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>()>();
+
+        throw $r12;
+
+     label5:
+        $z5 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label6;
+
+        $z9 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsMethod(byte)>($b0);
+
+        if $z9 != 0 goto label6;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label6:
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $z6 = virtualinvoke $r2.<java.lang.Class: boolean isInterface()>();
+
+        if $z6 == 0 goto label9;
+
+        $z7 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z7 != 0 goto label9;
+
+        $i3 = (int) $b0;
+
+        if $i3 == 9 goto label9;
+
+        $i4 = (int) $b0;
+
+        if $i4 == 6 goto label9;
+
+        $i5 = (int) $b0;
+
+        if $i5 == 7 goto label9;
+
+        $i6 = (int) $b0;
+
+        if $i6 != 5 goto label7;
+
+        $z8 = specialinvoke r0.<java.lang.invoke.MemberName: boolean isObjectPublicMethod()>();
+
+        if $z8 != 0 goto label9;
+
+     label7:
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label8:
+        $z3 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label9;
+
+        $r15 = new java.lang.AssertionError;
+
+        specialinvoke $r15.<java.lang.AssertionError: void <init>()>();
+
+        throw $r15;
+
+     label9:
+        return 1;
+    }
+
+    private boolean isObjectPublicMethod()
+    {
+        int $i0, $i1, $i2;
+        java.lang.String $r3, $r10, $r11;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.MethodType $r2;
+        java.lang.invoke.MemberName r0;
+        java.lang.Class $r1, $r4, $r5, $r6, $r7, $r8, $r9;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r1 != class "Ljava/lang/Object;" goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("toString");
+
+        if $z0 == 0 goto label2;
+
+        $r9 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        if $r9 != class "Ljava/lang/String;" goto label2;
+
+        $i2 = virtualinvoke $r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i2 != 0 goto label2;
+
+        return 1;
+
+     label2:
+        $r10 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("hashCode");
+
+        if $z1 == 0 goto label3;
+
+        $r7 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r8 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if $r7 != $r8 goto label3;
+
+        $i1 = virtualinvoke $r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i1 != 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r11 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $z2 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("equals");
+
+        if $z2 == 0 goto label4;
+
+        $r4 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r5 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if $r4 != $r5 goto label4;
+
+        $i0 = virtualinvoke $r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 != 1 goto label4;
+
+        $r6 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        if $r6 != class "Ljava/lang/Object;" goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    boolean referenceKindIsConsistentWith(int)
+    {
+        java.lang.AssertionError $r10, $r11, $r13;
+        byte $b0, $b2;
+        int i1, $i3, $i4, $i5, $i6;
+        java.lang.String $r7, $r9;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.MemberName r0;
+        java.lang.StringBuilder $r5, $r6, $r8, $r12;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        i1 := @parameter0: int;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i3 = (int) $b0;
+
+        if $i3 != i1 goto label1;
+
+        return 1;
+
+     label1:
+        tableswitch(i1)
+        {
+            case 5: goto label4;
+            case 6: goto label6;
+            case 7: goto label6;
+            case 8: goto label4;
+            case 9: goto label2;
+            default: goto label6;
+        };
+
+     label2:
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        $i4 = (int) $b0;
+
+        if $i4 == 5 goto label3;
+
+        $i5 = (int) $b0;
+
+        if $i5 == 7 goto label3;
+
+        $r10 = new java.lang.AssertionError;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>(r0);
+
+        throw $r10;
+
+     label3:
+        return 1;
+
+     label4:
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label5;
+
+        $i6 = (int) $b0;
+
+        if $i6 == 7 goto label5;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>(java.lang.Object)>(r0);
+
+        throw $r11;
+
+     label5:
+        return 1;
+
+     label6:
+        $z2 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label7;
+
+        $r13 = new java.lang.AssertionError;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $b2 = (byte) i1;
+
+        $r7 = staticinvoke <java.lang.invoke.MethodHandleNatives: java.lang.String refKindName(byte)>($b2);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>(java.lang.Object)>($r9);
+
+        throw $r13;
+
+     label7:
+        return 1;
+    }
+
+    private boolean staticIsConsistent()
+    {
+        byte $b0;
+        java.lang.invoke.MemberName r0;
+        int $i1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsStatic(byte)>($b0);
+
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isStatic()>();
+
+        if $z0 == $z1 goto label1;
+
+        $i1 = virtualinvoke r0.<java.lang.invoke.MemberName: int getModifiers()>();
+
+        if $i1 != 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private boolean vminfoIsConsistent()
+    {
+        byte $b0, $b2, $b3, $b4;
+        java.lang.Long $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.lang.invoke.MemberName r0;
+        java.lang.StringBuilder $r10, $r11, $r12, $r17, $r18, $r19, $r24, $r25, $r26, $r33, $r36, $r39;
+        java.lang.Object[] $r2, $r3, $r6, $r7;
+        long $l1;
+        java.lang.AssertionError $r31, $r32, $r34, $r35, $r37, $r38, $r40;
+        int $i5, $i6, $i7;
+        java.lang.String $r13, $r20, $r27;
+        java.lang.Object $r1, $r4, $r28;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z11 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z11 != 0 goto label1;
+
+        $r31 = new java.lang.AssertionError;
+
+        specialinvoke $r31.<java.lang.AssertionError: void <init>()>();
+
+        throw $r31;
+
+     label1:
+        $r1 = staticinvoke <java.lang.invoke.MethodHandleNatives: java.lang.Object getMemberVMInfo(java.lang.invoke.MemberName)>(r0);
+
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $z10 = $r1 instanceof java.lang.Object[];
+
+        if $z10 != 0 goto label2;
+
+        $r32 = new java.lang.AssertionError;
+
+        specialinvoke $r32.<java.lang.AssertionError: void <init>()>();
+
+        throw $r32;
+
+     label2:
+        $r2 = (java.lang.Object[]) $r1;
+
+        $r3 = (java.lang.Object[]) $r2;
+
+        $r4 = $r3[0];
+
+        $r5 = (java.lang.Long) $r4;
+
+        $l1 = virtualinvoke $r5.<java.lang.Long: long longValue()>();
+
+        $r6 = (java.lang.Object[]) $r1;
+
+        $r7 = (java.lang.Object[]) $r6;
+
+        $r28 = $r7[1];
+
+        $z2 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsField(byte)>($b0);
+
+        if $z2 == 0 goto label4;
+
+        $z7 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z7 != 0 goto label3;
+
+        $b4 = $l1 cmp 0L;
+
+        $i5 = (int) $b4;
+
+        if $i5 >= 0 goto label3;
+
+        $r34 = new java.lang.AssertionError;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.lang.AssertionError: void <init>(java.lang.Object)>($r27);
+
+        throw $r34;
+
+     label3:
+        $z8 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z8 != 0 goto label7;
+
+        $z9 = $r28 instanceof java.lang.Class;
+
+        if $z9 != 0 goto label7;
+
+        $r35 = new java.lang.AssertionError;
+
+        specialinvoke $r35.<java.lang.AssertionError: void <init>()>();
+
+        throw $r35;
+
+     label4:
+        $z3 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindDoesDispatch(byte)>($b0);
+
+        if $z3 == 0 goto label5;
+
+        $z6 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z6 != 0 goto label6;
+
+        $b3 = $l1 cmp 0L;
+
+        $i6 = (int) $b3;
+
+        if $i6 >= 0 goto label6;
+
+        $r37 = new java.lang.AssertionError;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r37.<java.lang.AssertionError: void <init>(java.lang.Object)>($r20);
+
+        throw $r37;
+
+     label5:
+        $z4 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label6;
+
+        $b2 = $l1 cmp 0L;
+
+        $i7 = (int) $b2;
+
+        if $i7 < 0 goto label6;
+
+        $r38 = new java.lang.AssertionError;
+
+        specialinvoke $r38.<java.lang.AssertionError: void <init>(long)>($l1);
+
+        throw $r38;
+
+     label6:
+        $z12 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z12 != 0 goto label7;
+
+        $z5 = $r28 instanceof java.lang.invoke.MemberName;
+
+        if $z5 != 0 goto label7;
+
+        $r40 = new java.lang.AssertionError;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r40.<java.lang.AssertionError: void <init>(java.lang.Object)>($r13);
+
+        throw $r40;
+
+     label7:
+        return 1;
+    }
+
+    private java.lang.invoke.MemberName changeReferenceKind(byte, byte)
+    {
+        java.lang.AssertionError $r3, $r4;
+        byte b0, b1, $b6;
+        int $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, $i11;
+        boolean $z0, $z1, $z2;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        b0 := @parameter0: byte;
+
+        b1 := @parameter1: byte;
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $b6 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i7 = (int) $b6;
+
+        $i8 = (int) b1;
+
+        if $i7 == $i8 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $i9 = (int) b0;
+
+        $z2 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsValid(int)>($i9);
+
+        if $z2 != 0 goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $i4 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $i10 = (int) b0;
+
+        $i11 = (int) b1;
+
+        $i2 = $i10 - $i11;
+
+        $i3 = $i2 << 24;
+
+        $i5 = $i4 + $i3;
+
+        r0.<java.lang.invoke.MemberName: int flags> = $i5;
+
+        return r0;
+    }
+
+    private boolean testFlags(int, int)
+    {
+        java.lang.invoke.MemberName r0;
+        int i0, $i1, i2, $i3;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $i1 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $i3 = $i1 & i0;
+
+        if $i3 != i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private boolean testAllFlags(int)
+    {
+        int i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        i0 := @parameter0: int;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testFlags(int,int)>(i0, i0);
+
+        return $z0;
+    }
+
+    private boolean testAnyFlags(int)
+    {
+        java.lang.invoke.MemberName r0;
+        int i0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        i0 := @parameter0: int;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testFlags(int,int)>(i0, 0);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isMethodHandleInvoke()
+    {
+        java.lang.invoke.MemberName r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testFlags(int,int)>(280, 272);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r1 != class "Ljava/lang/invoke/MethodHandle;" goto label1;
+
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $z1 = staticinvoke <java.lang.invoke.MemberName: boolean isMethodHandleInvokeName(java.lang.String)>($r2);
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    public static boolean isMethodHandleInvokeName(java.lang.String)
+    {
+        byte b1;
+        int $i0;
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1183693704: goto label1;
+            case 941760871: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("invoke");
+
+        if $z1 == 0 goto label3;
+
+        b1 = 0;
+
+        goto label3;
+
+     label2:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("invokeExact");
+
+        if $z0 == 0 goto label3;
+
+        b1 = 1;
+
+     label3:
+        lookupswitch(b1)
+        {
+            case 0: goto label4;
+            case 1: goto label4;
+            default: goto label5;
+        };
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    public boolean isStatic()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isStatic(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isPublic()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isPrivate()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isPrivate(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isProtected()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isProtected(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isFinal()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isFinal(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean canBeStaticallyBound()
+    {
+        java.lang.invoke.MemberName r0;
+        int $i0, $i1, $i2;
+        java.lang.Class $r1;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $i1 = virtualinvoke $r1.<java.lang.Class: int getModifiers()>();
+
+        $i2 = $i0 | $i1;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isFinal(int)>($i2);
+
+        return $z0;
+    }
+
+    public boolean isVolatile()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isVolatile(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isAbstract()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isAbstract(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isNative()
+    {
+        int $i0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isNative(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean isBridge()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(65600);
+
+        return $z0;
+    }
+
+    public boolean isVarargs()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(128);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean isSynthetic()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(4096);
+
+        return $z0;
+    }
+
+    public boolean isInvocable()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAnyFlags(int)>(196608);
+
+        return $z0;
+    }
+
+    public boolean isFieldOrMethod()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAnyFlags(int)>(327680);
+
+        return $z0;
+    }
+
+    public boolean isMethod()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(65536);
+
+        return $z0;
+    }
+
+    public boolean isConstructor()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(131072);
+
+        return $z0;
+    }
+
+    public boolean isField()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(262144);
+
+        return $z0;
+    }
+
+    public boolean isType()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(524288);
+
+        return $z0;
+    }
+
+    public boolean isPackage()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAnyFlags(int)>(7);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isCallerSensitive()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAllFlags(int)>(1048576);
+
+        return $z0;
+    }
+
+    public boolean isAccessibleFrom(java.lang.Class)
+    {
+        java.lang.invoke.MemberName r0;
+        int $i0;
+        java.lang.Class $r1, $r2, r3;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r3 := @parameter0: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        $i0 = r0.<java.lang.invoke.MemberName: int flags>;
+
+        $z0 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isMemberAccessible(java.lang.Class,java.lang.Class,int,java.lang.Class,int)>($r1, $r2, $i0, r3, 15);
+
+        return $z0;
+    }
+
+    private void init(java.lang.Class, java.lang.String, java.lang.Object, int)
+    {
+        java.lang.AssertionError $r5, $r6;
+        java.lang.invoke.MemberName r0;
+        int i0;
+        java.lang.Class r1;
+        java.lang.Object r3, $r4;
+        java.lang.String r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Object;
+
+        i0 := @parameter3: int;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Class clazz> = r1;
+
+        r0.<java.lang.invoke.MemberName: java.lang.String name> = r2;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = r3;
+
+        r0.<java.lang.invoke.MemberName: int flags> = i0;
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = specialinvoke r0.<java.lang.invoke.MemberName: boolean testAnyFlags(int)>(983040);
+
+        if $z2 != 0 goto label1;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $r4 = r0.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        if $r4 == null goto label2;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        return;
+    }
+
+    private void expandFromVM()
+    {
+        java.lang.Object $r1;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r1 == null goto label1;
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z0 != 0 goto label2;
+
+        return;
+
+     label2:
+        staticinvoke <java.lang.invoke.MethodHandleNatives: void expand(java.lang.invoke.MemberName)>(r0);
+
+        return;
+    }
+
+    private static int flagsMods(int, int, byte)
+    {
+        java.lang.AssertionError $r3, $r4, $r5;
+        byte b2, $b6;
+        int i0, i1, $i3, $i4, $i5, $i7, $i8, $i10, $i11;
+        boolean $z0, $z1, $z2;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        b2 := @parameter2: byte;
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $i10 = (int) 65535;
+
+        $i8 = i0 & $i10;
+
+        if $i8 == 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $i7 = i1 & -65536;
+
+        if $i7 == 0 goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $z2 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        $b6 = b2 & -16;
+
+        if $b6 == 0 goto label3;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label3:
+        $i4 = i0 | i1;
+
+        $i11 = (int) b2;
+
+        $i3 = $i11 << 24;
+
+        $i5 = $i4 | $i3;
+
+        return $i5;
+    }
+
+    public void <init>(java.lang.reflect.Method)
+    {
+        java.lang.invoke.MemberName r0;
+        java.lang.reflect.Method r1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.reflect.Method;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void <init>(java.lang.reflect.Method,boolean)>(r1, 0);
+
+        return;
+    }
+
+    public void <init>(java.lang.reflect.Method, boolean)
+    {
+        java.lang.AbstractMethodError $r22;
+        byte $b0, $b1;
+        java.lang.reflect.Method r1;
+        boolean $z0, z1, $z2, $z3, $z4, $z5;
+        java.lang.LinkageError $r20;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object[] $r7;
+        java.lang.AssertionError $r21;
+        int $i2, $i3, $i4, $i5;
+        java.lang.String $r3, $r6, $r13, $r17, $r19;
+        java.lang.Class[] $r9, $r15;
+        java.lang.invoke.MethodType $r16;
+        java.lang.Class $r2, $r8, $r11, $r12, $r14;
+        java.lang.Object $r4;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.reflect.Method;
+
+        z1 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        staticinvoke <java.lang.invoke.MethodHandleNatives: void init(java.lang.invoke.MemberName,java.lang.Object)>(r0, r1);
+
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r2 != null goto label2;
+
+        $r12 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getDeclaringClass()>();
+
+        if $r12 != class "Ljava/lang/invoke/MethodHandle;" goto label1;
+
+        $r13 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $z4 = staticinvoke <java.lang.invoke.MemberName: boolean isMethodHandleInvokeName(java.lang.String)>($r13);
+
+        if $z4 == 0 goto label1;
+
+        $r14 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r15 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        $r16 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class,java.lang.Class[])>($r14, $r15);
+
+        $i2 = virtualinvoke r1.<java.lang.reflect.Method: int getModifiers()>();
+
+        $i3 = staticinvoke <java.lang.invoke.MemberName: int flagsMods(int,int,byte)>(65536, $i2, 5);
+
+        $r17 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void init(java.lang.Class,java.lang.String,java.lang.Object,int)>(class "Ljava/lang/invoke/MethodHandle;", $r17, $r16, $i3);
+
+        $z5 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isMethodHandleInvoke()>();
+
+        if $z5 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r20 = new java.lang.LinkageError;
+
+        $r19 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.LinkageError: void <init>(java.lang.String)>($r19);
+
+        throw $r20;
+
+     label2:
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        $z3 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z3 == 0 goto label3;
+
+        $r11 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r11 != null goto label4;
+
+     label3:
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label4:
+        $r3 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        r0.<java.lang.invoke.MemberName: java.lang.String name> = $r3;
+
+        $r4 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r4 != null goto label5;
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r8 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r7[0] = $r8;
+
+        $r9 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        $r7[1] = $r9;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r7;
+
+     label5:
+        if z1 == 0 goto label8;
+
+        $z2 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isAbstract()>();
+
+        if $z2 == 0 goto label6;
+
+        $r22 = new java.lang.AbstractMethodError;
+
+        $r6 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        specialinvoke $r22.<java.lang.AbstractMethodError: void <init>(java.lang.String)>($r6);
+
+        throw $r22;
+
+     label6:
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i4 = (int) $b0;
+
+        if $i4 != 5 goto label7;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(7, 5);
+
+        goto label8;
+
+     label7:
+        $b1 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i5 = (int) $b1;
+
+        if $i5 != 9 goto label8;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(7, 9);
+
+     label8:
+        return;
+    }
+
+    public java.lang.invoke.MemberName asSpecial()
+    {
+        java.lang.IllegalArgumentException $r9;
+        byte $b0;
+        java.lang.invoke.MemberName r0, $r1, $r2, $r3, $r4, $r5, $r6;
+        int $i1;
+        java.lang.String $r8;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i1 = (int) $b0;
+
+        tableswitch($i1)
+        {
+            case 5: goto label2;
+            case 6: goto label5;
+            case 7: goto label1;
+            case 8: goto label4;
+            case 9: goto label3;
+            default: goto label5;
+        };
+
+     label1:
+        return r0;
+
+     label2:
+        $r5 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r6 = specialinvoke $r5.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(7, 5);
+
+        return $r6;
+
+     label3:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r2 = specialinvoke $r1.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(7, 9);
+
+        return $r2;
+
+     label4:
+        $r3 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r4 = specialinvoke $r3.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(7, 8);
+
+        return $r4;
+
+     label5:
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r8 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r9;
+    }
+
+    public java.lang.invoke.MemberName asConstructor()
+    {
+        byte $b0;
+        java.lang.invoke.MemberName r0, $r1, $r2;
+        int $i1;
+        java.lang.String $r4;
+        java.lang.IllegalArgumentException $r5;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i1 = (int) $b0;
+
+        lookupswitch($i1)
+        {
+            case 7: goto label1;
+            case 8: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r2 = specialinvoke $r1.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(8, 7);
+
+        return $r2;
+
+     label2:
+        return r0;
+
+     label3:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+    }
+
+    public java.lang.invoke.MemberName asNormalOriginal()
+    {
+        java.lang.AssertionError $r5;
+        byte $b0, $b1, $b2, b3;
+        java.lang.invoke.MemberName r0, $r2, $r3;
+        int $i4, $i5, $i6;
+        java.lang.Class $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isInterface()>();
+
+        if $z0 == 0 goto label1;
+
+        $b2 = 9;
+
+        goto label2;
+
+     label1:
+        $b2 = 5;
+
+     label2:
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        b3 = $b0;
+
+        $i4 = (int) $b0;
+
+        tableswitch($i4)
+        {
+            case 5: goto label3;
+            case 6: goto label4;
+            case 7: goto label3;
+            case 8: goto label4;
+            case 9: goto label3;
+            default: goto label4;
+        };
+
+     label3:
+        b3 = $b2;
+
+     label4:
+        $i5 = (int) $b0;
+
+        if b3 != $i5 goto label5;
+
+        return r0;
+
+     label5:
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r3 = specialinvoke $r2.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>(b3, $b0);
+
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label6;
+
+        $b1 = virtualinvoke $r3.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i6 = (int) $b1;
+
+        $z2 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean referenceKindIsConsistentWith(int)>($i6);
+
+        if $z2 != 0 goto label6;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label6:
+        return $r3;
+    }
+
+    public void <init>(java.lang.reflect.Constructor)
+    {
+        java.lang.Object[] $r3;
+        java.lang.Class[] $r5;
+        java.lang.AssertionError $r6;
+        java.lang.reflect.Constructor r1;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object $r2;
+        java.lang.Class $r4, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.reflect.Constructor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        staticinvoke <java.lang.invoke.MethodHandleNatives: void init(java.lang.invoke.MemberName,java.lang.Object)>(r0, r1);
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z1 == 0 goto label1;
+
+        $r7 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r7 != null goto label2;
+
+     label1:
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        r0.<java.lang.invoke.MemberName: java.lang.String name> = "<init>";
+
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        if $r2 != null goto label3;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r4 = <java.lang.Void: java.lang.Class TYPE>;
+
+        $r3[0] = $r4;
+
+        $r5 = virtualinvoke r1.<java.lang.reflect.Constructor: java.lang.Class[] getParameterTypes()>();
+
+        $r3[1] = $r5;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r3;
+
+     label3:
+        return;
+    }
+
+    public void <init>(java.lang.reflect.Field)
+    {
+        java.lang.reflect.Field r1;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.reflect.Field;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void <init>(java.lang.reflect.Field,boolean)>(r1, 0);
+
+        return;
+    }
+
+    public void <init>(java.lang.reflect.Field, boolean)
+    {
+        java.lang.AssertionError $r7, $r8;
+        byte $b0, $b2, $b3;
+        int $i1, $i4, $i5;
+        java.lang.String $r2;
+        boolean $z0, $z1, z2, $z3, $z4;
+        java.lang.reflect.Field r1;
+        java.lang.invoke.MemberName r0;
+        java.lang.Class $r3, $r6;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.reflect.Field;
+
+        z2 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        staticinvoke <java.lang.invoke.MethodHandleNatives: void init(java.lang.invoke.MemberName,java.lang.Object)>(r0, r1);
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $z4 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z4 == 0 goto label1;
+
+        $r6 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r6 != null goto label2;
+
+     label1:
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label2:
+        $r2 = virtualinvoke r1.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        r0.<java.lang.invoke.MemberName: java.lang.String name> = $r2;
+
+        $r3 = virtualinvoke r1.<java.lang.reflect.Field: java.lang.Class getType()>();
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r3;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z1 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label5;
+
+        $z3 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isStatic()>();
+
+        if $z3 == 0 goto label3;
+
+        $b3 = 2;
+
+        goto label4;
+
+     label3:
+        $b3 = 1;
+
+     label4:
+        $i4 = (int) $b0;
+
+        if $i4 == $b3 goto label5;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label5:
+        if z2 == 0 goto label6;
+
+        $i5 = (int) $b0;
+
+        $i1 = $i5 + 2;
+
+        $b2 = (byte) $i1;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>($b2, $b0);
+
+     label6:
+        return;
+    }
+
+    public boolean isGetter()
+    {
+        byte $b0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsGetter(byte)>($b0);
+
+        return $z0;
+    }
+
+    public boolean isSetter()
+    {
+        byte $b0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsSetter(byte)>($b0);
+
+        return $z0;
+    }
+
+    public java.lang.invoke.MemberName asSetter()
+    {
+        java.lang.AssertionError $r4;
+        byte $b0, $b2;
+        java.lang.invoke.MemberName r0, $r1, $r2;
+        int $i1, $i3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsGetter(byte)>($b0);
+
+        if $z1 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $i3 = (int) $b0;
+
+        $i1 = $i3 + 2;
+
+        $b2 = (byte) $i1;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r2 = specialinvoke $r1.<java.lang.invoke.MemberName: java.lang.invoke.MemberName changeReferenceKind(byte,byte)>($b2, $b0);
+
+        return $r2;
+    }
+
+    public void <init>(java.lang.Class)
+    {
+        java.lang.invoke.MemberName r0;
+        int $i0, $i1;
+        java.lang.Class r1, $r2;
+        java.lang.String $r3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.Class;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.Class getDeclaringClass()>();
+
+        $r3 = virtualinvoke r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $i0 = virtualinvoke r1.<java.lang.Class: int getModifiers()>();
+
+        $i1 = staticinvoke <java.lang.invoke.MemberName: int flagsMods(int,int,byte)>(524288, $i0, 0);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void init(java.lang.Class,java.lang.String,java.lang.Object,int)>($r2, $r3, r1, $i1);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void initResolved(boolean)>(1);
+
+        return;
+    }
+
+    static java.lang.invoke.MemberName makeMethodHandleInvoke(java.lang.String, java.lang.invoke.MethodType)
+    {
+        java.lang.String r0;
+        java.lang.invoke.MethodType r1;
+        java.lang.invoke.MemberName $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.invoke.MethodType;
+
+        $r2 = staticinvoke <java.lang.invoke.MemberName: java.lang.invoke.MemberName makeMethodHandleInvoke(java.lang.String,java.lang.invoke.MethodType,int)>(r0, r1, 4369);
+
+        return $r2;
+    }
+
+    static java.lang.invoke.MemberName makeMethodHandleInvoke(java.lang.String, java.lang.invoke.MethodType, int)
+    {
+        java.lang.AssertionError $r3;
+        java.lang.invoke.MethodType r2;
+        java.lang.invoke.MemberName $r0;
+        int i0, $i1, $i2;
+        java.lang.String r1;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.invoke.MethodType;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.lang.invoke.MemberName;
+
+        specialinvoke $r0.<java.lang.invoke.MemberName: void <init>(java.lang.Class,java.lang.String,java.lang.invoke.MethodType,byte)>(class "Ljava/lang/invoke/MethodHandle;", r1, r2, 5);
+
+        $i1 = $r0.<java.lang.invoke.MemberName: int flags>;
+
+        $i2 = $i1 | i0;
+
+        $r0.<java.lang.invoke.MemberName: int flags> = $i2;
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r0.<java.lang.invoke.MemberName: boolean isMethodHandleInvoke()>();
+
+        if $z1 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>($r0);
+
+        throw $r3;
+
+     label1:
+        return $r0;
+    }
+
+    void <init>()
+    {
+        java.lang.invoke.MemberName r0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected java.lang.invoke.MemberName clone()
+    {
+        java.lang.invoke.MemberName r0, $r2;
+        java.lang.InternalError $r4;
+        java.lang.Object $r1;
+        java.lang.CloneNotSupportedException $r3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+     label1:
+        $r1 = specialinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (java.lang.invoke.MemberName) $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.InternalError newInternalError(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+    }
+
+    public java.lang.invoke.MemberName getDefinition()
+    {
+        java.lang.IllegalStateException $r5;
+        java.lang.AssertionError $r4;
+        java.lang.invoke.MemberName r0, $r1;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r2, $r3, $r9;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("must be resolved: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isType()>();
+
+        if $z1 == 0 goto label2;
+
+        return r0;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        $r1.<java.lang.invoke.MemberName: java.lang.Class clazz> = null;
+
+        $r1.<java.lang.invoke.MemberName: java.lang.Object type> = null;
+
+        $r1.<java.lang.invoke.MemberName: java.lang.String name> = null;
+
+        $r1.<java.lang.invoke.MemberName: java.lang.Object resolution> = $r1;
+
+        specialinvoke $r1.<java.lang.invoke.MemberName: void expandFromVM()>();
+
+        $z2 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        $r3 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z3 != 0 goto label3;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        return $r1;
+    }
+
+    public int hashCode()
+    {
+        java.lang.Object[] $r0;
+        byte $b0;
+        java.lang.invoke.MemberName r1;
+        int $i1;
+        java.lang.Class $r2;
+        java.lang.Object $r5;
+        java.lang.String $r4;
+        java.lang.Byte $r3;
+
+        r1 := @this: java.lang.invoke.MemberName;
+
+        $r0 = newarray (java.lang.Object)[4];
+
+        $r2 = r1.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r0[0] = $r2;
+
+        $b0 = virtualinvoke r1.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $r3 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        $r0[1] = $r3;
+
+        $r4 = r1.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $r0[2] = $r4;
+
+        $r5 = virtualinvoke r1.<java.lang.invoke.MemberName: java.lang.Object getType()>();
+
+        $r0[3] = $r5;
+
+        $i1 = staticinvoke <java.util.Objects: int hash(java.lang.Object[])>($r0);
+
+        return $i1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.invoke.MemberName r1, $r2;
+        java.lang.Object r0;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.lang.invoke.MemberName;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.invoke.MemberName;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.lang.invoke.MemberName) r0;
+
+        $z1 = virtualinvoke r1.<java.lang.invoke.MemberName: boolean equals(java.lang.invoke.MemberName)>($r2);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean equals(java.lang.invoke.MemberName)
+    {
+        byte $b0, $b1;
+        java.lang.invoke.MemberName r0, r1;
+        int $i2, $i3;
+        java.lang.Class $r2, $r3;
+        java.lang.Object $r6, $r7;
+        java.lang.String $r4, $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.invoke.MemberName;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r2 = r1.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        if $r3 != $r2 goto label3;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $b1 = virtualinvoke r1.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $i2 = (int) $b0;
+
+        $i3 = (int) $b1;
+
+        if $i2 != $i3 goto label3;
+
+        $r5 = r0.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $r4 = r1.<java.lang.invoke.MemberName: java.lang.String name>;
+
+        $z0 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Object getType()>();
+
+        $r7 = virtualinvoke r1.<java.lang.invoke.MemberName: java.lang.Object getType()>();
+
+        $z1 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+        if $z1 == 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    public void <init>(java.lang.Class, java.lang.String, java.lang.Class, byte)
+    {
+        byte b0;
+        java.lang.invoke.MemberName r0;
+        int $i1;
+        java.lang.Class r1, r3;
+        java.lang.String r2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Class;
+
+        b0 := @parameter3: byte;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = staticinvoke <java.lang.invoke.MemberName: int flagsMods(int,int,byte)>(262144, 0, b0);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void init(java.lang.Class,java.lang.String,java.lang.Object,int)>(r1, r2, r3, $i1);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void initResolved(boolean)>(0);
+
+        return;
+    }
+
+    public void <init>(java.lang.Class, java.lang.String, java.lang.invoke.MethodType, byte)
+    {
+        java.lang.invoke.MethodType r3;
+        byte b0;
+        java.lang.invoke.MemberName r0;
+        int $i1, $i2;
+        java.lang.Class r2;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.invoke.MethodType;
+
+        b0 := @parameter3: byte;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 == null goto label1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("<init>");
+
+        if $z0 == 0 goto label1;
+
+        $i1 = 131072;
+
+        goto label2;
+
+     label1:
+        $i1 = 65536;
+
+     label2:
+        $i2 = staticinvoke <java.lang.invoke.MemberName: int flagsMods(int,int,byte)>($i1, 0, b0);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void init(java.lang.Class,java.lang.String,java.lang.Object,int)>(r2, r1, r3, $i2);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void initResolved(boolean)>(0);
+
+        return;
+    }
+
+    public void <init>(byte, java.lang.Class, java.lang.String, java.lang.Object)
+    {
+        byte b0;
+        int i1, $i2, $i3, $i4;
+        java.lang.String $r4, r8, $r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.RuntimeException $r5, $r7, $r11, $r12;
+        java.lang.invoke.MemberName r0;
+        java.lang.StringBuilder $r2, $r3, $r13;
+        java.lang.Object r6;
+        java.lang.Class r10;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        b0 := @parameter0: byte;
+
+        r10 := @parameter1: java.lang.Class;
+
+        r8 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $z0 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsField(byte)>(b0);
+
+        if $z0 == 0 goto label1;
+
+        i1 = 262144;
+
+        $z5 = r6 instanceof java.lang.Class;
+
+        if $z5 != 0 goto label5;
+
+        $r12 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("not a field type");
+
+        throw $r12;
+
+     label1:
+        $z1 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindIsMethod(byte)>(b0);
+
+        if $z1 == 0 goto label2;
+
+        i1 = 65536;
+
+        $z4 = r6 instanceof java.lang.invoke.MethodType;
+
+        if $z4 != 0 goto label5;
+
+        $r11 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("not a method type");
+
+        throw $r11;
+
+     label2:
+        $i3 = (int) b0;
+
+        if $i3 != 8 goto label4;
+
+        i1 = 131072;
+
+        $z2 = r6 instanceof java.lang.invoke.MethodType;
+
+        if $z2 == 0 goto label3;
+
+        $r9 = "<init>";
+
+        $z3 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>(r8);
+
+        if $z3 != 0 goto label5;
+
+     label3:
+        $r7 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("not a constructor type or name");
+
+        throw $r7;
+
+     label4:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad reference kind ");
+
+        $i4 = (int) b0;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label5:
+        $i2 = staticinvoke <java.lang.invoke.MemberName: int flagsMods(int,int,byte)>(i1, 0, b0);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void init(java.lang.Class,java.lang.String,java.lang.Object,int)>(r10, r8, r6, $i2);
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void initResolved(boolean)>(0);
+
+        return;
+    }
+
+    public boolean hasReceiverTypeDispatch()
+    {
+        byte $b0;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        $z0 = staticinvoke <java.lang.invoke.MethodHandleNatives: boolean refKindDoesDispatch(byte)>($b0);
+
+        return $z0;
+    }
+
+    public boolean isResolved()
+    {
+        java.lang.Object $r1;
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void initResolved(boolean)
+    {
+        java.lang.AssertionError $r1, $r3;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object $r2;
+        boolean $z0, z1, $z2, $z3;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        if $r2 == null goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        if z1 != 0 goto label2;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object resolution> = r0;
+
+     label2:
+        $z2 = <java.lang.invoke.MemberName: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        $z3 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z3 == z1 goto label3;
+
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+
+     label3:
+        return;
+    }
+
+    void checkForTypeAlias(java.lang.Class)
+    {
+        java.lang.String $r10, $r21;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.LinkageError $r4, $r15;
+        java.lang.invoke.MethodType $r13, $r14, r23;
+        java.lang.invoke.MemberName r0;
+        java.lang.Object $r1, $r11, $r12, $r22;
+        java.lang.Class $r2, r3, r24;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9, $r16, $r17, $r18, $r19, $r20;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        r3 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z0 == 0 goto label5;
+
+        $r12 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z3 = $r12 instanceof java.lang.invoke.MethodType;
+
+        if $z3 == 0 goto label1;
+
+        $r22 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        r23 = (java.lang.invoke.MethodType) $r22;
+
+        goto label2;
+
+     label1:
+        $r13 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MethodType getMethodType()>();
+
+        r23 = $r13;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r13;
+
+     label2:
+        $r14 = virtualinvoke r23.<java.lang.invoke.MethodType: java.lang.invoke.MethodType erase()>();
+
+        if $r14 != r23 goto label3;
+
+        return;
+
+     label3:
+        $z4 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isTypeVisible(java.lang.invoke.MethodType,java.lang.Class)>(r23, r3);
+
+        if $z4 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r15 = new java.lang.LinkageError;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad method type alias: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r23);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not visible from ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.LinkageError: void <init>(java.lang.String)>($r21);
+
+        throw $r15;
+
+     label5:
+        $r1 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $z1 = $r1 instanceof java.lang.Class;
+
+        if $z1 == 0 goto label6;
+
+        $r11 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        r24 = (java.lang.Class) $r11;
+
+        goto label7;
+
+     label6:
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getFieldType()>();
+
+        r24 = $r2;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object type> = $r2;
+
+     label7:
+        $z2 = staticinvoke <sun.invoke.util.VerifyAccess: boolean isTypeVisible(java.lang.Class,java.lang.Class)>(r24, r3);
+
+        if $z2 == 0 goto label8;
+
+        return;
+
+     label8:
+        $r4 = new java.lang.LinkageError;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad field type alias: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r24);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not visible from ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.LinkageError: void <init>(java.lang.String)>($r10);
+
+        throw $r4;
+    }
+
+    public java.lang.String toString()
+    {
+        byte $b0;
+        java.lang.String $r3, $r5, $r6, $r8, $r10, $r11, $r12, $r13;
+        boolean $z0, $z1;
+        java.lang.invoke.MemberName r0;
+        java.lang.StringBuilder $r1;
+        java.lang.Class $r2, $r7;
+        java.lang.Object $r4, $r9;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isType()>();
+
+        if $z0 == 0 goto label01;
+
+        $r9 = r0.<java.lang.invoke.MemberName: java.lang.Object type>;
+
+        $r10 = virtualinvoke $r9.<java.lang.Object: java.lang.String toString()>();
+
+        return $r10;
+
+     label01:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Class getDeclaringClass()>();
+
+        if $r2 == null goto label02;
+
+        $r7 = r0.<java.lang.invoke.MemberName: java.lang.Class clazz>;
+
+        $r8 = staticinvoke <java.lang.invoke.MemberName: java.lang.String getName(java.lang.Object)>($r7);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+     label02:
+        $r3 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.String getName()>();
+
+        if $r3 != null goto label03;
+
+        $r11 = "*";
+
+        goto label04;
+
+     label03:
+        $r11 = $r3;
+
+     label04:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.Object getType()>();
+
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isInvocable()>();
+
+        if $z1 != 0 goto label07;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        if $r4 != null goto label05;
+
+        $r12 = "*";
+
+        goto label06;
+
+     label05:
+        $r12 = staticinvoke <java.lang.invoke.MemberName: java.lang.String getName(java.lang.Object)>($r4);
+
+     label06:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        goto label10;
+
+     label07:
+        if $r4 != null goto label08;
+
+        $r13 = "(*)*";
+
+        goto label09;
+
+     label08:
+        $r13 = staticinvoke <java.lang.invoke.MemberName: java.lang.String getName(java.lang.Object)>($r4);
+
+     label09:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+     label10:
+        $b0 = virtualinvoke r0.<java.lang.invoke.MemberName: byte getReferenceKind()>();
+
+        if $b0 == 0 goto label11;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        $r6 = staticinvoke <java.lang.invoke.MethodHandleNatives: java.lang.String refKindName(byte)>($b0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+     label11:
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private static java.lang.String getName(java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.lang.Class $r2;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.Class;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.lang.Class) r0;
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        return $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r0);
+
+        return $r1;
+    }
+
+    public java.lang.IllegalAccessException makeAccessException(java.lang.String, java.lang.Object)
+    {
+        java.lang.IllegalAccessException $r8;
+        java.lang.invoke.MemberName r3;
+        java.lang.StringBuilder $r0, $r1, $r2, $r5, $r9, $r10, $r11, $r12;
+        java.lang.Object r7;
+        java.lang.String $r4, $r6, r13, r14;
+
+        r3 := @this: java.lang.invoke.MemberName;
+
+        r13 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.Object;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r4 = virtualinvoke r3.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r14 = $r6;
+
+        if r7 == null goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", from ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r8 = new java.lang.IllegalAccessException;
+
+        specialinvoke $r8.<java.lang.IllegalAccessException: void <init>(java.lang.String)>(r14);
+
+        return $r8;
+    }
+
+    private java.lang.String message()
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $z0 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z0 == 0 goto label1;
+
+        return "no access";
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isConstructor()>();
+
+        if $z1 == 0 goto label2;
+
+        return "no such constructor";
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.invoke.MemberName: boolean isMethod()>();
+
+        if $z2 == 0 goto label3;
+
+        return "no such method";
+
+     label3:
+        return "no such field";
+    }
+
+    public java.lang.ReflectiveOperationException makeAccessException()
+    {
+        java.lang.Throwable $r10;
+        java.lang.NoSuchMethodException $r13, $r14;
+        java.lang.ReflectiveOperationException r16;
+        java.lang.NoSuchFieldException $r12;
+        java.lang.String $r2, $r5, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.IllegalAccessException $r8;
+        java.lang.invoke.MemberName r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6;
+        java.lang.Object $r9, $r11, $r15, $r17;
+
+        r1 := @this: java.lang.invoke.MemberName;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.lang.invoke.MemberName: java.lang.String message()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r5 = virtualinvoke r1.<java.lang.invoke.MemberName: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = virtualinvoke r1.<java.lang.invoke.MemberName: boolean isResolved()>();
+
+        if $z0 != 0 goto label1;
+
+        $r11 = r1.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        $z1 = $r11 instanceof java.lang.NoSuchMethodError;
+
+        if $z1 != 0 goto label2;
+
+        $r15 = r1.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        $z4 = $r15 instanceof java.lang.NoSuchFieldError;
+
+        if $z4 != 0 goto label2;
+
+     label1:
+        $r8 = new java.lang.IllegalAccessException;
+
+        specialinvoke $r8.<java.lang.IllegalAccessException: void <init>(java.lang.String)>($r7);
+
+        r16 = $r8;
+
+        goto label5;
+
+     label2:
+        $z2 = virtualinvoke r1.<java.lang.invoke.MemberName: boolean isConstructor()>();
+
+        if $z2 == 0 goto label3;
+
+        $r14 = new java.lang.NoSuchMethodException;
+
+        specialinvoke $r14.<java.lang.NoSuchMethodException: void <init>(java.lang.String)>($r7);
+
+        r16 = $r14;
+
+        goto label5;
+
+     label3:
+        $z3 = virtualinvoke r1.<java.lang.invoke.MemberName: boolean isMethod()>();
+
+        if $z3 == 0 goto label4;
+
+        $r13 = new java.lang.NoSuchMethodException;
+
+        specialinvoke $r13.<java.lang.NoSuchMethodException: void <init>(java.lang.String)>($r7);
+
+        r16 = $r13;
+
+        goto label5;
+
+     label4:
+        $r12 = new java.lang.NoSuchFieldException;
+
+        specialinvoke $r12.<java.lang.NoSuchFieldException: void <init>(java.lang.String)>($r7);
+
+        r16 = $r12;
+
+     label5:
+        $r17 = r1.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        $z5 = $r17 instanceof java.lang.Throwable;
+
+        if $z5 == 0 goto label6;
+
+        $r9 = r1.<java.lang.invoke.MemberName: java.lang.Object resolution>;
+
+        $r10 = (java.lang.Throwable) $r9;
+
+        virtualinvoke r16.<java.lang.ReflectiveOperationException: java.lang.Throwable initCause(java.lang.Throwable)>($r10);
+
+     label6:
+        return r16;
+    }
+
+    static java.lang.invoke.MemberName$Factory getFactory()
+    {
+        java.lang.invoke.MemberName$Factory $r0;
+
+        $r0 = <java.lang.invoke.MemberName$Factory: java.lang.invoke.MemberName$Factory INSTANCE>;
+
+        return $r0;
+    }
+
+    protected volatile java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        java.lang.invoke.MemberName r0, $r1;
+
+        r0 := @this: java.lang.invoke.MemberName;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MemberName: java.lang.invoke.MemberName clone()>();
+
+        return $r1;
+    }
+
+    static java.lang.Object access$002(java.lang.invoke.MemberName, java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.lang.invoke.MemberName r0;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r0.<java.lang.invoke.MemberName: java.lang.Object resolution> = r1;
+
+        return r1;
+    }
+
+    static boolean access$100(java.lang.invoke.MemberName)
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean referenceKindIsConsistent()>();
+
+        return $z0;
+    }
+
+    static void access$200(java.lang.invoke.MemberName, boolean)
+    {
+        java.lang.invoke.MemberName r0;
+        boolean z0;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.invoke.MemberName: void initResolved(boolean)>(z0);
+
+        return;
+    }
+
+    static boolean access$300(java.lang.invoke.MemberName)
+    {
+        java.lang.invoke.MemberName r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.invoke.MemberName;
+
+        $z0 = specialinvoke r0.<java.lang.invoke.MemberName: boolean vminfoIsConsistent()>();
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <java.lang.invoke.MemberName: int SEARCH_ALL_SUPERS> = 3145728;
+
+        <java.lang.invoke.MemberName: int IS_FIELD_OR_METHOD> = 327680;
+
+        <java.lang.invoke.MemberName: int IS_INVOCABLE> = 196608;
+
+        <java.lang.invoke.MemberName: int ALL_KINDS> = 983040;
+
+        <java.lang.invoke.MemberName: int ALL_ACCESS> = 7;
+
+        <java.lang.invoke.MemberName: int CALLER_SENSITIVE> = 1048576;
+
+        <java.lang.invoke.MemberName: int IS_TYPE> = 524288;
+
+        <java.lang.invoke.MemberName: int IS_FIELD> = 262144;
+
+        <java.lang.invoke.MemberName: int IS_CONSTRUCTOR> = 131072;
+
+        <java.lang.invoke.MemberName: int IS_METHOD> = 65536;
+
+        <java.lang.invoke.MemberName: int RECOGNIZED_MODIFIERS> = 65535;
+
+        <java.lang.invoke.MemberName: java.lang.String CONSTRUCTOR_NAME> = "<init>";
+
+        <java.lang.invoke.MemberName: int ENUM> = 16384;
+
+        <java.lang.invoke.MemberName: int ANNOTATION> = 8192;
+
+        <java.lang.invoke.MemberName: int SYNTHETIC> = 4096;
+
+        <java.lang.invoke.MemberName: int VARARGS> = 128;
+
+        <java.lang.invoke.MemberName: int BRIDGE> = 64;
+
+        <java.lang.invoke.MemberName: int MH_INVOKE_MODS> = 273;
+
+        $r0 = class "Ljava/lang/invoke/MemberName;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.lang.invoke.MemberName: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

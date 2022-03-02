@@ -1,0 +1,422 @@
+final class sun.rmi.transport.proxy.CGIForwardCommand extends java.lang.Object implements sun.rmi.transport.proxy.CGICommandHandler
+{
+
+    void <init>()
+    {
+        sun.rmi.transport.proxy.CGIForwardCommand r0;
+
+        r0 := @this: sun.rmi.transport.proxy.CGIForwardCommand;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.rmi.transport.proxy.CGIForwardCommand r0;
+
+        r0 := @this: sun.rmi.transport.proxy.CGIForwardCommand;
+
+        return "forward";
+    }
+
+    private java.lang.String getLine(java.io.DataInputStream) throws java.io.IOException
+    {
+        java.io.DataInputStream r0;
+        java.lang.String $r1;
+        sun.rmi.transport.proxy.CGIForwardCommand r2;
+
+        r2 := @this: sun.rmi.transport.proxy.CGIForwardCommand;
+
+        r0 := @parameter0: java.io.DataInputStream;
+
+        $r1 = virtualinvoke r0.<java.io.DataInputStream: java.lang.String readLine()>();
+
+        return $r1;
+    }
+
+    public void execute(java.lang.String) throws sun.rmi.transport.proxy.CGIClientException, sun.rmi.transport.proxy.CGIServerException
+    {
+        byte[] r61, r62;
+        sun.rmi.transport.proxy.CGIServerException $r70, $r76, $r78, $r79, $r80, $r81, $r82, $r83, $r84, $r85;
+        java.net.InetAddress $r8;
+        java.io.DataOutputStream $r74;
+        sun.rmi.transport.proxy.CGIClientException $r63, $r64, $r66, $r68, $r72, $r73;
+        sun.rmi.transport.proxy.CGIForwardCommand r22;
+        java.lang.StringBuilder $r4, $r5, $r14, $r15, $r16, $r37, $r38, $r65, $r67, $r75;
+        java.lang.String $r0, r1, $r6, $r17, $r20, $r21, $r23, $r24, $r31, $r32, $r39;
+        java.io.IOException $r41, $r43, $r47, $r49, $r51, $r53, $r57;
+        java.lang.NumberFormatException $r59;
+        boolean $z0, $z1, z2, z3, z4;
+        java.io.EOFException $r45, $r55;
+        java.io.DataInputStream $r71, $r77;
+        java.net.Socket $r69;
+        int $i0, $i1, $i2, $i3, $i6, i7, $i9, $i11, $i12, $i13;
+        java.io.OutputStream $r12;
+        java.io.PrintStream $r26, $r27, $r28, $r29, $r30;
+        char $c4, $c5;
+        java.io.InputStream $r10, $r19;
+
+        r22 := @this: sun.rmi.transport.proxy.CGIForwardCommand;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.rmi.transport.proxy.CGIHandler: java.lang.String RequestMethod>;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z0 != 0 goto label01;
+
+        $r63 = new sun.rmi.transport.proxy.CGIClientException;
+
+        specialinvoke $r63.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String)>("can only forward POST requests");
+
+        throw $r63;
+
+     label01:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r59 := @caughtexception;
+
+        $r64 = new sun.rmi.transport.proxy.CGIClientException;
+
+        specialinvoke $r64.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String,java.lang.Throwable)>("invalid port number.", $r59);
+
+        throw $r64;
+
+     label04:
+        if $i0 <= 0 goto label05;
+
+        $i9 = (int) 65535;
+
+        if $i0 <= $i9 goto label06;
+
+     label05:
+        $r66 = new sun.rmi.transport.proxy.CGIClientException;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid port: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r66.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String)>($r6);
+
+        throw $r66;
+
+     label06:
+        if $i0 >= 1024 goto label07;
+
+        $r68 = new sun.rmi.transport.proxy.CGIClientException;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("permission denied for port: ");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r68.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String)>($r39);
+
+        throw $r68;
+
+     label07:
+        $r69 = new java.net.Socket;
+
+        $r8 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        specialinvoke $r69.<java.net.Socket: void <init>(java.net.InetAddress,int)>($r8, $i0);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r57 := @caughtexception;
+
+        $r70 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r70.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("could not connect to local port", $r57);
+
+        throw $r70;
+
+     label10:
+        $r71 = new java.io.DataInputStream;
+
+        $r10 = <java.lang.System: java.io.InputStream in>;
+
+        specialinvoke $r71.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r10);
+
+        $i1 = <sun.rmi.transport.proxy.CGIHandler: int ContentLength>;
+
+        r61 = newarray (byte)[$i1];
+
+     label11:
+        virtualinvoke $r71.<java.io.DataInputStream: void readFully(byte[])>(r61);
+
+     label12:
+        goto label15;
+
+     label13:
+        $r55 := @caughtexception;
+
+        $r72 = new sun.rmi.transport.proxy.CGIClientException;
+
+        specialinvoke $r72.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String,java.lang.Throwable)>("unexpected EOF reading request body", $r55);
+
+        throw $r72;
+
+     label14:
+        $r53 := @caughtexception;
+
+        $r73 = new sun.rmi.transport.proxy.CGIClientException;
+
+        specialinvoke $r73.<sun.rmi.transport.proxy.CGIClientException: void <init>(java.lang.String,java.lang.Throwable)>("error reading request body", $r53);
+
+        throw $r73;
+
+     label15:
+        $r74 = new java.io.DataOutputStream;
+
+        $r12 = virtualinvoke $r69.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r74.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r12);
+
+        virtualinvoke $r74.<java.io.DataOutputStream: void writeBytes(java.lang.String)>("POST / HTTP/1.0\r\n");
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Content-length: ");
+
+        $i2 = <sun.rmi.transport.proxy.CGIHandler: int ContentLength>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n\r\n");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r74.<java.io.DataOutputStream: void writeBytes(java.lang.String)>($r17);
+
+        virtualinvoke $r74.<java.io.DataOutputStream: void write(byte[])>(r61);
+
+        virtualinvoke $r74.<java.io.DataOutputStream: void flush()>();
+
+     label16:
+        goto label18;
+
+     label17:
+        $r51 := @caughtexception;
+
+        $r76 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r76.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("error writing to server", $r51);
+
+        throw $r76;
+
+     label18:
+        $r77 = new java.io.DataInputStream;
+
+        $r19 = virtualinvoke $r69.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r77.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r19);
+
+     label19:
+        goto label21;
+
+     label20:
+        $r49 := @caughtexception;
+
+        $r78 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r78.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("error reading from server", $r49);
+
+        throw $r78;
+
+     label21:
+        $r20 = "Content-length:";
+
+        $r21 = virtualinvoke $r20.<java.lang.String: java.lang.String toLowerCase()>();
+
+        z2 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        $i11 = (int) -1;
+
+        i7 = $i11;
+
+     label22:
+        $r23 = specialinvoke r22.<sun.rmi.transport.proxy.CGIForwardCommand: java.lang.String getLine(java.io.DataInputStream)>($r77);
+
+     label23:
+        goto label25;
+
+     label24:
+        $r47 := @caughtexception;
+
+        $r79 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r79.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("error reading from server", $r47);
+
+        throw $r79;
+
+     label25:
+        if $r23 != null goto label26;
+
+        $r80 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r80.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String)>("unexpected EOF reading server response");
+
+        throw $r80;
+
+     label26:
+        $r24 = virtualinvoke $r23.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z1 = virtualinvoke $r24.<java.lang.String: boolean startsWith(java.lang.String)>($r21);
+
+        if $z1 == 0 goto label28;
+
+        if z4 == 0 goto label27;
+
+        $r81 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r81.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String)>("Multiple Content-length entries found.");
+
+        throw $r81;
+
+     label27:
+        $i6 = virtualinvoke $r21.<java.lang.String: int length()>();
+
+        $r31 = virtualinvoke $r23.<java.lang.String: java.lang.String substring(int)>($i6);
+
+        $r32 = virtualinvoke $r31.<java.lang.String: java.lang.String trim()>();
+
+        i7 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r32);
+
+        z2 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label28:
+        $i3 = virtualinvoke $r23.<java.lang.String: int length()>();
+
+        if $i3 == 0 goto label29;
+
+        $c4 = virtualinvoke $r23.<java.lang.String: char charAt(int)>(0);
+
+        $i12 = (int) $c4;
+
+        if $i12 == 13 goto label29;
+
+        $c5 = virtualinvoke $r23.<java.lang.String: char charAt(int)>(0);
+
+        $i13 = (int) $c5;
+
+        if $i13 != 10 goto label22;
+
+     label29:
+        if z3 == 0 goto label30;
+
+        if i7 >= 0 goto label31;
+
+     label30:
+        $r82 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r82.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String)>("missing or invalid content length in server response");
+
+        throw $r82;
+
+     label31:
+        r62 = newarray (byte)[i7];
+
+     label32:
+        virtualinvoke $r77.<java.io.DataInputStream: void readFully(byte[])>(r62);
+
+     label33:
+        goto label36;
+
+     label34:
+        $r45 := @caughtexception;
+
+        $r83 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r83.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("unexpected EOF reading server response", $r45);
+
+        throw $r83;
+
+     label35:
+        $r43 := @caughtexception;
+
+        $r84 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r84.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("error reading from server", $r43);
+
+        throw $r84;
+
+     label36:
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>("Status: 200 OK");
+
+        $r27 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r27.<java.io.PrintStream: void println(java.lang.String)>("Content-type: application/octet-stream");
+
+        $r28 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>("");
+
+     label37:
+        $r29 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r29.<java.io.PrintStream: void write(byte[])>(r62);
+
+     label38:
+        goto label40;
+
+     label39:
+        $r41 := @caughtexception;
+
+        $r85 = new sun.rmi.transport.proxy.CGIServerException;
+
+        specialinvoke $r85.<sun.rmi.transport.proxy.CGIServerException: void <init>(java.lang.String,java.lang.Throwable)>("error writing response", $r41);
+
+        throw $r85;
+
+     label40:
+        $r30 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r30.<java.io.PrintStream: void flush()>();
+
+        return;
+
+        catch java.lang.NumberFormatException from label01 to label02 with label03;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.EOFException from label11 to label12 with label13;
+        catch java.io.IOException from label11 to label12 with label14;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.io.IOException from label18 to label19 with label20;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch java.io.EOFException from label32 to label33 with label34;
+        catch java.io.IOException from label32 to label33 with label35;
+        catch java.io.IOException from label37 to label38 with label39;
+    }
+}

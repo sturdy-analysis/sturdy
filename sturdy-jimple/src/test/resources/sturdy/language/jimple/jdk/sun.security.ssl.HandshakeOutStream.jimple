@@ -1,0 +1,342 @@
+public class sun.security.ssl.HandshakeOutStream extends java.io.ByteArrayOutputStream
+{
+    sun.security.ssl.OutputRecord outputRecord;
+
+    void <init>(sun.security.ssl.OutputRecord)
+    {
+        sun.security.ssl.OutputRecord r1;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        r1 := @parameter0: sun.security.ssl.OutputRecord;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord> = r1;
+
+        return;
+    }
+
+    void complete() throws java.io.IOException
+    {
+        sun.security.ssl.OutputRecord $r1, $r2, $r7;
+        byte[] $r4, $r6;
+        java.lang.Object[] $r3;
+        java.lang.RuntimeException $r8;
+        sun.security.ssl.HandshakeOutStream r0;
+        java.nio.ByteBuffer $r5;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        $i0 = virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: int size()>();
+
+        if $i0 >= 4 goto label1;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String)>("handshake message is not available");
+
+        throw $r8;
+
+     label1:
+        $r1 = r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord>;
+
+        $z0 = virtualinvoke $r2.<sun.security.ssl.OutputRecord: boolean isClosed()>();
+
+        if $z0 != 0 goto label2;
+
+        $r7 = r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord>;
+
+        $r6 = r0.<sun.security.ssl.HandshakeOutStream: byte[] buf>;
+
+        $i2 = r0.<sun.security.ssl.HandshakeOutStream: int count>;
+
+        virtualinvoke $r7.<sun.security.ssl.OutputRecord: void encodeHandshake(byte[],int,int)>($r6, 0, $i2);
+
+        goto label3;
+
+     label2:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z2 == 0 goto label3;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r4 = r0.<sun.security.ssl.HandshakeOutStream: byte[] buf>;
+
+        $i1 = r0.<sun.security.ssl.HandshakeOutStream: int count>;
+
+        $r5 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>($r4, 0, $i1);
+
+        $r3[0] = $r5;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("outbound has closed, ignore outbound handshake messages", $r3);
+
+     label3:
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void reset()>();
+
+     label4:
+        return;
+    }
+
+    public void write(byte[], int, int)
+    {
+        byte[] r1;
+        int i0, i1;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        staticinvoke <sun.security.ssl.HandshakeOutStream: void checkOverflow(int,int)>(i0, 16777216);
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r1, i1, i0);
+
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        sun.security.ssl.OutputRecord $r1, $r2;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        $r1 = r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.ssl.HandshakeOutStream: sun.security.ssl.OutputRecord outputRecord>;
+
+        virtualinvoke $r2.<sun.security.ssl.OutputRecord: void flush()>();
+
+     label1:
+        return;
+    }
+
+    void putInt8(int) throws java.io.IOException
+    {
+        int i0;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        i0 := @parameter0: int;
+
+        staticinvoke <sun.security.ssl.HandshakeOutStream: void checkOverflow(int,int)>(i0, 256);
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>(i0);
+
+        return;
+    }
+
+    void putInt16(int) throws java.io.IOException
+    {
+        int i0, $i1;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        i0 := @parameter0: int;
+
+        staticinvoke <sun.security.ssl.HandshakeOutStream: void checkOverflow(int,int)>(i0, 65536);
+
+        $i1 = i0 >> 8;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i1);
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>(i0);
+
+        return;
+    }
+
+    void putInt24(int) throws java.io.IOException
+    {
+        int i0, $i1, $i2;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        i0 := @parameter0: int;
+
+        staticinvoke <sun.security.ssl.HandshakeOutStream: void checkOverflow(int,int)>(i0, 16777216);
+
+        $i1 = i0 >> 16;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i1);
+
+        $i2 = i0 >> 8;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i2);
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>(i0);
+
+        return;
+    }
+
+    void putInt32(int) throws java.io.IOException
+    {
+        int i0, $i1, $i2, $i3;
+        sun.security.ssl.HandshakeOutStream r0;
+
+        r0 := @this: sun.security.ssl.HandshakeOutStream;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 >> 24;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i1);
+
+        $i2 = i0 >> 16;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i2);
+
+        $i3 = i0 >> 8;
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>($i3);
+
+        specialinvoke r0.<java.io.ByteArrayOutputStream: void write(int)>(i0);
+
+        return;
+    }
+
+    void putBytes8(byte[]) throws java.io.IOException
+    {
+        byte[] r0;
+        int $i0, $i1;
+        sun.security.ssl.HandshakeOutStream r1;
+
+        r1 := @this: sun.security.ssl.HandshakeOutStream;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt8(int)>(0);
+
+        goto label2;
+
+     label1:
+        $i0 = lengthof r0;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt8(int)>($i0);
+
+        $i1 = lengthof r0;
+
+        specialinvoke r1.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r0, 0, $i1);
+
+     label2:
+        return;
+    }
+
+    public void putBytes16(byte[]) throws java.io.IOException
+    {
+        byte[] r0;
+        int $i0, $i1;
+        sun.security.ssl.HandshakeOutStream r1;
+
+        r1 := @this: sun.security.ssl.HandshakeOutStream;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>(0);
+
+        goto label2;
+
+     label1:
+        $i0 = lengthof r0;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i0);
+
+        $i1 = lengthof r0;
+
+        specialinvoke r1.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r0, 0, $i1);
+
+     label2:
+        return;
+    }
+
+    void putBytes24(byte[]) throws java.io.IOException
+    {
+        byte[] r0;
+        int $i0, $i1;
+        sun.security.ssl.HandshakeOutStream r1;
+
+        r1 := @this: sun.security.ssl.HandshakeOutStream;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt24(int)>(0);
+
+        goto label2;
+
+     label1:
+        $i0 = lengthof r0;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt24(int)>($i0);
+
+        $i1 = lengthof r0;
+
+        specialinvoke r1.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r0, 0, $i1);
+
+     label2:
+        return;
+    }
+
+    private static void checkOverflow(int, int)
+    {
+        java.lang.RuntimeException $r0;
+        int i0, i1;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 < i1 goto label1;
+
+        $r0 = new java.lang.RuntimeException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Field length overflow, the field length (");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") should be less than ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.RuntimeException: void <init>(java.lang.String)>($r6);
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+}

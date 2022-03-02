@@ -1,0 +1,2167 @@
+class javax.swing.text.html.CSSParser extends java.lang.Object
+{
+    private static final int IDENTIFIER;
+    private static final int BRACKET_OPEN;
+    private static final int BRACKET_CLOSE;
+    private static final int BRACE_OPEN;
+    private static final int BRACE_CLOSE;
+    private static final int PAREN_OPEN;
+    private static final int PAREN_CLOSE;
+    private static final int END;
+    private static final char[] charMapping;
+    private boolean didPushChar;
+    private int pushedChar;
+    private java.lang.StringBuffer unitBuffer;
+    private int[] unitStack;
+    private int stackCount;
+    private java.io.Reader reader;
+    private boolean encounteredRuleSet;
+    private javax.swing.text.html.CSSParser$CSSParserCallback callback;
+    private char[] tokenBuffer;
+    private int tokenBufferLength;
+    private boolean readWS;
+
+    void <init>()
+    {
+        int[] $r1;
+        java.lang.StringBuffer $r3;
+        javax.swing.text.html.CSSParser r0;
+        char[] $r2;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (int)[2];
+
+        r0.<javax.swing.text.html.CSSParser: int[] unitStack> = $r1;
+
+        $r2 = newarray (char)[80];
+
+        r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer> = $r2;
+
+        $r3 = new java.lang.StringBuffer;
+
+        specialinvoke $r3.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer> = $r3;
+
+        return;
+    }
+
+    void parse(java.io.Reader, javax.swing.text.html.CSSParser$CSSParserCallback, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r1;
+        javax.swing.text.html.CSSParser r0;
+        javax.swing.text.html.CSSParser$CSSParserCallback r3;
+        java.io.Reader r2;
+        boolean z0, $z1;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        r2 := @parameter0: java.io.Reader;
+
+        r3 := @parameter1: javax.swing.text.html.CSSParser$CSSParserCallback;
+
+        z0 := @parameter2: boolean;
+
+        r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback> = r3;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = 0;
+
+        r0.<javax.swing.text.html.CSSParser: int stackCount> = 0;
+
+        r0.<javax.swing.text.html.CSSParser: java.io.Reader reader> = r2;
+
+        r0.<javax.swing.text.html.CSSParser: boolean encounteredRuleSet> = 0;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseDeclarationBlock()>();
+
+        goto label3;
+
+     label2:
+        $z1 = specialinvoke r0.<javax.swing.text.html.CSSParser: boolean getNextStatement()>();
+
+        if $z1 == 0 goto label3;
+
+        goto label2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+     label5:
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private boolean getNextStatement() throws java.io.IOException
+    {
+        char $c2;
+        java.lang.RuntimeException $r4;
+        java.lang.StringBuffer $r1;
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i3;
+        char[] $r3;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: void setLength(int)>(0);
+
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int nextToken(char)>(0);
+
+        tableswitch($i0)
+        {
+            case -1: goto label6;
+            case 0: goto label7;
+            case 1: goto label1;
+            case 2: goto label4;
+            case 3: goto label5;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label4;
+            case 7: goto label5;
+            default: goto label7;
+        };
+
+     label1:
+        $i1 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i1 <= 0 goto label3;
+
+        $r3 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c2 = $r3[0];
+
+        $i3 = (int) $c2;
+
+        if $i3 != 64 goto label2;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseAtRule()>();
+
+        goto label3;
+
+     label2:
+        r0.<javax.swing.text.html.CSSParser: boolean encounteredRuleSet> = 1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseRuleSet()>();
+
+     label3:
+        return 1;
+
+     label4:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseTillClosed(int)>($i0);
+
+        return 1;
+
+     label5:
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected top level block close");
+
+        throw $r4;
+
+     label6:
+        return 0;
+
+     label7:
+        return 1;
+    }
+
+    private void parseAtRule() throws java.io.IOException
+    {
+        boolean z0, $z1, $z2, $z3, z4, $z5;
+        java.lang.StringBuffer $r1, $r4, $r5, $r8, $r9, $r10, $r19, $r20, $r22;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i9, $i10, $i18, $i19, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i31;
+        java.lang.String $r3;
+        char $c3, $c8, $c11, $c12, $c13, $c14, $c15, $c16, $c17, $c20;
+        java.lang.RuntimeException $r24;
+        javax.swing.text.html.CSSParser r0;
+        char[] $r7, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r21, $r23;
+        javax.swing.text.html.CSSParser$CSSParserCallback $r2;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        z4 = 0;
+
+        $i0 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i0 != 7 goto label01;
+
+        $r12 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c11 = $r12[0];
+
+        $i22 = (int) $c11;
+
+        if $i22 != 64 goto label01;
+
+        $r13 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c12 = $r13[1];
+
+        $i23 = (int) $c12;
+
+        if $i23 != 105 goto label01;
+
+        $r14 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c13 = $r14[2];
+
+        $i24 = (int) $c13;
+
+        if $i24 != 109 goto label01;
+
+        $r15 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c14 = $r15[3];
+
+        $i25 = (int) $c14;
+
+        if $i25 != 112 goto label01;
+
+        $r16 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c15 = $r16[4];
+
+        $i26 = (int) $c15;
+
+        if $i26 != 111 goto label01;
+
+        $r17 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c16 = $r17[5];
+
+        $i27 = (int) $c16;
+
+        if $i27 != 114 goto label01;
+
+        $r18 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $c17 = $r18[6];
+
+        $i28 = (int) $c17;
+
+        if $i28 != 116 goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        z0 = $z5;
+
+        $r19 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r19.<java.lang.StringBuffer: void setLength(int)>(0);
+
+     label03:
+        if z4 != 0 goto label14;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.CSSParser: int nextToken(char)>(59);
+
+        tableswitch($i1)
+        {
+            case -1: goto label12;
+            case 0: goto label13;
+            case 1: goto label04;
+            case 2: goto label10;
+            case 3: goto label11;
+            case 4: goto label07;
+            case 5: goto label11;
+            case 6: goto label10;
+            case 7: goto label11;
+            default: goto label13;
+        };
+
+     label04:
+        $i4 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i4 <= 0 goto label05;
+
+        $r11 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i6 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i7 = $i6 - 1;
+
+        $c8 = $r11[$i7];
+
+        $i29 = (int) $c8;
+
+        if $i29 != 59 goto label05;
+
+        $i9 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i10 = $i9 - 1;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = $i10;
+
+        z4 = 1;
+
+     label05:
+        $i18 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i18 <= 0 goto label13;
+
+        $r9 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i5 = virtualinvoke $r9.<java.lang.StringBuffer: int length()>();
+
+        if $i5 <= 0 goto label06;
+
+        $z3 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z3 == 0 goto label06;
+
+        $r10 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r10.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label06:
+        $r20 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r21 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i19 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        virtualinvoke $r20.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r21, 0, $i19);
+
+        goto label13;
+
+     label07:
+        $r4 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i2 = virtualinvoke $r4.<java.lang.StringBuffer: int length()>();
+
+        if $i2 <= 0 goto label08;
+
+        $z2 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z2 == 0 goto label08;
+
+        $r5 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label08:
+        $r22 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r23 = <javax.swing.text.html.CSSParser: char[] charMapping>;
+
+        $c20 = $r23[$i1];
+
+        virtualinvoke $r22.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c20);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseTillClosed(int)>($i1);
+
+        z4 = 1;
+
+        $i21 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readWS()>();
+
+        $i31 = (int) -1;
+
+        if $i21 == $i31 goto label09;
+
+        if $i21 == 59 goto label09;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i21);
+
+     label09:
+        goto label13;
+
+     label10:
+        $r8 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r7 = <javax.swing.text.html.CSSParser: char[] charMapping>;
+
+        $c3 = $r7[$i1];
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseTillClosed(int)>($i1);
+
+        goto label13;
+
+     label11:
+        $r24 = new java.lang.RuntimeException;
+
+        specialinvoke $r24.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected close in @ rule");
+
+        throw $r24;
+
+     label12:
+        z4 = 1;
+
+     label13:
+        goto label03;
+
+     label14:
+        if z0 == 0 goto label15;
+
+        $z1 = r0.<javax.swing.text.html.CSSParser: boolean encounteredRuleSet>;
+
+        if $z1 != 0 goto label15;
+
+        $r2 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<javax.swing.text.html.CSSParser$CSSParserCallback: void handleImport(java.lang.String)>($r3);
+
+     label15:
+        return;
+    }
+
+    private void parseRuleSet() throws java.io.IOException
+    {
+        javax.swing.text.html.CSSParser r0;
+        javax.swing.text.html.CSSParser$CSSParserCallback $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $z0 = specialinvoke r0.<javax.swing.text.html.CSSParser: boolean parseSelectors()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        interfaceinvoke $r1.<javax.swing.text.html.CSSParser$CSSParserCallback: void startRule()>();
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseDeclarationBlock()>();
+
+        $r2 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        interfaceinvoke $r2.<javax.swing.text.html.CSSParser$CSSParserCallback: void endRule()>();
+
+     label1:
+        return;
+    }
+
+    private boolean parseSelectors() throws java.io.IOException
+    {
+        java.lang.RuntimeException $r2;
+        java.lang.StringBuffer $r1, $r3;
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        char[] $r5, $r8;
+        javax.swing.text.html.CSSParser$CSSParserCallback $r6, $r9;
+        java.lang.String $r4, $r7;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $i0 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i0 <= 0 goto label1;
+
+        $r9 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        $r7 = new java.lang.String;
+
+        $r8 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i3 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        specialinvoke $r7.<java.lang.String: void <init>(char[],int,int)>($r8, 0, $i3);
+
+        interfaceinvoke $r9.<javax.swing.text.html.CSSParser$CSSParserCallback: void handleSelector(java.lang.String)>($r7);
+
+     label1:
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: void setLength(int)>(0);
+
+     label2:
+        $i4 = specialinvoke r0.<javax.swing.text.html.CSSParser: int nextToken(char)>(0);
+
+        if $i4 != 1 goto label3;
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i1 <= 0 goto label2;
+
+        $r6 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        $r4 = new java.lang.String;
+
+        $r5 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i2 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        specialinvoke $r4.<java.lang.String: void <init>(char[],int,int)>($r5, 0, $i2);
+
+        interfaceinvoke $r6.<javax.swing.text.html.CSSParser$CSSParserCallback: void handleSelector(java.lang.String)>($r4);
+
+        goto label2;
+
+     label3:
+        tableswitch($i4)
+        {
+            case -1: goto label7;
+            case 0: goto label8;
+            case 1: goto label8;
+            case 2: goto label5;
+            case 3: goto label6;
+            case 4: goto label4;
+            case 5: goto label6;
+            case 6: goto label5;
+            case 7: goto label6;
+            default: goto label8;
+        };
+
+     label4:
+        return 1;
+
+     label5:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseTillClosed(int)>($i4);
+
+        $r3 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: void setLength(int)>(0);
+
+        goto label8;
+
+     label6:
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected block close in selector");
+
+        throw $r2;
+
+     label7:
+        return 0;
+
+     label8:
+        goto label2;
+    }
+
+    private void parseDeclarationBlock() throws java.io.IOException
+    {
+        int $i0;
+        java.lang.RuntimeException $r1;
+        javax.swing.text.html.CSSParser r0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+     label1:
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int parseDeclaration()>();
+
+        tableswitch($i0)
+        {
+            case -1: goto label2;
+            case 0: goto label4;
+            case 1: goto label4;
+            case 2: goto label4;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label2;
+            case 6: goto label4;
+            case 7: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        return;
+
+     label3:
+        $r1 = new java.lang.RuntimeException;
+
+        specialinvoke $r1.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected close in declaration block");
+
+        throw $r1;
+
+     label4:
+        goto label1;
+    }
+
+    private int parseDeclaration() throws java.io.IOException
+    {
+        java.lang.StringBuffer $r1, $r2, $r5, $r8, $r9;
+        int $i0, $i1, $i2, i5, $i7;
+        java.lang.String $r4, $r7;
+        char $c3, $c4;
+        javax.swing.text.html.CSSParser r0;
+        javax.swing.text.html.CSSParser$CSSParserCallback $r3, $r6;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int parseIdentifiers(char,boolean)>(58, 0);
+
+        if $i0 == 1 goto label1;
+
+        return $i0;
+
+     label1:
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i1 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        i5 = $i1 - 1;
+
+     label2:
+        if i5 < 0 goto label3;
+
+        $r9 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r8 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $c3 = virtualinvoke $r8.<java.lang.StringBuffer: char charAt(int)>(i5);
+
+        $c4 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c3);
+
+        virtualinvoke $r9.<java.lang.StringBuffer: void setCharAt(int,char)>(i5, $c4);
+
+        $i7 = (int) -1;
+
+        i5 = i5 + $i7;
+
+        goto label2;
+
+     label3:
+        $r3 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        $r2 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        interfaceinvoke $r3.<javax.swing.text.html.CSSParser$CSSParserCallback: void handleProperty(java.lang.String)>($r4);
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.CSSParser: int parseIdentifiers(char,boolean)>(59, 1);
+
+        $r6 = r0.<javax.swing.text.html.CSSParser: javax.swing.text.html.CSSParser$CSSParserCallback callback>;
+
+        $r5 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<javax.swing.text.html.CSSParser$CSSParserCallback: void handleValue(java.lang.String)>($r7);
+
+        return $i2;
+    }
+
+    private int parseIdentifiers(char, boolean) throws java.io.IOException
+    {
+        boolean z0, $z1, $z2;
+        java.lang.StringBuffer $r1, $r2, $r3, $r5, $r7, $r8, $r9, $r10, $r11, $r13;
+        int $i1, $i2, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        char c0, $c3, $c7;
+        javax.swing.text.html.CSSParser r0;
+        char[] $r4, $r6, $r12, $r14;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        c0 := @parameter0: char;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: void setLength(int)>(0);
+
+     label01:
+        $i1 = specialinvoke r0.<javax.swing.text.html.CSSParser: int nextToken(char)>(c0);
+
+        tableswitch($i1)
+        {
+            case -1: goto label09;
+            case 0: goto label10;
+            case 1: goto label02;
+            case 2: goto label07;
+            case 3: goto label09;
+            case 4: goto label07;
+            case 5: goto label09;
+            case 6: goto label07;
+            case 7: goto label09;
+            default: goto label10;
+        };
+
+     label02:
+        $i4 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i4 <= 0 goto label10;
+
+        $r6 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i5 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i6 = $i5 - 1;
+
+        $c7 = $r6[$i6];
+
+        $i14 = (int) $c7;
+
+        $i15 = (int) c0;
+
+        if $i14 != $i15 goto label05;
+
+        $i9 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i10 = $i9 - 1;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = $i10;
+
+        if $i10 <= 0 goto label04;
+
+        $z2 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z2 == 0 goto label03;
+
+        $r9 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i11 = virtualinvoke $r9.<java.lang.StringBuffer: int length()>();
+
+        if $i11 <= 0 goto label03;
+
+        $r10 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r10.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label03:
+        $r11 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r12 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i12 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        virtualinvoke $r11.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r12, 0, $i12);
+
+     label04:
+        return 1;
+
+     label05:
+        $z1 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z1 == 0 goto label06;
+
+        $r7 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i8 = virtualinvoke $r7.<java.lang.StringBuffer: int length()>();
+
+        if $i8 <= 0 goto label06;
+
+        $r8 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label06:
+        $r13 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r14 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i13 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        virtualinvoke $r13.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r14, 0, $i13);
+
+        goto label10;
+
+     label07:
+        $r2 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i2 = virtualinvoke $r2.<java.lang.StringBuffer: int length()>();
+
+        if z0 == 0 goto label08;
+
+        $r5 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r4 = <javax.swing.text.html.CSSParser: char[] charMapping>;
+
+        $c3 = $r4[$i1];
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+     label08:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void parseTillClosed(int)>($i1);
+
+        if z0 != 0 goto label10;
+
+        $r3 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: void setLength(int)>($i2);
+
+        goto label10;
+
+     label09:
+        return $i1;
+
+     label10:
+        goto label01;
+    }
+
+    private void parseTillClosed(int) throws java.io.IOException
+    {
+        java.lang.StringBuffer $r1, $r2, $r3, $r4, $r5, $r7, $r8, $r10, $r12;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0, $z1, $z2, z3, $z4;
+        char $c7, $c8;
+        java.lang.RuntimeException $r9;
+        javax.swing.text.html.CSSParser r0;
+        char[] $r6, $r11, $r13;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        i0 := @parameter0: int;
+
+        z3 = 0;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void startBlock(int)>(i0);
+
+     label01:
+        if z3 != 0 goto label10;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.CSSParser: int nextToken(char)>(0);
+
+        tableswitch($i1)
+        {
+            case -1: goto label08;
+            case 0: goto label09;
+            case 1: goto label02;
+            case 2: goto label04;
+            case 3: goto label06;
+            case 4: goto label04;
+            case 5: goto label06;
+            case 6: goto label04;
+            case 7: goto label06;
+            default: goto label09;
+        };
+
+     label02:
+        $r5 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i4 = virtualinvoke $r5.<java.lang.StringBuffer: int length()>();
+
+        if $i4 <= 0 goto label03;
+
+        $z2 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z2 == 0 goto label03;
+
+        $r8 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label03:
+        $i6 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i6 <= 0 goto label09;
+
+        $r7 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r6 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i5 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        virtualinvoke $r7.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r6, 0, $i5);
+
+        goto label09;
+
+     label04:
+        $r3 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i3 = virtualinvoke $r3.<java.lang.StringBuffer: int length()>();
+
+        if $i3 <= 0 goto label05;
+
+        $z1 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z1 == 0 goto label05;
+
+        $r4 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label05:
+        $r10 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r11 = <javax.swing.text.html.CSSParser: char[] charMapping>;
+
+        $c7 = $r11[$i1];
+
+        virtualinvoke $r10.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c7);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void startBlock(int)>($i1);
+
+        goto label09;
+
+     label06:
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $i2 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        if $i2 <= 0 goto label07;
+
+        $z0 = r0.<javax.swing.text.html.CSSParser: boolean readWS>;
+
+        if $z0 == 0 goto label07;
+
+        $r2 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+     label07:
+        $r12 = r0.<javax.swing.text.html.CSSParser: java.lang.StringBuffer unitBuffer>;
+
+        $r13 = <javax.swing.text.html.CSSParser: char[] charMapping>;
+
+        $c8 = $r13[$i1];
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void endBlock(int)>($i1);
+
+        $z4 = specialinvoke r0.<javax.swing.text.html.CSSParser: boolean inBlock()>();
+
+        if $z4 != 0 goto label09;
+
+        z3 = 1;
+
+        goto label09;
+
+     label08:
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unclosed block");
+
+        throw $r9;
+
+     label09:
+        goto label01;
+
+     label10:
+        return;
+    }
+
+    private int nextToken(char) throws java.io.IOException
+    {
+        char c7;
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i9;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        c7 := @parameter0: char;
+
+        r0.<javax.swing.text.html.CSSParser: boolean readWS> = 0;
+
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readWS()>();
+
+        lookupswitch($i0)
+        {
+            case -1: goto label11;
+            case 34: goto label03;
+            case 39: goto label01;
+            case 40: goto label09;
+            case 41: goto label10;
+            case 91: goto label05;
+            case 93: goto label06;
+            case 123: goto label07;
+            case 125: goto label08;
+            default: goto label12;
+        };
+
+     label01:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void readTill(char)>(39);
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i1 <= 0 goto label02;
+
+        $i2 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i3 = $i2 - 1;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = $i3;
+
+     label02:
+        return 1;
+
+     label03:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void readTill(char)>(34);
+
+        $i4 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i4 <= 0 goto label04;
+
+        $i5 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i6 = $i5 - 1;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = $i6;
+
+     label04:
+        return 1;
+
+     label05:
+        return 2;
+
+     label06:
+        return 3;
+
+     label07:
+        return 4;
+
+     label08:
+        return 5;
+
+     label09:
+        return 6;
+
+     label10:
+        return 7;
+
+     label11:
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label12:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i0);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: boolean getIdentifier(char)>(c7);
+
+        return 1;
+    }
+
+    private boolean getIdentifier(char) throws java.io.IOException
+    {
+        byte b14, b15, b16, b17, b18;
+        int $i1, $i2, $i3, $i5, $i8, $i10, i11, i12, i13, $i20, $i21;
+        boolean z0, z1, $z2, z3, z4, z5;
+        char c0, $c4, $c6, $c7, $c9;
+        javax.swing.text.html.CSSParser r0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        c0 := @parameter0: char;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        i11 = 0;
+
+        i12 = 0;
+
+        i13 = 0;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = 0;
+
+     label01:
+        if z3 != 0 goto label19;
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        tableswitch($i2)
+        {
+            case -1: goto label08;
+            case 0: goto label09;
+            case 1: goto label09;
+            case 2: goto label09;
+            case 3: goto label09;
+            case 4: goto label09;
+            case 5: goto label09;
+            case 6: goto label09;
+            case 7: goto label09;
+            case 8: goto label09;
+            case 9: goto label06;
+            case 10: goto label06;
+            case 11: goto label09;
+            case 12: goto label09;
+            case 13: goto label06;
+            case 14: goto label09;
+            case 15: goto label09;
+            case 16: goto label09;
+            case 17: goto label09;
+            case 18: goto label09;
+            case 19: goto label09;
+            case 20: goto label09;
+            case 21: goto label09;
+            case 22: goto label09;
+            case 23: goto label09;
+            case 24: goto label09;
+            case 25: goto label09;
+            case 26: goto label09;
+            case 27: goto label09;
+            case 28: goto label09;
+            case 29: goto label09;
+            case 30: goto label09;
+            case 31: goto label09;
+            case 32: goto label06;
+            case 33: goto label09;
+            case 34: goto label06;
+            case 35: goto label09;
+            case 36: goto label09;
+            case 37: goto label09;
+            case 38: goto label09;
+            case 39: goto label06;
+            case 40: goto label06;
+            case 41: goto label06;
+            case 42: goto label09;
+            case 43: goto label09;
+            case 44: goto label09;
+            case 45: goto label09;
+            case 46: goto label09;
+            case 47: goto label07;
+            case 48: goto label03;
+            case 49: goto label03;
+            case 50: goto label03;
+            case 51: goto label03;
+            case 52: goto label03;
+            case 53: goto label03;
+            case 54: goto label03;
+            case 55: goto label03;
+            case 56: goto label03;
+            case 57: goto label03;
+            case 58: goto label09;
+            case 59: goto label09;
+            case 60: goto label09;
+            case 61: goto label09;
+            case 62: goto label09;
+            case 63: goto label09;
+            case 64: goto label09;
+            case 65: goto label05;
+            case 66: goto label05;
+            case 67: goto label05;
+            case 68: goto label05;
+            case 69: goto label05;
+            case 70: goto label05;
+            case 71: goto label09;
+            case 72: goto label09;
+            case 73: goto label09;
+            case 74: goto label09;
+            case 75: goto label09;
+            case 76: goto label09;
+            case 77: goto label09;
+            case 78: goto label09;
+            case 79: goto label09;
+            case 80: goto label09;
+            case 81: goto label09;
+            case 82: goto label09;
+            case 83: goto label09;
+            case 84: goto label09;
+            case 85: goto label09;
+            case 86: goto label09;
+            case 87: goto label09;
+            case 88: goto label09;
+            case 89: goto label09;
+            case 90: goto label09;
+            case 91: goto label06;
+            case 92: goto label02;
+            case 93: goto label06;
+            case 94: goto label09;
+            case 95: goto label09;
+            case 96: goto label09;
+            case 97: goto label04;
+            case 98: goto label04;
+            case 99: goto label04;
+            case 100: goto label04;
+            case 101: goto label04;
+            case 102: goto label04;
+            case 103: goto label09;
+            case 104: goto label09;
+            case 105: goto label09;
+            case 106: goto label09;
+            case 107: goto label09;
+            case 108: goto label09;
+            case 109: goto label09;
+            case 110: goto label09;
+            case 111: goto label09;
+            case 112: goto label09;
+            case 113: goto label09;
+            case 114: goto label09;
+            case 115: goto label09;
+            case 116: goto label09;
+            case 117: goto label09;
+            case 118: goto label09;
+            case 119: goto label09;
+            case 120: goto label09;
+            case 121: goto label09;
+            case 122: goto label09;
+            case 123: goto label06;
+            case 124: goto label09;
+            case 125: goto label06;
+            default: goto label09;
+        };
+
+     label02:
+        b14 = 1;
+
+        b18 = 1;
+
+        b17 = 1;
+
+        b16 = 1;
+
+        b15 = 1;
+
+        goto label10;
+
+     label03:
+        b14 = 2;
+
+        b18 = 2;
+
+        b17 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        i13 = $i2 - 48;
+
+        goto label10;
+
+     label04:
+        b14 = 2;
+
+        b18 = 2;
+
+        b17 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        $i3 = $i2 - 97;
+
+        i13 = $i3 + 10;
+
+        goto label10;
+
+     label05:
+        b14 = 2;
+
+        b18 = 2;
+
+        b17 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        $i10 = $i2 - 65;
+
+        i13 = $i10 + 10;
+
+        goto label10;
+
+     label06:
+        b14 = 3;
+
+        b18 = 3;
+
+        b17 = 3;
+
+        b16 = 3;
+
+        b15 = 3;
+
+        goto label10;
+
+     label07:
+        b14 = 4;
+
+        b18 = 4;
+
+        b17 = 4;
+
+        b16 = 4;
+
+        b15 = 4;
+
+        goto label10;
+
+     label08:
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        b14 = 0;
+
+        b18 = 0;
+
+        b17 = 0;
+
+        b16 = 0;
+
+        b15 = 0;
+
+        goto label10;
+
+     label09:
+        b14 = 0;
+
+        b18 = 0;
+
+        b17 = 0;
+
+        b16 = 0;
+
+        b15 = 0;
+
+     label10:
+        if z0 == 0 goto label13;
+
+        if b15 != 2 goto label11;
+
+        $i8 = i12 * 16;
+
+        i12 = $i8 + i13;
+
+        i11 = i11 + 1;
+
+        if i11 != 4 goto label01;
+
+        z0 = 0;
+
+        $c9 = (char) i12;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c9);
+
+        goto label01;
+
+     label11:
+        z0 = 0;
+
+        if i11 <= 0 goto label12;
+
+        $c7 = (char) i12;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c7);
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i2);
+
+        goto label01;
+
+     label12:
+        if z4 != 0 goto label01;
+
+        $c6 = (char) $i2;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c6);
+
+        goto label01;
+
+     label13:
+        if z5 != 0 goto label01;
+
+        if b16 != 1 goto label14;
+
+        z0 = 1;
+
+        i11 = 0;
+
+        i12 = 0;
+
+        goto label01;
+
+     label14:
+        if b17 != 3 goto label15;
+
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i2);
+
+        goto label01;
+
+     label15:
+        if b18 != 4 goto label18;
+
+        $i5 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        if $i5 != 42 goto label16;
+
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void readComment()>();
+
+        r0.<javax.swing.text.html.CSSParser: boolean readWS> = 1;
+
+        goto label01;
+
+     label16:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>(47);
+
+        $i20 = (int) -1;
+
+        if $i5 != $i20 goto label17;
+
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        goto label01;
+
+     label17:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i5);
+
+        goto label01;
+
+     label18:
+        $c4 = (char) $i2;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c4);
+
+        $i21 = (int) c0;
+
+        if $i2 != $i21 goto label01;
+
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        goto label01;
+
+     label19:
+        $i1 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        if $i1 <= 0 goto label20;
+
+        $z2 = 1;
+
+        goto label21;
+
+     label20:
+        $z2 = 0;
+
+     label21:
+        return $z2;
+    }
+
+    private void readTill(char) throws java.io.IOException
+    {
+        byte b13, b14, b15, b16;
+        int $i1, $i2, $i7, $i9, i10, i11, i12, $i17, $i18;
+        java.lang.String $r5;
+        boolean z0, z1;
+        char c0, $c3, $c4, $c5, $c6, $c8;
+        java.lang.RuntimeException $r7;
+        javax.swing.text.html.CSSParser r0;
+        java.lang.StringBuilder $r3, $r4, $r6;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        c0 := @parameter0: char;
+
+        z0 = 0;
+
+        i10 = 0;
+
+        i11 = 0;
+
+        z1 = 0;
+
+        i12 = 0;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = 0;
+
+     label01:
+        if z1 != 0 goto label16;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        tableswitch($i1)
+        {
+            case -1: goto label06;
+            case 0: goto label07;
+            case 1: goto label07;
+            case 2: goto label07;
+            case 3: goto label07;
+            case 4: goto label07;
+            case 5: goto label07;
+            case 6: goto label07;
+            case 7: goto label07;
+            case 8: goto label07;
+            case 9: goto label07;
+            case 10: goto label07;
+            case 11: goto label07;
+            case 12: goto label07;
+            case 13: goto label07;
+            case 14: goto label07;
+            case 15: goto label07;
+            case 16: goto label07;
+            case 17: goto label07;
+            case 18: goto label07;
+            case 19: goto label07;
+            case 20: goto label07;
+            case 21: goto label07;
+            case 22: goto label07;
+            case 23: goto label07;
+            case 24: goto label07;
+            case 25: goto label07;
+            case 26: goto label07;
+            case 27: goto label07;
+            case 28: goto label07;
+            case 29: goto label07;
+            case 30: goto label07;
+            case 31: goto label07;
+            case 32: goto label07;
+            case 33: goto label07;
+            case 34: goto label07;
+            case 35: goto label07;
+            case 36: goto label07;
+            case 37: goto label07;
+            case 38: goto label07;
+            case 39: goto label07;
+            case 40: goto label07;
+            case 41: goto label07;
+            case 42: goto label07;
+            case 43: goto label07;
+            case 44: goto label07;
+            case 45: goto label07;
+            case 46: goto label07;
+            case 47: goto label07;
+            case 48: goto label03;
+            case 49: goto label03;
+            case 50: goto label03;
+            case 51: goto label03;
+            case 52: goto label03;
+            case 53: goto label03;
+            case 54: goto label03;
+            case 55: goto label03;
+            case 56: goto label03;
+            case 57: goto label03;
+            case 58: goto label07;
+            case 59: goto label07;
+            case 60: goto label07;
+            case 61: goto label07;
+            case 62: goto label07;
+            case 63: goto label07;
+            case 64: goto label07;
+            case 65: goto label05;
+            case 66: goto label05;
+            case 67: goto label05;
+            case 68: goto label05;
+            case 69: goto label05;
+            case 70: goto label05;
+            case 71: goto label07;
+            case 72: goto label07;
+            case 73: goto label07;
+            case 74: goto label07;
+            case 75: goto label07;
+            case 76: goto label07;
+            case 77: goto label07;
+            case 78: goto label07;
+            case 79: goto label07;
+            case 80: goto label07;
+            case 81: goto label07;
+            case 82: goto label07;
+            case 83: goto label07;
+            case 84: goto label07;
+            case 85: goto label07;
+            case 86: goto label07;
+            case 87: goto label07;
+            case 88: goto label07;
+            case 89: goto label07;
+            case 90: goto label07;
+            case 91: goto label07;
+            case 92: goto label02;
+            case 93: goto label07;
+            case 94: goto label07;
+            case 95: goto label07;
+            case 96: goto label07;
+            case 97: goto label04;
+            case 98: goto label04;
+            case 99: goto label04;
+            case 100: goto label04;
+            case 101: goto label04;
+            case 102: goto label04;
+            default: goto label07;
+        };
+
+     label02:
+        b13 = 1;
+
+        b16 = 1;
+
+        b15 = 1;
+
+        b14 = 1;
+
+        goto label08;
+
+     label03:
+        b13 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        b14 = 2;
+
+        i12 = $i1 - 48;
+
+        goto label08;
+
+     label04:
+        b13 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        b14 = 2;
+
+        $i2 = $i1 - 97;
+
+        i12 = $i2 + 10;
+
+        goto label08;
+
+     label05:
+        b13 = 2;
+
+        b16 = 2;
+
+        b15 = 2;
+
+        b14 = 2;
+
+        $i9 = $i1 - 65;
+
+        i12 = $i9 + 10;
+
+        goto label08;
+
+     label06:
+        $r7 = new java.lang.RuntimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unclosed ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label07:
+        b13 = 0;
+
+        b16 = 0;
+
+        b15 = 0;
+
+        b14 = 0;
+
+     label08:
+        if z0 == 0 goto label13;
+
+        if b16 != 2 goto label09;
+
+        $i7 = i11 * 16;
+
+        i11 = $i7 + i12;
+
+        i10 = i10 + 1;
+
+        if i10 != 4 goto label01;
+
+        z0 = 0;
+
+        $c8 = (char) i11;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c8);
+
+        goto label01;
+
+     label09:
+        if i10 <= 0 goto label12;
+
+        $c5 = (char) i11;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c5);
+
+        if b14 != 1 goto label10;
+
+        z0 = 1;
+
+        i10 = 0;
+
+        i11 = 0;
+
+        goto label01;
+
+     label10:
+        $i17 = (int) c0;
+
+        if $i1 != $i17 goto label11;
+
+        z1 = 1;
+
+     label11:
+        $c6 = (char) $i1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c6);
+
+        z0 = 0;
+
+        goto label01;
+
+     label12:
+        $c4 = (char) $i1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c4);
+
+        z0 = 0;
+
+        goto label01;
+
+     label13:
+        if b15 != 1 goto label14;
+
+        z0 = 1;
+
+        i10 = 0;
+
+        i11 = 0;
+
+        goto label01;
+
+     label14:
+        $i18 = (int) c0;
+
+        if $i1 != $i18 goto label15;
+
+        z1 = 1;
+
+     label15:
+        $c3 = (char) $i1;
+
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void append(char)>($c3);
+
+        goto label01;
+
+     label16:
+        return;
+    }
+
+    private void append(char)
+    {
+        char c4;
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7;
+        char[] $r1, $r2, $r3, r4, $r5, $r6;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        c4 := @parameter0: char;
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 != $i0 goto label1;
+
+        $r3 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i5 = lengthof $r3;
+
+        $i6 = $i5 * 2;
+
+        r4 = newarray (char)[$i6];
+
+        $r6 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $r5 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i7 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r4, 0, $i7);
+
+        r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer> = r4;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.CSSParser: char[] tokenBuffer>;
+
+        $i2 = r0.<javax.swing.text.html.CSSParser: int tokenBufferLength>;
+
+        $i3 = $i2 + 1;
+
+        r0.<javax.swing.text.html.CSSParser: int tokenBufferLength> = $i3;
+
+        $r2[$i2] = c4;
+
+        return;
+    }
+
+    private void readComment() throws java.io.IOException
+    {
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i3;
+        java.lang.RuntimeException $r3, $r4;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+     label1:
+        $i1 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        lookupswitch($i1)
+        {
+            case -1: goto label2;
+            case 42: goto label3;
+            default: goto label6;
+        };
+
+     label2:
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unclosed comment");
+
+        throw $r3;
+
+     label3:
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        if $i0 != 47 goto label4;
+
+        return;
+
+     label4:
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label5;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unclosed comment");
+
+        throw $r4;
+
+     label5:
+        specialinvoke r0.<javax.swing.text.html.CSSParser: void pushChar(int)>($i0);
+
+        goto label1;
+
+     label6:
+        goto label1;
+    }
+
+    private void startBlock(int)
+    {
+        int[] $r1, $r2, r3, $r4;
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        i4 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        $r1 = r0.<javax.swing.text.html.CSSParser: int[] unitStack>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 != $i0 goto label1;
+
+        $i5 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        $i6 = $i5 * 2;
+
+        r3 = newarray (int)[$i6];
+
+        $r4 = r0.<javax.swing.text.html.CSSParser: int[] unitStack>;
+
+        $i7 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r3, 0, $i7);
+
+        r0.<javax.swing.text.html.CSSParser: int[] unitStack> = r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.html.CSSParser: int[] unitStack>;
+
+        $i2 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        $i3 = $i2 + 1;
+
+        r0.<javax.swing.text.html.CSSParser: int stackCount> = $i3;
+
+        $r2[$i2] = i4;
+
+        return;
+    }
+
+    private void endBlock(int)
+    {
+        java.lang.RuntimeException $r1;
+        byte b6;
+        int[] $r2;
+        javax.swing.text.html.CSSParser r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i7;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 3: goto label1;
+            case 4: goto label4;
+            case 5: goto label2;
+            case 6: goto label4;
+            case 7: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        b6 = 2;
+
+        goto label5;
+
+     label2:
+        b6 = 4;
+
+        goto label5;
+
+     label3:
+        b6 = 6;
+
+        goto label5;
+
+     label4:
+        b6 = -1;
+
+     label5:
+        $i7 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        if $i7 <= 0 goto label6;
+
+        $r2 = r0.<javax.swing.text.html.CSSParser: int[] unitStack>;
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        $i2 = $i1 - 1;
+
+        $i3 = $r2[$i2];
+
+        if $i3 != b6 goto label6;
+
+        $i4 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        $i5 = $i4 - 1;
+
+        r0.<javax.swing.text.html.CSSParser: int stackCount> = $i5;
+
+        goto label7;
+
+     label6:
+        $r1 = new java.lang.RuntimeException;
+
+        specialinvoke $r1.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unmatched block");
+
+        throw $r1;
+
+     label7:
+        return;
+    }
+
+    private boolean inBlock()
+    {
+        int $i0;
+        javax.swing.text.html.CSSParser r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $i0 = r0.<javax.swing.text.html.CSSParser: int stackCount>;
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private int readWS() throws java.io.IOException
+    {
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i3;
+        char $c1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+     label1:
+        $i0 = specialinvoke r0.<javax.swing.text.html.CSSParser: int readChar()>();
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label2;
+
+        $c1 = (char) $i0;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c1);
+
+        if $z0 == 0 goto label2;
+
+        r0.<javax.swing.text.html.CSSParser: boolean readWS> = 1;
+
+        goto label1;
+
+     label2:
+        return $i0;
+    }
+
+    private int readChar() throws java.io.IOException
+    {
+        javax.swing.text.html.CSSParser r0;
+        int $i0, $i1;
+        java.io.Reader $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        $z0 = r0.<javax.swing.text.html.CSSParser: boolean didPushChar>;
+
+        if $z0 == 0 goto label1;
+
+        r0.<javax.swing.text.html.CSSParser: boolean didPushChar> = 0;
+
+        $i1 = r0.<javax.swing.text.html.CSSParser: int pushedChar>;
+
+        return $i1;
+
+     label1:
+        $r1 = r0.<javax.swing.text.html.CSSParser: java.io.Reader reader>;
+
+        $i0 = virtualinvoke $r1.<java.io.Reader: int read()>();
+
+        return $i0;
+    }
+
+    private void pushChar(int)
+    {
+        javax.swing.text.html.CSSParser r0;
+        int i0;
+        java.lang.RuntimeException $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.CSSParser;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<javax.swing.text.html.CSSParser: boolean didPushChar>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.RuntimeException;
+
+        specialinvoke $r1.<java.lang.RuntimeException: void <init>(java.lang.String)>("Can not handle look ahead of more than one character");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.text.html.CSSParser: boolean didPushChar> = 1;
+
+        r0.<javax.swing.text.html.CSSParser: int pushedChar> = i0;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r0;
+
+        <javax.swing.text.html.CSSParser: int END> = -1;
+
+        <javax.swing.text.html.CSSParser: int PAREN_CLOSE> = 7;
+
+        <javax.swing.text.html.CSSParser: int PAREN_OPEN> = 6;
+
+        <javax.swing.text.html.CSSParser: int BRACE_CLOSE> = 5;
+
+        <javax.swing.text.html.CSSParser: int BRACE_OPEN> = 4;
+
+        <javax.swing.text.html.CSSParser: int BRACKET_CLOSE> = 3;
+
+        <javax.swing.text.html.CSSParser: int BRACKET_OPEN> = 2;
+
+        <javax.swing.text.html.CSSParser: int IDENTIFIER> = 1;
+
+        $r0 = newarray (char)[9];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r0[2] = 91;
+
+        $r0[3] = 93;
+
+        $r0[4] = 123;
+
+        $r0[5] = 125;
+
+        $r0[6] = 40;
+
+        $r0[7] = 41;
+
+        $r0[8] = 0;
+
+        <javax.swing.text.html.CSSParser: char[] charMapping> = $r0;
+
+        return;
+    }
+}

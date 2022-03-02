@@ -1,0 +1,846 @@
+final class sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter extends java.lang.Object implements sun.awt.geom.PathConsumer2D
+{
+    private sun.awt.geom.PathConsumer2D out;
+    private final float[] clipRect;
+    private final float[] corners;
+    private boolean init_corners;
+    private final sun.java2d.marlin.Helpers$IndexStack stack;
+    private int cOutCode;
+    private int gOutCode;
+    private boolean outside;
+    private float sx0;
+    private float sy0;
+    private float cx0;
+    private float cy0;
+    private float cox0;
+    private float coy0;
+    private boolean subdivide;
+    private final sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter;
+
+    void <init>(sun.java2d.marlin.RendererContext)
+    {
+        sun.java2d.marlin.Helpers$IndexStack $r12;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r4;
+        float[] $r1, $r3;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        sun.java2d.marlin.RendererStats $r5, $r6, $r7, $r8;
+        sun.java2d.marlin.stats.StatLong $r9, $r11;
+        sun.java2d.marlin.stats.Histogram $r10;
+        boolean $z0;
+        sun.java2d.marlin.RendererContext r2;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        r2 := @parameter0: sun.java2d.marlin.RendererContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (float)[8];
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] corners> = $r1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean init_corners> = 0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = 0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = 15;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 0;
+
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_CLIP_SUBDIVIDER>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = $z0;
+
+        $r3 = r2.<sun.java2d.marlin.RendererContext: float[] clipRect>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect> = $r3;
+
+        $r4 = r2.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveClipSplitter>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter> = $r4;
+
+        $r5 = r2.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        if $r5 == null goto label1;
+
+        $r12 = new sun.java2d.marlin.Helpers$IndexStack;
+
+        $r6 = r2.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r11 = $r6.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_pcf_idxstack_indices>;
+
+        $r7 = r2.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r10 = $r7.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_pcf_idxstack_indices>;
+
+        $r8 = r2.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r9 = $r8.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_pcf_idxstack_indices>;
+
+        specialinvoke $r12.<sun.java2d.marlin.Helpers$IndexStack: void <init>(sun.java2d.marlin.RendererContext,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.Histogram,sun.java2d.marlin.stats.StatLong)>(r2, $r11, $r10, $r9);
+
+        goto label2;
+
+     label1:
+        $r12 = new sun.java2d.marlin.Helpers$IndexStack;
+
+        specialinvoke $r12.<sun.java2d.marlin.Helpers$IndexStack: void <init>(sun.java2d.marlin.RendererContext)>(r2);
+
+     label2:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack> = $r12;
+
+        return;
+    }
+
+    sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter init(sun.awt.geom.PathConsumer2D)
+    {
+        sun.awt.geom.PathConsumer2D r1;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r2;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        r1 := @parameter0: sun.awt.geom.PathConsumer2D;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out> = r1;
+
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_CLIP_SUBDIVIDER>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: void init()>();
+
+     label1:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean init_corners> = 1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = 15;
+
+        return r0;
+    }
+
+    void dispose()
+    {
+        sun.java2d.marlin.Helpers$IndexStack $r1;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.Helpers$IndexStack: void dispose()>();
+
+        return;
+    }
+
+    private void finishPath()
+    {
+        sun.java2d.marlin.Helpers$IndexStack $r1;
+        int $i0;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        $z0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode>;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finish()>();
+
+        goto label2;
+
+     label1:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 0;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.Helpers$IndexStack: void reset()>();
+
+     label2:
+        return;
+    }
+
+    private void finish()
+    {
+        float[] $r3, r5, r6;
+        boolean $z0, $z1;
+        sun.java2d.marlin.Helpers$IndexStack $r1, $r4;
+        sun.awt.geom.PathConsumer2D $r2, $r7;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 0;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        $z0 = virtualinvoke $r1.<sun.java2d.marlin.Helpers$IndexStack: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean init_corners>;
+
+        if $z1 == 0 goto label1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean init_corners> = 0;
+
+        r5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] corners>;
+
+        r6 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $f0 = r6[2];
+
+        r5[0] = $f0;
+
+        $f1 = r6[0];
+
+        r5[1] = $f1;
+
+        $f2 = r6[2];
+
+        r5[2] = $f2;
+
+        $f3 = r6[1];
+
+        r5[3] = $f3;
+
+        $f4 = r6[3];
+
+        r5[4] = $f4;
+
+        $f5 = r6[0];
+
+        r5[5] = $f5;
+
+        $f6 = r6[3];
+
+        r5[6] = $f6;
+
+        $f7 = r6[1];
+
+        r5[7] = $f7;
+
+     label1:
+        $r4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        $r3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] corners>;
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.Helpers$IndexStack: void pullAll(float[],sun.awt.geom.PathConsumer2D)>($r3, $r2);
+
+     label2:
+        $r7 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        $f8 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0>;
+
+        $f9 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0>;
+
+        interfaceinvoke $r7.<sun.awt.geom.PathConsumer2D: void lineTo(float,float)>($f8, $f9);
+
+        $f10 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = $f10;
+
+        $f11 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = $f11;
+
+        return;
+    }
+
+    public void pathDone()
+    {
+        sun.awt.geom.PathConsumer2D $r1;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finishPath()>();
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.awt.geom.PathConsumer2D: void pathDone()>();
+
+        virtualinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void dispose()>();
+
+        return;
+    }
+
+    public void closePath()
+    {
+        sun.awt.geom.PathConsumer2D $r1;
+        float[] $r2;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        int $i0;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finishPath()>();
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.awt.geom.PathConsumer2D: void closePath()>();
+
+        $f1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sx0>;
+
+        $f0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sy0>;
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i0 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>($f1, $f0, $r2);
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i0;
+
+        $f2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sx0>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = $f2;
+
+        $f3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sy0>;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = $f3;
+
+        return;
+    }
+
+    public void moveTo(float, float)
+    {
+        sun.awt.geom.PathConsumer2D $r1;
+        int $i0;
+        float f0, f1;
+        float[] $r2;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finishPath()>();
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.awt.geom.PathConsumer2D: void moveTo(float,float)>(f0, f1);
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i0 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f0, f1, $r2);
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = f0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = f1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sx0> = f0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float sy0> = f1;
+
+        return;
+    }
+
+    public void lineTo(float, float)
+    {
+        float[] $r1;
+        int i0, $i1, i2, i3, $i4, $i5;
+        boolean $z0, $z1, z2, $z3;
+        sun.awt.geom.PathConsumer2D $r2;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r3, $r4;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        float f0, f1, $f2, $f3, $f4, $f5;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        i0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f0, f1, $r1);
+
+        i2 = i0 | $i1;
+
+        if i2 == 0 goto label5;
+
+        i3 = i0 & $i1;
+
+        if i3 != 0 goto label4;
+
+        $z0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 0;
+
+        $z1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z1 == 0 goto label1;
+
+        $r4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0>;
+
+        $f4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0>;
+
+        z2 = virtualinvoke $r4.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitLine(float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f5, $f4, f0, f1, i2, r0);
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0>;
+
+        $f2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0>;
+
+        z2 = virtualinvoke $r3.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitLine(float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f3, $f2, f0, f1, i2, r0);
+
+     label2:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 1;
+
+        if z2 == 0 goto label3;
+
+        return;
+
+     label3:
+        goto label5;
+
+     label4:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i1;
+
+        $i4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode>;
+
+        $i5 = $i4 & i3;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = $i5;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0> = f0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0> = f1;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void clip(int,int,int)>(i3, i0, $i1);
+
+        return;
+
+     label5:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = 0;
+
+        $z3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z3 == 0 goto label6;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finish()>();
+
+     label6:
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r2.<sun.awt.geom.PathConsumer2D: void lineTo(float,float)>(f0, f1);
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = f0;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = f1;
+
+        return;
+    }
+
+    private void clip(int, int, int)
+    {
+        byte $b12, $b13, $b14, $b15, $b16, $b17;
+        int i0, i1, i2, $i3, i4, i5, i6, $i7, $i8, $i9, $i10;
+        sun.java2d.marlin.Helpers$IndexStack $r1, $r2, $r3, $r4, $r5, $r6;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if i0 == i1 goto label7;
+
+        $i3 = i2 & 12;
+
+        if $i3 == 0 goto label7;
+
+        i4 = i0 | i1;
+
+        i5 = i4 & 3;
+
+        i6 = i4 & 12;
+
+        if i6 != 4 goto label1;
+
+        $b17 = 0;
+
+        $b16 = 0;
+
+        $b15 = 0;
+
+        $b14 = 0;
+
+        $b13 = 0;
+
+        $b12 = 0;
+
+        goto label2;
+
+     label1:
+        $b17 = 2;
+
+        $b16 = 2;
+
+        $b15 = 2;
+
+        $b14 = 2;
+
+        $b13 = 2;
+
+        $b12 = 2;
+
+     label2:
+        lookupswitch(i5)
+        {
+            case 1: goto label3;
+            case 2: goto label4;
+            default: goto label5;
+        };
+
+     label3:
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($b15);
+
+        return;
+
+     label4:
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        $i7 = $b13 + 1;
+
+        virtualinvoke $r1.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($i7);
+
+        return;
+
+     label5:
+        $i8 = i0 & 1;
+
+        if $i8 == 0 goto label6;
+
+        $r5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        virtualinvoke $r5.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($b16);
+
+        $r6 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        $i10 = $b14 + 1;
+
+        virtualinvoke $r6.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($i10);
+
+        goto label7;
+
+     label6:
+        $r3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        $i9 = $b17 + 1;
+
+        virtualinvoke $r3.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($i9);
+
+        $r4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.Helpers$IndexStack stack>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.Helpers$IndexStack: void push(int)>($b12);
+
+     label7:
+        return;
+    }
+
+    public void curveTo(float, float, float, float, float, float)
+    {
+        boolean $z0, $z1, z2, $z3;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        float f0, f1, f2, f3, f4, f5, $f6, $f7, $f8, $f9;
+        float[] $r1, $r2, $r3;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, i9, $i10, $i11;
+        sun.awt.geom.PathConsumer2D $r4;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r5, $r6;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        f2 := @parameter2: float;
+
+        f3 := @parameter3: float;
+
+        f4 := @parameter4: float;
+
+        f5 := @parameter5: float;
+
+        i0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f0, f1, $r1);
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f2, f3, $r2);
+
+        $r3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i3 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f4, f5, $r3);
+
+        $i4 = i0 | $i1;
+
+        $i5 = $i4 | $i2;
+
+        i6 = $i5 | $i3;
+
+        if i6 == 0 goto label5;
+
+        $i7 = i0 & $i1;
+
+        $i8 = $i7 & $i2;
+
+        i9 = $i8 & $i3;
+
+        if i9 != 0 goto label4;
+
+        $z0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 0;
+
+        $z1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z1 == 0 goto label1;
+
+        $r6 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f9 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0>;
+
+        $f8 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0>;
+
+        z2 = virtualinvoke $r6.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitCurve(float,float,float,float,float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f9, $f8, f0, f1, f2, f3, f4, f5, i6, r0);
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f7 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0>;
+
+        $f6 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0>;
+
+        z2 = virtualinvoke $r5.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitCurve(float,float,float,float,float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f7, $f6, f0, f1, f2, f3, f4, f5, i6, r0);
+
+     label2:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 1;
+
+        if z2 == 0 goto label3;
+
+        return;
+
+     label3:
+        goto label5;
+
+     label4:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i3;
+
+        $i10 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode>;
+
+        $i11 = $i10 & i9;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = $i11;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0> = f4;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0> = f5;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void clip(int,int,int)>(i9, i0, $i3);
+
+        return;
+
+     label5:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i3;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = 0;
+
+        $z3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z3 == 0 goto label6;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finish()>();
+
+     label6:
+        $r4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r4.<sun.awt.geom.PathConsumer2D: void curveTo(float,float,float,float,float,float)>(f0, f1, f2, f3, f4, f5);
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = f4;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = f5;
+
+        return;
+    }
+
+    public void quadTo(float, float, float, float)
+    {
+        float[] $r1, $r2;
+        int i0, $i1, $i2, $i3, i4, $i5, i6, $i7, $i8;
+        boolean $z0, $z1, z2, $z3;
+        sun.awt.geom.PathConsumer2D $r3;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r4, $r5;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r0;
+        float f0, f1, f2, f3, $f4, $f5, $f6, $f7;
+
+        r0 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        f2 := @parameter2: float;
+
+        f3 := @parameter3: float;
+
+        i0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f0, f1, $r1);
+
+        $r2 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.Helpers: int outcode(float,float,float[])>(f2, f3, $r2);
+
+        $i3 = i0 | $i1;
+
+        i4 = $i3 | $i2;
+
+        if i4 == 0 goto label5;
+
+        $i5 = i0 & $i1;
+
+        i6 = $i5 & $i2;
+
+        if i6 != 0 goto label4;
+
+        $z0 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 0;
+
+        $z1 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z1 == 0 goto label1;
+
+        $r5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f7 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0>;
+
+        $f6 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0>;
+
+        z2 = virtualinvoke $r5.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitQuad(float,float,float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f7, $f6, f0, f1, f2, f3, i4, r0);
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $f5 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0>;
+
+        $f4 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0>;
+
+        z2 = virtualinvoke $r4.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: boolean splitQuad(float,float,float,float,float,float,int,sun.awt.geom.PathConsumer2D)>($f5, $f4, f0, f1, f2, f3, i4, r0);
+
+     label2:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean subdivide> = 1;
+
+        if z2 == 0 goto label3;
+
+        return;
+
+     label3:
+        goto label5;
+
+     label4:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i2;
+
+        $i7 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode>;
+
+        $i8 = $i7 & i6;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = $i8;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside> = 1;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cox0> = f2;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float coy0> = f3;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void clip(int,int,int)>(i6, i0, $i2);
+
+        return;
+
+     label5:
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int cOutCode> = $i2;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: int gOutCode> = 0;
+
+        $z3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: boolean outside>;
+
+        if $z3 == 0 goto label6;
+
+        specialinvoke r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: void finish()>();
+
+     label6:
+        $r3 = r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: sun.awt.geom.PathConsumer2D out>;
+
+        interfaceinvoke $r3.<sun.awt.geom.PathConsumer2D: void quadTo(float,float,float,float)>(f0, f1, f2, f3);
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cx0> = f2;
+
+        r0.<sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter: float cy0> = f3;
+
+        return;
+    }
+
+    public long getNativeConsumer()
+    {
+        java.lang.InternalError $r0;
+        sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter r1;
+
+        r1 := @this: sun.java2d.marlin.TransformingPathConsumer2D$PathClipFilter;
+
+        $r0 = new java.lang.InternalError;
+
+        specialinvoke $r0.<java.lang.InternalError: void <init>(java.lang.String)>("Not using a native peer");
+
+        throw $r0;
+    }
+}

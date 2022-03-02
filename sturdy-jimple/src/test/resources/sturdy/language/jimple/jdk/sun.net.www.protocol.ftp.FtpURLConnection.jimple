@@ -1,0 +1,1675 @@
+public class sun.net.www.protocol.ftp.FtpURLConnection extends sun.net.www.URLConnection
+{
+    sun.net.www.protocol.http.HttpURLConnection http;
+    private java.net.Proxy instProxy;
+    java.io.InputStream is;
+    java.io.OutputStream os;
+    sun.net.ftp.FtpClient ftp;
+    java.security.Permission permission;
+    java.lang.String password;
+    java.lang.String user;
+    java.lang.String host;
+    java.lang.String pathname;
+    java.lang.String filename;
+    java.lang.String fullpath;
+    int port;
+    static final int NONE;
+    static final int ASCII;
+    static final int BIN;
+    static final int DIR;
+    int type;
+    private int connectTimeout;
+    private int readTimeout;
+
+    static java.net.URL checkURL(java.net.URL) throws java.lang.IllegalArgumentException
+    {
+        java.net.MalformedURLException $r9, $r11;
+        java.net.URL r0;
+        java.lang.IllegalArgumentException $r10, $r12;
+        int $i0, $i2;
+        java.lang.String $r1, $r4, $r5, $r8;
+
+        r0 := @parameter0: java.net.URL;
+
+        if r0 == null goto label1;
+
+        $r5 = virtualinvoke r0.<java.net.URL: java.lang.String toExternalForm()>();
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int indexOf(int)>(10);
+
+        $i2 = (int) -1;
+
+        if $i0 <= $i2 goto label1;
+
+        $r9 = new java.net.MalformedURLException;
+
+        specialinvoke $r9.<java.net.MalformedURLException: void <init>(java.lang.String)>("Illegal character in URL");
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        $r8 = virtualinvoke $r9.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>($r8, $r9);
+
+        throw $r10;
+
+     label1:
+        $r1 = staticinvoke <sun.net.util.IPAddressUtil: java.lang.String checkAuthority(java.net.URL)>(r0);
+
+        if $r1 == null goto label2;
+
+        $r11 = new java.net.MalformedURLException;
+
+        specialinvoke $r11.<java.net.MalformedURLException: void <init>(java.lang.String)>($r1);
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r4 = virtualinvoke $r11.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>($r4, $r11);
+
+        throw $r12;
+
+     label2:
+        return r0;
+    }
+
+    public void <init>(java.net.URL)
+    {
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.net.URL r1;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r1 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void <init>(java.net.URL,java.net.Proxy)>(r1, null);
+
+        return;
+    }
+
+    void <init>(java.net.URL, java.net.Proxy)
+    {
+        java.net.URL r1, $r2;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.net.Proxy r3;
+        int $i0, $i1, i2, $i4, $i6, $i8;
+        java.lang.String $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r1 := @parameter0: java.net.URL;
+
+        r3 := @parameter1: java.net.Proxy;
+
+        $r2 = staticinvoke <sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL checkURL(java.net.URL)>(r1);
+
+        specialinvoke r0.<sun.net.www.URLConnection: void <init>(java.net.URL)>($r2);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http> = null;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = null;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os> = null;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp> = null;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 0;
+
+        $i4 = (int) -1;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout> = $i4;
+
+        $i6 = (int) -1;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout> = $i6;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy instProxy> = r3;
+
+        $r4 = virtualinvoke r1.<java.net.URL: java.lang.String getHost()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String host> = $r4;
+
+        $i0 = virtualinvoke r1.<java.net.URL: int getPort()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int port> = $i0;
+
+        $r5 = virtualinvoke r1.<java.net.URL: java.lang.String getUserInfo()>();
+
+        if $r5 == null goto label2;
+
+        $i1 = virtualinvoke $r5.<java.lang.String: int indexOf(int)>(58);
+
+        $i8 = (int) -1;
+
+        if $i1 != $i8 goto label1;
+
+        $r10 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r5);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String user> = $r10;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String password> = null;
+
+        goto label2;
+
+     label1:
+        i2 = $i1 + 1;
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r7 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r6);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String user> = $r7;
+
+        $r8 = virtualinvoke $r5.<java.lang.String: java.lang.String substring(int)>(i2);
+
+        $r9 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r8);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String password> = $r9;
+
+     label2:
+        return;
+    }
+
+    private void setTimeouts()
+    {
+        sun.net.ftp.FtpClient $r1, $r2, $r3;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        if $r1 == null goto label2;
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        if $i0 < 0 goto label1;
+
+        $r3 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $i3 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        virtualinvoke $r3.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setConnectTimeout(int)>($i3);
+
+     label1:
+        $i1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        if $i1 < 0 goto label2;
+
+        $r2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $i2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        virtualinvoke $r2.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setReadTimeout(int)>($i2);
+
+     label2:
+        return;
+    }
+
+    public synchronized void connect() throws java.io.IOException
+    {
+        sun.net.ftp.FtpProtocolException $r59, $r63;
+        java.net.Proxy $r1, $r28, $r42, r68;
+        sun.net.www.protocol.http.HttpURLConnection $r30, $r31, $r32, $r33, $r34, $r54, $r55, $r56, $r57, $r58, $r75, $r76;
+        java.lang.StringBuilder $r21, $r22, $r23, $r78;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.lang.String $r4, $r8, $r9, $r10, $r12, $r14, $r24, $r26, r70;
+        java.io.IOException $r62, $r67, $r74, $r82;
+        java.net.UnknownHostException $r66;
+        sun.net.ftp.FtpLoginException $r83;
+        char[] $r72;
+        java.net.SocketAddress $r47, $r49, $r50;
+        java.net.URL $r29, $r37, $r53;
+        sun.security.action.GetPropertyAction $r77, $r79;
+        java.net.ProxySelector r69;
+        java.net.URI $r38;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.net.ftp.FtpClient $r5, $r7, $r11, $r15, $r16, $r60, $r64, $r65;
+        java.net.InetSocketAddress r51, $r80, $r81;
+        java.util.List $r39;
+        java.net.Proxy$Type $r2, $r3, $r43, $r44, $r45, $r46;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12;
+        sun.net.www.protocol.ftp.FtpURLConnection$1 $r73;
+        java.util.Iterator $r40;
+        java.lang.Object $r18, $r25, $r36, $r41;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        r68 = null;
+
+        $r1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy instProxy>;
+
+        if $r1 != null goto label12;
+
+        $r73 = new sun.net.www.protocol.ftp.FtpURLConnection$1;
+
+        specialinvoke $r73.<sun.net.www.protocol.ftp.FtpURLConnection$1: void <init>(sun.net.www.protocol.ftp.FtpURLConnection)>(r0);
+
+        $r36 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r73);
+
+        r69 = (java.net.ProxySelector) $r36;
+
+        if r69 == null goto label11;
+
+        $r37 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $r38 = staticinvoke <sun.net.www.ParseUtil: java.net.URI toURI(java.net.URL)>($r37);
+
+        $r39 = virtualinvoke r69.<java.net.ProxySelector: java.util.List select(java.net.URI)>($r38);
+
+        $r40 = interfaceinvoke $r39.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z6 = interfaceinvoke $r40.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label11;
+
+        $r41 = interfaceinvoke $r40.<java.util.Iterator: java.lang.Object next()>();
+
+        r68 = (java.net.Proxy) $r41;
+
+        if r68 == null goto label11;
+
+        $r42 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        if r68 == $r42 goto label11;
+
+        $r43 = virtualinvoke r68.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r44 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r43 != $r44 goto label03;
+
+        goto label11;
+
+     label03:
+        $r45 = virtualinvoke r68.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r46 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r45 != $r46 goto label04;
+
+        $r49 = virtualinvoke r68.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $z3 = $r49 instanceof java.net.InetSocketAddress;
+
+        if $z3 != 0 goto label05;
+
+     label04:
+        $r47 = virtualinvoke r68.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r74 = new java.io.IOException;
+
+        specialinvoke $r74.<java.io.IOException: void <init>(java.lang.String)>("Wrong proxy type");
+
+        virtualinvoke r69.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>($r38, $r47, $r74);
+
+        goto label02;
+
+     label05:
+        $r50 = virtualinvoke r68.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        r51 = (java.net.InetSocketAddress) $r50;
+
+     label06:
+        $r75 = new sun.net.www.protocol.http.HttpURLConnection;
+
+        $r53 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        specialinvoke $r75.<sun.net.www.protocol.http.HttpURLConnection: void <init>(java.net.URL,java.net.Proxy)>($r53, r68);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http> = $r75;
+
+        $r54 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $z4 = virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean getDoInput()>();
+
+        virtualinvoke $r54.<sun.net.www.protocol.http.HttpURLConnection: void setDoInput(boolean)>($z4);
+
+        $r55 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $z5 = virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean getDoOutput()>();
+
+        virtualinvoke $r55.<sun.net.www.protocol.http.HttpURLConnection: void setDoOutput(boolean)>($z5);
+
+        $i7 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        if $i7 < 0 goto label07;
+
+        $r58 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $i10 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        virtualinvoke $r58.<sun.net.www.protocol.http.HttpURLConnection: void setConnectTimeout(int)>($i10);
+
+     label07:
+        $i8 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        if $i8 < 0 goto label08;
+
+        $r57 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $i9 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        virtualinvoke $r57.<sun.net.www.protocol.http.HttpURLConnection: void setReadTimeout(int)>($i9);
+
+     label08:
+        $r56 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        virtualinvoke $r56.<sun.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected> = 1;
+
+     label09:
+        return;
+
+     label10:
+        $r67 := @caughtexception;
+
+        virtualinvoke r69.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>($r38, r51, $r67);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http> = null;
+
+        goto label02;
+
+     label11:
+        goto label15;
+
+     label12:
+        r68 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy instProxy>;
+
+        $r2 = virtualinvoke r68.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r3 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r2 != $r3 goto label15;
+
+        $r76 = new sun.net.www.protocol.http.HttpURLConnection;
+
+        $r29 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $r28 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy instProxy>;
+
+        specialinvoke $r76.<sun.net.www.protocol.http.HttpURLConnection: void <init>(java.net.URL,java.net.Proxy)>($r29, $r28);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http> = $r76;
+
+        $r30 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $z1 = virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean getDoInput()>();
+
+        virtualinvoke $r30.<sun.net.www.protocol.http.HttpURLConnection: void setDoInput(boolean)>($z1);
+
+        $r31 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $z2 = virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean getDoOutput()>();
+
+        virtualinvoke $r31.<sun.net.www.protocol.http.HttpURLConnection: void setDoOutput(boolean)>($z2);
+
+        $i3 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        if $i3 < 0 goto label13;
+
+        $r34 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $i6 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        virtualinvoke $r34.<sun.net.www.protocol.http.HttpURLConnection: void setConnectTimeout(int)>($i6);
+
+     label13:
+        $i4 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        if $i4 < 0 goto label14;
+
+        $r33 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $i5 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        virtualinvoke $r33.<sun.net.www.protocol.http.HttpURLConnection: void setReadTimeout(int)>($i5);
+
+     label14:
+        $r32 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        virtualinvoke $r32.<sun.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected> = 1;
+
+        return;
+
+     label15:
+        $r4 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String user>;
+
+        if $r4 != null goto label16;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String user> = "anonymous";
+
+        $r77 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r77.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.version");
+
+        $r18 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r77);
+
+        r70 = (java.lang.String) $r18;
+
+        $r79 = new sun.security.action.GetPropertyAction;
+
+        $r78 = new java.lang.StringBuilder;
+
+        specialinvoke $r78.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Java");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r70);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r79.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("ftp.protocol.user", $r24);
+
+        $r25 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r79);
+
+        $r26 = (java.lang.String) $r25;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String password> = $r26;
+
+     label16:
+        $r5 = staticinvoke <sun.net.ftp.FtpClient: sun.net.ftp.FtpClient create()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp> = $r5;
+
+        if r68 == null goto label17;
+
+        $r16 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r16.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setProxy(java.net.Proxy)>(r68);
+
+     label17:
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void setTimeouts()>();
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int port>;
+
+        $i12 = (int) -1;
+
+        if $i0 == $i12 goto label18;
+
+        $r15 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r80 = new java.net.InetSocketAddress;
+
+        $r14 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String host>;
+
+        $i2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int port>;
+
+        specialinvoke $r80.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r14, $i2);
+
+        virtualinvoke $r15.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient connect(java.net.SocketAddress)>($r80);
+
+        goto label19;
+
+     label18:
+        $r7 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r81 = new java.net.InetSocketAddress;
+
+        $r8 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String host>;
+
+        $i1 = staticinvoke <sun.net.ftp.FtpClient: int defaultPort()>();
+
+        specialinvoke $r81.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r8, $i1);
+
+        virtualinvoke $r7.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient connect(java.net.SocketAddress)>($r81);
+
+     label19:
+        goto label26;
+
+     label20:
+        $r66 := @caughtexception;
+
+        throw $r66;
+
+     label21:
+        $r63 := @caughtexception;
+
+        $r64 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        if $r64 == null goto label25;
+
+     label22:
+        $r65 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r65.<sun.net.ftp.FtpClient: void close()>();
+
+     label23:
+        goto label25;
+
+     label24:
+        $r62 := @caughtexception;
+
+        virtualinvoke $r63.<sun.net.ftp.FtpProtocolException: void addSuppressed(java.lang.Throwable)>($r62);
+
+     label25:
+        $r82 = new java.io.IOException;
+
+        specialinvoke $r82.<java.io.IOException: void <init>(java.lang.Throwable)>($r63);
+
+        throw $r82;
+
+     label26:
+        $r11 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r12 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String user>;
+
+        $r9 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String password>;
+
+        if $r9 != null goto label27;
+
+        $r72 = null;
+
+        goto label28;
+
+     label27:
+        $r10 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String password>;
+
+        $r72 = virtualinvoke $r10.<java.lang.String: char[] toCharArray()>();
+
+     label28:
+        virtualinvoke $r11.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient login(java.lang.String,char[])>($r12, $r72);
+
+     label29:
+        goto label31;
+
+     label30:
+        $r59 := @caughtexception;
+
+        $r60 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r60.<sun.net.ftp.FtpClient: void close()>();
+
+        $r83 = new sun.net.ftp.FtpLoginException;
+
+        specialinvoke $r83.<sun.net.ftp.FtpLoginException: void <init>(java.lang.String)>("Invalid username/password");
+
+        throw $r83;
+
+     label31:
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected> = 1;
+
+        return;
+
+        catch java.io.IOException from label06 to label09 with label10;
+        catch java.net.UnknownHostException from label16 to label19 with label20;
+        catch sun.net.ftp.FtpProtocolException from label16 to label19 with label21;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch sun.net.ftp.FtpProtocolException from label26 to label29 with label30;
+    }
+
+    private void decodePath(java.lang.String)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r5, $r6, $r8, $r22;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10;
+        java.lang.String $r1, $r2, $r4, $r7, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, r19, $r20, $r21;
+        char $c7;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r19 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r19.<java.lang.String: int indexOf(java.lang.String)>(";type=");
+
+        if $i0 < 0 goto label04;
+
+        $i8 = $i0 + 6;
+
+        $i9 = virtualinvoke r19.<java.lang.String: int length()>();
+
+        $r15 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>($i8, $i9);
+
+        $r16 = "i";
+
+        $z1 = virtualinvoke $r16.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r15);
+
+        if $z1 == 0 goto label01;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 2;
+
+     label01:
+        $r17 = "a";
+
+        $z2 = virtualinvoke $r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r15);
+
+        if $z2 == 0 goto label02;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 1;
+
+     label02:
+        $r18 = "d";
+
+        $z3 = virtualinvoke $r18.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r15);
+
+        if $z3 == 0 goto label03;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 3;
+
+     label03:
+        r19 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label04:
+        if r19 == null goto label05;
+
+        $i6 = virtualinvoke r19.<java.lang.String: int length()>();
+
+        if $i6 <= 1 goto label05;
+
+        $c7 = virtualinvoke r19.<java.lang.String: char charAt(int)>(0);
+
+        $i10 = (int) $c7;
+
+        if $i10 != 47 goto label05;
+
+        r19 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label05:
+        if r19 == null goto label06;
+
+        $z0 = virtualinvoke r19.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label07;
+
+     label06:
+        r19 = "./";
+
+     label07:
+        $z4 = virtualinvoke r19.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z4 != 0 goto label09;
+
+        $i3 = virtualinvoke r19.<java.lang.String: int lastIndexOf(int)>(47);
+
+        if $i3 <= 0 goto label08;
+
+        $i4 = $i3 + 1;
+
+        $i5 = virtualinvoke r19.<java.lang.String: int length()>();
+
+        $r11 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>($i4, $i5);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename> = $r11;
+
+        $r12 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        $r13 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r12);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename> = $r13;
+
+        $r14 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname> = $r14;
+
+        goto label10;
+
+     label08:
+        $r10 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>(r19);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename> = $r10;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname> = null;
+
+        goto label10;
+
+     label09:
+        $i1 = virtualinvoke r19.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        $r1 = virtualinvoke r19.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname> = $r1;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename> = null;
+
+     label10:
+        $r20 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        if $r20 == null goto label13;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        $r5 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r7 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        if $r7 == null goto label11;
+
+        $r21 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        goto label12;
+
+     label11:
+        $r21 = "";
+
+     label12:
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath> = $r9;
+
+        goto label14;
+
+     label13:
+        $r2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath> = $r2;
+
+     label14:
+        return;
+    }
+
+    private void cd(java.lang.String) throws sun.net.ftp.FtpProtocolException, java.io.IOException
+    {
+        sun.net.ftp.FtpClient $r3, $r6;
+        sun.net.www.protocol.ftp.FtpURLConnection r2;
+        java.util.StringTokenizer $r8;
+        int $i0, $i2;
+        java.lang.String r0, $r4, $r5, $r7;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(47);
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label3;
+
+        $r6 = r2.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r7 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>(r0);
+
+        virtualinvoke $r6.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient changeDirectory(java.lang.String)>($r7);
+
+        return;
+
+     label3:
+        $r8 = new java.util.StringTokenizer;
+
+        specialinvoke $r8.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r0, "/");
+
+     label4:
+        $z1 = virtualinvoke $r8.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 == 0 goto label5;
+
+        $r3 = r2.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r4 = virtualinvoke $r8.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r5 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r4);
+
+        virtualinvoke $r3.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient changeDirectory(java.lang.String)>($r5);
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        sun.net.ftp.FtpProtocolException $r44, $r48;
+        byte $b3;
+        java.lang.Exception $r66;
+        sun.net.www.protocol.http.HttpURLConnection $r1, $r41;
+        sun.net.ProgressMonitor $r21;
+        long $l2;
+        sun.net.ProgressSource r69, $r77;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.lang.String $r6, $r7, $r9, $r10, $r12, $r16, $r17, $r32, $r34, $r50, $r56, $r60, $r68, r70;
+        java.io.IOException $r43, $r47, $r53, $r54, $r72, $r82;
+        sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream $r74, $r75, $r76, $r79;
+        sun.net.www.MessageHeader $r73;
+        java.net.URL $r5, $r22, $r26;
+        boolean $z0, $z1, $z2;
+        sun.net.ftp.FtpClient $r8, $r13, $r14, $r28, $r29, $r31, $r35, $r36, $r38, $r45, $r46, $r51, $r52, $r57, $r58, $r61, $r63, $r64, $r67;
+        java.io.FileNotFoundException $r59, $r80, $r81;
+        int $i0, $i1, $i4;
+        java.io.OutputStream $r2;
+        sun.net.www.MeteredStream $r78;
+        java.io.InputStream $r3, $r15, $r18, $r19, $r20, $r24, $r30, $r37, $r39, $r42, $r65;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected>;
+
+        if $z0 != 0 goto label01;
+
+        virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void connect()>();
+
+     label01:
+        $r1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        if $r1 == null goto label02;
+
+        $r41 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $r42 = virtualinvoke $r41.<sun.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+        return $r42;
+
+     label02:
+        $r2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os>;
+
+        if $r2 == null goto label03;
+
+        $r72 = new java.io.IOException;
+
+        specialinvoke $r72.<java.io.IOException: void <init>(java.lang.String)>("Already opened for output");
+
+        throw $r72;
+
+     label03:
+        $r3 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        if $r3 == null goto label04;
+
+        $r39 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        return $r39;
+
+     label04:
+        $r73 = new sun.net.www.MessageHeader;
+
+        specialinvoke $r73.<sun.net.www.MessageHeader: void <init>()>();
+
+     label05:
+        $r5 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $r6 = virtualinvoke $r5.<java.net.URL: java.lang.String getPath()>();
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void decodePath(java.lang.String)>($r6);
+
+        $r7 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        if $r7 == null goto label06;
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type>;
+
+        if $i0 != 3 goto label08;
+
+     label06:
+        $r8 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r8.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setAsciiType()>();
+
+        $r9 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void cd(java.lang.String)>($r9);
+
+        $r10 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        if $r10 != null goto label07;
+
+        $r74 = new sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream;
+
+        $r29 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r28 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r30 = virtualinvoke $r28.<sun.net.ftp.FtpClient: java.io.InputStream list(java.lang.String)>(null);
+
+        specialinvoke $r74.<sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream: void <init>(sun.net.www.protocol.ftp.FtpURLConnection,sun.net.ftp.FtpClient,java.io.InputStream)>(r0, $r29, $r30);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = $r74;
+
+        goto label11;
+
+     label07:
+        $r75 = new sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream;
+
+        $r14 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r13 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r12 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        $r15 = virtualinvoke $r13.<sun.net.ftp.FtpClient: java.io.InputStream nameList(java.lang.String)>($r12);
+
+        specialinvoke $r75.<sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream: void <init>(sun.net.www.protocol.ftp.FtpURLConnection,sun.net.ftp.FtpClient,java.io.InputStream)>(r0, $r14, $r15);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = $r75;
+
+        goto label11;
+
+     label08:
+        $i1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type>;
+
+        if $i1 != 1 goto label09;
+
+        $r38 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r38.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setAsciiType()>();
+
+        goto label10;
+
+     label09:
+        $r31 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r31.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setBinaryType()>();
+
+     label10:
+        $r32 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void cd(java.lang.String)>($r32);
+
+        $r76 = new sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream;
+
+        $r36 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r35 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r34 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        $r37 = virtualinvoke $r35.<sun.net.ftp.FtpClient: java.io.InputStream getFileStream(java.lang.String)>($r34);
+
+        specialinvoke $r76.<sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream: void <init>(sun.net.www.protocol.ftp.FtpURLConnection,sun.net.ftp.FtpClient,java.io.InputStream)>(r0, $r36, $r37);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = $r76;
+
+     label11:
+        $r67 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $l2 = virtualinvoke $r67.<sun.net.ftp.FtpClient: long getLastTransferSize()>();
+
+        $r68 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l2);
+
+        virtualinvoke $r73.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>("content-length", $r68);
+
+        $b3 = $l2 cmp 0L;
+
+        $i4 = (int) $b3;
+
+        if $i4 <= 0 goto label13;
+
+        $r21 = staticinvoke <sun.net.ProgressMonitor: sun.net.ProgressMonitor getDefault()>();
+
+        $r22 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $z2 = virtualinvoke $r21.<sun.net.ProgressMonitor: boolean shouldMeterInput(java.net.URL,java.lang.String)>($r22, "GET");
+
+        r69 = null;
+
+        if $z2 == 0 goto label12;
+
+        $r77 = new sun.net.ProgressSource;
+
+        $r26 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        specialinvoke $r77.<sun.net.ProgressSource: void <init>(java.net.URL,java.lang.String,long)>($r26, "GET", $l2);
+
+        r69 = $r77;
+
+        virtualinvoke $r77.<sun.net.ProgressSource: void beginTracking()>();
+
+     label12:
+        $r78 = new sun.net.www.MeteredStream;
+
+        $r24 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        specialinvoke $r78.<sun.net.www.MeteredStream: void <init>(java.io.InputStream,sun.net.ProgressSource,long)>($r24, r69, $l2);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = $r78;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r66 := @caughtexception;
+
+        virtualinvoke $r66.<java.lang.Exception: void printStackTrace()>();
+
+     label15:
+        goto label16;
+
+     label16:
+        virtualinvoke $r73.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>("access-type", "file");
+
+        $r16 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath>;
+
+        $r17 = staticinvoke <sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String guessContentTypeFromName(java.lang.String)>($r16);
+
+        r70 = $r17;
+
+        if $r17 != null goto label17;
+
+        $r19 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        $z1 = virtualinvoke $r19.<java.io.InputStream: boolean markSupported()>();
+
+        if $z1 == 0 goto label17;
+
+        $r20 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        r70 = staticinvoke <sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String guessContentTypeFromStream(java.io.InputStream)>($r20);
+
+     label17:
+        if r70 == null goto label18;
+
+        virtualinvoke $r73.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>("content-type", r70);
+
+     label18:
+        goto label38;
+
+     label19:
+        $r59 := @caughtexception;
+
+     label20:
+        $r60 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath>;
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void cd(java.lang.String)>($r60);
+
+        $r61 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r61.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setAsciiType()>();
+
+        $r79 = new sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream;
+
+        $r64 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r63 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r65 = virtualinvoke $r63.<sun.net.ftp.FtpClient: java.io.InputStream list(java.lang.String)>(null);
+
+        specialinvoke $r79.<sun.net.www.protocol.ftp.FtpURLConnection$FtpInputStream: void <init>(sun.net.www.protocol.ftp.FtpURLConnection,sun.net.ftp.FtpClient,java.io.InputStream)>(r0, $r64, $r65);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is> = $r79;
+
+        virtualinvoke $r73.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>("content-type", "text/plain");
+
+        virtualinvoke $r73.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>("access-type", "directory");
+
+     label21:
+        goto label32;
+
+     label22:
+        $r54 := @caughtexception;
+
+        $r80 = new java.io.FileNotFoundException;
+
+        $r56 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath>;
+
+        specialinvoke $r80.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r56);
+
+        $r57 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        if $r57 == null goto label26;
+
+     label23:
+        $r58 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r58.<sun.net.ftp.FtpClient: void close()>();
+
+     label24:
+        goto label26;
+
+     label25:
+        $r53 := @caughtexception;
+
+        virtualinvoke $r80.<java.io.FileNotFoundException: void addSuppressed(java.lang.Throwable)>($r53);
+
+     label26:
+        throw $r80;
+
+     label27:
+        $r48 := @caughtexception;
+
+        $r81 = new java.io.FileNotFoundException;
+
+        $r50 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String fullpath>;
+
+        specialinvoke $r81.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r50);
+
+        $r51 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        if $r51 == null goto label31;
+
+     label28:
+        $r52 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r52.<sun.net.ftp.FtpClient: void close()>();
+
+     label29:
+        goto label31;
+
+     label30:
+        $r47 := @caughtexception;
+
+        virtualinvoke $r81.<java.io.FileNotFoundException: void addSuppressed(java.lang.Throwable)>($r47);
+
+     label31:
+        throw $r81;
+
+     label32:
+        goto label38;
+
+     label33:
+        $r44 := @caughtexception;
+
+        $r45 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        if $r45 == null goto label37;
+
+     label34:
+        $r46 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r46.<sun.net.ftp.FtpClient: void close()>();
+
+     label35:
+        goto label37;
+
+     label36:
+        $r43 := @caughtexception;
+
+        virtualinvoke $r44.<sun.net.ftp.FtpProtocolException: void addSuppressed(java.lang.Throwable)>($r43);
+
+     label37:
+        $r82 = new java.io.IOException;
+
+        specialinvoke $r82.<java.io.IOException: void <init>(java.lang.Throwable)>($r44);
+
+        throw $r82;
+
+     label38:
+        virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void setProperties(sun.net.www.MessageHeader)>($r73);
+
+        $r18 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        return $r18;
+
+        catch java.lang.Exception from label11 to label13 with label14;
+        catch java.io.FileNotFoundException from label05 to label18 with label19;
+        catch java.io.IOException from label20 to label21 with label22;
+        catch java.io.IOException from label23 to label24 with label25;
+        catch sun.net.ftp.FtpProtocolException from label20 to label21 with label27;
+        catch java.io.IOException from label28 to label29 with label30;
+        catch sun.net.ftp.FtpProtocolException from label05 to label18 with label33;
+        catch java.io.IOException from label34 to label35 with label36;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        java.net.URL $r4;
+        sun.net.www.protocol.ftp.FtpURLConnection$FtpOutputStream $r11;
+        sun.net.ftp.FtpProtocolException $r24;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        int $i0;
+        java.lang.String $r5, $r6, $r8, $r9, $r12, $r18;
+        boolean $z0, $z1;
+        java.io.OutputStream $r3, $r15, $r16, $r19, $r22;
+        sun.net.ftp.FtpClient $r10, $r13, $r14, $r17;
+        java.io.IOException $r7, $r20, $r25;
+        sun.net.www.protocol.http.HttpURLConnection $r1, $r21, $r23;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: boolean connected>;
+
+        if $z0 != 0 goto label01;
+
+        virtualinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void connect()>();
+
+     label01:
+        $r1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        if $r1 == null goto label02;
+
+        $r21 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        $r22 = virtualinvoke $r21.<sun.net.www.protocol.http.HttpURLConnection: java.io.OutputStream getOutputStream()>();
+
+        $r23 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.www.protocol.http.HttpURLConnection http>;
+
+        virtualinvoke $r23.<sun.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+        return $r22;
+
+     label02:
+        $r2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream is>;
+
+        if $r2 == null goto label03;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("Already opened for input");
+
+        throw $r20;
+
+     label03:
+        $r3 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os>;
+
+        if $r3 == null goto label04;
+
+        $r19 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os>;
+
+        return $r19;
+
+     label04:
+        $r4 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $r5 = virtualinvoke $r4.<java.net.URL: java.lang.String getPath()>();
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void decodePath(java.lang.String)>($r5);
+
+        $r6 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        if $r6 == null goto label05;
+
+        $r8 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 == 0 goto label06;
+
+     label05:
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("illegal filename for a PUT");
+
+        throw $r7;
+
+     label06:
+        $r9 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        if $r9 == null goto label07;
+
+        $r18 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String pathname>;
+
+        specialinvoke r0.<sun.net.www.protocol.ftp.FtpURLConnection: void cd(java.lang.String)>($r18);
+
+     label07:
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type>;
+
+        if $i0 != 1 goto label08;
+
+        $r17 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r17.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setAsciiType()>();
+
+        goto label09;
+
+     label08:
+        $r10 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        virtualinvoke $r10.<sun.net.ftp.FtpClient: sun.net.ftp.FtpClient setBinaryType()>();
+
+     label09:
+        $r11 = new sun.net.www.protocol.ftp.FtpURLConnection$FtpOutputStream;
+
+        $r14 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r13 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: sun.net.ftp.FtpClient ftp>;
+
+        $r12 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String filename>;
+
+        $r15 = virtualinvoke $r13.<sun.net.ftp.FtpClient: java.io.OutputStream putFileStream(java.lang.String,boolean)>($r12, 0);
+
+        specialinvoke $r11.<sun.net.www.protocol.ftp.FtpURLConnection$FtpOutputStream: void <init>(sun.net.www.protocol.ftp.FtpURLConnection,sun.net.ftp.FtpClient,java.io.OutputStream)>(r0, $r14, $r15);
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os> = $r11;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r24 := @caughtexception;
+
+        $r25 = new java.io.IOException;
+
+        specialinvoke $r25.<java.io.IOException: void <init>(java.lang.Throwable)>($r24);
+
+        throw $r25;
+
+     label12:
+        $r16 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream os>;
+
+        return $r16;
+
+        catch sun.net.ftp.FtpProtocolException from label06 to label10 with label11;
+    }
+
+    java.lang.String guessContentTypeFromFilename(java.lang.String)
+    {
+        sun.net.www.protocol.ftp.FtpURLConnection r2;
+        java.lang.String r0, $r1;
+
+        r2 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String guessContentTypeFromName(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    public java.security.Permission getPermission()
+    {
+        java.net.URL $r2;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.security.Permission $r1, $r10;
+        int $i0, $i1;
+        java.lang.StringBuilder $r3, $r5, $r6, $r7;
+        java.lang.String $r4, $r8;
+        java.net.SocketPermission $r9;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.security.Permission permission>;
+
+        if $r1 != null goto label3;
+
+        $r2 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r2.<java.net.URL: int getPort()>();
+
+        if $i0 >= 0 goto label1;
+
+        $i1 = staticinvoke <sun.net.ftp.FtpClient: int defaultPort()>();
+
+        goto label2;
+
+     label1:
+        $i1 = $i0;
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.lang.String host>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = new java.net.SocketPermission;
+
+        specialinvoke $r9.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r8, "connect");
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.security.Permission permission> = $r9;
+
+     label3:
+        $r10 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: java.security.Permission permission>;
+
+        return $r10;
+    }
+
+    public void setRequestProperty(java.lang.String, java.lang.String)
+    {
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.lang.String r1, r2, $r3, $r4, $r5, $r6, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r7;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r12, $r13;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.net.www.URLConnection: void setRequestProperty(java.lang.String,java.lang.String)>(r1, r2);
+
+        $r3 = "type";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label4;
+
+        $r4 = "i";
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r2);
+
+        if $z1 == 0 goto label1;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 2;
+
+        goto label4;
+
+     label1:
+        $r5 = "a";
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r2);
+
+        if $z2 == 0 goto label2;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 1;
+
+        goto label4;
+
+     label2:
+        $r6 = "d";
+
+        $z3 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r2);
+
+        if $z3 == 0 goto label3;
+
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type> = 3;
+
+        goto label4;
+
+     label3:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value of \'");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' request property was \'");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' when it must be either \'i\', \'a\' or \'d\'");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r14);
+
+        throw $r7;
+
+     label4:
+        return;
+    }
+
+    public java.lang.String getRequestProperty(java.lang.String)
+    {
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        int $i0, $i1;
+        java.lang.String r1, $r2, $r3, r4, $r5;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.net.www.URLConnection: java.lang.String getRequestProperty(java.lang.String)>(r1);
+
+        r4 = $r2;
+
+        if $r2 != null goto label4;
+
+        $r3 = "type";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label4;
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type>;
+
+        if $i0 != 1 goto label1;
+
+        $r5 = "a";
+
+        goto label3;
+
+     label1:
+        $i1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int type>;
+
+        if $i1 != 3 goto label2;
+
+        $r5 = "d";
+
+        goto label3;
+
+     label2:
+        $r5 = "i";
+
+     label3:
+        r4 = $r5;
+
+     label4:
+        return r4;
+    }
+
+    public void setConnectTimeout(int)
+    {
+        int i0;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeouts can\'t be negative");
+
+        throw $r1;
+
+     label1:
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout> = i0;
+
+        return;
+    }
+
+    public int getConnectTimeout()
+    {
+        int $i0, $i1;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+        if $i0 >= 0 goto label1;
+
+        $i1 = 0;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int connectTimeout>;
+
+     label2:
+        return $i1;
+    }
+
+    public void setReadTimeout(int)
+    {
+        int i0;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeouts can\'t be negative");
+
+        throw $r1;
+
+     label1:
+        r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout> = i0;
+
+        return;
+    }
+
+    public int getReadTimeout()
+    {
+        int $i0, $i1;
+        sun.net.www.protocol.ftp.FtpURLConnection r0;
+
+        r0 := @this: sun.net.www.protocol.ftp.FtpURLConnection;
+
+        $i0 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+        if $i0 >= 0 goto label1;
+
+        $i1 = 0;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<sun.net.www.protocol.ftp.FtpURLConnection: int readTimeout>;
+
+     label2:
+        return $i1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.net.www.protocol.ftp.FtpURLConnection: int DIR> = 3;
+
+        <sun.net.www.protocol.ftp.FtpURLConnection: int BIN> = 2;
+
+        <sun.net.www.protocol.ftp.FtpURLConnection: int ASCII> = 1;
+
+        <sun.net.www.protocol.ftp.FtpURLConnection: int NONE> = 0;
+
+        return;
+    }
+}

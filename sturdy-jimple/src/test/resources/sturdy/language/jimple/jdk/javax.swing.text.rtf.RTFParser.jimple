@@ -1,0 +1,937 @@
+abstract class javax.swing.text.rtf.RTFParser extends javax.swing.text.rtf.AbstractFilter
+{
+    public int level;
+    private int state;
+    private java.lang.StringBuffer currentCharacters;
+    private java.lang.String pendingKeyword;
+    private int pendingCharacter;
+    private long binaryBytesLeft;
+    java.io.ByteArrayOutputStream binaryBuf;
+    private boolean[] savedSpecials;
+    protected java.io.PrintStream warnings;
+    private final int S_text;
+    private final int S_backslashed;
+    private final int S_token;
+    private final int S_parameter;
+    private final int S_aftertick;
+    private final int S_aftertickc;
+    private final int S_inblob;
+    static final boolean[] rtfSpecialsTable;
+
+    public abstract boolean handleKeyword(java.lang.String);
+
+    public abstract boolean handleKeyword(java.lang.String, int);
+
+    public abstract void handleText(java.lang.String);
+
+    public void handleText(char)
+    {
+        javax.swing.text.rtf.RTFParser r0;
+        char c0;
+        java.lang.String $r1;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        c0 := @parameter0: char;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>(c0);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>($r1);
+
+        return;
+    }
+
+    public abstract void handleBinaryBlob(byte[]);
+
+    public abstract void begingroup();
+
+    public abstract void endgroup();
+
+    public void <init>()
+    {
+        boolean[] $r2;
+        javax.swing.text.rtf.RTFParser r0;
+        java.lang.StringBuffer $r1;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        specialinvoke r0.<javax.swing.text.rtf.AbstractFilter: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_inblob> = 6;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_aftertickc> = 5;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_aftertick> = 4;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_parameter> = 3;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_token> = 2;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_backslashed> = 1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_text> = 0;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_text> = 0;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_backslashed> = 1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_token> = 2;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_parameter> = 3;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_aftertick> = 4;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_aftertickc> = 5;
+
+        r0.<javax.swing.text.rtf.RTFParser: int S_inblob> = 6;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        r0.<javax.swing.text.rtf.RTFParser: int level> = 0;
+
+        $r2 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        r0.<javax.swing.text.rtf.RTFParser: boolean[] specialsTable> = $r2;
+
+        return;
+    }
+
+    public void writeSpecial(int) throws java.io.IOException
+    {
+        int i0;
+        javax.swing.text.rtf.RTFParser r0;
+        char $c1;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        i0 := @parameter0: int;
+
+        $c1 = (char) i0;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void write(char)>($c1);
+
+        return;
+    }
+
+    protected void warning(java.lang.String)
+    {
+        java.io.PrintStream $r1, $r3;
+        javax.swing.text.rtf.RTFParser r0;
+        java.lang.String r2;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFParser: java.io.PrintStream warnings>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.text.rtf.RTFParser: java.io.PrintStream warnings>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>(r2);
+
+     label1:
+        return;
+    }
+
+    public void write(java.lang.String) throws java.io.IOException
+    {
+        char $c4;
+        javax.swing.text.rtf.RTFParser r0;
+        java.lang.StringBuffer $r1, $r2;
+        int $i0, $i1, $i2, $i3, i5;
+        java.lang.String r3;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFParser: int state>;
+
+        if $i0 == 0 goto label4;
+
+        i5 = 0;
+
+        $i2 = virtualinvoke r3.<java.lang.String: int length()>();
+
+     label1:
+        if i5 >= $i2 goto label2;
+
+        $i3 = r0.<javax.swing.text.rtf.RTFParser: int state>;
+
+        if $i3 == 0 goto label2;
+
+        $c4 = virtualinvoke r3.<java.lang.String: char charAt(int)>(i5);
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void write(char)>($c4);
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        if i5 < $i2 goto label3;
+
+        return;
+
+     label3:
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>(i5);
+
+     label4:
+        $r1 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $i1 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        if $i1 <= 0 goto label5;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r3);
+
+        goto label6;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>(r3);
+
+     label6:
+        return;
+    }
+
+    public void write(char) throws java.io.IOException
+    {
+        byte[] $r3;
+        byte $b2, $b17, $b19, $b24;
+        java.lang.StringBuilder $r12, $r14, $r15, $r17, $r18, $r32, $r34, $r39, $r40, $r41, $r42, $r43, $r61, $r64, $r65, $r67, $r68, $r72, $r75, $r76, $r87, $r89, $r90, $r95, $r96;
+        java.io.ByteArrayOutputStream $r2, $r4, $r92, $r93, $r94;
+        long $l1, $l3, $l4, $l14, $l15, $l16, $l18, $l20, $l22;
+        java.lang.StringBuffer $r7, $r16, $r20, $r25, $r26, $r29, $r36, $r45, $r46, $r47, $r50, $r52, $r55, $r56, $r62, $r73, $r82, $r83, $r85, $r88, $r91, $r97;
+        boolean[] $r1, $r80, $r81;
+        java.io.IOException $r84;
+        int $i0, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i21, $i23, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i46, $i48, $i49, $i50;
+        java.lang.String $r6, $r8, $r9, $r13, $r19, $r21, $r27, $r30, $r33, $r35, $r44, $r48, $r53, $r57, $r63, $r66, $r69, $r74, $r77, $r86;
+        java.lang.NumberFormatException $r59, $r70;
+        char[] $r5, r79;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        char c33, c34;
+        javax.swing.text.rtf.RTFParser r0;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        c33 := @parameter0: char;
+
+        $i0 = r0.<javax.swing.text.rtf.RTFParser: int state>;
+
+        tableswitch($i0)
+        {
+            case 0: goto label01;
+            case 1: goto label10;
+            case 2: goto label14;
+            case 3: goto label19;
+            case 4: goto label34;
+            case 5: goto label36;
+            case 6: goto label37;
+            default: goto label39;
+        };
+
+     label01:
+        $i35 = (int) c33;
+
+        if $i35 == 10 goto label39;
+
+        $i36 = (int) c33;
+
+        if $i36 != 13 goto label02;
+
+        goto label39;
+
+     label02:
+        $i37 = (int) c33;
+
+        if $i37 != 123 goto label04;
+
+        $r55 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $i30 = virtualinvoke $r55.<java.lang.StringBuffer: int length()>();
+
+        if $i30 <= 0 goto label03;
+
+        $r56 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>($r57);
+
+        $r82 = new java.lang.StringBuffer;
+
+        specialinvoke $r82.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r82;
+
+     label03:
+        $i31 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        $i32 = $i31 + 1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int level> = $i32;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void begingroup()>();
+
+        goto label39;
+
+     label04:
+        $i38 = (int) c33;
+
+        if $i38 != 125 goto label07;
+
+        $r50 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $i26 = virtualinvoke $r50.<java.lang.StringBuffer: int length()>();
+
+        if $i26 <= 0 goto label05;
+
+        $r52 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>($r53);
+
+        $r83 = new java.lang.StringBuffer;
+
+        specialinvoke $r83.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r83;
+
+     label05:
+        $i27 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        if $i27 != 0 goto label06;
+
+        $r84 = new java.io.IOException;
+
+        specialinvoke $r84.<java.io.IOException: void <init>(java.lang.String)>("Too many close-groups in RTF text");
+
+        throw $r84;
+
+     label06:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void endgroup()>();
+
+        $i28 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        $i29 = $i28 - 1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int level> = $i29;
+
+        goto label39;
+
+     label07:
+        $i39 = (int) c33;
+
+        if $i39 != 92 goto label09;
+
+        $r46 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $i25 = virtualinvoke $r46.<java.lang.StringBuffer: int length()>();
+
+        if $i25 <= 0 goto label08;
+
+        $r47 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>($r48);
+
+        $r85 = new java.lang.StringBuffer;
+
+        specialinvoke $r85.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r85;
+
+     label08:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 1;
+
+        goto label39;
+
+     label09:
+        $r45 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        virtualinvoke $r45.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(c33);
+
+        goto label39;
+
+     label10:
+        $i40 = (int) c33;
+
+        if $i40 != 39 goto label11;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 4;
+
+        goto label39;
+
+     label11:
+        $z8 = staticinvoke <java.lang.Character: boolean isLetter(char)>(c33);
+
+        if $z8 != 0 goto label13;
+
+        r79 = newarray (char)[1];
+
+        r79[0] = c33;
+
+        $r86 = new java.lang.String;
+
+        specialinvoke $r86.<java.lang.String: void <init>(char[])>(r79);
+
+        $z9 = virtualinvoke r0.<javax.swing.text.rtf.RTFParser: boolean handleKeyword(java.lang.String)>($r86);
+
+        if $z9 != 0 goto label12;
+
+        $r87 = new java.lang.StringBuilder;
+
+        specialinvoke $r87.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown keyword: ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r79);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $b24 = (byte) c33;
+
+        $i41 = (int) $b24;
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>($r44);
+
+     label12:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        goto label39;
+
+     label13:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 2;
+
+     label14:
+        $z4 = staticinvoke <java.lang.Character: boolean isLetter(char)>(c33);
+
+        if $z4 == 0 goto label15;
+
+        $r36 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(c33);
+
+        goto label39;
+
+     label15:
+        $r26 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = $r27;
+
+        $r88 = new java.lang.StringBuffer;
+
+        specialinvoke $r88.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r88;
+
+        $z5 = staticinvoke <java.lang.Character: boolean isDigit(char)>(c33);
+
+        if $z5 != 0 goto label16;
+
+        $i42 = (int) c33;
+
+        if $i42 != 45 goto label17;
+
+     label16:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 3;
+
+        $r29 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        virtualinvoke $r29.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(c33);
+
+        goto label39;
+
+     label17:
+        $r30 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $z6 = virtualinvoke r0.<javax.swing.text.rtf.RTFParser: boolean handleKeyword(java.lang.String)>($r30);
+
+        if $z6 != 0 goto label18;
+
+        $r89 = new java.lang.StringBuilder;
+
+        specialinvoke $r89.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown keyword: ");
+
+        $r33 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>($r35);
+
+     label18:
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        $z7 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>(c33);
+
+        if $z7 != 0 goto label39;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void write(char)>(c33);
+
+        goto label39;
+
+     label19:
+        $z0 = staticinvoke <java.lang.Character: boolean isDigit(char)>(c33);
+
+        if $z0 == 0 goto label20;
+
+        $r25 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(c33);
+
+        goto label39;
+
+     label20:
+        $r6 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("bin");
+
+        if $z1 == 0 goto label29;
+
+     label21:
+        $r20 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $l14 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r21);
+
+     label22:
+        goto label25;
+
+     label23:
+        $r70 := @caughtexception;
+
+        $r90 = new java.lang.StringBuilder;
+
+        specialinvoke $r90.<java.lang.StringBuilder: void <init>()>();
+
+        $r72 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal number format ");
+
+        $r73 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r75 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r74);
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in \u0008in tag");
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>($r77);
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        $r91 = new java.lang.StringBuffer;
+
+        specialinvoke $r91.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r91;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        $z10 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>(c33);
+
+        if $z10 != 0 goto label24;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void write(char)>(c33);
+
+     label24:
+        goto label39;
+
+     label25:
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 6;
+
+        r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft> = $l14;
+
+        $l16 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $l15 = (long) 4194304;
+
+        $b17 = $l16 cmp $l15;
+
+        $i43 = (int) $b17;
+
+        if $i43 <= 0 goto label26;
+
+        $r92 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r92.<java.io.ByteArrayOutputStream: void <init>(int)>(4194304);
+
+        r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf> = $r92;
+
+        goto label28;
+
+     label26:
+        $l18 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $b19 = $l18 cmp 0L;
+
+        $i44 = (int) $b19;
+
+        if $i44 >= 0 goto label27;
+
+        r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft> = 0L;
+
+        $r93 = new java.io.ByteArrayOutputStream;
+
+        $l22 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $i23 = (int) $l22;
+
+        specialinvoke $r93.<java.io.ByteArrayOutputStream: void <init>(int)>($i23);
+
+        r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf> = $r93;
+
+        goto label28;
+
+     label27:
+        $r94 = new java.io.ByteArrayOutputStream;
+
+        $l20 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $i21 = (int) $l20;
+
+        specialinvoke $r94.<java.io.ByteArrayOutputStream: void <init>(int)>($i21);
+
+        r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf> = $r94;
+
+     label28:
+        $r80 = r0.<javax.swing.text.rtf.RTFParser: boolean[] specialsTable>;
+
+        r0.<javax.swing.text.rtf.RTFParser: boolean[] savedSpecials> = $r80;
+
+        $r81 = <javax.swing.text.rtf.RTFParser: boolean[] allSpecialsTable>;
+
+        r0.<javax.swing.text.rtf.RTFParser: boolean[] specialsTable> = $r81;
+
+        goto label39;
+
+     label29:
+        $r7 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $i13 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r8);
+
+        $r9 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $z2 = virtualinvoke r0.<javax.swing.text.rtf.RTFParser: boolean handleKeyword(java.lang.String,int)>($r9, $i13);
+
+        if $z2 != 0 goto label30;
+
+        $r95 = new java.lang.StringBuilder;
+
+        specialinvoke $r95.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown keyword: ");
+
+        $r13 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (param ");
+
+        $r16 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>($r19);
+
+     label30:
+        goto label32;
+
+     label31:
+        $r59 := @caughtexception;
+
+        $r96 = new java.lang.StringBuilder;
+
+        specialinvoke $r96.<java.lang.StringBuilder: void <init>()>();
+
+        $r61 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal number format ");
+
+        $r62 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r64 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r63);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r66 = r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword>;
+
+        $r67 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r66);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" tag");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>($r69);
+
+     label32:
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.String pendingKeyword> = null;
+
+        $r97 = new java.lang.StringBuffer;
+
+        specialinvoke $r97.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r97;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        $z3 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>(c33);
+
+        if $z3 != 0 goto label33;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void write(char)>(c33);
+
+     label33:
+        goto label39;
+
+     label34:
+        $i11 = staticinvoke <java.lang.Character: int digit(char,int)>(c33, 16);
+
+        $i46 = (int) -1;
+
+        if $i11 != $i46 goto label35;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        goto label39;
+
+     label35:
+        $i12 = staticinvoke <java.lang.Character: int digit(char,int)>(c33, 16);
+
+        r0.<javax.swing.text.rtf.RTFParser: int pendingCharacter> = $i12;
+
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 5;
+
+        goto label39;
+
+     label36:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        $i5 = staticinvoke <java.lang.Character: int digit(char,int)>(c33, 16);
+
+        $i48 = (int) -1;
+
+        if $i5 == $i48 goto label39;
+
+        $i6 = r0.<javax.swing.text.rtf.RTFParser: int pendingCharacter>;
+
+        $i7 = $i6 * 16;
+
+        $i8 = staticinvoke <java.lang.Character: int digit(char,int)>(c33, 16);
+
+        $i9 = $i7 + $i8;
+
+        r0.<javax.swing.text.rtf.RTFParser: int pendingCharacter> = $i9;
+
+        $r5 = r0.<javax.swing.text.rtf.RTFParser: char[] translationTable>;
+
+        $i10 = r0.<javax.swing.text.rtf.RTFParser: int pendingCharacter>;
+
+        c34 = $r5[$i10];
+
+        if c34 == 0 goto label39;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(char)>(c34);
+
+        goto label39;
+
+     label37:
+        $l1 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $b2 = $l1 cmp 0L;
+
+        $i49 = (int) $b2;
+
+        if $i49 <= 0 goto label38;
+
+        $r4 = r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf>;
+
+        $i50 = (int) c33;
+
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void write(int)>($i50);
+
+        $l3 = r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft>;
+
+        $l4 = $l3 - 1L;
+
+        r0.<javax.swing.text.rtf.RTFParser: long binaryBytesLeft> = $l4;
+
+        goto label39;
+
+     label38:
+        r0.<javax.swing.text.rtf.RTFParser: int state> = 0;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFParser: boolean[] savedSpecials>;
+
+        r0.<javax.swing.text.rtf.RTFParser: boolean[] specialsTable> = $r1;
+
+        r0.<javax.swing.text.rtf.RTFParser: boolean[] savedSpecials> = null;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf>;
+
+        $r3 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleBinaryBlob(byte[])>($r3);
+
+        r0.<javax.swing.text.rtf.RTFParser: java.io.ByteArrayOutputStream binaryBuf> = null;
+
+     label39:
+        return;
+
+        catch java.lang.NumberFormatException from label21 to label22 with label23;
+        catch java.lang.NumberFormatException from label29 to label30 with label31;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFParser r0;
+        java.lang.StringBuffer $r1, $r2, $r4;
+        int $i0, $i1;
+        java.lang.String $r3;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        specialinvoke r0.<javax.swing.text.rtf.AbstractFilter: void flush()>();
+
+        $i0 = r0.<javax.swing.text.rtf.RTFParser: int state>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $i1 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        if $i1 <= 0 goto label1;
+
+        $r2 = r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void handleText(java.lang.String)>($r3);
+
+        $r4 = new java.lang.StringBuffer;
+
+        specialinvoke $r4.<java.lang.StringBuffer: void <init>()>();
+
+        r0.<javax.swing.text.rtf.RTFParser: java.lang.StringBuffer currentCharacters> = $r4;
+
+     label1:
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.swing.text.rtf.RTFParser r0;
+        int $i0, $i1, $i2, $i3, $i4;
+
+        r0 := @this: javax.swing.text.rtf.RTFParser;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void flush()>();
+
+        $i0 = r0.<javax.swing.text.rtf.RTFParser: int state>;
+
+        if $i0 != 0 goto label1;
+
+        $i3 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        if $i3 <= 0 goto label3;
+
+     label1:
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void warning(java.lang.String)>("Truncated RTF file.");
+
+     label2:
+        $i4 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        if $i4 <= 0 goto label3;
+
+        virtualinvoke r0.<javax.swing.text.rtf.RTFParser: void endgroup()>();
+
+        $i1 = r0.<javax.swing.text.rtf.RTFParser: int level>;
+
+        $i2 = $i1 - 1;
+
+        r0.<javax.swing.text.rtf.RTFParser: int level> = $i2;
+
+        goto label2;
+
+     label3:
+        specialinvoke r0.<javax.swing.text.rtf.AbstractFilter: void close()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        boolean[] $r0, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.lang.Object $r1;
+
+        $r0 = <javax.swing.text.rtf.RTFParser: boolean[] noSpecialsTable>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (boolean[]) $r1;
+
+        <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable> = $r2;
+
+        $r3 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        $r3[10] = 1;
+
+        $r4 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        $r4[13] = 1;
+
+        $r5 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        $r5[123] = 1;
+
+        $r6 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        $r6[125] = 1;
+
+        $r7 = <javax.swing.text.rtf.RTFParser: boolean[] rtfSpecialsTable>;
+
+        $r7[92] = 1;
+
+        return;
+    }
+}

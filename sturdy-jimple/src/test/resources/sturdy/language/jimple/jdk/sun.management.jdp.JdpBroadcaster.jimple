@@ -1,0 +1,175 @@
+public final class sun.management.jdp.JdpBroadcaster extends java.lang.Object
+{
+    private final java.net.InetAddress addr;
+    private final int port;
+    private final java.nio.channels.DatagramChannel channel;
+
+    public void <init>(java.net.InetAddress, java.net.InetAddress, int, int) throws java.io.IOException, sun.management.jdp.JdpException
+    {
+        sun.management.jdp.JdpBroadcaster r0;
+        java.nio.channels.DatagramChannel $r2, $r3, $r6, $r12, $r14;
+        java.net.SocketOption $r4, $r7, $r13;
+        java.lang.Integer $r8;
+        java.net.InetAddress r1, r9;
+        int i0, i1;
+        java.lang.Boolean $r5;
+        java.net.StandardProtocolFamily $r17;
+        boolean $z0;
+        sun.management.jdp.JdpException $r16;
+        java.net.NetworkInterface $r10;
+        java.nio.channels.UnsupportedAddressTypeException $r15;
+        java.net.InetSocketAddress $r11;
+
+        r0 := @this: sun.management.jdp.JdpBroadcaster;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        r9 := @parameter1: java.net.InetAddress;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.jdp.JdpBroadcaster: java.net.InetAddress addr> = r1;
+
+        r0.<sun.management.jdp.JdpBroadcaster: int port> = i0;
+
+        $z0 = r1 instanceof java.net.Inet6Address;
+
+        if $z0 == 0 goto label1;
+
+        $r17 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET6>;
+
+        goto label2;
+
+     label1:
+        $r17 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET>;
+
+     label2:
+        $r2 = staticinvoke <java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel open(java.net.ProtocolFamily)>($r17);
+
+        r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel> = $r2;
+
+        $r3 = r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        $r4 = <java.net.StandardSocketOptions: java.net.SocketOption SO_REUSEADDR>;
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        virtualinvoke $r3.<java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel setOption(java.net.SocketOption,java.lang.Object)>($r4, $r5);
+
+        $r6 = r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        $r7 = <java.net.StandardSocketOptions: java.net.SocketOption IP_MULTICAST_TTL>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        virtualinvoke $r6.<java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel setOption(java.net.SocketOption,java.lang.Object)>($r7, $r8);
+
+        if r9 == null goto label7;
+
+        $r10 = staticinvoke <java.net.NetworkInterface: java.net.NetworkInterface getByInetAddress(java.net.InetAddress)>(r9);
+
+     label3:
+        $r12 = r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        $r11 = new java.net.InetSocketAddress;
+
+        specialinvoke $r11.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r9, 0);
+
+        virtualinvoke $r12.<java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel bind(java.net.SocketAddress)>($r11);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r16 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r16.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Unable to bind to source address");
+
+        throw $r16;
+
+     label6:
+        $r14 = r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        $r13 = <java.net.StandardSocketOptions: java.net.SocketOption IP_MULTICAST_IF>;
+
+        virtualinvoke $r14.<java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel setOption(java.net.SocketOption,java.lang.Object)>($r13, $r10);
+
+     label7:
+        return;
+
+        catch java.nio.channels.UnsupportedAddressTypeException from label3 to label4 with label5;
+    }
+
+    public void <init>(java.net.InetAddress, int, int) throws java.io.IOException, sun.management.jdp.JdpException
+    {
+        java.net.InetAddress r1;
+        sun.management.jdp.JdpBroadcaster r0;
+        int i0, i1;
+
+        r0 := @this: sun.management.jdp.JdpBroadcaster;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.management.jdp.JdpBroadcaster: void <init>(java.net.InetAddress,java.net.InetAddress,int,int)>(r1, null, i0, i1);
+
+        return;
+    }
+
+    public void sendPacket(sun.management.jdp.JdpPacket) throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.management.jdp.JdpBroadcaster r3;
+        java.nio.channels.DatagramChannel $r6;
+        sun.management.jdp.JdpPacket r0;
+        java.net.InetSocketAddress $r4;
+        java.nio.ByteBuffer $r2;
+        java.net.InetAddress $r5;
+        int $i0;
+
+        r3 := @this: sun.management.jdp.JdpBroadcaster;
+
+        r0 := @parameter0: sun.management.jdp.JdpPacket;
+
+        $r1 = interfaceinvoke r0.<sun.management.jdp.JdpPacket: byte[] getPacketData()>();
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r1);
+
+        $r6 = r3.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        $r4 = new java.net.InetSocketAddress;
+
+        $r5 = r3.<sun.management.jdp.JdpBroadcaster: java.net.InetAddress addr>;
+
+        $i0 = r3.<sun.management.jdp.JdpBroadcaster: int port>;
+
+        specialinvoke $r4.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r5, $i0);
+
+        virtualinvoke $r6.<java.nio.channels.DatagramChannel: int send(java.nio.ByteBuffer,java.net.SocketAddress)>($r2, $r4);
+
+        return;
+    }
+
+    public void shutdown() throws java.io.IOException
+    {
+        sun.management.jdp.JdpBroadcaster r0;
+        java.nio.channels.DatagramChannel $r1;
+
+        r0 := @this: sun.management.jdp.JdpBroadcaster;
+
+        $r1 = r0.<sun.management.jdp.JdpBroadcaster: java.nio.channels.DatagramChannel channel>;
+
+        virtualinvoke $r1.<java.nio.channels.DatagramChannel: void close()>();
+
+        return;
+    }
+}

@@ -1,0 +1,584 @@
+public abstract class java.awt.GraphicsDevice extends java.lang.Object
+{
+    private java.awt.Window fullScreenWindow;
+    private sun.awt.AppContext fullScreenAppContext;
+    private final java.lang.Object fsAppContextLock;
+    private java.awt.Rectangle windowedModeBounds;
+    public static final int TYPE_RASTER_SCREEN;
+    public static final int TYPE_PRINTER;
+    public static final int TYPE_IMAGE_BUFFER;
+
+    protected void <init>()
+    {
+        java.lang.Object $r1;
+        java.awt.GraphicsDevice r0;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.GraphicsDevice: java.lang.Object fsAppContextLock> = $r1;
+
+        return;
+    }
+
+    public abstract int getType();
+
+    public abstract java.lang.String getIDstring();
+
+    public abstract java.awt.GraphicsConfiguration[] getConfigurations();
+
+    public abstract java.awt.GraphicsConfiguration getDefaultConfiguration();
+
+    public java.awt.GraphicsConfiguration getBestConfiguration(java.awt.GraphicsConfigTemplate)
+    {
+        java.awt.GraphicsConfiguration $r3;
+        java.awt.GraphicsDevice r0;
+        java.awt.GraphicsConfigTemplate r2;
+        java.awt.GraphicsConfiguration[] $r1;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        r2 := @parameter0: java.awt.GraphicsConfigTemplate;
+
+        $r1 = virtualinvoke r0.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration[] getConfigurations()>();
+
+        $r3 = virtualinvoke r2.<java.awt.GraphicsConfigTemplate: java.awt.GraphicsConfiguration getBestConfiguration(java.awt.GraphicsConfiguration[])>($r1);
+
+        return $r3;
+    }
+
+    public boolean isFullScreenSupported()
+    {
+        java.awt.GraphicsDevice r0;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        return 0;
+    }
+
+    public void setFullScreenWindow(java.awt.Window)
+    {
+        java.awt.Color $r26, $r31;
+        byte $b6;
+        sun.awt.AppContext $r2;
+        boolean $z0, $z1;
+        java.awt.Shape $r20;
+        java.awt.GraphicsConfiguration $r6, $r21;
+        float $f0;
+        java.lang.Throwable $r28;
+        java.awt.Rectangle $r5, $r7, $r13, $r14, $r15, $r16, $r18, $r19;
+        java.awt.GraphicsDevice r1, $r22, $r23, $r25;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10;
+        java.awt.Window r0, $r3, $r4, $r8, $r9, $r10, $r11, $r12, $r17, $r24, $r29;
+        java.lang.Object $r30;
+
+        r1 := @this: java.awt.GraphicsDevice;
+
+        r0 := @parameter0: java.awt.Window;
+
+        if r0 == null goto label04;
+
+        $r20 = virtualinvoke r0.<java.awt.Window: java.awt.Shape getShape()>();
+
+        if $r20 == null goto label01;
+
+        virtualinvoke r0.<java.awt.Window: void setShape(java.awt.Shape)>(null);
+
+     label01:
+        $f0 = virtualinvoke r0.<java.awt.Window: float getOpacity()>();
+
+        $b6 = $f0 cmpg 1.0F;
+
+        $i10 = (int) $b6;
+
+        if $i10 >= 0 goto label02;
+
+        virtualinvoke r0.<java.awt.Window: void setOpacity(float)>(1.0F);
+
+     label02:
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isOpaque()>();
+
+        if $z1 != 0 goto label03;
+
+        $r26 = virtualinvoke r0.<java.awt.Window: java.awt.Color getBackground()>();
+
+        $r31 = new java.awt.Color;
+
+        $i7 = virtualinvoke $r26.<java.awt.Color: int getRed()>();
+
+        $i8 = virtualinvoke $r26.<java.awt.Color: int getGreen()>();
+
+        $i9 = virtualinvoke $r26.<java.awt.Color: int getBlue()>();
+
+        specialinvoke $r31.<java.awt.Color: void <init>(int,int,int,int)>($i7, $i8, $i9, 255);
+
+        virtualinvoke r0.<java.awt.Window: void setBackground(java.awt.Color)>($r31);
+
+     label03:
+        $r21 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        if $r21 == null goto label04;
+
+        $r22 = virtualinvoke $r21.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        if $r22 == r1 goto label04;
+
+        $r23 = virtualinvoke $r21.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r24 = virtualinvoke $r23.<java.awt.GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r24 != r0 goto label04;
+
+        $r25 = virtualinvoke $r21.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        virtualinvoke $r25.<java.awt.GraphicsDevice: void setFullScreenWindow(java.awt.Window)>(null);
+
+     label04:
+        $r29 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        if $r29 == null goto label07;
+
+        $r13 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        if $r13 == null goto label07;
+
+        $r14 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        $i4 = $r14.<java.awt.Rectangle: int width>;
+
+        if $i4 != 0 goto label05;
+
+        $r19 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        $r19.<java.awt.Rectangle: int width> = 1;
+
+     label05:
+        $r15 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        $i5 = $r15.<java.awt.Rectangle: int height>;
+
+        if $i5 != 0 goto label06;
+
+        $r18 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        $r18.<java.awt.Rectangle: int height> = 1;
+
+     label06:
+        $r17 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        $r16 = r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds>;
+
+        virtualinvoke $r17.<java.awt.Window: void setBounds(java.awt.Rectangle)>($r16);
+
+     label07:
+        $r30 = r1.<java.awt.GraphicsDevice: java.lang.Object fsAppContextLock>;
+
+        entermonitor $r30;
+
+     label08:
+        if r0 != null goto label09;
+
+        r1.<java.awt.GraphicsDevice: sun.awt.AppContext fullScreenAppContext> = null;
+
+        goto label10;
+
+     label09:
+        $r2 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        r1.<java.awt.GraphicsDevice: sun.awt.AppContext fullScreenAppContext> = $r2;
+
+     label10:
+        r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow> = r0;
+
+        exitmonitor $r30;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r28 := @caughtexception;
+
+        exitmonitor $r30;
+
+     label13:
+        throw $r28;
+
+     label14:
+        $r3 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        if $r3 == null goto label16;
+
+        $r4 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        $r5 = virtualinvoke $r4.<java.awt.Window: java.awt.Rectangle getBounds()>();
+
+        r1.<java.awt.GraphicsDevice: java.awt.Rectangle windowedModeBounds> = $r5;
+
+        $r6 = virtualinvoke r1.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r8 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        $z0 = staticinvoke <sun.awt.SunToolkit: boolean isDispatchThreadForAppContext(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label15;
+
+        $r12 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        virtualinvoke $r12.<java.awt.Window: void setGraphicsConfiguration(java.awt.GraphicsConfiguration)>($r6);
+
+     label15:
+        $r9 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        $i3 = $r7.<java.awt.Rectangle: int x>;
+
+        $i2 = $r7.<java.awt.Rectangle: int y>;
+
+        $i1 = $r7.<java.awt.Rectangle: int width>;
+
+        $i0 = $r7.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r9.<java.awt.Window: void setBounds(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+        $r10 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        virtualinvoke $r10.<java.awt.Window: void setVisible(boolean)>(1);
+
+        $r11 = r1.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+        virtualinvoke $r11.<java.awt.Window: void toFront()>();
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public java.awt.Window getFullScreenWindow()
+    {
+        java.lang.Throwable $r4;
+        java.awt.GraphicsDevice r0;
+        sun.awt.AppContext $r2, $r3;
+        java.awt.Window r5;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        r5 = null;
+
+        $r1 = r0.<java.awt.GraphicsDevice: java.lang.Object fsAppContextLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.GraphicsDevice: sun.awt.AppContext fullScreenAppContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label2;
+
+        r5 = r0.<java.awt.GraphicsDevice: java.awt.Window fullScreenWindow>;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean isDisplayChangeSupported()
+    {
+        java.awt.GraphicsDevice r0;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        return 0;
+    }
+
+    public void setDisplayMode(java.awt.DisplayMode)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        java.awt.GraphicsDevice r1;
+        java.awt.DisplayMode r2;
+
+        r1 := @this: java.awt.GraphicsDevice;
+
+        r2 := @parameter0: java.awt.DisplayMode;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Cannot change display mode");
+
+        throw $r0;
+    }
+
+    public java.awt.DisplayMode getDisplayMode()
+    {
+        java.awt.Rectangle $r2;
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.GraphicsDevice r0;
+        java.awt.image.ColorModel $r3;
+        java.awt.DisplayMode $r4;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        $r1 = virtualinvoke r0.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r3 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.image.ColorModel getColorModel()>();
+
+        $r4 = new java.awt.DisplayMode;
+
+        $i0 = $r2.<java.awt.Rectangle: int width>;
+
+        $i1 = $r2.<java.awt.Rectangle: int height>;
+
+        $i2 = virtualinvoke $r3.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        specialinvoke $r4.<java.awt.DisplayMode: void <init>(int,int,int,int)>($i0, $i1, $i2, 0);
+
+        return $r4;
+    }
+
+    public java.awt.DisplayMode[] getDisplayModes()
+    {
+        java.awt.DisplayMode[] $r0;
+        java.awt.GraphicsDevice r1;
+        java.awt.DisplayMode $r2;
+
+        r1 := @this: java.awt.GraphicsDevice;
+
+        $r0 = newarray (java.awt.DisplayMode)[1];
+
+        $r2 = virtualinvoke r1.<java.awt.GraphicsDevice: java.awt.DisplayMode getDisplayMode()>();
+
+        $r0[0] = $r2;
+
+        return $r0;
+    }
+
+    public int getAvailableAcceleratedMemory()
+    {
+        int $i1;
+        java.awt.GraphicsDevice r0;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    public boolean isWindowTranslucencySupported(java.awt.GraphicsDevice$WindowTranslucency)
+    {
+        java.awt.GraphicsDevice r2;
+        int[] $r1;
+        java.awt.GraphicsDevice$WindowTranslucency r0;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: java.awt.GraphicsDevice;
+
+        r0 := @parameter0: java.awt.GraphicsDevice$WindowTranslucency;
+
+        $r1 = <java.awt.GraphicsDevice$1: int[] $SwitchMap$java$awt$GraphicsDevice$WindowTranslucency>;
+
+        $i0 = virtualinvoke r0.<java.awt.GraphicsDevice$WindowTranslucency: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $z2 = staticinvoke <java.awt.GraphicsDevice: boolean isWindowShapingSupported()>();
+
+        return $z2;
+
+     label2:
+        $z1 = staticinvoke <java.awt.GraphicsDevice: boolean isWindowOpacitySupported()>();
+
+        return $z1;
+
+     label3:
+        $z0 = virtualinvoke r2.<java.awt.GraphicsDevice: boolean isWindowPerpixelTranslucencySupported()>();
+
+        return $z0;
+
+     label4:
+        return 0;
+    }
+
+    static boolean isWindowShapingSupported()
+    {
+        sun.awt.SunToolkit $r1;
+        java.awt.Toolkit $r0;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = (sun.awt.SunToolkit) $r0;
+
+        $z1 = virtualinvoke $r1.<sun.awt.SunToolkit: boolean isWindowShapingSupported()>();
+
+        return $z1;
+    }
+
+    static boolean isWindowOpacitySupported()
+    {
+        sun.awt.SunToolkit $r1;
+        java.awt.Toolkit $r0;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = (sun.awt.SunToolkit) $r0;
+
+        $z1 = virtualinvoke $r1.<sun.awt.SunToolkit: boolean isWindowOpacitySupported()>();
+
+        return $z1;
+    }
+
+    boolean isWindowPerpixelTranslucencySupported()
+    {
+        java.awt.GraphicsConfiguration $r3;
+        java.awt.GraphicsDevice r2;
+        sun.awt.SunToolkit $r1;
+        java.awt.Toolkit $r0;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: java.awt.GraphicsDevice;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = (sun.awt.SunToolkit) $r0;
+
+        $z1 = virtualinvoke $r1.<sun.awt.SunToolkit: boolean isWindowTranslucencySupported()>();
+
+        if $z1 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = virtualinvoke r2.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getTranslucencyCapableGC()>();
+
+        if $r3 == null goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    java.awt.GraphicsConfiguration getTranslucencyCapableGC()
+    {
+        java.awt.GraphicsConfiguration $r1, $r3, $r4;
+        java.awt.GraphicsDevice r0;
+        java.awt.GraphicsConfiguration[] $r2;
+        int $i0, i1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.GraphicsDevice;
+
+        $r1 = virtualinvoke r0.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: boolean isTranslucencyCapable()>();
+
+        if $z0 == 0 goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration[] getConfigurations()>();
+
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label4;
+
+        $r3 = $r2[i1];
+
+        $z1 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: boolean isTranslucencyCapable()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = $r2[i1];
+
+        return $r4;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    public static void <clinit>()
+    {
+        <java.awt.GraphicsDevice: int TYPE_IMAGE_BUFFER> = 2;
+
+        <java.awt.GraphicsDevice: int TYPE_PRINTER> = 1;
+
+        <java.awt.GraphicsDevice: int TYPE_RASTER_SCREEN> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,814 @@
+public final class java.util.UUID extends java.lang.Object implements java.io.Serializable, java.lang.Comparable
+{
+    private static final long serialVersionUID;
+    private final long mostSigBits;
+    private final long leastSigBits;
+    static final boolean $assertionsDisabled;
+
+    private void <init>(byte[])
+    {
+        byte[] r1;
+        long $l2, $l3, $l6, $l7, l9, l10;
+        java.lang.AssertionError $r3;
+        short $s1, $s5, $s13, $s14;
+        byte $b0, $b4;
+        int $i8, i11, i12;
+        boolean $z0;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        l9 = 0L;
+
+        l10 = 0L;
+
+        $z0 = <java.util.UUID: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $i8 = lengthof r1;
+
+        if $i8 == 16 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("data must be 16 bytes in length");
+
+        throw $r3;
+
+     label1:
+        i11 = 0;
+
+     label2:
+        if i11 >= 8 goto label3;
+
+        $l7 = l9 << 8;
+
+        $b4 = r1[i11];
+
+        $s13 = (short) $b4;
+
+        $s5 = $s13 & 255;
+
+        $l6 = (long) $s5;
+
+        l9 = $l7 | $l6;
+
+        i11 = i11 + 1;
+
+        goto label2;
+
+     label3:
+        i12 = 8;
+
+     label4:
+        if i12 >= 16 goto label5;
+
+        $l3 = l10 << 8;
+
+        $b0 = r1[i12];
+
+        $s14 = (short) $b0;
+
+        $s1 = $s14 & 255;
+
+        $l2 = (long) $s1;
+
+        l10 = $l3 | $l2;
+
+        i12 = i12 + 1;
+
+        goto label4;
+
+     label5:
+        r0.<java.util.UUID: long mostSigBits> = l9;
+
+        r0.<java.util.UUID: long leastSigBits> = l10;
+
+        return;
+    }
+
+    public void <init>(long, long)
+    {
+        long l0, l1;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.UUID: long mostSigBits> = l0;
+
+        r0.<java.util.UUID: long leastSigBits> = l1;
+
+        return;
+    }
+
+    public static java.util.UUID randomUUID()
+    {
+        byte[] r1;
+        java.security.SecureRandom r0;
+        short $s10, $s12;
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $b11;
+        java.util.UUID $r3;
+
+        r0 = <java.util.UUID$Holder: java.security.SecureRandom numberGenerator>;
+
+        r1 = newarray (byte)[16];
+
+        virtualinvoke r0.<java.security.SecureRandom: void nextBytes(byte[])>(r1);
+
+        $b0 = r1[6];
+
+        $b1 = $b0 & 15;
+
+        $b2 = (byte) $b1;
+
+        r1[6] = $b2;
+
+        $b3 = r1[6];
+
+        $b4 = $b3 | 64;
+
+        $b5 = (byte) $b4;
+
+        r1[6] = $b5;
+
+        $b6 = r1[8];
+
+        $b7 = $b6 & 63;
+
+        $b8 = (byte) $b7;
+
+        r1[8] = $b8;
+
+        $b9 = r1[8];
+
+        $s12 = (short) $b9;
+
+        $s10 = $s12 | 128;
+
+        $b11 = (byte) $s10;
+
+        r1[8] = $b11;
+
+        $r3 = new java.util.UUID;
+
+        specialinvoke $r3.<java.util.UUID: void <init>(byte[])>(r1);
+
+        return $r3;
+    }
+
+    public static java.util.UUID nameUUIDFromBytes(byte[])
+    {
+        byte[] r1, $r2;
+        java.security.MessageDigest $r0;
+        short $s10, $s12;
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $b11;
+        java.lang.InternalError $r6;
+        java.util.UUID $r7;
+        java.security.NoSuchAlgorithmException $r4;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r6 = new java.lang.InternalError;
+
+        specialinvoke $r6.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("MD5 not supported", $r4);
+
+        throw $r6;
+
+     label4:
+        $r2 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest(byte[])>(r1);
+
+        $b0 = $r2[6];
+
+        $b1 = $b0 & 15;
+
+        $b2 = (byte) $b1;
+
+        $r2[6] = $b2;
+
+        $b3 = $r2[6];
+
+        $b4 = $b3 | 48;
+
+        $b5 = (byte) $b4;
+
+        $r2[6] = $b5;
+
+        $b6 = $r2[8];
+
+        $b7 = $b6 & 63;
+
+        $b8 = (byte) $b7;
+
+        $r2[8] = $b8;
+
+        $b9 = $r2[8];
+
+        $s12 = (short) $b9;
+
+        $s10 = $s12 | 128;
+
+        $b11 = (byte) $s10;
+
+        $r2[8] = $b11;
+
+        $r7 = new java.util.UUID;
+
+        specialinvoke $r7.<java.util.UUID: void <init>(byte[])>($r2);
+
+        return $r7;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    public static java.util.UUID fromString(java.lang.String)
+    {
+        java.lang.Long $r3, $r5, $r7, $r9, $r11;
+        java.util.UUID $r12;
+        java.lang.StringBuilder $r13, $r14, $r16, $r19, $r20, $r21;
+        java.lang.String[] $r1;
+        long $l1, $l2, $l3, $l4, $l5, l7, l8, l9, l10, l11, l12;
+        int $i0, i6;
+        java.lang.String r0, $r2, $r4, $r6, $r8, $r10, $r15, $r17, $r22;
+        java.lang.IllegalArgumentException $r18;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String[] split(java.lang.String)>("-");
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 5 goto label1;
+
+        $r18 = new java.lang.IllegalArgumentException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid UUID string: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r22);
+
+        throw $r18;
+
+     label1:
+        i6 = 0;
+
+     label2:
+        if i6 >= 5 goto label3;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0x");
+
+        $r15 = $r1[i6];
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[i6] = $r17;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        $r2 = $r1[0];
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long decode(java.lang.String)>($r2);
+
+        $l1 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        l7 = $l1 << 16;
+
+        $r4 = $r1[1];
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.Long decode(java.lang.String)>($r4);
+
+        $l2 = virtualinvoke $r5.<java.lang.Long: long longValue()>();
+
+        l8 = l7 | $l2;
+
+        l9 = l8 << 16;
+
+        $r6 = $r1[2];
+
+        $r7 = staticinvoke <java.lang.Long: java.lang.Long decode(java.lang.String)>($r6);
+
+        $l3 = virtualinvoke $r7.<java.lang.Long: long longValue()>();
+
+        l10 = l9 | $l3;
+
+        $r8 = $r1[3];
+
+        $r9 = staticinvoke <java.lang.Long: java.lang.Long decode(java.lang.String)>($r8);
+
+        $l4 = virtualinvoke $r9.<java.lang.Long: long longValue()>();
+
+        l11 = $l4 << 48;
+
+        $r10 = $r1[4];
+
+        $r11 = staticinvoke <java.lang.Long: java.lang.Long decode(java.lang.String)>($r10);
+
+        $l5 = virtualinvoke $r11.<java.lang.Long: long longValue()>();
+
+        l12 = l11 | $l5;
+
+        $r12 = new java.util.UUID;
+
+        specialinvoke $r12.<java.util.UUID: void <init>(long,long)>(l10, l12);
+
+        return $r12;
+    }
+
+    public long getLeastSignificantBits()
+    {
+        long $l0;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        $l0 = r0.<java.util.UUID: long leastSigBits>;
+
+        return $l0;
+    }
+
+    public long getMostSignificantBits()
+    {
+        long $l0;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        $l0 = r0.<java.util.UUID: long mostSigBits>;
+
+        return $l0;
+    }
+
+    public int version()
+    {
+        int $i3;
+        long $l0, $l1, $l2;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        $l0 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l1 = $l0 >> 12;
+
+        $l2 = $l1 & 15L;
+
+        $i3 = (int) $l2;
+
+        return $i3;
+    }
+
+    public int variant()
+    {
+        long $l0, $l1, $l2, $l4, $l5, $l6, $l7, $l8;
+        java.util.UUID r0;
+        int $i3, $i9;
+
+        r0 := @this: java.util.UUID;
+
+        $l4 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l0 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l1 = $l0 >>> 62;
+
+        $l2 = 64L - $l1;
+
+        $i3 = (int) $l2;
+
+        $l7 = $l4 >>> $i3;
+
+        $l5 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l6 = $l5 >> 63;
+
+        $l8 = $l7 & $l6;
+
+        $i9 = (int) $l8;
+
+        return $i9;
+    }
+
+    public long timestamp()
+    {
+        java.lang.UnsupportedOperationException $r1;
+        long $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11;
+        java.util.UUID r0;
+        int $i0;
+
+        r0 := @this: java.util.UUID;
+
+        $i0 = virtualinvoke r0.<java.util.UUID: int version()>();
+
+        if $i0 == 1 goto label1;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not a time-based UUID");
+
+        throw $r1;
+
+     label1:
+        $l1 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l2 = $l1 & 4095L;
+
+        $l7 = $l2 << 48;
+
+        $l3 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l4 = $l3 >> 16;
+
+        $l5 = $l4 & 65535L;
+
+        $l6 = $l5 << 32;
+
+        $l10 = $l7 | $l6;
+
+        $l8 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l9 = $l8 >>> 32;
+
+        $l11 = $l10 | $l9;
+
+        return $l11;
+    }
+
+    public int clockSequence()
+    {
+        java.lang.UnsupportedOperationException $r1;
+        int $i0, $i4;
+        long $l1, $l2, $l3;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        $i0 = virtualinvoke r0.<java.util.UUID: int version()>();
+
+        if $i0 == 1 goto label1;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not a time-based UUID");
+
+        throw $r1;
+
+     label1:
+        $l1 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l2 = $l1 & 4611404543450677248L;
+
+        $l3 = $l2 >>> 48;
+
+        $i4 = (int) $l3;
+
+        return $i4;
+    }
+
+    public long node()
+    {
+        java.lang.UnsupportedOperationException $r1;
+        int $i0;
+        long $l1, $l2;
+        java.util.UUID r0;
+
+        r0 := @this: java.util.UUID;
+
+        $i0 = virtualinvoke r0.<java.util.UUID: int version()>();
+
+        if $i0 == 1 goto label1;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not a time-based UUID");
+
+        throw $r1;
+
+     label1:
+        $l1 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l2 = $l1 & 281474976710655L;
+
+        return $l2;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7;
+        java.lang.String $r2, $r5, $r8, $r11, $r14, $r16;
+        java.util.UUID r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r7, $r9, $r10, $r12, $r13, $r15;
+
+        r1 := @this: java.util.UUID;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $l0 = r1.<java.util.UUID: long mostSigBits>;
+
+        $l1 = $l0 >> 32;
+
+        $r2 = staticinvoke <java.util.UUID: java.lang.String digits(long,int)>($l1, 8);
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $l2 = r1.<java.util.UUID: long mostSigBits>;
+
+        $l3 = $l2 >> 16;
+
+        $r5 = staticinvoke <java.util.UUID: java.lang.String digits(long,int)>($l3, 4);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $l4 = r1.<java.util.UUID: long mostSigBits>;
+
+        $r8 = staticinvoke <java.util.UUID: java.lang.String digits(long,int)>($l4, 4);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $l5 = r1.<java.util.UUID: long leastSigBits>;
+
+        $l6 = $l5 >> 48;
+
+        $r11 = staticinvoke <java.util.UUID: java.lang.String digits(long,int)>($l6, 4);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $l7 = r1.<java.util.UUID: long leastSigBits>;
+
+        $r14 = staticinvoke <java.util.UUID: java.lang.String digits(long,int)>($l7, 12);
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r16;
+    }
+
+    private static java.lang.String digits(long, int)
+    {
+        long l2, l3, $l4, $l5, $l6;
+        int i0, $i1;
+        java.lang.String $r0, $r1;
+
+        l3 := @parameter0: long;
+
+        i0 := @parameter1: int;
+
+        $i1 = i0 * 4;
+
+        l2 = 1L << $i1;
+
+        $l4 = l2 - 1L;
+
+        $l5 = l3 & $l4;
+
+        $l6 = l2 | $l5;
+
+        $r0 = staticinvoke <java.lang.Long: java.lang.String toHexString(long)>($l6);
+
+        $r1 = virtualinvoke $r0.<java.lang.String: java.lang.String substring(int)>(1);
+
+        return $r1;
+    }
+
+    public int hashCode()
+    {
+        long $l0, $l1, l2, $l3;
+        java.util.UUID r0;
+        int $i4, $i5, $i6;
+
+        r0 := @this: java.util.UUID;
+
+        $l1 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l0 = r0.<java.util.UUID: long leastSigBits>;
+
+        l2 = $l1 ^ $l0;
+
+        $l3 = l2 >> 32;
+
+        $i5 = (int) $l3;
+
+        $i4 = (int) l2;
+
+        $i6 = $i5 ^ $i4;
+
+        return $i6;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        long $l0, $l1, $l3, $l4;
+        java.util.UUID r2, r3;
+        byte $b2, $b5;
+        java.lang.Object r0;
+        java.lang.Class $r1;
+        boolean $z0;
+
+        r3 := @this: java.util.UUID;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if null == r0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 == class "Ljava/util/UUID;" goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        r2 = (java.util.UUID) r0;
+
+        $l1 = r3.<java.util.UUID: long mostSigBits>;
+
+        $l0 = r2.<java.util.UUID: long mostSigBits>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label3;
+
+        $l4 = r3.<java.util.UUID: long leastSigBits>;
+
+        $l3 = r2.<java.util.UUID: long leastSigBits>;
+
+        $b5 = $l4 cmp $l3;
+
+        if $b5 != 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    public int compareTo(java.util.UUID)
+    {
+        long $l0, $l1, $l3, $l4, $l6, $l7, $l9, $l10;
+        byte $b2, $b5, $b8, $b11, $b12;
+        int $i13, $i14, $i15, $i16;
+        java.util.UUID r0, r1;
+
+        r0 := @this: java.util.UUID;
+
+        r1 := @parameter0: java.util.UUID;
+
+        $l1 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l0 = r1.<java.util.UUID: long mostSigBits>;
+
+        $b2 = $l1 cmp $l0;
+
+        $i13 = (int) $b2;
+
+        if $i13 >= 0 goto label1;
+
+        $b12 = -1;
+
+        goto label5;
+
+     label1:
+        $l4 = r0.<java.util.UUID: long mostSigBits>;
+
+        $l3 = r1.<java.util.UUID: long mostSigBits>;
+
+        $b5 = $l4 cmp $l3;
+
+        $i14 = (int) $b5;
+
+        if $i14 <= 0 goto label2;
+
+        $b12 = 1;
+
+        goto label5;
+
+     label2:
+        $l7 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l6 = r1.<java.util.UUID: long leastSigBits>;
+
+        $b8 = $l7 cmp $l6;
+
+        $i15 = (int) $b8;
+
+        if $i15 >= 0 goto label3;
+
+        $b12 = -1;
+
+        goto label5;
+
+     label3:
+        $l10 = r0.<java.util.UUID: long leastSigBits>;
+
+        $l9 = r1.<java.util.UUID: long leastSigBits>;
+
+        $b11 = $l10 cmp $l9;
+
+        $i16 = (int) $b11;
+
+        if $i16 <= 0 goto label4;
+
+        $b12 = 1;
+
+        goto label5;
+
+     label4:
+        $b12 = 0;
+
+     label5:
+        return $b12;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        int $i0;
+        java.lang.Object r1;
+        java.util.UUID r0, $r2;
+
+        r0 := @this: java.util.UUID;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.util.UUID) r1;
+
+        $i0 = virtualinvoke r0.<java.util.UUID: int compareTo(java.util.UUID)>($r2);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <java.util.UUID: long serialVersionUID> = -4856846361193249489L;
+
+        $r0 = class "Ljava/util/UUID;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.util.UUID: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

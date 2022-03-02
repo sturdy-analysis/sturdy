@@ -1,0 +1,695 @@
+public class java.awt.image.AreaAveragingScaleFilter extends java.awt.image.ReplicateScaleFilter
+{
+    private static final java.awt.image.ColorModel rgbmodel;
+    private static final int neededHints;
+    private boolean passthrough;
+    private float[] reds;
+    private float[] greens;
+    private float[] blues;
+    private float[] alphas;
+    private int savedy;
+    private int savedyrem;
+
+    public void <init>(int, int)
+    {
+        int i0, i1;
+        java.awt.image.AreaAveragingScaleFilter r0;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.awt.image.ReplicateScaleFilter: void <init>(int,int)>(i0, i1);
+
+        return;
+    }
+
+    public void setHints(int)
+    {
+        int i0, $i1;
+        java.awt.image.AreaAveragingScaleFilter r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 6;
+
+        if $i1 == 6 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<java.awt.image.AreaAveragingScaleFilter: boolean passthrough> = $z0;
+
+        specialinvoke r0.<java.awt.image.ReplicateScaleFilter: void setHints(int)>(i0);
+
+        return;
+    }
+
+    private void makeAccumBuffers()
+    {
+        float[] $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3;
+        java.awt.image.AreaAveragingScaleFilter r0;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        $i0 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r1 = newarray (float)[$i0];
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: float[] reds> = $r1;
+
+        $i1 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r2 = newarray (float)[$i1];
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: float[] greens> = $r2;
+
+        $i2 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r3 = newarray (float)[$i2];
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: float[] blues> = $r3;
+
+        $i3 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r4 = newarray (float)[$i3];
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: float[] alphas> = $r4;
+
+        return;
+    }
+
+    private int[] calcRow()
+    {
+        int[] $r2, $r7, $r8;
+        boolean $z0;
+        float $f0, $f1, f2, $f3, $f4, $f5, f6, $f7, $f8, $f9, $f10, $f11, $f12;
+        java.awt.image.AreaAveragingScaleFilter r0;
+        float[] $r3, $r4, $r9, $r10, $r11;
+        int $i0, $i1, $i2, $i3, i4, $i5, i6, $i7, i8, $i9, i10, $i11, i12, $i13, $i14, $i15, $i16, $i17, $i18;
+        java.lang.Object $r1, $r5, $r6;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        $i0 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcWidth>;
+
+        $f1 = (float) $i0;
+
+        $i1 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcHeight>;
+
+        $f0 = (float) $i1;
+
+        f2 = $f1 * $f0;
+
+        $r1 = r0.<java.awt.image.AreaAveragingScaleFilter: java.lang.Object outpixbuf>;
+
+        if $r1 == null goto label01;
+
+        $r5 = r0.<java.awt.image.AreaAveragingScaleFilter: java.lang.Object outpixbuf>;
+
+        $z0 = $r5 instanceof int[];
+
+        if $z0 != 0 goto label02;
+
+     label01:
+        $i2 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r2 = newarray (int)[$i2];
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: java.lang.Object outpixbuf> = $r2;
+
+     label02:
+        $r6 = r0.<java.awt.image.AreaAveragingScaleFilter: java.lang.Object outpixbuf>;
+
+        $r7 = (int[]) $r6;
+
+        $r8 = (int[]) $r7;
+
+        i4 = 0;
+
+     label03:
+        $i5 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        if i4 >= $i5 goto label13;
+
+        f6 = f2;
+
+        $r3 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] alphas>;
+
+        $f3 = $r3[i4];
+
+        $f4 = $f3 / f2;
+
+        $i3 = staticinvoke <java.lang.Math: int round(float)>($f4);
+
+        i6 = $i3;
+
+        if $i3 > 0 goto label04;
+
+        i6 = 0;
+
+        goto label06;
+
+     label04:
+        if $i3 < 255 goto label05;
+
+        i6 = 255;
+
+        goto label06;
+
+     label05:
+        $r4 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] alphas>;
+
+        $f5 = $r4[i4];
+
+        f6 = $f5 / 255.0F;
+
+     label06:
+        $r9 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] reds>;
+
+        $f7 = $r9[i4];
+
+        $f8 = $f7 / f6;
+
+        $i7 = staticinvoke <java.lang.Math: int round(float)>($f8);
+
+        i8 = $i7;
+
+        $r10 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] greens>;
+
+        $f9 = $r10[i4];
+
+        $f10 = $f9 / f6;
+
+        $i9 = staticinvoke <java.lang.Math: int round(float)>($f10);
+
+        i10 = $i9;
+
+        $r11 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] blues>;
+
+        $f11 = $r11[i4];
+
+        $f12 = $f11 / f6;
+
+        $i11 = staticinvoke <java.lang.Math: int round(float)>($f12);
+
+        i12 = $i11;
+
+        if $i7 >= 0 goto label07;
+
+        i8 = 0;
+
+        goto label08;
+
+     label07:
+        if $i7 <= 255 goto label08;
+
+        i8 = 255;
+
+     label08:
+        if $i9 >= 0 goto label09;
+
+        i10 = 0;
+
+        goto label10;
+
+     label09:
+        if $i9 <= 255 goto label10;
+
+        i10 = 255;
+
+     label10:
+        if $i11 >= 0 goto label11;
+
+        i12 = 0;
+
+        goto label12;
+
+     label11:
+        if $i11 <= 255 goto label12;
+
+        i12 = 255;
+
+     label12:
+        $i13 = i6 << 24;
+
+        $i14 = i8 << 16;
+
+        $i15 = $i13 | $i14;
+
+        $i16 = i10 << 8;
+
+        $i17 = $i15 | $i16;
+
+        $i18 = $i17 | i12;
+
+        $r8[i4] = $i18;
+
+        i4 = i4 + 1;
+
+        goto label03;
+
+     label13:
+        return $r8;
+    }
+
+    private void accumPixels(int, int, int, int, java.awt.image.ColorModel, java.lang.Object, int, int)
+    {
+        byte[] $r13, $r14;
+        byte $b19, $b21;
+        java.awt.image.AreaAveragingScaleFilter r0;
+        float[] $r1, $r5, $r6, $r7, $r8, $r15, $r16, $r17, $r18;
+        java.awt.image.ImageConsumer $r4;
+        int[] $r2, $r10, $r11;
+        boolean $z0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, f19, f20, f21, f22, f23;
+        int i0, i1, i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i20, $i22, i23, i24, i25, i26, i27, i28, $i29, i30, i31, i32, i33, i34, i35, i36, i37, $i38;
+        java.awt.image.ColorModel $r3, r12;
+        java.lang.Object r9;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        i23 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        r12 := @parameter4: java.awt.image.ColorModel;
+
+        r9 := @parameter5: java.lang.Object;
+
+        i24 := @parameter6: int;
+
+        i4 := @parameter7: int;
+
+        $r1 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] reds>;
+
+        if $r1 != null goto label01;
+
+        specialinvoke r0.<java.awt.image.AreaAveragingScaleFilter: void makeAccumBuffers()>();
+
+     label01:
+        i25 = i0;
+
+        i26 = r0.<java.awt.image.AreaAveragingScaleFilter: int destHeight>;
+
+        if i0 != 0 goto label02;
+
+        i27 = 0;
+
+        i28 = 0;
+
+        goto label03;
+
+     label02:
+        i27 = r0.<java.awt.image.AreaAveragingScaleFilter: int savedy>;
+
+        i28 = r0.<java.awt.image.AreaAveragingScaleFilter: int savedyrem>;
+
+     label03:
+        $i29 = i0 + i1;
+
+        if i25 >= $i29 goto label23;
+
+        if i28 != 0 goto label06;
+
+        i30 = 0;
+
+     label04:
+        $i22 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        if i30 >= $i22 goto label05;
+
+        $r18 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] alphas>;
+
+        $r17 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] reds>;
+
+        $r16 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] greens>;
+
+        $r15 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] blues>;
+
+        $r15[i30] = 0.0F;
+
+        $r16[i30] = 0.0F;
+
+        $r17[i30] = 0.0F;
+
+        $r18[i30] = 0.0F;
+
+        i30 = i30 + 1;
+
+        goto label04;
+
+     label05:
+        i28 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcHeight>;
+
+     label06:
+        if i26 >= i28 goto label07;
+
+        i31 = i26;
+
+        goto label08;
+
+     label07:
+        i31 = i28;
+
+     label08:
+        i32 = 0;
+
+        i33 = 0;
+
+        i34 = 0;
+
+        i35 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcWidth>;
+
+        f19 = 0.0F;
+
+        f20 = 0.0F;
+
+        f21 = 0.0F;
+
+        f22 = 0.0F;
+
+     label09:
+        if i32 >= i2 goto label17;
+
+        if i34 != 0 goto label12;
+
+        i34 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $z0 = r9 instanceof byte[];
+
+        if $z0 == 0 goto label10;
+
+        $r13 = (byte[]) r9;
+
+        $r14 = (byte[]) $r13;
+
+        $i20 = i24 + i32;
+
+        $b21 = $r14[$i20];
+
+        $i38 = (int) $b21;
+
+        i36 = $i38 & 255;
+
+        goto label11;
+
+     label10:
+        $r10 = (int[]) r9;
+
+        $r11 = (int[]) $r10;
+
+        $i11 = i24 + i32;
+
+        i36 = $r11[$i11];
+
+     label11:
+        $i12 = virtualinvoke r12.<java.awt.image.ColorModel: int getRGB(int)>(i36);
+
+        $i13 = $i12 >>> 24;
+
+        $f15 = (float) $i13;
+
+        f19 = $f15;
+
+        $i14 = $i12 >> 16;
+
+        $i15 = $i14 & 255;
+
+        $f16 = (float) $i15;
+
+        f20 = $f16;
+
+        $i16 = $i12 >> 8;
+
+        $i17 = $i16 & 255;
+
+        $f17 = (float) $i17;
+
+        f21 = $f17;
+
+        $i18 = $i12 & 255;
+
+        $f18 = (float) $i18;
+
+        f22 = $f18;
+
+        $b19 = $f15 cmpl 255.0F;
+
+        if $b19 == 0 goto label12;
+
+        f23 = $f15 / 255.0F;
+
+        f20 = $f16 * f23;
+
+        f21 = $f17 * f23;
+
+        f22 = $f18 * f23;
+
+     label12:
+        if i34 >= i35 goto label13;
+
+        i37 = i34;
+
+        goto label14;
+
+     label13:
+        i37 = i35;
+
+     label14:
+        $f1 = (float) i37;
+
+        $f0 = (float) i31;
+
+        $f14 = $f1 * $f0;
+
+        $r5 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] alphas>;
+
+        $f3 = $r5[i33];
+
+        $f2 = $f14 * f19;
+
+        $f4 = $f3 + $f2;
+
+        $r5[i33] = $f4;
+
+        $r6 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] reds>;
+
+        $f6 = $r6[i33];
+
+        $f5 = $f14 * f20;
+
+        $f7 = $f6 + $f5;
+
+        $r6[i33] = $f7;
+
+        $r7 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] greens>;
+
+        $f9 = $r7[i33];
+
+        $f8 = $f14 * f21;
+
+        $f10 = $f9 + $f8;
+
+        $r7[i33] = $f10;
+
+        $r8 = r0.<java.awt.image.AreaAveragingScaleFilter: float[] blues>;
+
+        $f12 = $r8[i33];
+
+        $f11 = $f14 * f22;
+
+        $f13 = $f12 + $f11;
+
+        $r8[i33] = $f13;
+
+        $i9 = i34 - i37;
+
+        i34 = $i9;
+
+        if $i9 != 0 goto label15;
+
+        i32 = i32 + 1;
+
+     label15:
+        $i10 = i35 - i37;
+
+        i35 = $i10;
+
+        if $i10 != 0 goto label16;
+
+        i33 = i33 + 1;
+
+        i35 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcWidth>;
+
+     label16:
+        goto label09;
+
+     label17:
+        $i3 = i28 - i31;
+
+        i28 = $i3;
+
+        if $i3 != 0 goto label20;
+
+        $r2 = specialinvoke r0.<java.awt.image.AreaAveragingScaleFilter: int[] calcRow()>();
+
+     label18:
+        $r4 = r0.<java.awt.image.AreaAveragingScaleFilter: java.awt.image.ImageConsumer consumer>;
+
+        $i6 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        $r3 = <java.awt.image.AreaAveragingScaleFilter: java.awt.image.ColorModel rgbmodel>;
+
+        $i5 = r0.<java.awt.image.AreaAveragingScaleFilter: int destWidth>;
+
+        interfaceinvoke $r4.<java.awt.image.ImageConsumer: void setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(0, i27, $i6, 1, $r3, $r2, 0, $i5);
+
+        i27 = i27 + 1;
+
+        $i7 = i26 - i31;
+
+        i26 = $i7;
+
+        if $i7 < i31 goto label19;
+
+        $i8 = r0.<java.awt.image.AreaAveragingScaleFilter: int srcHeight>;
+
+        if i31 == $i8 goto label18;
+
+     label19:
+        goto label21;
+
+     label20:
+        i26 = i26 - i31;
+
+     label21:
+        if i26 != 0 goto label22;
+
+        i26 = r0.<java.awt.image.AreaAveragingScaleFilter: int destHeight>;
+
+        i25 = i25 + 1;
+
+        i24 = i24 + i4;
+
+     label22:
+        goto label03;
+
+     label23:
+        r0.<java.awt.image.AreaAveragingScaleFilter: int savedyrem> = i28;
+
+        r0.<java.awt.image.AreaAveragingScaleFilter: int savedy> = i27;
+
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, byte[], int, int)
+    {
+        byte[] r2;
+        java.awt.image.ColorModel r1;
+        int i0, i1, i2, i3, i4, i5;
+        java.awt.image.AreaAveragingScaleFilter r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r1 := @parameter4: java.awt.image.ColorModel;
+
+        r2 := @parameter5: byte[];
+
+        i4 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        $z0 = r0.<java.awt.image.AreaAveragingScaleFilter: boolean passthrough>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.awt.image.ReplicateScaleFilter: void setPixels(int,int,int,int,java.awt.image.ColorModel,byte[],int,int)>(i0, i1, i2, i3, r1, r2, i4, i5);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<java.awt.image.AreaAveragingScaleFilter: void accumPixels(int,int,int,int,java.awt.image.ColorModel,java.lang.Object,int,int)>(i0, i1, i2, i3, r1, r2, i4, i5);
+
+     label2:
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, int[], int, int)
+    {
+        java.awt.image.ColorModel r1;
+        int[] r2;
+        int i0, i1, i2, i3, i4, i5;
+        java.awt.image.AreaAveragingScaleFilter r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.image.AreaAveragingScaleFilter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r1 := @parameter4: java.awt.image.ColorModel;
+
+        r2 := @parameter5: int[];
+
+        i4 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        $z0 = r0.<java.awt.image.AreaAveragingScaleFilter: boolean passthrough>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.awt.image.ReplicateScaleFilter: void setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(i0, i1, i2, i3, r1, r2, i4, i5);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<java.awt.image.AreaAveragingScaleFilter: void accumPixels(int,int,int,int,java.awt.image.ColorModel,java.lang.Object,int,int)>(i0, i1, i2, i3, r1, r2, i4, i5);
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.image.ColorModel $r0;
+
+        <java.awt.image.AreaAveragingScaleFilter: int neededHints> = 6;
+
+        $r0 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        <java.awt.image.AreaAveragingScaleFilter: java.awt.image.ColorModel rgbmodel> = $r0;
+
+        return;
+    }
+}

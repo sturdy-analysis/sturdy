@@ -1,0 +1,155 @@
+abstract class jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks extends java.lang.Object
+{
+    protected java.io.FileDescriptor fd;
+
+    void <init>()
+    {
+        jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    abstract void socketClose0(boolean);
+
+    protected synchronized void create(boolean) throws java.io.IOException
+    {
+        long $l0, $l2, $l3, $l4, l5;
+        jdk.management.resource.ResourceRequestDeniedException $r7;
+        byte $b1;
+        int $i6;
+        jdk.management.resource.internal.ApproverGroup $r4;
+        boolean z0;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        java.io.IOException $r9, $r10;
+        jdk.management.resource.ResourceRequest $r5;
+        java.io.FileDescriptor $r1, $r3;
+        jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks;
+
+        z0 := @parameter0: boolean;
+
+        virtualinvoke r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: void create(boolean)>(z0);
+
+        $r1 = r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r1);
+
+        $r4 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r3 = r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: java.io.FileDescriptor fd>;
+
+        $r5 = virtualinvoke $r4.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r3);
+
+        l5 = 0L;
+
+     label1:
+        $l0 = interfaceinvoke $r5.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(1L, $r2);
+
+        l5 = $l0;
+
+        $b1 = $l0 cmp 1L;
+
+        $i6 = (int) $b1;
+
+        if $i6 >= 0 goto label2;
+
+        virtualinvoke r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: void socketClose0(boolean)>(0);
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Resource limited: too many open file descriptors");
+
+        throw $r9;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $l4 = neg l5;
+
+        interfaceinvoke $r5.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l4, $r2);
+
+        virtualinvoke r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: void socketClose0(boolean)>(0);
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Resource limited: too many open file descriptors", $r7);
+
+        throw $r10;
+
+     label4:
+        $l2 = $l0 - 1L;
+
+        $l3 = neg $l2;
+
+        interfaceinvoke $r5.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l3, $r2);
+
+        return;
+
+        catch jdk.management.resource.ResourceRequestDeniedException from label1 to label2 with label3;
+    }
+
+    protected void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        jdk.management.resource.internal.ResourceIdImpl r6;
+        jdk.management.resource.ResourceRequest r7;
+        java.io.FileDescriptor $r1, $r2, $r3;
+        jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks r0;
+        jdk.management.resource.internal.ApproverGroup $r4;
+
+        r0 := @this: jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks;
+
+        r6 = null;
+
+        r7 = null;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: java.io.FileDescriptor fd>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: java.io.FileDescriptor fd>;
+
+        r6 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r2);
+
+        $r4 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r3 = r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: java.io.FileDescriptor fd>;
+
+        r7 = virtualinvoke $r4.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r3);
+
+     label1:
+        virtualinvoke r0.<jdk.management.resource.internal.inst.AbstractPlainSocketImplRMHooks: void close()>();
+
+     label2:
+        if r7 == null goto label6;
+
+        interfaceinvoke r7.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, r6);
+
+        goto label6;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        if r7 == null goto label5;
+
+        interfaceinvoke r7.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, r6);
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+}

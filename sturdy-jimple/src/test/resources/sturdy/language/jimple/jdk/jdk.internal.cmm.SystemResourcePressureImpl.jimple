@@ -1,0 +1,206 @@
+public final class jdk.internal.cmm.SystemResourcePressureImpl extends javax.management.NotificationBroadcasterSupport implements jdk.management.cmm.SystemResourcePressureMXBean
+{
+    private static final int MIN_PRESSURE_LEVEL;
+    private static final int MAX_PRESSURE_LEVEL;
+    public static final java.lang.String RESOURCE_PRESSURE_MXBEAN_NAME;
+    private static final java.lang.String MEM_PRESSURE_ATTRIBUTE_NAME;
+    private long notifSeqNum;
+    private static java.lang.management.ManagementPermission controlPermission;
+
+    public void <init>()
+    {
+        jdk.internal.cmm.SystemResourcePressureImpl r0;
+        java.lang.String[] $r3;
+        java.lang.Class $r4;
+        java.lang.String $r5;
+        javax.management.MBeanNotificationInfo[] $r1;
+        javax.management.MBeanNotificationInfo $r2;
+
+        r0 := @this: jdk.internal.cmm.SystemResourcePressureImpl;
+
+        $r1 = newarray (javax.management.MBeanNotificationInfo)[1];
+
+        $r2 = new javax.management.MBeanNotificationInfo;
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = "jmx.attribute.change";
+
+        $r4 = class "Ljavax/management/AttributeChangeNotification;";
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r2.<javax.management.MBeanNotificationInfo: void <init>(java.lang.String[],java.lang.String,java.lang.String)>($r3, $r5, "Notification that Memory pressure level has changed");
+
+        $r1[0] = $r2;
+
+        specialinvoke r0.<javax.management.NotificationBroadcasterSupport: void <init>(javax.management.MBeanNotificationInfo[])>($r1);
+
+        return;
+    }
+
+    public synchronized int getMemoryPressure()
+    {
+        int $i0;
+        jdk.internal.cmm.SystemResourcePressureImpl r0;
+
+        r0 := @this: jdk.internal.cmm.SystemResourcePressureImpl;
+
+        $i0 = specialinvoke r0.<jdk.internal.cmm.SystemResourcePressureImpl: int getVmMemoryPressure()>();
+
+        return $i0;
+    }
+
+    public void setMemoryPressure(int)
+    {
+        java.lang.Throwable $r11;
+        long $l2, $l3, $l4;
+        java.lang.Integer $r8, $r9;
+        int i0, $i1;
+        java.lang.String $r4;
+        javax.management.AttributeChangeNotification $r7;
+        jdk.internal.cmm.SystemResourcePressureImpl r6;
+        java.lang.IllegalArgumentException $r0;
+        java.lang.SecurityManager $r5;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.management.ManagementPermission $r10;
+
+        r6 := @this: jdk.internal.cmm.SystemResourcePressureImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label01;
+
+        if i0 <= 10 goto label02;
+
+     label01:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid pressure level: ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r0;
+
+     label02:
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label03;
+
+        $r10 = <jdk.internal.cmm.SystemResourcePressureImpl: java.lang.management.ManagementPermission controlPermission>;
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r10);
+
+     label03:
+        entermonitor r6;
+
+     label04:
+        $i1 = specialinvoke r6.<jdk.internal.cmm.SystemResourcePressureImpl: int setVmMemoryPressure(int)>(i0);
+
+        if i0 != $i1 goto label06;
+
+        exitmonitor r6;
+
+     label05:
+        return;
+
+     label06:
+        $r7 = new javax.management.AttributeChangeNotification;
+
+        $l2 = r6.<jdk.internal.cmm.SystemResourcePressureImpl: long notifSeqNum>;
+
+        $l3 = $l2 + 1L;
+
+        r6.<jdk.internal.cmm.SystemResourcePressureImpl: long notifSeqNum> = $l3;
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        specialinvoke $r7.<javax.management.AttributeChangeNotification: void <init>(java.lang.Object,long,long,java.lang.String,java.lang.String,java.lang.String,java.lang.Object,java.lang.Object)>(r6, $l3, $l4, "Memory pressure level change detected", "MemoryPressure", "int", $r8, $r9);
+
+        exitmonitor r6;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r11 := @caughtexception;
+
+        exitmonitor r6;
+
+     label09:
+        throw $r11;
+
+     label10:
+        virtualinvoke r6.<jdk.internal.cmm.SystemResourcePressureImpl: void sendNotification(javax.management.Notification)>($r7);
+
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label08;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private native int setVmMemoryPressure(int);
+
+    private native int getVmMemoryPressure();
+
+    public javax.management.ObjectName getObjectName()
+    {
+        javax.management.MalformedObjectNameException $r1;
+        jdk.internal.cmm.SystemResourcePressureImpl r3;
+        java.lang.InternalError $r2;
+        javax.management.ObjectName $r0;
+
+        r3 := @this: jdk.internal.cmm.SystemResourcePressureImpl;
+
+     label1:
+        $r0 = staticinvoke <javax.management.ObjectName: javax.management.ObjectName getInstance(java.lang.String)>("com.oracle.management:type=ResourcePressureMBean");
+
+     label2:
+        return $r0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>()>();
+
+        throw $r2;
+
+        catch javax.management.MalformedObjectNameException from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.management.ManagementPermission $r0;
+
+        <jdk.internal.cmm.SystemResourcePressureImpl: java.lang.String MEM_PRESSURE_ATTRIBUTE_NAME> = "MemoryPressure";
+
+        <jdk.internal.cmm.SystemResourcePressureImpl: java.lang.String RESOURCE_PRESSURE_MXBEAN_NAME> = "com.oracle.management:type=ResourcePressureMBean";
+
+        <jdk.internal.cmm.SystemResourcePressureImpl: int MAX_PRESSURE_LEVEL> = 10;
+
+        <jdk.internal.cmm.SystemResourcePressureImpl: int MIN_PRESSURE_LEVEL> = 0;
+
+        $r0 = new java.lang.management.ManagementPermission;
+
+        specialinvoke $r0.<java.lang.management.ManagementPermission: void <init>(java.lang.String)>("control");
+
+        <jdk.internal.cmm.SystemResourcePressureImpl: java.lang.management.ManagementPermission controlPermission> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,439 @@
+final class sun.security.ssl.CertificateRequest$T10CertificateRequestMessage extends sun.security.ssl.SSLHandshake$HandshakeMessage
+{
+    final byte[] types;
+    final java.util.List authorities;
+
+    void <init>(sun.security.ssl.HandshakeContext, java.security.cert.X509Certificate[], sun.security.ssl.CipherSuite$KeyExchange)
+    {
+        java.security.cert.X509Certificate r5;
+        byte[] $r4, $r8;
+        javax.security.auth.x500.X500Principal $r6;
+        java.util.ArrayList $r2;
+        sun.security.ssl.CipherSuite$KeyExchange r9;
+        java.util.List $r7;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r0;
+        int $i0, i1, i2;
+        sun.security.ssl.HandshakeContext r1;
+        java.security.cert.X509Certificate[] r3;
+
+        r0 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r3 := @parameter1: java.security.cert.X509Certificate[];
+
+        r9 := @parameter2: sun.security.ssl.CipherSuite$KeyExchange;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        $r2 = new java.util.ArrayList;
+
+        $i0 = lengthof r3;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities> = $r2;
+
+        i1 = lengthof r3;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i1 goto label2;
+
+        r5 = r3[i2];
+
+        $r6 = virtualinvoke r5.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r7 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r8 = virtualinvoke $r6.<javax.security.auth.x500.X500Principal: byte[] getEncoded()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = staticinvoke <sun.security.ssl.CertificateRequest$ClientCertificateType: byte[] access$600()>();
+
+        r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types> = $r4;
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r3, $r6;
+        java.nio.ByteBuffer r2;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.util.LinkedList $r5;
+        sun.security.ssl.TransportContext $r9, $r12;
+        java.util.List $r4, $r7;
+        javax.net.ssl.SSLException $r10, $r13;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r0;
+        sun.security.ssl.Alert $r8, $r11;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        $i0 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 4 goto label1;
+
+        $r12 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r13 = virtualinvoke $r12.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r11, "Incorrect CertificateRequest message: no sufficient data");
+
+        throw $r13;
+
+     label1:
+        $r3 = staticinvoke <sun.security.ssl.Record: byte[] getBytes8(java.nio.ByteBuffer)>(r2);
+
+        r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types> = $r3;
+
+        $i1 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r2);
+
+        i5 = $i1;
+
+        $i2 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i1 <= $i2 goto label2;
+
+        $r9 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r10 = virtualinvoke $r9.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r8, "Incorrect CertificateRequest message:no sufficient data");
+
+        throw $r10;
+
+     label2:
+        if $i1 <= 0 goto label4;
+
+        $r5 = new java.util.LinkedList;
+
+        specialinvoke $r5.<java.util.LinkedList: void <init>()>();
+
+        r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities> = $r5;
+
+     label3:
+        if i5 <= 0 goto label5;
+
+        $r6 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r2);
+
+        $i3 = lengthof $r6;
+
+        $i4 = 2 + $i3;
+
+        i5 = i5 - $i4;
+
+        $r7 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label3;
+
+     label4:
+        $r4 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities> = $r4;
+
+     label5:
+        return;
+    }
+
+    java.lang.String[] getKeyTypes()
+    {
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r0;
+        byte[] $r1;
+        java.lang.String[] $r2;
+
+        r0 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        $r1 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types>;
+
+        $r2 = staticinvoke <sun.security.ssl.CertificateRequest$ClientCertificateType: java.lang.String[] access$700(byte[])>($r1);
+
+        return $r2;
+    }
+
+    javax.security.auth.x500.X500Principal[] getAuthorities()
+    {
+        byte[] r6;
+        javax.security.auth.x500.X500Principal $r7;
+        java.util.Iterator $r4;
+        javax.security.auth.x500.X500Principal[] r2;
+        java.util.List $r1, $r3;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r0;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        $r1 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        r2 = newarray (javax.security.auth.x500.X500Principal)[$i0];
+
+        i2 = 0;
+
+        $r3 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (byte[]) $r5;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r7 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r7.<javax.security.auth.x500.X500Principal: void <init>(byte[])>(r6);
+
+        r2[$i1] = $r7;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    public sun.security.ssl.SSLHandshake handshakeType()
+    {
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r1;
+        sun.security.ssl.SSLHandshake $r0;
+
+        r1 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        $r0 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_REQUEST>;
+
+        return $r0;
+    }
+
+    public int messageLength()
+    {
+        byte[] $r1, r5;
+        java.util.Iterator $r3;
+        java.util.List $r2;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r0;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        $r1 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 1 + $i0;
+
+        i4 = $i1 + 2;
+
+        $r2 = r0.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (byte[]) $r4;
+
+        $i2 = lengthof r5;
+
+        $i3 = $i2 + 2;
+
+        i4 = i4 + $i3;
+
+        goto label1;
+
+     label2:
+        return i4;
+    }
+
+    public void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] $r2, r9, r10;
+        int $i0, $i1, i2;
+        boolean $z0, $z1;
+        java.util.Iterator $r4, $r6;
+        sun.security.ssl.HandshakeOutStream r0;
+        java.util.List $r3, $r5;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r1;
+        java.lang.Object $r7, $r8;
+
+        r1 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $r2 = r1.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes8(byte[])>($r2);
+
+        i2 = 0;
+
+        $r3 = r1.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r8 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (byte[]) $r8;
+
+        $i0 = lengthof r9;
+
+        $i1 = $i0 + 2;
+
+        i2 = i2 + $i1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>(i2);
+
+        $r5 = r1.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (byte[]) $r7;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>(r10);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r4, r15, r16;
+        java.lang.Object[] $r9;
+        javax.security.auth.x500.X500Principal $r12;
+        java.text.MessageFormat $r0;
+        java.util.ArrayList $r2, $r5;
+        byte b4;
+        java.util.Locale $r1;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r10, $r13, $r14;
+        boolean $z0;
+        java.util.Iterator $r8;
+        java.util.List $r6, $r7;
+        sun.security.ssl.CertificateRequest$T10CertificateRequestMessage r3;
+        java.lang.Object $r11;
+
+        r3 := @this: sun.security.ssl.CertificateRequest$T10CertificateRequestMessage;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"CertificateRequest\": \'{\'\n  \"certificate types\": {0}\n  \"certificate authorities\": {1}\n\'}\'", $r1);
+
+        $r2 = new java.util.ArrayList;
+
+        $r4 = r3.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types>;
+
+        $i0 = lengthof $r4;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r15 = r3.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: byte[] types>;
+
+        i2 = lengthof r15;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i2 goto label2;
+
+        b4 = r15[i3];
+
+        $r14 = staticinvoke <sun.security.ssl.CertificateRequest$ClientCertificateType: java.lang.String access$800(byte)>(b4);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $r5 = new java.util.ArrayList;
+
+        $r6 = r3.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $i1 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $r7 = r3.<sun.security.ssl.CertificateRequest$T10CertificateRequestMessage: java.util.List authorities>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r11 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (byte[]) $r11;
+
+        $r12 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r12.<javax.security.auth.x500.X500Principal: void <init>(byte[])>(r16);
+
+        $r13 = virtualinvoke $r12.<javax.security.auth.x500.X500Principal: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+        goto label3;
+
+     label4:
+        $r9 = newarray (java.lang.Object)[2];
+
+        $r9[0] = $r2;
+
+        $r9[1] = $r5;
+
+        $r10 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r9);
+
+        return $r10;
+    }
+}

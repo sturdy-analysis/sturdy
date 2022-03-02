@@ -1,0 +1,1171 @@
+public class sun.misc.ExtensionDependency extends java.lang.Object
+{
+    private static java.util.Vector providers;
+    static final boolean DEBUG;
+
+    public void <init>()
+    {
+        sun.misc.ExtensionDependency r0;
+
+        r0 := @this: sun.misc.ExtensionDependency;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized void addExtensionInstallationProvider(sun.misc.ExtensionInstallationProvider)
+    {
+        sun.misc.ExtensionInstallationProvider r1;
+        java.util.Vector $r0, $r2, $r3;
+
+        r1 := @parameter0: sun.misc.ExtensionInstallationProvider;
+
+        $r0 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        if $r0 != null goto label1;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        <sun.misc.ExtensionDependency: java.util.Vector providers> = $r3;
+
+     label1:
+        $r2 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public static synchronized void removeExtensionInstallationProvider(sun.misc.ExtensionInstallationProvider)
+    {
+        sun.misc.ExtensionInstallationProvider r0;
+        java.util.Vector $r1;
+
+        r0 := @parameter0: sun.misc.ExtensionInstallationProvider;
+
+        $r1 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        virtualinvoke $r1.<java.util.Vector: boolean remove(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    public static boolean checkExtensionsDependencies(java.util.jar.JarFile)
+    {
+        sun.misc.ExtensionInstallationException $r3;
+        java.util.Vector $r0;
+        sun.misc.ExtensionDependency $r1;
+        java.util.jar.JarFile r2;
+        java.lang.String $r4;
+        boolean $z0;
+
+        r2 := @parameter0: java.util.jar.JarFile;
+
+        $r0 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        if $r0 != null goto label1;
+
+        return 1;
+
+     label1:
+        $r1 = new sun.misc.ExtensionDependency;
+
+        specialinvoke $r1.<sun.misc.ExtensionDependency: void <init>()>();
+
+        $z0 = virtualinvoke $r1.<sun.misc.ExtensionDependency: boolean checkExtensions(java.util.jar.JarFile)>(r2);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<sun.misc.ExtensionInstallationException: java.lang.String getMessage()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r4);
+
+        return 0;
+
+        catch sun.misc.ExtensionInstallationException from label1 to label2 with label3;
+    }
+
+    protected boolean checkExtensions(java.util.jar.JarFile) throws sun.misc.ExtensionInstallationException
+    {
+        java.util.jar.Manifest $r1;
+        java.util.jar.JarFile r0;
+        boolean $z0, $z1, z2;
+        java.util.jar.Attributes $r2;
+        java.lang.StringBuilder $r5, $r6, $r8, $r12, $r13, $r15, $r16, $r17, $r19, $r20, $r21, $r24, $r28, $r29, $r30, $r32, $r33, $r35, $r36, $r37, $r38, $r39, $r40;
+        java.util.StringTokenizer $r10;
+        java.util.jar.Attributes$Name $r3, $r22;
+        java.lang.String $r4, $r7, $r9, $r11, $r14, $r18, $r23, $r25, $r26, $r31, $r34, $r41;
+        java.io.IOException $r42;
+        sun.misc.ExtensionDependency r27;
+
+        r27 := @this: sun.misc.ExtensionDependency;
+
+        r0 := @parameter0: java.util.jar.JarFile;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.util.jar.JarFile: java.util.jar.Manifest getManifest()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r42 := @caughtexception;
+
+        return 0;
+
+     label04:
+        if $r1 != null goto label05;
+
+        return 1;
+
+     label05:
+        z2 = 1;
+
+        $r2 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        if $r2 == null goto label11;
+
+        $r3 = <java.util.jar.Attributes$Name: java.util.jar.Attributes$Name EXTENSION_LIST>;
+
+        $r4 = virtualinvoke $r2.<java.util.jar.Attributes: java.lang.String getValue(java.util.jar.Attributes$Name)>($r3);
+
+        if $r4 == null goto label10;
+
+        $r10 = new java.util.StringTokenizer;
+
+        specialinvoke $r10.<java.util.StringTokenizer: void <init>(java.lang.String)>($r4);
+
+     label06:
+        $z0 = virtualinvoke $r10.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label09;
+
+        $r11 = virtualinvoke $r10.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The file ");
+
+        $r14 = virtualinvoke r0.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" appears to depend on ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r18);
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r22 = <java.util.jar.Attributes$Name: java.util.jar.Attributes$Name EXTENSION_NAME>;
+
+        $r23 = virtualinvoke $r22.<java.util.jar.Attributes$Name: java.lang.String toString()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = virtualinvoke $r2.<java.util.jar.Attributes: java.lang.String getValue(java.lang.String)>($r25);
+
+        if $r26 != null goto label07;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The jar file ");
+
+        $r34 = virtualinvoke r0.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" appers to depend on ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" but does not define the ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" attribute in its manifest ");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r41);
+
+        goto label08;
+
+     label07:
+        $z1 = virtualinvoke r27.<sun.misc.ExtensionDependency: boolean checkExtension(java.lang.String,java.util.jar.Attributes)>($r11, $r2);
+
+        if $z1 != 0 goto label08;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed installing ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r31);
+
+        z2 = 0;
+
+     label08:
+        goto label06;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No dependencies for ");
+
+        $r7 = virtualinvoke r0.<java.util.jar.JarFile: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r9);
+
+     label11:
+        return z2;
+
+        catch java.io.IOException from label01 to label02 with label03;
+    }
+
+    protected synchronized boolean checkExtension(java.lang.String, java.util.jar.Attributes) throws sun.misc.ExtensionInstallationException
+    {
+        sun.misc.ExtensionInfo $r7;
+        java.util.jar.Attributes r6;
+        sun.misc.ExtensionDependency r5;
+        java.lang.StringBuilder $r0, $r1, $r3;
+        java.lang.String r2, $r4;
+        boolean $z0, $z1;
+
+        r5 := @this: sun.misc.ExtensionDependency;
+
+        r2 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.util.jar.Attributes;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Checking extension ");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r4);
+
+        $z0 = virtualinvoke r5.<sun.misc.ExtensionDependency: boolean checkExtensionAgainstInstalled(java.lang.String,java.util.jar.Attributes)>(r2, r6);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>("Extension not currently installed ");
+
+        $r7 = new sun.misc.ExtensionInfo;
+
+        specialinvoke $r7.<sun.misc.ExtensionInfo: void <init>(java.lang.String,java.util.jar.Attributes)>(r2, r6);
+
+        $z1 = virtualinvoke r5.<sun.misc.ExtensionDependency: boolean installExtension(sun.misc.ExtensionInfo,sun.misc.ExtensionInfo)>($r7, null);
+
+        return $z1;
+    }
+
+    boolean checkExtensionAgainstInstalled(java.lang.String, java.util.jar.Attributes) throws sun.misc.ExtensionInstallationException
+    {
+        java.io.IOException $r6, $r8, $r9;
+        java.util.jar.Attributes r4;
+        java.io.File $r2, $r5;
+        java.io.FileNotFoundException $r7, $r10;
+        sun.misc.ExtensionDependency r0;
+        int $i0, i1;
+        java.lang.String r1;
+        java.io.File[] $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.misc.ExtensionDependency;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.jar.Attributes;
+
+        $r2 = specialinvoke r0.<sun.misc.ExtensionDependency: java.io.File checkExtensionExists(java.lang.String)>(r1);
+
+        if $r2 == null goto label07;
+
+     label01:
+        $z1 = virtualinvoke r0.<sun.misc.ExtensionDependency: boolean checkExtensionAgainst(java.lang.String,java.util.jar.Attributes,java.io.File)>(r1, r4, $r2);
+
+        if $z1 == 0 goto label03;
+
+     label02:
+        return 1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r10 := @caughtexception;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>($r10);
+
+        goto label06;
+
+     label05:
+        $r9 := @caughtexception;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>($r9);
+
+     label06:
+        return 0;
+
+     label07:
+        $r3 = specialinvoke r0.<sun.misc.ExtensionDependency: java.io.File[] getInstalledExtensions()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>($r8);
+
+        return 0;
+
+     label10:
+        i1 = 0;
+
+     label11:
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label18;
+
+     label12:
+        $r5 = $r3[i1];
+
+        $z0 = virtualinvoke r0.<sun.misc.ExtensionDependency: boolean checkExtensionAgainst(java.lang.String,java.util.jar.Attributes,java.io.File)>(r1, r4, $r5);
+
+        if $z0 == 0 goto label14;
+
+     label13:
+        return 1;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r7 := @caughtexception;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>($r7);
+
+        goto label17;
+
+     label16:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>($r6);
+
+     label17:
+        i1 = i1 + 1;
+
+        goto label11;
+
+     label18:
+        return 0;
+
+        catch java.io.FileNotFoundException from label01 to label02 with label04;
+        catch java.io.IOException from label01 to label02 with label05;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.FileNotFoundException from label12 to label13 with label15;
+        catch java.io.IOException from label12 to label13 with label16;
+    }
+
+    protected boolean checkExtensionAgainst(java.lang.String, java.util.jar.Attributes, java.io.File) throws java.io.IOException, java.io.FileNotFoundException, sun.misc.ExtensionInstallationException
+    {
+        java.util.jar.Manifest r12;
+        boolean $z0, $z1;
+        sun.misc.ExtensionInfo $r13, $r20;
+        java.util.jar.Attributes r14, $r19;
+        java.lang.Exception $r26, $r27, $r29;
+        java.io.FileNotFoundException $r30;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r7, $r15, $r16, $r17, $r21, $r22, $r23;
+        int $i0;
+        java.lang.String r2, $r6, $r8, $r18, $r24;
+        java.security.PrivilegedActionException $r25;
+        sun.misc.ExtensionDependency$1 $r9;
+        java.io.IOException $r28;
+        java.io.File r5;
+        sun.misc.ExtensionDependency r10;
+        java.lang.Object $r11;
+
+        r10 := @this: sun.misc.ExtensionDependency;
+
+        r2 := @parameter0: java.lang.String;
+
+        r14 := @parameter1: java.util.jar.Attributes;
+
+        r5 := @parameter2: java.io.File;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Checking extension ");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" against ");
+
+        $r6 = virtualinvoke r5.<java.io.File: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r8);
+
+     label1:
+        $r9 = new sun.misc.ExtensionDependency$1;
+
+        specialinvoke $r9.<sun.misc.ExtensionDependency$1: void <init>(sun.misc.ExtensionDependency,java.io.File)>(r10, r5);
+
+        $r11 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r9);
+
+        r12 = (java.util.jar.Manifest) $r11;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r25 := @caughtexception;
+
+        $r26 = virtualinvoke $r25.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $z1 = $r26 instanceof java.io.FileNotFoundException;
+
+        if $z1 == 0 goto label4;
+
+        $r29 = virtualinvoke $r25.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r30 = (java.io.FileNotFoundException) $r29;
+
+        throw $r30;
+
+     label4:
+        $r27 = virtualinvoke $r25.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r28 = (java.io.IOException) $r27;
+
+        throw $r28;
+
+     label5:
+        $r13 = new sun.misc.ExtensionInfo;
+
+        specialinvoke $r13.<sun.misc.ExtensionInfo: void <init>(java.lang.String,java.util.jar.Attributes)>(r2, r14);
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Requested Extension : ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r18);
+
+        if r12 == null goto label9;
+
+        $r19 = virtualinvoke r12.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        if $r19 == null goto label9;
+
+        $r20 = new sun.misc.ExtensionInfo;
+
+        specialinvoke $r20.<sun.misc.ExtensionInfo: void <init>(java.lang.String,java.util.jar.Attributes)>(null, $r19);
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Extension Installed ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r20);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r24);
+
+        $i0 = virtualinvoke $r20.<sun.misc.ExtensionInfo: int isCompatibleWith(sun.misc.ExtensionInfo)>($r13);
+
+        lookupswitch($i0)
+        {
+            case 0: goto label6;
+            case 4: goto label7;
+            default: goto label8;
+        };
+
+     label6:
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>("Extensions are compatible");
+
+        return 1;
+
+     label7:
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>("Extensions are incompatible");
+
+        return 0;
+
+     label8:
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>("Extensions require an upgrade or vendor switch");
+
+        $z0 = virtualinvoke r10.<sun.misc.ExtensionDependency: boolean installExtension(sun.misc.ExtensionInfo,sun.misc.ExtensionInfo)>($r13, $r20);
+
+        return $z0;
+
+     label9:
+        return 0;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    protected boolean installExtension(sun.misc.ExtensionInfo, sun.misc.ExtensionInfo) throws sun.misc.ExtensionInstallationException
+    {
+        java.lang.Throwable $r21;
+        java.util.Enumeration $r3;
+        sun.misc.Launcher $r17;
+        java.util.Vector $r0, $r1, r22;
+        java.lang.String $r6, $r9, $r13, $r16;
+        boolean $z0, $z1;
+        sun.misc.ExtensionInfo r5, r11;
+        sun.misc.Launcher$ExtClassLoader r24;
+        sun.misc.ExtensionInstallationProvider r23;
+        sun.misc.ExtensionDependency r20;
+        java.lang.Object $r2, $r10;
+        java.lang.StringBuilder $r4, $r7, $r8, $r12, $r14, $r15;
+        java.lang.ClassLoader $r18, $r19;
+
+        r20 := @this: sun.misc.ExtensionDependency;
+
+        r5 := @parameter0: sun.misc.ExtensionInfo;
+
+        r11 := @parameter1: sun.misc.ExtensionInfo;
+
+        $r0 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <sun.misc.ExtensionDependency: java.util.Vector providers>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object clone()>();
+
+        r22 = (java.util.Vector) $r2;
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r21 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r21;
+
+     label5:
+        $r3 = virtualinvoke r22.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label6:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label8;
+
+        $r10 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r23 = (sun.misc.ExtensionInstallationProvider) $r10;
+
+        if r23 == null goto label7;
+
+        $z1 = interfaceinvoke r23.<sun.misc.ExtensionInstallationProvider: boolean installExtension(sun.misc.ExtensionInfo,sun.misc.ExtensionInfo)>(r5, r11);
+
+        if $z1 == 0 goto label7;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = r5.<sun.misc.ExtensionInfo: java.lang.String name>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" installation successful");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r16);
+
+        $r17 = staticinvoke <sun.misc.Launcher: sun.misc.Launcher getLauncher()>();
+
+        $r18 = virtualinvoke $r17.<sun.misc.Launcher: java.lang.ClassLoader getClassLoader()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.ClassLoader: java.lang.ClassLoader getParent()>();
+
+        r24 = (sun.misc.Launcher$ExtClassLoader) $r19;
+
+        specialinvoke r20.<sun.misc.ExtensionDependency: java.lang.Boolean addNewExtensionsToClassLoader(sun.misc.Launcher$ExtClassLoader)>(r24);
+
+        return 1;
+
+     label7:
+        goto label6;
+
+     label8:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = r5.<sun.misc.ExtensionInfo: java.lang.String name>;
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" installation failed");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r9);
+
+        return 0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private java.io.File checkExtensionExists(java.lang.String)
+    {
+        sun.misc.ExtensionDependency r3;
+        sun.misc.ExtensionDependency$2 $r2;
+        java.lang.String[] $r1;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        java.io.File $r5;
+
+        r3 := @this: sun.misc.ExtensionDependency;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r1[0] = ".jar";
+
+        $r1[1] = ".zip";
+
+        $r2 = new sun.misc.ExtensionDependency$2;
+
+        specialinvoke $r2.<sun.misc.ExtensionDependency$2: void <init>(sun.misc.ExtensionDependency,java.lang.String[],java.lang.String)>(r3, $r1, r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r5 = (java.io.File) $r4;
+
+        return $r5;
+    }
+
+    private static java.io.File[] getExtDirs()
+    {
+        sun.security.action.GetPropertyAction $r0;
+        java.util.StringTokenizer $r11;
+        int $i0, $i1, i2;
+        java.lang.String r2, $r6, $r10, $r12, $r16, $r18, $r25;
+        java.io.File $r17, $r23;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7, $r8, $r9, $r13, $r14, $r15, $r19, $r20, $r21, $r22, $r24;
+        java.io.File[] r26;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.ext.dirs");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label3;
+
+        $r11 = new java.util.StringTokenizer;
+
+        $r12 = <java.io.File: java.lang.String pathSeparator>;
+
+        specialinvoke $r11.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r2, $r12);
+
+        $i1 = virtualinvoke $r11.<java.util.StringTokenizer: int countTokens()>();
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtDirs count ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r16);
+
+        r26 = newarray (java.io.File)[$i1];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label2;
+
+        $r17 = new java.io.File;
+
+        $r18 = virtualinvoke $r11.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        specialinvoke $r17.<java.io.File: void <init>(java.lang.String)>($r18);
+
+        r26[i2] = $r17;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtDirs dirs[");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] ");
+
+        $r23 = r26[i2];
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r25);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        goto label4;
+
+     label3:
+        r26 = newarray (java.io.File)[0];
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtDirs dirs ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r26);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r6);
+
+     label4:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtDirs dirs.length ");
+
+        $i0 = lengthof r26;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r10);
+
+        return r26;
+    }
+
+    private static java.io.File[] getExtFiles(java.io.File[]) throws java.io.IOException
+    {
+        sun.misc.JarFilter $r6;
+        java.lang.String[] $r8;
+        java.util.Vector $r0;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.lang.String $r5, $r12, $r14, $r21;
+        java.io.File $r7, $r13, $r15;
+        java.lang.StringBuilder $r2, $r3, $r4, $r9, $r10, $r11, $r16, $r17, $r18, $r19, $r20;
+        java.io.File[] r1, r22;
+
+        r1 := @parameter0: java.io.File[];
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        i5 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i5 >= $i0 goto label4;
+
+        $r7 = r1[i5];
+
+        $r6 = new sun.misc.JarFilter;
+
+        specialinvoke $r6.<sun.misc.JarFilter: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.io.File: java.lang.String[] list(java.io.FilenameFilter)>($r6);
+
+        if $r8 == null goto label3;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtFiles files.length ");
+
+        $i3 = lengthof $r8;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r12);
+
+        i6 = 0;
+
+     label2:
+        $i4 = lengthof $r8;
+
+        if i6 >= $i4 goto label3;
+
+        $r13 = new java.io.File;
+
+        $r15 = r1[i5];
+
+        $r14 = $r8[i6];
+
+        specialinvoke $r13.<java.io.File: void <init>(java.io.File,java.lang.String)>($r15, $r14);
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r13);
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtFiles f[");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r21);
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label4:
+        $i1 = virtualinvoke $r0.<java.util.Vector: int size()>();
+
+        r22 = newarray (java.io.File)[$i1];
+
+        virtualinvoke $r0.<java.util.Vector: void copyInto(java.lang.Object[])>(r22);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getExtFiles ua.length ");
+
+        $i2 = lengthof r22;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r5);
+
+        return r22;
+    }
+
+    private java.io.File[] getInstalledExtensions() throws java.io.IOException
+    {
+        sun.misc.ExtensionDependency r1;
+        sun.misc.ExtensionDependency$3 $r0;
+        java.lang.Object $r2;
+        java.io.File[] $r3;
+
+        r1 := @this: sun.misc.ExtensionDependency;
+
+        $r0 = new sun.misc.ExtensionDependency$3;
+
+        specialinvoke $r0.<sun.misc.ExtensionDependency$3: void <init>(sun.misc.ExtensionDependency)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.io.File[]) $r2;
+
+        return $r3;
+    }
+
+    private java.lang.Boolean addNewExtensionsToClassLoader(sun.misc.Launcher$ExtClassLoader)
+    {
+        java.net.URL r5, $r16, $r21;
+        java.net.URL[] $r7;
+        boolean z0;
+        java.lang.StringBuilder $r8, $r9, $r10, $r12, $r13, $r14, $r15, $r17, $r18, $r19;
+        int $i0, $i1, $i2, i3, i4;
+        java.lang.Boolean $r26;
+        java.lang.String $r11, $r20, $r22, $r23;
+        sun.misc.Launcher$ExtClassLoader r6;
+        java.net.MalformedURLException $r25;
+        sun.misc.ExtensionDependency$4 $r3;
+        java.io.IOException $r24;
+        java.io.File r2;
+        sun.misc.ExtensionDependency r0;
+        java.lang.Object $r4;
+        java.io.File[] $r1;
+
+        r0 := @this: sun.misc.ExtensionDependency;
+
+        r6 := @parameter0: sun.misc.Launcher$ExtClassLoader;
+
+     label01:
+        $r1 = specialinvoke r0.<sun.misc.ExtensionDependency: java.io.File[] getInstalledExtensions()>();
+
+        i3 = 0;
+
+     label02:
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label07;
+
+        r2 = $r1[i3];
+
+        $r3 = new sun.misc.ExtensionDependency$4;
+
+        specialinvoke $r3.<sun.misc.ExtensionDependency$4: void <init>(sun.misc.ExtensionDependency,java.io.File)>(r0, r2);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r5 = (java.net.URL) $r4;
+
+        if r5 == null goto label06;
+
+        $r7 = virtualinvoke r6.<sun.misc.Launcher$ExtClassLoader: java.net.URL[] getURLs()>();
+
+        z0 = 0;
+
+        i4 = 0;
+
+     label03:
+        $i1 = lengthof $r7;
+
+        if i4 >= $i1 goto label05;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URL[");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] is ");
+
+        $r16 = $r7[i4];
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" looking for ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r20);
+
+        $r21 = $r7[i4];
+
+        $r22 = virtualinvoke $r21.<java.net.URL: java.lang.String toString()>();
+
+        $r23 = virtualinvoke r5.<java.net.URL: java.lang.String toString()>();
+
+        $i2 = virtualinvoke $r22.<java.lang.String: int compareToIgnoreCase(java.lang.String)>($r23);
+
+        if $i2 != 0 goto label04;
+
+        z0 = 1;
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>("Found !");
+
+     label04:
+        i4 = i4 + 1;
+
+        goto label03;
+
+     label05:
+        if z0 != 0 goto label06;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not Found ! adding to the classloader ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>($r11);
+
+        virtualinvoke r6.<sun.misc.Launcher$ExtClassLoader: void addExtURL(java.net.URL)>(r5);
+
+     label06:
+        i3 = i3 + 1;
+
+        goto label02;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r25 := @caughtexception;
+
+        virtualinvoke $r25.<java.net.MalformedURLException: void printStackTrace()>();
+
+        goto label10;
+
+     label09:
+        $r24 := @caughtexception;
+
+        virtualinvoke $r24.<java.io.IOException: void printStackTrace()>();
+
+     label10:
+        $r26 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        return $r26;
+
+        catch java.net.MalformedURLException from label01 to label07 with label08;
+        catch java.io.IOException from label01 to label07 with label09;
+    }
+
+    private static void debug(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    private void debugException(java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        sun.misc.ExtensionDependency r0;
+
+        r0 := @this: sun.misc.ExtensionDependency;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        return;
+    }
+
+    static java.io.File[] access$000()
+    {
+        java.io.File[] $r0;
+
+        $r0 = staticinvoke <sun.misc.ExtensionDependency: java.io.File[] getExtDirs()>();
+
+        return $r0;
+    }
+
+    static void access$100(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <sun.misc.ExtensionDependency: void debug(java.lang.String)>(r0);
+
+        return;
+    }
+
+    static void access$200(sun.misc.ExtensionDependency, java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        sun.misc.ExtensionDependency r0;
+
+        r0 := @parameter0: sun.misc.ExtensionDependency;
+
+        r1 := @parameter1: java.lang.Throwable;
+
+        specialinvoke r0.<sun.misc.ExtensionDependency: void debugException(java.lang.Throwable)>(r1);
+
+        return;
+    }
+
+    static java.io.File[] access$300(java.io.File[]) throws java.io.IOException
+    {
+        java.io.File[] r0, $r1;
+
+        r0 := @parameter0: java.io.File[];
+
+        $r1 = staticinvoke <sun.misc.ExtensionDependency: java.io.File[] getExtFiles(java.io.File[])>(r0);
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.misc.ExtensionDependency: boolean DEBUG> = 0;
+
+        return;
+    }
+}
