@@ -69,7 +69,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
         .getOrElse(fail(UnboundClass, s))
 
   def evalBinop(v1: V, v2: V, op: BinOp): V = op match {
-    case BinOp.Add => typeOf[V](v1, v2) {
+    case BinOp.Add => typeOf(v1, v2) {
       case (Type.IntT(), Type.IntT()) => intOps.add(v1, v2)
       case (Type.IntT(), Type.LongT()) => longOps.add(convertIntLong(v1, config.Bits.Signed), v2)
       // TODO follow the Java language specification https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.18
