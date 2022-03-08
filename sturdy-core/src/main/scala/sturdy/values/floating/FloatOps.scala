@@ -14,7 +14,8 @@ trait FloatOps[B, V]:
   def mul(v1: V, v2: V): V
   def div(v1: V, v2: V): V
   def min(v1: V, v2: V): V 
-  def max(v1: V, v2: V): V 
+  def max(v1: V, v2: V): V
+  def remainder(v1: V, v2: V): V
 
   def absolute(v: V): V 
   def negated(v: V): V 

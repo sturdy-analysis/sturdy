@@ -19,6 +19,8 @@ given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] w
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
   def max(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.max, v2)
 
+  def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = ??? //v1.binary(ops.remainder, v2)
+
   def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)
   def negated(v: Topped[T]): Topped[T] = v.unary(ops.negated)
   def sqrt(v: Topped[T]): Topped[T] = v.unary(ops.sqrt)

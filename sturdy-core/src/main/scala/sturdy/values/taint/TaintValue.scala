@@ -97,6 +97,8 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def min(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.min, v2)
   def max(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.max, v2)
 
+  def remainder(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
   def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
   def negated(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.negated)
   def sqrt(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.sqrt)

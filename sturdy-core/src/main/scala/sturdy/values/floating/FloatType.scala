@@ -28,6 +28,9 @@ given TypeFloatOps[B: ClassTag] (using Fractional[B]): FloatOps[B, BaseType[B]] 
   def min(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
   def max(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
 
+  def remainder(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = ???
+
+
   def absolute(v: BaseType[B]): BaseType[B] = BaseType[B]
   def negated(v: BaseType[B]): BaseType[B] = BaseType[B]
   def sqrt(v: BaseType[B]): BaseType[B] = BaseType[B]

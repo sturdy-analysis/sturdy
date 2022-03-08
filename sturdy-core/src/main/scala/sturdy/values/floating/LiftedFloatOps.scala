@@ -11,6 +11,8 @@ class LiftedFloatOps[B, V, D](extract: V => D, inject: D => V)(using ops: FloatO
   def min(v1: V, v2: V): V = inject(ops.min(extract(v1), extract(v2)))
   def max(v1: V, v2: V): V = inject(ops.max(extract(v1), extract(v2)))
 
+  def remainder(v1: V, v2: V): V = ??? //inject(ops.remainder(extract(v1), extract(v2)))
+
   def absolute(v: V): V = inject(ops.absolute(extract(v)))
   def negated(v: V): V = inject(ops.negated(extract(v)))
   def sqrt(v: V): V = inject(ops.sqrt(extract(v)))

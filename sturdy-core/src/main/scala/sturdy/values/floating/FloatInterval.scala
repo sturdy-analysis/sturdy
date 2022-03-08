@@ -68,6 +68,8 @@ given IntervalFloatOps: FloatOps[Float, FloatInterval] with
 
   def min(v1: FloatInterval, v2: FloatInterval): FloatInterval = ???
   def max(v1: FloatInterval, v2: FloatInterval): FloatInterval = ???
+  
+  def remainder(v1: FloatInterval, v2: FloatInterval): FloatInterval = ???
 
   def absolute(v: FloatInterval): FloatInterval = ???
   def negated(v: FloatInterval): FloatInterval = ???

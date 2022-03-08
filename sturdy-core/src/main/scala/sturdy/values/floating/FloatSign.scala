@@ -132,6 +132,8 @@ given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
   def min(v1: FloatSign, v2: FloatSign): FloatSign = ???
   def max(v1: FloatSign, v2: FloatSign): FloatSign = ???
 
+  def remainder(v1: FloatSign, v2: FloatSign): FloatSign = ???
+
   def absolute(v: FloatSign): FloatSign = ???
   def negated(v: FloatSign): FloatSign = ???
   def sqrt(v: FloatSign): FloatSign = ???

@@ -27,6 +27,8 @@ given ConcreteDoubleOps: FloatOps[Double, Double] with
   def min(v1: Double, v2: Double): Double = Math.min(v1, v2)
   def max(v1: Double, v2: Double): Double = Math.max(v1, v2)
 
+  def remainder(v1: Double, v2: Double): Double = v1 % v2
+
   def absolute(v: Double): Double = Math.abs(v)
   def negated(v: Double): Double = -v
   def sqrt(v: Double): Double = Math.sqrt(v)
