@@ -1,5 +1,6 @@
 package sturdy.language.jimple
 
+import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.effect.callframe.CallFrame
 import sturdy.effect.failure.Failure
@@ -39,6 +40,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   val callFrame: CallFrame[CallFrameData, Identifier, V, J]
 
   val classTable: SymbolTable[Unit, String, Container, J]
+  def getClass(name: String): JOption[J, Container] = classTable.get((), name)
 
 
   import failure.*
@@ -63,10 +65,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   def evalImmediate(i: Immediate): V = i match
     case Immediate.ConstI(c) => constant(c)
     case Immediate.LocalI(l) => callFrame.getLocalByName(l.id).getOrElse(fail(UnboundLocal, l.id))
-    case Immediate.ClassI(s) =>
-      classTable.get((), s)
-        .map(classOps.classValue)
-        .getOrElse(fail(UnboundClass, s))
+    case Immediate.ClassI(name) => getClass(name).map(classValue).getOrElse(fail(UnboundClass, name))
 
   def evalBinop(v1: V, v2: V, op: BinOp): V = op match {
     case BinOp.Add => typeOf(v1, v2) {
