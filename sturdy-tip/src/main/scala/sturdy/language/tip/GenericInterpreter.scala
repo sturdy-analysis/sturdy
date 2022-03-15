@@ -67,7 +67,7 @@ object GenericInterpreter:
 import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
-  extends fix.Fixpoint[FixIn, FixOut[V]]:
+  extends fix.FixpointInterface[FixIn, FixOut[V]]:
 
   // joins
   implicit def jv: J[V]

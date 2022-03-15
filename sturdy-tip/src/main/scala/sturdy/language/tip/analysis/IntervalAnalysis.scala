@@ -17,6 +17,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
+import sturdy.fix.DaiFix
 import sturdy.fix.given
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -34,7 +35,7 @@ object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type Ctx = CallString
+  override type Ctx = Unit
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
@@ -42,7 +43,7 @@ object IntervalAnalysis extends Interpreter,
   type OutState = (Store, APrintPrefix.PrintResult[Value])
   type AllState = OutState
 
-  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance with fix.DAIFixpoint[FixIn, FixOut[Value], InState, OutState, AllState]:
     override def jv: WithJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
@@ -69,16 +70,3 @@ object IntervalAnalysis extends Interpreter,
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
-
-    val callSites = callSitesLogger()
-
-    protected override def context = callSites.callString(2)
-    protected override def contextFree = fix.log(callSites, _)
-    override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(
-      // call
-      fix.iter.topmost,
-      // while
-      fix.unwind(steps,
-        fix.iter.innermost
-      )
-    ))

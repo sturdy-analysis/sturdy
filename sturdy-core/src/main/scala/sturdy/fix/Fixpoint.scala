@@ -5,15 +5,15 @@ import sturdy.fix.context.Sensitivity
 
 import scala.collection.mutable.ListBuffer
 
-trait Fixpoint[Dom, Codom]:
+trait FixpointInterface[Dom, Codom]:
   final type Fixed = Dom => Codom
 
-  def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
-    val phi = fixpointAlgorithm()
-    computeFixpoint(fixed => phi(f(using fixed)))
+  def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom
 
-  private def computeFixpoint(f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
-    f(dom => computeFixpoint(f)(dom))
+trait Fixpoint[Dom, Codom] extends FixpointInterface[Dom, Codom]:
+  override def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
+    val phi = fixpointAlgorithm()
+    Fixpoint.computeFixpoint(fixed => phi(f(using fixed)))
 
   type Ctx
   protected def context: Sensitivity[Dom, Ctx]
@@ -47,7 +47,6 @@ trait Fixpoint[Dom, Codom]:
     else
       log(manyLogger(contextFreeLoggers.toList), phi)
 
-
 trait ContextInsensitive[Dom, Codom] extends Fixpoint[Dom, Codom]:
   final type Ctx = Unit
   final protected override def context: Sensitivity[Dom, Ctx] = sturdy.fix.context.none
@@ -61,4 +60,8 @@ trait Concrete[Dom, Codom] extends ContextInsensitive[Dom, Codom]:
 object Fixpoint:
   var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "true").toBoolean
   val DEBUG_INVARIANTS = System.getProperty("STURDY_DEBUG_INVARIANTS", "false").toBoolean
+
+  private[fix] def computeFixpoint[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
+    f(dom => computeFixpoint(f)(dom))
+
   
