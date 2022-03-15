@@ -35,7 +35,7 @@ object SignAnalysis extends Interpreter,
   type OutState = (Store, APrintPrefix.PrintResult[Value])
   type AllState = OutState
 
-  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance with fix.Fixpoint[FixIn, FixOut[Value]]:
     override def jv: WithJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly

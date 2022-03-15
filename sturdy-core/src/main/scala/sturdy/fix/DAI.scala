@@ -9,9 +9,10 @@ import sturdy.data.JoinTuple2
 
 
 trait DAIFixpoint[Dom, Codom, In, Out, All]
-  (using state: AnalysisState[Dom, In, Out, All])
-  (using EffectStack, Join[Codom], Join[Out])
+  (using Join[Codom], Join[Out])
   (using Finite[Dom]) extends FixpointInterface[Dom, Codom]:
+
+  val state: AnalysisState[Dom, In, Out, All]
 
   type Conf = (Dom, In)
   type InCache = Map[Conf, (Codom, Out)]

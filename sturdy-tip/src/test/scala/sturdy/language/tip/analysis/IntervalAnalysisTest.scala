@@ -45,27 +45,27 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       val analysis = new IntervalAnalysis.Instance(Map(), Map(), steps)
 
       val onlyCalls = false
-      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
+//      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
 
-      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
-      if (deadNodes.nonEmpty)
-        println(s"Found dead code: $deadNodes")
+//      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
+//      if (deadNodes.nonEmpty)
+//        println(s"Found dead code: $deadNodes")
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
-      (aresult, analysis, cfg)
+      (aresult, analysis)
     } else {
       null
     }
 
 object RunIntervalAnalysis extends App {
   val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI;
-  val (res, analysis, cfg) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), 10)
+  val (res, analysis) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.callFrame.getState)
   println(analysis.store.getState)

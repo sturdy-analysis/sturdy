@@ -17,7 +17,6 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
-import sturdy.fix.DaiFix
 import sturdy.fix.given
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -66,6 +65,8 @@ object IntervalAnalysis extends Interpreter,
     var bounds: Set[Int] = Set.empty
     given Widen[IntInterval] = new IntIntervalWiden(bounds)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
+
+    override val state = analysisState
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals

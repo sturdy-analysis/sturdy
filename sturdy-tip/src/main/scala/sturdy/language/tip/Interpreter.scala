@@ -74,7 +74,7 @@ trait Interpreter:
   abstract class GenericInstance
     extends GenericInterpreter[Value, Addr, J]:
 
-    override type Ctx = Interpreter.this.Ctx
+    type Ctx = Interpreter.this.Ctx
 
     given Instance = this.asInstanceOf[Instance]
 

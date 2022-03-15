@@ -52,7 +52,7 @@ trait Fix extends Interpreter:
       case CallReturn(call) => Some(call)
       case _ => None
 
-  def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
+  def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance & fix.Fixpoint[FixIn, FixOut[Value]]) =
     val cfg = fix.control[Ctx, FixIn, FixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {
       case FixIn.Run(Stm.Block(_)) => None
       case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
