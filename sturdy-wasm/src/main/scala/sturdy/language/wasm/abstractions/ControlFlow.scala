@@ -71,7 +71,7 @@ trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
   def controlFlow(config: CfgConfig, analysis: Instance) =
-    val cfg = fix.control[analysis.Ctx, FixIn, FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
+    val cfg = fix.control[analysis.fixpoint.Ctx, FixIn, FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
       case FixIn.Eval(c: (Call | CallIndirect), loc) => Some(CfgNode.Call(c, loc))
       case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labled(c, loc))
       case FixIn.Eval(inst, loc) =>
@@ -90,7 +90,7 @@ trait ControlFlow extends Interpreter:
       case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
       case _ => None
     }(using analysis.effectStack, analysis.except)
-    analysis.addContextSensitiveLogger(cfg.logger)
+    analysis.fixpoint.addContextSensitiveLogger(cfg.logger)
     cfg
 
 

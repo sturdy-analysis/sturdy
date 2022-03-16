@@ -65,16 +65,24 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], conf: WasmConfig) extends
-    GenericInstance, WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf):
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+    GenericInstance
+//    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
+      :
     private given Instance = this
+
+    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
+      override type Ctx = config.ctx.Ctx
+      val (contextPreparation, sensitivity) = config.ctx.make[Value]
+      import config.ctx.finiteCtx
+      override protected def contextFree = contextPreparation
+      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+    }
 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
-    override def widenState: Widen[State] = implicitly
-    override def widenInState: Widen[InState] = implicitly
-    override def widenOutState: Widen[OutState] = implicitly
 
     val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
@@ -87,4 +95,4 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    override def toString: String = s"type $conf"
+    override def toString: String = s"type $config"

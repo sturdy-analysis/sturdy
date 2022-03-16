@@ -66,8 +66,11 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
-  extends fix.FixpointInterface[FixIn, FixOut[V]]:
+trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
+
+  // fixpoint
+  val fixpoint: (AnalysisState[FixIn, InState, OutState, OutState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
+  type Fixed = FixIn => FixOut[V]
 
   // joins
   implicit def jv: J[V]

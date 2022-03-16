@@ -21,6 +21,7 @@ import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labled
 import sturdy.{*, given}
 import sturdy.data.given
+import sturdy.fix.DAIFixpoint
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -37,7 +38,7 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Try, Success, Failure}
 
-class SignAnalysisTest extends AnyFlatSpec, Matchers:
+class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign analysis"
 
@@ -57,7 +58,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new SignAnalysis.Instance(Map(), Map()) {
-        val fixpoint = parameterSensitive(this, loopUnwinding(steps, topmost)).fixpoint
+        val fixpoint = new DAIFixpoint
       }
 
 //      val onlyCalls = false
@@ -79,7 +80,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       null
     }
 
-object RunSignAnalysis extends App {
+object RunSignAnalysisDAI extends App {
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI;
   val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
   println(res)

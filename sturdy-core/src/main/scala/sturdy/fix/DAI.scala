@@ -8,11 +8,9 @@ import sturdy.values.Join
 import sturdy.data.JoinTuple2
 
 
-trait DAIFixpoint[Dom, Codom, In, Out, All]
-  (using Join[Codom], Join[Out])
-  (using Finite[Dom]) extends FixpointInterface[Dom, Codom]:
-
-  val state: AnalysisState[Dom, In, Out, All]
+class DAIFixpoint[Dom, Codom, In, Out, All]
+  (using state: AnalysisState[Dom, In, Out, All])
+  (using Join[Codom], Join[Out], Finite[Dom]) extends Fixpoint[Dom, Codom]:
 
   type Conf = (Dom, In)
   type InCache = Map[Conf, (Codom, Out)]
@@ -22,7 +20,7 @@ trait DAIFixpoint[Dom, Codom, In, Out, All]
   var outcache: OutCache = Map()
 
   //   (mrun ((fix-cache (fix (ev-cache f))) e)))
-  override def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
+  override def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
     FixCache(Fixpoint.computeFixpoint(fixed => EvCache(f(using fixed))))
 
 

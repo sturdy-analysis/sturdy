@@ -8,7 +8,13 @@ import sturdy.fix.cfg.ControlLogger
 
 import scala.reflect.ClassTag
 
-trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]
+trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]:
+  def fixpoint: CombinatorFixpoint[Dom, Codom] = new CombinatorFixpoint {
+    override lazy val phi: Combinator[Dom, Codom] = Combinator.this
+  }
+  
+trait ContextualCombinator[Ctx, Dom, Codom] extends Function[Contextual[Ctx, Dom, Codom] ?=> Dom => Codom, Dom => Codom]:
+  type Context = Contextual[Ctx, Dom, Codom]
 
 def identity[Dom, Codom]: Identity[Dom, Codom] = new Identity
 final class Identity[Dom, Codom] extends Combinator[Dom, Codom] {
@@ -52,6 +58,18 @@ final class Dispatch[Dom, Codom](choose: Dom => Int, val phis: Array[Combinator[
       phis(ix)(f)(dom)
     else
       f(dom)
+}
+
+def conditional[Dom, Codom]
+  (cond: Dom => Boolean, ifTrue: Combinator[Dom, Codom], ifFalse: Combinator[Dom, Codom])
+  : Conditional[Dom, Codom] = new Conditional(cond, ifTrue, ifFalse)
+final class Conditional[Dom, Codom](cond: Dom => Boolean, phiIfTrue: Combinator[Dom, Codom], phiIfFalse: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
+  override def apply(f: Dom => Codom): Dom => Codom = dom =>
+    val bool = cond(dom)
+    if (bool)
+      phiIfTrue(f)(dom)
+    else
+      phiIfFalse(f)(dom)
 }
 
 def control[Ctx, Dom, Codom, Exc, Node <: ControlFlowGraph.Node]

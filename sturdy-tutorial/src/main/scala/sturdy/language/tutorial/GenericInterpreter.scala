@@ -159,8 +159,11 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, J[_] <: MayJoin[_]]
-  extends fix.Fixpoint[FixIn,FixOut[V]]:
+trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
+
+  val fixpoint: fix.Fixpoint[FixIn,FixOut[V]]
+  type Fixed = FixIn => FixOut[V]
+
   // value components - we require a NumericOps component and a Branching component
   val numericOps: NumericOps[V]
   val branching: Branching[V,Unit]

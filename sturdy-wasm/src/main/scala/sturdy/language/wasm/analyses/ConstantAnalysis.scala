@@ -13,7 +13,6 @@ import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
 import sturdy.effect.symboltable.{JoinedSymbolTable, ConstantSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
-import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
@@ -79,12 +78,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
       :
     private given Instance = this
 
-    override type Ctx = config.ctx.Ctx
-    val (contextPreparation, sensitivity) = config.ctx.make[Value]
-    import config.ctx.finiteCtx
-    override protected def contextFree = contextPreparation
-    override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-    override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
+      override type Ctx = config.ctx.Ctx
+      val (contextPreparation, sensitivity) = config.ctx.make[Value]
+      import config.ctx.finiteCtx
+      override protected def contextFree = contextPreparation
+      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+    }
 
 
     override def jvUnit: WithJoin[Unit] = implicitly

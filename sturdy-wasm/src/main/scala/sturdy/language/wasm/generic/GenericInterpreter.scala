@@ -105,9 +105,13 @@ enum FixOut[V]:
 given finiteFixIn: Finite[FixIn] with {}
 
 
-trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
-  extends fix.Fixpoint[FixIn, FixOut[V]]:
+trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
 
+  // fixpoint
+  val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
+  type Fixed = FixIn => FixOut[V]
+
+  // joins
   implicit def jvUnit: J[Unit]
   implicit def jvV: J[V]
   implicit def jvFunV: J[FunV]

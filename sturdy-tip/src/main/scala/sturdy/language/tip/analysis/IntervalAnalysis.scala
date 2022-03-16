@@ -34,15 +34,10 @@ object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type Ctx = Unit
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  type InState = Store
-  type OutState = (Store, APrintPrefix.PrintResult[Value])
-  type AllState = OutState
-
-  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance with fix.DAIFixpoint[FixIn, FixOut[Value], InState, OutState, AllState]:
+  abstract class Instance(initEnvironment: Environment, initStore: Store)() extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
@@ -66,8 +61,7 @@ object IntervalAnalysis extends Interpreter,
     given Widen[IntInterval] = new IntIntervalWiden(bounds)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
-    override val state = analysisState
-
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
+

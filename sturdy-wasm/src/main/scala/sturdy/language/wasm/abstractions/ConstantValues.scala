@@ -52,7 +52,7 @@ trait ConstantValues extends Interpreter:
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
-    analysis.addContextFreeLogger(constants)
+    analysis.fixpoint.addContextFreeLogger(constants)
     constants
 
   class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):

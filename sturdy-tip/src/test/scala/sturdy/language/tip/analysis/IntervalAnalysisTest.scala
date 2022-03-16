@@ -4,9 +4,11 @@ import cats.parse.{Numbers, Parser0 as P0, Parser as P}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
+import sturdy.data.given
 import sturdy.Soundness
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.AFallible
+import sturdy.effect.print.given
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.GenericInterpreter.AllocationSite
 import sturdy.language.tip.Parser.*
@@ -16,7 +18,15 @@ import sturdy.effect.failure.{afallibleAbstractly, falliblePO}
 import sturdy.util.Labled
 import sturdy.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.booleans.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.records.{*, given}
+import sturdy.values.references.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
+import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
 
 import java.nio.file.{Path, Paths, Files}
 import scala.io.Source
@@ -42,9 +52,11 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), steps)
+      val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
+        val fixpoint = callSiteSensitive(2, loopUnwinding(steps, topmost)).fixpoint
+      }
 
-      val onlyCalls = false
+//      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
