@@ -27,15 +27,17 @@ enum Label:
   case Numeric(i: Int)
   case Symbolic(s: String)
 
-  override def toString: String = this match {
+  override def toString: String = this match 
     case Numeric(i) => s"(;$i;)"
     case Symbolic(s) => s"$$$s"
-  }
   
-  def toNum: Int = this match {
+  def getString: String = this match
+    case Numeric(i) => i.toString
+    case Symbolic(s) => s
+    
+  def toNum: Int = this match 
     case Numeric(i) => i
     case _ => ???
-  }
   
 object Label:
   def apply(s: String): Label =
@@ -47,4 +49,4 @@ case class TypeDef(label: Label, param: Option[List[WASMType]], result: Option[L
 
 case class FuncExport(name: String, label: Label)
 
-case class FuncDef(label: Label, sig: TypeDef)
+case class FuncDef(label: Label, sig: TypeDef, exportedAs: Option[String])

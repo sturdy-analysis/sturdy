@@ -45,7 +45,7 @@ object FuncExtractor:
       .map{
         case Match(str) =>
           funcDef.parseAll(str) match {
-            case Right((l, i)) => FuncDef(l, typeDefs(Label(i)))
+            case Right((l, i)) => FuncDef(l, typeDefs(Label(i)), Some(funcExports(l).name))
             case Left(err) => ???}
       }.toList
     funcDefs

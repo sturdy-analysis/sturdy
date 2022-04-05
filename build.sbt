@@ -66,9 +66,10 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
     libraryDependencies ++= Seq(
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
-      "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
       "org.json4s" %% "json4s-native" % "4.0.4",
-      ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13)
+      ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13),
+//      "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
+//      ("org.typelevel" %% "cats-effect" % "3.3.9").cross(CrossVersion.for3Use2_13),
       //      "io.circe" %% "circe-core" % "0.14.1",
       //      "io.circe" %% "circe-generic" % "0.14.1",
       //      "io.circe" %% "circe-parser" % "0.14.1"
