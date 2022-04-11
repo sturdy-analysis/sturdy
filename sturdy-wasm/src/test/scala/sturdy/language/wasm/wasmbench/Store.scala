@@ -2,15 +2,13 @@ package sturdy.language.wasm.wasmbench
 
 import java.net.URI
 
-case class WASMBenchBinary(md: Metadata, ex: List[FuncDef])
+trait Store[K,V]:
+  var wbbs: Map[K, V]
 
-trait Store:
-  var wbbs: Map[String, WASMBenchBinary]
+//  def load(): List[V]
+  def retrieve(predicate: V => Boolean): List[V]
+  def retrieve(keys: List[K]): List[V]
+  def retrieve(key: K): Option[V]
 
-//  def load(): List[WASMBenchBinary]
-  def retrieve(predicate: WASMBenchBinary => Boolean): List[WASMBenchBinary]
-  def retrieve(keys: List[String]): List[WASMBenchBinary]
-  def retrieve(key: String): Option[WASMBenchBinary]
-
-  def store(data: List[WASMBenchBinary]): Unit
-  def store(data: WASMBenchBinary): Unit
+  def store(data: List[V]): Unit
+  def store(data: V): Unit

@@ -9,7 +9,7 @@ import java.io.InputStream
 import java.nio.file.{Files, Path, Paths}
 
 
-class JSONStore(mdSource: Path, exSource: Path) extends Store:
+class JSONStore(mdSource: Path, exSource: Path) extends Store[String, WASMBenchBinary]:
 
   var wbbs: Map[String, WASMBenchBinary] = {
 
@@ -25,19 +25,12 @@ class JSONStore(mdSource: Path, exSource: Path) extends Store:
     val md = read[Map[String, Metadata]](mdStream)
     val ex = read[Map[String,List[FuncDef]]](exStream)
 
-    val g = ex.foldLeft[Map[String, WASMBenchBinary]](Map.empty){
+    ex.foldLeft[Map[String, WASMBenchBinary]](Map.empty){
       case (acc, (hash, lis)) => md.get(hash) match {
         case Some(datum) => acc + (hash -> WASMBenchBinary(md = datum, ex = lis))
         case None => acc
       }
     }
-    g
-
-//    ex.map{
-//      case (hash, lis) => md.get(hash) match {
-//        case Some(datum) => (hash, WASMBenchBinary(md = datum, ex = lis))
-//      }
-//    }
   }
 
   override def retrieve(predicate: WASMBenchBinary => Boolean): List[WASMBenchBinary] =
@@ -59,24 +52,22 @@ class JSONStore(mdSource: Path, exSource: Path) extends Store:
     }
   override def store(data: WASMBenchBinary): Unit = wbbs = wbbs + (data.md.hash -> data)
 
+class ResultStore[A <: RRecord](src: Path) extends Store[String, A]:
+  import scala.jdk.CollectionConverters.*
 
-//object Test extends App:
-//  import org.json4s.native.JsonMethods.*
-//  import org.json4s.*
-//  import org.json4s.native.Serialization
-//  import org.json4s.native.Serialization.{read,write}
-//  implicit val formats: Formats = Serialization.formats(NoTypeHints)
-//
-//  val t = JObject(List(
-//      ("hash",JString("957e860e09bde8e26a45cd986dab1fe18289d290638bb9498602e98ebed41a15")),
-//      ("sizeBytes",JInt(44304)),
-//      ("processors",JObject(List(
-//        ("clang",JString("10.0.0 (https://github.com/llvm/llvm-project d32170dbd5b0d54436537b6b75beaf44324e0c28"))))),
-//      ("languages",JObject(List(
-//        ("C_plus_plus_14",JString("")),
-//        ("C99",JString(""))))),
-//      ("instructionCount",JInt(14719)),
-//      ("inferredSourceLanguages",JArray(List(JString("C"), JString("C++"))))))
-//
-//  val m = read[Metadata](compact(render(t)))
-//  println(m)
+  var wbbs: Map[String, A] = {
+    val in = Files.newBufferedReader(src).lines().iterator().asScala
+    val headers = in.next().split(";")
+    
+    in.map(s => {
+      val d = s.split(";")
+      (d(0), RRecord(headers.zip(d):_*).asInstanceOf[A])
+    }).toMap
+  }
+
+  def retrieve(predicate: A => Boolean): List[A] = ???
+  def retrieve(keys: List[String]): List[A] = ???
+  def retrieve(key: String): Option[A] = ???
+
+  def store(data: List[A]): Unit = ???
+  def store(data: A): Unit = ???
