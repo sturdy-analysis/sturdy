@@ -64,6 +64,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
       case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.args_sizes_get => List(Value.Int32(topI32))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], conf: WasmConfig) extends
     GenericInstance, WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf):

@@ -25,14 +25,14 @@ package sturdy.language.wasm.wasmbench:
   }
 
   type ConstantResult = RRecord {
-    val constantInstructions: Int;
-    val constantInstructionPercent: Double;
-    val liveInstructions: Int;
+    val constantInstructions: Int
+    val constantInstructionPercent: Double
+    val liveInstructions: Int
   }
 
   type TaintResult = RRecord {
-    val taintedAccesses: Int;
-    val taintedAccessesPercent: Double;
+    val taintedAccesses: Int
+    val taintedAccessesPercent: Double
   }
 //
 //  case class DeadCodeResult(hash: String,

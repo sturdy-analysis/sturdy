@@ -76,7 +76,8 @@ object ConcreteInterpreter extends Interpreter:
       HostFunction.fd_read -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
       HostFunction.fd_seek -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
       HostFunction.fd_write -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
-      HostFunction.fd_fdstat_get -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") }
+      HostFunction.fd_fdstat_get -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") },
+      HostFunction.args_sizes_get -> { args => f.fail(MockError, s"Mock implementation of args_sizes_get") }
     )
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =

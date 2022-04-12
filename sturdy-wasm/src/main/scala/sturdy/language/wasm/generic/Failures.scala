@@ -15,3 +15,4 @@ case object InvalidModule extends FailureKind
 case object TypeError extends FailureKind
 case class ProcExit[V](exitCode: V) extends FailureKind
 case object FileError extends FailureKind
+case object MockError extends FailureKind

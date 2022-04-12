@@ -73,6 +73,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
       case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.args_sizes_get => List(Value.Int32(tainted(Topped.Top)))
 
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends

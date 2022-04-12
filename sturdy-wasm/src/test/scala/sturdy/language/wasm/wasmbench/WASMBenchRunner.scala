@@ -31,7 +31,6 @@ enum Analysis:
       case Analysis.Type => TypeTest(p, funcName, config, binary)
       case Analysis.Constant => ConstantTest(p, funcName, config, binary)
       case Analysis.Taint => TaintTest(p, funcName, config, binary)
-    
 
 object TaintTest:
   def apply(p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): RRecord =
@@ -55,22 +54,19 @@ object TaintTest:
     val allInstructions = allNodes.filter(_.isInstruction)
     val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
     val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+
     val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
     val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
     val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
-    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
     val liveInstructions = allInstructions.size - deadInstructions.size
     val constantInstructions = constants.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
-    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
     val allMemoryInstructions = allNodes.filter{
       case CfgNode.Instruction(inst, _) => inst match
@@ -80,17 +76,22 @@ object TaintTest:
     }
     val taintedAccesses = memory.instructions
     val taintedAccessesPercent = (10000.0 * taintedAccesses.size / allMemoryInstructions.size.toDouble).round / 100.0
-    println(s"Found ${taintedAccesses.size} tainted memory accesses, $taintedAccessesPercent% of all load and store instructions in $name.")
-    println(s"  This means, ${100.0 - taintedAccessesPercent}% of all load and store instructions in $name are safe.")
 
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
+
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
+    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
+    println(s"Found ${taintedAccesses.size} tainted memory accesses, $taintedAccessesPercent% of all load and store instructions in $name.")
+    println(s"  This means, ${100.0 - taintedAccessesPercent}% of all load and store instructions in $name are safe.")
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     RRecord(
-      "name" -> name,
+      "hash" -> name,
       "duration" -> duration,
       "allInstructions" -> allInstructions.size,
       "deadInstructions" -> deadInstructions.size,
@@ -132,36 +133,39 @@ object ConstantTest:
     val allInstructions = allNodes.filter(_.isInstruction)
     val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
     val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+
     val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
     val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
     val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
-    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
     val liveInstructions = allInstructions.size - deadInstructions.size
     val constantInstructions = constants.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
-    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
 
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
+
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
+    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
     println(s"This analysis can eliminate $eliminatable instructions, $eliminatablePercent% of the ${allInstructions.size} instructions in $name")
 
     // write CFG to .dot file
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
-    Files.writeString(dotPath, cfg.toGraphViz)
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val blockCfg = cfg.withBlocks(shortLabels = true)
+    Files.writeString(dotPath, blockCfg.toGraphViz)
     
     RRecord(
-      "name" -> name,
+      "hash" -> name,
       "duration" -> duration,
       "allInstructions" -> allInstructions.size,
       "deadInstructions" -> deadInstructions.size,
@@ -191,40 +195,41 @@ object TypeTest:
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val modInst = interp.initializeModule(module)
-      interp.failure.fallible(
-        interp.invokeExported(modInst, funcName, List.empty)
-      )
+    interp.failure.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
+    )
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
     val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
     val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
-    
+
     val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
     val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
     val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
-    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
-    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
+
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
+    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
     Files.writeString(dotPath, cfg.toGraphViz)
     
     RRecord(
-      "name" -> name,
+      "hash" -> name,
       "duration" -> duration,
       "allInstructions" -> allInstructions.size,
       "deadInstructions" -> deadInstructions.size,
@@ -239,19 +244,19 @@ object TypeTest:
       "eliminatablePercent" -> eliminatablePercent,
     )
 
-class WASMBenchRunner extends AnyFunSpec:
-  type RunnerConfig = RRecord{
-    val filtering: Filtering
-    val timeLimit: Span
-    val analysis: Analysis
-    val wasmConfig: WasmConfig
-    val rootDir: Path
-    val warmup: Boolean
-    val logOpenOption: StandardOpenOption
-    val logErrors: Boolean
-    val logResults: Boolean
-  }
-  
+type RunnerConfig = RRecord{
+  val filtering: Filtering
+  val timeLimit: Span
+  val analysis: Analysis
+  val wasmConfig: WasmConfig
+  val rootDir: Path
+  val warmup: Boolean
+  val logOpenOption: StandardOpenOption
+  val logErrors: Boolean
+  val logResults: Boolean
+}
+
+object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
     "timeLimit" -> new GrainOfTime(1200).seconds,
@@ -263,8 +268,10 @@ class WASMBenchRunner extends AnyFunSpec:
     "logErrors" -> true,
     "logResults" -> true,
   ).asInstanceOf[RunnerConfig]
+
+class WASMBenchRunner extends AnyFunSpec:
   
-  import runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -287,8 +294,8 @@ class WASMBenchRunner extends AnyFunSpec:
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
     }
 
-    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv"), logOpenOption, logResults)
-    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv"), logOpenOption, logErrors)
+    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
+    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
 
 
     if warmup then

@@ -39,4 +39,4 @@ Binaries analysed: 0 - 730, whereby `c1cfe409e`, `2acb3a786`, `f79f5d53d`
 timed out.
 
 A second run from 728 until 1038 produced no more timed out futures, indicating 
-that timing out futures really does cause a memory leak. 
+that timing out futures really do cause a memory leak. 

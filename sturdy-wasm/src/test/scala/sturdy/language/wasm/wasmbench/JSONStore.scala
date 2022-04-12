@@ -65,9 +65,21 @@ class ResultStore[A <: RRecord](src: Path) extends Store[String, A]:
     }).toMap
   }
 
-  def retrieve(predicate: A => Boolean): List[A] = ???
-  def retrieve(keys: List[String]): List[A] = ???
-  def retrieve(key: String): Option[A] = ???
-
   def store(data: List[A]): Unit = ???
   def store(data: A): Unit = ???
+
+class ErrorStore(src: Path) extends Store[String, String]:
+  import scala.jdk.CollectionConverters.*
+
+  var wbbs: Map[String, String] = {
+    val in = Files.newBufferedReader(src).lines().iterator().asScala
+    val headers = in.next().split(";")
+
+    in.map(s => {
+      val d = s.split(";")
+      (d(0), d(1))
+    }).toMap
+  }
+
+  def store(data: List[String]): Unit = ???
+  def store(data: String): Unit = ???
