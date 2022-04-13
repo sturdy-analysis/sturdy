@@ -2,18 +2,20 @@ package sturdy.language.wasm.wasmbench
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 
-import java.nio.file.Path
+import java.nio.file.{Files, Path, Paths}
 import java.util.regex.Pattern
 import scala.util.matching.Regex
 import sys.process.*
 import scala.util.matching.Regex.Match
+import scala.jdk.CollectionConverters.*
 
 object FuncExtractor:
+
 
   def extractFuncDefs(bin: Path, binMd: Metadata, wasm2wat: Path): List[FuncDef] =
     val typeDefRegex = "\\(type \\(;[0-9]+;\\).*".r
     val funcExportRegex = "\\(export \".*\" \\(func .*\\)\\)".r
-    def funcDefRegex(lab: Label) = {val r = s"\\(func ${lab} \\(type [0-9]+\\).*"; r.r}
+//    def funcDefRegex = "\\(func (\\(;[0-9]+\\)|\\$.+) \\(type [0-9]+\\).*".r
     def funcDefsRegex(lab: Set[Label]) = {
       val labStr = lab.mkString("|").flatMap(c => {
         if List('(', ')', '$').contains(c) then s"\\${c}" else s"$c"
@@ -22,10 +24,29 @@ object FuncExtractor:
       val p = Pattern.compile(r)
       r.r}
 
-    val wat = s"$wasm2wat $bin".!!
+    var typeDefStr = ""
+    var funcExStr = ""
+    var funcDefStr = ""
+
+    {
+      s"$wasm2wat $bin -o /tmp/tr.wat".!
+      val tmpFilePath = Paths.get("/tmp/tr.wat")
+      val in = Files.newBufferedReader(tmpFilePath).lines().iterator().asScala
+
+      in.foreach(line => {
+        if line.startsWith("(func") then
+          funcDefStr = funcDefStr + "\n" + line
+        else if line.startsWith("(type") then
+          typeDefStr = typeDefStr + "\n" + line
+        else if line.startsWith("(export") then
+          funcExStr = funcExStr + "\n" + line
+      })
+
+      Files.delete(tmpFilePath)
+    }
 
     val typeDefs = typeDefRegex
-      .findAllMatchIn(wat)
+      .findAllMatchIn(typeDefStr)
       .map{
         case Match(str) =>
           val td = parseTypeDef(str)
@@ -33,7 +54,7 @@ object FuncExtractor:
       .toMap
 
     val funcExports = funcExportRegex
-      .findAllMatchIn(wat)
+      .findAllMatchIn(funcExStr)
       .map{
         case Match(str) =>
           val fe = parseFuncExport(str)
@@ -41,7 +62,7 @@ object FuncExtractor:
       .toMap
 
     val funcDefs = funcDefsRegex(funcExports.keySet)
-      .findAllMatchIn(wat)
+      .findAllMatchIn(funcDefStr)
       .map{
         case Match(str) =>
           funcDef.parseAll(str) match {
@@ -49,7 +70,6 @@ object FuncExtractor:
             case Left(err) => ???}
       }.toList
     funcDefs
-
 
   def parseFuncExport(source: String): FuncExport =
     funcExport.parseAll(source) match

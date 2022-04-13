@@ -1,6 +1,6 @@
 package sturdy.language.wasm.wasmbench
 
-//import java.sql.{Connection, DriverManager}
+
 import org.scalatest.flatspec.AnyFlatSpec
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
@@ -15,6 +15,16 @@ import scala.util.matching.Regex
 import scala.util.matching.Regex.Match
 import scala.jdk.StreamConverters.*
 
+/*
+
+This class serves as way to run various scripts and query the metadata and test results
+
+It includes
+- the procedure to process the WasmBench metadata file
+- the procedure to extract all the binaries' exported functions
+  extraction logic in class FuncExtractor
+-
+*/
 
 class WASMBench extends AnyFlatSpec:
   import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
@@ -33,18 +43,15 @@ class WASMBench extends AnyFlatSpec:
     Path.of(u)
   }
 
-
+  val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
+  val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
+  prepareMetadata(mdPath, output)
+  extractFuncDefsScript()
 //  metadataScripts()
-//
-//  val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
-//  val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
-//  prepareMetadata(mdPath, output)
-//  metadataScripts()
-
-  resultMdExploration
+//  resultMdExploration
 
   def resultMdExploration = {
-
+    // Procedure to query metadata and results
     val resStore = mkResultStore
     val hashes = resStore.retrieve(_ => true).map(r => r.hash.split('.')(0))
 
@@ -83,8 +90,8 @@ class WASMBench extends AnyFlatSpec:
       a && b
     })
 
-    val jacarteResults = resStore.retrieve(r => {
-      ofWhichPassed.exists{
+    val nonJacarteResults = resStore.retrieve(r => {
+      !ofWhichPassed.exists{
         case WASMBenchBinary(Metadata(hash,_,_,_,_,_,_), _) => hash == r.hash.split('.')(0)
         case _ => false
       }
@@ -93,14 +100,14 @@ class WASMBench extends AnyFlatSpec:
     println(s"of which passed: ${ofWhichPassed.size}")
     println(s"of which export \"polybench_prepare_instruments\" and \"malloc\": ${exportPolybench.size}")
     for {
-      r <- jacarteResults
+      r <- nonJacarteResults
     } do {
       println(s"${r.hash}")
     }
 
   }
 
-  it should "print and log a histogram of all error messages" in {
+  def errorHistogram = {
     val errStore = {
       val p = rootDir.resolve("Constant.topmost-calls(1).exceptions.csv")
       new ErrorStore(p)
@@ -206,7 +213,10 @@ class WASMBench extends AnyFlatSpec:
     import org.json4s.JsonDSL.*
 
     // exclude contains hashes of binaries that don't halt or consume too much memory during testing
-    val exclude = List("b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737")
+    val exclude = List(
+      "b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737",
+      "681460c7ceeb6c96f37934f7b2d216dff3e7aa3e02f3325d5417113b607b1c03"
+    )
 
     for {
       (hash, md) <- json.obj
@@ -273,32 +283,32 @@ class WASMBench extends AnyFlatSpec:
     outStream.flush(); outStream.close()
     read[Map[String, Metadata]](output)
 
-//  def extractFuncDefsScript() =
-//    import org.json4s.native.Serialization
-//    import org.json4s.native.Serialization.{read,write}
-//    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label])))
+  def extractFuncDefsScript() =
 
-//    val mdUri = this.getClass.getResource("/sturdy/language/wasm/wasmbench/sturdy.metadata.filtered.json").toURI
-//    val mdPath = Path.of(mdUri)
-//
-//    val mdStream: InputStream = Files.newInputStream(mdPath)
-//    val md = read[Map[String, Metadata]](mdStream)
-//    var erroneous = List.empty[String]
-//    var funcDefs: Map[String, List[FuncDef]] = Map.empty
-//    md.values.filter(m => m.sizeBytes < MAXSIZE).foreach(x => {
-//      val binaryHash = x.hash
-//      val md = x
-//      val binPath = WASMBench.mkBinPath(binaryHash, filtering)
-//      try
-//        funcDefs = funcDefs + (binaryHash -> FuncExtractor.extractFuncDefs(binPath, md, wasm2wat))
-//      catch
-//        case e => erroneous = binaryHash :: erroneous; println(binaryHash)
-//    })
-//    val funcDefsPath = Paths.get(mdPath.toString.replaceAll("metadata\\.filtered\\.json", "sturdy\\.funcdefs\\.filtered\\.json"))
-//    val outStream = Files.newOutputStream(funcDefsPath)
-//    val output = write(funcDefs)
-//    outStream.write(output.getBytes())
-//    println(erroneous)
+    import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.{read,write}
+    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label])))
+
+    val mdPath = rootDir.resolve("sturdy.metadata.filtered.json")
+
+    val mdStream: InputStream = Files.newInputStream(mdPath)
+    val md = read[Map[String, Metadata]](mdStream)
+    var erroneous = List.empty[String]
+    var funcDefs: Map[String, List[FuncDef]] = Map.empty
+    md.values.foreach(x => {
+      val binaryHash = x.hash
+      val md = x
+      val binPath = WASMBench.mkBinPath(binaryHash, filtering)
+      try
+        funcDefs = funcDefs + (binaryHash -> FuncExtractor.extractFuncDefs(binPath, md, wasm2wat))
+      catch
+        case e => erroneous = binaryHash :: erroneous; println(binaryHash)
+    })
+    val funcDefsPath = rootDir.resolve("sturdy.funcdefs.filtered.json")
+    val outStream = Files.newOutputStream(funcDefsPath)
+    val output = write(funcDefs)
+    outStream.write(output.getBytes())
+    println(erroneous)
 
 
 object WASMBench:

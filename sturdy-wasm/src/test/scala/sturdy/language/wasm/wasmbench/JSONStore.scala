@@ -8,6 +8,12 @@ import org.json4s.native.Serialization.{read,write}
 import java.io.InputStream
 import java.nio.file.{Files, Path, Paths}
 
+/*
+  
+Contains classes to interface with metadata.json file and result.vsc files
+
+*/
+
 
 class JSONStore(mdSource: Path, exSource: Path) extends Store[String, WASMBenchBinary]:
 
