@@ -254,6 +254,7 @@ type RunnerConfig = RRecord{
   val logOpenOption: StandardOpenOption
   val logErrors: Boolean
   val logResults: Boolean
+  val skipTestsIncludingIndex: Int
 }
 
 object WASMBenchRunner:
@@ -267,6 +268,7 @@ object WASMBenchRunner:
     "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
+    "skipTestsIncludingIndex" -> -1
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
