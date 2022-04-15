@@ -94,31 +94,41 @@ class WASMBenchRunner extends AnyFunSpec:
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
     }.drop(skipTestsIncludingIndex).take(50)
 
-//    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
-//    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
-
     analysis match {
-      case Analysis.All(constantCfg, typeCfg, taintCfg) =>
-        run(binaries, Analysis.Constant, constantCfg)
-        run(binaries, Analysis.Taint, taintCfg)
-        run(binaries, Analysis.Type, typeCfg)
+      case Analysis.All(constantCfg, taintCfg, typeCfg) =>
+
+        val (constantSuccLogger, constantExcLogger) = {
+          def s(string: String) = s"${Analysis.Constant}.$constantCfg.$string.csv".replace(' ', '-')
+          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
+          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
+          (a,b)
+        }
+        val (typeSuccLogger, typeExcLogger) = {
+          def s(string: String) = s"${Analysis.Type}.$typeCfg.$string.csv".replace(' ', '-')
+          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
+          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
+          (a,b)
+        }
+        val (taintSuccLogger, taintExcLogger) = {
+          def s(string: String) = s"${Analysis.Taint}.$taintCfg.$string.csv".replace(' ', '-')
+          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
+          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
+          (a,b)
+        }
+        run(binaries, Analysis.Constant, constantCfg, constantSuccLogger, constantExcLogger)
+        run(binaries, Analysis.Taint, taintCfg, taintSuccLogger, taintExcLogger)
+        run(binaries, Analysis.Type, typeCfg, typeSuccLogger, typeExcLogger)
       case _ =>
-        run(binaries, analysis, wasmConfig)
+        val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
+        val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
+        run(binaries, analysis, wasmConfig, succLogger, excLogger)
     }
 
-    def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig): Unit = {
+    def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig, sLogger: CsvLogger, eLogger: CsvLogger): Unit = {
 
-      val succLogger: CsvLogger = new CsvLogger(
-          saveResultsToDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')),
-          logOpenOption,
-          logResults)
-      val excLogger: CsvLogger = new CsvLogger(
-          saveResultsToDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')),
-          logOpenOption,
-          logErrors)
 
       if warmup then
-        excLogger.log("hash;exceptionMsg")
+        eLogger.log("hash;exceptionMsg")
       it(s"Warm-up until first successful run in $an") {
         val currBin = bins.iterator
         var cont = true
@@ -136,7 +146,7 @@ class WASMBenchRunner extends AnyFunSpec:
 
           result match {
             case Left(e) => if t.isAlive then {t.interrupt; t.join}; println(e.toString)
-            case Right(v) => cont = false; succLogger.log(v.getCsvHeaders); println("warmed-up!")
+            case Right(v) => cont = false; sLogger.log(v.getCsvHeaders); println("warmed-up!")
           }
       }
 
@@ -160,10 +170,10 @@ class WASMBenchRunner extends AnyFunSpec:
           result match {
             case Left(e) =>
               if t.isAlive then {t.interrupt(); t.join()}
-              excLogger.log(s"$name;${e.toString}")
+              eLogger.log(s"$name;${e.toString}")
               throw e
             case Right(v) =>
-              succLogger.log(v.toCsv)
+              sLogger.log(v.toCsv)
           }
         }
       }
