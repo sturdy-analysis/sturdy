@@ -6,14 +6,21 @@ import swam.{FuncType, ValType}
 import ValType.*
 
 enum HostFunction(val name: String, val funcType: FuncType) extends Enumeration:
-  case args_sizes_get extends HostFunction("args_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))
   case proc_exit extends HostFunction("proc_exit", FuncType(Vector(I32), Vector()))
   case fd_close extends HostFunction("fd_close", FuncType(Vector(I32), Vector(I32)))
   case fd_read extends HostFunction("fd_read", FuncType(Vector(I32, I32, I32, I32), Vector(I32)))
   case fd_seek extends HostFunction("fd_seek", FuncType(Vector(I32, I64, I32, I32), Vector(I32)))
   case fd_write extends HostFunction("fd_write", FuncType(Vector(I32, I32, I32, I32), Vector(I32)))
   case fd_fdstat_get extends HostFunction("fd_fdstat_get", FuncType(Vector(I32, I32), Vector(I32)))
-
+  case args_sizes_get extends HostFunction("args_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))
+  case args_get extends HostFunction("args_get", FuncType(Vector(I32,I32), Vector(I32)))
+  case environ_sizes_get extends HostFunction("environ_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))
+  case environ_get extends HostFunction("environ_get", FuncType(Vector(I32,I32), Vector(I32)))
+  case fd_prestat_get extends HostFunction("fd_prestat_get", FuncType(Vector(I32,I32), Vector(I32)))
+  case random_get extends HostFunction("random_get", FuncType(Vector(I32, I32), Vector(I32)))
+  case path_open extends HostFunction("path_open", FuncType(Vector(I32,I32,I32,I32,I32,I64,I64,I32,I32), Vector(I32)))
+  case fd_prestat_dir_name extends HostFunction("fd_prestat_dir_name", FuncType(Vector(I32,I32,I32), Vector(I32)))
+  
   override def toString(): String = name
 
 

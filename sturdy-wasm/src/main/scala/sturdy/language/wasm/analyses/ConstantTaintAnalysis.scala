@@ -74,7 +74,13 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.args_sizes_get => List(Value.Int32(tainted(Topped.Top)))
-
+      case HostFunction.args_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(InvocationError, s"in ${hostFunc.name}"))
+      case HostFunction.environ_sizes_get => List(Value.Int32(tainted(Topped.Top)))
+      case HostFunction.environ_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(InvocationError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_prestat_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.random_get => List(Value.Int32(tainted(Topped.Top)))
+      case HostFunction.path_open => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_prestat_dir_name => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance
