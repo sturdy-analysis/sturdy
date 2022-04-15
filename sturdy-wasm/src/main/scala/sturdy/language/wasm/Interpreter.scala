@@ -20,6 +20,7 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.{f32, f64, i64, i32}
 import swam.FuncType
+import swam.ValType
 
 import java.nio.ByteOrder
 
@@ -64,6 +65,13 @@ trait Interpreter:
   def topI64: I64
   def topF32: F32
   def topF64: F64
+  
+  def typedTop(ty: ValType): Value = ty match
+    case ValType.I32 => Value.Int32(topI32)
+    case ValType.I64 => Value.Int64(topI64)
+    case ValType.F32 => Value.Float32(topF32)
+    case ValType.F64 => Value.Float64(topF64)
+  
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
 
