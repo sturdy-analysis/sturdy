@@ -21,7 +21,6 @@ trait AnalysisRunnable extends Runnable:
     }
     catch {
       case e: InterruptedException =>
-        Thread.currentThread().interrupt()
         println("time limited reached, terminating analysis.")
         setRes(Left(e))
       case e =>

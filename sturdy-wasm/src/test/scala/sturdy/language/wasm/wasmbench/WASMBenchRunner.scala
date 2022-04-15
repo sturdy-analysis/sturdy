@@ -52,11 +52,12 @@ type RunnerConfig = RRecord{
 object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(1).seconds,
-    "analysis" -> Analysis.All(
+    "timeLimit" -> new GrainOfTime(600).seconds,
+    "analysis" -> // Analysis.Constant,
+    Analysis.All(
       WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-      WasmConfig(ctx = CallSites(1)),
-      WasmConfig()
+      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
+      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
     ),
     "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
@@ -65,7 +66,7 @@ object WASMBenchRunner:
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
-    "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results")
+    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-v0")
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
@@ -92,8 +93,9 @@ class WASMBenchRunner extends AnyFunSpec:
       //      val timeOuts = List(
       //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
-    }.drop(skipTestsIncludingIndex).take(50)
+    }.drop(skipTestsIncludingIndex + 1)
 
+    saveResultsToDir.toFile.mkdirs()
     analysis match {
       case Analysis.All(constantCfg, taintCfg, typeCfg) =>
 
@@ -115,18 +117,16 @@ class WASMBenchRunner extends AnyFunSpec:
           val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
           (a,b)
         }
+        run(binaries, Analysis.Type, typeCfg, typeSuccLogger, typeExcLogger)
         run(binaries, Analysis.Constant, constantCfg, constantSuccLogger, constantExcLogger)
         run(binaries, Analysis.Taint, taintCfg, taintSuccLogger, taintExcLogger)
-        run(binaries, Analysis.Type, typeCfg, typeSuccLogger, typeExcLogger)
       case _ =>
-        val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
-        val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
+        val succLogger: CsvLogger = new CsvLogger(saveResultsToDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
+        val excLogger: CsvLogger = new CsvLogger(saveResultsToDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
         run(binaries, analysis, wasmConfig, succLogger, excLogger)
     }
 
     def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig, sLogger: CsvLogger, eLogger: CsvLogger): Unit = {
-
-
       if warmup then
         eLogger.log("hash;exceptionMsg")
       it(s"Warm-up until first successful run in $an") {
@@ -143,9 +143,14 @@ class WASMBenchRunner extends AnyFunSpec:
 
           t.start()
           t.join(timeLimit.toMillis)
+          if (t.isAlive) {
+            t.interrupt()
+            t.join()
+            t.stop()
+          }
 
           result match {
-            case Left(e) => if t.isAlive then {t.interrupt; t.join}; println(e.toString)
+            case Left(e) => if t.isAlive then {t.interrupt(); t.join()}; println(e.toString)
             case Right(v) => cont = false; sLogger.log(v.getCsvHeaders); println("warmed-up!")
           }
       }
@@ -166,10 +171,14 @@ class WASMBenchRunner extends AnyFunSpec:
 
           t.start()
           t.join(timeLimit.toMillis)
+          if (t.isAlive) {
+            t.interrupt()
+            t.join()
+            t.stop()
+          }
 
           result match {
             case Left(e) =>
-              if t.isAlive then {t.interrupt(); t.join()}
               eLogger.log(s"$name;${e.toString}")
               throw e
             case Right(v) =>

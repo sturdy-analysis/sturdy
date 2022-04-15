@@ -128,6 +128,9 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
   def push(dom: Dom, in: In): Option[TrySturdy[Codom]] =
+    if (Thread.currentThread().isInterrupted)
+      throw new InterruptedException
+
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
     stack.get(frame) match
