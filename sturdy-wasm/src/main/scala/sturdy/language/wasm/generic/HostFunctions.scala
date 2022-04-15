@@ -8,7 +8,7 @@ import ValType.*
 enum HostFunction(val name: String, val funcType: FuncType) extends Enumeration:
   case args_sizes_get extends HostFunction("args_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))
   case args_get extends HostFunction("args_get", FuncType(Vector(I32,I32), Vector(I32)))
-  case clock_time_get extends HostFunction("clock_time_get", FuncType(Vector(I32,I64,I32), Vector(I32)))
+  case clock_time_get extends HostFunction("clock_time_get", FuncType(Vector(I32,I32,I32), Vector(I32)))
   case environ_sizes_get extends HostFunction("environ_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))
   case environ_get extends HostFunction("environ_get", FuncType(Vector(I32,I32), Vector(I32)))
   case fd_close extends HostFunction("fd_close", FuncType(Vector(I32), Vector(I32)))
