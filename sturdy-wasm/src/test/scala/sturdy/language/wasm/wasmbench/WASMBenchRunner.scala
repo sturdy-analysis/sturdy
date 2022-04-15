@@ -254,12 +254,13 @@ type RunnerConfig = RRecord{
   val logOpenOption: StandardOpenOption
   val logErrors: Boolean
   val logResults: Boolean
+  val skipTestsIncludingIndex: Int
 }
 
 object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(1200).seconds,
+    "timeLimit" -> new GrainOfTime(600).seconds,
     "analysis" -> Analysis.Constant,
     "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
@@ -267,11 +268,12 @@ object WASMBenchRunner:
     "logOpenOption" -> StandardOpenOption.CREATE,
     "logErrors" -> true,
     "logResults" -> true,
+    "skipTestsIncludingIndex" -> -1
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
   
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults, skipTestsIncludingIndex}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -292,8 +294,8 @@ class WASMBenchRunner extends AnyFunSpec:
 //      val timeOuts = List(
 //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
-    }
-    
+    }.drop(skipTestsIncludingIndex + 1)
+
     val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
     val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
 

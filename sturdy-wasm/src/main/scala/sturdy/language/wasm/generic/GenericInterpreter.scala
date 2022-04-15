@@ -548,7 +548,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
     module.imports.foreach { imp =>
       // handle host functions
-      if (imp.moduleName == "wasi_snapshot_preview1") {
+      if (imp.moduleName == "wasi_snapshot_preview1" || imp.moduleName == "wasi_unstable") {
         imp match
           case Import.Function(_,funcName, funcType) =>
             val hf = HostFunction.nameToHostFunction(funcName)

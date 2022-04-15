@@ -34,8 +34,8 @@ class WASMBench extends AnyFlatSpec:
   val os: OS = {
     System.getProperty("os.name").toLowerCase() match {
       case "linux" => OS.Linux
-      case "mac" => OS.Mac
-      case _ => ???
+      case s if s.startsWith("mac") => OS.Mac
+      case s => println(s); ???
     }
   }
   val wasm2wat: Path = {
