@@ -553,7 +553,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           case Import.Function(_,funcName, funcType) =>
             val hf = HostFunction.nameToHostFunction(funcName)
             if (hf.funcType != module.types(funcType))
-              throw new Error(s"Importing host function with wrong type: expected ${hf.funcType}, but got ${module.types(funcType)}")
+              throw new Error(s"Importing host function $funcName with wrong type: expected ${hf.funcType}, but imported with ${module.types(funcType)}")
             funcs += FunctionInstance.Host(hf)
           case _ => throw new Error(s"Import from runtime: expected a function, but got $imp.")
       } else {
