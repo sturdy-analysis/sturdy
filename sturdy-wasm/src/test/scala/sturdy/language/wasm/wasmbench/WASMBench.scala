@@ -42,17 +42,25 @@ class WASMBench extends AnyFlatSpec:
     val u: URI = this.getClass.getResource(s"/sturdy/language/wasm/wasmbench/wasm2wat_${os}").toURI
     Path.of(u)
   }
-//
+    
+  // adjust argument accordingly
+  printBinariesFromJacarteInResult(rootDir.resolve("Constant.topmost-calls(1).results.csv"))
+
+
   val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
   val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
   prepareMetadata(mdPath, output)
+  
+  
 //  extractFuncDefsScript()
 //  metadataScripts()
-//  resultMdExploration
 
-  def resultMdExploration = {
+  def printBinariesFromJacarteInResult(pathToResultCSV: Path) = {
     // Procedure to query metadata and results
-    val resStore = mkResultStore
+
+    println(s"\nBinaries from Jacarte in ${pathToResultCSV.toString}")
+
+    val resStore = mkResultStore(pathToResultCSV)
     val hashes = resStore.retrieve(_ => true).map(r => r.hash.split('.')(0))
 
     val store = mkMdStore
@@ -97,8 +105,9 @@ class WASMBench extends AnyFlatSpec:
       }
     })
 
-    println(s"of which passed: ${ofWhichPassed.size}")
+    println(s"number of successfully tested binaries: ${hashes.size}, of which are from Jacarte/CROW_tmp/: ${ofWhichPassed.size}")
     println(s"of which export \"polybench_prepare_instruments\" and \"malloc\": ${exportPolybench.size}")
+    println("\nnon Jacarte/CROW_tmp/ binaries:")
     for {
       r <- nonJacarteResults
     } do {
@@ -142,9 +151,8 @@ class WASMBench extends AnyFlatSpec:
     }
     store
 
-  def mkResultStore: Store[String, Result] =
-    val resultPath = rootDir.resolve("Constant.topmost-calls(1).results.csv")
-    new ResultStore[Result](resultPath)
+  def mkResultStore(path: Path): Store[String, Result] =
+    new ResultStore[Result](path)
 
   def metadataScripts() =
     import org.json4s.native.Serialization
@@ -214,7 +222,7 @@ class WASMBench extends AnyFlatSpec:
 
     // exclude contains hashes of binaries that don't halt or consume too much memory during testing
     val exclude = List(
-//      "b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737",
+      "b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737",
       "681460c7ceeb6c96f37934f7b2d216dff3e7aa3e02f3325d5417113b607b1c03"
     )
 

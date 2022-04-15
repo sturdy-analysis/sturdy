@@ -17,7 +17,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.*
 import ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import java.nio.file.{Files, Path, StandardOpenOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.util.{Failure, Success, Try}
 
 
@@ -25,12 +25,14 @@ enum Analysis:
   case Constant
   case Taint
   case Type
+  case All(constantCfg: WasmConfig, taintCfg: WasmConfig, typeCfg: WasmConfig)
 
   def apply(set: Either[Throwable, RRecord] => Unit, p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): Runnable =
     this match 
       case Analysis.Type => new TypeRunnable(set, p, funcName, config, binary)
       case Analysis.Constant => new ConstantRunnable(set, p, funcName, config, binary)
       case Analysis.Taint => new TaintRunnable(set, p, funcName, config, binary)
+      case All(_,_,_) => ???
 
 
 type RunnerConfig = RRecord{
@@ -44,25 +46,32 @@ type RunnerConfig = RRecord{
   val logErrors: Boolean
   val logResults: Boolean
   val skipTestsIncludingIndex: Int
+  val saveResultsToDir: Path
 }
 
 object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(300).seconds,
-    "analysis" -> Analysis.Constant,
+    "timeLimit" -> new GrainOfTime(1).seconds,
+    "analysis" -> Analysis.All(
+      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
+      WasmConfig(ctx = CallSites(1)),
+      WasmConfig()
+    ),
     "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
     "warmup" -> true, // default: true
     "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
-    "skipTestsIncludingIndex" -> -1
+    "skipTestsIncludingIndex" -> -1,
+    "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results")
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
   
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults. skipTestsIncludingIndex}
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption,
+    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -83,16 +92,35 @@ class WASMBenchRunner extends AnyFunSpec:
       //      val timeOuts = List(
       //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
-    }.drop(skipTestsIncludingIndex)
+    }.drop(skipTestsIncludingIndex).take(50)
 
-    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
-    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
+//    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
+//    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
 
+    analysis match {
+      case Analysis.All(constantCfg, typeCfg, taintCfg) =>
+        run(binaries, Analysis.Constant, constantCfg)
+        run(binaries, Analysis.Taint, taintCfg)
+        run(binaries, Analysis.Type, typeCfg)
+      case _ =>
+        run(binaries, analysis, wasmConfig)
+    }
 
-    if warmup then
-      excLogger.log("hash;exceptionMsg")
-      it("Warm-up until first successful run") {
-        val currBin = binaries.iterator
+    def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig): Unit = {
+
+      val succLogger: CsvLogger = new CsvLogger(
+          saveResultsToDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')),
+          logOpenOption,
+          logResults)
+      val excLogger: CsvLogger = new CsvLogger(
+          saveResultsToDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')),
+          logOpenOption,
+          logErrors)
+
+      if warmup then
+        excLogger.log("hash;exceptionMsg")
+      it(s"Warm-up until first successful run in $an") {
+        val currBin = bins.iterator
         var cont = true
         while cont do
           val md = currBin.next().md
@@ -101,7 +129,7 @@ class WASMBenchRunner extends AnyFunSpec:
 
           var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
-          val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
+          val t = new Thread(an(v => {result = v}, p, "_start", cfg, true))
 
           t.start()
           t.join(timeLimit.toMillis)
@@ -112,33 +140,85 @@ class WASMBenchRunner extends AnyFunSpec:
           }
       }
 
-    for {
-      (WASMBenchBinary(md, ex), num) <- binaries.zipWithIndex
-    } do {
-      val name = md.hash;
-      val p = WASMBench.mkBinPath(name, filtering)
-      //      println(s"Test nr.: $num, hash: $name")
-      it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes}") {
-        //        TimeLimitedTests does not always terminate test after the specified time,
-        //        utilize 'Thread.join(millis)' instead
+      for {
+        (WASMBenchBinary(md, ex), num) <- bins.zipWithIndex
+      } do {
+        val name = md.hash;
+        val p = WASMBench.mkBinPath(name, filtering)
+        //      println(s"Test nr.: $num, hash: $name")
+        it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes} in $an") {
+          //        TimeLimitedTests does not always terminate test after the specified time,
+          //        utilize 'Thread.join(millis)' instead
 
-        var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
-        val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
+          val t = new Thread(an(v => {result = v}, p, "_start", cfg, true))
 
-        t.start()
-        t.join(timeLimit.toMillis)
+          t.start()
+          t.join(timeLimit.toMillis)
 
-        result match {
-          case Left(e) =>
-            if t.isAlive then {t.interrupt(); t.join()}
-            excLogger.log(s"$name;${e.toString}")
-            throw e
-          case Right(v) =>
-            succLogger.log(v.toCsv)
+          result match {
+            case Left(e) =>
+              if t.isAlive then {t.interrupt(); t.join()}
+              excLogger.log(s"$name;${e.toString}")
+              throw e
+            case Right(v) =>
+              succLogger.log(v.toCsv)
+          }
         }
       }
     }
+
+//    if warmup then
+//      excLogger.log("hash;exceptionMsg")
+//      it("Warm-up until first successful run") {
+//        val currBin = binaries.iterator
+//        var cont = true
+//        while cont do
+//          val md = currBin.next().md
+//          val name = md.hash;
+//          val p = WASMBench.mkBinPath(name, filtering)
+//
+//          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+//
+//          val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
+//
+//          t.start()
+//          t.join(timeLimit.toMillis)
+//
+//          result match {
+//            case Left(e) => if t.isAlive then {t.interrupt; t.join}; println(e.toString)
+//            case Right(v) => cont = false; succLogger.log(v.getCsvHeaders); println("warmed-up!")
+//          }
+//      }
+//
+//    for {
+//      (WASMBenchBinary(md, ex), num) <- binaries.zipWithIndex
+//    } do {
+//      val name = md.hash;
+//      val p = WASMBench.mkBinPath(name, filtering)
+//      //      println(s"Test nr.: $num, hash: $name")
+//      it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes}") {
+//        //        TimeLimitedTests does not always terminate test after the specified time,
+//        //        utilize 'Thread.join(millis)' instead
+//
+//        var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+//
+//        val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
+//
+//        t.start()
+//        t.join(timeLimit.toMillis)
+//
+//        result match {
+//          case Left(e) =>
+//            if t.isAlive then {t.interrupt(); t.join()}
+//            excLogger.log(s"$name;${e.toString}")
+//            throw e
+//          case Right(v) =>
+//            succLogger.log(v.toCsv)
+//        }
+//      }
+//    }
   }
 
 
