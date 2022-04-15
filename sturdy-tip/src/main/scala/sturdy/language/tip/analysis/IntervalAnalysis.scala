@@ -7,7 +7,7 @@ import sturdy.effect.{Effectful, AnalysisState, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.DecidableCallFrame
-import sturdy.effect.callframe.JoinedDecidableCallFrame
+import sturdy.effect.callframe.JoinableConcreteCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.{APrintPrefix, given}
@@ -56,7 +56,7 @@ object IntervalAnalysis extends Interpreter,
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Topped[Boolean], Unit] = implicitly
 
-    override val callFrame: JoinedDecidableCallFrame[Unit, String, Addr] = new JoinedDecidableCallFrame((), initEnvironment)
+    override val callFrame: JoinableConcreteCallFrame[Unit, String, Addr] = new JoinableConcreteCallFrame((), initEnvironment)
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: APrintPrefix[Value] = new APrintPrefix

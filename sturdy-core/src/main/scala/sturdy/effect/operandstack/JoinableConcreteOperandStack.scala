@@ -10,7 +10,7 @@ import ConcreteOperandStack.*
 import sturdy.values.MaybeChanged
 
 /** Stacks of different execution branches are joined. */
-class JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
+class JoinableConcreteOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
 
   override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
   private class OperandStackJoiner[A] extends ComputationJoiner[A] {

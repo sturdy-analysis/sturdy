@@ -5,11 +5,11 @@ import sturdy.effect.EffectStack
 import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.TopMemory
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.callframe.JoinedDecidableCallFrame
+import sturdy.effect.callframe.JoinableConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinedSymbolTable, UpperBoundSymbolTable}
+import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
+import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -74,11 +74,11 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     override def widenInState: Widen[InState] = implicitly
     override def widenOutState: Widen[OutState] = implicitly
 
-    val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
+    val stack: JoinableConcreteOperandStack[Value] = new JoinableConcreteOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
-    val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
+    val globals: JoinableConcreteSymbolTable[Unit, GlobalAddr, Value] = new JoinableConcreteSymbolTable
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
-    val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableConcreteCallFrame[FrameData, Int, Value] = new JoinableConcreteCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
     given Failure = failure

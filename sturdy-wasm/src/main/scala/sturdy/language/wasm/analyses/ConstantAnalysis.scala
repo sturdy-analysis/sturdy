@@ -6,11 +6,11 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.callframe.JoinedDecidableCallFrame
+import sturdy.effect.callframe.JoinableConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinedSymbolTable, ConstantSymbolTable}
+import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
+import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.Combinator
@@ -91,11 +91,11 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
 //    override def widenState: Widen[State] = implicitly
 
     
-    val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
+    val stack: JoinableConcreteOperandStack[Value] = new JoinableConcreteOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
-    val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
+    val globals: JoinableConcreteSymbolTable[Unit, GlobalAddr, Value] = new JoinableConcreteSymbolTable
     val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
-    val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableConcreteCallFrame[FrameData, Int, Value] = new JoinableConcreteCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
     private given Failure = failure

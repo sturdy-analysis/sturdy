@@ -18,7 +18,7 @@ import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
-import sturdy.effect.symboltable.JoinedSymbolTable
+import sturdy.effect.symboltable.JoinableConcreteSymbolTable
 import sturdy.values.Combine
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged

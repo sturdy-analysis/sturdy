@@ -7,7 +7,7 @@ import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.values.Join
 
-class JoinedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteSymbolTable[Key, Symbol, Entry]:
+class JoinableConcreteSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteSymbolTable[Key, Symbol, Entry]:
   override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
