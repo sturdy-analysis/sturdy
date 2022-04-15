@@ -1,39 +1,39 @@
 package sturdy.language.wasm.wasmbench
 
-import org.scalatest
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.SpanSugar.GrainOfTime
-import org.scalatest.time.Span
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantTaintAnalysis, FixpointConfig, TypeAnalysis, WasmConfig}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.FrameData
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
-import java.util.concurrent.{ExecutionException, TimeoutException}
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration.*
-import ExecutionContext.Implicits.global
-import scala.language.postfixOps
-import java.nio.file.{Files, Path, StandardOpenOption}
-import scala.util.{Failure, Success, Try}
+import java.nio.file.{Files, Path}
 
+trait AnalysisRunnable extends Runnable:
+  def setRes(v: Either[Throwable, RRecord]): Unit
+  def start(): RRecord
 
-enum Analysis:
-  case Constant
-  case Taint
-  case Type
+  def run(): Unit =
+    try {
+      val res = start()
+      setRes(Right(res))
+    }
+    catch {
+      case e: InterruptedException =>
+        Thread.currentThread().interrupt()
+        println("time limited reached, terminating analysis.")
+        setRes(Left(e))
+      case e =>
+        setRes(Left(e))
+    }
 
-  def apply(p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): RRecord =
-    this match 
-      case Analysis.Type => TypeTest(p, funcName, config, binary)
-      case Analysis.Constant => ConstantTest(p, funcName, config, binary)
-      case Analysis.Taint => TaintTest(p, funcName, config, binary)
-
-object TaintTest:
-  def apply(p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): RRecord =
+class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
+                p: Path, funcName: String,
+                config: WasmConfig,
+                binary: Boolean = false) extends AnalysisRunnable:
+  override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
+  override def start(): RRecord =
     Fixpoint.DEBUG = false
 
     val name = p.getFileName.toString
@@ -111,8 +111,80 @@ object TaintTest:
       "taintedAccessesPercent" -> taintedAccessesPercent,
     )
 
-object ConstantTest:
-  def apply(p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): RRecord =
+
+class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
+                   p: Path, funcName: String,
+                   config: WasmConfig,
+                   binary: Boolean = false) extends AnalysisRunnable:
+  override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
+  override def start(): RRecord =
+    Fixpoint.DEBUG = false
+
+    val startTimeMillis = System.currentTimeMillis()
+
+    val name = p.getFileName.toString
+    val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+
+    val modInst = interp.initializeModule(module)
+    interp.failure.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
+    )
+
+    val allNodes = ControlFlow.allCfgNodes(List(modInst))
+    val allInstructions = allNodes.filter(_.isInstruction)
+    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
+    val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
+
+    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
+    val deadLabels = ControlFlow.deadLabels(cfg)
+    val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
+    val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
+
+    val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
+    val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
+    val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
+
+    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size
+    val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
+
+    val endTimeMillis = System.currentTimeMillis()
+    val duration = endTimeMillis - startTimeMillis
+
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
+    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
+
+    // write CFG to .dot file
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
+    Files.writeString(dotPath, cfg.toGraphViz)
+
+    RRecord(
+      "hash" -> name,
+      "duration" -> duration,
+      "allInstructions" -> allInstructions.size,
+      "deadInstructions" -> deadInstructions.size,
+      "deadInstructionPercent" -> deadInstructionPercent,
+      "deadLabels" -> deadLabels.size,
+      "deadLabelsPercent" -> deadLabelsPercent,
+      "allLabels" -> allLabels.size,
+      "deadLabelsBlock" -> deadLabelsBlock.size,
+      "deadLabelLoop" -> deadLabelLoop.size,
+      "deadLabelsIf" -> deadLabelsIf.size,
+      "eliminatable" -> eliminatable,
+      "eliminatablePercent" -> eliminatablePercent,
+    )
+
+class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
+                       p: Path, funcName: String,
+                       config: WasmConfig,
+                       binary: Boolean = false) extends AnalysisRunnable{
+
+  override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
+
+  override def start(): RRecord =
     Fixpoint.DEBUG = false
 
     val name = p.getFileName.toString
@@ -163,7 +235,7 @@ object ConstantTest:
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
     val blockCfg = cfg.withBlocks(shortLabels = true)
     Files.writeString(dotPath, blockCfg.toGraphViz)
-    
+
     RRecord(
       "hash" -> name,
       "duration" -> duration,
@@ -182,194 +254,4 @@ object ConstantTest:
       "constantInstructionPercent" -> constantInstructionPercent,
       "liveInstructions" -> liveInstructions,
     )
-
-object TypeTest:
-  def apply(p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): RRecord =
-    Fixpoint.DEBUG = false
-
-    val startTimeMillis = System.currentTimeMillis()
-
-    val name = p.getFileName.toString
-    val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, config)
-    val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
-    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
-
-    val modInst = interp.initializeModule(module)
-    interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, List.empty)
-    )
-
-    val allNodes = ControlFlow.allCfgNodes(List(modInst))
-    val allInstructions = allNodes.filter(_.isInstruction)
-    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-    val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-
-    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
-    val deadLabels = ControlFlow.deadLabels(cfg)
-    val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
-    val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
-
-    val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
-    val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
-    val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
-
-    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size
-    val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
-
-    val endTimeMillis = System.currentTimeMillis()
-    val duration = endTimeMillis - startTimeMillis
-
-    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
-    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
-    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
-
-    // write CFG to .dot file
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
-    Files.writeString(dotPath, cfg.toGraphViz)
-    
-    RRecord(
-      "hash" -> name,
-      "duration" -> duration,
-      "allInstructions" -> allInstructions.size,
-      "deadInstructions" -> deadInstructions.size,
-      "deadInstructionPercent" -> deadInstructionPercent,
-      "deadLabels" -> deadLabels.size,
-      "deadLabelsPercent" -> deadLabelsPercent,
-      "allLabels" -> allLabels.size,
-      "deadLabelsBlock" -> deadLabelsBlock.size,
-      "deadLabelLoop" -> deadLabelLoop.size,
-      "deadLabelsIf" -> deadLabelsIf.size,
-      "eliminatable" -> eliminatable,
-      "eliminatablePercent" -> eliminatablePercent,
-    )
-
-type RunnerConfig = RRecord{
-  val filtering: Filtering
-  val timeLimit: Span
-  val analysis: Analysis
-  val wasmConfig: WasmConfig
-  val rootDir: Path
-  val warmup: Boolean
-  val logOpenOption: StandardOpenOption
-  val logErrors: Boolean
-  val logResults: Boolean
 }
-
-object WASMBenchRunner:
-  val runnerConfig: RunnerConfig = RRecord(
-    "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(300).seconds,
-    "analysis" -> Analysis.Constant,
-    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-    "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
-    "warmup" -> true, // default: true
-    "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
-    "logErrors" -> true, // default: true
-    "logResults" -> true, // default: true
-  ).asInstanceOf[RunnerConfig]
-
-class WASMBenchRunner extends AnyFunSpec:
-  
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
-
-  val store: Store[String, WASMBenchBinary] = {
-    val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
-    val exPath = rootDir.resolve(s"sturdy.funcdefs.$filtering.json")
-    new JSONStore(mdPath, exPath)
-  }
-
-  describe(s"Running $analysis on every binary exposing a \"_start\" function " +
-    s"in the $filtering WasmBench dataset") {
-
-    val pred = (x: WASMBenchBinary) =>
-      x.ex.exists {
-        case FuncDef(_, _, Some("_start")) => true
-        case _ => false
-      }
-
-    val binaries = {
-      //      val timeOuts = List(
-      //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
-      store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
-    }.drop(50)
-
-    val succLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
-    val excLogger: CsvLogger = new CsvLogger(rootDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
-
-
-    if warmup then
-      excLogger.log("hash;exceptionMsg")
-      it("Warm-up until first successful run") {
-        val currBin = binaries.iterator
-        var cont = true
-        while cont do
-          val md = currBin.next().md
-          val name = md.hash;
-          val p = WASMBench.mkBinPath(name, filtering)
-
-          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
-
-          val t = new Thread(new Runnable {
-            def run: Unit = {
-              Try(analysis(p, "_start", wasmConfig, true)) match
-                case Success(v) => result = Right(v)
-                case Failure(e) => result = Left(e)
-            }
-          })
-
-          t.start()
-          t.join(timeLimit.toMillis)
-
-          result match {
-            case Left(e) => if t.isAlive then t.stop; println(e.toString)
-            case Right(v) => cont = false; succLogger.log(v.getCsvHeaders); println("warmed-up!")
-          }
-      }
-
-    for {
-      (WASMBenchBinary(md, ex), num) <- binaries.zipWithIndex
-    } do {
-      val name = md.hash;
-      val p = WASMBench.mkBinPath(name, filtering)
-      //      println(s"Test nr.: $num, hash: $name")
-      it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes}") {
-        //        TimeLimitedTests does not always terminate test after the specified time,
-        //        utilize 'Thread.join(millis)' instead
-
-        var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
-
-        val t = new Thread(new ConstantRunnable(v => {result = v}, p, "_start", wasmConfig, true))
-
-        t.start()
-        t.join(timeLimit.toMillis)
-
-        result match {
-          case Left(e) =>
-            if t.isAlive then {t.interrupt(); t.join()}
-            excLogger.log(s"$name;${e.toString}")
-            throw e
-          case Right(v) =>
-            succLogger.log(v.toCsv)
-        }
-      }
-    }
-  }
-
-
-class CsvLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false):
-  import StandardOpenOption.*
-
-  (oo, doLog) match
-    case (CREATE, true) =>
-      if Files.exists(p) then Files.delete(p)
-      val init = Files.newOutputStream(p, oo)
-      init.flush(); init.close()
-    case _ => ()
-
-  val log: String => Unit = if doLog then this.doLogFun else (x: String) => ()
-
-  private def doLogFun(str: String): Unit =
-    val logStream = Files.newOutputStream(p, StandardOpenOption.APPEND)
-    logStream.write(str.concat("\n").getBytes())
-    logStream.flush(); logStream.close()

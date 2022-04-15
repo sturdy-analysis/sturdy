@@ -42,11 +42,11 @@ class WASMBench extends AnyFlatSpec:
     val u: URI = this.getClass.getResource(s"/sturdy/language/wasm/wasmbench/wasm2wat_${os}").toURI
     Path.of(u)
   }
-
+//
   val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
   val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
   prepareMetadata(mdPath, output)
-  extractFuncDefsScript()
+//  extractFuncDefsScript()
 //  metadataScripts()
 //  resultMdExploration
 
@@ -214,7 +214,7 @@ class WASMBench extends AnyFlatSpec:
 
     // exclude contains hashes of binaries that don't halt or consume too much memory during testing
     val exclude = List(
-      "b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737",
+//      "b022a54c3b5546fd09f00e6cb6ed12d04530298cef64182db9e12b8d9b4e4737",
       "681460c7ceeb6c96f37934f7b2d216dff3e7aa3e02f3325d5417113b607b1c03"
     )
 

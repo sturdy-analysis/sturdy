@@ -34,11 +34,12 @@ object FuncExtractor:
       val in = Files.newBufferedReader(tmpFilePath).lines().iterator().asScala
 
       in.foreach(line => {
-        if line.startsWith("(func") then
+        val l = line.strip()
+        if l.startsWith("(func") then
           funcDefStr = funcDefStr + "\n" + line
-        else if line.startsWith("(type") then
+        else if l.strip().startsWith("(type") then
           typeDefStr = typeDefStr + "\n" + line
-        else if line.startsWith("(export") then
+        else if l.startsWith("(export") then
           funcExStr = funcExStr + "\n" + line
       })
 
