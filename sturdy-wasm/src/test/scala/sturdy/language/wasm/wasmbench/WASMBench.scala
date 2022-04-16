@@ -27,7 +27,7 @@ It includes
 */
 
 class WASMBench extends AnyFlatSpec:
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults}
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults, saveResultsToDir}
 
   val MAXSIZE: Int = 10485760
 
@@ -44,12 +44,12 @@ class WASMBench extends AnyFlatSpec:
   }
     
   // adjust argument accordingly
-  printBinariesFromJacarteInResult(rootDir.resolve("Constant.topmost-calls(1).results.csv"))
+  printBinariesFromJacarteInResult(saveResultsToDir.resolve("Constant.topmost-calls(1).results.csv"))
 
 
-  val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
-  val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
-  prepareMetadata(mdPath, output)
+//  val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
+//  val output: Path = rootDir.resolve(s"sturdy.metadata.$filtering.json")
+//  prepareMetadata(mdPath, output)
   
   
 //  extractFuncDefsScript()

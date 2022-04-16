@@ -47,32 +47,34 @@ type RunnerConfig = RRecord{
   val logResults: Boolean
   val skipTestsIncludingIndex: Int
   val saveResultsToDir: Path
+  val onlyBinariesInCSV: Option[Path]
 }
 
 object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(600).seconds,
-    "analysis" -> // Analysis.Constant,
-    Analysis.All(
-      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
-    ),
+    "timeLimit" -> new GrainOfTime(120).seconds,
+    "analysis" -> Analysis.Constant,
+//      Analysis.All(
+//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
+//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
+//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
+//    ),
     "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
     "warmup" -> true, // default: true
-    "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
+    "logOpenOption" -> StandardOpenOption.APPEND, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
-    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-v0")
+    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-v1"),
+    "onlyBinariesInCSV" -> Some(Path.of("/Volumes/home/tmp/wasmbench/results-v0/Type.topmost-calls(1).results.csv"))
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
   
   import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption,
-    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir}
+    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir, onlyBinariesInCSV}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -89,11 +91,19 @@ class WASMBenchRunner extends AnyFunSpec:
         case _ => false
       }
 
-    val binaries = {
+    var binaries = {
       //      val timeOuts = List(
       //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
       store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
     }.drop(skipTestsIncludingIndex + 1)
+
+    if (onlyBinariesInCSV.isDefined) {
+      val csvStore = new ResultStore[Result](onlyBinariesInCSV.get)
+      val hashes = csvStore.retrieve(_ => true).map(r => r.hash.split('.')(0)).toSet
+      binaries = binaries.filter(b => !hashes.contains(b.md.hash))
+    }
+
+    println(s"Considering ${binaries.size} binaries")
 
     saveResultsToDir.toFile.mkdirs()
     analysis match {
@@ -127,32 +137,37 @@ class WASMBenchRunner extends AnyFunSpec:
     }
 
     def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig, sLogger: CsvLogger, eLogger: CsvLogger): Unit = {
-      if warmup then
+      if (warmup) {
         eLogger.log("hash;exceptionMsg")
-      it(s"Warm-up until first successful run in $an") {
-        val currBin = bins.iterator
-        var cont = true
-        while cont do
-          val md = currBin.next().md
-          val name = md.hash;
-          val p = WASMBench.mkBinPath(name, filtering)
+        it(s"Warm-up until first successful run in $an") {
+          val currBin = bins.iterator
+          var cont = true
+          while cont do
+            val md = currBin.next().md
+            val name = md.hash;
+            val p = WASMBench.mkBinPath(name, filtering)
 
-          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+            var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
-          val t = new Thread(an(v => {result = v}, p, "_start", cfg, true))
+            val t = new Thread(an(v => {
+              result = v
+            }, p, "_start", cfg, true))
 
-          t.start()
-          t.join(timeLimit.toMillis)
-          if (t.isAlive) {
-            t.interrupt()
-            t.join()
-            t.stop()
-          }
+            t.start()
+            t.join(timeLimit.toMillis)
+            if (t.isAlive) {
+              t.interrupt()
+              t.join()
+              t.stop()
+            }
 
-          result match {
-            case Left(e) => if t.isAlive then {t.interrupt(); t.join()}; println(e.toString)
-            case Right(v) => cont = false; sLogger.log(v.getCsvHeaders); println("warmed-up!")
-          }
+            result match {
+              case Left(e) => if t.isAlive then {
+                t.interrupt(); t.join()
+              }; println(e.toString)
+              case Right(v) => cont = false; sLogger.log(v.getCsvHeaders); println("warmed-up!")
+            }
+        }
       }
 
       for {
