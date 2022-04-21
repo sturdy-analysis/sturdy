@@ -8,7 +8,7 @@ import sturdy.fix.Contextual
 import sturdy.fix.Stack
 import sturdy.util.StackManager
 import sturdy.values.Finite
-import sturdy.values.Widen
+import sturdy.values.{Widen, Join}
 
 import scala.collection.mutable
 import scala.util.Try
@@ -16,7 +16,7 @@ import scala.util.Try
 def topmost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[Dom, In, Out, All])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Topmost[Dom, Codom, In, Out, All, Ctx] =
   new Topmost(state, context)
@@ -26,7 +26,7 @@ object TopmostCounter:
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 

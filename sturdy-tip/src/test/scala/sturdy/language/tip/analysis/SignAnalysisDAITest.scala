@@ -82,12 +82,12 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
       null
     }
 
-object RunSignAnalysisDAI extends App {
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/7x7.tip").toURI;
-  val (res, analysis) = new SignAnalysisDAITest().runSignAnalysis(Paths.get(uri))
-  println(res)
-  println(analysis.callFrame.getState)
-  println(analysis.store.getState)
-  println(analysis.print.getState)
-//  println(cfg.toGraphViz)
-}
+//object RunSignAnalysisDAI extends App {
+//  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/7x7.tip").toURI;
+//  val (res, analysis) = new SignAnalysisDAITest().runSignAnalysis(Paths.get(uri))
+//  println(res)
+//  println(analysis.callFrame.getState)
+//  println(analysis.store.getState)
+//  println(analysis.print.getState)
+////  println(cfg.toGraphViz)
+//}

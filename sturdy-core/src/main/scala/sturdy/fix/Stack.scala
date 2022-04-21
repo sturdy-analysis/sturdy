@@ -6,7 +6,7 @@ import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
 import sturdy.values.Finite
-import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged}
+import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged, Join}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -35,7 +35,7 @@ import scala.util.Try
  *
  */
 final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
-  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], effectStack: EffectStack)
+  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
   (using Finite[Dom], Finite[Ctx]):
 
   /** Set of active calls identified by their context and their stack position.
@@ -222,8 +222,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
         println(s"${stackHeightIndent}  POP RECURRENT  $frame")
       TrySturdy(throw RecurrentCall(frame))
     case Some((res, previousOut)) =>
-      state.setOutState(Widen(previousOut, state.getOutState(frame.dom)).get)
-
+      state.setOutState(joinOut(state.getOutState(frame.dom), previousOut).get)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
       res

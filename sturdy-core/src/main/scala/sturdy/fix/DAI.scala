@@ -31,7 +31,7 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
   def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
 //    FixCache(Fixpoint.computeFixpoint(fixed => EvCache(f(using fixed))))
 //
-    FixCache(Fixpoint.computeFixpoint(
+    FixCache(Fixpoint.computeLeastFixpoint(
       (fixed: Dom => Codom) => dispatch(filterFunc,
         Seq((fixed: Dom => Codom) => EvCache(f(using fixed)), (fixed: Dom => Codom) => EvCache(f(using fixed)))
       )(f(using fixed))

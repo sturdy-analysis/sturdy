@@ -7,7 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
 import sturdy.values.Finite
-import sturdy.values.Widen
+import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -16,14 +16,14 @@ import scala.util.Try
 def innermost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[Dom, In, Out, All])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Innermost[Dom, Codom, In, Out, All, Ctx] =
   new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 

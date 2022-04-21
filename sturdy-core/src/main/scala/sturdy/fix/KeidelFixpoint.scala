@@ -4,21 +4,25 @@ import sturdy.effect.{AnalysisState, CombineTrySturdy, RecurrentCall, TrySturdy}
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Widen
-import iter.Config
+import sturdy.fix.iter.Config
 import sturdy.util.StackManager
 
 import scala.language.implicitConversions
+
 // Scc: BitSet
-def identityStackWidening[Dom, In]: StackWidening[Dom, In] = scala.Predef.identity[(Stack[Dom, In], Call[Dom, In])]
 
-type StackWidening[Dom, In] = (Stack[Dom, In], Call[Dom, In]) => (Stack[Dom, In], Call[Dom, In])
 
-case class Call[Dom, In](dom: Dom, in: In)
-type Stack[Dom, In] = Map[Call[Dom, In], Int]
+object KeidelFixpoint:
+  case class Call[Dom, In](dom: Dom, in: In)
+  type Stack[Dom, In] = Map[Call[Dom, In], Int]
+
+  type StackWidening[Dom, In] = (Stack[Dom, In], Call[Dom, In]) => (Stack[Dom, In], Call[Dom, In])
+  def identityStackWidening[Dom, In]: StackWidening[Dom, In] = (stack, call) => (stack, call)
+
+import KeidelFixpoint.*
 
 class KeidelFixpoint[Dom, Codom, In, Out, All]
-  (chooseFun: Dom => Int, phiConfigs: Iterable[Config])
-  (stackWidening: StackWidening[Dom, In])
+  (chooseFun: Dom => Int, phiConfigs: Iterable[Config], stackWidening: StackWidening[Dom, In] = identityStackWidening[Dom, In])
   (using state: AnalysisState[Dom, In, Out, All])
 //  (using Join[Out], Finite[Dom], Widen[Codom], Widen[Out], Widen[In])
   (using Finite[Dom], Widen[Codom], Widen[Out], Widen[In])
@@ -62,7 +66,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
 //      case Config.Topmost => fixed => outermost.compose(widenStack)(fixed)
     )
     val fixCombinator: (Dom => Codom) => Dom => TrySturdy[Codom] = fixed => dispatch(chooseFun, phis)(fToTrySturdy(fixed))
-    Fixpoint.computeFixpoint(
+    Fixpoint.computeLeastFixpoint(
       (fixed: Dom => Codom) => (dom: Dom) => fixCombinator(fixed)(dom)
         .getOrThrow
     )

@@ -6,7 +6,7 @@ import scala.collection.immutable.IntMap
 
 given FiniteMap[K, V](using Finite[K], Finite[V]): Finite[Map[K, V]] with {}
 
-given JoinMap[K, V, W <: Widening](using j: Combine[V, W]): Join[Map[K, V]] with
+given JoinMap[K, V](using j: Join[V]): Join[Map[K, V]] with
   override def apply(vs1: Map[K, V], vs2: Map[K, V]): MaybeChanged[Map[K, V]] =
     var joined = vs1
     var changed = false

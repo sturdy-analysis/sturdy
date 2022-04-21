@@ -17,7 +17,7 @@ import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.analysis.SignAnalysis.Parameters
-import sturdy.values.{Finite, Widen}
+import sturdy.values.{Finite, Widen, Join}
 
 def isFunOrWhile(dom: FixIn): Int = dom match
   case FixIn.EnterFunction(_) => 0
@@ -46,13 +46,13 @@ trait Fix extends Interpreter:
 
   def topmost[Ctx, In, Out, All]
     (using AnalysisState[FixIn, In, Out, All])
-    (using Widen[Value], Widen[In], Widen[Out], Finite[Ctx], EffectStack)
+    (using Widen[Value], Widen[In], Widen[Out], Join[Out], Finite[Ctx], EffectStack)
     : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
     = filter(isFunOrWhile(_) >= 0, iter.topmost)
 
   def innermost[Ctx, In, Out, All]
     (using AnalysisState[FixIn, In, Out, All])
-    (using Widen[Value], Widen[In], Widen[Out], Finite[Ctx], EffectStack)
+    (using Widen[Value], Widen[In], Widen[Out], Join[Out], Finite[Ctx], EffectStack)
     : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
     = filter(isFunOrWhile(_) >= 0, iter.innermost)
 
