@@ -50,7 +50,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
   private var inCacheDirty: Boolean = false
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
-  private var outCache: Map[Frame[Dom, Ctx], (TrySturdy[Codom], Out)] = Map()
+  var outCache: Map[Frame[Dom, Ctx], (TrySturdy[Codom], Out)] = Map()
   private var outCacheDirty: Boolean = false
 
   /** Set of _active_ stack frames that have recurred.
@@ -222,7 +222,8 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
         println(s"${stackHeightIndent}  POP RECURRENT  $frame")
       TrySturdy(throw RecurrentCall(frame))
     case Some((res, previousOut)) =>
-      state.setOutState(previousOut)
+      state.setOutState(Widen(previousOut, state.getOutState(frame.dom)).get)
+
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
       res

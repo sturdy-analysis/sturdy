@@ -57,11 +57,10 @@ object IntervalAnalysis extends Interpreter,
     override val print: APrintPrefix[Value] = new APrintPrefix
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntInterval.Top))
 
-    var bounds: Set[Int] = Set.empty
+    var bounds: Set[Int] = Set()
     given Widen[IntInterval] = new IntIntervalWiden(bounds)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
-

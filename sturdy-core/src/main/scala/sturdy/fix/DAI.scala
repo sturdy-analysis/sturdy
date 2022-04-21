@@ -1,28 +1,46 @@
 package sturdy.fix
 
-import sturdy.effect.AnalysisState
+import sturdy.effect.{AnalysisState, EffectStack, RecurrentCall, TrySturdy}
 import sturdy.values.Finite
-import sturdy.effect.EffectStack
-import sturdy.effect.RecurrentCall
-import sturdy.values.Join
+import sturdy.values.{Widen, Join}
 import sturdy.data.JoinTuple2
+import sturdy.util.Profiler
+
+import scala.reflect.ClassTag
+
+class OutCacheOwner[Dom, Codom, In, Out, All]:
+  var outCache: Map[(Dom, In), (Codom, In)] = Map()
 
 
 class DAIFixpoint[Dom, Codom, In, Out, All]
+//  (filterFunc: Dom => Boolean)
+  (filterFunc: Dom => Int)
+//  (comp: Map[(Dom, In), (Codom, Out)])
+  (comp: OutCacheOwner[Dom, Codom, In, Out, All])
   (using state: AnalysisState[Dom, In, Out, All])
-  (using Join[Codom], Join[Out], Finite[Dom]) extends Fixpoint[Dom, Codom]:
+  (using Join[Codom], Join[In], Finite[Dom], Widen[Out])    // Join[Out]
+  extends Fixpoint[Dom, Codom]:
 
   type Conf = (Dom, In)
-  type InCache = Map[Conf, (Codom, Out)]
-  type OutCache = Map[Conf, (Codom, Out)]
+  type InCache = Map[Conf, (Codom, In)]
+  type OutCache = Map[Conf, (Codom, In)]
 
-  var incache: InCache = Map()
-  var outcache: OutCache = Map()
+  var inCache: InCache = Map()
+  var outCache: OutCache = Map()
+
+  def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
+//    FixCache(Fixpoint.computeFixpoint(fixed => EvCache(f(using fixed))))
+//
+    FixCache(Fixpoint.computeFixpoint(
+      (fixed: Dom => Codom) => dispatch(filterFunc,
+        Seq((fixed: Dom => Codom) => EvCache(f(using fixed)), (fixed: Dom => Codom) => EvCache(f(using fixed)))
+      )(f(using fixed))
+    ))
 
   //   (mrun ((fix-cache (fix (ev-cache f))) e)))
-  override def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
-    FixCache(Fixpoint.computeFixpoint(fixed => EvCache(f(using fixed))))
 
+
+  def getOutCache: OutCache = outCache
 
   /*
   (define (((ev-cache ev₀) ev) e)
@@ -35,7 +53,7 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
                   (do (put-store σ)
                       (return v)))
             (do $in ← ask-cache-in
-                v×σ  ≔ (if (∈ ς $in) ($in ς) ∅)
+                v×σ₀  ≔ (if (∈ ς $in) ($in ς) ∅)
                 (put-cache-out ($out ς v×σ₀))
                 v ← ((ev₀ ev) e)
                 σ′ ← get-store
@@ -47,19 +65,26 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
     override def apply(f: Dom => Codom): Dom => Codom =
       def apply_(dom: Dom): Codom =
         val conf = (dom, state.getInState(dom))
-        outcache.get(conf) match
+//        println(conf)
+        outCache.get(conf) match
           case Some(null) => throw RecurrentCall(dom)
           case Some((codom, out)) =>
-            state.setOutState(out)
+            state.setInState(out)    // setOut
             codom
           case None =>
-            val oldResult = incache.getOrElse(conf, null)
-            outcache += conf -> oldResult
+            val oldResult = inCache.getOrElse(conf, null)
+            outCache += conf -> oldResult
             val codom = f(dom)
-            val out = state.getOutState(dom)
-            val (codomOld, outOld) = outcache(conf)
-            val joined = Join((codomOld, outOld), (codom, out)).get
-            outcache += conf -> joined
+            val out = state.getInState(dom)   // getOut
+
+            val joinedValueAndOut = outCache(conf) match
+              case null => (codom, out)
+              case (codomCached, outCached) =>
+                val widened = (Join(codomCached, codom).get, Join(outCached, out).get)
+                //                println(s"${widened._1}    $codom     $codomCached")
+                widened
+
+            outCache += conf -> joinedValueAndOut
             codom
       apply_
 
@@ -75,11 +100,35 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
           (for/monad+ ([let v×σ = ($⁺ ς)])
                 (do (put-store σ)
                   (return v)))))
+
+    (define (mlfp f)
+      (let loop ([x ∅])
+        (do x′ ← (f x)
+        (if (equal? x′ x) (return x) (loop x′)))))
   */
   object FixCache extends Combinator[Dom, Codom]:
+    var counter = 0
     override def apply(f: Dom => Codom): Dom => Codom =
-      def apply_(dom: Dom): Codom =
-        ???
+      def apply_(dom: Dom): Codom = {
+        var result: Option[Codom] = None
+        val stateAllFromStart = state.getAllState
+        while
+          inCache = outCache
+          outCache = Map()
+          state.setAllState(stateAllFromStart)
+          println("startInCache: " + inCache)
+          result = Some(f(dom))
+          //          println(s"In     $incache")
+          //          println(s"Out    $outcache")
+
+          counter += 1
+          Profiler.addTime("comparison")(
+            inCache != outCache //&& counter < 5
+          )
+        do()
+        comp.outCache = outCache
+        result.get
+      }
       apply_
 
 

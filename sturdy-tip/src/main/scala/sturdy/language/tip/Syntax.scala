@@ -27,7 +27,8 @@ enum Exp extends Labled:
     case NumLit(_) => f(this)
     case Input() => f(this)
     case Var(_) => f(this)
-    case Add(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Add(e1, e2) =>
+      m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Sub(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Mul(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Div(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
@@ -60,6 +61,11 @@ enum Exp extends Labled:
     case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
     case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
+  def intLiterals: Set[Int] =
+    fold(using e => e match
+      case NumLit(n: Int) => Set(n)
+      case _ => Set()
+    )
 
 enum Stm extends Labled:
   case Assign(lhs: Assignable, e: Exp)
@@ -71,9 +77,12 @@ enum Stm extends Labled:
 
   def fold[A](using f: Stm => A, g: Exp => A)(using m: Monoid[A]): A = this match
     case Assign(_, e) => m.combine(f(this), e.fold)
-    case If(c, t, e) => m.combine(f(this), m.combine(c.fold, Monoid.maybeCombine(t.fold, e.map(f))))
-    case While(c, b) => m.combine(f(this), m.combine(c.fold, b.fold))
-    case Block(body) => m.combine(f(this), m.combineAll(body.view.map(f)))
+    case If(c, t, e: Option[Stm]) => m.combine(f(this),
+      m.combine(c.fold, m.combine(t.fold, if (e.nonEmpty) e.get.fold else m.empty)))
+    case While(c, b) =>
+      m.combine(f(this), m.combine(c.fold, b.fold))
+    case Block(body) =>
+      m.combine(f(this), m.combineAll(body.view.map(_.fold)))
     case Output(e) => m.combine(f(this), e.fold)
     case Error(e) => m.combine(f(this), e.fold)
 
@@ -85,25 +94,36 @@ enum Stm extends Labled:
     case Output(e) => s"Output@${this.label}"
     case Error(e) => s"Error@${this.label}"
 
+  def intLiterals: Set[Int] =
+    fold(using _ => Set(), _.intLiterals)
+
 enum Assignable:
   case AVar(name: String)
   case ADeref(e: Exp)
   case AField(rec: String, field: String)
   case ADerefField(rec: Exp, field: String)
 
+  def fold[A](using g: Exp => A)(using m: Monoid[A]): A = this match
+    case ADeref(e) => g(e)
+    case ADerefField(rec, _) => g(rec)
+    case _ => m.empty
+
+  def intLiterals: Set[Int] = this match
+    case ADeref(e) => e.intLiterals
+    case ADerefField(rec, _) => rec.intLiterals
+
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
   override def toString: String = s"function $name"
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))
 
+  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
+
 case class Program(funs: Seq[Function]):
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))
 
-  def intLiterals: Set[Int] = fold(using _ => Set(), _ => Set(), {
-    case Exp.NumLit(n: Int) => Set(n)
-    case _ => Set()
-  })
+  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
 
 
 given StructuralFunction: Structural[Function] with {}

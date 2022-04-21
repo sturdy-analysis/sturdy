@@ -109,6 +109,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
+  val fixpointSuper: fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
   // joins
@@ -467,7 +468,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: Fixed): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
-  private def fixed: Fixed = fixpoint {
+  private def fixed: Fixed = fixpointSuper {
     case FixIn.Eval(inst, loc) =>
       eval_open(inst, loc)
       FixOut.Eval()

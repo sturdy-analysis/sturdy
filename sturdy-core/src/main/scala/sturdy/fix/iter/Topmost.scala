@@ -6,6 +6,7 @@ import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
+import sturdy.util.StackManager
 import sturdy.values.Finite
 import sturdy.values.Widen
 
@@ -17,7 +18,11 @@ def topmost[Dom, Codom, In, Out, All, Ctx]
   (using state: AnalysisState[Dom, In, Out, All])
   (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
-  : Topmost[Dom, Codom, In, Out, All, Ctx] = new Topmost(state, context)
+  : Topmost[Dom, Codom, In, Out, All, Ctx] =
+  new Topmost(state, context)
+
+object TopmostCounter:
+  var instanceCounter = 0
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
@@ -25,8 +30,14 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 
+  private val id = TopmostCounter.instanceCounter
+  TopmostCounter.instanceCounter += 1
+
+  override def equals(obj: Any): Boolean = super.equals(obj)
+
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var hasLoop: Boolean = false
+  StackManager.stacks = StackManager.stacks.updated(id, stack)
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =

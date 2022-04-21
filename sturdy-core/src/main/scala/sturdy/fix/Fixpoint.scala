@@ -68,4 +68,5 @@ object Fixpoint:
   private[fix] def computeFixpoint[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
     f(dom => computeFixpoint(f)(dom))
 
-  
+  private[fix] def computeFixpointTrySturdy[Dom, Codom](f: (Dom => TrySturdy[Codom]) => (Dom => TrySturdy[Codom])): Dom => TrySturdy[Codom] =
+    f(dom => computeFixpoint(f)(dom))

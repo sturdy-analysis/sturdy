@@ -4,9 +4,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.analyses.WasmConfig
-import sturdy.language.wasm.generic.{FunctionInstance, FuncId, InstLoc, FrameData}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
+import sturdy.language.wasm.generic.{FrameData, FuncId, FunctionInstance, InstLoc}
 import sturdy.values.Topped
 
 import java.nio.file.{Path, Paths}
@@ -22,7 +21,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = Parsing.fromText(path)
-  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(

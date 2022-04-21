@@ -100,4 +100,5 @@ object ConcreteInterpreter extends Interpreter:
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
     
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
+    override val fixpointSuper = fixpoint
 

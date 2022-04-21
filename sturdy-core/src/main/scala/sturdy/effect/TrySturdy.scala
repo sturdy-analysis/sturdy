@@ -37,7 +37,8 @@ enum TrySturdy[+A]:
     case _ => None
   def getOrThrow: A = this match
     case Success(a) => a
-    case Failure(f) => throw f
+    case Failure(f) =>
+      throw f
     case Exception(e) => throw e
     case Recurrent(rc) => throw rc
   def throwable: SturdyThrowable = this match

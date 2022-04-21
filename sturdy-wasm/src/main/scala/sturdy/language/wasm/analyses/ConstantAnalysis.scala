@@ -72,20 +72,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
+  abstract class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
       GenericInstance
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
-
-    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
-      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
-    }
+    
+    var dummy: List[Value] = List()
 
 
     override def jvUnit: WithJoin[Unit] = implicitly
@@ -104,5 +97,3 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
     private given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
-
-    override def toString: String = s"constant $config"

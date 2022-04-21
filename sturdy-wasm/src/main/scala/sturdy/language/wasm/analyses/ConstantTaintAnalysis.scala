@@ -91,6 +91,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
       override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
     }
 
+    override val fixpointSuper = fixpoint
+
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly

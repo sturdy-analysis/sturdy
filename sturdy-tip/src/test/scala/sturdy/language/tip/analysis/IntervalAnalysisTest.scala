@@ -27,6 +27,7 @@ import sturdy.values.relational.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
+import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.nio.file.{Path, Paths, Files}
 import scala.io.Source
@@ -53,7 +54,18 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = callSiteSensitive(2, loopUnwinding(steps, topmost)).fixpoint
+        val fixpoint = callSiteSensitive(0, fix.dispatch(isFunOrWhile, Seq(
+          fix.iter.innermost, fix.iter.innermost
+//          // call
+//          fix.unwind(steps,
+//            fix.iter.topmost,
+//          ),
+//          // while
+//          fix.unwind(steps,
+//            fix.iter.innermost
+//          )
+        ))
+        ).fixpoint
       }
 
 //      val onlyCalls = false

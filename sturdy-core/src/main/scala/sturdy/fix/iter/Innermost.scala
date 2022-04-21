@@ -18,7 +18,8 @@ def innermost[Dom, Codom, In, Out, All, Ctx]
   (using state: AnalysisState[Dom, In, Out, All])
   (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
-  : Innermost[Dom, Codom, In, Out, All, Ctx] = new Innermost(state, context)
+  : Innermost[Dom, Codom, In, Out, All, Ctx] =
+  new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])

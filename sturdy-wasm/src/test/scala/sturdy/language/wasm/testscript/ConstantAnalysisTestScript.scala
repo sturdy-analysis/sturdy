@@ -1,6 +1,6 @@
 package sturdy.language.wasm.testscript
 
-import cats.effect.{IO, Blocker}
+import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -8,18 +8,17 @@ import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
-import sturdy.{Soundness, IsSound}
+import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -61,7 +60,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, use
   type AValue = ConstantAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val aInterp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

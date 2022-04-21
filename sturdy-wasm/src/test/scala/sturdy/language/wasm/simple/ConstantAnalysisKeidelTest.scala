@@ -7,16 +7,17 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
+import sturdy.fix.KeidelFixpoint
 import sturdy.fix.context.Sensitivity
+import sturdy.fix.iter.Config
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
+import sturdy.language.wasm.abstractions.Fix
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, Insensitive, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
-import sturdy.values.Topped
 import sturdy.values.integer.IntegerDivisionByZero
 
 import java.nio.file.Files
@@ -29,11 +30,37 @@ import swam.text.*
 
 import scala.reflect.ClassTag
 import scala.reflect.TypeTest
+import sturdy.effect.{AnalysisState, EffectStack}
+import sturdy.effect.bytememory.ConstantAddressMemory
+import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
+import sturdy.effect.callframe.ConcreteCallFrame
+import sturdy.effect.callframe.JoinedDecidableCallFrame
+import sturdy.effect.except.JoinedExcept
+import sturdy.effect.failure.{*, given}
+import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinedSymbolTable}
+import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.fix.context.Sensitivity
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.abstractions.*
+import sturdy.language.wasm.abstractions.Fix.{*, given}
+import sturdy.language.wasm.generic.{*, given}
+import sturdy.values.floating.FloatOps
+import swam.syntax.*
+import swam.FuncType
+import sturdy.values.booleans.{*, given}
+import sturdy.values.convert.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
+import sturdy.data.{*, given}
 
 
 
-
-class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
+class ConstantAnalysisKeidelTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant analysis"
 
   val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
@@ -41,8 +68,12 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+//  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(5))), List(Value.Int64(Topped.Top)))
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
+
+
+
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
     testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
@@ -126,7 +157,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
     it must s"execute $funcName withs args $args with result $expected" in {
-      val res = runConstantAnalysis(path, funcName, args)
+      val res = runConstantAnalysisKeidel(path, funcName, args)
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
@@ -135,7 +166,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
-      val res = runConstantAnalysis(path, funcName, args)//args.map(ConstantAnalysis.liftConcreteValue))
+      val res = runConstantAnalysisKeidel(path, funcName, args)//args.map(ConstantAnalysis.liftConcreteValue))
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
@@ -143,24 +174,33 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
+def runConstantAnalysisKeidel(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
-  val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
-  val constants = ConstantAnalysis.constantInstructions(interp)
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty) {
 
+    override val fixpointSuper: fix.Fixpoint[FixIn, FixOut[Value]] = new KeidelFixpoint(
+      Fix.isFunOrLoopToIndex, Seq(Config.Innermost, Config.Innermost))
+
+    override val fixpoint = null
+
+    dummy = dummy.appended(Value.TopValue)
+  }
+
+//  val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
+//  val constants = ConstantAnalysis.constantInstructions(interp)
+//
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-//  println(cfg.toGraphViz)
+  //  println(cfg.toGraphViz)
 
-  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-  val deadLabels = ControlFlow.deadLabels(cfg)
-  val constantInstructions = constants.get
-  println(s"Found ${deadInstructions.size} dead instructions")
-  println(s"Found ${deadLabels.size} dead labels")
-  println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.withBlocks(shortLabels = false).toGraphViz)
+//  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
+//  val deadLabels = ControlFlow.deadLabels(cfg)
+//  val constantInstructions = constants.get
+//  println(s"Found ${deadInstructions.size} dead instructions")
+//  println(s"Found ${deadLabels.size} dead labels")
+//  println(s"Found ${constantInstructions.size} constant instructions")
+//  println(cfg.withBlocks(shortLabels = false).toGraphViz)
   result
