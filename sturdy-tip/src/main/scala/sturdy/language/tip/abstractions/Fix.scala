@@ -26,7 +26,6 @@ def isFunOrWhile(dom: FixIn): Int = dom match
 
 trait Fix extends Interpreter:
 
-
   final def callSitesLogger() = context.callSites[FixIn, Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None

@@ -1,11 +1,12 @@
 package sturdy.fix
 
-import sturdy.effect.{AnalysisState, CombineTrySturdy, RecurrentCall, TrySturdy}
+import sturdy.effect.{AnalysisState, CombineTrySturdy, TrySturdy, RecurrentCall}
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.fix.iter.Config
 import sturdy.util.StackManager
+import sturdy.values.MaybeChanged
 
 import scala.language.implicitConversions
 
@@ -14,15 +15,56 @@ import scala.language.implicitConversions
 
 object KeidelFixpoint:
   case class Call[Dom, In](dom: Dom, in: In)
-  type Stack[Dom, In] = Map[Call[Dom, In], Int]
-
-  type StackWidening[Dom, In] = (Stack[Dom, In], Call[Dom, In]) => (Stack[Dom, In], Call[Dom, In])
-  def identityStackWidening[Dom, In]: StackWidening[Dom, In] = (stack, call) => (stack, call)
+  given finiteCall[Dom, In](using Finite[Dom], Finite[In]): Finite[Call[Dom, In]] with {}
 
 import KeidelFixpoint.*
 
+
+trait KeidelStack[Dom, In]:
+  def height: Int
+  def contains(c: Call[Dom, In]): Boolean
+  def pushLocal[A](c: Call[Dom, In])(f: => A): A
+  def widenLocal[A](c: Call[Dom, In])(f: Call[Dom, In] => A): A
+
+/** Assumes there are only finitely many Call[Dom, In] */
+class FiniteStack[Dom, In]() extends KeidelStack[Dom, In]:
+  private var stack: Map[Call[Dom, In], Int] = Map()
+
+  def height: Int = stack.size
+  def contains(c: Call[Dom, In]): Boolean = stack.contains(c)
+  def pushLocal[A](c: Call[Dom, In])(f: => A): A =
+    val oldStack = stack
+    stack += c -> stack.size
+    try f finally {
+      stack = oldStack
+    }
+  def widenLocal[A](c: Call[Dom, In])(f: Call[Dom, In] => A): A =
+    f(c)
+
+/** Only considers Dom and widens In states when a Dom is recurrent */
+class InsensitiveStack[Dom, In](using Widen[In]) extends KeidelStack[Dom, In]:
+  private var stack: Map[Dom, (In, Int)] = Map()
+  def height: Int = stack.size
+  def contains(c: Call[Dom, In]): Boolean = stack.contains(c.dom)
+  def pushLocal[A](c: Call[Dom, In])(f: => A): A =
+    val oldStack = stack
+    stack += c.dom -> (c.in, stack.size)
+    try f finally {
+      stack = oldStack
+    }
+  def widenLocal[A](c: Call[Dom, In])(f: Call[Dom, In] => A): A =
+    stack.get(c.dom) match
+      case None => f(c)
+      case Some((previousIn, _)) =>
+        Widen(previousIn, c.in) match
+          case MaybeChanged.Changed(widenedIn) =>
+            val widenedCall = Call(c.dom, widenedIn)
+            pushLocal(widenedCall)(f(widenedCall))
+          case MaybeChanged.Unchanged(_) =>
+            f(c)
+
 class KeidelFixpoint[Dom, Codom, In, Out, All]
-  (chooseFun: Dom => Int, phiConfigs: Iterable[Config], stackWidening: StackWidening[Dom, In] = identityStackWidening[Dom, In])
+  (chooseFun: Dom => Int, phiConfigs: Iterable[Config], stack: KeidelStack[Dom, In])
   (using state: AnalysisState[Dom, In, Out, All])
 //  (using Join[Out], Finite[Dom], Widen[Codom], Widen[Out], Widen[In])
   (using Finite[Dom], Widen[Codom], Widen[Out], Widen[In])
@@ -36,7 +78,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
   var cache: Cache = Map()
   var results: Map[Call[Dom, In], (TrySturdy[Codom], Out)] = Map()
   var scc: SCC = Set()
-  var stack: Stack[Dom, In] = Map()
+
 
   enum Stability:
     case Stable
@@ -50,8 +92,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
     case Yes
     case No
 
-  var height = 0
-  def indent: String = "  " * height
+  def indent: String = "  " * stack.height
 
 
   implicit def fromBoolean(bool: Boolean): CacheWasWidened =
@@ -106,9 +147,10 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
   def iterateOutermost(f: Dom => TrySturdy[Codom]): Call[Dom, In] => TrySturdy[Codom] =
     def iterateOutermost_(call: Call[Dom, In]): TrySturdy[Codom] =
       state.setInState(call.in)
-      height += 1
-      val codomNew = f(call.dom)
-      height -= 1
+      val codomNew = stack.pushLocal(call) {
+        f(call.dom)
+      }
+      f(call.dom)
       if (scc.contains(call) && scc.size == 1)
         val (cacheWasWidened, codomWidened) = updateCacheAndGetUpdatedCodom(call, codomNew)
         if (cacheWasWidened == CacheWasWidened.Yes)
@@ -163,13 +205,10 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
       val call = Call(dom, state.getInState(dom))
       println(s"${indent}iterate: $call")
 //      state.setInState(call.in)
-      val oldStack = stack
-      stack += (call -> height)
-      height += 1
-      val codomNew = f(dom)
-      height -= 1
+      val codomNew = stack.pushLocal(call){
+        f(dom)
+      }
       println(s"${indent}new result: $codomNew")
-      stack = oldStack
       if (!scc.contains(call))
         println(s"${indent}end iterate bc not in scc: $scc")
         codomNew
@@ -212,13 +251,10 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
 
   def widenStack(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
     def widenStack_(dom: Dom): TrySturdy[Codom] =
-      val (stackWidened, callWidened) = stackWidening(stack, Call(dom, state.getInState(dom)))
-      val oldStack = stack
-      stack = stackWidened
-      state.setInState(callWidened.in)
-      val result = f(callWidened.dom)
-      stack = oldStack
-      result
+      stack.widenLocal(Call(dom, state.getInState(dom))) { callWidened =>
+        state.setInState(callWidened.in)
+        f(callWidened.dom)
+      }
     widenStack_
 
 
