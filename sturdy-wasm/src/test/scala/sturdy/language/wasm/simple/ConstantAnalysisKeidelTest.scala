@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
-import sturdy.fix.KeidelFixpoint
+import sturdy.fix.{InsensitiveStack, KeidelFixpoint}
 import sturdy.fix.context.Sensitivity
 import sturdy.fix.iter.Config
 import sturdy.language.wasm
@@ -131,11 +131,7 @@ class ConstantAnalysisKeidelTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
-  // these two are precise due to call-site sensitivity
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Actual(1))))
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(2))), List(Value.Int64(Topped.Actual(2))))
-
-  (3 to 8).foreach { arg =>
+  (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
   }
   testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
@@ -180,7 +176,7 @@ def runConstantAnalysisKeidel(path: Path, funName: String, args: List[Value]): A
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty) {
 
     override val fixpointSuper: fix.Fixpoint[FixIn, FixOut[Value]] = new KeidelFixpoint(
-      Fix.isFunOrLoopToIndex, Seq(Config.Innermost, Config.Innermost))
+      Fix.isFunOrLoopToIndex, Seq(Config.Innermost, Config.Innermost), new InsensitiveStack[FixIn, InState]())
 
     override val fixpoint = null
 

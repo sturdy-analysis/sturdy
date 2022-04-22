@@ -100,11 +100,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
-  // these two are precise due to call-site sensitivity
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Actual(1))))
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(2))), List(Value.Int64(Topped.Actual(2))))
-
-  (3 to 8).foreach { arg =>
+  (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
   }
   testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
@@ -146,7 +142,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
+  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 
