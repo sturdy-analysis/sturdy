@@ -45,9 +45,10 @@ class FiniteStack[Dom, In]() extends KeidelStack[Dom, In]:
 class InsensitiveStack[Dom, In](using Widen[In]) extends KeidelStack[Dom, In]:
   private var stack: Map[Dom, (In, Int)] = Map()
   def height: Int = stack.size
-  def contains(c: Call[Dom, In]): Boolean = stack.contains(c.dom)
+  def contains(c: Call[Dom, In]): Boolean = stack.get(c.dom).exists(_._1 == c.in)
   def pushLocal[A](c: Call[Dom, In])(f: => A): A =
     val oldStack = stack
+    println(s"## push c")
     stack += c.dom -> (c.in, stack.size)
     try f finally {
       stack = oldStack
@@ -59,7 +60,8 @@ class InsensitiveStack[Dom, In](using Widen[In]) extends KeidelStack[Dom, In]:
         Widen(previousIn, c.in) match
           case MaybeChanged.Changed(widenedIn) =>
             val widenedCall = Call(c.dom, widenedIn)
-            pushLocal(widenedCall)(f(widenedCall))
+            println(s"## Widened call from $c to $widenedCall")
+            f(widenedCall)
           case MaybeChanged.Unchanged(_) =>
             f(c)
 
@@ -103,7 +105,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
     val phis: Iterable[Combinator[Dom, TrySturdy[Codom]]] = phiConfigs.map(c => c match
 //      case Config.Innermost => fixed => innermost(fixed)
 //      case Config.Topmost => fixed => outermost(fixed)
-      case Config.Innermost => fixed => innermost.compose(widenStack)(fixed)
+      case Config.Innermost => fixed => widenStack.compose(innermost)(fixed)
 //      case Config.Topmost => fixed => outermost.compose(widenStack)(fixed)
     )
     val fixCombinator: (Dom => Codom) => Dom => TrySturdy[Codom] = fixed => dispatch(chooseFun, phis)(fToTrySturdy(fixed))
@@ -143,6 +145,36 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
         result
       }
     keidelEntryFunction_
+
+
+  def iterateInnermost(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
+    def iterateInnermost_(dom: Dom): TrySturdy[Codom] =
+      val call = Call(dom, state.getInState(dom))
+      println(s"${indent}iterate: $call")
+      //      state.setInState(call.in)
+      val codomNew = stack.pushLocal(call){
+        f(dom)
+      }
+      println(s"${indent}new result: $codomNew")
+      if (!scc.contains(call)) {
+        println(s"${indent}end iterate bc $call not in scc: $scc")
+        codomNew
+      } else {
+        val (cacheWasWidened, codomWidened) = updateCacheAndGetUpdatedCodom(call, codomNew)
+        println(s"${indent}cache after${if (cacheWasWidened == CacheWasWidened.No) " NO" else ""} widening: $cache")
+        if (cacheWasWidened == CacheWasWidened.Yes)
+          state.setInState(call.in)
+          iterateInnermost(f)(dom)
+        else
+          if (scc.size == 1)
+            makeCacheEntryOfCallStable(call)
+          else
+            println(s"scc > 1: $scc")
+          scc -= call
+          println(s"${indent}end iterate cache was not widened")
+          codomWidened
+      }
+    iterateInnermost_
 
   def iterateOutermost(f: Dom => TrySturdy[Codom]): Call[Dom, In] => TrySturdy[Codom] =
     def iterateOutermost_(call: Call[Dom, In]): TrySturdy[Codom] =
@@ -200,36 +232,6 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
 
 
 
-  def iterateInnermost(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
-    def iterateInnermost_(dom: Dom): TrySturdy[Codom] =
-      val call = Call(dom, state.getInState(dom))
-      println(s"${indent}iterate: $call")
-//      state.setInState(call.in)
-      val codomNew = stack.pushLocal(call){
-        f(dom)
-      }
-      println(s"${indent}new result: $codomNew")
-      if (!scc.contains(call))
-        println(s"${indent}end iterate bc not in scc: $scc")
-        codomNew
-      else
-        val (cacheWasWidened, codomWidened) = updateCacheAndGetUpdatedCodom(call, codomNew)
-        println(s"${indent}cache after${if (cacheWasWidened == CacheWasWidened.No) " NO" else ""} widening: $cache")
-        if (cacheWasWidened == CacheWasWidened.Yes)
-          state.setInState(call.in)
-          iterateInnermost(f)(dom)
-        else
-          if (scc.size == 1)
-            makeCacheEntryOfCallStable(call)
-          else
-            println(s"scc > 1: $scc")
-          scc -= call
-          println(s"${indent}end iterate cache was not widened")
-          codomWidened
-    iterateInnermost_
-
-
-
 
 /*
   def widenStack2(dom: Dom): Call =
@@ -251,6 +253,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
 
   def widenStack(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
     def widenStack_(dom: Dom): TrySturdy[Codom] =
+      println(s"${indent}Widening the stack")
       stack.widenLocal(Call(dom, state.getInState(dom))) { callWidened =>
         state.setInState(callWidened.in)
         f(callWidened.dom)
