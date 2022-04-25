@@ -259,20 +259,20 @@ object Parser:
       (int <* P.not(P.char('.').peek)).backtrack.map(Constant.IntC.apply) |
       double.map(Constant.DoubleC.apply) |
       string.map(Constant.StringC.apply) |
-      keyword(KNULL).map(_ => Constant.NullC()) |
-      keyword(KNANF).map(_ => Constant.FloatNanC()).backtrack |
-      keyword(KNAN).map(_ => Constant.NanC()) |
-      keyword(KNEGINFINITYF).map(_ => Constant.FloatNegInfinityC()).backtrack |
-      keyword(KNEGINFINITY).map(_ => Constant.NegInfinityC()).backtrack |
-      keyword(KINFINITYF).map(_ => Constant.FloatInfinityC()).backtrack |
-      keyword(KINFINITY).map(_ => Constant.InfinityC())
+      keyword(KNULL).map(_ => Constant.NullC) |
+      keyword(KNANF).map(_ => Constant.FloatNanC).backtrack |
+      keyword(KNAN).map(_ => Constant.NanC) |
+      keyword(KNEGINFINITYF).map(_ => Constant.FloatNegInfinityC).backtrack |
+      keyword(KNEGINFINITY).map(_ => Constant.NegInfinityC).backtrack |
+      keyword(KINFINITYF).map(_ => Constant.FloatInfinityC).backtrack |
+      keyword(KINFINITY).map(_ => Constant.InfinityC)
 
   val types: P[Type] =
-    (keyword(KINT) <* not(op('[')).peek).map(_ => Type.IntT()).backtrack |
-      (keyword(KLONG) <* not(op('[')).peek).map(_ => Type.LongT()).backtrack |
-      (keyword(KFLOAT) <* not(op('[')).peek).map(_ => Type.FloatT()).backtrack |
-      (keyword(KDOUBLE) <* not(op('[')).peek).map(_ => Type.DoubleT()).backtrack |
-      (keyword(KVOID) <* not(op('[')).peek).map(_ => Type.VoidT()).backtrack |
+    (keyword(KINT) <* not(op('[')).peek).map(_ => Type.IntT).backtrack |
+      (keyword(KLONG) <* not(op('[')).peek).map(_ => Type.LongT).backtrack |
+      (keyword(KFLOAT) <* not(op('[')).peek).map(_ => Type.FloatT).backtrack |
+      (keyword(KDOUBLE) <* not(op('[')).peek).map(_ => Type.DoubleT).backtrack |
+      (keyword(KVOID) <* not(op('[')).peek).map(_ => Type.VoidT).backtrack |
       (spaced(className) ~ op("[]").rep0).map{
         case (s, x) => Type.RefT(addBrackets(s, x.length))
       }
@@ -337,7 +337,6 @@ object Parser:
       op('|').map(_ => BinOp.Or) |
       op('%').map(_ => BinOp.Rem) |
       op(">>>").map(_ => BinOp.Ushr).backtrack |
-      op("<<<").map(_ => BinOp.Ushl).backtrack |
       op("<<").map(_ => BinOp.Shl).backtrack |
       op(">>").map(_ => BinOp.Shr).backtrack |
       op('-').map(_ => BinOp.Sub) |
@@ -352,10 +351,9 @@ object Parser:
       op('<').map(_ => CondOp.Lt)
 
   val unaryOperators: P[UnOp] =
-    keyword(KLENGTHOF).map(_ => UnOp.Length()) |
-      op('-').map(_ => UnOp.Neg()) |
-      op("neg").map(_ => UnOp.NegWord())
-
+    keyword(KLENGTHOF).map(_ => UnOp.Length) |
+      op('-').map(_ => UnOp.Neg) |
+      op("neg").map(_ => UnOp.NegWord)
 
   val variables: P[Var] =
     (immediates ~ inBrackets(immediates)).backtrack.map((i1,i2) => Var.ArrayRefV(i1,i2)).backtrack |
@@ -366,7 +364,7 @@ object Parser:
   val expressions: P[Exp] =
     (immediates ~ binaryOperators ~ immediates)
       .backtrack.map {
-        case ((i1,operator : BinOp),i2) => Exp.BinopE(i1, i2, operator) }|
+        case ((i1,operator),i2) => Exp.BinopE(i1, i2, operator) }|
       (immediates ~ conditionalOperators ~ immediates)
         .backtrack.map{
           case ((i1, cond), i2) => Exp.ConditionE(i1, i2, cond)} |
@@ -382,7 +380,7 @@ object Parser:
           case (((t, i), m), ls) => Exp.InvokeE(t, i, m, ls)
         } |
       (keyword(KNEWARRAY) *> inParens(types) ~ inBrackets(immediates)).backtrack.map((t,i) => Exp.NewArrayE(t, i)) |
-      (keyword(KNEW) *> types <* op("()").?)
+      (keyword(KNEW) *> types)
         .map{
           case t : Type.RefT => Exp.NewE(t)
           case _ => throw new IllegalArgumentException }
@@ -406,7 +404,7 @@ object Parser:
     ((identifier | generatedIdentifier) ~ (op(":=") *> identityValues <* semi)).backtrack.map((s, iv) => Stmt.IdentityS(Local(s), iv))
 
   val statements: P[Stmt] =
-    keyword(KBREAKPOINT) *> semi.map(_ => Stmt.BreakpointS()) |
+    keyword(KBREAKPOINT) *> semi.map(_ => Stmt.BreakpointS) |
       (variables ~ (op('=') *> rValues <* semi)).backtrack.map((l, r) => Stmt.AssignS(l, r)) |
       ((identifier | generatedIdentifier) ~ (op(":=") *> identityValues <* semi)).backtrack.map{case (s, iv: IdentityVal.CaughtExcRef) => Stmt.ExceptionIdentityS(Local(s), iv)} |
       identityStatements |
@@ -424,9 +422,9 @@ object Parser:
         keyword(KDEFAULT) *> op(':') *> keyword(KGOTO) *> identifier <* semi)) <* semi)
         .map {
           case (i, (ls, s)) => Stmt.LookupSwitchS(i, ls, s) } |
-      keyword(KNOP) *> semi.map(_ => Stmt.NopS()) |
+      keyword(KNOP) *> semi.map(_ => Stmt.NopS) |
       keyword(KRET).backtrack *> (identifier <* semi).backtrack.map(s => Stmt.RetS(Local(s))) |
-      (keywordNoSpace(KRETURN) *> semi).backtrack.map(_ => Stmt.ReturnVoidS()) |
+      (keywordNoSpace(KRETURN) *> semi).backtrack.map(_ => Stmt.ReturnVoidS) |
       (keyword(KRETURN) *> (immediates <* semi)).map(Stmt.ReturnS.apply) |
       (keyword(KTABLESWITCH) *> inParens(immediates) ~ inBraces(cases.rep0 ~ (
         keyword(KDEFAULT) *> op(':') *> keyword(KGOTO) *> identifier <* semi)) <* semi)

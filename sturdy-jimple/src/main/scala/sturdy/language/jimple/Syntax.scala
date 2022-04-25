@@ -57,7 +57,7 @@ enum Var:
     case LocalV(l) => s"LocalV($l)"
 
 enum Stmt extends Labeled:
-  case BreakpointS()
+  case BreakpointS
   case AssignS(v: Var, newVal: RVal)//variable = rvalue
   case IdentityS(l: Local, i: IdentityVal) //identity_value
   case ExceptionIdentityS(l: Local, i: IdentityVal)
@@ -67,17 +67,17 @@ enum Stmt extends Labeled:
   case IfS(c: Exp.ConditionE, l: Label)//"if" condition "then" label
   case InvokeS(e: Exp.InvokeE | Exp.StaticInvokeE)
   case LookupSwitchS(i: Immediate, cs: Seq[Case], l: Label)//"lookupswitch(" immediate "){" cases "default: goto" label "}"
-  case NopS()
+  case NopS
   case RetS(l: Local)//"ret" local
   case ReturnS(i: Immediate)//"ret" Immediate
-  case ReturnVoidS()
+  case ReturnVoidS
   case TableSwitchS(i: Immediate, cs: Seq[Case], l: Label)//"tableswitch(" immediate "){" cases "default: goto" label "}"
   case ThrowS(i: Immediate)//"throw" immediate
   case LabelS(l: Label)
   case CatchS(e: ExceptionRange)
 
   override def toString: String = this match
-    case BreakpointS() => s"BreakpointS()@${this.label}"
+    case BreakpointS => s"BreakpointS@${this.label}"
     case AssignS(v, newVal) => s"AssignS($v, $newVal)@${this.label}"
     case IdentityS(l, i) => s"IdentityS($l, $i)@${this.label}"
     case ExceptionIdentityS(l, i) => s"ExceptionIdentityS($l, $i)@${this.label}"
@@ -87,17 +87,17 @@ enum Stmt extends Labeled:
     case IfS(c, l) => s"IfS($c, $l)@${this.label}"
     case InvokeS(e) => s"InvokeS($e)@${this.label}"
     case LookupSwitchS(i, cs, l) => s"LookupSwitchS($i, $cs, $l)@${this.label}"
-    case NopS() => s"NopS@${this.label}"
+    case NopS => s"NopS@${this.label}"
     case RetS(l) => s"RetS($l)@${this.label}"
     case ReturnS(i) => s"ReturnS($i)@${this.label}"
-    case ReturnVoidS() => s"ReturnVoidS@${this.label}"
+    case ReturnVoidS => s"ReturnVoidS@${this.label}"
     case TableSwitchS(i, cs, l) => s"TableswitchS@${this.label}"
     case ThrowS(i) => s"ThrowS@${this.label}"
     case LabelS(l) => s"LabelS($l)@${this.label}"
     case CatchS(e) => s"CatcHS($e)@${this.label}"
 
 enum Exp extends Labeled:
-  case BinopE(i1: Immediate, i2: Immediate, op: BinOp | CondOp)
+  case BinopE(i1: Immediate, i2: Immediate, op: BinOp)
   case ConditionE(i1: Immediate, i2: Immediate, op: CondOp)
   case CastE(t: Type, i: Immediate)
   case InstanceOfE(i: Immediate, ref: Type.RefT)
@@ -124,9 +124,9 @@ enum Exp extends Labeled:
 enum BinOp:
   case Add
   case And
-  case Cmp //TODO: What are these?
-  case Cmpg//TODO: What are these?
-  case Cmpl//TODO: What are these?
+  case Cmp //turns long comparison into int result, so it can be compared
+  case Cmpg //turns floating point comparison into int result, so it can be compared
+  case Cmpl //turns floating point comparison into int result, so it can be compared
   case Div
   case Mul
   case Or
@@ -135,14 +135,13 @@ enum BinOp:
   case Shr
   case Sub
   case Ushr
-  case Ushl
   case Xor
 
   override def toString: String = this match
     case Add => s"Add"
     case And => s"And"
-    case Cmp => s"Cmp"
-    case Cmpg => s"Cmpg"
+    case Cmp => s"Cmp" 
+    case Cmpg => s"Cmpg" 
     case Cmpl => s"Cmpl"
     case Div => s"Div"
     case Mul => s"Mul"
@@ -153,9 +152,8 @@ enum BinOp:
     case Sub => s"Sub"
     case Ushr => s"Ushr"
     case Xor => s"Xor"
-    case Ushl => s"Ushl"
 
-enum CondOp:
+enum CondOp: //does not compare floating point or long values
   case Eq
   case Ge
   case Le
@@ -172,18 +170,18 @@ enum CondOp:
     case Lt => s"Lt"
 
 enum UnOp:
-  case Length()
-  case Neg()
-  case NegWord()
+  case Length
+  case Neg
+  case NegWord
 
   override def toString: String = this match
-    case Length() => s"Length()"
-    case Neg() => s"Neg()"
-    case NegWord() => s"NegWord()"
+    case Length => s"Length"
+    case Neg => s"Neg"
+    case NegWord => s"NegWord"
 
 enum InvokeType:
   case InterfaceI
-  case SpecialI
+  case SpecialI //TODO: only invokes <init>
   case VirtualI
 
   override def toString: String = this match
@@ -197,13 +195,13 @@ enum Constant:
   case IntC(v: Int)
   case LongC(v: Long)
   case StringC(v: String)
-  case NullC()
-  case InfinityC()
-  case NegInfinityC()
-  case NanC()
-  case FloatInfinityC()
-  case FloatNegInfinityC()
-  case FloatNanC()
+  case NullC
+  case InfinityC
+  case NegInfinityC
+  case NanC
+  case FloatInfinityC
+  case FloatNegInfinityC
+  case FloatNanC
 
   override def toString: String = this match
     case DoubleC(v) => s"DoubleC($v)"
@@ -211,13 +209,13 @@ enum Constant:
     case IntC(v) => s"IntC($v)"
     case LongC(v) => s"LongC($v)"
     case StringC(v) => s"StringC($v)"
-    case NullC() => s"NullC()"
-    case InfinityC() => s"InfinityC()"
-    case NegInfinityC() => s"NegInfinityC()"
-    case NanC() => s"NanC()"
-    case FloatInfinityC() => s"FloatInfinityC()"
-    case FloatNegInfinityC() => s"FloatNegInfinityC()"
-    case FloatNanC() => s"FloatNanC()"
+    case NullC => s"NullC"
+    case InfinityC => s"InfinityC"
+    case NegInfinityC => s"NegInfinityC("
+    case NanC => s"NanC"
+    case FloatInfinityC => s"FloatInfinityC"
+    case FloatNegInfinityC => s"FloatNegInfinityC"
+    case FloatNanC => s"FloatNanC"
 
 
 enum IdentityVal:
@@ -231,22 +229,22 @@ enum IdentityVal:
     case ThisRef(t) => s"ThisRef($t)"
 
 enum Type:
-  case IntT()
-  case LongT()
-  case FloatT()
-  case DoubleT()
+  case IntT
+  case LongT
+  case FloatT
+  case DoubleT
   case RefT(s: String)
-  //case StmtAddressT()
-  case VoidT()
+  //case StmtAddressT
+  case VoidT
 
   override def toString: String = this match
-    case IntT() => s"IntT()"
-    case LongT() => s"LongT()"
-    case FloatT() => s"FloatT()"
-    case DoubleT() => s"DoubleT()"
+    case IntT => s"IntT"
+    case LongT => s"LongT"
+    case FloatT => s"FloatT"
+    case DoubleT => s"DoubleT"
     case RefT(s) => s"RefT($s)"
-   // case StmtAddressT() => s"StmtAddressT()"
-    case VoidT() => s"VoidT()"
+   // case StmtAddressT => s"StmtAddressT"
+    case VoidT => s"VoidT"
 
 
 
@@ -262,7 +260,10 @@ case class ExceptionRange(ref: Type.RefT, start: Label, end: Label, catchBlock: 
 
 case class Method(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
 
-case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isStrict: Boolean, isTransient: Boolean, isSynchronized: Boolean, isVolatile: Boolean, isAbstract: Boolean, ret: Type, id: Identifier, params: Seq[Type], throws: Seq[Type.RefT])
+case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isStrict: Boolean, isTransient: Boolean, isSynchronized: Boolean, isVolatile: Boolean, isAbstract: Boolean, ret: Type, id: Identifier, params: Seq[Type], throws: Seq[Type.RefT]):
+  def getID: Identifier =
+    this match
+      case MethodHeader(_, _, _, _, _, _, _, _, _, _, _, id, _, _) => id
 
 case class Program(funs: Seq[Container])//:
 //  def fold[A]: Seq[Char => ((Char, Char) => Char) => Char] =
@@ -284,6 +285,13 @@ enum ClassBodyElement:
   case MethodCB(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
   case MethodHeaderCB(header: MethodHeader)
 
+  def getID: Identifier =
+    this match
+      case ClassBodyElement.GlobalVarCB(_, _, _, _, _, _, _, _, _, id) => id
+      case ClassBodyElement.NativeCallCB(_, _, _, _, _, _, _, _, id, _, _) => id
+      case ClassBodyElement.MethodCB(header, _, _, _, _) => header.getID
+      case ClassBodyElement.MethodHeaderCB(header) => header.getID
+  
   override def toString: String = this match
     case GlobalVarCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isEnum, isTransient, isVolatile, t, id) => s"GlobalVarCB($isPublic,$isPrivate,$isProtected,$isStatic,$isFinal,$isEnum,$isTransient,$isVolatile,$t,$id)"
     case NativeCallCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isSynchronized, isNative, t, id, params, except) => s"NativeCallCB($isPublic,$isPrivate,$isProtected,$isStatic,$isFinal,$isSynchronized,$isNative,$t,$id,$params,$except)"
