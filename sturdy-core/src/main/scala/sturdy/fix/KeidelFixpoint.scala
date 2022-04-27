@@ -61,11 +61,13 @@ class SensitiveStack[Ctx, Dom, In](getContext: Call[Dom, In] => Ctx)(using Widen
     val oldStack = stack
     val oldContexts = contexts
     if (Fixpoint.DEBUG)
-      println(s"## push c")
+      println(s"## push $c")
     stack += c -> stack.size
     val ctx = getContext(c)
     contexts += ctx -> c
     try f finally {
+      if (Fixpoint.DEBUG)
+        println(s"## pop  $c")
       stack = oldStack
       contexts = oldContexts
     }
@@ -146,34 +148,32 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
         .getOrThrow
     )
 
-  def innermost: Combinator[Dom, TrySturdy[Codom]] = keidelEntryFunction(iterateInnermost)
+  def innermost: Combinator[Dom, TrySturdy[Codom]] = keidelInnermost(iterateInnermost)
 //  def outermost: Combinator[Dom, TrySturdy[Codom]] = keidelEntryFunction(iterateOutermost)
 
-  def keidelEntryFunction(iterateFunction: (Dom => TrySturdy[Codom]) => (Dom => TrySturdy[Codom]))(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
-    def keidelEntryFunction_(dom: Dom): TrySturdy[Codom] =
+  def keidelInnermost(iterateFunction: (Dom => TrySturdy[Codom]) => (Dom => TrySturdy[Codom]))(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
+    def keidelInnermost_(dom: Dom): TrySturdy[Codom] =
       val call = Call(dom, state.getInState(dom))
+      val cacheLookup = cache.get(call)
       if (Fixpoint.DEBUG)
-        println(s"${indent}call: $call")
+        println(s"${indent}cache lookup: $call -> $cacheLookup")
       LinearStateOperationCounter.lookupCounter += 1
-      val cachedEntry: CacheEntry = cache.get(call) match {
+      val cachedEntry: CacheEntry = cacheLookup match {
         case None => CacheEntry(Stability.Unstable, TrySturdy(throw RecurrentCall(call)), state.getOutState(dom))
         case Some(entry) => entry
       }
 
       if (cachedEntry.stability.isStable) {
         if (Fixpoint.DEBUG)
-          println(s"${indent}Use stable cached: ${cachedEntry.codom}")
+          println(s"${indent}Stable result")
         state.setOutState(cachedEntry.out)
         cachedEntry.codom
       } else {
         stack.getPosition(call) match
           case Some(pos) =>
-            if (Fixpoint.DEBUG)
-              println(s"${indent}Use unstable cached: ${cachedEntry.codom}")
             scc += pos
             if (Fixpoint.DEBUG)
-              println(s"${indent}added to scc: $scc")
-              println(s"${indent}sccSize ${scc.size}")
+              println(s"${indent}Recurrent call: $scc")
             state.setOutState(cachedEntry.out)
             cachedEntry.codom
           case None =>
@@ -182,7 +182,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
               println(s"${indent}result after iterating: $result")
             result
       }
-    keidelEntryFunction_
+    keidelInnermost_
 
 
   def iterateInnermost(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
@@ -192,7 +192,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
       val stackPosOfCallInTheCallOfF = stack.height
       if (Fixpoint.DEBUG)
         println(s"${indent}iterate: $call")
-      val codomNew = stack.pushLocal(call){
+      val codomNew = stack.pushLocal(call) {
         f(dom)
       }
       if (Fixpoint.DEBUG)
@@ -204,12 +204,14 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
         codomNew
       } else {
         val (cacheWasWidened, codomWidened) = updateCacheAndGetUpdatedCodom(call, codomNew)
-        if (Fixpoint.DEBUG)
-          println(s"${indent}cache after${if (cacheWasWidened == CacheWasWidened.No) " NO" else ""} widening: $cache")
-        if (cacheWasWidened == CacheWasWidened.Yes)
+        if (cacheWasWidened == CacheWasWidened.Yes) {
+          if (Fixpoint.DEBUG)
+            println(s"${indent}unstable cache entry for: $call -> ${(codomNew, state.getOutState(dom))}")
           state.setAllState(originalState)
           iterateInnermost(f)(dom)
-        else
+        } else {
+          if (Fixpoint.DEBUG)
+            println(s"${indent}stable cache entry for: $call -> ${(codomNew, state.getOutState(dom))}")
           if (scc.size == 1)
             makeCacheEntryOfCallStable(call)
           else
@@ -219,13 +221,12 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
           if (Fixpoint.DEBUG)
             println(s"${indent}end iterate cache was not widened")
           codomWidened
+        }
       }
     iterateInnermost_
 
   def widenStack(f: Dom => TrySturdy[Codom]): Dom => TrySturdy[Codom] =
     def widenStack_(dom: Dom): TrySturdy[Codom] =
-      if (Fixpoint.DEBUG)
-        println(s"${indent}Widening the stack")
       stack.widenLocal(Call(dom, state.getInState(dom))) { callWidened =>
         state.setInState(callWidened.in)
         f(callWidened.dom)
