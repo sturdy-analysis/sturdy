@@ -18,7 +18,7 @@ import sturdy.effect.failure.given
 import sturdy.effect.print.APrintPrefix
 import sturdy.fix.{Fixpoint, Stack}
 import sturdy.language.tip.GenericInterpreter
-import sturdy.util.{Labled, StackManager}
+import sturdy.util.Labled
 import sturdy.{*, given}
 import sturdy.data.{*, given}
 import sturdy.values.{*, given}
@@ -45,7 +45,6 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
-      StackManager.reset()
       runSignAnalysis(p, 0)
     }
   }
@@ -67,9 +66,6 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
-      StackManager.getStacks.foreach((topmost, stack) => println(s"$topmost      ${stack.outCache}"))
-//      println(s"1 ${StackManager.stack1.get.asInstanceOf[Stack[Any, Any, Any, Any, Any, Any]].outCache}")
-//      println(s"2 ${StackManager.stack2.get.asInstanceOf[Stack[Any, Any, Any, Any, Any, Any]].outCache}")
 //      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
 
 //      if (deadNodes.nonEmpty)

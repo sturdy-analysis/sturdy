@@ -6,7 +6,6 @@ import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
-import sturdy.util.StackManager
 import sturdy.values.Finite
 import sturdy.values.{Widen, Join}
 
@@ -37,7 +36,6 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var hasLoop: Boolean = false
-  StackManager.stacks = StackManager.stacks.updated(id, stack)
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =

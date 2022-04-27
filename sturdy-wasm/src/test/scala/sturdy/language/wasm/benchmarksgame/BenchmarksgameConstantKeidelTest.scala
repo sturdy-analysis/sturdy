@@ -49,6 +49,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 import sturdy.data.{*, given}
+import sturdy.util.LinearStateOperationCounter
 
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
@@ -89,11 +90,7 @@ class BenchmarksgameConstantKeidelTest extends AnyFlatSpec, Matchers:
     val res = interp.failure.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )
+    LinearStateOperationCounter.addToListAndReset()
     println(interp.analysisState.getAllState)
-
-/*
-
-(StackFrameState(List()),Map(MemoryAddr(0) -> SizeMem(16777216,Some(256),true,Top)),Map(() -> Map(GlobalAddr(0) -> Int32(5243920))),List())
-
-
-*/
+    println(s"${LinearStateOperationCounter.toString} in the last tests")
+    println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")

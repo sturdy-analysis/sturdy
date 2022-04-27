@@ -17,7 +17,7 @@ import sturdy.language.tip.{Program, Parser}
 import sturdy.effect.failure.{falliblePO, afallibleAbstractly}
 import sturdy.fix.iter.Config
 import sturdy.fix.{DAIFixpoint, KeidelFixpoint}
-import sturdy.util.{StackManager, Labled}
+import sturdy.util.Labled
 import sturdy.{*, given}
 import sturdy.data.{*, given}
 import sturdy.fix.InsensitiveStack

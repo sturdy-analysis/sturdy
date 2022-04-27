@@ -5,8 +5,9 @@ import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
+import sturdy.util.LinearStateOperationCounter
 import sturdy.values.Finite
-import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged, Join}
+import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -142,6 +143,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
           println(s"${stackHeightIndent}PUSH $frame")
         None
       case Some(info) =>
+        LinearStateOperationCounter.wideningCounter += 1
         val stackInWidened = widenIn(info.inState, in)
         if (stackInWidened.hasChanged) {
           // call is semi-recurrent (stack): the frame occurs on the stack but with a different state
@@ -149,6 +151,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
           updateSemiRecurrentFrame(frame, info, newIn)
           None
         } else {
+          LinearStateOperationCounter.wideningCounter += 1
           val cachedInWidened = inCache.get(frame).map(widenIn(_, in))
           if (cachedInWidened.nonEmpty && cachedInWidened.get.hasChanged) {
             // call is semi-recurrent (cache): output state occurs in the cache but for an incompatible input state
@@ -213,6 +216,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
   inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In, info: FrameInfo[In]): Unit = inCache.get(frame) match
     case None =>
     case Some(recurrentIn) =>
+      LinearStateOperationCounter.wideningCounter += 1
       val newIn = widenIn(recurrentIn, in)
       state.setInState(newIn.get)
 
@@ -222,6 +226,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
         println(s"${stackHeightIndent}  POP RECURRENT  $frame")
       TrySturdy(throw RecurrentCall(frame))
     case Some((res, previousOut)) =>
+      LinearStateOperationCounter.wideningCounter += 1
       state.setOutState(joinOut(state.getOutState(frame.dom), previousOut).get)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
@@ -238,6 +243,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
     case Some((previousResult, previousOut)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       val currentOut = state.getOutState(frame.dom)
+      LinearStateOperationCounter.wideningCounter += 1
       val newOut = widenOut(previousOut, currentOut)
 
       if (newResult.hasChanged || newOut.hasChanged) {
