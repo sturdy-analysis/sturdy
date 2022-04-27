@@ -56,7 +56,8 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
-      case Some(result) => 
+      case Some(result) =>
+        hasLoop = hasLoop || !result.isBottom
         result
       case None =>
         val result = TrySturdy(f(dom))
