@@ -1,15 +1,22 @@
+# Compiling Apron
 
-setze `apron_prefix=/usr` in apron ./configure // standardmäßig auf /usr/local, unter WSL2 Ubuntu NICHT in `java.library.path`
-`JAVA_HOME=$JAVA_HOME ./configure -no-ppl` // ppl ist nicht trivial installierbar
- `make -I$JAVA_HOME/include -I$JAVA_HOME/include/linux` // für jni
+Install the [nix package manager](https://nixos.org/download.html):
+```
+# Linux
+$ sh <(curl -L https://nixos.org/nix/install) --daemon
 
+# MacOS
+$ sh <(curl -L https://nixos.org/nix/install)
+```
 
- ```
- apt install mlocate openjdk-11-jdk
- ```
- apron:
-`sudo make install`
+Build the apron library:
+```
+nix-build -E '(import <nixpkgs> {}).callPackage ./apron.nix {}'
+```
+The compiled library resides in directory `./result/lib/`.
 
-
-// -Djava.library.path=/usr/local/lib   // für apron/japron, falls pfad nicht geändert
-
+Install the Scala build tool SBT and run the sturdy test suite to see if everything worked out:
+```
+sbt compile
+sbt test
+```
