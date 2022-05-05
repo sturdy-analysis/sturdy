@@ -57,7 +57,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
       case Some(result) =>
-        hasLoop = hasLoop || !result.isBottom
+        hasLoop = hasLoop || !result.isRecurrent
         result
       case None =>
         val result = TrySturdy(f(dom))

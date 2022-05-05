@@ -32,6 +32,9 @@ enum TrySturdy[+A]:
   def isBottom: Boolean = this match
     case _: Failure[_] | _: Recurrent[_] => true
     case _ => false
+  def isRecurrent: Boolean = this match
+    case _: Recurrent[_] => true
+    case _ => false
   def get: Option[A] = this match
     case Success(a) => Some(a)
     case _ => None

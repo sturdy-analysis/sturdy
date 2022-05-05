@@ -43,7 +43,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
       case Some(result) =>
-        (result, !result.isBottom)
+        (result, !result.isRecurrent)
       case None =>
         val result = TrySturdy(f(dom))
         val (widened, loop) = stack.pop(dom, inState, result)

@@ -133,11 +133,11 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
     stack.get(frame) match
       case None =>
         // call is not recurrent, push call to stack
-        val info = new FrameInstanceInfo(in, stackHeight)
+        // load input state based on previous calls with the same context
+        val loadedWidened = loadCorecurrentInput(frame, in)
+        val info = new FrameInstanceInfo(loadedWidened, stackHeight)
         stack += frame -> info
         stackHeight += 1
-        // load input state based on previous calls with the same context
-        loadCorecurrentInput(frame, in, info)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $frame:$in")
         None
@@ -190,9 +190,9 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
     val frame = Frame(dom, ctx)
     val newStackHeight = stackHeight - 1
     val updatedResult = if (recurrentCalls.remove(newStackHeight)) {
-      if (!result.isBottom) {
-        val widenedResult = storeCorecurrentOutput(frame, result)
-        (widenedResult, true)
+      if (!result.isRecurrent) {
+        val (widenedResult, changed) = storeCorecurrentOutput(frame, result)
+        (widenedResult, changed)
       } else {
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}POP  $frame:$in <- $result")
@@ -213,12 +213,14 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
     state.setInState(newIn)
   }
 
-  inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In, info: FrameInstanceInfo[In]): Unit = inCache.get(frame) match
+  inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In): In = inCache.get(frame) match
     case None =>
+      in
     case Some(recurrentIn) =>
       LinearStateOperationCounter.wideningCounter += 1
-      val newIn = widenIn(recurrentIn, in)
-      state.setInState(newIn.get)
+      val newIn = widenIn(recurrentIn, in).get
+      state.setInState(newIn)
+      newIn
 
   inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx]): TrySturdy[Codom] = outCache.get(frame) match
     case None =>
@@ -232,21 +234,29 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
         println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
       res
 
-  inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): TrySturdy[Codom] = outCache.get(frame) match
+  inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): (TrySturdy[Codom], Boolean)  = outCache.get(frame) match
     case None =>
       val out = state.getOutState(frame.dom)
       outCache += frame -> (result, out)
       outCacheDirty = true
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP  $frame <- ${Changed(result)}")
-      result
+      (result, true)
     case Some((previousResult, previousOut)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       val currentOut = state.getOutState(frame.dom)
       LinearStateOperationCounter.wideningCounter += 1
       val newOut = widenOut(previousOut, currentOut)
 
-      if (newResult.hasChanged || newOut.hasChanged) {
+//      if (Widen(result, previousResult).hasChanged) {
+//        throw new IllegalStateException(s"bla $result $previousResult")
+//      }
+//      if (widenOut(currentOut, previousOut).hasChanged) {
+//        throw new IllegalStateException(s"bla $currentOut $previousOut $newOut")
+//      }
+
+      val changed = newResult.hasChanged || newOut.hasChanged
+      if (changed) {
         outCache += frame -> (newResult.get, newOut.get)
         outCacheDirty = true
       }
@@ -254,7 +264,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
 
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP  $frame <- $newResult")
-      newResult.get
+      (newResult.get, changed)
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
 class FrameInstanceInfo[In](var inStates: List[In], var frameIDs: List[Int]):
