@@ -20,17 +20,11 @@ def outermost[Dom, Codom, In, Out, All, Ctx]
   : Outermost[Dom, Codom, In, Out, All, Ctx] =
   new Outermost(state, context)
 
-object OutermostCounter:
-  var instanceCounter = 0
-
 final class Outermost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
-
-  private val id = OutermostCounter.instanceCounter
-  OutermostCounter.instanceCounter += 1
 
   override def equals(obj: Any): Boolean = super.equals(obj)
 
