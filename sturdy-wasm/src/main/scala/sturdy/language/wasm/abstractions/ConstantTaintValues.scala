@@ -78,7 +78,7 @@ trait ConstantTaintValues extends Interpreter:
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
-    analysis.addContextFreeLogger(constants)
+    analysis.fixpoint.addContextFreeLogger(constants)
     constants
 
   class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
@@ -103,7 +103,7 @@ trait ConstantTaintValues extends Interpreter:
 
   def taintedMemoryAccessLogger(analysis: Instance): TaintedMemoryAccessLogger = {
     val logger = new TaintedMemoryAccessLogger(analysis.stack)(using analysis.failure)
-    analysis.addContextFreeLogger(logger)
+    analysis.fixpoint.addContextFreeLogger(logger)
     logger
   }
 

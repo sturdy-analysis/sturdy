@@ -6,16 +6,16 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
+import sturdy.fix
+import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.analyses.CallSites
-import sturdy.language.wasm.analyses.WasmConfig
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.generic.UnreachableInstruction
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
 import sturdy.values.Topped
 import sturdy.values.integer.IntegerDivisionByZero
 
@@ -29,6 +29,8 @@ import swam.text.*
 
 import scala.reflect.ClassTag
 import scala.reflect.TypeTest
+
+
 
 
 class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
@@ -98,11 +100,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
-  // these two are precise due to call-site sensitivity
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Actual(1))))
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(2))), List(Value.Int64(Topped.Actual(2))))
-
-  (3 to 8).foreach { arg =>
+  (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
   }
   testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
@@ -144,7 +142,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
+  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

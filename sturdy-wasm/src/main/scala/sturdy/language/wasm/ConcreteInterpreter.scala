@@ -93,8 +93,7 @@ object ConcreteInterpreter extends Interpreter:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc)(args)
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
-    extends GenericInstance with fix.Concrete[FixIn, FixOut[Value]]:
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends GenericInstance:
 
     override def jvUnit: NoJoin[Unit] = implicitly
     override def jvV: NoJoin[Value] = implicitly
@@ -110,4 +109,7 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
     
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
+    
+    val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
+    override val fixpointSuper = fixpoint
 

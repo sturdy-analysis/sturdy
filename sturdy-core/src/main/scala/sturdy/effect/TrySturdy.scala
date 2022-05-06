@@ -32,12 +32,16 @@ enum TrySturdy[+A]:
   def isBottom: Boolean = this match
     case _: Failure[_] | _: Recurrent[_] => true
     case _ => false
+  def isRecurrent: Boolean = this match
+    case _: Recurrent[_] => true
+    case _ => false
   def get: Option[A] = this match
     case Success(a) => Some(a)
     case _ => None
   def getOrThrow: A = this match
     case Success(a) => a
-    case Failure(f) => throw f
+    case Failure(f) =>
+      throw f
     case Exception(e) => throw e
     case Recurrent(rc) => throw rc
   def throwable: SturdyThrowable = this match

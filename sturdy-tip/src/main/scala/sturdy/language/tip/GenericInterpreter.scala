@@ -14,12 +14,13 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{OrderingOps, EqOps}
+import sturdy.values.relational.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
 import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.AFailureCollect
+import sturdy.fix.OutCacheOwner
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -66,8 +67,11 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
-  extends fix.Fixpoint[FixIn, FixOut[V]]:
+trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
+
+  // fixpoint
+  val fixpoint: (AnalysisState[FixIn, InState, OutState, OutState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
+  type Fixed = FixIn => FixOut[V]
 
   // joins
   implicit def jv: J[V]
@@ -110,6 +114,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
     override def setAllState(out: OutState): Unit = setOutState(out)
   }
 
+
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
@@ -121,7 +126,9 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
       case None =>
         val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
         store.read(addr).getOrElse(failure(UnboundAddr, s"$addr for variable $x"))
-    case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
+    case Exp.Add(e1, e2) =>
+      val result = add(eval(e1), eval(e2))
+      result
     case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
     case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
@@ -141,7 +148,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
       unmanagedRefValue(addr)
     case Exp.Deref(e) =>
       val addr = refAddr(eval(e))
-      store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+      val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+      result
     case Exp.NullRef() =>
       nullValue
     case r@Exp.Record(fields) =>
@@ -152,7 +160,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
       store.write(addr, rec)
       refValue(addr)
     case Exp.FieldAccess(rec, field) =>
-      val recVal = eval(Exp.Deref(rec))
+      val addr = refAddr(eval(rec))
+      val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
   }
 

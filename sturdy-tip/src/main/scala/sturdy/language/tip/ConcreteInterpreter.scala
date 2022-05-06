@@ -21,8 +21,7 @@ import sturdy.values.{*, given}
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
-  override type Ctx = Unit
-  
+
   override type VBool = Boolean
   override type VInt = Int
   override type VRef = Option[Addr]
@@ -45,7 +44,7 @@ object ConcreteInterpreter extends Interpreter:
   type Environment = Map[String, Int]
   type Store = Map[Int, Value]
 
-  class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance with fix.Concrete[FixIn, FixOut[Value]]:
+  class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance:
     override def jv: NoJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
@@ -64,6 +63,8 @@ object ConcreteInterpreter extends Interpreter:
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)
+
+    override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
 
   def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
     new Instance(initEnvironment, initStore, nextInput)

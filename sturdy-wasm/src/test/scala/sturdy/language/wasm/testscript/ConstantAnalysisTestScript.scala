@@ -8,7 +8,7 @@ import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.{WasmConfig, ConstantAnalysisSturdyInstance, ConstantAnalysis}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
@@ -19,7 +19,9 @@ import sturdy.values.PartialOrder
 import sturdy.{Soundness, IsSound}
 import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.WasmConfig
+import sturdy.language.wasm.analyses.CallSites
+import sturdy.language.wasm.analyses.FixpointConfig
+import sturdy.language.wasm.analyses.Insensitive
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -44,34 +46,44 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   val spectest = Parsing.fromText(pathSpectest)
 
+
+  def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
+    Iterator(
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = Insensitive)),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = Insensitive)),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(2))),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(2))),
+    )
+
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
-    it must s"execute ${p.getFileName}" in {
-      println(s"Executing TestScript constant analysis on ${p.getFileName}")
-      val script = Parsing.testscript(p)
-      val interp = ConstantAnalysisTestScriptInterpreter(Some(spectest))
-      interp.run(script)
-      val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), true)
-      interpTop.run(script)
+    for (aInterp <- analyses) {
+      it must s"execute ${p.getFileName} with ${aInterp()}" in {
+        println(s"Executing TestScript constant analysis on ${p.getFileName}")
+        val script = Parsing.testscript(p)
+        val interp = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp())
+        interp.run(script)
+        val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
+        interpTop.run(script)
+      }
     }
   }
 
 
-class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
+class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
   val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] = 
+  val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] =
     if (useTop)
       constExprToTops
-    else 
+    else
       constExprToAVals
 
   spectest.foreach{ mod =>
@@ -108,61 +120,61 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, use
     case Some(name) => aModules(name)
 
   def eval(c: Command): Unit = c match
-      case ValidModule(m) =>
-        // validate and compile module
-        val mod = Parsing.fromUnresolved(m)
-        val id = m.id match
-          case SomeId(name) => Some(name)
-          case _ => None
-        loadModule(id, mod)
-      case Register(s, id) =>
-        cImports += s -> getCModule(id)
-        aImports += s -> getAModule(id)
-      case BinaryModule(id, bytes) =>
-        val mod = Parsing.fromBytes(bytes)
-        loadModule(id, mod)
-      case QuotedModule(id, text) =>
-        ???
-      case AssertReturn(action, expectedRes) =>
-        val aRes = runAAction(action, convertVals)
-        val res = runCAction(action)
-        assert(!res.isFailing)
-        val expected = constExprToVals(expectedRes)
-        assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
-      case AssertReturnCanonicalNaN(action) =>
-        val aRes = runAAction(action, convertVals)
-        val res = runCAction(action)
-        checkNaN(res, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
-      case AssertReturnArithmeticNaN(action) =>
-        val aRes = runAAction(action, convertVals)
-        val res = runCAction(action)
-        checkNaN(res, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
-      case AssertTrap(action: Action, message: String) =>
-        val aRes = runAAction(action, convertVals)
-        val res = runCAction(action)
-        assert(res.isFailing, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
-      case AssertModuleTrap(mod,_) =>
-        val aRes = aInstantiate(mod)
-        val res = instantiate(mod)
-        assert(res.isFailing, c.toString)
-        //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
-        assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
-      case _: AssertUnlinkable => // skip
-      case _: AssertInvalid => // skip
-      case _: AssertMalformed => // skip
-      case _: AssertExhaustion => // skip
-      case action: Action =>
-        runAAction(action, convertVals)
-        runCAction(action)
-      case _: Meta => // skip
+    case ValidModule(m) =>
+      // validate and compile module
+      val mod = Parsing.fromUnresolved(m)
+      val id = m.id match
+        case SomeId(name) => Some(name)
+        case _ => None
+      loadModule(id, mod)
+    case Register(s, id) =>
+      cImports += s -> getCModule(id)
+      aImports += s -> getAModule(id)
+    case BinaryModule(id, bytes) =>
+      val mod = Parsing.fromBytes(bytes)
+      loadModule(id, mod)
+    case QuotedModule(id, text) =>
+      ???
+    case AssertReturn(action, expectedRes) =>
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      assert(!res.isFailing)
+      val expected = constExprToVals(expectedRes)
+      assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
+      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+    case AssertReturnCanonicalNaN(action) =>
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      checkNaN(res, c.toString)
+      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+    case AssertReturnArithmeticNaN(action) =>
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      checkNaN(res, c.toString)
+      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+    case AssertTrap(action: Action, message: String) =>
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      assert(res.isFailing, c.toString)
+      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+    case AssertModuleTrap(mod,_) =>
+      val aRes = aInstantiate(mod)
+      val res = instantiate(mod)
+      assert(res.isFailing, c.toString)
+      //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
+    case _: AssertUnlinkable => // skip
+    case _: AssertInvalid => // skip
+    case _: AssertMalformed => // skip
+    case _: AssertExhaustion => // skip
+    case action: Action =>
+      runAAction(action, convertVals)
+      runCAction(action)
+    case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =
     val cModInst = cInterp.initializeModule(mod, cImports)

@@ -13,10 +13,12 @@ import swam.FuncIdx
 import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
 
 object Fix:
-  final def isFunOrLoop(dom: FixIn): Boolean = dom match
-    case _: FixIn.EnterWasmFunction => true
-    case FixIn.Eval(_: Loop, _) => true
-    case _ => false
+  final def isFunOrLoop(dom: FixIn): Boolean = isFunOrLoopToIndex(dom) > -1
+
+  final def isFunOrLoopToIndex(dom: FixIn): Int = dom match
+    case _: FixIn.EnterWasmFunction => 0
+    case FixIn.Eval(_: Loop, _) => 1
+    case _ => -1
 
   final def casesFunOrLoop(dom: FixIn): Int = dom match
     case _: FixIn.EnterWasmFunction => 0

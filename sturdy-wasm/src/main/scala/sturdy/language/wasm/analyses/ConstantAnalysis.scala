@@ -13,7 +13,6 @@ import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
 import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
-import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
@@ -71,19 +70,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
+  abstract class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
       GenericInstance
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
-
-    override type Ctx = config.ctx.Ctx
-    val (contextPreparation, sensitivity) = config.ctx.make[Value]
-    import config.ctx.finiteCtx
-    override protected def contextFree = contextPreparation
-    override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-    override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
-
+    
+    var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
@@ -101,5 +94,3 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
     private given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
-
-    override def toString: String = s"constant $config"

@@ -60,14 +60,14 @@ object WASMBenchRunner:
 //      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
 //      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
 //    ),
-    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
+    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
     "warmup" -> true, // default: true
     "logOpenOption" -> StandardOpenOption.APPEND, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
-    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-v1"),
+    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-newfix"),
     "onlyBinariesInCSV" -> Some(Path.of("/Volumes/home/tmp/wasmbench/results-v0/Type.topmost-calls(1).results.csv"))
   ).asInstanceOf[RunnerConfig]
 
@@ -260,7 +260,7 @@ class CsvLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false):
   import StandardOpenOption.*
 
   (oo, doLog) match
-    case (CREATE, true) =>
+    case (CREATE, true) | (CREATE_NEW, true) =>
       if Files.exists(p) then Files.delete(p)
       val init = Files.newOutputStream(p, oo)
       init.flush(); init.close()

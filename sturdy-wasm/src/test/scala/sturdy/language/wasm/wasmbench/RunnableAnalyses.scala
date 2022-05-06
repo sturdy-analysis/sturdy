@@ -4,11 +4,12 @@ import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
+import sturdy.language.wasm.analyses.ConstantAnalysisSturdyInstance
+import sturdy.language.wasm.analyses.{WasmConfig, ConstantTaintAnalysis, TypeAnalysis, ConstantAnalysis}
 import sturdy.language.wasm.generic.FrameData
-import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
+import swam.syntax.{StoreNInst, StoreInst, LoadInst, LoadNInst}
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{Path, Files}
 
 trait AnalysisRunnable extends Runnable:
   def setRes(v: Either[Throwable, RRecord]): Unit
@@ -191,7 +192,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val startTimeMillis = System.currentTimeMillis()
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, config)
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 

@@ -34,15 +34,10 @@ object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type Ctx = CallString
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  type InState = Store
-  type OutState = (Store, APrintPrefix.PrintResult[Value])
-  type AllState = OutState
-
-  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance:
+  abstract class Instance(initEnvironment: Environment, initStore: Store)() extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
@@ -62,23 +57,10 @@ object IntervalAnalysis extends Interpreter,
     override val print: APrintPrefix[Value] = new APrintPrefix
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntInterval.Top))
 
-    var bounds: Set[Int] = Set.empty
+    var bounds: Set[Int] = Set()
     given Widen[IntInterval] = new IntIntervalWiden(bounds)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
-
-    val callSites = callSitesLogger()
-
-    protected override def context = callSites.callString(2)
-    protected override def contextFree = fix.log(callSites, _)
-    override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(
-      // call
-      fix.iter.topmost,
-      // while
-      fix.unwind(steps,
-        fix.iter.innermost
-      )
-    ))

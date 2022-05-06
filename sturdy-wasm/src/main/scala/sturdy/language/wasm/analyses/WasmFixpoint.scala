@@ -16,23 +16,23 @@ import sturdy.language.wasm.generic.GenericInterpreter
 import sturdy.language.wasm.generic.{FixIn, finiteFixIn, FixOut}
 import sturdy.report.Properties
 import sturdy.values.Finite
-import sturdy.values.{Widen, Finite}
+import sturdy.values.{Widen, Finite, Join}
 
-trait WasmFixpoint[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
-  (val config: WasmConfig)(using Widen[FixOut[V]])
-  extends GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J], fix.Fixpoint[FixIn, FixOut[V]]:
-
-  override type Ctx = config.ctx.Ctx
-
-  implicit def widenState: Widen[State]
-  implicit def widenInState: Widen[InState]
-  implicit def widenOutState: Widen[OutState]
-
-  val (contextPreparation, sensitivity) = config.ctx.make[V]
-  import config.ctx.finiteCtx
-  override protected def contextFree = contextPreparation
-  override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-  override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+//trait WasmFixpoint[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
+//  (val config: WasmConfig)(using Widen[FixOut[V]])
+//  extends GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J], fix.Fixpoint[FixIn, FixOut[V]]:
+//
+//  override type Ctx = config.ctx.Ctx
+//
+//  implicit def widenState: Widen[State]
+//  implicit def widenInState: Widen[InState]
+//  implicit def widenOutState: Widen[OutState]
+//
+//  val (contextPreparation, sensitivity) = config.ctx.make[V]
+//  import config.ctx.finiteCtx
+//  override protected def contextFree = contextPreparation
+//  override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+//  override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
 
 case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive):
   override def toString: String = s"$fix $ctx"
@@ -49,7 +49,7 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost, loo
 
   def get[V, In, Out, All, Ctx]
     (using AnalysisState[FixIn, In, Out, All], EffectStack)
-    (using Widen[FixOut[V]], Widen[In], Widen[Out])
+    (using Widen[FixOut[V]], Widen[In], Widen[Out], Join[Out])
     (using Finite[Ctx])
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
 

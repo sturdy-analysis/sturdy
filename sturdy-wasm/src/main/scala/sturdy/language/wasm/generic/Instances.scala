@@ -35,7 +35,7 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
         case _ => false
       case _ => this.b eq that.b
     case _ => false
-  override def hashCode(): Int = b.hashCode
+  override val hashCode: Int = b.hashCode
 
 class ModuleInstance:
   var functionTypes: Vector[FuncType] = Vector.empty

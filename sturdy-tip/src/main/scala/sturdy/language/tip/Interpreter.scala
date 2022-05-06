@@ -14,7 +14,6 @@ import sturdy.values.relational.{OrderingOps, EqOps, LiftedOrderingOps}
 
 trait Interpreter:
   type J[A] <: MayJoin[A]
-  type Ctx
   type VBool
   type VInt
   type VRef
@@ -68,13 +67,11 @@ trait Interpreter:
       case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
       case _ => MaybeChanged(TopValue, v1)
 
-  class FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]) extends Finite[Value]
+  given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   type Instance <: GenericInstance
   abstract class GenericInstance
     extends GenericInterpreter[Value, Addr, J]:
-
-    override type Ctx = Interpreter.this.Ctx
 
     given Instance = this.asInstanceOf[Instance]
 

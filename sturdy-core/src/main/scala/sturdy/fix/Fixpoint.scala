@@ -6,14 +6,17 @@ import sturdy.fix.context.Sensitivity
 import scala.collection.mutable.ListBuffer
 
 trait Fixpoint[Dom, Codom]:
-  final type Fixed = Dom => Codom
+  def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom
 
-  def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
-    val phi = fixpointAlgorithm()
-    computeFixpoint(fixed => phi(f(using fixed)))
+trait CombinatorFixpoint[Dom, Codom] extends Fixpoint[Dom, Codom]:
+  lazy val phi: Combinator[Dom, Codom]
 
-  private def computeFixpoint(f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
-    f(dom => computeFixpoint(f)(dom))
+  final override def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
+    Fixpoint.computeLeastFixpoint(fixed => phi(f(using fixed)))
+
+trait ContextualFixpoint[Dom, Codom] extends CombinatorFixpoint[Dom, Codom]:
+
+  override lazy val phi = fixpointAlgorithm()
 
   type Ctx
   protected def context: Sensitivity[Dom, Ctx]
@@ -26,7 +29,7 @@ trait Fixpoint[Dom, Codom]:
   private val contextFreeLoggers: ListBuffer[Logger[Dom, Codom]] = ListBuffer()
   def addContextFreeLogger(logger: Logger[Dom, Codom]): Unit = contextFreeLoggers += logger
   def removeContextFreeLogger(logger: Logger[Dom, Codom]): Unit = contextFreeLoggers -= logger
-  
+
   private val contextSensitiveLoggers: ListBuffer[Contextual[Ctx, Dom, Codom] ?=> Logger[Dom, Codom]] = ListBuffer()
   def addContextSensitiveLogger(logger: Contextual[Ctx, Dom, Codom] ?=> Logger[Dom, Codom]): Unit = contextSensitiveLoggers += logger
   def removeContextSensitiveLogger(logger: Contextual[Ctx, Dom, Codom] ?=> Logger[Dom, Codom]): Unit = contextSensitiveLoggers -= logger
@@ -48,17 +51,20 @@ trait Fixpoint[Dom, Codom]:
       log(manyLogger(contextFreeLoggers.toList), phi)
 
 
-trait ContextInsensitive[Dom, Codom] extends Fixpoint[Dom, Codom]:
+trait ContextInsensitiveFixpoint[Dom, Codom] extends ContextualFixpoint[Dom, Codom]:
   final type Ctx = Unit
   final protected override def context: Sensitivity[Dom, Ctx] = sturdy.fix.context.none
   final protected override def contextFree: Combinator[Dom, Codom] => Combinator[Dom, Codom] = f => f
   final protected override def contextSensitive: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = contextInsensitive
   protected def contextInsensitive: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom]
 
-trait Concrete[Dom, Codom] extends ContextInsensitive[Dom, Codom]:
+class ConcreteFixpoint[Dom, Codom] extends ContextInsensitiveFixpoint[Dom, Codom]:
   override protected def contextInsensitive = identity
 
 object Fixpoint:
   var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "true").toBoolean
   val DEBUG_INVARIANTS = System.getProperty("STURDY_DEBUG_INVARIANTS", "false").toBoolean
-  
+
+  private[fix] def computeLeastFixpoint[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
+    f(dom => computeLeastFixpoint(f)(dom))
+

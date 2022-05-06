@@ -7,7 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
 import sturdy.values.Finite
-import sturdy.values.Widen
+import sturdy.values.{Widen, Join}
 
 import scala.collection.mutable
 import scala.util.Try
@@ -15,15 +15,18 @@ import scala.util.Try
 def topmost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[Dom, In, Out, All])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
-  : Topmost[Dom, Codom, In, Out, All, Ctx] = new Topmost(state, context)
+  : Topmost[Dom, Codom, In, Out, All, Ctx] =
+  new Topmost(state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
+  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
+
+  override def equals(obj: Any): Boolean = super.equals(obj)
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var hasLoop: Boolean = false
@@ -47,7 +50,8 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
-      case Some(result) => 
+      case Some(result) =>
+        hasLoop = hasLoop || !result.isRecurrent
         result
       case None =>
         val result = TrySturdy(f(dom))
