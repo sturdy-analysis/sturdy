@@ -1,6 +1,7 @@
 package sturdy.effect.failure
 
 import sturdy.effect.Effectful
+import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyFailure
 import sturdy.values.Powerset
 import sturdy.values.Abstractly
@@ -27,6 +28,7 @@ class AFailureCollect extends Failure with Effectful:
         AFallible.MaybeFailing(res, Powerset(failures.toSet))
     } catch {
       case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
+      case recur: RecurrentCall => AFallible.Diverging(recur)
       case ex => throw ex
     }
 

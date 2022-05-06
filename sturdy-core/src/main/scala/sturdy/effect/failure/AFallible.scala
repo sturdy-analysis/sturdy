@@ -1,5 +1,6 @@
 package sturdy.effect.failure
 
+import sturdy.effect.RecurrentCall
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Powerset
@@ -8,14 +9,13 @@ enum AFallible[T]:
   case Unfailing(t: T)
   case Failing(msgs: Powerset[(FailureKind,String)])
   case MaybeFailing(t: T, msgs: Powerset[(FailureKind,String)])
+  case Diverging(recur: RecurrentCall)
 
   def isFailing: Boolean = this match
     case Failing(_) => true
     case _ => false
 
-  def isSucceeding: Boolean = this match
-    case Failing(_) => false
-    case _ => true
+  def isSucceeding: Boolean = !isFailing
   
   def get: T = this match
     case Unfailing(t) => t
@@ -32,9 +32,11 @@ given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallib
     case AFallible.Unfailing(t) => AFallible.Unfailing(abs.abstractly(t))
     case AFallible.MaybeFailing(t, msgs) => AFallible.MaybeFailing(abs.abstractly(t), msgs)
     case AFallible.Failing(msgs) => AFallible.Failing(msgs)
+    case AFallible.Diverging(recur) => AFallible.Diverging(recur)
 
 given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
   override def lteq(x: AFallible[T], y: AFallible[T]): Boolean = (x, y) match
+    case (AFallible.Diverging(_), _) => true
     case (AFallible.Unfailing(t1), AFallible.Unfailing(t2)) => po.lteq(t1, t2)
     case (AFallible.Failing(fails1), AFallible.Failing(fails2)) => fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case (AFallible.Unfailing(t1), AFallible.MaybeFailing(t2, fails2)) => po.lteq(t1, t2)

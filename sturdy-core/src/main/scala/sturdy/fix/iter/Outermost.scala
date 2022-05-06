@@ -45,7 +45,7 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
       case None =>
         val result = TrySturdy(f(dom))
         val wasRecurrent = stack.hasRecurrentCalls
-        val (widenedResult, looping) = stack.pop(dom, inState, result)
+        val (widenedResult, _) = stack.pop(dom, inState, result)
         val isRecurrent = stack.hasRecurrentCalls
         val isOutermost = wasRecurrent && !isRecurrent
         (widenedResult, isOutermost)
