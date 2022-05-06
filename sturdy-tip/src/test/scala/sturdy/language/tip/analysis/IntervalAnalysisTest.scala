@@ -40,7 +40,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("corecurrent_widening.tip")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
       runIntervalAnalysis(p, 10)
     }

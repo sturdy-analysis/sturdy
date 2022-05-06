@@ -13,10 +13,12 @@ val Property = "iteration strategy"
 
 enum Config:
   case Innermost
+  case Outermost
   case Topmost
 
   override def toString: String = this match
     case Innermost => "innermost"
+    case Outermost => "outermost"
     case Topmost => "topmost"
   
   def get[Dom, Codom, In, Out, All, Ctx]
@@ -25,4 +27,5 @@ enum Config:
   (using Finite[Dom], Finite[Ctx])
   : Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = this match
     case Innermost => fix.iter.innermost
+    case Outermost => fix.iter.outermost
     case Topmost => fix.iter.topmost

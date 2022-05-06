@@ -58,6 +58,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
    *  When a stack frame becomes inactive, it is also removed from this set.
    */
   private val recurrentCalls: mutable.Set[Int] = mutable.BitSet()
+  def hasRecurrentCalls: Boolean = recurrentCalls.nonEmpty
 
   override def toString: String = stack.toList.map(_._1).mkString("Stack(", ", ", ")")
 
@@ -124,6 +125,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
 
   /** Pushes a frame on top of the stack and detects if the frame is recurrent.
    *
+   *  If the frame is not recurrent, yields None.
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
