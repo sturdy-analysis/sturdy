@@ -63,7 +63,7 @@ object WASMBenchRunner:
     "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost)),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
     "warmup" -> true, // default: true
-    "logOpenOption" -> StandardOpenOption.APPEND, // default: CREATE
+    "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
@@ -100,7 +100,7 @@ class WASMBenchRunner extends AnyFunSpec:
     if (onlyBinariesInCSV.isDefined) {
       val csvStore = new ResultStore[Result](onlyBinariesInCSV.get)
       val hashes = csvStore.retrieve(_ => true).map(r => r.hash.split('.')(0)).toSet
-      binaries = binaries.filter(b => !hashes.contains(b.md.hash))
+      binaries = binaries.filter(b => hashes.contains(b.md.hash))
     }
 
     println(s"Considering ${binaries.size} binaries")
