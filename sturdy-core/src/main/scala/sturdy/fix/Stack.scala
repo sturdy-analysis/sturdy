@@ -176,6 +176,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
           info.pushed(stackInWidened, stackHeight)
           stackHeight += 1
           state.setInState(stackInWidened)
+          outCache.get(frame).foreach(_.stability = Stability.Unstable)
           None
 
 //
@@ -250,12 +251,15 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
 
   inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In): MaybeChanged[In] = inCache.get(frame) match
     case None =>
+      inCache += frame -> in
+      inCacheDirty = true
       Unchanged(in)
     case Some(recurrentIn) =>
       LinearStateOperationCounter.wideningCounter += 1
       val newIn = Profiler.addTime("widen"){widenIn(recurrentIn, in)}
       if (newIn.hasChanged)
         inCache += frame -> newIn.get
+        inCacheDirty = true
       state.setInState(newIn.get)
       newIn
 
@@ -294,6 +298,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, O
 //      }
 
       if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
+        println(s"${stackHeightIndent}blaPOP  $frame <- $newResult")
         throw new IllegalStateException(s"Why can a stable out cache entry be written again?")
       }
       val changed = newResult.hasChanged || newOut.hasChanged
