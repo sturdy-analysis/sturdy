@@ -1,38 +1,61 @@
 package sturdy.util
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 object Profiler:
-  val measuredTimes: mutable.Map[String, Long] = mutable.Map()
+  private var measuredTimes: Map[String, Long] = Map()
 
-  private val startTimes: mutable.Map[String, Long] = mutable.Map()
+  private var startTimes: Map[String, Long] = Map()
+
+  private var savedTimes: Map[String, ListBuffer[Long]] = Map()
 
   def addTime[R](name: String)(block: => R): R = {
-    val t0: Long = System.nanoTime()
+    start(name)
     val result = block    // call-by-name
-    val t1 = System.nanoTime()
-    if (!measuredTimes.contains(name)) measuredTimes(name) = 0
-    measuredTimes(name) += t1 - t0
+    end(name)
     result
   }
 
-  def print(): Unit =
+  def printLastMeasured(): Unit =
     println("Elapsed times:")
-    measuredTimes.keys.foreach(print)
+    measuredTimes.keys.foreach(printByName)
 
-  def print(name: String): Unit =
-    println(s"\t$name:${measuredTimes(name) / 1000000000.0}s")
+  def printByName(name: String): Unit =
+    println(s"\t$name:${nanoToFormattedSeconds(measuredTimes(name))}")
+
+  private def nanoToFormattedSeconds(nanoseconds: Long): String =
+    val seconds: Double = nanoseconds / 1000000000.0
+    f"$seconds%1.4fs"
+//    s"$seconds"
+
+
+  def printSavedTimes(): Unit =
+    savedTimes.foreach{
+      (name, listOfTimes: ListBuffer[Long]) =>
+        print(s"$name: ")
+        println(listOfTimes.map(nano => s"${nanoToFormattedSeconds(nano)}").mkString(", "))
+    }
 
   def reset(): Unit =
-    measuredTimes.clear()
+    measuredTimes = Map()
     assert(startTimes.isEmpty)
 
 
   def start(name: String): Unit =
     assert(!startTimes.contains(name))
-    startTimes(name) = System.nanoTime()
+    startTimes += name -> System.nanoTime()
 
   def end(name: String): Unit =
     assert(startTimes.contains(name))
-    if (!measuredTimes.contains(name)) measuredTimes(name) = 0
-    measuredTimes(name) += System.nanoTime() - startTimes(name)
+    if (!measuredTimes.contains(name)) measuredTimes += name -> 0
+    measuredTimes += name -> (measuredTimes(name) + System.nanoTime() - startTimes(name))
     startTimes -= name
+
+  def saveTimesAndReset(): Unit =
+    measuredTimes.foreach {
+      (name, time) =>
+        if (!savedTimes.contains(name))
+          savedTimes += name -> ListBuffer()
+        savedTimes(name).append(time)
+    }
+    measuredTimes = Map()

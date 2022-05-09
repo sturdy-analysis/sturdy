@@ -1,5 +1,4 @@
 package sturdy.language.tip.analysis
-
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -39,19 +38,32 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
 
-class IntervalAnalysisKeidelTest extends AnyFlatSpec, Matchers:
+
+class IntervalAnalysisKeidelByStoreSizeTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip interval Keidel analysis"
 
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  var uri = classOf[IntervalAnalysisKeidelByStoreSizeTest].getResource("/sturdy/language/tip").toURI
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("loop_nested.tip")).sorted.foreach { p =>
-    it must s"soundly analyze ${p.getFileName}" in {
-      runIntervalAnalysis(p, 10)
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(s"0start.tip")).sorted.foreach { p =>
+    it must s"warm up " in {
+      runIntervalAnalysis(p)
     }
   }
 
-  def runIntervalAnalysis(p: Path, steps: Int) =
+//  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(s"incrementVarsToTen.tip")).sorted.foreach { p =>
+//    it must s"soundly analyze ${p.getFileName} " in {
+//      runIntervalAnalysis(p)
+//    }
+//  }
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("01000_20000Stack.tip")).sorted.foreach { p =>
+    it must s"soundly analyze ${p.getFileName}" in {
+      while (true)
+        runIntervalAnalysis(p)
+    }
+  }
+
+  def runIntervalAnalysis(p: Path) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
@@ -63,21 +75,21 @@ class IntervalAnalysisKeidelTest extends AnyFlatSpec, Matchers:
           isFunOrWhile, Seq(Config.Innermost, Config.Innermost), new InsensitiveStack[FixIn, InState]())
       }
 
-      val aresult = analysis.failure.fallible(analysis.execute(program))
-      Profiler.printLastMeasured()
-      LinearStateOperationCounter.addToListAndReset()
-      println(s"${LinearStateOperationCounter.toString} in the last tests")
-      println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-//        println(StackManager.keidelFixpoint.asInstanceOf[KeidelFixpoint[GenericInterpreter.FixIn,
-//          GenericInterpreter.FixOut[SignAnalysis.Value],
-//          Map[AllocationSiteAddr, SignAnalysis.Value],
-//          (Map[AllocationSiteAddr, SignAnalysis.Value], APrintPrefix.PrintResult[SignAnalysis.Value]),
-//          (Map[AllocationSiteAddr, SignAnalysis.Value], APrintPrefix.PrintResult[SignAnalysis.Value])]].results)
+
+      val aresult = Profiler.addTime("analysis"){analysis.failure.fallible(analysis.execute(program))}
+//      println(aresult)
+//      Profiler.saveTimesAndReset()
+//      Profiler.printSavedTimes()
+//      LinearStateOperationCounter.addToListAndReset()
+//      println(s"${LinearStateOperationCounter.toString} in the last tests")
+//      println(s"#linear state operations per test: ${LinearStateOperationCounter.getOperationsPerTest}")
+
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      val cresult = interp.failure.fallible(interp.execute(program))
-      given CAllocationIntIncrement[AllocationSite] = interp.alloc
-      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
-      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+//      val cresult = interp.failure.fallible(interp.execute(program))
+//      given CAllocationIntIncrement[AllocationSite] = interp.alloc
+//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
+//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+      LinearStateOperationCounter.clearAll()
       (aresult, analysis)
     } else {
       null

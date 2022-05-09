@@ -16,6 +16,7 @@ import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Topped
 import sturdy.values.integer.IntegerDivisionByZero
 
@@ -159,4 +160,9 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallib
   println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
   println(cfg.withBlocks(shortLabels = false).toGraphViz)
+
+  LinearStateOperationCounter.addToListAndReset()
+  println(s"${LinearStateOperationCounter.toString} in the last tests")
+  println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
+  Profiler.printLastMeasured()
   result
