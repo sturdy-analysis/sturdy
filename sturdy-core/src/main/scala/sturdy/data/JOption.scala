@@ -1,8 +1,11 @@
 package sturdy.data
 
 import sturdy.effect.Effectful
+import sturdy.values.Combine
 import sturdy.values.Join
+import sturdy.values.MaybeChanged
 import sturdy.values.Powerset
+import sturdy.values.Widening
 
 trait JOption[J[_] <: MayJoin[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
@@ -92,6 +95,16 @@ object JOptionA:
   def apply[A](opt: scala.Option[A]): JOptionA[A] = opt match
     case scala.Some(a) => JOptionA.Some(a)
     case scala.None => JOptionA.None()
+
+given CombineJoinA[A, W <: Widening](using Combine[A, W]): Combine[JOptionA[A], W] with
+  def apply(v1: JOptionA[A], v2: JOptionA[A]): MaybeChanged[JOptionA[A]] = (v1, v2) match
+    case (JOptionA.None(), JOptionA.None()) => MaybeChanged.Unchanged(JOptionA.None())
+    case (JOptionA.None(), _) => MaybeChanged.Changed(v2)
+    case (_, JOptionA.None()) => MaybeChanged.Unchanged(v1)
+    case (JOptionA.Some(a1), JOptionA.Some(a2)) => Combine[A, W](a1, a2).map(JOptionA.Some.apply)
+    case (JOptionA.Some(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
+    case (JOptionA.NoneSome(a1), JOptionA.Some(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
+    case (JOptionA.NoneSome(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
 
 //case class JOptionPower[A](opt: JOption[WithJoin, Powerset[A]]) extends JOption[WithJoin, A]:
 //  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B =

@@ -55,7 +55,7 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
       () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("conversions.wast")).sorted.foreach { p =>
     for (aInterp <- analyses) {
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript constant analysis on ${p.getFileName}")

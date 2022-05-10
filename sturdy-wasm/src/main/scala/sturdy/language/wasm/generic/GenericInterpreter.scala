@@ -144,7 +144,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
   enum OutState:
     case ExitFunState(ops: stack.OperandFrame, mem: memory.State, globs: globals.State)
-    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
+    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State, exc: except.State)
 
   given CombineInState[W <: Widening]
     (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W]):
@@ -164,7 +164,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
   
   given CombineOutState[W <: Widening]
-    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W]):
+    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W], cExcs: Combine[except.State, W]):
     Combine[OutState, W] with
     override def apply(v1: OutState, v2: OutState): MaybeChanged[OutState] = (v1, v2) match
       case (s1: OutState.ExitFunState, s2: OutState.ExitFunState) =>
@@ -177,7 +177,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val vars = cVars(s1.vars, s2.vars)
         val mem = cMem(s1.mem, s2.mem)
         val globs = cGlobs(s1.globs, s2.globs)
-        MaybeChanged(OutState.InstructionState(ops.get, vars.get, mem.get, globs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged)
+        val excs = cExcs(s1.exc, s2.exc)
+        MaybeChanged(OutState.InstructionState(ops.get, vars.get, mem.get, globs.get, excs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged || excs.hasChanged)
       case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
   
   type State = (stack.OperandFrame, memory.State, globals.State, callFrame.Locals)
@@ -197,17 +198,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         globals.setState(globs)
     override def getOutState(dom: FixIn): OutState = dom match
       case _: FixIn.EnterWasmFunction => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
-      case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
+      case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState, except.getState)
     override def setOutState(out: OutState): Unit = out match
       case OutState.ExitFunState(ops, mem, globs) =>
         stack.setOperandFrame(ops)
         memory.setState(mem)
         globals.setState(globs)
-      case OutState.InstructionState(ops, vars, mem, globs) =>
+      case OutState.InstructionState(ops, vars, mem, globs, exc) =>
         stack.setOperandFrame(ops)
         callFrame.setLocals(vars)
         memory.setState(mem)
         globals.setState(globs)
+        except.setState(exc)
     override def getAllState: State = (stack.getOperandFrame, memory.getState, globals.getState, callFrame.getLocals)
     override def setAllState(in: State): Unit =
       stack.setOperandFrame(in._1)
