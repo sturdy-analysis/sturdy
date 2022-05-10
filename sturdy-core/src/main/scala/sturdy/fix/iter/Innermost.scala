@@ -31,20 +31,20 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
 
   /** Runs `f` until a fixed point is reached as soon as something is looping. */
   override def apply(f: Dom => Codom): Dom => Codom =
-    def apply_(dom: Dom): Codom =
-      stack.repeatUntilStable(dom)(() => step(f, dom)).getOrThrow
+    def apply_(dom: Dom): Codom = {
+      var currentResult = null.asInstanceOf[TrySturdy[Codom]]
+      var looping = true
+      while (looping) {
+        val inState = state.getInState(dom)
+        stack.push(dom, inState) match
+          case Some(result) =>
+            return result.getOrThrow
+          case None =>
+            val result = TrySturdy(f(dom))
+            val (widened, loop) = stack.pop(dom, inState, result)
+            currentResult = widened
+            looping = loop
+      }
+      currentResult.getOrThrow
+    }
     apply_
-
-  /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior.
-   *  
-   *  @return the result of running `f` and a flag that indicates if `f` is looping and needs iterating.
-   */
-  private def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
-    val inState = state.getInState(dom)
-    stack.push(dom, inState) match
-      case Some(result) =>
-        (result, !result.isRecurrent)
-      case None =>
-        val result = TrySturdy(f(dom))
-        val (widened, loop) = stack.pop(dom, inState, result)
-        (widened, loop)
