@@ -7,6 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
@@ -56,6 +57,6 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
         priorResult
       case None =>
         val result = TrySturdy(f(dom))
-        val (widenedResult, looping) = stack.pop(dom, inState, result)
+        val MaybeChanged(widenedResult, looping) = stack.pop(dom, inState, result)
         someComponentIsLooping = someComponentIsLooping || looping
         widenedResult

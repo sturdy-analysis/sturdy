@@ -8,6 +8,7 @@ import sturdy.fix.Contextual
 import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
@@ -35,7 +36,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom = {
-      val (result, loop) = step(f, dom)
+      val MaybeChanged(result, loop) = step(f, dom)
       if (loop) {
         if (Fixpoint.DEBUG) {
           val iterationCount = iterationCounts.getOrElse(dom, 2)
@@ -49,11 +50,11 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
     }
     apply_
 
-  private inline def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
+  private inline def step(f: Dom => Codom, dom: Dom): MaybeChanged[TrySturdy[Codom]] =
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
       case Some(priorResult) =>
-        (priorResult, false)
+        MaybeChanged.Unchanged(priorResult)
       case None =>
         val result = TrySturdy(f(dom))
         stack.pop(dom, inState, result)

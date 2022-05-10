@@ -7,6 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Stack
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
@@ -36,7 +37,7 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom = {
-      val (result, isOutermost) = step(f, dom)
+      val MaybeChanged(result, isOutermost) = step(f, dom)
       if (isOutermost && someComponentIsLooping) {
         someComponentIsLooping = false
         apply_(dom)
@@ -46,16 +47,16 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private inline def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
+  private inline def step(f: Dom => Codom, dom: Dom): MaybeChanged[TrySturdy[Codom]] =
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
       case Some(priorResult) =>
-        (priorResult, false)
+        MaybeChanged.Unchanged(priorResult)
       case None =>
         val result = TrySturdy(f(dom))
         val wasRecurrent = stack.hasRecurrentCalls
-        val (widenedResult, looping) = stack.pop(dom, inState, result)
+        val MaybeChanged(widenedResult, looping) = stack.pop(dom, inState, result)
         val isRecurrent = stack.hasRecurrentCalls
         val isOutermost = wasRecurrent && !isRecurrent
         someComponentIsLooping = someComponentIsLooping || looping
-        (widenedResult, isOutermost)
+        MaybeChanged(widenedResult, isOutermost)

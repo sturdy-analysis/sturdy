@@ -3,7 +3,7 @@ ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 ThisBuild / version := "0.1"
 
-ThisBuild / scalaVersion := "3.1.0"
+ThisBuild / scalaVersion := "3.1.2"
 
 ThisBuild / Test / fork := false
 ThisBuild / Test / parallelExecution := false
@@ -26,6 +26,7 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     name := "sturdy-core",
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
+      "org.eclipse.collections" % "eclipse-collections" % "11.0.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
