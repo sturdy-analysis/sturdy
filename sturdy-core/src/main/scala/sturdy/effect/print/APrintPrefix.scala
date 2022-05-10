@@ -5,9 +5,7 @@ import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
-import sturdy.values.Finite
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
+import sturdy.values.*
 
 import scala.collection.mutable.ListBuffer
 
@@ -114,14 +112,18 @@ object APrintPrefix:
     case Mismatch(cs: List[C], rest: PrintResult[A])
     case Partial(rest: PrintResult[A])
 
-// TODO this is a workaround. We don't need widening for PrintResult since it's stability does not influence the fixed point
-given finitePrintResult[A]: Finite[APrintPrefix.PrintResult[A]] with {}
-
 given JoinPrintResult[A]: Join[APrintPrefix.PrintResult[A]] with
   import APrintPrefix.*
   override def apply(v1: PrintResult[A], v2: PrintResult[A]): MaybeChanged[PrintResult[A]] =
     val joined = v1.join(v2)
     MaybeChanged(joined, v1)
+
+given WidenPrintResult[A]: Widen[APrintPrefix.PrintResult[A]] with
+  import APrintPrefix.*
+  override def apply(v1: PrintResult[A], v2: PrintResult[A]): MaybeChanged[PrintResult[A]] =
+    val joined = v1.join(v2)
+    // This is a workaround. We don't need widening for PrintResult since it's stability does not influence the fixed point
+    Unchanged(joined)
 
 
 class APrintPrefix[P] extends Print[P]:

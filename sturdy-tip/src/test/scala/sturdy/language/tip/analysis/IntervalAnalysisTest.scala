@@ -57,7 +57,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
         val fixpoint = callSiteSensitive(0, fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.innermost, fix.iter.innermost
+          fix.iter.outermost, fix.iter.outermost
 //          // call
 //          fix.unwind(steps,
 //            fix.iter.topmost,
