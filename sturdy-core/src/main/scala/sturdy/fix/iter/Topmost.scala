@@ -5,6 +5,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
+import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
@@ -32,15 +33,22 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var someComponentIsLooping: Boolean = false
+  private var iterationCount: Int = 1
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom =
       if (stack.height == 0) {
+        val state = stack.state.getAllState
         val result = step(f, dom)
         if (someComponentIsLooping) {
+          if (Fixpoint.DEBUG) {
+            iterationCount += 1
+            println(s"## REPEAT (Iteration $iterationCount) of $dom")
+          }
           someComponentIsLooping = false
+          stack.state.setAllState(state)
           apply_(dom)
         } else
           result.getOrThrow

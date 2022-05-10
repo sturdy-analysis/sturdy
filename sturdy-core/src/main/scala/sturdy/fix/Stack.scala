@@ -37,7 +37,7 @@ import scala.util.Try
  *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
  *
  */
-final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[Dom, In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
+final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
   (using Finite[Dom], Finite[Ctx]):
 

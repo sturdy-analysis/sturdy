@@ -5,6 +5,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
+import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
@@ -32,6 +33,7 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var someComponentIsLooping: Boolean = false
+  private var iterationCount: Int = 1
 
   /** Runs `f`. If this is the outermost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
@@ -39,6 +41,10 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
     def apply_(dom: Dom): Codom = {
       val MaybeChanged(result, isOutermost) = step(f, dom)
       if (isOutermost && someComponentIsLooping) {
+        if (Fixpoint.DEBUG) {
+          iterationCount += 1
+          println(s"## REPEAT (Iteration $iterationCount) of $dom")
+        }
         someComponentIsLooping = false
         apply_(dom)
       } else

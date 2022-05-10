@@ -36,6 +36,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom = {
+      val state = stack.state.getAllState
       val MaybeChanged(result, loop) = step(f, dom)
       if (loop) {
         if (Fixpoint.DEBUG) {
@@ -43,6 +44,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
           iterationCounts += dom -> (iterationCount + 1)
           println(s"## REPEAT (Iteration $iterationCount) of $dom")
         }
+        stack.state.setAllState(state)
         apply_(dom)
       } else {
         result.getOrThrow
