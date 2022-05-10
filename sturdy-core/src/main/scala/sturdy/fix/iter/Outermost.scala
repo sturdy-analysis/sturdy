@@ -39,6 +39,7 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom = {
+      val state = stack.state.getAllState
       val MaybeChanged(result, isOutermost) = step(f, dom)
       if (isOutermost && someComponentIsLooping) {
         if (Fixpoint.DEBUG) {
@@ -46,6 +47,7 @@ final class Outermost[Dom, Codom, In, Out, All, Ctx]
           println(s"## REPEAT (Iteration $iterationCount) of $dom")
         }
         someComponentIsLooping = false
+        stack.state.setAllState(state)
         apply_(dom)
       } else
         result.getOrThrow
