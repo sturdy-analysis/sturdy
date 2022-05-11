@@ -5,10 +5,13 @@ import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
+import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
@@ -29,32 +32,39 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   override def equals(obj: Any): Boolean = super.equals(obj)
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
-  private var hasLoop: Boolean = false
+  private var someComponentIsLooping: Boolean = false
+  private var iterationCount: Int = 1
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
+    @tailrec
     def apply_(dom: Dom): Codom =
-      if (stack.height > 0) {
-        step(f, dom).getOrThrow
+      if (stack.height == 0) {
+        val state = stack.state.getAllState
+        val result = step(f, dom)
+        if (someComponentIsLooping) {
+          if (Fixpoint.DEBUG) {
+            iterationCount += 1
+            println(s"## REPEAT (Iteration $iterationCount) of $dom")
+          }
+          someComponentIsLooping = false
+          stack.state.setAllState(state)
+          apply_(dom)
+        } else
+          result.getOrThrow
       } else {
-        // this is the topmost call
-        stack.repeatUntilStable(dom) { () =>
-          hasLoop = false
-          val result = step(f, dom)
-          (result, hasLoop)
-        }.getOrThrow
+        step(f, dom).getOrThrow
       }
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
+  private inline def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
     val inState = state.getInState(dom)
     stack.push(dom, inState) match
-      case Some(result) =>
-        hasLoop = hasLoop || !result.isRecurrent
-        result
+      case Some(priorResult) =>
+        priorResult
       case None =>
         val result = TrySturdy(f(dom))
-        val (widenedResult, looping) = stack.pop(dom, inState, result)
-        hasLoop = hasLoop || looping
+        val MaybeChanged(widenedResult, looping) = stack.pop(dom, inState, result)
+        someComponentIsLooping = someComponentIsLooping || looping
         widenedResult

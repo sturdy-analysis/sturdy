@@ -38,12 +38,12 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
         case JOptionA.Some(ex) => JEitherA.LeftRight(a, ex)
         case JOptionA.NoneSome(ex) => JEitherA.LeftRight(a, ex)
     } catch {
-      case AbstractSturdyException =>
+      case exc@AbstractSturdyException =>
         exception match
-          case JOptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
+          case JOptionA.None() => throw new IllegalStateException(s"exception cannot be None here", exc)
           case JOptionA.NoneSome(ex) => JEitherA.Right(ex)
           case JOptionA.Some(ex) => JEitherA.Right(ex)
-      case exc =>
+      case exc: SturdyThrowable =>
         // Our exception may have been replaced by another exception, such as a Failure.
         // We need to resurface our exception here so that it can be handled.
         exception match

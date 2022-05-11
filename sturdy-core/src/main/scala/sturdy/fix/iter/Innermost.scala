@@ -5,8 +5,10 @@ import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
+import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
@@ -28,23 +30,33 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   extends Combinator[Dom, Codom]:
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
+  private var iterationCounts: Map[Dom, Int] = Map()
 
   /** Runs `f` until a fixed point is reached as soon as something is looping. */
   override def apply(f: Dom => Codom): Dom => Codom =
+    @tailrec
     def apply_(dom: Dom): Codom = {
-      var currentResult = null.asInstanceOf[TrySturdy[Codom]]
-      var looping = true
-      while (looping) {
-        val inState = state.getInState(dom)
-        stack.push(dom, inState) match
-          case Some(result) =>
-            return result.getOrThrow
-          case None =>
-            val result = TrySturdy(f(dom))
-            val (widened, loop) = stack.pop(dom, inState, result)
-            currentResult = widened
-            looping = loop
+      val state = stack.state.getAllState
+      val MaybeChanged(result, loop) = step(f, dom)
+      if (loop) {
+        if (Fixpoint.DEBUG) {
+          val iterationCount = iterationCounts.getOrElse(dom, 2)
+          iterationCounts += dom -> (iterationCount + 1)
+          println(s"## REPEAT (Iteration $iterationCount) of $dom")
+        }
+        stack.state.setAllState(state)
+        apply_(dom)
+      } else {
+        result.getOrThrow
       }
-      currentResult.getOrThrow
     }
     apply_
+
+  private inline def step(f: Dom => Codom, dom: Dom): MaybeChanged[TrySturdy[Codom]] =
+    val inState = state.getInState(dom)
+    stack.push(dom, inState) match
+      case Some(priorResult) =>
+        MaybeChanged.Unchanged(priorResult)
+      case None =>
+        val result = TrySturdy(f(dom))
+        stack.pop(dom, inState, result)
