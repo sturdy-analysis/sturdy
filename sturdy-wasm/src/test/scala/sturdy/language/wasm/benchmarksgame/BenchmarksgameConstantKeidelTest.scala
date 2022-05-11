@@ -49,7 +49,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 import sturdy.data.{*, given}
-import sturdy.util.LinearStateOperationCounter
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
@@ -63,6 +63,8 @@ class BenchmarksgameConstantKeidelTest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
     it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
+      LinearStateOperationCounter.clearAll()
+      Profiler.reset()
     }
   }
 
@@ -87,10 +89,15 @@ class BenchmarksgameConstantKeidelTest extends AnyFlatSpec, Matchers:
     }
 
     val modInst = interp.initializeModule(module)
-    val res = interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, List.empty)
-    )
+    val res = Profiler.addTime("analysis") {
+      interp.failure.fallible(
+        interp.invokeExported(modInst, funcName, List.empty)
+      )
+    }
+
     LinearStateOperationCounter.addToListAndReset()
     println(interp.analysisState.getAllState)
     println(s"${LinearStateOperationCounter.toString} in the last tests")
     println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
+
+    Profiler.printLastMeasured()

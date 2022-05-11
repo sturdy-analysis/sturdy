@@ -61,7 +61,7 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
     Profiler.start("init")
     val program = Parser.parse(sourceCode)
     Profiler.end("init")
-    Profiler.print("init")
+    Profiler.printByName("init")
     Profiler.reset()
     if (program.funs.exists(_.name == "main")) {
       val comp: DaiTipOutCache = new DaiTipOutCache()
@@ -71,7 +71,7 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
       
       val aresult = analysis.failure.fallible(analysis.execute(program))
 //      println(comp.outCache)
-      Profiler.print()
+      Profiler.printLastMeasured()
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc

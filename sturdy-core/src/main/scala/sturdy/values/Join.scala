@@ -25,11 +25,16 @@ enum MaybeChanged[A]:
     case Changed(a) => f(a)
     case Unchanged(_) => // nothing
 
+
 object MaybeChanged:
   inline def apply[A](a: A, hasChanged: Boolean): MaybeChanged[A] =
     if (hasChanged) MaybeChanged.Changed(a) else MaybeChanged.Unchanged(a)
   inline def apply[A](a: A, previous: A): MaybeChanged[A] =
     if (a == previous) MaybeChanged.Unchanged(a) else MaybeChanged.Changed(a)
+  def unapply[A](mc: MaybeChanged[A]): (A, Boolean) = mc match
+    case Changed(a) => (a, true)
+    case Unchanged(a) => (a, false)
+
 def Changed[A](a: A) = MaybeChanged.Changed(a)
 def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
 

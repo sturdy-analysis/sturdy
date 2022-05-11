@@ -5,7 +5,7 @@ import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.fix.iter.Config
-import sturdy.util.LinearStateOperationCounter
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.MaybeChanged
 
 import scala.collection.immutable.BitSet
@@ -21,7 +21,6 @@ import KeidelFixpoint.*
 
 trait KeidelStack[Dom, In]:
   def height: Int
-  def contains(c: Call[Dom, In]): Boolean
   def pushLocal[A](c: Call[Dom, In])(f: => A): A
   def widenLocal[A](c: Call[Dom, In])(f: Call[Dom, In] => A): A
 
@@ -32,9 +31,6 @@ class FiniteStack[Dom, In]() extends KeidelStack[Dom, In]:
   private var stack: Map[Call[Dom, In], Int] = Map()
 
   def height: Int = stack.size
-  def contains(c: Call[Dom, In]): Boolean =
-    LinearStateOperationCounter.lookupCounter += 1
-    stack.contains(c)
   def pushLocal[A](c: Call[Dom, In])(f: => A): A =
     val oldStack = stack
     stack += c -> stack.size
@@ -44,7 +40,9 @@ class FiniteStack[Dom, In]() extends KeidelStack[Dom, In]:
   def widenLocal[A](c: Call[Dom, In])(f: Call[Dom, In] => A): A =
     f(c)
 
-  def getPosition(c: Call[Dom, In]): Option[Int] = stack.get(c)
+  def getPosition(c: Call[Dom, In]): Option[Int] =
+    LinearStateOperationCounter.lookupStackCounter += 1
+    stack.get(c)
 
 
 /** Only considers Dom and widens In states when a Dom is recurrent */
@@ -54,9 +52,6 @@ class SensitiveStack[Ctx, Dom, In](getContext: Call[Dom, In] => Ctx)(using Widen
   private var stack: Map[Call[Dom, In], Int] = Map()
   private var contexts: Map[Ctx, Call[Dom, In]] = Map()
   def height: Int = stack.size
-  def contains(c: Call[Dom, In]): Boolean =
-    LinearStateOperationCounter.lookupCounter += 1
-    stack.contains(c)
   def pushLocal[A](c: Call[Dom, In])(f: => A): A =
     val oldStack = stack
     val oldContexts = contexts
@@ -77,7 +72,7 @@ class SensitiveStack[Ctx, Dom, In](getContext: Call[Dom, In] => Ctx)(using Widen
       case None => f(c)
       case Some(previousCall) =>
         LinearStateOperationCounter.wideningCounter += 1
-        Widen(previousCall.in, c.in) match
+        Profiler.addTime("widen"){Widen(previousCall.in, c.in)} match
           case MaybeChanged.Changed(widenedIn) =>
             val widenedCall = Call(c.dom, widenedIn)
             if (Fixpoint.DEBUG)
@@ -87,8 +82,14 @@ class SensitiveStack[Ctx, Dom, In](getContext: Call[Dom, In] => Ctx)(using Widen
             f(c)
 
   def getPosition(c: Call[Dom, In]): Option[Int] =
-    LinearStateOperationCounter.lookupCounter += 1
-    stack.get(c)
+    Profiler.addTime("lookupStack"){
+      LinearStateOperationCounter.lookupStackCounter += 1
+      stack.get(c)
+//      if (contexts.contains(getContext(c)))
+//        stack.get(c)
+//      else
+//        None
+    }
 
 //class SensitiveStack[Dom, Ctx, In] extends KeidelStack[Dom, In]:
 //  private var stack: Set[Call[Dom, In]] = Set()
@@ -158,7 +159,7 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
       if (Fixpoint.DEBUG)
         println(s"${indent}cache lookup: $call -> $cacheLookup")
       LinearStateOperationCounter.lookupCounter += 1
-      val cachedEntry: CacheEntry = cacheLookup match {
+      val cachedEntry: CacheEntry = Profiler.addTime("lookup"){cache.get(call)} match {
         case None => CacheEntry(Stability.Unstable, TrySturdy(throw RecurrentCall(call)), state.getOutState(dom))
         case Some(entry) => entry
       }
@@ -236,20 +237,20 @@ class KeidelFixpoint[Dom, Codom, In, Out, All]
 
   def makeCacheEntryOfCallStable(call: Call[Dom, In]): Unit =
     LinearStateOperationCounter.lookupCounter += 1
-    val cachedEntry: CacheEntry = cache(call)
+    val cachedEntry: CacheEntry = Profiler.addTime("lookup"){cache(call)}
     cachedEntry.stability = Stability.Stable
 
   def updateCacheAndGetUpdatedCodom(call: Call[Dom, In], codom: TrySturdy[Codom]): (CacheWasWidened, TrySturdy[Codom]) =
     val out = state.getOutState(call.dom)
     LinearStateOperationCounter.lookupCounter += 1
-    cache.get(call) match {
+    Profiler.addTime("lookup"){cache.get(call)} match {
       case None =>
         cache += call -> CacheEntry(Stability.Unstable, codom, out)
         (CacheWasWidened.Yes, codom)
       case Some(oldCacheEntry) =>
         val widenedCodom = Widen(oldCacheEntry.codom, codom)
         LinearStateOperationCounter.wideningCounter += 1
-        val widenedOut = Widen(oldCacheEntry.out, out)
+        val widenedOut = Profiler.addTime("widen"){Widen(oldCacheEntry.out, out)}
         cache += call -> CacheEntry(Stability.Unstable, widenedCodom.get, widenedOut.get)
         state.setOutState(widenedOut.get)
         (widenedCodom.hasChanged || widenedOut.hasChanged, widenedCodom.get)
