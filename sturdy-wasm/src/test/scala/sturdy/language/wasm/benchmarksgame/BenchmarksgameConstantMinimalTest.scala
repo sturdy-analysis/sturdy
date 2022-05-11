@@ -41,7 +41,7 @@ class BenchmarksgameConstantMinimalTest extends AnyFlatSpec, Matchers:
   }
 
   def run(p: Path, binary: Boolean = false) =
-    Fixpoint.DEBUG = true
+    Fixpoint.DEBUG = false
     
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)

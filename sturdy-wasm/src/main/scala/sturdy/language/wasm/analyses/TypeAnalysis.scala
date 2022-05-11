@@ -34,12 +34,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
+object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
-  type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
@@ -91,7 +90,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
-    val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
+    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
     given Failure = failure
 

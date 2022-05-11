@@ -34,12 +34,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
+object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[Topped[Byte]]
   type Size = I32
-  type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
@@ -91,7 +90,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
     val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
-    val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
+    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
     private given Failure = failure
 

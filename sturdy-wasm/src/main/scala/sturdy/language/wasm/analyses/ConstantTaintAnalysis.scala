@@ -35,13 +35,12 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFlow:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
   type Bytes = Seq[AByte]
   type Size = Topped[Int]
-  type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
   type FunV = Powerset[FunctionInstance]
 
@@ -103,7 +102,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
     val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
-    val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
+    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
     given Failure = failure
 

@@ -57,9 +57,13 @@ given frameDataIsSound: Soundness[FrameData, FrameData] with
 object FrameData:
   val empty: FrameData = FrameData(0, null)
 
-enum WasmException[V]:
-  case Jump(labelIndex: LabelIdx, operands: List[V])
-  case Return(operands: List[V])
+enum JumpTarget:
+  case Jump(labelIndex: LabelIdx)
+  case Return
+
+given Finite[JumpTarget] with {}
+
+case class WasmException[V](target: JumpTarget, operands: List[V])
 
 type Imports = mutable.Map[String, ModuleInstance]
 
@@ -366,7 +370,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      throws(WasmException.Return(operands))
+      throws(WasmException(JumpTarget.Return, operands))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
@@ -380,7 +384,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    throws(WasmException.Jump(labelIndex, operands))
+    throws(WasmException(JumpTarget.Jump(labelIndex), operands))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
@@ -404,7 +408,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException.Jump(labelIndex, operands) =>
+          case WasmException(JumpTarget.Jump(labelIndex), operands) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
               assertFrameSize(arities.jumpOperands)
@@ -413,9 +417,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
               assertFrameSize(arities.results)
             } else {
               assertFrameSize(0)
-              throws(WasmException.Jump(labelIndex - 1, operands))
+              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands))
             }
-          case _: WasmException.Return[V] =>
+          case WasmException(JumpTarget.Return, _) =>
             assertFrameSize(0)
             throws(ex)
         }
@@ -447,9 +451,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
-        case WasmException.Return(operands) =>
+        case WasmException(JumpTarget.Return, operands) =>
           stack.pushN(operands)
-        case WasmException.Jump(_, _) =>
+        case WasmException(JumpTarget.Jump(_), _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
     }
