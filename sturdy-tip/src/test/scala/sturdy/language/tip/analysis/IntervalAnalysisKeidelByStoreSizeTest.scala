@@ -70,10 +70,7 @@ class IntervalAnalysisKeidelByStoreSizeTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = new KeidelFixpoint(
-          isFunOrWhile, Seq(Config.Innermost, Config.Innermost), new InsensitiveStack[FixIn, InState]())
-      }
+      val analysis = new IntervalAnalysis.KeidelInstance(Map(), Map())
 
 
       val aresult = Profiler.addTime("analysis"){analysis.failure.fallible(analysis.execute(program))}

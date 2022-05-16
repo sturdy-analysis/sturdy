@@ -71,20 +71,7 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = callSiteSensitive(0, fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.innermost, fix.iter.innermost
-          //          // call
-          //          fix.unwind(steps,
-          //            fix.iter.topmost,
-          //          ),
-          //          // while
-          //          fix.unwind(steps,
-          //            fix.iter.innermost
-          //          )
-        ))
-        ).fixpoint
-      }
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), 0)
 
       var aresult: AFallible[Value] = AFallible.Unfailing(Value.TopValue)
       while (true)

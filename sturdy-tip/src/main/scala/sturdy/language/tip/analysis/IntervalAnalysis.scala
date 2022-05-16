@@ -1,9 +1,9 @@
 package sturdy.language.tip.analysis
 
-import sturdy.data
+import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
-import sturdy.effect.{Effectful, AnalysisState, given}
+import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.DecidableCallFrame
@@ -16,7 +16,6 @@ import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix
 import sturdy.fix.given
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -27,7 +26,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
@@ -37,19 +36,20 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  abstract class Instance(initEnvironment: Environment, initStore: Store)() extends GenericInstance:
+  abstract class UnfixedInstance(initEnvironment: Environment, initStore: Store) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
-    final def vintOps: IntegerOps[Int, VInt] = implicitly
-    final def vcompareOps: OrderingOps[VInt, VBool] = implicitly
-    final def vintEqOps: EqOps[VInt, VBool] = implicitly
-    final def vrefEqOps: EqOps[VRef, VBool] = implicitly
-    final def vfunEqOps: EqOps[VFun, VBool] = implicitly
-    final def vrecEqOps: EqOps[VRecord, VBool] = ??? //new ARecordEqOps(using lazily(eqOps))
-    final def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun] = implicitly
-    final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Topped[Boolean], Unit] = implicitly
+    override val failure: AFailureCollect = new AFailureCollect
+    private given Failure = failure
+
+    given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+    override val intOps: IntegerOps[Int, Value] = implicitly
+    override val compareOps: OrderingOps[Value, Value] = implicitly
+    override val eqOps: EqOps[Value, Value] = implicitly
+    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val refOps: ReferenceOps[Addr, Value] = implicitly
+    override val recOps: RecordOps[Field, Value, Value] = implicitly
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableConcreteCallFrame[Unit, String, Addr] = new JoinableConcreteCallFrame((), initEnvironment)
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
@@ -64,3 +64,23 @@ object IntervalAnalysis extends Interpreter,
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
+
+    override def copyState(from: Executor): Unit = {
+      super.copyState(from)
+      bounds = from.asInstanceOf[UnfixedInstance].bounds
+    }
+
+
+  class Instance(initEnvironment: Environment, initStore: Store, callSites: Int) extends UnfixedInstance(initEnvironment, initStore):
+    final override val fixpoint =
+      callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
+        fix.iter.innermost, fix.iter.innermost))
+      ).fixpoint
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, callSites)
+
+  class KeidelInstance(initEnvironment: Environment, initStore: Store) extends UnfixedInstance(initEnvironment, initStore):
+    final override val fixpoint = new fix.KeidelFixpoint(
+      isFunOrWhile, Seq(fix.iter.Config.Innermost, fix.iter.Config.Innermost),
+      new fix.InsensitiveStack[FixIn, InState]()
+    )
+    override def newInstance: sturdy.Executor = new KeidelInstance(initEnvironment, initStore)

@@ -17,9 +17,7 @@ import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
-import sturdy.effect.AnalysisState
-import sturdy.effect.EffectStack
-import sturdy.effect.failure.AFailureCollect
+import sturdy.effect.{AnalysisState, EffectStack, Effectful}
 import sturdy.fix.OutCacheOwner
 import sturdy.values.references.ReferenceOps
 
@@ -67,7 +65,7 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // fixpoint
   val fixpoint: (AnalysisState[FixIn, InState, OutState, OutState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
@@ -91,13 +89,11 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
   val input: UserInput[V]
+  val failure: Failure
 
   // effect stack
-  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input))
+  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure))
   given EffectStack = effectStack
-
-  final val failure: AFailureCollect = new AFailureCollect {}
-  given Failure = failure
 
   // analysis state
   type InState = store.State

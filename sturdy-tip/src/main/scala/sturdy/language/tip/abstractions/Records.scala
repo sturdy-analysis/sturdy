@@ -10,4 +10,4 @@ import sturdy.values.Widening
 object Records:
   trait PreciseFieldsOrTop extends Interpreter :
     final type VRecord = ARecord[Field, Value]
-    final def topRecord(using Instance): ARecord[Field, Value] = ARecord.Top()
+    final def topRecord: ARecord[Field, Value] = ARecord.Top()

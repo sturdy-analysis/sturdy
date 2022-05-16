@@ -7,7 +7,7 @@ import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.AFallible
+import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.GenericInterpreter.AllocationSite
@@ -55,20 +55,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = callSiteSensitive(0, fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.topmost, fix.iter.topmost
-//          // call
-//          fix.unwind(steps,
-//            fix.iter.topmost,
-//          ),
-//          // while
-//          fix.unwind(steps,
-//            fix.iter.innermost
-//          )
-        ))
-        ).fixpoint
-      }
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)

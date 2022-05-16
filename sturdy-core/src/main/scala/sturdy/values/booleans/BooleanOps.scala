@@ -1,5 +1,6 @@
 package sturdy.values.booleans
 
+import sturdy.data.MayJoin
 import sturdy.values.Structural
 
 trait BooleanOps[V]:
