@@ -61,9 +61,11 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       }
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
-      given EffectStack = EffectStack(List(this))
       c.getState.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x)).option(Powerset[V]())(Powerset(_))
+        val avs = this.read(varAbstractly.abstractly(x)) match
+          case JOptionA.None() => Powerset()
+          case JOptionA.NoneSome(a) => Powerset(a)
+          case JOptionA.Some(a) => Powerset(a)
         val subSound = Soundness.isSound(v, avs)
         if (subSound.isNotSound)
           return subSound
