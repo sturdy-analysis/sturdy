@@ -77,3 +77,9 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
       joinComputations(f(a))(mapJoinIt(as, f))
     }
 
+  def copyState(other: EffectStack): Unit =
+    this.effects.zip(other.effects).foreach {
+      case (to, from) =>
+        to.setState(from.getState.asInstanceOf[to.State])
+    }
+

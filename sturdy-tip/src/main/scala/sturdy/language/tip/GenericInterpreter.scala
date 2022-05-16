@@ -15,7 +15,7 @@ import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, OrderingOps}
-import sturdy.fix
+import sturdy.{Executor, fix}
 import sturdy.data.unit
 import sturdy.effect.{AnalysisState, EffectStack, Effectful}
 import sturdy.fix.OutCacheOwner
@@ -110,6 +110,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     override def setAllState(out: OutState): Unit = setOutState(out)
   }
 
+  override def copyState(from: Executor): Unit = {
+    super.copyState(from)
+    val other = from.asInstanceOf[GenericInterpreter[V, Addr, J]]
+    this.functions = other.functions
+    this.effectStack.copyState(other.effectStack)
+  }
 
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
