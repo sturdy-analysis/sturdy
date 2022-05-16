@@ -80,7 +80,7 @@ class SignNumericOps(using f: Failure, j: EffectStack) extends NumericOps[Sign]:
 
   override def div(v1: Sign, v2: Sign): Sign = v2 match
     case Zero => f.fail(DivisionByZero, s"$v1 / $v2")
-    case Top => j.joinComputations(v1)(f.fail(DivisionByZero, s"$v1 / $v2"))
+    case Top => j.joinWithFailure(v1)(f.fail(DivisionByZero, s"$v1 / $v2"))
     case _ => mul(v1,v2)
 
   override def lt(v1: Sign, v2: Sign): Sign = (v1,v2) match

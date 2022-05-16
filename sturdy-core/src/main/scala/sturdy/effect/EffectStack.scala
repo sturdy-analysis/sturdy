@@ -46,10 +46,9 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     val triedG = TrySturdy[A](g)
 
     (triedF.isBottom, triedG.isBottom) match
-      case (false, false) => joiner.retainBoth(triedF, triedG)
       case (false, true) => joiner.retainFirst(triedF)
-      case (true, false) => joiner.retainSecond(triedG)
       case (true, true) => joiner.retainNone()
+      case (_, false) => throw new MatchError(s"joinWithFailure: g must yield bottom but was $triedG")
 
     implicit val joinA: Join[A] = null.asInstanceOf[Join[A]]
     Join(triedF, triedG).get.getOrThrow

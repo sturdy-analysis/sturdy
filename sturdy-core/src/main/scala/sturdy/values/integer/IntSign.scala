@@ -126,9 +126,9 @@ given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): In
 
   def div(v1: IntSign, v2: IntSign): IntSign = v2 match
     case Zero => f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-    case ZeroOrPos => j.joinComputations(v1)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-    case NegOrZero => j.joinComputations(v1.negated)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-    case TopSign => j.joinComputations(TopSign)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case ZeroOrPos => j.joinWithFailure(v1)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case NegOrZero => j.joinWithFailure(v1.negated)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case TopSign => j.joinWithFailure(TopSign)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
     case _ => mul(v1, v2)
 
   def divUnsigned(v1: IntSign, v2: IntSign): IntSign = ???

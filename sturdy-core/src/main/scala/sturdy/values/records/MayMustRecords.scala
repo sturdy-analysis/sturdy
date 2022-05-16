@@ -22,11 +22,11 @@ given mayMustRecordOps[F, V](using Failure, Join[V])(using j: EffectStack): Reco
   override def lookupRecordField(rec: MayMustRecord[F, V], field: F): V = rec.m.get(field) match
     case None => UnboundRecordField(field).failedLookup(rec)
     case Some(MayMust.Must(v)) => v
-    case Some(MayMust.May(v)) => j.joinComputations(v)(UnboundRecordField(field).failedLookup(rec))
+    case Some(MayMust.May(v)) => j.joinWithFailure(v)(UnboundRecordField(field).failedLookup(rec))
   override def updateRecordField(rec: MayMustRecord[F, V], field: F, newval: V): MayMustRecord[F, V] = rec.m.get(field) match
     case None => UnboundRecordField(field).failedUpdate(rec)
     case Some(MayMust.Must(v)) => MayMustRecord(rec.m + (field -> MayMust.Must(newval)))
-    case Some(MayMust.May(v)) => j.joinComputations(MayMustRecord(rec.m + (field -> MayMust.Must(newval))))(UnboundRecordField(field).failedUpdate(rec))
+    case Some(MayMust.May(v)) => j.joinWithFailure(MayMustRecord(rec.m + (field -> MayMust.Must(newval))))(UnboundRecordField(field).failedUpdate(rec))
 
 given CombineMayMustRecord[F, V, W <: Widening](using j: Combine[V, W]): Combine[MayMustRecord[F, V], W] with
   override def apply(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MaybeChanged[MayMustRecord[F, V]] =
