@@ -1,6 +1,10 @@
 package sturdy.effect
 
+import sturdy.{Executable, Executor}
 import sturdy.values.Join
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
   private lazy val effects = _effects
@@ -22,12 +26,17 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
   }
 
-  final def joinComputations[A](f: => A)(g: => A): Join[A] ?=> A = {
+  final def joinComputations[A](f: Executable[A])(g: Executable[A]): (Executor, Join[A]) ?=> A = {
     val joiner = makeComputationJoiner[A]
 
-    val triedF = TrySturdy(f)
-    joiner.inbetween()
-    val triedG = TrySturdy(g)
+    val gExecutor = if (f.executor eq g.executor) f.executor.fork else g.executor
+
+    import concurrent.ExecutionContext.Implicits.global
+    val futureF = Future(f.run)
+    val futureG = Future(g.runWith(gExecutor))
+
+    val triedF = TrySturdy(Await.result(futureF, Duration.Inf))
+    val triedG = TrySturdy(Await.result(futureG, Duration.Inf))
 
     (triedF.isBottom, triedG.isBottom) match
       case (false, false) => joiner.retainBoth(triedF, triedG)
@@ -37,6 +46,7 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
 
     Join(triedF, triedG).get.getOrThrow
   }
+
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {
     val joiner = makeComputationJoiner[A]
@@ -54,7 +64,7 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     Join(triedF, triedG).get.getOrThrow
   }
 
-  final def mapJoin[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match
+  final def mapJoin[A, B](as: Iterable[A], f: A => B): (Executor, Join[B]) ?=> B = as.size match
     case 0 => throw new IllegalArgumentException
     case 1 => f(as.head)
     case 2 =>
@@ -69,7 +79,7 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     case _ =>
       mapJoinIt(as.iterator, f)
 
-  private final def mapJoinIt[A, B](as: Iterator[A], f: A => B): Join[B] ?=> B =
+  private final def mapJoinIt[A, B](as: Iterator[A], f: A => B): (Executor, Join[B]) ?=> B =
     val a = as.next()
     if (as.isEmpty)
       f(a)

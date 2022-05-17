@@ -14,10 +14,10 @@ lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
     sturdy_core,
-    sturdy_scheme,
+//    sturdy_scheme,
     sturdy_tip,
-    sturdy_wasm,
-    sturdy_tutorial
+//    sturdy_wasm,
+//    sturdy_tutorial
   )
   .settings(skip / publish := true)
 
@@ -44,49 +44,49 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
     )
   )
 
-lazy val sturdy_scheme = (project in file("sturdy-scheme"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .settings(
-    name := "sturdy-scheme",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      // test
-      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
-  )
+//lazy val sturdy_scheme = (project in file("sturdy-scheme"))
+//  .dependsOn(sturdy_core % "compile->compile;test->test")
+//  .settings(
+//    name := "sturdy-scheme",
+//    libraryDependencies ++= Seq(
+//      "org.typelevel" %% "cats-parse" % "0.3.4",
+//      // test
+//      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+//    )
+//  )
 
 val swamCommit = "39999a1751076c6dbfe2a92c874f17683730d14e"
 val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
-lazy val sturdy_wasm = (project in file("sturdy-wasm"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
-  .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
-  .settings(
-    name := "sturdy-wasm",
-    libraryDependencies ++= Seq(
-      // test
-      "org.scalatest" %% "scalatest" % "3.2.9" % "test",
-      "org.json4s" %% "json4s-native" % "4.0.4" % "test",
-      ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13) % "test",
-//      "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
-//      ("org.typelevel" %% "cats-effect" % "3.3.9").cross(CrossVersion.for3Use2_13),
-      //      "io.circe" %% "circe-core" % "0.14.1",
-      //      "io.circe" %% "circe-generic" % "0.14.1",
-      //      "io.circe" %% "circe-parser" % "0.14.1"
-    )
-  )
+//lazy val sturdy_wasm = (project in file("sturdy-wasm"))
+//  .dependsOn(sturdy_core % "compile->compile;test->test")
+//  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
+//  .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
+//  .settings(
+//    name := "sturdy-wasm",
+//    libraryDependencies ++= Seq(
+//      // test
+//      "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+//      "org.json4s" %% "json4s-native" % "4.0.4" % "test",
+//      ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13) % "test",
+////      "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
+////      ("org.typelevel" %% "cats-effect" % "3.3.9").cross(CrossVersion.for3Use2_13),
+//      //      "io.circe" %% "circe-core" % "0.14.1",
+//      //      "io.circe" %% "circe-generic" % "0.14.1",
+//      //      "io.circe" %% "circe-parser" % "0.14.1"
+//    )
+//  )
 
-lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .settings(
-    name := "sturdy-tutorial",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      "org.typelevel" %% "cats-core" % "2.6.1",
-      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
-  )
+//lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
+//  .dependsOn(sturdy_core % "compile->compile;test->test")
+//  .settings(
+//    name := "sturdy-tutorial",
+//    libraryDependencies ++= Seq(
+//      "org.typelevel" %% "cats-parse" % "0.3.4",
+//      "org.typelevel" %% "cats-core" % "2.6.1",
+//      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+//    )
+//  )
 
 //lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
 //  .dependsOn(sturdy_wasm % "compile->compile")

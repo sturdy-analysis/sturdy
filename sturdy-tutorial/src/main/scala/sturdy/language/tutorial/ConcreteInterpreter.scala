@@ -25,3 +25,5 @@ class ConcreteInterpreter extends GenericInterpreter[Int, NoJoin]:
   override val jv: NoJoin[Int] = noJoin
 
   override val fixpoint: Fixpoint[FixIn, FixOut[Int]] = new ConcreteFixpoint[FixIn, FixOut[Int]]
+
+  override def newInstance: ConcreteInterpreter = new ConcreteInterpreter

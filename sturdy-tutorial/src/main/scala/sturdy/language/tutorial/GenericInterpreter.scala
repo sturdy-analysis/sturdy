@@ -79,7 +79,8 @@ case object UninitializedVariable extends FailureKind
  * With these interface at hand we can now implement the generic interpreter. This is only the first try without
  * using a fixpoint computation. We will later refine the generic interpreter.
  */
-trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
+trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]
+  extends sturdy.Executor[GenericInterpreterFirstShot[V, J]]:
   // value components - we require a NumericOps component and a Branching component
   val numericOps: NumericOps[V]
   val branching: Branching[V,Unit]
@@ -90,7 +91,10 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
 
   // joining of computations requires all effect components to participate in the join.
   // We achieve this by using an effect stack containing all effect components of the language.
-  final val effectStack: EffectStack = new EffectStack(List(store, failure))
+  final val effectStack: EffectStack = new EffectStack {
+    override type E = GenericInterpreterFirstShot[V, J]
+    override lazy val effects: List[Effectful] = List(store, failure)
+  }
   given EffectStack = effectStack
   given Failure = failure
 
@@ -159,7 +163,10 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, J[_] <: MayJoin[_]]
+  extends sturdy.Executor[GenericInterpreter[V, J]]:
+
+  override def self: GenericInterpreter[V, J] = this
 
   val fixpoint: fix.Fixpoint[FixIn,FixOut[V]]
   type Fixed = FixIn => FixOut[V]
@@ -174,7 +181,10 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   // joining of computations requires all effect components to participate in the join.
   // We achieve this by using an effect stack containing all effect components of the language.
-  final val effectStack: EffectStack = new EffectStack(List(store, failure))
+  final val effectStack: EffectStack = new EffectStack {
+    override type E = GenericInterpreter[V, J]
+    override lazy val effects: List[Effectful] = List(store, failure)
+  }
   given EffectStack = effectStack
   given Failure = failure
 

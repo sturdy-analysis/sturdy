@@ -222,7 +222,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       callFrame.setLocals(in._4)
   }
 
-  private given Failure = failure
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)
 
   private val labelStack = new LabelStack

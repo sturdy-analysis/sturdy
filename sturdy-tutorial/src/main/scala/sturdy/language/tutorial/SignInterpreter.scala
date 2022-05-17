@@ -42,6 +42,8 @@ class SignInterpreter extends GenericInterpreter[Sign, WithJoin]:
     given Finite[String] with {}
   }
 
+  override def newInstance: SignInterpreter = new SignInterpreter
+
 // We define what is means for a sign interpreter to be sound with respect to a concrete interpreter
 given Soundness[ConcreteInterpreter, SignInterpreter] with
   def isSound(c: ConcreteInterpreter, a: SignInterpreter): IsSound = a.store.storeIsSound(c.store)

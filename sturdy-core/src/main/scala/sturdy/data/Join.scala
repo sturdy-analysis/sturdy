@@ -1,5 +1,6 @@
 package sturdy.data
 
+import sturdy.Executable
 import sturdy.effect.EffectStack
 import sturdy.values.Join
 
@@ -22,7 +23,7 @@ type WithJoin[A] = MayJoin.WithJoin[A]
 
 given noJoin[A]: NoJoin[A] = MayJoin.NoJoin()
 
-inline def joinComputations[A](f: => A)(g: => A)(using w: WithJoin[A]): A =
+inline def joinComputations[A](f: Executable[A])(g: Executable[A])(using w: WithJoin[A]): A =
   w.eff.joinComputations(f)(g)(using w.j)
 
 inline def joinWithFailure[A](f: => A)(g: => Nothing)(using eff: EffectStack): A =
