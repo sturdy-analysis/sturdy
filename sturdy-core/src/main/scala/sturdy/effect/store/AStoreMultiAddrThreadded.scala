@@ -22,20 +22,23 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
 
   override def read(xs: Powerset[Addr]): JOptionA[V] = {
     var needsNotFound = false
-    val vs = ListBuffer[V]()
+    var vs: Option[V] = None
     for (x <- xs.set)
       if (!x.isManaged)
         needsNotFound = true
       store.get(x) match
         case None =>
           needsNotFound = true
-        case Some(v) => vs += v
+        case Some(v) =>
+          vs = vs match
+            case None => Some(v)
+            case Some(v_) => Some(Join(v_, v).get)
     if (vs.isEmpty)
       JOptionA.None()
     else if (needsNotFound)
-      JOptionA.NoneSome(vs.reduce(Join(_, _).get))
+      JOptionA.NoneSome(vs.get)
     else
-      JOptionA.Some(vs.reduce(Join(_, _).get))
+      JOptionA.Some(vs.get)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =

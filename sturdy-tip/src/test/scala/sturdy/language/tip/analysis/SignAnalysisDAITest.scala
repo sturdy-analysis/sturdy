@@ -47,7 +47,7 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
 //    !p.toString.contains("record") &&
 //    p.toString.contains("fib") &&
-    p.toString.endsWith(".tip")
+    p.toString.endsWith("pushdown.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
       runSignAnalysis(p)
@@ -64,7 +64,7 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
     Profiler.printByName("init")
     Profiler.reset()
     if (program.funs.exists(_.name == "main")) {
-      val comp: DaiTipOutCache = new DaiTipOutCache()
+      val comp: DaiTipOutCacheSign = new DaiTipOutCacheSign()
       val analysis = new SignAnalysis.Instance(Map(), Map()) {
         override val fixpoint = new DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))(comp)
       }
