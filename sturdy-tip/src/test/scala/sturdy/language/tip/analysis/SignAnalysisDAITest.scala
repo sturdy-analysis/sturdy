@@ -64,9 +64,8 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
     Profiler.printByName("init")
     Profiler.reset()
     if (program.funs.exists(_.name == "main")) {
-      val comp: DaiTipOutCacheSign = new DaiTipOutCacheSign()
       val analysis = new SignAnalysis.Instance(Map(), Map()) {
-        override val fixpoint = new DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))(comp)
+        override val fixpoint = new DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
       }
       
       val aresult = analysis.failure.fallible(analysis.execute(program))

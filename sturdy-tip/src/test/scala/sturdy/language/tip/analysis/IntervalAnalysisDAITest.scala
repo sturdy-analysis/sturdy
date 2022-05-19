@@ -54,9 +54,8 @@ class IntervalAnalysisDAITest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val comp: DaiTipOutCacheInterval = new DaiTipOutCacheInterval()
       val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = new DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))(comp)
+        val fixpoint = new DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
       }
 
       //      val onlyCalls = false

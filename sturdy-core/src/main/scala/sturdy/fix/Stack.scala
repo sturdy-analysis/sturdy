@@ -178,7 +178,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
 
   inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In): MaybeChanged[In] = Option(inCache.get(frame)) match
     case None =>
-      inCache.put(frame, in)
+//      inCache.put(frame, in)
       Unchanged(in)
     case Some(recurrentIn) =>
       LinearStateOperationCounter.wideningCounter += 1

@@ -49,6 +49,7 @@ trait Interpreter:
   def topFun(using Instance): VFun
   def topReference(using Instance): VRef
   def topRecord(using Instance): VRecord
+  def topBool: VBool
 
   def asBoolean(v: Value)(using Failure): VBool
   def boolean(b: VBool): Value
@@ -95,12 +96,14 @@ trait Interpreter:
         case (RefValue(a1), RefValue(a2)) => boolean(vrefEqOps.equ(a1, a2))
         case (FunValue(f1), FunValue(f2)) => boolean(vfunEqOps.equ(f1, f2))
         case (RecValue(r1), RecValue(r2)) => boolean(vrecEqOps.equ(r1, r2))
+        case (TopValue, _) | (_, TopValue) => boolean(topBool)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolean(vintEqOps.neq(i1, i2))
         case (RefValue(a1), RefValue(a2)) => boolean(vrefEqOps.neq(a1, a2))
         case (FunValue(f1), FunValue(f2)) => boolean(vfunEqOps.neq(f1, f2))
         case (RecValue(r1), RecValue(r2)) => boolean(vrecEqOps.neq(r1, r2))
+        case (TopValue, _) | (_, TopValue) => boolean(topBool)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     final val functionOps = new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)

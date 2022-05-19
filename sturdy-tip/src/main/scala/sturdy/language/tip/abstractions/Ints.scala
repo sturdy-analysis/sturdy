@@ -13,6 +13,7 @@ object Ints:
     final type VInt = IntInterval
 
     final def topInt(using Instance): IntInterval = IntInterval.Top
+    final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using f: Failure): VBool = v match
       case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
@@ -30,6 +31,7 @@ object Ints:
     final type VInt = IntSign
 
     final def topInt(using Instance): IntSign = IntSign.TopSign
+    final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using f: Failure): VBool = v match
       case Value.IntValue(i) => i match

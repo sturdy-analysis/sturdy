@@ -2,7 +2,7 @@ package sturdy.language.tip
 
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.DecidableCallFrame
+import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
@@ -39,6 +39,7 @@ object GenericInterpreter:
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
   case object TypeError extends FailureKind
+  case object VariableReferencesNotSupported extends FailureKind
 
   enum FixIn:
     case Eval(e: Exp)
@@ -70,7 +71,7 @@ import GenericInterpreter.*
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
 
   // fixpoint
-  val fixpoint: (AnalysisState[FixIn, InState, OutState, OutState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
+  val fixpoint: (AnalysisState[FixIn, InState, OutState, AllState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
   // joins
@@ -86,7 +87,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableCallFrame[Unit, String, Addr]
+  val callFrame: DecidableMutableCallFrame[Unit, String, V]
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
@@ -100,18 +101,23 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   given Failure = failure
 
   // analysis state
-  type InState = store.State
+  type InState = (callFrame.State, store.State)
   type OutState = (store.State, print.State)
-  private implicit val analysisState: AnalysisState[FixIn, InState, OutState, OutState] = new AnalysisState {
-    override def getInState(dom: FixIn): InState = store.getState
-    override def setInState(in: InState): Unit = store.setState(in)
+  type AllState = (callFrame.State, store.State, print.State)
+  implicit val analysisState: AnalysisState[FixIn, InState, OutState, AllState] = new AnalysisState {
+    override def getInState(dom: FixIn): InState = (callFrame.getState, store.getState)
+    override def setInState(in: InState): Unit =
+      callFrame.setState(in._1)
+      store.setState(in._2)
     override def getOutState(dom: FixIn): OutState = (store.getState, print.getState)
     override def setOutState(out: OutState): Unit =
-      val (st, pr) = out
-      store.setState(st)
-      print.setState(pr)
-    override def getAllState: OutState = (store.getState, print.getState)
-    override def setAllState(out: OutState): Unit = setOutState(out)
+      store.setState(out._1)
+      print.setState(out._2)
+    override def getAllState: AllState = (callFrame.getState, store.getState, print.getState)
+    override def setAllState(all: AllState): Unit =
+      callFrame.setState(all._1)
+      store.setState(all._2)
+      print.setState(all._3)
   }
 
 
@@ -123,9 +129,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
-      case None =>
-        val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-        store.read(addr).getOrElse(failure(UnboundAddr, s"$addr for variable $x"))
+      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
     case Exp.Add(e1, e2) =>
       val result = add(eval(e1), eval(e2))
       result
@@ -144,8 +148,9 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
       store.write(addr, eval(e))
       refValue(addr)
     case Exp.VarRef(x) =>
-      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-      unmanagedRefValue(addr)
+      failure(VariableReferencesNotSupported, s"&$x")
+//      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+//      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
       val addr = refAddr(eval(e))
       val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
@@ -182,8 +187,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
 
   def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
     case Assignable.AVar(x) =>
-      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-      store.write(addr, v)
+      callFrame.setLocalByName(x, v).getOrElse(failure(UnboundVariable, x))
     case Assignable.ADeref(e) =>
       val addr = refAddr(eval(e))
       store.write(addr, v)
@@ -201,24 +205,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
       store.write(recAddr, updated)
 
   def call(fun: Function, args: Seq[V])(using Fixed): V =
-    var locals: Map[String, Addr] = Map()
-    val paramAddrs = fun.params.map { name =>
-      val addr = alloc(AllocationSite.ParamBinding(fun, name))
-      locals += name -> addr
-      addr
-    }
-    val localsAddrs = fun.locals.map { name =>
-      val addr = alloc(AllocationSite.LocalBinding(fun, name))
-      locals += name -> addr
-      addr
-    }
+    val locals: Map[String, V] =
+      Map() ++
+        fun.params.zip(args) ++
+        fun.locals.map(x => (x, integerLit(-1)))
     callFrame.withNew((), locals) {
-      paramAddrs.zip(args).map(store.write)
-      try enterFunction(fun)
-      finally {
-        paramAddrs.foreach(store.free)
-        localsAddrs.foreach(store.free)
-      }
+      enterFunction(fun)
     }
 
   inline def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}

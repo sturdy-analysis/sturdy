@@ -32,6 +32,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord(using Instance): VRecord = throw new UnsupportedOperationException
+  override def topBool: Boolean = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using f: Failure): Boolean = v match
     case Value.IntValue(i) => i != 0
@@ -41,7 +42,7 @@ object ConcreteInterpreter extends Interpreter:
   given Structural[VRecord] with {}
 
   override type Addr = Int
-  type Environment = Map[String, Int]
+  type Environment = Map[String, Value]
   type Store = Map[Int, Value]
 
   class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance:
@@ -58,7 +59,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Boolean, Unit] = implicitly
 
-    override val callFrame: ConcreteCallFrame[Unit, String, Addr] = new ConcreteCallFrame((), initEnvironment)
+    override val callFrame: ConcreteCallFrame[Unit, String, Value] = new ConcreteCallFrame((), initEnvironment)
     override val store: CStore[Addr, Value] = new CStore(initStore)
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint

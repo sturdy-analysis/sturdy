@@ -8,15 +8,15 @@ import sturdy.util.Profiler
 
 import scala.reflect.ClassTag
 
-class OutCacheOwner[Dom, Codom, In, Out, All]:
-  var outCache: Map[(Dom, In), (Codom, In)] = Map()
+//class OutCacheOwner[Dom, Codom, In, Out, All]:
+//  var outCache: Map[(Dom, In), (Codom, In)] = Map()
 
 
 class DAIFixpoint[Dom, Codom, In, Out, All]
 //  (filterFunc: Dom => Boolean)
   (filterFunc: Dom => Int)
 //  (comp: Map[(Dom, In), (Codom, Out)])
-  (comp: OutCacheOwner[Dom, Codom, In, Out, All])
+//  (comp: OutCacheOwner[Dom, Codom, In, Out, All])
   (using state: AnalysisState[Dom, In, Out, All])
   (using Join[Codom], Join[In], Finite[Dom], Widen[Out])    // Join[Out]
   extends Fixpoint[Dom, Codom]:
@@ -126,7 +126,7 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
             inCache != outCache //&& counter < 5
           )
         do()
-        comp.outCache = outCache
+//        comp.outCache = outCache
         result.get
       }
       apply_

@@ -33,12 +33,12 @@ trait Fix extends Interpreter:
   type CallString = context.CallString[Exp.Call]
   given Finite[CallString] = context.FiniteCallString
 
-  final def parameters[J[_] <: MayJoin[_]](callFrame: DecidableCallFrame[Unit, String, Addr], store: Store[Addr, Value, J])(using J[Value]): context.Sensitivity[FixIn, Parameters] =
-    context.parametersFromStore[FixIn, Addr, Value, J] {
-      case FixIn.EnterFunction(f) => Some(f.params.map(p => callFrame.getLocalByName(p).get))
+  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[FixIn, Parameters] =
+    context.parameters[FixIn, String, Value] {
+      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
       case _ => None
-    }(using store)
-  type Parameters = Map[Addr, Value]
+    }
+  type Parameters = Map[String, Value]
   given Finite[Parameters] with {}
 
 
@@ -68,7 +68,7 @@ trait Fix extends Interpreter:
     notContextSensitive(phi)
 
   def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters, FixIn, FixOut[Value]], Finite[Parameters]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
-    contextSensitive(parameters(analysis.callFrame, analysis.store), phi)
+    contextSensitive(parameters(analysis.callFrame), phi)
 
   def callSiteSensitive(k: Int, phi: (Contextual[CallString, FixIn, FixOut[Value]], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
     val callSites = callSitesLogger()

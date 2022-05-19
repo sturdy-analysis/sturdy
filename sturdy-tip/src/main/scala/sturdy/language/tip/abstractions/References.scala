@@ -14,7 +14,7 @@ object References:
   trait AllocationSites extends Interpreter:
     final type Addr = Powerset[AllocationSiteAddr]
     final type VRef = Powerset[AllocationSiteRef]
-    final type Environment = Map[String, Addr]
+    final type Environment = Map[String, Value]
     final type Store = Map[AllocationSiteAddr, Value]
 
     def fromAllocationSite(asite: AllocationSite): Addr = Powerset(asite match
