@@ -102,7 +102,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   // analysis state
   type InState = store.State
   type OutState = (store.State, print.State)
-  implicit def analysisState: AnalysisState[FixIn, InState, OutState, OutState] = new AnalysisState {
+  private implicit val analysisState: AnalysisState[FixIn, InState, OutState, OutState] = new AnalysisState {
     override def getInState(dom: FixIn): InState = store.getState
     override def setInState(in: InState): Unit = store.setState(in)
     override def getOutState(dom: FixIn): OutState = (store.getState, print.getState)
@@ -225,10 +225,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   inline def run(s: Stm)(using rec: Fixed): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
   private inline def enterFunction(fun: Function)(using rec: Fixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
-  private lazy val fixed = fixpoint {
-    case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
-    case FixIn.Run(s) => run_open(s); FixOut.Run()
-    case FixIn.EnterFunction(f) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
+  private lazy val fixed = {
+    fixpoint {
+      case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
+      case FixIn.Run(s) => run_open(s); FixOut.Run()
+      case FixIn.EnterFunction(f) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
+    }
   }
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 

@@ -5,7 +5,7 @@ import sturdy.data.*
 /*
  * A concrete environment.
  */
-trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, V, NoJoin], ClosableEnvironment[Map[Var, V]]:
+trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends ClosableEnvironment[Var, V, Map[Var, V], NoJoin]:
   protected var env: Map[Var, V] = _init
   def getEnv: Map[Var, V] = env
   

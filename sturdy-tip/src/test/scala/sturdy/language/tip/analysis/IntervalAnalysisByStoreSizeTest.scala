@@ -16,7 +16,7 @@ import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.{afallibleAbstractly, falliblePO}
 import sturdy.fix.Fixpoint
-import sturdy.util.{Labled, LinearStateOperationCounter, Profiler}
+import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
 import sturdy.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}

@@ -17,7 +17,7 @@ import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.given
 import sturdy.fix.{DAIFixpoint, Fixpoint}
 import sturdy.language.tip.GenericInterpreter
-import sturdy.util.{Labled, Profiler}
+import sturdy.util.{Labeled, Profiler}
 import sturdy.{*, given}
 import sturdy.data.given
 import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}

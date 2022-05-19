@@ -14,7 +14,6 @@ lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
     sturdy_core,
-    sturdy_scheme,
     sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial
@@ -44,12 +43,13 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
     )
   )
 
-lazy val sturdy_scheme = (project in file("sturdy-scheme"))
+lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
-    name := "sturdy-scheme",
+    name := "sturdy-pcf",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
+      "org.typelevel" %% "cats-core" % "2.6.1",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )

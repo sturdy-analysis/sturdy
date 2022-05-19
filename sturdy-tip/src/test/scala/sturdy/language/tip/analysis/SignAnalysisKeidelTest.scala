@@ -17,7 +17,7 @@ import sturdy.effect.failure.given
 import sturdy.fix.{DAIFixpoint, KeidelFixpoint, Fixpoint}
 import sturdy.fix.KeidelFixpoint.given
 import sturdy.language.tip.GenericInterpreter
-import sturdy.util.Labled
+import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}

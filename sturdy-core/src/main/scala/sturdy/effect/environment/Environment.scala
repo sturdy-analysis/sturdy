@@ -2,11 +2,12 @@ package sturdy.effect.environment
 
 import sturdy.data.JOption
 import sturdy.data.MayJoin
+import sturdy.effect.Effectful
 
 /*
  * The environment interface.
  */
-trait Environment[Var, V, J[_] <: MayJoin[_]]:
+trait Environment[Var, V, J[_] <: MayJoin[_]] extends Effectful:
   def lookup(x: Var): JOption[J, V]
   def bind(x: Var, v: V): Unit
   def scoped[A](f: => A): A
@@ -17,4 +18,7 @@ trait Environment[Var, V, J[_] <: MayJoin[_]]:
 
   final def freshScoped[A](f: => A): A =
     scoped({clear(); f})
-  
+
+trait ClosableEnvironment[Var, V, Env, J[_] <: MayJoin[_]] extends Environment[Var, V, J]:
+  def closeEnvironment: Env
+  def loadClosedEnvironment(env: Env): Unit

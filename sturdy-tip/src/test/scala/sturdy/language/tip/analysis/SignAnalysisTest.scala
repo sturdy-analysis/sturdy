@@ -18,7 +18,7 @@ import sturdy.effect.failure.given
 import sturdy.effect.print.APrintPrefix
 import sturdy.fix.{Fixpoint, Stack}
 import sturdy.language.tip.GenericInterpreter
-import sturdy.util.Labled
+import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.data.{*, given}
 import sturdy.values.{*, given}
