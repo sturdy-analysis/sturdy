@@ -67,8 +67,8 @@ object WASMBenchRunner:
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
-    "saveResultsToDir" -> Path.of("/Volumes/home/tmp/wasmbench/results-newfix"),
-    "onlyBinariesInCSV" -> Some(Path.of("/Volumes/home/tmp/wasmbench/results-v0/Type.topmost-calls(1).results.csv"))
+    "saveResultsToDir" -> Path.of("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/"),
+    "onlyBinariesInCSV" -> None//Some(Paths.get("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/onlyBinariesInCSV.csv"))
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:

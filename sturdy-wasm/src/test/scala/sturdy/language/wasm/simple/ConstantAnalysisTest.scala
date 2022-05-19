@@ -13,7 +13,7 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, WasmConfig}
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
@@ -143,7 +143,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig())
+  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost)))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

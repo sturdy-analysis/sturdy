@@ -53,10 +53,10 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
     apply_
 
   private inline def step(f: Dom => Codom, dom: Dom): MaybeChanged[TrySturdy[Codom]] =
-    val inState = state.getInState(dom)
-    stack.push(dom, inState) match
+    stack.push(dom, state.getInState(dom)) match
       case Some(priorResult) =>
         MaybeChanged.Unchanged(priorResult)
       case None =>
+        val in = state.getInState(dom)
         val result = TrySturdy(f(dom))
-        stack.pop(dom, inState, result)
+        stack.pop(dom, in, result)

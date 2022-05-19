@@ -12,7 +12,9 @@ given JoinMap[K, V](using j: Join[V]): Join[Map[K, V]] with
     var changed = false
     for ((x, v2) <- vs2)
       joined.get(x) match
-        case None => joined += x -> v2
+        case None =>
+          joined += x -> v2
+          changed = true
         case Some(v1) =>
           val joinedV = j(v1, v2)
           joined += x -> joinedV.get
@@ -25,7 +27,9 @@ given JoinIntMap[V, W <: Widening](using j: Combine[V, W]): Join[IntMap[V]] with
     var changed = false
     for ((x, v2) <- vs2)
       joined.get(x) match
-        case None => joined += x -> v2
+        case None =>
+          joined += x -> v2
+          changed = true
         case Some(v1) =>
           val joinedV = j(v1, v2)
           joined += x -> joinedV.get
@@ -38,7 +42,9 @@ given WidenFiniteKeyMap[K, V](using j: Widen[V], fk: Finite[K]): Widen[Map[K, V]
     var changed = false
     for ((x, v2V) <- v2)
       joined.get(x) match
-        case None => joined += x -> v2V
+        case None =>
+          joined += x -> v2V
+          changed = true
         case Some(v1V) =>
           val joinedV = j(v1V, v2V)
           joined += x -> joinedV.get

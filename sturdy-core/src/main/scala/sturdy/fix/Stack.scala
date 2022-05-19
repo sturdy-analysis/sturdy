@@ -44,7 +44,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
    */
-  private val stack: MutableMap[Frame[Dom, Ctx], FrameInstanceInfo[In]] = Maps.mutable.empty()
+  private val stack: MutableMap[Frame[Dom, Ctx], FrameInstanceInfo] = Maps.mutable.empty()
   private var stackHeight: Int = 0
 
   /** Cache of the inputs of previously executed stack frames.
@@ -66,19 +66,20 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
   /** Set of _active_ stack frames that have recurred.
    *  When a stack frame becomes inactive, it is also removed from this set.
    */
-  private val recurrentCalls: mutable.Set[Int] = mutable.BitSet()
-  def hasRecurrentCalls: Boolean = recurrentCalls.nonEmpty
+  private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
+  def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
   override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
 
   /** Current height of the stack. */
-  def height: Int = stack.size()
+  def height: Int = stackHeight //stack.size()
 
-  def stackHeightIndent: String = "  " * (height - 1)
+  def stackHeightIndent: String = "  " * (height)
+  def stackHeightMinusOneIndent: String = "  " * (height - 1)
 
-  inline private def dropFrame(frame: Frame[Dom, Ctx]): Unit = {
+  inline private def dropFrame(frame: Frame[Dom, Ctx], id: Int): Unit = {
     val info = stack.getIfAbsent(frame, () => throw new MatchError(stack))
-    val isEmpty = info.popped()
+    val isEmpty = info.popAndGetIsEmpty(id)
     if (isEmpty)
       stack.remove(frame)
   }
@@ -99,8 +100,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
       case None =>
         // call is not recurrent
         // load input state based on previous calls with the same context
-        val MaybeChanged(loadedIn, inHasChanged) = loadCorecurrentInput(frame, in)
-
+        val MaybeChanged(loadedIn, inHasChanged) = loadStateFromInCache(frame, in)
         val outEntry = Option(outCache.get(frame))
         if (inHasChanged) {
           // previous input does not subsume current input => previous result is not valid anymore
@@ -109,51 +109,51 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
           outEntry.filter(_.isStable).foreach { outCacheEntry =>
             // previous input subsume current input and previous result still stable => return previous result
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}  READ PRIOR OUTPUT $frame:$loadedIn <- ${outCacheEntry.result}")
+              println(s"${stackHeightIndent}READ PRIOR OUTPUT $frame:$loadedIn <- ${outCacheEntry.result}")
             state.setOutState(outCacheEntry.out)
             return Some(outCacheEntry.result)
           }
         }
-
         // push call to stack
-        val info = new FrameInstanceInfo(loadedIn, stackHeight)
+        val info = new FrameInstanceInfo(stackHeight)
         stack.put(frame, info)
-        stackHeight += 1
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $frame:${state.getInState(dom)}")
+        stackHeight += 1
         None
       case Some(info) =>
-        LinearStateOperationCounter.wideningCounter += 1
-        val MaybeChanged(stackInWidened, stackWasWider) = Profiler.addTime("widen"){widenIn(info.inState, in)}
-        if (stackWasWider) {
-          // call is semi-recurrent (stack): the frame occurs on the stack but with a different state
-          if (Fixpoint.DEBUG)
-            println(s"${stackHeightIndent}PUSH SEMI-RECURRENT $frame:$stackInWidened")
+        Option(inCache.get(frame)) match {
+          case None =>
+            if (Stack.writeInCacheWhenPushToStack)
+              throw new IllegalStateException("inCache(frame) should have been created when frame was pushed to stack")
+            if (Fixpoint.DEBUG)
+              println(s"${stackHeightIndent}PUSH SEMI-RECURRENT (new) $frame:$in")
+            inCache.put(frame, in)
+            info.push(stackHeight)
+            stackHeight += 1
+            None
+          case Some(cachedIn) =>
+            LinearStateOperationCounter.wideningCounter += 1
+            val inWidenedWithCache = Profiler.addTime("widen"){widenIn(cachedIn, in)}
+            if (inWidenedWithCache.hasChanged || info.frameIdWithInStateOfCache.isEmpty) {
+              // call is semi-recurrent: output state occurs in the cache but for an incompatible input state
+              val newIn = inWidenedWithCache.get
+              if (Fixpoint.DEBUG)
+                println(s"${stackHeightIndent}PUSH SEMI-RECURRENT $frame:$newIn")
 
-          info.pushed(stackInWidened, stackHeight)
-          stackHeight += 1
-          state.setInState(stackInWidened)
-          Option(outCache.get(frame)).foreach(_.stability = Stability.Unstable)
-          None
-        } else {
-          // call is recurrent
-          recurrentCalls += info.frameID
-          if (Fixpoint.DEBUG)
-            println(s"${stackHeightIndent}  PUSH RECURRENT $frame:$in")
-
-          Option(inCache.get(frame)) match
-            case None =>
-              // input is new
-              inCache.put(frame, stackInWidened)
-              if (Fixpoint.DEBUG_INVARIANTS && outCache.contains(frame))
-                throw new IllegalStateException(s"Found existing output for new input of $frame")
-            case Some(inCached) =>
-              LinearStateOperationCounter.wideningCounter += 1
-              val MaybeChanged(inCachedWidened, inCacheHasChanged) = Profiler.addTime("widen"){widenIn(inCached, in)}
-              if (inCacheHasChanged) {
-                inCache.put(frame, inCachedWidened)
-              }
-          Some(loadRecurrentOutput(frame))
+              info.push(stackHeight)
+              stackHeight += 1
+              inCache.put(frame, newIn)
+              state.setInState(newIn)
+              Option(outCache.get(frame)).foreach(_.stability = Stability.Unstable)
+              None
+            } else {
+              // call is recurrent
+              corecurrentCalls += info.frameIdWithInStateOfCache.get
+              if (Fixpoint.DEBUG)
+                println(s"${stackHeightIndent}PUSH RECURRENT $frame:${inWidenedWithCache.get}")
+              Some(loadRecurrentOutput(frame))
+            }
         }
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -164,21 +164,22 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
     val newStackHeight = stackHeight - 1
-    val updatedResult = if (recurrentCalls.remove(newStackHeight)) {
+    val updatedResult = if (corecurrentCalls.remove(newStackHeight)) {
       storeCorecurrentOutput(frame, result)
     } else {
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame:$in <- $result")
+        println(s"${stackHeightMinusOneIndent}POP  $frame:$in <- $result")
       MaybeChanged.Unchanged(result)
     }
-    dropFrame(frame)
+    dropFrame(frame, newStackHeight)
     stackHeight = newStackHeight
     updatedResult
 
 
-  inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In): MaybeChanged[In] = Option(inCache.get(frame)) match
+  inline private def loadStateFromInCache(frame: Frame[Dom, Ctx], in: In): MaybeChanged[In] = Option(inCache.get(frame)) match
     case None =>
-//      inCache.put(frame, in)
+      if (Stack.writeInCacheWhenPushToStack)
+        inCache.put(frame, in)
       Unchanged(in)
     case Some(recurrentIn) =>
       LinearStateOperationCounter.wideningCounter += 1
@@ -192,13 +193,13 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
   inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx]): TrySturdy[Codom] = Option(outCache.get(frame)) match
     case None =>
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}  POP RECURRENT  $frame")
+        println(s"${stackHeightIndent}POP RECURRENT  $frame")
       TrySturdy(throw RecurrentCall(frame))
     case Some(OutCacheEntry(res, previousOut, _)) =>
       LinearStateOperationCounter.wideningCounter += 1
       state.setOutState(Profiler.addTime("widen"){joinOut(state.getOutState(frame.dom), previousOut).get})
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
+        println(s"${stackHeightIndent}POP RECURRENT  $frame <- $res")
       res
 
   inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): MaybeChanged[TrySturdy[Codom]] = Option(outCache.get(frame)) match
@@ -206,7 +207,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
       val out = state.getOutState(frame.dom)
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame <- ${Changed(result)}")
+        println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}")
       MaybeChanged.Changed(result)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
@@ -226,20 +227,25 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](val state: AnalysisState[Dom, I
       state.setOutState(newOut.get)
 
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame <- $newResult")
+        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
       MaybeChanged(newResult.get, changed)
 
+object Stack:
+  private val writeInCacheWhenPushToStack: Boolean = false
+
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
-class FrameInstanceInfo[In](var inStates: List[In], var frameIDs: List[Int]):
-  def this(in: In, id: Int) =
-    this(in::Nil, id::Nil)
-  def inState: In = inStates.head
-  def frameID: Int = frameIDs.head
-  def pushed(newIn: In, newID: Int): Unit =
-    this.inStates = newIn :: this.inStates
-    this.frameIDs = newID :: this.frameIDs
-  /** Yields true if frame is non-empty after pop. */
-  def popped(): Boolean =
-    this.inStates = this.inStates.tail
-    this.frameIDs = this.frameIDs.tail
-    this.frameIDs.isEmpty
+class FrameInstanceInfo(var frameIdWithInStateOfCache: Option[Int]):
+  private var frameCounter: Int = 1
+
+  def this(id: Int) =
+    this(Some(id))
+
+  def push(newID: Int): Unit =
+    frameIdWithInStateOfCache = Some(newID)
+    frameCounter += 1
+
+  def popAndGetIsEmpty(id: Int): Boolean =
+    frameIdWithInStateOfCache = None
+    frameCounter -= 1
+    assert(frameCounter >= 0)
+    frameCounter == 0

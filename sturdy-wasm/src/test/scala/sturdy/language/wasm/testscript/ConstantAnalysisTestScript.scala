@@ -22,6 +22,7 @@ import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
+import sturdy.fix.Fixpoint
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -49,13 +50,15 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
     Iterator(
-//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = Insensitive)),
-//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = Insensitive)),
-      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
-      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = Insensitive)),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost), ctx = Insensitive)),
+      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = Insensitive)),
+//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
+//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("conversions.wast")).sorted.foreach { p =>
+  Fixpoint.DEBUG = false
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     for (aInterp <- analyses) {
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript constant analysis on ${p.getFileName}")
@@ -119,7 +122,8 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
     case None => aCurrent
     case Some(name) => aModules(name)
 
-  def eval(c: Command): Unit = c match
+  def eval(c: Command): Unit =
+    c match
     case ValidModule(m) =>
       // validate and compile module
       val mod = Parsing.fromUnresolved(m)

@@ -20,7 +20,6 @@ import sturdy.data.unit
 import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.AFailureCollect
-import sturdy.fix.OutCacheOwner
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
