@@ -7,7 +7,7 @@ import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.AFallible
+import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.GenericInterpreter.AllocationSite
@@ -58,10 +58,7 @@ class IntervalAnalysisKeidelTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map()) {
-        val fixpoint = new KeidelFixpoint(
-          isFunOrWhile, Seq(Config.Innermost, Config.Innermost), new InsensitiveStack[FixIn, InState]())
-      }
+      val analysis = new IntervalAnalysis.KeidelInstance(Map(), Map())
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
       Profiler.printLastMeasured()

@@ -4,6 +4,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.util.*
 import sturdy.values.*
+import sturdy.values.booleans.{BooleanBranching, BooleanSelection}
 import sturdy.values.relational.EqOps
 
 import reflect.Selectable.reflectiveSelectable
@@ -59,13 +60,13 @@ given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[AReco
         return false
       // all entries e1 of rec1 have a corresponding e2 in rec2 that s.t. e1 <= e2
       for ((f, v1) <- m1) {
-        val v2 = m2.get(f).getOrElse(return false)
+        val v2 = m2.getOrElse(f, return false)
         if (!PartialOrder[V](using force).lteq(v1, v2))
           return false
       }
       true
 
-given ARecordEqOps[F, V, B <: {def asBoolean: Topped[Boolean]}](using Lazy[EqOps[V, B]]): EqOps[ARecord[F, V], Topped[Boolean]] with
+given ARecordEqOps[F, V, B](using Lazy[EqOps[V, B]], BooleanSelection[B, Topped[Boolean]]): EqOps[ARecord[F, V], Topped[Boolean]] with
   override def equ(rec1: ARecord[F, V], rec2: ARecord[F, V]): Topped[Boolean] = (rec1, rec2) match
     case (ARecord.Top(), _) | (_, ARecord.Top()) => Topped.Top
     case (ARecord.Map(m1), ARecord.Map(m2)) =>
@@ -74,8 +75,9 @@ given ARecordEqOps[F, V, B <: {def asBoolean: Topped[Boolean]}](using Lazy[EqOps
         return Topped.Actual(false)
 
       for ((f, v1) <- m1) {
-        val v2 = m2.get(f).getOrElse(return Topped.Actual(false))
-        EqOps.equ(v1, v2)(using force).asBoolean match
+        val v2 = m2.getOrElse(f, return Topped.Actual(false))
+        val b = EqOps.equ(v1, v2)(using force)
+        BooleanSelection(b, Topped.Actual(true), Topped.Actual(false)) match
           case Topped.Top => return Topped.Top
           case Topped.Actual(false) => return Topped.Actual(false)
           case _ => // nothing

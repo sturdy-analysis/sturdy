@@ -11,3 +11,4 @@ given ToppedBooleanOps[V](using ops: BooleanOps[V]): BooleanOps[Topped[V]] with
     for (b <- v) yield ops.not(b)
   def or(v1: Topped[V], v2: Topped[V]): Topped[V] =
     for (b1 <- v1; b2 <- v2) yield ops.or(b1, b2)
+

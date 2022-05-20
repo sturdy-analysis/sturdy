@@ -12,13 +12,13 @@ object Ints:
     final type VBool = Topped[Boolean]
     final type VInt = IntInterval
 
-    final def topInt(using Instance): IntInterval = IntInterval.Top
+    final def topInt: IntInterval = IntInterval.Top
     final def topBool: Topped[Boolean] = Topped.Top
 
-    final def asBoolean(v: Value)(using f: Failure): VBool = v match
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
       case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
       case Value.TopValue => Topped.Top
-      case _ => f.fail(TypeError, s"Expected Int but got $this")
+      case _ => failure(TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
       case Topped.Top => IntInterval(0, 1)
@@ -30,16 +30,16 @@ object Ints:
     final type VBool = Topped[Boolean]
     final type VInt = IntSign
 
-    final def topInt(using Instance): IntSign = IntSign.TopSign
+    final def topInt: IntSign = IntSign.TopSign
     final def topBool: Topped[Boolean] = Topped.Top
 
-    final def asBoolean(v: Value)(using f: Failure): VBool = v match
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
       case Value.IntValue(i) => i match
         case IntSign.Zero => Topped.Actual(false)
         case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
         case _ => Topped.Top
       case Value.TopValue => Topped.Top
-      case _ => f.fail(TypeError, s"Expected Int but got $this")
+      case _ => failure(TypeError, s"Expected Int but got $this")
 
     final def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
       case Topped.Top => IntSign.ZeroOrPos

@@ -67,10 +67,7 @@ class SignAnalysisKeidelTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
 
-      val analysis = new SignAnalysis.Instance(Map(), Map()) {
-        override val fixpoint = new KeidelFixpoint(
-          isFunOrWhile, Seq(Config.Innermost, Config.Innermost), new FiniteStack[FixIn, InState]())
-      }
+      val analysis = new SignAnalysis.KeidelInstance(Map(), Map())
       val aresult = analysis.failure.fallible(analysis.execute(program))
 //      println(StackManager.keidelFixpoint.asInstanceOf[KeidelFixpoint[GenericInterpreter.FixIn,
 //        GenericInterpreter.FixOut[SignAnalysis.Value],

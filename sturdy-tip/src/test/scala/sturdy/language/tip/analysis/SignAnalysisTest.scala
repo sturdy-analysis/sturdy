@@ -58,11 +58,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map()) {
-        val fixpoint = parameterSensitive(this,
-        //loopUnwinding(steps, topmost)).fixpoint
-        topmost).fixpoint
-      }
+      val analysis = new SignAnalysis.Instance(Map(), Map())
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
