@@ -1,8 +1,9 @@
 package sturdy.language.pcf
 
 import sturdy.data.MayJoin
-import sturdy.effect.{AnalysisState, EffectStack}
+import sturdy.effect.{EffectStack, AnalysisState}
 import sturdy.effect.environment.ClosableEnvironment
+import sturdy.effect.environment.CyclicEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.userinput.UserInput
 import sturdy.fix
@@ -10,11 +11,12 @@ import sturdy.util.{IntLabel, Labeled}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.closures.ClosureOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.relational.{EqOps, OrderingOps}
+import sturdy.values.relational.{OrderingOps, EqOps}
 
 import scala.collection.immutable.List
 
 case object UnboundVariable extends FailureKind
+case object TypeError extends FailureKind
 
 trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
 
@@ -26,11 +28,11 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   val closureOps: ClosureOps[String, V, Exp, Env, V, V]
 
   // effect operations
-  val fail: Failure
-  val environment: ClosableEnvironment[String, V, Env, J]
+  val failure: Failure
+  val environment: CyclicEnvironment[String, V, J] with ClosableEnvironment[String, V, Env, J]
   val input: UserInput[V]
 
-  val effectStack: EffectStack = new EffectStack(List(fail, environment, input))
+  val effectStack: EffectStack = new EffectStack(List(failure, environment, input))
   given EffectStack = effectStack
 
   // joins
@@ -46,7 +48,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
     override def getAllState: State = environment.getState
     override def setAllState(all: State): Unit = environment.setState(all)
   }
-  
+
   type Fixed = Exp => V
   val fixpoint: (AnalysisState[Exp, State, State, State], EffectStack) ?=> fix.Fixpoint[Exp, V]
 
@@ -62,7 +64,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
     case Exp.Var(name) =>
       environment.lookup(name).getOrElse(
         toplevelDefs.get(name).map(eval).getOrElse(
-          fail(UnboundVariable, name)
+          failure(UnboundVariable, name)
         )
       )
     case Exp.Num(n) => intOps.integerLit(n)
@@ -85,21 +87,20 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
     case Exp.App(fun, arg) =>
       val cl = eval(fun)
       closureOps.invokeClosure(cl) {
-        case (List(), rec@Exp.Rec(f, body), env) => environment.scoped {
-          environment.loadClosedEnvironment(env)
-          environment.bind(f, cl)
-          eval(rec.label @: Exp.App(body, arg))
-        }
         case (List(x), body, env) => environment.scoped {
-          environment.loadClosedEnvironment(env)
           val a = eval(arg)
+          environment.loadClosedEnvironment(env)
           environment.bind(x, a)
           eval(body)
         }
         case c => throw MatchError(c)
       }
     case Exp.Rec(f, body) =>
-      closureOps.closureValue(List(), Exp.Rec(f, body), environment.closeEnvironment)
+      lazy val rec: V = {
+        environment.bindLazy(f, rec)
+        eval(body)
+      }
+      rec
 
   def eval(e: Exp)(using rec: Fixed): V = rec(e)
 

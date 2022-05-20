@@ -93,15 +93,15 @@ object Parser:
   val variable: P[Exp] = identifier.map(Exp.Var.apply)
 
   lazy val atom: P[Exp] =
+    (variable <* P.not(P.char('('))).backtrack |
     (keyword(KREAD) *> inParens(P.unit)).map(_ => Exp.Read) |
-    ((variable | inParens(recExpression)) ~ inParens(recExpression)).backtrack.map(Exp.App.apply) |
     (keyword(KLAM) *> identifier ~ (op('.') *> recExpression)).map(Exp.Lam.apply) |
     (keyword(KREC) *> identifier ~ (op('.') *> recExpression)).map(Exp.Rec.apply) |
     (keyword(KIF) *> inParens(recExpression) ~ recExpression ~ (keyword(KELSE) *> recExpression))
       .map { case ((c, t), e) => Exp.If(c, t, e) } |
     spaced(Numbers.signedIntString.map(s => Exp.Num(s.toInt))) |
     inParens(recExpression) |
-    variable
+    ((variable | inParens(recExpression)) ~ inParens(recExpression).rep).map(es => es._2.foldLeft(es._1)(Exp.App.apply))
 
   lazy val term: P[Exp] =
     (atom ~ (

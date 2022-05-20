@@ -11,8 +11,8 @@ import sturdy.effect.Effectful
  *
  *     case If(e, thn, els) => boolBranch(eval(e), scoped(thn), scoped(els))
  */
-trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], Effectful:
-  def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
+trait AEnvironmentStaticScope[Var, V] extends ConcreteEnvironment[Var, V], Effectful:
+  def environmentIsSound[VC](c: ConcreteEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
     if (c.getEnv.keySet != env.keySet) {
       val different = (c.getEnv.keySet -- env.keySet) ++ (env.keySet -- c.getEnv.keySet)
       IsSound.NotSound(s"${classOf[AEnvironmentStaticScope[_, _]].getName}: Expected identical keys but environments differ for $different in $env")
