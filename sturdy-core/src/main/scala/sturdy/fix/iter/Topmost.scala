@@ -7,6 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.Fixpoint
 import sturdy.fix.Stack
+import sturdy.fix.StackedFrames
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
@@ -16,22 +17,23 @@ import scala.collection.mutable
 import scala.util.Try
 
 def topmost[Dom, Codom, In, Out, All, Ctx]
+  (frames: Boolean = true)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[Dom, In, Out, All])
   (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Topmost[Dom, Codom, In, Out, All, Ctx] =
-  new Topmost(state, context)
+  new Topmost(frames, state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
-  (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
+  (frames: Boolean, state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 
   override def equals(obj: Any): Boolean = super.equals(obj)
 
-  private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
+  private val stack: Stack[Dom, Codom, In, Out] = Stack(frames, context)
   private var someComponentIsLooping: Boolean = false
   private var iterationCount: Int = 1
 
@@ -40,7 +42,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     @tailrec
     def apply_(dom: Dom): Codom =
       if (stack.height == 0) {
-        val state = stack.state.getAllState
+        val allState = state.getAllState
         val result = step(f, dom)
         if (someComponentIsLooping) {
           if (Fixpoint.DEBUG) {
@@ -48,7 +50,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
             println(s"## REPEAT (Iteration $iterationCount) of $dom")
           }
           someComponentIsLooping = false
-          stack.state.setAllState(state)
+          state.setAllState(allState)
           apply_(dom)
         } else
           result.getOrThrow
@@ -58,13 +60,20 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private inline def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
-    val inState = state.getInState(dom)
-    stack.push(dom, inState) match
-      case Some(priorResult) =>
-        priorResult
-      case None =>
+  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
+    val in = state.getInState(dom)
+    stack.push(dom, in) match
+      case stack.PushResult.Recurrent(result, widenedOut) =>
+        widenedOut.foreach(state.setOutState)
+        result
+      case stack.PushResult.Continue(widenedIn) =>
+        widenedIn.foreach(state.setInState)
         val result = TrySturdy(f(dom))
-        val MaybeChanged(widenedResult, looping) = stack.pop(dom, inState, result)
-        someComponentIsLooping = someComponentIsLooping || looping
-        widenedResult
+        val out = state.getOutState(dom)
+        stack.pop(dom, in, result, out) match
+          case stack.PopResult.Stable =>
+            result
+          case stack.PopResult.Unstable(newresult, newout) =>
+            newout.foreach(state.setOutState)
+            someComponentIsLooping = true
+            newresult

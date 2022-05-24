@@ -109,7 +109,9 @@ enum Assignable:
     case _ => m.empty
 
   def intLiterals: Set[Int] = this match
+    case AVar(_) => Set()
     case ADeref(e) => e.intLiterals
+    case AField(_, _) => Set()
     case ADerefField(rec, _) => rec.intLiterals
 
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):

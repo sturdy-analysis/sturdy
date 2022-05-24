@@ -62,6 +62,7 @@ class IntIntervalWiden(bounds: => Set[Int]) extends Widen[IntInterval]:
         v1.h
       else
         treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
+//    println(s"$v1 widen $v2 = ${IntInterval(low, high)}")
     MaybeChanged(IntInterval(low, high), v1)
 
 given IntervalIntegerOps(using f: Failure, j: EffectStack): IntegerOps[Int, IntInterval] with

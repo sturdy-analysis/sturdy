@@ -32,7 +32,7 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  abstract class UnfixedInstance(initEnvironment: Environment, initStore: Store) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackedFrames: Boolean) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: AFailureCollect = new AFailureCollect
@@ -59,16 +59,11 @@ object SignAnalysis extends Interpreter,
 //    given Widen[OutState] = implicitly
     given Lazy[Widen[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store) extends UnfixedInstance(initEnvironment, initStore):
-    override val fixpoint = parameterSensitive(this, topmost).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore)
+    override val fixpoint =
+      fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
+        parameterSensitive(this, fix.iter.innermost(stackedFrames))).fixpoint
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackedFrames)
 
-  class KeidelInstance(initEnvironment: Environment, initStore: Store) extends UnfixedInstance(initEnvironment, initStore):
-    override val fixpoint = new fix.KeidelFixpoint(
-      isFunOrWhile, Seq(fix.iter.Config.Innermost, fix.iter.Config.Innermost),
-      new fix.FiniteStack[FixIn, InState]())
-    override def newInstance: sturdy.Executor = new KeidelInstance(initEnvironment, initStore)
-
-  class DAIInstance(initEnvironment: Environment, initStore: Store) extends UnfixedInstance(initEnvironment, initStore):
+  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, true):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)

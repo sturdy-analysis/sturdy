@@ -13,7 +13,7 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantAnalysisSturdyInstance, FixpointConfig, WasmConfig}
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
@@ -123,17 +123,31 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue), expectedResult.map(ConstantAnalysis.liftConcreteValue))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
-    it must s"execute $funcName withs args $args with result $expected" in {
-      val res = runConstantAnalysis(path, funcName, args)
+    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
+      val res = runConstantAnalysis(path, funcName, args, true)
+      res match
+        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
+        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
+        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+    }
+    it must s"execute $funcName withs args $args with result $expected with stacked states" in {
+      val res = runConstantAnalysis(path, funcName, args, true)
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
     }
 
-  def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
-    it must s"execute $funcName with args $args throwing exception $failureKind" in {
-      val res = runConstantAnalysis(path, funcName, args)//args.map(ConstantAnalysis.liftConcreteValue))
+  def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
+    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
+      val res = runConstantAnalysis(path, funcName, args, true)
+      res match
+        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
+        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+    }
+    it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
+      val res = runConstantAnalysis(path, funcName, args, false)
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
@@ -141,10 +155,11 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
+def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackedFrames: Boolean): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost)))
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackedFrames))))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

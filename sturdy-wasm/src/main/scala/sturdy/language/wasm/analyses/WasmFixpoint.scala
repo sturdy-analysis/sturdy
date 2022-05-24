@@ -40,7 +40,7 @@ case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig
 object WasmConfig:
   def default = WasmConfig()
 
-case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost, loopUnwinding: Int = 0):
+case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(), loopUnwinding: Int = 0):
   override def toString: String =
     if (loopUnwinding <= 0)
       iter.toString

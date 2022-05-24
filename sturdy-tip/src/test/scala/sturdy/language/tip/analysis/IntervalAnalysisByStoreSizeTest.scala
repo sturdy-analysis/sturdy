@@ -45,14 +45,15 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(s"00100_20000Stack.tip")).sorted.foreach { p =>
     it must s"warm up " in {
-
-      runIntervalAnalysis(p)
+      runIntervalAnalysis(p, true)
+      runIntervalAnalysis(p, false)
     }
   }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("00100_20000Stack.tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
-      runIntervalAnalysis(p)
+      runIntervalAnalysis(p, true)
+      runIntervalAnalysis(p, false)
     }
   }
 //
@@ -64,17 +65,17 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
 //    }
 //  }
 
-  def runIntervalAnalysis(p: Path) =
+  def runIntervalAnalysis(p: Path, stackedFrames: Boolean) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), 0)
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackedFrames, 0)
 
       var aresult: AFallible[Value] = AFallible.Unfailing(Value.TopValue)
-      while (true)
+//      while (true)
         aresult = Profiler.addTime("analysis"){analysis.failure.fallible(analysis.execute(program))}
 
 //      println(aresult)

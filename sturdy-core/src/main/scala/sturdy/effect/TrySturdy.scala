@@ -49,7 +49,16 @@ enum TrySturdy[+A]:
     case Failure(f) => f
     case Exception(e) => e
     case Recurrent(rc) => rc
-
+  def map[B](f: A => B): TrySturdy[B] = this match
+    case Success(a) => Success(f(a))
+    case Failure(f) => Failure(f)
+    case Exception(e) => Exception(e)
+    case Recurrent(rc) => Recurrent(rc)
+  def flatMap[B](f: A => TrySturdy[B]): TrySturdy[B] = this match
+    case Success(a) => f(a)
+    case Failure(f) => Failure(f)
+    case Exception(e) => Exception(e)
+    case Recurrent(rc) => Recurrent(rc)
 object TrySturdy:
   inline def apply[A](f: => A): TrySturdy[A] =
     try Success(f) catch {

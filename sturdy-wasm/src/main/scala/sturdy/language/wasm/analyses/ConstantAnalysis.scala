@@ -69,7 +69,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  abstract class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
@@ -93,3 +93,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     private given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+
+    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
+      override type Ctx = config.ctx.Ctx
+      val (contextPreparation, sensitivity) = config.ctx.make[ConstantAnalysis.Value]
+      import config.ctx.finiteCtx
+      override protected def contextFree = contextPreparation
+      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+    }
+
+    override val fixpointSuper = fixpoint
+    override def toString: String = s"constant $config"
