@@ -25,17 +25,17 @@ object Fix:
     case FixIn.Eval(_: Loop, _) => 1
     case _ => -1
 
-  final def callSitesLogger() = fix.context.callSites[FixIn, Call | CallIndirect] {
-    case FixIn.Eval(c: Call, _) => Some(c)
-    case FixIn.Eval(c: CallIndirect, _) => Some(c)
+  final def callSitesLogger() = fix.context.callSites[FixIn, (Call | CallIndirect, InstLoc)] {
+    case FixIn.Eval(c: Call, loc) => Some((c, loc))
+    case FixIn.Eval(c: CallIndirect, loc) => Some((c, loc))
     case _ => None
   }
-  final def previousCallSitesLogger(k: Int) = fix.context.previousCallSites[FixIn, Call | CallIndirect](k) {
-    case FixIn.Eval(c: Call, _) => Some(c)
-    case FixIn.Eval(c: CallIndirect, _) => Some(c)
+  final def previousCallSitesLogger(k: Int) = fix.context.previousCallSites[FixIn, (Call | CallIndirect, InstLoc)](k) {
+    case FixIn.Eval(c: Call, loc) => Some((c, loc))
+    case FixIn.Eval(c: CallIndirect, loc) => Some((c, loc))
     case _ => None
   }
-  type CallString = fix.context.CallString[Call | CallIndirect]
+  type CallString = fix.context.CallString[(Call | CallIndirect, InstLoc)]
   given Finite[CallString] = fix.context.FiniteCallString
 
   given CombineFixOut[V, W <: Widening] (using w: Combine[V, W]): Combine[FixOut[V], W] with
