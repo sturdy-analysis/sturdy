@@ -177,8 +177,6 @@ given SignOrderingOps: OrderingOps[IntSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Topped.Actual(false)
     case (Pos, Zero) => Topped.Actual(false)
     case _ => Topped.Top
-  def ge(v1: IntSign, v2: IntSign): Topped[Boolean] = le(v2, v1)
-  def gt(v1: IntSign, v2: IntSign): Topped[Boolean] = lt(v2, v1)
 
 given SignEqOps: EqOps[IntSign, Topped[Boolean]] with
   def equ(v1: IntSign, v2: IntSign): Topped[Boolean] = (v1, v2) match

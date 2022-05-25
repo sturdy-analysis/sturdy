@@ -4,6 +4,14 @@ enum Topped[+V] extends Iterable[V]:
   case Top
   case Actual(v: V)
 
+  def isActual: Boolean = this match
+    case Top => false
+    case Actual(_) => true
+
+  def isTop: Boolean = this match
+    case Top => true
+    case Actual(_) => false
+
   override def iterator: Iterator[V] = this match
     case Top => Iterator.empty
     case Actual(v) => Iterator.single(v)

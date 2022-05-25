@@ -55,10 +55,10 @@ object IntervalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: APrintPrefix[Value] = new APrintPrefix
-    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntInterval.Top))
+    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval.top))
 
     var bounds: Set[Int] = Set()
-    given Widen[IntInterval] = new IntIntervalWiden(bounds)
+    given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =

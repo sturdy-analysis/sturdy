@@ -1,0 +1,183 @@
+package sturdy.values.integer
+
+import sturdy.effect.EffectStack
+import sturdy.effect.failure.Failure
+import sturdy.values.*
+import sturdy.values.relational.*
+
+import scala.collection.immutable.TreeSet
+
+
+import Ordering.Implicits.infixOrderingOps
+import Numeric.Implicits.infixNumericOps
+import Integral.Implicits.infixIntegralOps
+
+object NumericInterval:
+  def top[I]: NumericInterval[I] = NumericInterval.Top()
+  def apply[I](l: I, h: I)(using Ordering[I]): NumericInterval[I] =
+    if (l <= h)
+      NumericInterval.Bounded(l, h)
+    else
+      NumericInterval.Top()
+
+
+
+enum NumericInterval[I]:
+  case Top()
+  case Bounded(low: I, high: I)
+
+  def join(other: NumericInterval[I])(using Ordering[I]): NumericInterval[I] = (this, other) match
+    case (Top(), _) => this
+    case (_, Top()) => other
+    case (Bounded(l1, h1), Bounded(l2, h2)) => NumericInterval(l1.min(l2), h1.max(h2))
+
+  def +(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
+    case (Top(), _) => this
+    case (_, Top()) => y
+    case (Bounded(x1, x2), Bounded(y1, y2)) =>
+      NumericInterval(x1 + y1, x2 + y2)
+
+  def -(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
+    case (Top(), _) => this
+    case (_, Top()) => y
+    case (Bounded(x1, x2), Bounded(y1, y2)) => NumericInterval(x1 - y2, x2 - y1)
+
+  def *(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
+    case (Top(), _) => this
+    case (_, Top()) => y
+    case (Bounded(x1, x2), Bounded(y1, y2)) =>
+      val x1y1 = x1 * y1
+      val x1y2 = x1 * y2
+      val x2y1 = x2 * y1
+      val x2y2 = x2 * y2
+      NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
+
+  def /(y: NumericInterval[I])(using Integral[I]): NumericInterval[I] = (this, y) match
+    case (Top(), _) => this
+    case (_, Top()) => y
+    case (Bounded(x1, x2), Bounded(y1, y2)) =>
+      val x1y1 = x1 / y1
+      val x1y2 = x1 / y2
+      val x2y1 = x2 / y1
+      val x2y2 = x2 / y2
+      NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
+
+  def isZero(using Numeric[I]): Topped[Boolean] = this match
+    case Top() => Topped.Top
+    case Bounded(l, h) =>
+      val fromInt = summon[Numeric[I]].fromInt
+      if (l == fromInt(0) && h == fromInt(0))
+        Topped.Actual(true)
+      else if (l <= fromInt(0) && h >= fromInt(0))
+        Topped.Top
+      else
+        Topped.Actual(false)
+
+  def isConstant(using Ordering[I]): Boolean = this match
+    case Top() => false
+    case Bounded(l, h) => l == h
+
+given IntervalIntegerOps[I](using Integral[I])(using f: Failure, j: EffectStack): IntegerOps[I, NumericInterval[I]] with
+  private def fromInt(x: Int): I = summon[Numeric[I]].fromInt(x)
+
+  def integerLit(i: I): NumericInterval[I] = NumericInterval(i, i)
+  def randomInteger(): NumericInterval[I] = NumericInterval.top
+  def add(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 + v2
+  def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 - v2
+  def mul(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 * v2
+  def div(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v2 match
+    case NumericInterval.Top() => j.joinWithFailure(v2)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case NumericInterval.Bounded(0, 0) => f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+    case NumericInterval.Bounded(0, h) => j.joinWithFailure(v1 / NumericInterval(fromInt(0), h))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case NumericInterval.Bounded(l, 0) => j.joinWithFailure(v1 / NumericInterval(l, fromInt(-1)))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case NumericInterval.Bounded(l, h) =>
+      if (l <= fromInt(0) && h >= fromInt(0))
+        j.joinWithFailure(v1 / v2)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+      else
+        v1 / v2
+
+  def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def min(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  def divUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def remainder(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def gcd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  def absolute(v: NumericInterval[I]): NumericInterval[I] = ???
+  def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def bitOr(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def bitXor(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def shiftLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+  def shiftRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+  def shiftRightUnsigned(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+  def rotateLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+  def rotateRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+  def countLeadingZeros(v: NumericInterval[I]): NumericInterval[I] = ???
+  def countTrailinZeros(v: NumericInterval[I]): NumericInterval[I] = ???
+  def nonzeroBitCount(v: NumericInterval[I]): NumericInterval[I] = ???
+
+
+
+given NumericIntervalAbstractly[I](using Ordering[I]): Abstractly[I, NumericInterval[I]] with
+  override def abstractly(i: I): NumericInterval[I] =
+    NumericInterval(i, i)
+
+given NumericIntervalOrdering[I](using Ordering[I]): PartialOrder[NumericInterval[I]] with
+  override def lteq(x: NumericInterval[I], y: NumericInterval[I]): Boolean = (x, y) match
+    case (NumericInterval.Top(), _) => false
+    case (_, NumericInterval.Top()) => true
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      l2 <= l1 && h1 <= h2
+
+given NumericIntervalJoin[I](using Ordering[I]): Join[NumericInterval[I]] with
+  override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] =
+    MaybeChanged(v1.join(v2), v1)
+
+class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using Numeric[I]) extends Widen[NumericInterval[I]]:
+  private lazy val treeSet: TreeSet[I] = TreeSet.from(bounds)
+  override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] = (v1, v2) match
+    case (NumericInterval.Top(), _) => MaybeChanged.Unchanged(v1)
+    case (_, NumericInterval.Top()) => MaybeChanged.Changed(v2)
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      val low =
+        if (l1 <= l2) l1
+        else treeSet.maxBefore(l2 + summon[Numeric[I]].fromInt(1)).getOrElse(minValue)
+      val high =
+        if (h1 >= h2) h1
+        else treeSet.minAfter(h2).getOrElse(maxValue)
+  //    println(s"$v1 widen $v2 = ${NumericInterval(low, high)}")
+      MaybeChanged(NumericInterval(low, high), v1)
+
+given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInterval[I], Topped[Boolean]] with
+  def lt(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (h1 < l2) Topped.Actual(true)
+      else if (h2 <= l1) Topped.Actual(false)
+      else Topped.Top
+  def le(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (h1 <= l2) Topped.Actual(true)
+      else if (h2 < l1) Topped.Actual(false)
+      else Topped.Top
+
+given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topped[Boolean]] with
+  override def equ(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (l1 == h1 && h1 == l2 && l2 == h2) Topped.Actual(true)
+      else if (h1 < l2 || h2 < l1) Topped.Actual(false)
+      else Topped.Top
+  override def neq(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (l1 == h1 && h1 == l2 && l2 == h2) Topped.Actual(false)
+      else if (h1 < l2 || h2 < l1) Topped.Actual(true)
+      else Topped.Top

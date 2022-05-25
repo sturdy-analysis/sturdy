@@ -78,8 +78,6 @@ given EqOps[Int, Boolean] with
 given OrderingOps[Int, Boolean] with
   def lt(v1: Int, v2: Int): Boolean = v1 < v2
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
-  def ge(v1: Int, v2: Int): Boolean = v1 >= v2
-  def gt(v1: Int, v2: Int): Boolean = v1 > v2
 
 given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
   /*

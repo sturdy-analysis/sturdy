@@ -50,8 +50,6 @@ given EqOps[Double, Boolean] with
 given OrderingOps[Double, Boolean] with
   def lt(v1: Double, v2: Double): Boolean = v1 < v2
   def le(v1: Double, v2: Double): Boolean = v1 <= v2
-  def ge(v1: Double, v2: Double): Boolean = v1 >= v2
-  def gt(v1: Double, v2: Double): Boolean = v1 > v2
 
 given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] with
   /*

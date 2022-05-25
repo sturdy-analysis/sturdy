@@ -37,8 +37,6 @@ given BaseTypeEqOps[B: ClassTag]: EqOps[BaseType[B], BaseType[Boolean]] with
 given BaseTypeOrderingOps[B: ClassTag]: OrderingOps[BaseType[B], BaseType[Boolean]] with
   def lt(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def le(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
-  def ge(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
-  def gt(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
 given BaseTypeUnsignedCompareOps[B: ClassTag]: UnsignedCompareOps[BaseType[B], BaseType[Boolean]] with
   def ltUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
