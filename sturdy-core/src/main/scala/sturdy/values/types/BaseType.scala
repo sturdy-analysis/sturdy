@@ -4,7 +4,7 @@ import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
-import sturdy.values.relational.{UnsignedCompareOps, EqOps, OrderingOps}
+import sturdy.values.relational.{UnsignedOrderingOps, EqOps, OrderingOps}
 import sturdy.values.*
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.ConversionFailure
@@ -38,11 +38,9 @@ given BaseTypeOrderingOps[B: ClassTag]: OrderingOps[BaseType[B], BaseType[Boolea
   def lt(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def le(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
-given BaseTypeUnsignedCompareOps[B: ClassTag]: UnsignedCompareOps[BaseType[B], BaseType[Boolean]] with
+given BaseTypeUnsignedOrderingOps[B: ClassTag]: UnsignedOrderingOps[BaseType[B], BaseType[Boolean]] with
   def ltUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def leUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
-  def geUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
-  def gtUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
 given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, EffectStack): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =

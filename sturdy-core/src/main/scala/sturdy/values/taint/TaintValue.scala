@@ -5,7 +5,7 @@ import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.relational.{UnsignedCompareOps, EqOps, OrderingOps}
+import sturdy.values.relational.{UnsignedOrderingOps, EqOps, OrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
 
@@ -113,14 +113,10 @@ given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct
 given TaintOrderingOps[A,B] (using ops: OrderingOps[A,B]): OrderingOps[TaintProduct[A],TaintProduct[B]] with
   override def lt(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.lt, v2)
   override def le(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.le, v2)
-  override def ge(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.ge, v2)
-  override def gt(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.gt, v2)
 
-given TaintUnsignedCompareOps[A,B](using ops: UnsignedCompareOps[A,B]): UnsignedCompareOps[TaintProduct[A],TaintProduct[B]] with
+given TaintUnsignedOrderingOps[A,B] (using ops: UnsignedOrderingOps[A,B]): UnsignedOrderingOps[TaintProduct[A],TaintProduct[B]] with
   override def ltUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.ltUnsigned, v2)
   override def leUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.leUnsigned, v2)
-  override def geUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.geUnsigned, v2)
-  override def gtUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.gtUnsigned, v2)
 
 given TaintConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]](using conv: Convert[From, To, VFrom, VTo, Config]):
   Convert[From, To, TaintProduct[VFrom], TaintProduct[VTo], Config] with

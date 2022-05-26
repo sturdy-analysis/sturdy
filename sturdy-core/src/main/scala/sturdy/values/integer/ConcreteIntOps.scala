@@ -3,10 +3,9 @@ package sturdy.values.integer
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.convert.*
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.OrderingOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -135,3 +134,7 @@ given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
       case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
       case (config.BytesSize.Int, _) => buf.getInt
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+
+given ConcreteIntUnsignedOrderingOps: UnsignedOrderingOps[Int, Boolean] with
+  override def ltUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) < 0
+  override def leUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) <= 0

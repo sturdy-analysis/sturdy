@@ -3,11 +3,10 @@ package sturdy.values.integer
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
+import sturdy.values.convert.*
 import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
-
-
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
@@ -166,6 +165,22 @@ given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInter
       else if (h2 < l1) Topped.Actual(false)
       else Topped.Top
 
+given NumericIntervalUnsignedOrderingOps[I](using ops: UnsignedOrderingOps[I, Boolean]): UnsignedOrderingOps[NumericInterval[I], Topped[Boolean]] with
+  def ltUnsigned(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (ops.ltUnsigned(h1, l2)) Topped.Actual(true)
+      else if (ops.leUnsigned(h2, l1)) Topped.Actual(false)
+      else Topped.Top
+  def leUnsigned(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
+    case (NumericInterval.Top(), _) => Topped.Top
+    case (_, NumericInterval.Top()) => Topped.Top
+    case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+      if (ops.leUnsigned(h1, l2)) Topped.Actual(true)
+      else if (ops.ltUnsigned(h2, l1)) Topped.Actual(false)
+      else Topped.Top
+
 given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topped[Boolean]] with
   override def equ(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
     case (NumericInterval.Top(), _) => Topped.Top
@@ -181,3 +196,21 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
       if (l1 == h1 && h1 == l2 && l2 == h2) Topped.Actual(false)
       else if (h1 < l2 || h2 < l1) Topped.Actual(true)
       else Topped.Top
+
+given ConvertNumericIntervals[From, To, I1, I2, Config <: ConvertConfig[_]]
+  (using convert: Convert[From, To, I1, I2, Config])
+  : Convert[From, To, NumericInterval[I1], NumericInterval[I2], Config] with
+
+  def apply(i: NumericInterval[I1], conf: Config): NumericInterval[I2] = i match
+    case NumericInterval.Top() => NumericInterval.Top()
+    case NumericInterval.Bounded(l, h) => NumericInterval.Bounded(convert(l, conf), convert(h, conf))
+
+given ConvertNumericIntervalToConstant[T, I]: Convert[T, T, NumericInterval[I], Topped[I], NilCC.type] with
+  def apply(i: NumericInterval[I], conf: NilCC.type): Topped[I] = i match
+    case NumericInterval.Top() => Topped.Top
+    case NumericInterval.Bounded(l, h) => if (l == h) Topped.Actual(l) else Topped.Top
+
+given ConvertConstantToNumericInterval[T, I]: Convert[T, T, Topped[I], NumericInterval[I], NilCC.type] with
+  def apply(i: Topped[I], conf: NilCC.type): NumericInterval[I] = i match
+    case Topped.Top => NumericInterval.Top()
+    case Topped.Actual(l) => NumericInterval.Bounded(l, l)

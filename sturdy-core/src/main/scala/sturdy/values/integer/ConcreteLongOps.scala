@@ -7,8 +7,7 @@ import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.OrderingOps
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
 
 import java.lang.Float as JFloat
 import java.lang.Long as JLong
@@ -144,3 +143,6 @@ given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
       case (config.BytesSize.Long, _) => buf.getLong()
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
+given ConcreteLongUnsignedOrderingOps: UnsignedOrderingOps[Long, Boolean] with
+  override def ltUnsigned(v1: Long, v2: Long): Boolean = JLong.compareUnsigned(v1, v2) < 0
+  override def leUnsigned(v1: Long, v2: Long): Boolean = JLong.compareUnsigned(v1, v2) <= 0
