@@ -30,7 +30,7 @@ enum FloatSign:
 import FloatSign.*
 
 given Abstractly[Float, FloatSign] with
-  override def abstractly(d: Float): FloatSign =
+  override def apply(d: Float): FloatSign =
     if d < 0 then Neg
     else if d > 0 then Pos
     else Zero

@@ -3,7 +3,7 @@ package sturdy.language.wasm.analyses
 import sturdy.{*,given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.generic.{FunctionInstance, given}
-import ConstantAnalysis.*
+import IntervalAnalysis.*
 import sturdy.values.given
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
@@ -13,7 +13,7 @@ import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*,given}
 
-object ConstantAnalysisSoundness {
+object IntervalAnalysisSoundness {
 
   given poFloat: PartialOrder[Float] with
     override def lteq(f1: Float, f2: Float): Boolean =
@@ -26,8 +26,8 @@ object ConstantAnalysisSoundness {
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x,y) match
       case (_, Value.TopValue) => true
-      case (Value.Int32(i1), Value.Int32(i2)) => PartialOrder[Topped[Int]].lteq(i1,i2)
-      case (Value.Int64(l1), Value.Int64(l2)) => PartialOrder[Topped[Long]].lteq(l1,l2)
+      case (Value.Int32(i1), Value.Int32(i2)) => PartialOrder[NumericInterval[Int]].lteq(i1,i2)
+      case (Value.Int64(l1), Value.Int64(l2)) => PartialOrder[NumericInterval[Long]].lteq(l1,l2)
       case (Value.Float32(f1), Value.Float32(f2)) => PartialOrder[Topped[Float]].lteq(f1,f2)
       case (Value.Float64(d1), Value.Float64(d2)) => PartialOrder[Topped[Double]].lteq(d1,d2)
       case _ => false
@@ -52,9 +52,9 @@ object ConstantAnalysisSoundness {
     override def isSound(cFun: ConcreteInterpreter.FunV, aFun: FunV): IsSound =
       powersetContainsOneSound.isSound(cFun, aFun)
 
-  given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
-      // soundness for stack, memory, symbol table, call frame
+  given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis.Instance): IsSound =
+      // soundness for stack, memory, symbol tables, call frame
       a.stack.operandStackIsSound(c.stack) &&
         a.memory.memoryIsSound(c.memory) &&
         a.globals.tableIsSound(c.globals) &&

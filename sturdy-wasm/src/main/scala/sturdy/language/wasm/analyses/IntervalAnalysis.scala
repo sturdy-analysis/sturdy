@@ -1,13 +1,17 @@
 package sturdy.language.wasm.analyses
 
+import cats.effect.ContextShift
+import cats.effect.IO
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
+import sturdy.effect.bytememory.IntervalAddressMemory
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableConcreteCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.IntervalSymbolTable
 import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
 import sturdy.effect.{EffectStack, AnalysisState}
 import sturdy.fix
@@ -27,6 +31,7 @@ import sturdy.values.relational.{*, given}
 import sturdy.values.{config, *, given}
 import swam.FuncType
 import swam.syntax.*
+import swam.traversal.Traverser
 
 import java.nio.{ByteOrder, ByteBuffer}
 import scala.collection.IndexedSeqView
@@ -53,7 +58,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
           else
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
         case NumericInterval.Bounded(l, h) =>
-          val elems = for (i <- l.min(0) until h.max(vec.size))
+          val elems = for (i <- l.max(0) to h.min(vec.size - 1))
             yield vec(i)
           if (elems.isEmpty) {
             // no elems in range
@@ -74,6 +79,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
+  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
+    override def apply(c: ConcreteInterpreter.Value): Value = c match
+      case ConcreteInterpreter.Value.TopValue => Value.TopValue
+      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval.constant(i))
+      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval.constant(l))
+      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
+      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
@@ -87,11 +100,11 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def jvFunV: WithJoin[FunV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
-    
+    val rangeLimit = 100
     val stack: JoinableConcreteOperandStack[Value] = new JoinableConcreteOperandStack
-    val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
+    val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval.Bounded(0, 0), rangeLimit)
     val globals: JoinableConcreteSymbolTable[Unit, GlobalAddr, Value] = new JoinableConcreteSymbolTable
-    val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
+    val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableConcreteCallFrame[FrameData, Int, Value] = new JoinableConcreteCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: AFailureCollect = new AFailureCollect
@@ -133,6 +146,23 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       }
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+
+    var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
+    var longIntervalBounds: Set[Long] = Set(-1, 0, 1)
+    given Widen[I32] = new NumericIntervalWiden[Int](intIntervalBounds, Int.MinValue, Int.MaxValue)
+    given Widen[I64] = new NumericIntervalWiden[Long](longIntervalBounds, Long.MinValue, Long.MaxValue)
+    given Widen[NumericInterval[Byte]] = new NumericIntervalWiden[Byte](Set(), Byte.MinValue, Byte.MaxValue)
+
+    private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+    private val boundCollector = new Traverser[IO, Unit]() {
+      override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
+      override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
+    }
+    override def initializeModule(module: Module, imports: Imports): ModuleInstance = {
+      module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
+      module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
+      super.initializeModule(module, imports)
+    }
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx

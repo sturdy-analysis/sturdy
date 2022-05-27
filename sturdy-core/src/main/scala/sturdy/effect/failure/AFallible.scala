@@ -23,14 +23,14 @@ enum AFallible[T]:
     case _ => throw new MatchError(this)
 
 given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
-  override def abstractly(c: CFallible[C]): AFallible[A] = c match
-    case CFallible.Unfailing(c) => AFallible.Unfailing(abs.abstractly(c))
+  override def apply(c: CFallible[C]): AFallible[A] = c match
+    case CFallible.Unfailing(c) => AFallible.Unfailing(abs.apply(c))
     case CFallible.Failing(kind, msg) => AFallible.Failing(Powerset(kind -> msg))
 
 given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallible[C], AFallible[A]] with
-  override def abstractly(a: AFallible[C]): AFallible[A] = a match
-    case AFallible.Unfailing(t) => AFallible.Unfailing(abs.abstractly(t))
-    case AFallible.MaybeFailing(t, msgs) => AFallible.MaybeFailing(abs.abstractly(t), msgs)
+  override def apply(a: AFallible[C]): AFallible[A] = a match
+    case AFallible.Unfailing(t) => AFallible.Unfailing(abs.apply(t))
+    case AFallible.MaybeFailing(t, msgs) => AFallible.MaybeFailing(abs.apply(t), msgs)
     case AFallible.Failing(msgs) => AFallible.Failing(msgs)
     case AFallible.Diverging(recur) => AFallible.Diverging(recur)
 

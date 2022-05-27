@@ -1,5 +1,7 @@
 package sturdy.values.integer
 
+import sturdy.data.JOption
+import sturdy.data.MayJoin
 import sturdy.effect.failure.FailureKind
 import sturdy.values.config
 import sturdy.values.convert.&&
@@ -24,6 +26,7 @@ trait IntegerOps[B, V]:
 
   def max(v1: V, v2: V): V
   def min(v1: V, v2: V): V
+  def absolute(v: V): V
 
   def div(v1: V, v2: V): V
   def divUnsigned(v1: V, v2: V): V
@@ -35,7 +38,7 @@ trait IntegerOps[B, V]:
   def gcd(v1: V, v2: V): V
   final def lcm(v1: V, v2: V): V = mul(div(absolute(v1), gcd(v1, v2)), absolute(v2))
 
-  def absolute(v: V): V
+  /** Binary integer operations for base type B, represented as V */
   def bitAnd(v1: V, v2: V): V
   def bitOr(v1: V, v2: V): V
   def bitXor(v1: V, v2: V): V
@@ -45,8 +48,14 @@ trait IntegerOps[B, V]:
   def rotateLeft(v: V, shift: V): V
   def rotateRight(v: V, shift: V): V
   def countLeadingZeros(v: V): V
-  def countTrailinZeros(v: V): V
+  def countTrailingZeros(v: V): V
   def nonzeroBitCount(v: V): V
+
+/** Overflow-aware integer operations for base type B, represented as V */
+trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:
+  def addStrict(v1: V, v2: V): JOption[J, V]
+  def subStrict(v1: V, v2: V): JOption[J, V]
+  def mulStrict(v1: V, v2: V): JOption[J, V]
 
 type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.Bits]
 type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.Bits]

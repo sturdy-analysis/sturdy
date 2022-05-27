@@ -38,5 +38,5 @@ given TypeIntegerOps[B: ClassTag](using f: Failure, j: EffectStack, base: Integr
   def rotateLeft(v: BaseType[B], shift: BaseType[B]): BaseType[B] = BaseType[B]
   def rotateRight(v: BaseType[B], shift: BaseType[B]): BaseType[B] = BaseType[B]
   def countLeadingZeros(v: BaseType[B]): BaseType[B] = BaseType[B]
-  def countTrailinZeros(v: BaseType[B]): BaseType[B] = BaseType[B]
+  def countTrailingZeros(v: BaseType[B]): BaseType[B] = BaseType[B]
   def nonzeroBitCount(v: BaseType[B]): BaseType[B] = BaseType[B]

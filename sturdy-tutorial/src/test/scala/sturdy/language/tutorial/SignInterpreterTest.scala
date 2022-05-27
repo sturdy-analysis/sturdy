@@ -54,7 +54,7 @@ class SignInterpreterTest extends AnyFlatSpec, Matchers:
       val cInterp = new ConcreteInterpreter
       val sInterp = new SignInterpreter
       val cRes = fallible(cInterp.runProg(arg, program))
-      val sRes = sInterp.failure.fallible(sInterp.runProg(valuesAbstractly.abstractly(arg), program))
+      val sRes = sInterp.failure.fallible(sInterp.runProg(valuesAbstractly.apply(arg), program))
       // result needs to be sound
       assertResult(IsSound.Sound)(Soundness.isSound(cRes,sRes))
       // interpreter state needs to be sound

@@ -23,6 +23,7 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
 
   def max(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.max, v2)
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
+  def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)
 
   private inline def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
     if (v2 == Topped.Top)
@@ -36,7 +37,6 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
   def modulo(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.modulo, v1, v2)
   def gcd(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.gcd, v2)
 
-  def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)
   def bitAnd(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.bitAnd, v2)
   def bitOr(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.bitOr, v2)
   def bitXor(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.bitXor, v2)
@@ -46,5 +46,5 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
   def rotateLeft(v: Topped[T], shift: Topped[T]): Topped[T] = v.binary(ops.rotateLeft, shift)
   def rotateRight(v: Topped[T], shift: Topped[T]): Topped[T] = v.binary(ops.rotateRight, shift)
   def countLeadingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countLeadingZeros)
-  def countTrailinZeros(v: Topped[T]): Topped[T] = v.unary(ops.countTrailinZeros)
+  def countTrailingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countTrailingZeros)
   def nonzeroBitCount(v: Topped[T]): Topped[T] = v.unary(ops.nonzeroBitCount)

@@ -1,9 +1,13 @@
 package sturdy.values.integer
 
+import sturdy.data.JOption
+import sturdy.data.JOptionC
+import sturdy.data.MayJoin
+import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.convert.*
-import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
+import sturdy.values.relational.{UnsignedOrderingOps, OrderingOps, EqOps}
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
 
@@ -67,8 +71,19 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def rotateLeft(v: Int, shift: Int): Int = Integer.rotateLeft(v, shift)
   def rotateRight(v: Int, shift: Int): Int = Integer.rotateRight(v, shift)
   def countLeadingZeros(v: Int): Int = Integer.numberOfLeadingZeros(v)
-  def countTrailinZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
+  def countTrailingZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
+
+given ConcreteStrictIntegerOps: StrictIntegerOps[Int, Int, NoJoin] with
+  override def addStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.addExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def subStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.subtractExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def mulStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.multiplyExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
 
 given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2

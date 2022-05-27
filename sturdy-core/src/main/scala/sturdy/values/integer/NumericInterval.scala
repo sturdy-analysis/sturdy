@@ -1,9 +1,9 @@
 package sturdy.values.integer
 
+import sturdy.data.{NoJoin, noJoin, joinComputations, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
-import sturdy.values.convert.&&
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 
@@ -15,123 +15,178 @@ import Integral.Implicits.infixIntegralOps
 
 object NumericInterval:
   def top[I]: NumericInterval[I] = NumericInterval.Top()
-  def apply[I](l: I, h: I)(using Ordering[I]): NumericInterval[I] =
-    if (l <= h)
+  def apply[I](l: I, h: I)(using ord: Ordering[I]): NumericInterval[I] =
+    if (ord.lteq(l, h))
       NumericInterval.Bounded(l, h)
     else
       NumericInterval.Top()
-  def fromBounds[I](b1: I, b2: I)(using Ordering[I]): NumericInterval[I] =
-    if (b1 <= b2)
+  def fromBounds[I](b1: I, b2: I)(using ord: Ordering[I]): NumericInterval[I] =
+    if (ord.lteq(b1, b2))
       NumericInterval.Bounded(b1, b2)
     else
       NumericInterval.Bounded(b2, b1)
+  def constant[I](i: I): NumericInterval[I] = NumericInterval.Bounded(i, i)
 
+  enum IsZero[I]:
+    case Zero()
+    case NotZero()
+    case MaybeZeroTop()
+    case MaybeZero(nonZeroLow: I, nonZeroHigh: I)
+
+    def toBoolean: Topped[Boolean] = this match
+      case IsZero.Zero() => Topped.Actual(false)
+      case IsZero.NotZero() => Topped.Actual(true)
+      case IsZero.MaybeZeroTop() | IsZero.MaybeZero(_, _) => Topped.Top
+
+  private inline def fromInt[I](i: Int)(using Numeric[I]): I = summon[Numeric[I]].fromInt(i)
 
 enum NumericInterval[I]:
   case Top()
   case Bounded(low: I, high: I)
 
+  import NumericInterval.*
+
+  inline def map[J](f: I => J)(using Ordering[J]): NumericInterval[J] = this match
+    case Top() => Top()
+    case Bounded(l, h) =>
+      NumericInterval.fromBounds(f(l), f(h))
+
+  inline def mapConstant[J](f: I => J)(using ord: Ordering[I]): NumericInterval[J] = this match
+    case Top() => Top()
+    case Bounded(l, h) =>
+      if (ord.equiv(l, h))
+        NumericInterval.constant(f(l))
+      else
+        NumericInterval.Top()
+
+  inline def combine[J, K](other: NumericInterval[J], fl: (I, J) => K, fh: (I, J) => K)(using Ordering[K]): NumericInterval[K] = (this, other) match
+    case (Top(), _) => Top()
+    case (_, Top()) => Top()
+    case (Bounded(l1, h1), Bounded(l2, h2)) =>
+      NumericInterval.fromBounds(fl(l1, l2), fh(h1, h2))
+
+  inline def combineCross[J, K](other: NumericInterval[J], f: (I, J) => K)(using Ordering[K]): NumericInterval[K] = (this, other) match
+    case (Top(), _) => Top()
+    case (_, Top()) => Top()
+    case (Bounded(x1, x2), Bounded(y1, y2)) =>
+      val x1y1 = f(x1, y1)
+      val x1y2 = f(x1, y2)
+      val x2y1 = f(x2, y1)
+      val x2y2 = f(x2, y2)
+      NumericInterval.fromBounds(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
+
   def isTop: Boolean = this match
     case Top() => true
     case _ => false
 
-  def join(other: NumericInterval[I])(using Ordering[I]): NumericInterval[I] = (this, other) match
-    case (Top(), _) => this
-    case (_, Top()) => other
-    case (Bounded(l1, h1), Bounded(l2, h2)) => NumericInterval(l1.min(l2), h1.max(h2))
-
-  def +(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
-    case (Top(), _) => this
-    case (_, Top()) => y
-    case (Bounded(x1, x2), Bounded(y1, y2)) =>
-      NumericInterval(x1 + y1, x2 + y2)
-
-  def -(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
-    case (Top(), _) => this
-    case (_, Top()) => y
-    case (Bounded(x1, x2), Bounded(y1, y2)) => NumericInterval(x1 - y2, x2 - y1)
-
-  def *(y: NumericInterval[I])(using Numeric[I]): NumericInterval[I] = (this, y) match
-    case (Top(), _) => this
-    case (_, Top()) => y
-    case (Bounded(x1, x2), Bounded(y1, y2)) =>
-      val x1y1 = x1 * y1
-      val x1y2 = x1 * y2
-      val x2y1 = x2 * y1
-      val x2y2 = x2 * y2
-      NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
-
-  def /(y: NumericInterval[I])(using Integral[I]): NumericInterval[I] = (this, y) match
-    case (Top(), _) => this
-    case (_, Top()) => y
-    case (Bounded(x1, x2), Bounded(y1, y2)) =>
-      val x1y1 = x1 / y1
-      val x1y2 = x1 / y2
-      val x2y1 = x2 / y1
-      val x2y2 = x2 / y2
-      NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
-
-  def isZero(using Numeric[I]): Topped[Boolean] = this match
-    case Top() => Topped.Top
+  def isZero(using num: Numeric[I], ord: Ordering[I]): IsZero[I] = this match
+    case Top() => IsZero.MaybeZeroTop()
     case Bounded(l, h) =>
-      val fromInt = summon[Numeric[I]].fromInt
-      if (l == fromInt(0) && h == fromInt(0))
-        Topped.Actual(true)
-      else if (l <= fromInt(0) && h >= fromInt(0))
-        Topped.Top
+      val zero = num.fromInt(0)
+      if (l == zero && h == zero)
+        IsZero.Zero()
+      else if (l == zero)
+        IsZero.MaybeZero(num.fromInt(1), h)
+      else if (h == zero)
+        IsZero.MaybeZero(l, num.fromInt(-1))
       else
-        Topped.Actual(false)
+        IsZero.NotZero()
 
   def isConstant(using Ordering[I]): Boolean = this match
     case Top() => false
     case Bounded(l, h) => l == h
 
-given IntervalIntegerOps[I](using Integral[I])(using f: Failure, j: EffectStack): IntegerOps[I, NumericInterval[I]] with
-  private def fromInt(x: Int): I = summon[Numeric[I]].fromInt(x)
+
+given IntervalIntegerOps[I](using ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I])(using f: Failure, j: EffectStack): IntegerOps[I, NumericInterval[I]] with
+  import NumericInterval.*
+
+  private val zero = num.fromInt(0)
 
   def integerLit(i: I): NumericInterval[I] = NumericInterval(i, i)
   def randomInteger(): NumericInterval[I] = NumericInterval.top
-  def add(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 + v2
-  def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 - v2
-  def mul(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1 * v2
-  def div(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v2 match
-    case NumericInterval.Top() => j.joinWithFailure(v2)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-    case NumericInterval.Bounded(0, 0) => f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-    case NumericInterval.Bounded(0, h) => j.joinWithFailure(v1 / NumericInterval(fromInt(0), h))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-    case NumericInterval.Bounded(l, 0) => j.joinWithFailure(v1 / NumericInterval(l, fromInt(-1)))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-    case NumericInterval.Bounded(l, h) =>
-      if (l <= fromInt(0) && h >= fromInt(0))
-        j.joinWithFailure(v1 / v2)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
-      else
-        v1 / v2
 
-  def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def min(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def add(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    val addStrict = (i1: I, i2: I) => strict.addStrict(i1, i2).getOrElse(return NumericInterval.top)
+    v1.combine(v2, addStrict, addStrict)
+  def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    val subStrict = (i1: I, i2: I) => strict.subStrict(i1, i2).getOrElse(return NumericInterval.top)
+    v1.combine(v2, subStrict, subStrict)
 
-  def divUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def remainder(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def gcd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+  def mul(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    val mulStrict = (i1: I, i2: I) => strict.mulStrict(i1, i2).getOrElse(return NumericInterval.top)
+    v1.combineCross(v2, mulStrict)
 
-  def absolute(v: NumericInterval[I]): NumericInterval[I] = ???
-  def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def bitOr(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def bitXor(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
-  def shiftLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
-  def shiftRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
-  def shiftRightUnsigned(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
-  def rotateLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
-  def rotateRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
-  def countLeadingZeros(v: NumericInterval[I]): NumericInterval[I] = ???
-  def countTrailinZeros(v: NumericInterval[I]): NumericInterval[I] = ???
-  def nonzeroBitCount(v: NumericInterval[I]): NumericInterval[I] = ???
+  def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = (v1, v2) match
+    case (Top(), _) => Top()
+    case (_, Top()) => Top()
+    case (Bounded(l1, h1), Bounded(l2, h2)) => NumericInterval(ops.max(l1, l2), ops.max(h1, h2))
+
+  def min(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = (v1, v2) match
+    case (Top(), _) => Top()
+    case (_, Top()) => Top()
+    case (Bounded(l1, h1), Bounded(l2, h2)) => NumericInterval(ops.min(l1, l2), ops.min(h1, h2))
+
+  def absolute(v: NumericInterval[I]): NumericInterval[I] = v match
+    case Top() => v
+    case Bounded(l, h) =>
+      if (l < zero) {
+        if (h < zero) {
+          // neg, neg
+          NumericInterval.Bounded(h.abs, l.abs)
+        } else {
+          // neg, pos
+          NumericInterval.Bounded(zero, l.abs.max(h))
+        }
+      } else {
+        // pos, pos
+        v
+      }
 
 
+  private inline def divByZero(v1: NumericInterval[I], v2: NumericInterval[I]) = f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+  private inline def divWith(f: (I, I) => I, v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    def divBy(nonzeroDenom: NumericInterval[I]): NumericInterval[I] = v1.combineCross(nonzeroDenom, f)
+    v2.isZero match
+      case IsZero.Zero() => divByZero(v1, v2)
+      case IsZero.NotZero() => divBy(v2)
+      case IsZero.MaybeZero(l, h) => joinComputations(divBy(NumericInterval.Bounded(l, h)))(divByZero(v1, v2))
+      case IsZero.MaybeZeroTop() => joinComputations(divBy(v2))(divByZero(v1, v2))
+
+  def div(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.div, v1, v2)
+  def divUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.divUnsigned, v1, v2)
+  def remainder(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.remainder, v1, v2)
+  def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.remainderUnsigned, v1, v2)
+  def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.modulo, v1, v2)
+  def gcd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.gcd, v1, v2)
+
+    def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1.combineCross(v2, ops.bitAnd)
+
+    def bitOr(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1.combineCross(v2, ops.bitOr)
+
+    def bitXor(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = v1.combineCross(v2, ops.bitXor)
+
+    def shiftLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = v.combineCross(shift, ops.shiftLeft)
+
+    def shiftRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = v.combineCross(shift, ops.shiftRight)
+
+    def shiftRightUnsigned(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = v.combineCross(shift, ops.shiftRightUnsigned)
+
+    def rotateLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = v.combineCross(shift, ops.rotateLeft)
+
+    def rotateRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = v.combineCross(shift, ops.rotateRight)
+
+    def countLeadingZeros(v: NumericInterval[I]): NumericInterval[I] = v.map(ops.countLeadingZeros)
+
+    def countTrailingZeros(v: NumericInterval[I]): NumericInterval[I] = v.mapConstant(ops.countTrailingZeros)
+
+    def nonzeroBitCount(v: NumericInterval[I]): NumericInterval[I] = v.mapConstant(ops.nonzeroBitCount)
+
+given TopNumericInterval[I]: Top[NumericInterval[I]] with
+  override def top: NumericInterval[I] = NumericInterval.top
 
 given NumericIntervalAbstractly[I](using Ordering[I]): Abstractly[I, NumericInterval[I]] with
-  override def abstractly(i: I): NumericInterval[I] =
-    NumericInterval(i, i)
+  override def apply(i: I): NumericInterval[I] =
+    NumericInterval.Bounded(i, i)
 
 given NumericIntervalOrdering[I](using Ordering[I]): PartialOrder[NumericInterval[I]] with
   override def lteq(x: NumericInterval[I], y: NumericInterval[I]): Boolean = (x, y) match
@@ -141,8 +196,11 @@ given NumericIntervalOrdering[I](using Ordering[I]): PartialOrder[NumericInterva
       l2 <= l1 && h1 <= h2
 
 given NumericIntervalJoin[I](using Ordering[I]): Join[NumericInterval[I]] with
-  override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] =
-    MaybeChanged(v1.join(v2), v1)
+  import NumericInterval.*
+  override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] = (v1, v2) match
+    case (Top(), _) => MaybeChanged.Unchanged(v1)
+    case (_, Top()) => MaybeChanged.Changed(v2)
+    case (Bounded(l1, h1), Bounded(l2, h2)) => MaybeChanged(Bounded(l1.min(l2), h1.max(h2)), v1)
 
 class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using Numeric[I]) extends Widen[NumericInterval[I]]:
   private lazy val treeSet: TreeSet[I] = TreeSet.from(bounds)
@@ -156,8 +214,7 @@ class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using
       val high =
         if (h1 >= h2) h1
         else treeSet.minAfter(h2).getOrElse(maxValue)
-  //    println(s"$v1 widen $v2 = ${NumericInterval(low, high)}")
-      MaybeChanged(NumericInterval(low, high), v1)
+      MaybeChanged(NumericInterval.Bounded(low, high), v1)
 
 given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInterval[I], Topped[Boolean]] with
   def lt(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] = (iv1, iv2) match
@@ -236,7 +293,8 @@ given ConvertNumericIntervalToBytes[From, To, I, B, Config <: ConvertConfig[_]]
     case NumericInterval.Bounded(l, h) =>
       val lowBytes = convert(l, conf)
       val highBytes = convert(h, conf)
-      lowBytes.zip(highBytes).map(NumericInterval.fromBounds)
+      val bytes = lowBytes.zip(highBytes).map(NumericInterval.fromBounds)
+      bytes
 
 given ConvertBytesToNumericInterval[From, To, I, B]
   (using convert: Convert[From, To, Seq[B], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
@@ -254,15 +312,18 @@ given ConvertBytesToNumericInterval[From, To, I, B]
         val rev = boundedBytes.reverse
         (rev.head, rev.tail)
       }
-    val l1 = Convert(msb.low +: bigEndianRest.map(_.low), conf)
-    val h1 = Convert(msb.high +: bigEndianRest.map(_.high), conf)
+
+    val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
+
+    val l1 = Convert(msb.low +: bigEndianRest.map(_.low), bigEndianConf)
+    val h1 = Convert(msb.high +: bigEndianRest.map(_.high), bigEndianConf)
     val iv1 = NumericInterval.fromBounds(l1, h1)
 
-    val l2 = Convert(msb.low +: bigEndianRest.map(_.high), conf)
-    val h2 = Convert(msb.high +: bigEndianRest.map(_.low), conf)
+    val l2 = Convert(msb.low +: bigEndianRest.map(_.high), bigEndianConf)
+    val h2 = Convert(msb.high +: bigEndianRest.map(_.low), bigEndianConf)
     val iv2 = NumericInterval.fromBounds(l2, h2)
 
-    iv1.join(iv2)
+    Join(iv1, iv2).get
 
 
 

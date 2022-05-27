@@ -159,9 +159,9 @@ given ConcreteConvertFloatDouble: ConvertFloatDouble[Float, Double] with
     }
 
 given ConcreteConvertFloatBytes: ConvertFloatBytes[Float, Seq[Byte]] with
-  override def apply(from: Float, conf: SomeCC[ByteOrder]): Seq[Byte] =
+  override def apply(from: Float, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =
     val buf = ByteBuffer.allocate(4)
-    buf.order(conf.t)
+    buf.order(conf.c2.t)
     buf.putFloat(0, from)
     collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 

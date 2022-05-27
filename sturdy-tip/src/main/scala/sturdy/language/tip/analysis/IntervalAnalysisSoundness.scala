@@ -22,14 +22,14 @@ object IntervalAnalysisSoundness:
     new AllocationContextAbstractly(calloc, fromAllocationSite)
 
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
-    override def abstractly(c: ConcreteInterpreter.Value): Value = c match
+    override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.abstractly(d))
+      case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.apply(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
-        case Some(ca) => Value.RefValue(Abstractly.abstractly(ca).map(AllocationSiteRef.Addr.apply))
+        case Some(ca) => Value.RefValue(Abstractly.apply(ca).map(AllocationSiteRef.Addr.apply))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
-      case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => abstractly(v)).toMap))
+      case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
 
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match

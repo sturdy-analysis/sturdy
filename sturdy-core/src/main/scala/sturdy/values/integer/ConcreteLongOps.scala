@@ -1,5 +1,8 @@
 package sturdy.values.integer
 
+import sturdy.data.JOptionC
+import sturdy.data.MayJoin.NoJoin
+
 import scala.util.Random
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
@@ -7,7 +10,7 @@ import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
+import sturdy.values.relational.{UnsignedOrderingOps, OrderingOps, EqOps}
 
 import java.lang.Float as JFloat
 import java.lang.Long as JLong
@@ -71,8 +74,19 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def rotateLeft(v: Long, shift: Long): Long = JLong.rotateLeft(v, shift.toInt)
   def rotateRight(v: Long, shift: Long): Long = JLong.rotateRight(v, shift.toInt)
   def countLeadingZeros(v: Long): Long = JLong.numberOfLeadingZeros(v)
-  def countTrailinZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
+  def countTrailingZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
+
+given ConcreteStrictLongOps: StrictIntegerOps[Long, Long, NoJoin] with
+  override def addStrict(v1: Long, v2: Long): JOptionC[Long] =
+    try JOptionC.Some(StrictMath.addExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def subStrict(v1: Long, v2: Long): JOptionC[Long] =
+    try JOptionC.Some(StrictMath.subtractExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def mulStrict(v1: Long, v2: Long): JOptionC[Long] =
+    try JOptionC.Some(StrictMath.multiplyExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
 
 given EqOps[Long, Boolean] with
   override def equ(v1: Long, v2: Long): Boolean = v1 == v2

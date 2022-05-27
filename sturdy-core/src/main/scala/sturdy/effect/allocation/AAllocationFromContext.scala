@@ -10,4 +10,4 @@ class AAllocationFromContext[Context, Addr](addr: Context => Addr) extends Alloc
 
 class AllocationContextAbstractly[Addr, Context](c: CAllocationIntIncrement[Context], addr: Context => Addr) extends Abstractly[Int, Addr]:
   private val addressContexts: IntMap[Context] = IntMap.from(c.getAddressContexts)
-  override def abstractly(caddr: Int): Addr = addr(addressContexts(caddr))
+  override def apply(caddr: Int): Addr = addr(addressContexts(caddr))

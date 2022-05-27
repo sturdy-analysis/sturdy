@@ -65,6 +65,7 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
 
   def max(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.max, v2)
   def min(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.min, v2)
+  def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
 
   def div(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.div, v2)
   def divUnsigned(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.divUnsigned, v2)
@@ -73,7 +74,6 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
   def modulo(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.modulo, v2)
   def gcd(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.gcd, v2)
 
-  def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
   def bitAnd(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitAnd, v2)
   def bitOr(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitOr, v2)
   def bitXor(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitXor, v2)
@@ -83,7 +83,7 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
   def rotateLeft(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.rotateLeft, shift)
   def rotateRight(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.rotateRight, shift)
   def countLeadingZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countLeadingZeros)
-  def countTrailinZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailinZeros)
+  def countTrailingZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailingZeros)
   def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
 
 given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[V]] with
