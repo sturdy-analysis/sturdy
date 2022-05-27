@@ -1,5 +1,6 @@
 package sturdy.values.convert
 
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.FailureKind
 
@@ -29,3 +30,10 @@ object Convert:
   def apply[From, To, V1, V2, Config <: ConvertConfig[_]]
     (from: V1, conf: Config)
     (using c: Convert[From, To, V1, V2, Config]): V2 = c(from, conf)
+
+inline def safeConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(using eff: EffectStack, f: Failure): A =
+  if (conf.canFail)
+    eff.joinWithFailure(res)(f.fail(ConversionFailure, s"Conversion can fail"))
+  else
+    res
+

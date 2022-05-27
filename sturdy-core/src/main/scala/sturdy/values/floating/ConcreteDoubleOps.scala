@@ -163,7 +163,7 @@ given ConcreteConvertDoubleBytes: ConvertDoubleBytes[Double, Seq[Byte]] with
     val buf = ByteBuffer.allocate(8)
     buf.order(conf.t)
     buf.putDouble(0, from)
-    buf.array().toSeq
+    collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesDouble: ConvertBytesDouble[Seq[Byte], Double] with
   override def apply(from: Seq[Byte], conf: SomeCC[ByteOrder]): Double =

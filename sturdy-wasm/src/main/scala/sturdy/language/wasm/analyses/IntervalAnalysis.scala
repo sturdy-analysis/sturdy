@@ -8,15 +8,16 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableConcreteSymbolTable}
-import sturdy.effect.{AnalysisState, EffectStack}
+import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
+import sturdy.effect.{EffectStack, AnalysisState}
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.values.booleans.{*, given}
+import sturdy.values.config.BytesSize
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
@@ -27,22 +28,22 @@ import sturdy.values.{config, *, given}
 import swam.FuncType
 import swam.syntax.*
 
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.{ByteOrder, ByteBuffer}
 import scala.collection.IndexedSeqView
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
   type Addr = I32
-  type Bytes = Seq[Topped[Byte]]
-  type Size = I32
+  type Bytes = Seq[NumericInterval[Byte]]
+  type Size = Topped[Int]
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
   given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
-    override def valToSize(v: Value): Size = v.asInt32
-    override def sizeToVal(sz: Size): Value = Value.Int32(sz)
+    override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
+    override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
@@ -112,6 +113,24 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       new TransitiveConvert(using summon[ConvertDoubleInt[F64, Topped[Int]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
     given ConvertDoubleLong[F64, I64] =
       new TransitiveConvert(using summon[ConvertDoubleLong[F64, Topped[Long]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
+    given ConvertFloatBytes[F32, Bytes] with
+      def apply(from: Topped[Float], conf: BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[Byte]] =
+        val bytes: Seq[Topped[Byte]] = Convert(from, conf)
+        bytes.map(Convert.apply(_, NilCC))
+    given ConvertBytesFloat[Bytes, F32] with
+      override def apply(from: Seq[NumericInterval[Byte]], conf: SomeCC[ByteOrder]): Topped[Float] = {
+        val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
+        Convert(bytes, conf)
+      }
+    given ConvertDoubleBytes[F64, Bytes] with
+      def apply(from: Topped[Double], conf: BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[Byte]] =
+        val bytes: Seq[Topped[Byte]] = Convert(from, conf)
+        bytes.map(Convert.apply(_, NilCC))
+    given ConvertBytesDouble[Bytes, F64] with
+      override def apply(from: Seq[NumericInterval[Byte]], conf: SomeCC[ByteOrder]): Topped[Double] = {
+        val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
+        Convert(bytes, conf)
+      }
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 

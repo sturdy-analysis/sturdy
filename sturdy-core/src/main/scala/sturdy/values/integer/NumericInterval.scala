@@ -3,9 +3,11 @@ package sturdy.values.integer
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
+import sturdy.values.convert.&&
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 
+import java.nio.ByteOrder
 import scala.collection.immutable.TreeSet
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
@@ -18,12 +20,20 @@ object NumericInterval:
       NumericInterval.Bounded(l, h)
     else
       NumericInterval.Top()
-
+  def fromBounds[I](b1: I, b2: I)(using Ordering[I]): NumericInterval[I] =
+    if (b1 <= b2)
+      NumericInterval.Bounded(b1, b2)
+    else
+      NumericInterval.Bounded(b2, b1)
 
 
 enum NumericInterval[I]:
   case Top()
   case Bounded(low: I, high: I)
+
+  def isTop: Boolean = this match
+    case Top() => true
+    case _ => false
 
   def join(other: NumericInterval[I])(using Ordering[I]): NumericInterval[I] = (this, other) match
     case (Top(), _) => this
@@ -198,19 +208,61 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
       else Topped.Top
 
 given ConvertNumericIntervals[From, To, I1, I2, Config <: ConvertConfig[_]]
-  (using convert: Convert[From, To, I1, I2, Config])
+  (using convert: Convert[From, To, I1, I2, Config])(using Failure, EffectStack)
   : Convert[From, To, NumericInterval[I1], NumericInterval[I2], Config] with
 
   def apply(i: NumericInterval[I1], conf: Config): NumericInterval[I2] = i match
-    case NumericInterval.Top() => NumericInterval.Top()
+    case NumericInterval.Top() => safeConversion(conf, NumericInterval.Top())
     case NumericInterval.Bounded(l, h) => NumericInterval.Bounded(convert(l, conf), convert(h, conf))
 
-given ConvertNumericIntervalToConstant[T, I]: Convert[T, T, NumericInterval[I], Topped[I], NilCC.type] with
+given ConvertNumericIntervalToConstant[From, To, I]: Convert[From, To, NumericInterval[I], Topped[I], NilCC.type] with
   def apply(i: NumericInterval[I], conf: NilCC.type): Topped[I] = i match
     case NumericInterval.Top() => Topped.Top
     case NumericInterval.Bounded(l, h) => if (l == h) Topped.Actual(l) else Topped.Top
 
-given ConvertConstantToNumericInterval[T, I]: Convert[T, T, Topped[I], NumericInterval[I], NilCC.type] with
+given ConvertConstantToNumericInterval[From, To, I]: Convert[From, To, Topped[I], NumericInterval[I], NilCC.type] with
   def apply(i: Topped[I], conf: NilCC.type): NumericInterval[I] = i match
     case Topped.Top => NumericInterval.Top()
     case Topped.Actual(l) => NumericInterval.Bounded(l, l)
+
+given ConvertNumericIntervalToBytes[From, To, I, B, Config <: ConvertConfig[_]]
+  (using convert: Convert[From, To, I, Seq[B], config.BytesSize && Config])
+  (using Failure, EffectStack, Ordering[B])
+  : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && Config] with
+  def apply(i: NumericInterval[I], conf: config.BytesSize && Config): Seq[NumericInterval[B]] = i match
+    case NumericInterval.Top() =>
+      val bytes = Seq.fill(conf._1.bytes)(NumericInterval.Top[B]())
+      safeConversion(conf, bytes)
+    case NumericInterval.Bounded(l, h) =>
+      val lowBytes = convert(l, conf)
+      val highBytes = convert(h, conf)
+      lowBytes.zip(highBytes).map(NumericInterval.fromBounds)
+
+given ConvertBytesToNumericInterval[From, To, I, B]
+  (using convert: Convert[From, To, Seq[B], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
+  (using Failure, EffectStack, Ordering[I])
+  : Convert[From, To, Seq[NumericInterval[B]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+  def apply(bytes: Seq[NumericInterval[B]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
+    val boundedBytes: Seq[NumericInterval.Bounded[B]] = bytes.map {
+      case NumericInterval.Top() => return NumericInterval.Top()
+      case b@NumericInterval.Bounded(_, _) => b
+    }
+    val (msb, bigEndianRest) =
+      if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) {
+        (boundedBytes.head, boundedBytes.tail)
+      } else {
+        val rev = boundedBytes.reverse
+        (rev.head, rev.tail)
+      }
+    val l1 = Convert(msb.low +: bigEndianRest.map(_.low), conf)
+    val h1 = Convert(msb.high +: bigEndianRest.map(_.high), conf)
+    val iv1 = NumericInterval.fromBounds(l1, h1)
+
+    val l2 = Convert(msb.low +: bigEndianRest.map(_.high), conf)
+    val h2 = Convert(msb.high +: bigEndianRest.map(_.low), conf)
+    val iv2 = NumericInterval.fromBounds(l2, h2)
+
+    iv1.join(iv2)
+
+
+

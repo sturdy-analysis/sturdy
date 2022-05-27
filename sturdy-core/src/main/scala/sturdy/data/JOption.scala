@@ -96,12 +96,14 @@ object JOptionA:
     case scala.Some(a) => JOptionA.Some(a)
     case scala.None => JOptionA.None()
 
-given CombineJoinA[A, W <: Widening](using Combine[A, W]): Combine[JOptionA[A], W] with
+given CombineJOptionA[A, W <: Widening] (using Combine[A, W]): Combine[JOptionA[A], W] with
   def apply(v1: JOptionA[A], v2: JOptionA[A]): MaybeChanged[JOptionA[A]] = (v1, v2) match
     case (JOptionA.None(), JOptionA.None()) => MaybeChanged.Unchanged(JOptionA.None())
-    case (JOptionA.None(), _) => MaybeChanged.Changed(v2)
-    case (_, JOptionA.None()) => MaybeChanged.Unchanged(v1)
     case (JOptionA.Some(a1), JOptionA.Some(a2)) => Combine[A, W](a1, a2).map(JOptionA.Some.apply)
+    case (JOptionA.None(), JOptionA.NoneSome(_)) => MaybeChanged.Changed(v2)
+    case (JOptionA.None(), JOptionA.Some(a2)) => MaybeChanged.Changed(JOptionA.NoneSome(a2))
+    case (JOptionA.NoneSome(_), JOptionA.None()) => MaybeChanged.Unchanged(v1)
+    case (JOptionA.Some(a1), JOptionA.None()) => MaybeChanged.Changed(JOptionA.NoneSome(a1))
     case (JOptionA.Some(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
     case (JOptionA.NoneSome(a1), JOptionA.Some(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
     case (JOptionA.NoneSome(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)

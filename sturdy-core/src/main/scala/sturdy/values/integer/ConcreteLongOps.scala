@@ -127,7 +127,7 @@ given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
       case config.BytesSize.Short => buf.putShort(0, (from % (1L << 16)).toShort)
       case config.BytesSize.Int => buf.putInt(0, (from % (1L << 32)).toInt)
       case config.BytesSize.Long => buf.putLong(0, from)
-    buf.array().toSeq
+    collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Long =

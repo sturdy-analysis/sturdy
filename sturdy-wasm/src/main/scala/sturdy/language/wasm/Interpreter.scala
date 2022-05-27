@@ -232,8 +232,8 @@ trait Interpreter:
         case (Value.Int64(l), _: i64.Store16) => encodeI64(l, config.BytesSize.Short && LITTLE_ENDIAN)
         case (Value.Int64(l), _: i64.Store32) => encodeI64(l, config.BytesSize.Int && LITTLE_ENDIAN)
         case (Value.Int64(l), _: i64.Store) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
-        case (Value.Float32(f), _: f32.Store) => encodeF32(f, LITTLE_ENDIAN)
-        case (Value.Float64(d), _: f64.Store) => encodeF64(d, LITTLE_ENDIAN)
+        case (Value.Float32(f), _: f32.Store) => encodeF32(f, config.BytesSize.Float && LITTLE_ENDIAN)
+        case (Value.Float64(d), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
         case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
     override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst]]:

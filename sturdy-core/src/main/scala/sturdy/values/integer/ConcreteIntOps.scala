@@ -121,7 +121,7 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
       case config.BytesSize.Short => buf.putShort(0, (from % (1 << 16)).toShort)
       case config.BytesSize.Int => buf.putInt(0, from)
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-    buf.array().toSeq
+    collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
