@@ -1,4 +1,4 @@
-package sturdy.language.wasm.wasmbench
+ package sturdy.language.wasm.wasmbench
 
 
 import org.scalatest.flatspec.AnyFlatSpec
@@ -44,7 +44,7 @@ class WASMBench extends AnyFlatSpec:
   }
     
   // adjust argument accordingly
-  printBinariesFromJacarteInResult(saveResultsToDir.resolve("Constant.topmost-calls(1).results.csv"))
+//  printBinariesFromJacarteInResult(saveResultsToDir.resolve("Constant.topmost-calls(1).results.csv"))
 
 
 //  val mdPath: Path = rootDir.resolve(s"metadata.$filtering.json")
@@ -53,7 +53,7 @@ class WASMBench extends AnyFlatSpec:
   
   
 //  extractFuncDefsScript()
-//  metadataScripts()
+  metadataScripts()
 
   def printBinariesFromJacarteInResult(pathToResultCSV: Path) = {
     // Procedure to query metadata and results
@@ -212,10 +212,26 @@ class WASMBench extends AnyFlatSpec:
       })
     }
 
+    val repoHistogram = {
+      store.wbbs.values.foldLeft(mutable.HashMap.empty[String, Int])((acc, el) => {
+        val file = el.md.files.head
+        val repoRegex = "(?<=wasm-study/github/clone/repos/).+?/.+?(?=/)".r
+        if (file.collectionMethod == "github") then
+          val key = repoRegex
+            .findFirstIn(file.absolutePath)
+            .get
+          acc.get(key) match
+            case Some(n) => acc.update(key, n+1)
+            case None => acc.put(key,1)
+        acc
+      })
+    }
+
     println(store.wbbs.size)
     println(exportHistogram.toSeq.sortWith((x,y) => x._2 > y._2).take(50))
     println(s"Bytes: ${sizeBytesHistogram.toSeq.sortWith((x,y) => x._2 > y._2)}")
     println(s"Instructions: ${instructionCountHistogram.toSeq.sortWith((x,y) => x._2 > y._2)}")
+    println(s"Repos: ${repoHistogram.toSeq.sortWith((x,y) => x._2 > y._2)}")
 
   def filterWasmBenchMd(json: JObject): JValue =
     import org.json4s.JsonDSL.*

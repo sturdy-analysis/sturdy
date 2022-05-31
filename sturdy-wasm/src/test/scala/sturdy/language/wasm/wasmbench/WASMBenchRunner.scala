@@ -10,6 +10,7 @@ import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantTaintAnalysis, FixpointConfig, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.wasmbench.WASMBenchRunner.runnerConfig
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.util.concurrent.{ExecutionException, TimeoutException}
@@ -48,6 +49,7 @@ type RunnerConfig = RRecord{
   val skipTestsIncludingIndex: Int
   val saveResultsToDir: Path
   val onlyBinariesInCSV: Option[Path]
+  val funcName: String
 }
 
 object WASMBenchRunner:
@@ -67,27 +69,28 @@ object WASMBenchRunner:
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
-    "saveResultsToDir" -> Path.of("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/"),
-    "onlyBinariesInCSV" -> None//Some(Paths.get("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/onlyBinariesInCSV.csv"))
+    "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results"),
+    "onlyBinariesInCSV" -> None, //Some(Paths.get("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/onlyBinariesInCSV.csv"))
+    "funcName" -> "main"
   ).asInstanceOf[RunnerConfig]
 
 class WASMBenchRunner extends AnyFunSpec:
   
   import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption,
-    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir, onlyBinariesInCSV}
+    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir, onlyBinariesInCSV, funcName}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
     val exPath = rootDir.resolve(s"sturdy.funcdefs.$filtering.json")
     new JSONStore(mdPath, exPath)
   }
-
-  describe(s"Running $analysis on every binary exposing a \"_start\" function " +
+  println(funcName)
+  describe(s"Running $analysis on every binary exposing a \"$funcName\" function " +
     s"in the $filtering WasmBench dataset") {
 
     val pred = (x: WASMBenchBinary) =>
       x.ex.exists {
-        case FuncDef(_, _, Some("_start")) => true
+        case FuncDef(_, _, Some(x)) if x == funcName => true
         case _ => false
       }
 
@@ -151,7 +154,7 @@ class WASMBenchRunner extends AnyFunSpec:
 
             val t = new Thread(an(v => {
               result = v
-            }, p, "_start", cfg, true))
+            }, p, funcName, cfg, true))
 
             t.start()
             t.join(timeLimit.toMillis)
@@ -182,7 +185,7 @@ class WASMBenchRunner extends AnyFunSpec:
 
           var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
-          val t = new Thread(an(v => {result = v}, p, "_start", cfg, true))
+          val t = new Thread(an(v => {result = v}, p, funcName, cfg, true))
 
           t.start()
           t.join(timeLimit.toMillis)
