@@ -54,26 +54,52 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     Join(triedF, triedG).get.getOrThrow
   }
 
-  final def mapJoin[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match
+  final def joinFold[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match
     case 0 => throw new IllegalArgumentException
     case 1 => f(as.head)
     case 2 =>
-      val List(a0, a1) = as.toList
+      val Seq(a0, a1) = as.toSeq
       joinComputations(f(a0))(f(a1))
     case 3 =>
-      val List(a0, a1, a2) = as.toList
+      val Seq(a0, a1, a2) = as.toSeq
       joinComputations(joinComputations(f(a0))(f(a1)))(f(a2))
     case 4 =>
-      val List(a0, a1, a2, a3) = as.toList
+      val Seq(a0, a1, a2, a3) = as.toSeq
       joinComputations(joinComputations(joinComputations(f(a0))(f(a1)))(f(a2)))(f(a3))
     case _ =>
-      mapJoinIt(as.iterator, f)
+      joinFoldIt(as.iterator, f)
 
-  private final def mapJoinIt[A, B](as: Iterator[A], f: A => B): Join[B] ?=> B =
+  private final def joinFoldIt[A, B](as: Iterator[A], f: A => B): Join[B] ?=> B =
     val a = as.next()
     if (as.isEmpty)
       f(a)
     else {
-      joinComputations(f(a))(mapJoinIt(as, f))
+      joinComputations(f(a))(joinFoldIt(as, f))
     }
 
+object EffectStack:
+  def localEffect(eff: Effectful): EffectStack =
+    new EffectStack(List(eff))
+
+  def pureJoinFold[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match
+    case 0 => throw new IllegalArgumentException
+    case 1 => f(as.head)
+    case 2 =>
+      val Seq(a0, a1) = as.toSeq
+      Join(f(a0), f(a1)).get
+    case 3 =>
+      val Seq(a0, a1, a2) = as.toSeq
+      Join(Join(f(a0), f(a1)).get, f(a2)).get
+    case 4 =>
+      val Seq(a0, a1, a2, a3) = as.toSeq
+      Join(Join(Join(f(a0), f(a1)).get, f(a2)).get, f(a3)).get
+    case _ =>
+      pureJoinFoldIt(as.iterator, f)
+
+  final def pureJoinFoldIt[A, B](as: Iterator[A], f: A => B): Join[B] ?=> B =
+    val a = as.next()
+    if (as.isEmpty)
+      f(a)
+    else {
+      Join(f(a), pureJoinFoldIt(as, f)).get
+    }

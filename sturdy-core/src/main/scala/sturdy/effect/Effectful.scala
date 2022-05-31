@@ -14,6 +14,8 @@ trait Effectful extends ObservableJoin:
   
   def getComputationJoiner[A]: Option[ComputationJoiner[A]] = None
 
+
+
 trait Stateless extends Effectful:
   type State = Unit
   def getState: State = {}
