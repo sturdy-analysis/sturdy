@@ -43,19 +43,22 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.toString.contains("") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
-    it must s"soundly analyze ${p.getFileName}" in {
-      runIntervalAnalysis(p, 10)
+    it must s"soundly analyze ${p.getFileName} with stacked states" in {
+      runIntervalAnalysis(p, false)
+    }
+    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+      runIntervalAnalysis(p, true)
     }
   }
 
-  def runIntervalAnalysis(p: Path, steps: Int) =
+  def runIntervalAnalysis(p: Path, stackedFrames: Boolean) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), 0)
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackedFrames, 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -82,7 +85,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
 object RunIntervalAnalysis extends App {
   val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI;
-  val (res, analysis) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), 10)
+  val (res, analysis) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), true)
   println(res)
   println(analysis.callFrame.getState)
   println(analysis.store.getState)

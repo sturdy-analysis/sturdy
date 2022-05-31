@@ -34,15 +34,15 @@ object IntervalAnalysisSoundness:
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (_, Value.TopValue) => true
-      case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[IntInterval].lteq(i1, i2)
+      case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[VInt].lteq(i1, i2)
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[VRef].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 
-  given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis.UnfixedInstance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis.UnfixedInstance): IsSound = {
+  given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis.Instance): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.alloc
 
       // concrete environment is sound by construction

@@ -13,11 +13,12 @@ import sturdy.effect.callframe.DecidableCallFrame
 import sturdy.effect.except.ObservableExcept
 import sturdy.effect.store.Store
 import sturdy.fix.cfg.ControlFlowGraph
+import sturdy.fix.context.CallSiteLogger
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.analysis.SignAnalysis.Parameters
-import sturdy.values.{Finite, Widen, Join}
+import sturdy.values.{Widen, Finite, Join}
 
 def isFunOrWhile(dom: FixIn): Int = dom match
   case FixIn.EnterFunction(_) => 0
@@ -26,7 +27,7 @@ def isFunOrWhile(dom: FixIn): Int = dom match
 
 trait Fix extends Interpreter:
 
-  final def callSitesLogger() = context.callSites[FixIn, Exp.Call] {
+  final def callSitesLogger(): CallSiteLogger[FixIn, Exp.Call] = context.callSites[FixIn, Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
@@ -42,18 +43,6 @@ trait Fix extends Interpreter:
   given Finite[Parameters] with {}
 
 
-
-  def topmost[Ctx, In, Out, All]
-    (using AnalysisState[FixIn, In, Out, All])
-    (using Widen[Value], Widen[In], Widen[Out], Join[Out], Finite[Ctx], EffectStack)
-    : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
-    = filter(isFunOrWhile(_) >= 0, iter.topmost)
-
-  def innermost[Ctx, In, Out, All]
-    (using AnalysisState[FixIn, In, Out, All])
-    (using Widen[Value], Widen[In], Widen[Out], Join[Out], Finite[Ctx], EffectStack)
-    : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
-    = filter(isFunOrWhile(_) >= 0, iter.innermost)
 
   def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]])
                                       (using AnalysisState[FixIn, In, Out, All])

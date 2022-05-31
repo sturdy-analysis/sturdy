@@ -168,8 +168,6 @@ given SignOrderingOps: OrderingOps[FloatSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Topped.Actual(false)
     case (Pos, Zero) => Topped.Actual(false)
     case _ => Topped.Top
-  def ge(v1: FloatSign, v2: FloatSign): Topped[Boolean] = lt(v2, v1)
-  def gt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = le(v2, v1)
 
 given SignEqOps: EqOps[FloatSign, Topped[Boolean]] with
   def equ(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match

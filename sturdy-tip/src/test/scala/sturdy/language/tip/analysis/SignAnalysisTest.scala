@@ -16,7 +16,7 @@ import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.given
 import sturdy.effect.print.APrintPrefix
-import sturdy.fix.{Fixpoint, Stack}
+import sturdy.fix.{Fixpoint, StackedFrames}
 import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labeled
 import sturdy.{*, given}
@@ -46,19 +46,22 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
     !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
-    it must s"soundly analyze ${p.getFileName}" in {
-      runSignAnalysis(p, 0)
+    it must s"soundly analyze ${p.getFileName} with stacked states" in {
+      runSignAnalysis(p, false)
+    }
+    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+      runSignAnalysis(p, true)
     }
   }
 
-  def runSignAnalysis(p: Path, steps: Int) =
+  def runSignAnalysis(p: Path, stackedFrames: Boolean) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map())
+      val analysis = new SignAnalysis.Instance(Map(), Map(), stackedFrames)
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -80,7 +83,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 object RunSignAnalysis extends App {
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI;
-  val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
+  val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), true)
   println(res)
   println(analysis.callFrame.getState)
   println(analysis.store.getState)

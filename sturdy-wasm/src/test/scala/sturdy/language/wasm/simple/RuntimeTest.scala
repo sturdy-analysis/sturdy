@@ -42,7 +42,7 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
     it must s"execute $funcName with constant analysis returning exit code $exitCode" in {
-      val res = runConstantAnalysis(path, funcName, args)
+      val res = runConstantAnalysis(path, funcName, args, true)
       //println(res)
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $ProcExit but execution succeeded: $vals")

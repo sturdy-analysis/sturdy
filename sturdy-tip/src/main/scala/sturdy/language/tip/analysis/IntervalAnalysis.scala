@@ -16,7 +16,7 @@ import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix.given
+import sturdy.fix
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -36,7 +36,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  abstract class UnfixedInstance(initEnvironment: Environment, initStore: Store) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackedFrames: Boolean, callSites: Int) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: AFailureCollect = new AFailureCollect
@@ -55,10 +55,10 @@ object IntervalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: APrintPrefix[Value] = new APrintPrefix
-    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntInterval.Top))
+    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval.top))
 
     var bounds: Set[Int] = Set()
-    given Widen[IntInterval] = new IntIntervalWiden(bounds)
+    given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
@@ -67,20 +67,13 @@ object IntervalAnalysis extends Interpreter,
 
     override def copyState(from: Executor): Unit = {
       super.copyState(from)
-      bounds = from.asInstanceOf[UnfixedInstance].bounds
+      bounds = from.asInstanceOf[Instance].bounds
     }
 
-
-  class Instance(initEnvironment: Environment, initStore: Store, callSites: Int) extends UnfixedInstance(initEnvironment, initStore):
     final override val fixpoint =
       callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
-        fix.iter.innermost, fix.iter.innermost))
+        fix.iter.innermost(stackedFrames), fix.iter.innermost(stackedFrames)))
       ).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, callSites)
 
-  class KeidelInstance(initEnvironment: Environment, initStore: Store) extends UnfixedInstance(initEnvironment, initStore):
-    final override val fixpoint = new fix.KeidelFixpoint(
-      isFunOrWhile, Seq(fix.iter.Config.Innermost, fix.iter.Config.Innermost),
-      new fix.InsensitiveStack[FixIn, InState]()
-    )
-    override def newInstance: sturdy.Executor = new KeidelInstance(initEnvironment, initStore)
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackedFrames, callSites)
+

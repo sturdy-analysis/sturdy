@@ -31,7 +31,7 @@ class SignInterpreter extends GenericInterpreter[Sign, WithJoin]:
     // we need to configure the context insensitive fixpoint algorithm by providing a fixpoint combinator
     // we choose to apply the topmost iteration strategy to while loop statements (all other statements can't diverge)
     override protected def contextInsensitive: fix.Contextual[Unit, FixIn, FixOut[Sign]] ?=> fix.Combinator[FixIn, FixOut[Sign]] =
-      fix.filter(isLoop, fix.iter.topmost)
+      fix.filter(isLoop, fix.iter.topmost())
 
     private def isLoop(dom: FixIn): Boolean = dom match
       case FixIn.Run(Stm.While(_,_)) => true

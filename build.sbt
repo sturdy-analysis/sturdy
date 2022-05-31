@@ -22,7 +22,7 @@ lazy val root = (project in file("."))
 
 lazy val sturdy_core = (project in file("sturdy-core"))
   .settings(
-    name := "sturdy-core",
+    name := "sturdy_core",
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
       "org.eclipse.collections" % "eclipse-collections" % "11.0.0",
@@ -32,9 +32,9 @@ lazy val sturdy_core = (project in file("sturdy-core"))
   )
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .dependsOn(sturdy_core % "compile->compile")
   .settings(
-    name := "sturdy-tip",
+    name := "sturdy_tip",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
       "org.typelevel" %% "cats-core" % "2.6.1",
@@ -46,7 +46,7 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
 lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
-    name := "sturdy-pcf",
+    name := "sturdy_pcf",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
       "org.typelevel" %% "cats-core" % "2.6.1",
@@ -63,7 +63,7 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
   .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
   .settings(
-    name := "sturdy-wasm",
+    name := "sturdy_wasm",
     libraryDependencies ++= Seq(
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
@@ -80,7 +80,7 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
 lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
-    name := "sturdy-tutorial",
+    name := "sturdy_tutorial",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
       "org.typelevel" %% "cats-core" % "2.6.1",

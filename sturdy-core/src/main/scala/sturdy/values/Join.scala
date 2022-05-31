@@ -25,6 +25,9 @@ enum MaybeChanged[A]:
     case Changed(a) => f(a)
     case Unchanged(_) => // nothing
 
+  def toOption: Option[A] = this match
+    case Changed(a) => Some(a)
+    case Unchanged(_) => None
 
 object MaybeChanged:
   inline def apply[A](a: A, hasChanged: Boolean): MaybeChanged[A] =

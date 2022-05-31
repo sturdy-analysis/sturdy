@@ -49,8 +49,6 @@ given EqOps[Float, Boolean] with
 given OrderingOps[Float, Boolean] with
   def lt(v1: Float, v2: Float): Boolean = v1 < v2
   def le(v1: Float, v2: Float): Boolean = v1 <= v2
-  def ge(v1: Float, v2: Float): Boolean = v1 >= v2
-  def gt(v1: Float, v2: Float): Boolean = v1 > v2
 
 given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] with
   /*

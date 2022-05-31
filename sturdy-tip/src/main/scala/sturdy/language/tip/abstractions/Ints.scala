@@ -3,27 +3,27 @@ package sturdy.language.tip.abstractions
 import sturdy.effect.failure.Failure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
-import sturdy.values.integer.{IntInterval, IntSign, given}
+import sturdy.values.integer.{NumericInterval, IntSign, given}
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.GenericInterpreter.TypeError
 
 object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
-    final type VInt = IntInterval
+    final type VInt = NumericInterval[Int]
 
-    final def topInt: IntInterval = IntInterval.Top
+    final def topInt: NumericInterval[Int] = NumericInterval.top
     final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using failure: Failure): VBool = v match
-      case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
+      case Value.IntValue(i) => i.isZero.map(!_)
       case Value.TopValue => Topped.Top
       case _ => failure(TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => IntInterval(0, 1)
-      case Topped.Actual(true) => IntInterval(1, 1)
-      case Topped.Actual(false) => IntInterval(0, 0)
+      case Topped.Top => NumericInterval(0, 1)
+      case Topped.Actual(true) => NumericInterval(1, 1)
+      case Topped.Actual(false) => NumericInterval(0, 0)
     )
 
   trait Sign extends Interpreter :
