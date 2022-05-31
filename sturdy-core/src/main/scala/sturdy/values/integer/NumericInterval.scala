@@ -286,44 +286,51 @@ given ConvertNumericIntervalToBytes[From, To, I, B, Config <: ConvertConfig[_]]
   (using convert: Convert[From, To, I, Seq[B], config.BytesSize && Config])
   (using Failure, EffectStack, Ordering[B])
   : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && Config] with
-  def apply(i: NumericInterval[I], conf: config.BytesSize && Config): Seq[NumericInterval[B]] = i match
-    case NumericInterval.Top() =>
-      val bytes = Seq.fill(conf._1.bytes)(NumericInterval.Top[B]())
-      safeConversion(conf, bytes)
-    case NumericInterval.Bounded(l, h) =>
-      val lowBytes = convert(l, conf)
-      val highBytes = convert(h, conf)
-      val bytes = lowBytes.zip(highBytes).map(NumericInterval.fromBounds)
-      bytes
+  def apply(i: NumericInterval[I], conf: config.BytesSize && Config): Seq[NumericInterval[B]] =
+    encode(i, conf)
 
 given ConvertBytesToNumericInterval[From, To, I, B]
   (using convert: Convert[From, To, Seq[B], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
   (using Failure, EffectStack, Ordering[I])
   : Convert[From, To, Seq[NumericInterval[B]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
   def apply(bytes: Seq[NumericInterval[B]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
-    val boundedBytes: Seq[NumericInterval.Bounded[B]] = bytes.map {
-      case NumericInterval.Top() => return NumericInterval.Top()
-      case b@NumericInterval.Bounded(_, _) => b
+    decode(bytes, conf)
+
+def encode[From, To, I, B, Config <: ConvertConfig[_]](i: NumericInterval[I], conf: config.BytesSize && Config)(using convert: Convert[From, To, I, Seq[B], config.BytesSize && Config])
+          (using Failure, EffectStack, Ordering[B]): Seq[NumericInterval[B]] = i match
+  case NumericInterval.Top() =>
+    val bytes = Seq.fill(conf._1.bytes)(NumericInterval.Top[B]())
+    safeConversion(conf, bytes)
+  case NumericInterval.Bounded(l, h) =>
+    val lowBytes = convert(l, conf)
+    val highBytes = convert(h, conf)
+    val value = lowBytes.zip(highBytes)
+    val bytes = value.map(NumericInterval.fromBounds)
+    bytes
+
+def decode[B, I, From, To](bytes: Seq[NumericInterval[B]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits)(using convert: Convert[From, To, Seq[B], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
+                (using Failure, EffectStack, Ordering[I]): NumericInterval[I] =
+  val boundedBytes: Seq[NumericInterval.Bounded[B]] = bytes.map {
+    case NumericInterval.Top() => return NumericInterval.Top()
+    case b@NumericInterval.Bounded(_, _) => b
+  }
+  val (msb, bigEndianRest) =
+    if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) {
+      (boundedBytes.head, boundedBytes.tail)
+    } else {
+      val rev = boundedBytes.reverse
+      (rev.head, rev.tail)
     }
-    val (msb, bigEndianRest) =
-      if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) {
-        (boundedBytes.head, boundedBytes.tail)
-      } else {
-        val rev = boundedBytes.reverse
-        (rev.head, rev.tail)
-      }
 
-    val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
+  val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
 
-    val l1 = Convert(msb.low +: bigEndianRest.map(_.low), bigEndianConf)
-    val h1 = Convert(msb.high +: bigEndianRest.map(_.high), bigEndianConf)
-    val iv1 = NumericInterval.fromBounds(l1, h1)
+  val l1 = Convert(msb.low +: bigEndianRest.map(_.low), bigEndianConf)
+  val h1 = Convert(msb.high +: bigEndianRest.map(_.high), bigEndianConf)
+  val iv1 = NumericInterval.fromBounds(l1, h1)
 
-    val l2 = Convert(msb.low +: bigEndianRest.map(_.high), bigEndianConf)
-    val h2 = Convert(msb.high +: bigEndianRest.map(_.low), bigEndianConf)
-    val iv2 = NumericInterval.fromBounds(l2, h2)
+  val l2 = Convert(msb.low +: bigEndianRest.map(_.high), bigEndianConf)
+  val h2 = Convert(msb.high +: bigEndianRest.map(_.low), bigEndianConf)
+  val iv2 = NumericInterval.fromBounds(l2, h2)
 
-    Join(iv1, iv2).get
-
-
+  Join(iv1, iv2).get
 

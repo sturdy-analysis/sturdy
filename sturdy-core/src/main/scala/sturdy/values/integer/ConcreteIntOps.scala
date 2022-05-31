@@ -140,15 +140,18 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
 
 given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
-    val buf = ByteBuffer.wrap(from.toArray)
-    buf.order(conf.c1.c2.t)
-    (conf.c1.c1, conf.c2) match
-      case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toInt
-      case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFF
-      case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt
-      case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
-      case (config.BytesSize.Int, _) => buf.getInt
-      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    decode(from, conf)
+
+def decode(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
+   val buf = ByteBuffer.wrap(from.toArray)
+   buf.order(conf.c1.c2.t)
+   (conf.c1.c1, conf.c2) match
+     case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toInt
+     case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFF
+     case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt
+     case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
+     case (config.BytesSize.Int, _) => buf.getInt
+     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteIntUnsignedOrderingOps: UnsignedOrderingOps[Int, Boolean] with
   override def ltUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) < 0

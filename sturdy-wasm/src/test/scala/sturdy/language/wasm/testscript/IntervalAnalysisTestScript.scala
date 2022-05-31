@@ -59,13 +59,13 @@ class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
     )
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("linking.wast")).sorted.foreach { p =>
     for (aInterp <- analyses) {
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript constant analysis on ${p.getFileName}")
         val script = Parsing.testscript(p)
-        val interp = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp())
-        interp.run(script)
+//        val interp = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp())
+//        interp.run(script)
         val interpTop = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
         interpTop.run(script)
       }
@@ -124,6 +124,7 @@ class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
     case Some(name) => aModules(name)
 
   def eval(c: Command): Unit =
+    println(c)
     c match
     case ValidModule(m) =>
       // validate and compile module
