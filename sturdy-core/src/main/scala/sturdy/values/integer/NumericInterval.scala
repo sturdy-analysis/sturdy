@@ -1,17 +1,18 @@
 package sturdy.values.integer
 
-import sturdy.data.{NoJoin, noJoin, joinComputations, given}
+import sturdy.data.{NoJoin, joinComputations, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 
-import java.nio.ByteOrder
+import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.immutable.TreeSet
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
+import scala.collection.mutable.ListBuffer
 
 object NumericInterval:
   def top[I]: NumericInterval[I] = NumericInterval.Top()
@@ -282,48 +283,65 @@ given ConvertConstantToNumericInterval[From, To, I]: Convert[From, To, Topped[I]
     case Topped.Top => NumericInterval.Top()
     case Topped.Actual(l) => NumericInterval.Bounded(l, l)
 
-given ConvertNumericIntervalToBytes[From, To, I, B, Config <: ConvertConfig[_]]
-  (using convert: Convert[From, To, I, Seq[B], config.BytesSize && Config])
+given ConvertNumericIntervalToBytes[From, To, I, B]
+  (using convert: Convert[From, To, I, Seq[B], config.BytesSize && SomeCC[ByteOrder]])
   (using Failure, EffectStack, Ordering[B])
-  : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && Config] with
-  def apply(i: NumericInterval[I], conf: config.BytesSize && Config): Seq[NumericInterval[B]] = i match
+  : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && SomeCC[ByteOrder]] with
+  def apply(i: NumericInterval[I], conf: config.BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[B]] = i match
     case NumericInterval.Top() =>
       val bytes = Seq.fill(conf._1.bytes)(NumericInterval.Top[B]())
       safeConversion(conf, bytes)
     case NumericInterval.Bounded(l, h) =>
-      val lowBytes = convert(l, conf)
-      val highBytes = convert(h, conf)
-      val bytes = lowBytes.zip(highBytes).map(NumericInterval.fromBounds)
-      bytes
+      val bigEndianConf = conf.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false)
+      val lowBytes = convert(l, bigEndianConf)
+      val highBytes = convert(h, bigEndianConf)
 
-given ConvertBytesToNumericInterval[From, To, I, B]
-  (using convert: Convert[From, To, Seq[B], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
-  (using Failure, EffectStack, Ordering[I])
-  : Convert[From, To, Seq[NumericInterval[B]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
-  def apply(bytes: Seq[NumericInterval[B]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
-    val boundedBytes: Seq[NumericInterval.Bounded[B]] = bytes.map {
-      case NumericInterval.Top() => return NumericInterval.Top()
-      case b@NumericInterval.Bounded(_, _) => b
-    }
-    val (msb, bigEndianRest) =
-      if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) {
-        (boundedBytes.head, boundedBytes.tail)
-      } else {
-        val rev = boundedBytes.reverse
-        (rev.head, rev.tail)
+      val byteIntervals = new ListBuffer[NumericInterval[B]]
+      var equalPrefix = true
+      lowBytes.zip(highBytes).foreach { case (lowByte, highByte) =>
+        if (equalPrefix) {
+          if (lowByte == highByte)
+            byteIntervals += NumericInterval.constant(lowByte)
+          else {
+            equalPrefix = false
+            if (lowByte <= highByte)
+              byteIntervals += NumericInterval.Bounded(lowByte, highByte)
+            else
+              throw new IllegalStateException(s"lowByte ($lowByte) > highByte ($highByte), but should have been smaller")
+          }
+        } else {
+          byteIntervals += NumericInterval.Top()
+        }
       }
+      if (conf.c2.t == ByteOrder.BIG_ENDIAN)
+        byteIntervals.toSeq
+      else
+        byteIntervals.view.reverse.toSeq
+
+
+given ConvertBytesToNumericInterval[From, To, I]
+  (using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits])
+  (using Failure, EffectStack, Ordering[I])
+  : Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+  def apply(bytes: Seq[NumericInterval[Byte]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
+
+    val lowBytes = new ListBuffer[Byte]
+    val highBytes = new ListBuffer[Byte]
+
+    val byteIntervals = if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) bytes else bytes.reverse
+    byteIntervals.foreach {
+      case NumericInterval.Bounded(lowByte, highByte) =>
+        lowBytes += lowByte
+        highBytes += highByte
+      case NumericInterval.Top() =>
+        lowBytes += Byte.MinValue
+        highBytes += Byte.MaxValue
+    }
 
     val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
-
-    val l1 = Convert(msb.low +: bigEndianRest.map(_.low), bigEndianConf)
-    val h1 = Convert(msb.high +: bigEndianRest.map(_.high), bigEndianConf)
-    val iv1 = NumericInterval.fromBounds(l1, h1)
-
-    val l2 = Convert(msb.low +: bigEndianRest.map(_.high), bigEndianConf)
-    val h2 = Convert(msb.high +: bigEndianRest.map(_.low), bigEndianConf)
-    val iv2 = NumericInterval.fromBounds(l2, h2)
-
-    Join(iv1, iv2).get
+    val low = convert(lowBytes.toSeq, bigEndianConf)
+    val high = convert(highBytes.toSeq, bigEndianConf)
+    NumericInterval(low, high)
 
 
 
