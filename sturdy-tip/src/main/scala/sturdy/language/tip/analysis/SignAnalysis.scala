@@ -11,7 +11,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
-import sturdy.fix.Fixpoint
+import sturdy.fix.context.FiniteParameters
 import sturdy.fix.given
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -22,7 +22,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{Field, FixIn, AllocationSite, FixOut, given}
+import sturdy.language.tip.GenericInterpreter.{Field, FixIn, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
@@ -53,11 +53,7 @@ object SignAnalysis extends Interpreter,
     override val print: APrintPrefix[Value] = new APrintPrefix
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
 
-//    given Join[InState] = implicitly
-//    given Join[OutState] = implicitly
-//    given Widen[InState] = implicitly
-//    given Widen[OutState] = implicitly
-    given Lazy[Widen[Value]] = lazily(CombineValue)
+    given Lazy[Finite[Value]] = lazily(FiniteValue)
 
     override val fixpoint =
       fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,

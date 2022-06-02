@@ -6,7 +6,7 @@ import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.language.tip.{Program, Stm}
 import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut}
-import sturdy.fix.*
+import sturdy.fix.{*, given}
 import sturdy.language.tip.Exp
 import sturdy.effect.ObservableJoin
 import sturdy.effect.callframe.DecidableCallFrame
@@ -15,9 +15,9 @@ import sturdy.effect.store.Store
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.fix.context.CallSiteLogger
 import sturdy.fix.context.FiniteCallString
+import sturdy.fix.context.Parameters
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
-import sturdy.language.tip.analysis.SignAnalysis.Parameters
 import sturdy.values.{Widen, Finite, Join}
 
 def isFunOrWhile(dom: FixIn): Int = dom match
@@ -34,13 +34,11 @@ trait Fix extends Interpreter:
   type CallString = context.CallString[Exp.Call]
   given Finite[CallString] = context.FiniteCallString
 
-  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[FixIn, Parameters] =
+  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[FixIn, Parameters[String, Value]] =
     context.parameters[FixIn, String, Value] {
       case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
       case _ => None
     }
-  type Parameters = Map[String, Value]
-  given Finite[Parameters] with {}
 
 
 
@@ -56,7 +54,7 @@ trait Fix extends Interpreter:
   def contextInsensitive(phi: (Contextual[Unit, FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
     notContextSensitive(phi)
 
-  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters, FixIn, FixOut[Value]], Finite[Parameters]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
+  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
     contextSensitive(parameters(analysis.callFrame), phi)
 
   def callSiteSensitive(k: Int, phi: (Contextual[CallString, FixIn, FixOut[Value]], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
