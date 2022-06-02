@@ -112,7 +112,9 @@ final class StackedStates[Dom, Codom, In, Out](inStateWidening: InStateWidening[
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result")
       PopResult.Stable
     }
-    stack.remove(stateFrame)
+    val previousInfo = stack.remove(stateFrame)
+    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
+      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
     stackHeight = newStackHeight
     updatedResult
 

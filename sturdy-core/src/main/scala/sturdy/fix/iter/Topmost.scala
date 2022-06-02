@@ -70,7 +70,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
         widenedIn.foreach(state.setInState)
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
-        stack.pop(dom, in, result, out) match
+        stack.pop(dom, widenedIn.getOrElse(in), result, out) match
           case stack.PopResult.Stable =>
             result
           case stack.PopResult.Unstable(newresult, newout) =>
