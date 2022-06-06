@@ -1,12 +1,16 @@
 package sturdy.language.wasm.wasmbench:
 
   class RRecord(elems: (String, Any)*) extends Selectable:
+    private val ordering = elems.map(_._1).zipWithIndex.sortWith((l,r) => {l._2 < r._2})
     private val fields = elems.toMap
     def selectDynamic(name: String): Any = fields(name)
     def toCsv: String =
-      fields.values.mkString(";")
+      val res = ordering.foldLeft("")((acc,el) => {
+        s"${acc}${fields(el._1)};"
+      })
+      res.dropRight(1)
     def getCsvHeaders: String =
-      fields.keys.mkString(";")
+      ordering.map(_._1).mkString(";")
 
   type Result = RRecord {
     val hash: String;
@@ -73,7 +77,12 @@ package sturdy.language.wasm.wasmbench:
   object Test extends App:
 
     type Test = RRecord {val ab: String; val bb: String; val c: Int}
-    val test = RRecord("bb" -> "346", "ab" -> "sdfhj", "c" -> 12).asInstanceOf[Test]
+    val test = RRecord(
+      "bb" -> "346",
+      "ab" -> "sdfhj",
+      "c" -> 12,
+      "123" -> "sfartt",
+      "sf41234532523t" -> 2).asInstanceOf[Test]
 
     for i <- Range.inclusive(0,100) do
       println(s"keys: ${test.getCsvHeaders}, values: ${test.toCsv}")

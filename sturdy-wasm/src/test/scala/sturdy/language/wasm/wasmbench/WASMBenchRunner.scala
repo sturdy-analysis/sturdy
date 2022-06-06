@@ -20,7 +20,9 @@ import ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.util.{Failure, Success, Try}
+import com.typesafe.config.ConfigFactory
 
+val config = ConfigFactory.load("wasmbench/runnerConfig")
 
 enum Analysis:
   case Constant
@@ -70,7 +72,7 @@ object WASMBenchRunner:
     "logResults" -> true, // default: true
     "skipTestsIncludingIndex" -> -1,
     "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results"),
-    "onlyBinariesInCSV" -> None, //Some(Paths.get("C:/promotion/sturdy/wasmBench/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/results/onlyBinariesInCSV.csv"))
+    "onlyBinariesInCSV" -> None, //Some(Paths.get("/home/code/thesis/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/onlyBinariesInCsv.csv")),
     "funcName" -> "main"
   ).asInstanceOf[RunnerConfig]
 

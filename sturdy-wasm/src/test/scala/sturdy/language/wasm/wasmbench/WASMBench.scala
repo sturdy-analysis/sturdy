@@ -1,4 +1,4 @@
- package sturdy.language.wasm.wasmbench
+package sturdy.language.wasm.wasmbench
 
 
 import org.scalatest.flatspec.AnyFlatSpec
