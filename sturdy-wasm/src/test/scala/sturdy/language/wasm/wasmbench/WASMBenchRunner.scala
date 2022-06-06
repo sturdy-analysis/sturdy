@@ -30,11 +30,34 @@ enum Analysis:
   case Type
   case All(constantCfg: WasmConfig, taintCfg: WasmConfig, typeCfg: WasmConfig)
 
-  def apply(set: Either[Throwable, RRecord] => Unit, p: Path, funcName: String, config: WasmConfig, binary: Boolean = false): Runnable =
-    this match 
-      case Analysis.Type => new TypeRunnable(set, p, funcName, config, binary)
-      case Analysis.Constant => new ConstantRunnable(set, p, funcName, config, binary)
-      case Analysis.Taint => new TaintRunnable(set, p, funcName, config, binary)
+  def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, funcName: String, config: WasmConfig, binary: Boolean = false): Runnable =
+    val name = bin.md.hash
+    val p = WASMBench.mkBinPath(name, Filtering.Filtered)
+    val typeSig = bin.ex.find{
+      case FuncDef(_,ty,Some(str)) if str == funcName => true
+    }.get.sig      
+    this match
+      case Analysis.Type => 
+        val args = 
+          typeSig.param.map(
+            fd => fd.map(
+              x => WASMType.toTypeAnalysisValue(x))
+          ).getOrElse(List.empty)
+        new TypeRunnable(set, p, funcName, args, config, binary)
+      case Analysis.Constant => 
+        val args =
+          typeSig.param.map(
+            fd => fd.map(
+              x => WASMType.toConstantAnalysisValue(x))
+          ).getOrElse(List.empty)
+        new ConstantRunnable(set, p, funcName, getArgs(WASMType.toConstantAnalysisValue), config, binary)
+      case Analysis.Taint => 
+        val args =
+          typeSig.param.map(
+            fd => fd.map(
+              x => WASMType.toTaintAnalysisValue(x))
+          ).getOrElse(List.empty)
+        new TaintRunnable(set, p, funcName, getArgs(WASMType.toTaintAnalysisValue), config, binary)
       case All(_,_,_) => ???
 
 
@@ -149,14 +172,12 @@ class WASMBenchRunner extends AnyFunSpec:
           var cont = true
           while cont do
             val md = currBin.next().md
-            val name = md.hash;
-            val p = WASMBench.mkBinPath(name, filtering)
 
             var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
             val t = new Thread(an(v => {
               result = v
-            }, p, funcName, cfg, true))
+            }, md, funcName, cfg, true))
 
             t.start()
             t.join(timeLimit.toMillis)

@@ -1,5 +1,11 @@
 package sturdy.language.wasm.wasmbench
 
+import sturdy.language.wasm.Interpreter
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis}
+import sturdy.values.Topped
+import sturdy.values.taint.TaintProduct
+import sturdy.values.types.BaseType
+
 // (type (;1;) (func (param i32 i64 i32) (result i64)))
 
 // (func (;10;) (type 1)
@@ -14,6 +20,7 @@ enum WASMType:
   case F32
   case F64
 
+
 object WASMType:
   def apply(s: String): WASMType = s match {
     case "i32" | "I32" => I32
@@ -22,6 +29,24 @@ object WASMType:
     case "f64" | "F64" => F64
     case _ => ???
   }
+
+  def toTaintAnalysisValue(wty: WASMType) = wty match
+    case I32 => TaintProduct[Topped[Int]]
+    case I64 => TaintProduct[Topped[Long]]
+    case F32 => TaintProduct[Topped[Float]]
+    case F64 => TaintProduct[Topped[Double]]
+
+  def toTypeAnalysisValue(wty: WASMType) = wty match
+    case I32 => BaseType[Int]
+    case I64 => BaseType[Long]
+    case F32 => BaseType[Float]
+    case F64 => BaseType[Double]
+
+  def toConstantAnalysisValue(wty: WASMType) = wty match
+    case I32 => Topped[Int]
+    case I64 => Topped[Long]
+    case F32 => Topped[Float]
+    case F64 => Topped[Double]
 
 enum Label:
   case Numeric(i: Int)

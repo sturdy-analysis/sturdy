@@ -2,13 +2,13 @@ package sturdy.language.wasm.wasmbench
 
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
-import sturdy.language.wasm.Parsing
+import sturdy.language.wasm.{Interpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{WasmConfig, ConstantTaintAnalysis, TypeAnalysis, ConstantAnalysis}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.FrameData
-import swam.syntax.{StoreNInst, StoreInst, LoadInst, LoadNInst}
+import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
-import java.nio.file.{Path, Files}
+import java.nio.file.{Files, Path}
 
 trait AnalysisRunnable extends Runnable:
   def setRes(v: Either[Throwable, RRecord]): Unit
@@ -28,9 +28,9 @@ trait AnalysisRunnable extends Runnable:
     }
 
 class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
-                p: Path, funcName: String,
-                config: WasmConfig,
-                binary: Boolean = false) extends AnalysisRunnable:
+                    p: Path, funcName: String, funcArgs: List[Any],
+                    config: WasmConfig,
+                    binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
   override def start(): RRecord =
     Fixpoint.DEBUG = false
@@ -46,7 +46,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
     val modInst = interp.initializeModule(module)
     interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, List.empty)
+      interp.invokeExported(modInst, funcName, funcArgs)
     )
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
@@ -112,7 +112,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
 
 class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
-                   p: Path, funcName: String,
+                   p: Path, funcName: String, funcArgs: List[Any],
                    config: WasmConfig,
                    binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
@@ -128,7 +128,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
 
     val modInst = interp.initializeModule(module)
     interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, List.empty)
+      interp.invokeExported(modInst, funcName, funcArgs)
     )
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
@@ -177,7 +177,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     )
 
 class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
-                       p: Path, funcName: String,
+                       p: Path, funcName: String, funcArgs: List[Any],
                        config: WasmConfig,
                        binary: Boolean = false) extends AnalysisRunnable{
 
@@ -197,7 +197,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
 
     val modInst = interp.initializeModule(module)
     val res = interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, List.empty)
+      interp.invokeExported(modInst, funcName, funcArgs)
     )
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
