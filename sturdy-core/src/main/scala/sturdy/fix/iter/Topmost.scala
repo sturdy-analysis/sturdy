@@ -62,7 +62,8 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
   private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
     val in = state.getInState(dom)
-    stack.push(dom, in) match
+    val outBefore = state.getOutState(dom)
+    stack.push(dom, in, outBefore) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
         widenedOut.foreach(state.setOutState)
         result

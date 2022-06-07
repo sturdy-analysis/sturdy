@@ -91,7 +91,7 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: In): PushResult =
+  def push(dom: Dom, in: In, currentOut: Out): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
@@ -156,7 +156,7 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
               corecurrentCalls += info.frameIdWithInStateOfCache.get
               if (Fixpoint.DEBUG)
                 println(s"${stackHeightIndent}PUSH RECURRENT $frame:${inWidenedWithCache.get}")
-              loadRecurrentOutput(frame)
+              loadRecurrentOutput(frame, currentOut)
             }
         }
 
@@ -192,17 +192,17 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         inCache.put(frame, newIn.get)
       newIn
 
-  inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx]): PushResult = Option(outCache.get(frame)) match
+  inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx], currentOut: Out): PushResult = Option(outCache.get(frame)) match
     case None =>
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP RECURRENT  $frame")
       PushResult.Recurrent(TrySturdy(throw RecurrentCall(frame)), None)
     case Some(OutCacheEntry(result, out, _)) =>
       LinearStateOperationCounter.wideningCounter += 1
-//      val joinedOut = Profiler.addTime("widen"){joinOut(state.getOutState(frame.dom), previousOut).get}
+      val joinedOut = Profiler.addTime("widen"){joinOut(currentOut, out).get}
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP RECURRENT  $frame <- $result:$out")
-      PushResult.Recurrent(result, Some(out))
+        println(s"${stackHeightIndent}POP RECURRENT  $frame <- $result:$joinedOut")
+      PushResult.Recurrent(result, Some(joinedOut))
 
   inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom], out: Out): PopResult = Option(outCache.get(frame)) match
     case None =>

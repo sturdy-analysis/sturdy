@@ -59,7 +59,7 @@ final class StackedStates[Dom, Codom, In, Out](inStateWidening: InStateWidening[
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: In): PushResult =
+  def push(dom: Dom, in: In, currentOut: Out): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 

@@ -38,18 +38,21 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
   }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
-      run(p, binary = true)
+    it must s"execute constant analysis stacked-states on benchmark ${p.getFileName}" in {
+      run(p, binary = true, stackedFrames = false)
+    }
+    it must s"execute constant analysis stacked-frames on benchmark ${p.getFileName}" in {
+      run(p, binary = true, stackedFrames = true)
     }
   }
 
-  def run(p: Path, binary: Boolean = false) =
+  def run(p: Path, binary: Boolean = false, stackedFrames: Boolean = true) =
     Fixpoint.DEBUG = false
     
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost())))
+    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackedFrames))))
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 
@@ -84,6 +87,6 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     // write CFG to .dot file
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val dotPath = p.getParent.resolve(s"${p.getFileName}_frames-$stackedFrames.dot")
     val blockCfg = cfg.withBlocks(shortLabels = true)
     Files.writeString(dotPath, blockCfg.toGraphViz)

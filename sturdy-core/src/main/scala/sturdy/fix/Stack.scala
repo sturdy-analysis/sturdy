@@ -26,7 +26,7 @@ trait Stack[Dom, Codom, In, Out]:
     case Stable
     case Unstable(codom: TrySturdy[Codom], widenedOut: Option[Out])
 
-  def push(dom: Dom, in: In): PushResult
+  def push(dom: Dom, in: In, currentOut: Out): PushResult
   def pop(dom: Dom, in: In, codom: TrySturdy[Codom], out: Out): PopResult
 
   def height: Int
