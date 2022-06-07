@@ -125,7 +125,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
   import wasmOps.*
   import specialOps.*
-  import exceptOps.*
 
   // effect components
   val stack: DecidableOperandStack[V]
