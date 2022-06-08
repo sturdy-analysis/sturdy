@@ -334,8 +334,7 @@ given ConvertBytesToNumericInterval[From, To, I]
         lowBytes += lowByte
         highBytes += highByte
       case NumericInterval.Top() =>
-        lowBytes += Byte.MinValue
-        highBytes += Byte.MaxValue
+        return NumericInterval.Top()
     }
 
     val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
