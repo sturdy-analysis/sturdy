@@ -7,9 +7,10 @@ import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.fix.StackedFrames.{retainCacheWhenPopFromStack, readPriorOutput, onlyWriteInCacheWhenRecurrent}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Finite
-import sturdy.values.{MaybeChanged, Unchanged, Join, Changed, Widen}
+import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -78,11 +79,12 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
   def stackHeightIndent: String = "  " * (height)
   def stackHeightMinusOneIndent: String = "  " * (height - 1)
 
-  inline private def dropFrame(frame: Frame[Dom, Ctx], id: Int): Unit = {
+  inline private def dropFrame(frame: Frame[Dom, Ctx], id: Int): Boolean = {
     val info = stack.getIfAbsent(frame, () => throw new MatchError(stack))
     val isEmpty = info.popAndGetIsEmpty(id)
     if (isEmpty)
       stack.remove(frame)
+    isEmpty
   }
 
   /** Pushes a frame on top of the stack and detects if the frame is recurrent.
@@ -104,7 +106,7 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         val MaybeChanged(loadedIn, inHasChanged) = loadStateFromInCache(frame, in)
         val outEntry = Option(outCache.get(frame))
 
-        if (!inHasChanged && outEntry.exists(_.isStable)) {
+        if (readPriorOutput && retainCacheWhenPopFromStack && !inHasChanged && outEntry.exists(_.isStable)) {
           // previous input subsumes current input and previous result still stable => return previous result
           val OutCacheEntry(result, out, _) = outEntry.get
           if (Fixpoint.DEBUG)
@@ -129,7 +131,7 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
       case Some(info) =>
         Option(inCache.get(frame)) match {
           case None =>
-            if (StackedFrames.writeInCacheWhenPushToStack)
+            if (!onlyWriteInCacheWhenRecurrent)
               throw new IllegalStateException("inCache(frame) should have been created when frame was pushed to stack")
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}PUSH SEMI-RECURRENT (new) $frame:$in")
@@ -175,14 +177,17 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         println(s"${stackHeightMinusOneIndent}POP  $frame:$in <- $codom:$out")
       PopResult.Stable
     }
-    dropFrame(frame, newStackHeight)
+    if (dropFrame(frame, newStackHeight) && !retainCacheWhenPopFromStack) {
+      inCache.remove(frame)
+      outCache.remove(frame)
+    }
     stackHeight = newStackHeight
     updatedResult
 
 
   inline private def loadStateFromInCache(frame: Frame[Dom, Ctx], in: In): MaybeChanged[In] = Option(inCache.get(frame)) match
     case None =>
-      if (StackedFrames.writeInCacheWhenPushToStack)
+      if (!onlyWriteInCacheWhenRecurrent)
         inCache.put(frame, in)
       Unchanged(in)
     case Some(recurrentIn) =>
@@ -231,7 +236,9 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
       }
 
 object StackedFrames:
-  private val writeInCacheWhenPushToStack: Boolean = false
+  private val onlyWriteInCacheWhenRecurrent: Boolean = true
+  private val retainCacheWhenPopFromStack: Boolean = true
+  private val readPriorOutput: Boolean = true
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
 class FrameInstanceInfo(var frameIdWithInStateOfCache: Option[Int]):

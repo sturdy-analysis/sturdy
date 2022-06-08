@@ -163,7 +163,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = widenIn(ce.in.head, in)
+        val widenedIn = Profiler.addTime("widen"){widenIn(ce.in.head, in)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 
