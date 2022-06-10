@@ -4,7 +4,7 @@ import org.scalatest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.SpanSugar.GrainOfTime
 import org.scalatest.time.Span
-import sturdy.fix.Fixpoint
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
@@ -60,7 +60,7 @@ object WASMBenchRunner:
 //      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
 //      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
 //    ),
-    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost())),
+    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost(StackConfig.StackedCfgNodes()))),
     "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
     "warmup" -> true, // default: true
     "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE

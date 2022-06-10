@@ -4,6 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.CFallible
+import sturdy.fix.StackConfig
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.ProcExit
@@ -42,7 +43,7 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
     it must s"execute $funcName with constant analysis returning exit code $exitCode" in {
-      val res = runConstantAnalysis(path, funcName, args, true)
+      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedStates())
       //println(res)
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $ProcExit but execution succeeded: $vals")

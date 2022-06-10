@@ -6,17 +6,14 @@ import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.effect.Effectful
 import sturdy.fix
-import sturdy.fix.Contextual
-import sturdy.fix.Combinator
-import sturdy.fix.Combinator
-import sturdy.fix.Contextual
+import sturdy.fix.{Combinator, Contextual, StackConfig}
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.GenericInterpreter
-import sturdy.language.wasm.generic.{FixIn, finiteFixIn, FixOut}
+import sturdy.language.wasm.generic.{FixIn, FixOut, finiteFixIn}
 import sturdy.report.Properties
 import sturdy.values.Finite
-import sturdy.values.{Widen, Finite, Join}
+import sturdy.values.{Finite, Join, Widen}
 
 //trait WasmFixpoint[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
 //  (val config: WasmConfig)(using Widen[FixOut[V]])
@@ -40,7 +37,7 @@ case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig
 object WasmConfig:
   def default = WasmConfig()
 
-case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(), loopUnwinding: Int = 0):
+case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes()), loopUnwinding: Int = 0):
   override def toString: String =
     if (loopUnwinding <= 0)
       iter.toString

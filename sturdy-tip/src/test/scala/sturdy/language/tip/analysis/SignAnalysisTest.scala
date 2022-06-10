@@ -16,7 +16,7 @@ import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.given
 import sturdy.effect.print.APrintPrefix
-import sturdy.fix.{Fixpoint, StackedFrames}
+import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
 import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labeled
 import sturdy.{*, given}
@@ -47,21 +47,21 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
-      runSignAnalysis(p, false)
+      runSignAnalysis(p, StackConfig.StackedStates())
     }
     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runSignAnalysis(p, true)
+      runSignAnalysis(p, StackConfig.StackedCfgNodes())
     }
   }
 
-  def runSignAnalysis(p: Path, stackedFrames: Boolean) =
+  def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map(), stackedFrames)
+      val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -81,12 +81,3 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       null
     }
 
-object RunSignAnalysis extends App {
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI;
-  val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), true)
-  println(res)
-  println(analysis.callFrame.getState)
-  println(analysis.store.getState)
-  println(analysis.print.getState)
-//  println(cfg.toGraphViz)
-}

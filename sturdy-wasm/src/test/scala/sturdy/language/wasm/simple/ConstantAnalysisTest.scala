@@ -7,16 +7,17 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
+import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, ConstantAnalysis}
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, UnreachableInstruction, FixOut, FrameData}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
@@ -124,43 +125,47 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
-    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
-      val res = runConstantAnalysis(path, funcName, args, true)
-      res match
-        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
-        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
-        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
-    }
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
-      val res = runConstantAnalysis(path, funcName, args, true)
+      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
+    }
+    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
+      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+      res match
+        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
+        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
+        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
-    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
-      val res = runConstantAnalysis(path, funcName, args, true)
-      res match
-        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
-        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
-    }
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
-      val res = runConstantAnalysis(path, funcName, args, false)
+      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
+    }
+    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
+      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+      res match
+        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
+        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackedFrames: Boolean): AFallible[List[Value]] =
+def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
-    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackedFrames))))
+    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

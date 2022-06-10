@@ -8,14 +8,14 @@ import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 
 object Stack:
-  def apply[Dom, Codom, In, Out, Ctx](frames: Boolean, contextual: Contextual[Ctx, Dom, Codom])
+  def apply[Dom, Codom, In, Out, Ctx](config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
                                      (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
                                      (using Finite[Dom], Finite[Ctx])
-                                     : Stack[Dom, Codom, In, Out] =
-    if (frames)
-      new StackedFrames(contextual)
-    else
-      new StackedStates(new ContextualInStateWidening(contextual))
+                                     : Stack[Dom, Codom, In, Out] = config match
+    case StackConfig.StackedStates(readPriorOutput) =>
+      new StackedStates(new ContextualInStateWidening(contextual), readPriorOutput)
+    case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
+      new StackedFrames(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
 
 trait Stack[Dom, Codom, In, Out]:
   enum PushResult:
@@ -31,3 +31,7 @@ trait Stack[Dom, Codom, In, Out]:
 
   def height: Int
   def hasRecurrentCalls: Boolean
+
+enum StackConfig:
+  case StackedStates(readPriorOutput: Boolean = true)
+  case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true)

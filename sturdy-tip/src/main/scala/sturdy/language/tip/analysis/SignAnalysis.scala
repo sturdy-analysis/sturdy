@@ -2,7 +2,7 @@ package sturdy.language.tip.analysis
 
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.AnalysisState
-import sturdy.effect.{Effectful, AnalysisState, given}
+import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.callframe.JoinableConcreteCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
@@ -12,7 +12,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
-import sturdy.fix.given
+import sturdy.fix.{StackConfig, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -22,7 +22,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
@@ -32,7 +32,7 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackedFrames: Boolean) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: AFailureCollect = new AFailureCollect
@@ -57,9 +57,9 @@ object SignAnalysis extends Interpreter,
 
     override val fixpoint =
       fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
-        parameterSensitive(this, fix.iter.innermost(stackedFrames))).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackedFrames)
+        parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
-  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, true):
+  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)

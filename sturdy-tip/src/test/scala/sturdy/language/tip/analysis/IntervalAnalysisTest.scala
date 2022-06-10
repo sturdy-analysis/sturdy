@@ -15,6 +15,7 @@ import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.{afallibleAbstractly, falliblePO}
+import sturdy.fix.StackConfig
 import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
 import sturdy.{*, given}
 import sturdy.values.{*, given}
@@ -44,21 +45,21 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     p.toString.contains("") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
-      runIntervalAnalysis(p, false)
+      runIntervalAnalysis(p, StackConfig.StackedStates())
     }
     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runIntervalAnalysis(p, true)
+      runIntervalAnalysis(p, StackConfig.StackedCfgNodes())
     }
   }
 
-  def runIntervalAnalysis(p: Path, stackedFrames: Boolean) =
+  def runIntervalAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackedFrames, 0)
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -83,12 +84,3 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       null
     }
 
-object RunIntervalAnalysis extends App {
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI;
-  val (res, analysis) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), true)
-  println(res)
-  println(analysis.callFrame.getState)
-  println(analysis.store.getState)
-  println(analysis.print.getState)
-//  println(cfg.toGraphViz)
-}

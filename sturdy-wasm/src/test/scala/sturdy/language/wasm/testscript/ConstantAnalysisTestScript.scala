@@ -1,6 +1,6 @@
 package sturdy.language.wasm.testscript
 
-import cats.effect.{IO, Blocker}
+import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -8,21 +8,21 @@ import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.analyses.{WasmConfig, ConstantAnalysis}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
-import sturdy.{Soundness, IsSound}
+import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
-import sturdy.fix.Fixpoint
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis
 import swam.ModuleLoader
 import swam.binary.ModuleParser
@@ -51,10 +51,10 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
     Iterator(
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(true)), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
+      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
 //      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )

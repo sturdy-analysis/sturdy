@@ -15,7 +15,7 @@ import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.{afallibleAbstractly, falliblePO}
-import sturdy.fix.Fixpoint
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
 import sturdy.{*, given}
 import sturdy.values.{*, given}
@@ -45,15 +45,15 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(s"00100_20000Stack.tip")).sorted.foreach { p =>
     it must s"warm up " in {
-      runIntervalAnalysis(p, true)
-      runIntervalAnalysis(p, false)
+      runIntervalAnalysis(p, StackConfig.StackedCfgNodes())
+      runIntervalAnalysis(p, StackConfig.StackedStates())
     }
   }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("00100_20000Stack.tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
-      runIntervalAnalysis(p, true)
-      runIntervalAnalysis(p, false)
+      runIntervalAnalysis(p, StackConfig.StackedCfgNodes())
+      runIntervalAnalysis(p, StackConfig.StackedStates())
     }
   }
 //
@@ -65,14 +65,14 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
 //    }
 //  }
 
-  def runIntervalAnalysis(p: Path, stackedFrames: Boolean) =
+  def runIntervalAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackedFrames, 0)
+      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
 
       var aresult: AFallible[Value] = AFallible.Unfailing(Value.TopValue)
 //      while (true)

@@ -7,7 +7,6 @@ import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
-import sturdy.fix.StackedFrames.{retainCacheWhenPopFromStack, readPriorOutput, onlyWriteInCacheWhenRecurrent}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Finite
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
@@ -38,7 +37,7 @@ import scala.util.Try
  *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
  *
  */
-final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, Dom, Codom])
+final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
                                                    (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
                                                    (using Finite[Dom], Finite[Ctx])
   extends Stack[Dom, Codom, In, Out]:
@@ -106,27 +105,32 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         val MaybeChanged(loadedIn, inHasChanged) = loadStateFromInCache(frame, in)
         val outEntry = Option(outCache.get(frame))
 
-        if (readPriorOutput && retainCacheWhenPopFromStack && !inHasChanged && outEntry.exists(_.isStable)) {
-          // previous input subsumes current input and previous result still stable => return previous result
-          val OutCacheEntry(result, out, _) = outEntry.get
-          if (Fixpoint.DEBUG)
-            println(s"${stackHeightIndent}READ PRIOR OUTPUT $frame:$loadedIn <- $result:$out")
-          PushResult.Recurrent(result, Some(out))
-        } else {
-          if (inHasChanged)
-            outEntry.foreach(_.setUnstable())
-
-          // push call to stack
-          val info = new FrameInstanceInfo(stackHeight)
-          stack.put(frame, info)
-          if (Fixpoint.DEBUG)
-            println(s"${stackHeightIndent}PUSH $frame:$in")
-          stackHeight += 1
-          if (inHasChanged)
-            PushResult.Continue(Some(loadedIn))
-          else
-            PushResult.Continue(None)
+        if (readPriorOutput && !inHasChanged) {
+          val outEntry = Option(outCache.get(frame))
+          if (outEntry.exists(_.isStable)) {
+            // previous input subsumes current input and previous result still stable => return previous result
+            val OutCacheEntry(result, out, _) = outEntry.get
+            if (Fixpoint.DEBUG)
+              println(s"${stackHeightIndent}READ PRIOR OUTPUT $frame:$loadedIn <- $result:$out")
+            return PushResult.Recurrent(result, Some(out))
+          }
         }
+
+        if (inHasChanged) {
+          val outEntry = Option(outCache.get(frame))
+          outEntry.foreach(_.setUnstable())
+        }
+
+        // push call to stack
+        val info = new FrameInstanceInfo(stackHeight)
+        stack.put(frame, info)
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightIndent}PUSH $frame:$in")
+        stackHeight += 1
+        if (inHasChanged)
+          PushResult.Continue(Some(loadedIn))
+        else
+          PushResult.Continue(None)
 
       case Some(info) =>
         Option(inCache.get(frame)) match {
@@ -177,7 +181,7 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         println(s"${stackHeightMinusOneIndent}POP  $frame:$in <- $codom:$out")
       PopResult.Stable
     }
-    if (dropFrame(frame, newStackHeight) && !retainCacheWhenPopFromStack) {
+    if (dropFrame(frame, newStackHeight) && false) {
       inCache.remove(frame)
       outCache.remove(frame)
     }
@@ -234,11 +238,6 @@ final class StackedFrames[Dom, Codom, In, Out, Ctx](contextual: Contextual[Ctx, 
         outCacheEntry.stability = Stability.Stable
         PopResult.Stable
       }
-
-object StackedFrames:
-  private val onlyWriteInCacheWhenRecurrent: Boolean = true
-  private val retainCacheWhenPopFromStack: Boolean = true
-  private val readPriorOutput: Boolean = true
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
 class FrameInstanceInfo(var frameIdWithInStateOfCache: Option[Int]):

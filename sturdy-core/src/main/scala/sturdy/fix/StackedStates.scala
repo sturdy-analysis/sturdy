@@ -16,7 +16,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-final class StackedStates[Dom, Codom, In, Out](inStateWidening: InStateWidening[Dom, In])
+final class StackedStates[Dom, Codom, In, Out](inStateWidening: InStateWidening[Dom, In], readPriorOutput: Boolean)
                                               (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
                                               (using Finite[Dom])
   extends Stack[Dom, Codom, In, Out]:
@@ -68,20 +68,24 @@ final class StackedStates[Dom, Codom, In, Out](inStateWidening: InStateWidening[
     Option(stack.get(stateFrame)) match
       case None =>
         // call is not recurrent
-        Option(outCache.get(stateFrame)) match
-          case Some(OutCacheEntry(result, out, Stability.Stable)) =>
-            // stable output available
+        if (readPriorOutput) {
+          val outEntry = Option(outCache.get(stateFrame))
+          if (outEntry.exists(_.isStable)) {
+            // previous input subsumes current input and previous result still stable => return previous result
+            val OutCacheEntry(result, out, _) = outEntry.get
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
-            PushResult.Recurrent(result, Some(out))
-          case _ =>
-            // push call to stack
-            val info = new FrameInstanceInfo(stackHeight)
-            stack.put(stateFrame, info)
-            if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}PUSH $stateFrame")
-            stackHeight += 1
-            PushResult.Continue(Some(widenedIn))
+            return PushResult.Recurrent(result, Some(out))
+          }
+        }
+        
+        // push call to stack
+        val info = new FrameInstanceInfo(stackHeight)
+        stack.put(stateFrame, info)
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightIndent}PUSH $stateFrame")
+        stackHeight += 1
+        PushResult.Continue(Some(widenedIn))
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
