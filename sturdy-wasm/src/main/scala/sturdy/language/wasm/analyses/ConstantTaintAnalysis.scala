@@ -2,7 +2,7 @@ package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.{Effectful, AnalysisState}
+import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
@@ -10,17 +10,17 @@ import sturdy.effect.callframe.JoinableConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
-import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableConcreteSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.values.floating.FloatOps
 import swam.syntax.*
 import swam.FuncType
+import sturdy.values.abstraction.taint.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -28,7 +28,6 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.values.taint.{*, given}
 import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer

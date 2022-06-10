@@ -15,10 +15,9 @@ import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.{UnreachableInstruction, FrameData}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
-import sturdy.values.taint.Taint
-import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
+import sturdy.values.abstraction.taint.{Taint, TaintProduct}
+import Taint.{Untainted, Tainted, TopTaint}
 import sturdy.values.integer.IntegerDivisionByZero
-import sturdy.values.taint.TaintProduct
 import swam.syntax.Module
 import swam.text.*
 
@@ -59,30 +58,32 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(taintTest, "write_mem_mixed", List(Value.Int32(10)), List((Value.Int32(43), Untainted)))
   }
 
-  def testFunctionConstantArgsConst(path: Path, funcName: String, args: List[CVal], expectedResult: List[(ConstVal, Taint)]) =
+  private def testFunctionConstantArgsConst(path: Path, funcName: String, args: List[CVal], expectedResult: List[(ConstVal, Taint)]) =
     testFunction(path, funcName, args.map(Abstractly.apply),
       expectedResult.map((x: ConstVal, taint: Taint) => ConstantTaintAnalysis.liftConstantValue(x,taint)))
 
-  def testFunctionConstantArgs(path: Path, funcName: String, args: List[CVal], expectedResult: List[(CVal, Taint)]) =
+  private def testFunctionConstantArgs(path: Path, funcName: String, args: List[CVal], expectedResult: List[(CVal, Taint)]) =
     testFunction(path, funcName, args.map(Abstractly.apply),
       expectedResult.map((x: CVal, taint: Taint) => ConstantTaintAnalysis.liftConcreteValue(x,taint)))
 
-  def testFunction(path: Path, funcName: String, args: List[ConstantAnalysis.Value], expected: List[Value]) =
+  private def testFunction(path: Path, funcName: String, args: List[ConstantAnalysis.Value], expected: List[Value]) =
     it must s"execute $funcName withs args $args with result $expected" in {
       val res = runConstantTaintAnalysis(path, funcName, args.map(ConstantTaintAnalysis.liftConstantValue(_,Taint.Tainted)))
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+        case AFallible.Diverging(_) => assert(false, s"Expected $expected but execution diverged")
     }
 
-  def testFailingFunction(path: Path, funcName: String, args: List[ConstantAnalysis.Value], failureKind: FailureKind) =
+  private def testFailingFunction(path: Path, funcName: String, args: List[ConstantAnalysis.Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
       val res = runConstantTaintAnalysis(path, funcName, args.map(ConstantTaintAnalysis.liftConstantValue(_,Taint.Tainted)))
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Diverging(_) => assert(false, s"Expected $failureKind but execution diverged")
     }
 
 

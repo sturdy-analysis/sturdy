@@ -22,7 +22,8 @@ import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
-import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
+import sturdy.values.abstraction.taint.{*, given}
+import Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader

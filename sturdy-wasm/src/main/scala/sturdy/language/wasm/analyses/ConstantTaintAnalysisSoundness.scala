@@ -6,14 +6,9 @@ import sturdy.language.wasm.generic.{FunctionInstance, given}
 import ConstantTaintAnalysis.*
 import ConstantAnalysisSoundness.given
 import sturdy.values.{*, given}
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
-import sturdy.values.Topped
-import sturdy.values.toppedPartialOrder
-import sturdy.values.concretePO
+import sturdy.values.abstraction.taint.*
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
-import sturdy.values.taint.TaintProduct
 
 object ConstantTaintAnalysisSoundness {
 
