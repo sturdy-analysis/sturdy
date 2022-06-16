@@ -2,11 +2,9 @@ package sturdy.language.wasm.abstractions
 
 import sturdy.effect.ObservableJoin
 import sturdy.effect.except.ObservableExcept
-import swam.syntax.Loop
+import swam.syntax.{Block, CallIndirect, If, Inst, Loop}
 import sturdy.language.wasm.generic.InstLoc
-import swam.syntax.Block
 import sturdy.language.wasm.generic.FuncId
-import swam.syntax.Inst
 import sturdy.fix
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.wasm.Interpreter
@@ -14,8 +12,6 @@ import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
 import sturdy.language.wasm.generic.*
 import swam.OpCode
-import swam.syntax.If
-import swam.syntax.CallIndirect
 
 import collection.mutable
 
@@ -57,39 +53,42 @@ enum CfgNode extends ControlFlowGraph.Node:
     case Enter(funId) => s"enter $funId"
     case Exit(funId) => s"exit $funId"
 
-case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, endNodes: Boolean)
+case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, endNodes: Boolean):
+  import CfgGranularity.*
+  import swam.syntax.Call
+  def getInNode(in: FixIn): Option[CfgNode] = in match
+    case FixIn.Eval(c: (Call | CallIndirect), loc) => Some(CfgNode.Call(c, loc))
+    case FixIn.Eval(c: (Block | Loop | If), loc) => granularity match
+      case AllNodes | OnlyControl => Some(CfgNode.Labled(c, loc))
+      case _ => None
+    case FixIn.Eval(inst, loc) => granularity match
+      case AllNodes => Some(CfgNode.Instruction(inst, loc))
+      case OnlyControl if inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect => Some(CfgNode.Instruction(inst, loc))
+      case _ => None
+    case FixIn.EnterWasmFunction(id, _, _) =>  Some(CfgNode.Enter(id))
+    case _ => None
+
+  def getOutNode[V](in: FixIn, out: FixOut[V]): Option[CfgNode] = (in, out) match
+    case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
+    case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
+    case (FixIn.Eval(c: (Block | Loop | If), loc), _) if endNodes && granularity != OnlyCalls => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
+    case _ => None
+
 object CfgConfig:
   val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls, endNodes = true)
   def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl, endNodes = true)
   def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes, endNodes = true)
+
 enum CfgGranularity:
   case AllNodes
   case OnlyControl
   case OnlyCalls
 
-trait ControlFlow extends Interpreter:
-  import swam.syntax.Call
 
+trait ControlFlow extends Interpreter:
   def controlFlow(config: CfgConfig, analysis: Instance) =
-    val cfg = fix.control[analysis.fixpoint.Ctx, FixIn, FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
-      case FixIn.Eval(c: (Call | CallIndirect), loc) => Some(CfgNode.Call(c, loc))
-      case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labled(c, loc))
-      case FixIn.Eval(inst, loc) =>
-        val includeNode = config.granularity match
-          case CfgGranularity.AllNodes => true
-          case CfgGranularity.OnlyCalls => false
-          case CfgGranularity.OnlyControl => inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect
-        if (includeNode)
-          Some(CfgNode.Instruction(inst, loc))
-        else
-          None
-      case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
-    } {
-      case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
-      case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if config.endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
-      case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
-      case _ => None
-    }(using analysis.effectStack, analysis.except)
+    val cfg = fix.control[analysis.fixpoint.Ctx, FixIn, FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start)
+                (config.getInNode)(config.getOutNode)(using analysis.effectStack, analysis.except)
     analysis.fixpoint.addContextSensitiveLogger(cfg.logger)
     cfg
 

@@ -8,14 +8,13 @@ import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
-import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
+import sturdy.language.wasm.analyses.{IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.analyses.IntervalAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
-import sturdy.values.Topped
+import sturdy.values.integer.given
 import sturdy.values.relational.EqOps
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
+import sturdy.values.{*, given}
 import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
@@ -23,7 +22,6 @@ import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
-import sturdy.language.wasm.analyses.IntervalAnalysis
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -40,8 +38,8 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
-  behavior of "TestScript constant analysis"
+class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
+  behavior of "TestScript interval analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
@@ -49,14 +47,15 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
   val spectest = Parsing.fromText(pathSpectest)
 
 
-  def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
+  def analyses: IterableOnce[() => IntervalAnalysis.Instance] =
     Iterator(
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
-//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
-//      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
+      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
+//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
+//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )
 
   Fixpoint.DEBUG = false
@@ -65,18 +64,18 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript constant analysis on ${p.getFileName}")
         val script = Parsing.testscript(p)
-        val interp = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp())
+        val interp = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp())
         interp.run(script)
-        val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
+        val interpTop = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
         interpTop.run(script)
       }
     }
   }
 
 
-class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
+class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: IntervalAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
-  type AValue = ConstantAnalysis.Value
+  type AValue = IntervalAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
@@ -85,7 +84,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
   var aCurrent: ModuleInstance = null
   val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] =
+  val convertVals: unresolved.Expr => List[IntervalAnalysis.Value] =
     if (useTop)
       constExprToTops
     else
@@ -221,7 +220,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
     case Get(modName, name) => evalCGet(modName, name)
   }
 
-  def runAAction(a: Action, convertVals: unresolved.Expr => List[ConstantAnalysis.Value]): AResult = a match {
+  def runAAction(a: Action, convertVals: unresolved.Expr => List[IntervalAnalysis.Value]): AResult = a match {
     case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
     case Get(modName, name) => evalAGet(modName, name)
   }
@@ -281,20 +280,20 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
       case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-  def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+  def constExprToAVals(e: unresolved.Expr): List[IntervalAnalysis.Value] =
     e.map(constExprToAVal).toList
 
-  def constExprToAVal(inst: unresolved.Inst): ConstantAnalysis.Value = Abstractly(constExprToVal(inst))
+  def constExprToAVal(inst: unresolved.Inst): IntervalAnalysis.Value = Abstractly(constExprToVal(inst))
 
-  def constExprToTops(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+  def constExprToTops(e: unresolved.Expr): List[IntervalAnalysis.Value] =
     e.map(constExprToTop).toList
 
-  def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
+  def constExprToTop(inst: unresolved.Inst): IntervalAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
-      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
-      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
-      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
+      case unresolved.i32.Const(_) => IntervalAnalysis.Value.Int32(Top.top)
+      case unresolved.i64.Const(_) => IntervalAnalysis.Value.Int64(Top.top)
+      case unresolved.f32.Const(_) => IntervalAnalysis.Value.Float32(Top.top)
+      case unresolved.f64.Const(_) => IntervalAnalysis.Value.Float64(Top.top)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =

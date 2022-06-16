@@ -16,7 +16,7 @@ import sturdy.values.floating.{*,given}
 object TypeAnalysisSoundness {
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
-    override def abstractly(c: ConcreteInterpreter.Value): Value = c match
+    override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
       case ConcreteInterpreter.Value.Int32(i) => Value.Int32(topI32)
       case ConcreteInterpreter.Value.Int64(l) => Value.Int64(topI64)
@@ -37,8 +37,8 @@ object TypeAnalysisSoundness {
       case (ty1, ty2) => ty1 == ty2
 
   given [C,A](using aValue: Abstractly[C,A]): Abstractly[List[C], List[A]] with
-    override def abstractly(c: List[C]): List[A] =
-      c.map(aValue.abstractly(_))
+    override def apply(c: List[C]): List[A] =
+      c.map(aValue.apply(_))
 
   given [A](using poValue: PartialOrder[A]): PartialOrder[List[A]] with
     override def lteq(x: List[A], y: List[A]): Boolean =

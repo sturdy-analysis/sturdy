@@ -52,11 +52,11 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
     import sturdy.values
 
-    val abstractedKeys = c.getState.keySet.flatMap(k => varAbstractly.abstractly(k).set)
+    val abstractedKeys = c.getState.keySet.flatMap(k => varAbstractly.apply(k).set)
     if (!abstractedKeys.subsetOf(store.keySet)) {
       val missing = c.getState.flatMap{ kv =>
         val k = kv._1
-        val ak = varAbstractly.abstractly(k)
+        val ak = varAbstractly.apply(k)
         if (ak.set.subsetOf(store.keySet))
           None
         else
@@ -65,7 +65,7 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
       c.getState.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x)) match
+        val avs = this.read(varAbstractly.apply(x)) match
           case JOptionA.None() => Powerset()
           case JOptionA.NoneSome(a) => Powerset(a)
           case JOptionA.Some(a) => Powerset(a)

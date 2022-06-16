@@ -64,7 +64,6 @@ class ConcreteFixpoint[Dom, Codom] extends ContextInsensitiveFixpoint[Dom, Codom
 object Fixpoint:
   var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "true").toBoolean
   val DEBUG_INVARIANTS: Boolean = System.getProperty("STURDY_DEBUG_INVARIANTS", "true").toBoolean
-  val SEMI_RECURRENCY: Boolean = System.getProperty("STURDY_SEMI_RECURRENCY", "false").toBoolean
 
   private[fix] def computeLeastFixpoint[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
     f(dom => computeLeastFixpoint(f)(dom))

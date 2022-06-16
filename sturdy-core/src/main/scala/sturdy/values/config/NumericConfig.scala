@@ -22,3 +22,7 @@ enum BytesSize(val bytes: Int) extends ConvertConfig[BytesSize]:
   
   def bits: Int = this.bytes * 8
   def canFail: Boolean = false
+
+object BytesSize:
+  val Float: BytesSize = Int
+  val Double: BytesSize = Long

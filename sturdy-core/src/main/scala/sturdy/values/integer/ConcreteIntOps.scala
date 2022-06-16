@@ -1,12 +1,15 @@
 package sturdy.values.integer
 
+import sturdy.data.JOption
+import sturdy.data.JOptionC
+import sturdy.data.MayJoin
+import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.convert.*
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.{UnsignedOrderingOps, OrderingOps, EqOps}
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.OrderingOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -68,8 +71,19 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def rotateLeft(v: Int, shift: Int): Int = Integer.rotateLeft(v, shift)
   def rotateRight(v: Int, shift: Int): Int = Integer.rotateRight(v, shift)
   def countLeadingZeros(v: Int): Int = Integer.numberOfLeadingZeros(v)
-  def countTrailinZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
+  def countTrailingZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
+
+given ConcreteStrictIntegerOps: StrictIntegerOps[Int, Int, NoJoin] with
+  override def addStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.addExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def subStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.subtractExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
+  def mulStrict(v1: Int, v2: Int): JOptionC[Int] =
+    try JOptionC.Some(StrictMath.multiplyExact(v1, v2))
+    catch { case _: ArithmeticException => JOptionC.none }
 
 given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2
@@ -122,7 +136,7 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
       case config.BytesSize.Short => buf.putShort(0, (from % (1 << 16)).toShort)
       case config.BytesSize.Int => buf.putInt(0, from)
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-    buf.array().toSeq
+    collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
@@ -135,3 +149,7 @@ given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
       case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
       case (config.BytesSize.Int, _) => buf.getInt
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+
+given ConcreteIntUnsignedOrderingOps: UnsignedOrderingOps[Int, Boolean] with
+  override def ltUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) < 0
+  override def leUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) <= 0

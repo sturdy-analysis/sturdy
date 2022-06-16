@@ -72,6 +72,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
@@ -81,6 +82,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
 
 

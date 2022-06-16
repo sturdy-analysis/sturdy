@@ -36,10 +36,10 @@ class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
     () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
-    val abstractedKeys = c.getState.keySet.map(varAbstractly.abstractly)
+    val abstractedKeys = c.getState.keySet.map(varAbstractly.apply)
     if (!abstractedKeys.subsetOf(store.keySet)) {
       val missing = c.getState.keySet.flatMap{ k =>
-        val ak = varAbstractly.abstractly(k)
+        val ak = varAbstractly.apply(k)
         if (store.keySet.contains(ak))
           None
         else
@@ -48,7 +48,7 @@ class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
       IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
       c.getState.foreachEntry { case (x, v) =>
-        val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x)))
+        val subSound = vSoundness.isSound(v, store(varAbstractly.apply(x)))
         if (subSound.isNotSound)
           return subSound
       }

@@ -37,7 +37,7 @@ given CombineSign[W <: Widening]: Combine[Sign,W] with
       case _ => Changed(Top)
 
 given valuesAbstractly: Abstractly[Int, Sign] with
-  override def abstractly(c: Int): Sign =
+  override def apply(c: Int): Sign =
     if (c < 0) then Neg else if (c == 0) then Zero else Pos
 
 /*
@@ -184,7 +184,7 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
     IsSound.Sound
 
   given mustAbstractly[A,B](using a: Abstractly[A,B]): Abstractly[A, MayMust[B]] with
-    override def abstractly(c: A): MayMust[B] = Must(a.abstractly(c))
+    override def apply(c: A): MayMust[B] = Must(a.apply(c))
 
 /*
  * Abstract failures. We simply collect all possible failures in a list.

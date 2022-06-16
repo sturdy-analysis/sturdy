@@ -69,6 +69,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
+  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
+    override def apply(c: ConcreteInterpreter.Value): Value = c match
+      case ConcreteInterpreter.Value.TopValue => Value.TopValue
+      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
+      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
+      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
+      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)

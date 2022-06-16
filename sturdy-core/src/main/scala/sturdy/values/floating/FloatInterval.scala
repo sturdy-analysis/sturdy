@@ -34,7 +34,7 @@ case class FloatInterval(l: Float, h: Float):
   override def toString: String = s"[$l,$h]"
 
 given Abstractly[Float, FloatInterval] with
-  override def abstractly(d: Float): FloatInterval =
+  override def apply(d: Float): FloatInterval =
     FloatInterval(d, d)
 
 given PartialOrder[FloatInterval] with

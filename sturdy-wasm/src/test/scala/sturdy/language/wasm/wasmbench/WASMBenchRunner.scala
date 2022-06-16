@@ -4,13 +4,12 @@ import org.scalatest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.SpanSugar.GrainOfTime
 import org.scalatest.time.Span
-import sturdy.fix.Fixpoint
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantTaintAnalysis, FixpointConfig, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.wasmbench.WASMBenchRunner.runnerConfig
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.util.concurrent.{ExecutionException, TimeoutException}
@@ -20,9 +19,7 @@ import ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.util.{Failure, Success, Try}
-import com.typesafe.config.ConfigFactory
 
-val config = ConfigFactory.load("wasmbench/runnerConfig")
 
 enum Analysis:
   case Constant(config: WasmConfig)
@@ -35,10 +32,10 @@ enum Analysis:
     val typeSig = bin.ex.find{
       case FuncDef(_,_,Some(str)) if str == funcName => true
       case _ => false
-    }.get.sig      
+    }.get.sig
     this match
       case Analysis.Type(config) =>
-        val args = 
+        val args =
           typeSig.param.map(
             ty => WASMType.toTypeAnalysisValue(ty)
           )

@@ -108,8 +108,8 @@ trait Interpreter:
      , i64CompareOps: OrderingOps[I64, Bool]
      , f32CompareOps: OrderingOps[F32, Bool]
      , f64CompareOps: OrderingOps[F64, Bool]
-     , i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
-     , i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
+     , i32UnsignedCompareOps: UnsignedOrderingOps[I32, Bool]
+     , i64UnsignedCompareOps: UnsignedOrderingOps[I64, Bool]
      , convertI32I64: ConvertIntLong[I32, I64]
      , convertI32F32: ConvertIntFloat[I32, F32]
      , convertI32F64: ConvertIntDouble[I32, F64]
@@ -190,23 +190,23 @@ trait Interpreter:
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    final val unsignedCompareOps: UnsignedCompareOps[Value, Value] = new UnsignedCompareOps[Value, Value]:
+    final val unsignedCompareOps: UnsignedOrderingOps[Value, Value] = new UnsignedOrderingOps[Value, Value]:
       import Value.*
       override def ltUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.ltUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.ltUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedOrderingOps.ltUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedOrderingOps.ltUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def leUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.leUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.leUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedOrderingOps.leUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedOrderingOps.leUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def geUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.geUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.geUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedOrderingOps.geUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedOrderingOps.geUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def gtUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.gtUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.gtUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedOrderingOps.gtUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedOrderingOps.gtUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
 
     final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
@@ -232,8 +232,8 @@ trait Interpreter:
         case (Value.Int64(l), _: i64.Store16) => encodeI64(l, config.BytesSize.Short && LITTLE_ENDIAN)
         case (Value.Int64(l), _: i64.Store32) => encodeI64(l, config.BytesSize.Int && LITTLE_ENDIAN)
         case (Value.Int64(l), _: i64.Store) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
-        case (Value.Float32(f), _: f32.Store) => encodeF32(f, LITTLE_ENDIAN)
-        case (Value.Float64(d), _: f64.Store) => encodeF64(d, LITTLE_ENDIAN)
+        case (Value.Float32(f), _: f32.Store) => encodeF32(f, config.BytesSize.Float && LITTLE_ENDIAN)
+        case (Value.Float64(d), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
         case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
     override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst]]:

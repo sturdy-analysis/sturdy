@@ -43,6 +43,7 @@ class SignInterpreterTest extends AnyFlatSpec, Matchers:
         case AFallible.Unfailing(v) => assertResult(expected)(v)
         case AFallible.MaybeFailing(v,_) => assertResult(expected)(v)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
 
   def testSoundness(p: Path, arg: Int): Unit =
@@ -54,7 +55,7 @@ class SignInterpreterTest extends AnyFlatSpec, Matchers:
       val cInterp = new ConcreteInterpreter
       val sInterp = new SignInterpreter
       val cRes = fallible(cInterp.runProg(arg, program))
-      val sRes = sInterp.failure.fallible(sInterp.runProg(valuesAbstractly.abstractly(arg), program))
+      val sRes = sInterp.failure.fallible(sInterp.runProg(valuesAbstractly.apply(arg), program))
       // result needs to be sound
       assertResult(IsSound.Sound)(Soundness.isSound(cRes,sRes))
       // interpreter state needs to be sound

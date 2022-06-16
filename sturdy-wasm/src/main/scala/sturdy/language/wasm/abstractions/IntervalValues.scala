@@ -29,18 +29,11 @@ trait IntervalValues extends Interpreter:
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
 
-  final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.isZero.map(!_)
+  final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.isZero.toBoolean
   final def boolean(b: Bool): Value = b match
     case Topped.Top => Value.Int32(NumericInterval(0, 1))
     case Topped.Actual(true) => Value.Int32(NumericInterval(1, 1))
     case Topped.Actual(false) => Value.Int32(NumericInterval(0, 0))
-
-  def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match
-    case ConcreteInterpreter.Value.TopValue => Value.TopValue
-    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval(i, i))
-    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval(l, l))
-    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)

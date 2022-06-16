@@ -31,7 +31,7 @@ enum IntSign:
 import sturdy.values.integer.IntSign.*
 
 given Abstractly[Int, IntSign] with
-  override def abstractly(i: Int): IntSign =
+  override def apply(i: Int): IntSign =
     if i < 0 then Neg
     else if i > 0 then Pos
     else Zero
@@ -147,7 +147,7 @@ given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): In
   def rotateLeft(v: IntSign, shift: IntSign): IntSign = ???
   def rotateRight(v: IntSign, shift: IntSign): IntSign = ???
   def countLeadingZeros(v: IntSign): IntSign = ???
-  def countTrailinZeros(v: IntSign): IntSign = ???
+  def countTrailingZeros(v: IntSign): IntSign = ???
   def nonzeroBitCount(v: IntSign): IntSign = ???
 
 given SignOrderingOps: OrderingOps[IntSign, Topped[Boolean]] with

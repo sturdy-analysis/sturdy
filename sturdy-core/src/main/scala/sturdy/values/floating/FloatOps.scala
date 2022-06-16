@@ -28,11 +28,11 @@ trait FloatOps[B, V]:
 type ConvertFloatInt[VFrom, VTo] = Convert[Float, Int, VFrom, VTo, config.Overflow && config.Bits]
 type ConvertFloatLong[VFrom, VTo] = Convert[Float, Long, VFrom, VTo, config.Overflow && config.Bits]
 type ConvertFloatDouble[VFrom, VTo] = Convert[Float, Double, VFrom, VTo, NilCC.type]
-type ConvertFloatBytes[VFrom, VTo] = Convert[Float, Seq[Byte], VFrom, VTo, SomeCC[ByteOrder]]
+type ConvertFloatBytes[VFrom, VTo] = Convert[Float, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
 type ConvertBytesFloat[VFrom, VTo] = Convert[Seq[Byte], Float, VFrom, VTo, SomeCC[ByteOrder]]
 
 type ConvertDoubleInt[VFrom, VTo] = Convert[Double, Int, VFrom, VTo, config.Overflow && config.Bits]
 type ConvertDoubleLong[VFrom, VTo] = Convert[Double, Long, VFrom, VTo, config.Overflow && config.Bits]
 type ConvertDoubleFloat[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, NilCC.type]
-type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, SomeCC[ByteOrder]]
+type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
 type ConvertBytesDouble[VFrom, VTo] = Convert[Seq[Byte], Double, VFrom, VTo, SomeCC[ByteOrder]]

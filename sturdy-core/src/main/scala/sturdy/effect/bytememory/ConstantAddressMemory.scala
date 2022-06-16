@@ -116,8 +116,10 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           return IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide, was \n  $aMem wanted \n  ${(c.size, c.sizeLimit, c.pageNum)}.")
         c.bytes.zip(aMem.bytesIterable).foreach { (cByte, aByte) =>
           val bSound = bytesSound.isSound(cByte, aByte)
-          if (bSound.isNotSound)
-            return IsSound.NotSound(s"Byte $cByte is not approximated by $aByte.")
+          if (bSound.isNotSound) {
+            val sound = IsSound.NotSound(s"Byte $cByte is not approximated by $aByte.")
+            return sound
+          }
         }
         IsSound.Sound
 

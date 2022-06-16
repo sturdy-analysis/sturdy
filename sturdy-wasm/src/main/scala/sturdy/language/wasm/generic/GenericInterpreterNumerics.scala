@@ -66,7 +66,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
 
   inline def evalIUnop(op: IUnop, v: V): V = op match
     case i32.Clz => i32ops.countLeadingZeros(v)
-    case i32.Ctz => i32ops.countTrailinZeros(v)
+    case i32.Ctz => i32ops.countTrailingZeros(v)
     case i32.Popcnt => i32ops.nonzeroBitCount(v)
     case i32.Extend8S =>
       val shift = i32ops.integerLit(24)
@@ -76,7 +76,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
       i32ops.shiftRight(i32ops.shiftLeft(v, shift), shift)
 
     case i64.Clz => i64ops.countLeadingZeros(v)
-    case i64.Ctz => i64ops.countTrailinZeros(v)
+    case i64.Ctz => i64ops.countTrailingZeros(v)
     case i64.Popcnt => i64ops.nonzeroBitCount(v)
     case i64.Extend8S =>
       val shift = i64ops.integerLit(56)

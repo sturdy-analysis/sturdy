@@ -17,6 +17,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
+import sturdy.fix.StackConfig
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -36,7 +37,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackedFrames: Boolean, callSites: Int) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: AFailureCollect = new AFailureCollect
@@ -72,8 +73,8 @@ object IntervalAnalysis extends Interpreter,
 
     final override val fixpoint =
       callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
-        fix.iter.innermost(stackedFrames), fix.iter.innermost(stackedFrames)))
+        fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
       ).fixpoint
 
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackedFrames, callSites)
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 

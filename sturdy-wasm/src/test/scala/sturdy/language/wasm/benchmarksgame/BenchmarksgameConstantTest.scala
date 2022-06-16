@@ -4,7 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
-import sturdy.fix.Fixpoint
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
@@ -28,8 +28,8 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
     it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
-      run(p, stackedFrames = false, binary = true)
-      run(p, stackedFrames = true, binary = true)
+      run(p, binary = true, StackConfig.StackedStates())
+      run(p, binary = true, StackConfig.StackedCfgNodes())
       LinearStateOperationCounter.clearAll()
       Profiler.reset()
     }
@@ -37,21 +37,21 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
     it must s"execute constant analysis with stacked states on benchmark ${p.getFileName}" in {
-      run(p, stackedFrames = false, binary = true)
+      run(p, binary = true, StackConfig.StackedStates())
     }
     it must s"execute constant analysis with stacked frames on benchmark ${p.getFileName}" in {
-      run(p, stackedFrames = true, binary = true)
+      run(p, binary = true, StackConfig.StackedCfgNodes())
     }
   }
 
-  def run(p: Path, stackedFrames: Boolean, binary: Boolean = false) =
+  def run(p: Path, binary: Boolean, stackConfig: StackConfig) =
     Fixpoint.DEBUG = false
     
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackedFrames))))
+      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
 
     val modInst = interp.initializeModule(module)
 

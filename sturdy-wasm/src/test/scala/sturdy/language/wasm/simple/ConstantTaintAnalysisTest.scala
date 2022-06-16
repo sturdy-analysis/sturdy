@@ -13,6 +13,7 @@ import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{untaint, Value}
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.{UnreachableInstruction, FrameData}
+import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.taint.Taint
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
@@ -59,11 +60,11 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
   }
 
   def testFunctionConstantArgsConst(path: Path, funcName: String, args: List[CVal], expectedResult: List[(ConstVal, Taint)]) =
-    testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue),
+    testFunction(path, funcName, args.map(Abstractly.apply),
       expectedResult.map((x: ConstVal, taint: Taint) => ConstantTaintAnalysis.liftConstantValue(x,taint)))
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[CVal], expectedResult: List[(CVal, Taint)]) =
-    testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue),
+    testFunction(path, funcName, args.map(Abstractly.apply),
       expectedResult.map((x: CVal, taint: Taint) => ConstantTaintAnalysis.liftConcreteValue(x,taint)))
 
   def testFunction(path: Path, funcName: String, args: List[ConstantAnalysis.Value], expected: List[Value]) =

@@ -29,7 +29,7 @@ inline def joinWithFailure[A](f: => A)(g: => Nothing)(using eff: EffectStack): A
   eff.joinWithFailure(f)(g)
 
 inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using w: WithJoin[B]): B =
-  w.eff.mapJoin(as, f)(using w.j)
+  w.eff.joinFold(as, f)(using w.j)
 
 //given JoinedJoin[A](using j: WithJoin[A]): Join[A] = j._1
 //given JoinedJoinEffects[A](using j: WithJoin[A]): Effectful = j._2

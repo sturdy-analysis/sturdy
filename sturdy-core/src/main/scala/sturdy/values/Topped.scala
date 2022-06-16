@@ -54,7 +54,7 @@ enum Topped[+V] extends Iterable[V]:
     case Actual(v) => scala.Some(v)
 
 given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
-  override def abstractly(c: C): Topped[A] = Topped.Actual(abs.abstractly(c))
+  override def apply(c: C): Topped[A] = Topped.Actual(abs.apply(c))
 
 given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] with
   override def lteq(x: Topped[A], y: Topped[A]): Boolean = (x, y) match
