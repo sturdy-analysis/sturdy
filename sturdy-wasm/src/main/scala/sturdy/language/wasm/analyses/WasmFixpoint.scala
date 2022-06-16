@@ -53,7 +53,7 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(Stac
     if (loopUnwinding <= 0)
       fix.filter(isFunOrLoop, iter.get)
     else
-      fix.dispatch(casesFunOrLoop, Seq(
+      fix.dispatch(isFunOrLoopToIndex, Seq(
         // enter Wasm function
         iter.get,
         // loop

@@ -17,12 +17,7 @@ object Fix:
 
   final def isFunOrLoopToIndex(dom: FixIn): Int = dom match
     case _: FixIn.EnterWasmFunction => 0
-    case FixIn.Eval(_: Loop, _) => 1
-    case _ => -1
-
-  final def casesFunOrLoop(dom: FixIn): Int = dom match
-    case _: FixIn.EnterWasmFunction => 0
-    case FixIn.Eval(_: Loop, _) => 1
+    case FixIn.Eval(_: Loop, _) | FixIn.MostGeneralClientLoop(_) => 1
     case _ => -1
 
   final def callSitesLogger() = fix.context.callSites[FixIn, (Call | CallIndirect, InstLoc)] {

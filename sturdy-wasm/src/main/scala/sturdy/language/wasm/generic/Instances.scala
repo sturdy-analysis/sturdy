@@ -58,6 +58,11 @@ class ModuleInstance:
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
+  def exportedFunctions: Map[String, ExternalValue.Function] =
+    exports.collect {
+      case (name, fun: ExternalValue.Function) => (name, fun)
+    }.toMap
+
   /** For each block, where does each contained instruction start. */
   var blockInstLocs: Map[(BlockId, Int), InstLoc] = Map.empty
 

@@ -44,6 +44,22 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+  it must s"execute most general client for simple with stacked states" in {
+    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+  }
+
+  it must s"execute most general client for simple with stacked frames" in {
+    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+  }
+
+  it must s"execute most general client for fact with stacked states" in {
+    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+  }
+
+  it must s"execute most general client for fact with stacked frames" in {
+    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+  }
+
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
@@ -103,7 +119,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Actual(1))))
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Actual(1))))
   (2 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
   }
@@ -119,12 +135,10 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
 
-
-
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 
-  def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
+  def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value], expectedFrames: List[Value] = null) =
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
       val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedStates())
       res match
@@ -133,13 +147,14 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
-    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
+    val expected2 = Option(expectedFrames).getOrElse(expected)
+    it must s"execute $funcName withs args $args with result $expected2 with stacked frames" in {
       val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
       res match
-        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
-        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
-        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
-        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
+        case AFallible.Unfailing(vals) => assertResult(expected2)(vals)
+        case AFallible.MaybeFailing(vals, _) => assertResult(expected2)(vals)
+        case AFallible.Failing(fails) => assert(false, s"Expected $expected2 but execution failed: $fails")
+        case AFallible.Diverging(recur) => assert(false, s"Expected $expected2 but execution diverged: $recur")
     }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
@@ -161,7 +176,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
+def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig, mostGeneralClient: Boolean = false): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
@@ -171,7 +186,12 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
-    interp.invokeExported(modInst, funName, args)
+    if (!mostGeneralClient)
+      interp.invokeExported(modInst, funName, args)
+    else {
+      interp.runMostGeneralClient(modInst, ConstantAnalysis.typedTop)
+      List()
+    }
   )
 //  println(cfg.toGraphViz)
 
@@ -181,7 +201,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   println(s"Found ${deadInstructions.size} dead instructions")
   println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.withBlocks(shortLabels = false).toGraphViz)
+//  println(cfg.withBlocks(shortLabels = false).toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")

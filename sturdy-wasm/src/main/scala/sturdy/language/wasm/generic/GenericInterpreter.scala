@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
+import sturdy.data.CombineUnit
 import sturdy.effect.AnalysisState
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.EffectStack
@@ -93,6 +94,7 @@ enum InstLoc:
 enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
+  case MostGeneralClientLoop(modInst: ModuleInstance)
 
   override def toString: String = this match
     case Eval(i, loc) => i match
@@ -101,10 +103,12 @@ enum FixIn:
       case If(_, _, _) => s"If @$loc"
       case _ => s"$i @$loc"
     case EnterWasmFunction(id, _, _) => s"Enter $id"
+    case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
 
 enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
+  case MostGeneralClient()
 
 given finiteFixIn: Finite[FixIn] with {}
 
@@ -187,7 +191,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   type State = (stack.OperandFrame, memory.State, globals.State, callFrame.Locals)
   implicit def analysisState: AnalysisState[FixIn, InState, OutState, State] = new AnalysisState {
     override def getInState(dom: FixIn): InState = dom match
-      case _: FixIn.EnterWasmFunction => InState.EnterFunState(callFrame.getLocals, memory.getState, globals.getState)
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => InState.EnterFunState(callFrame.getLocals, memory.getState, globals.getState)
       case _: FixIn.Eval => InState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
     override def setInState(in: InState): Unit = in match
       case InState.EnterFunState(vars, mem, globs) =>
@@ -200,7 +204,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         memory.setState(mem)
         globals.setState(globs)
     override def getOutState(dom: FixIn): OutState = dom match
-      case _: FixIn.EnterWasmFunction => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
       case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState, except.getState)
     override def setOutState(out: OutState): Unit = out match
       case OutState.ExitFunState(ops, mem, globs) =>
@@ -443,7 +447,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         }
         stack.pushN(res)
 
-  def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
+  private def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
     tryCatch {
       label(BlockId(id), LabelArities(0, returnN, returnN), func.body, None)
@@ -479,13 +483,37 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       FixOut.Eval()
     case FixIn.EnterWasmFunction(id, func, funcType) =>
       FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
+    case FixIn.MostGeneralClientLoop(modInst) =>
+      runMostGeneralClient_open(modInst)
+      FixOut.Eval()
   }
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
+  private var typedTop: ValType => V = _
+  def runMostGeneralClient(modInst: ModuleInstance, typedTop: ValType => V): Unit = external { rec ?=>
+    this.typedTop = typedTop
+    rec(FixIn.MostGeneralClientLoop(modInst))
+  }
+
+  private def runMostGeneralClient_open(modInst: ModuleInstance)(using rec: Fixed): Unit = {
+    effectStack.joinFold(modInst.exportedFunctions, { case (funcName, ExternalValue.Function(funcIx)) =>
+      val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      val paramTys = fun.funcType.params
+      val args = paramTys.map(typedTop).toList
+      invokeExported_open(modInst, funcName, args)
+      ()
+    })
+    rec(FixIn.MostGeneralClientLoop(modInst))
+  }
+
   def invokeExported(modInst: ModuleInstance, funcName: String, args: List[V]): List[V] = external {
+    invokeExported_open(modInst, funcName, args)
+  }
+
+  private def invokeExported_open(modInst: ModuleInstance, funcName: String, args: List[V])(using Fixed): List[V] = {
     stack.withNewStack {
-      modInst.exports.find(entry => entry._1 == funcName) match
-        case Some((_, ExternalValue.Function(funcIx))) =>
+      modInst.exportedFunctions.get(funcName) match
+        case Some(ExternalValue.Function(funcIx)) =>
           val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
           val paramTys = fun.funcType.params
           if (paramTys.length != args.length)
