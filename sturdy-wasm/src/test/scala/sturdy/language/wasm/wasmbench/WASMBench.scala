@@ -27,7 +27,7 @@ It includes
 */
 
 class WASMBench extends AnyFlatSpec:
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption, logErrors, logResults, saveResultsToDir}
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analyses, rootDir, warmup, logOpenOption, logErrors, logResults, saveResultsToDir}
 
   val MAXSIZE: Int = 10485760
 
@@ -52,8 +52,8 @@ class WASMBench extends AnyFlatSpec:
 //  prepareMetadata(mdPath, output)
   
   
-//  extractFuncDefsScript()
-  metadataScripts()
+  extractFuncDefsScript()
+//  metadataScripts()
 
   def printBinariesFromJacarteInResult(pathToResultCSV: Path) = {
     // Procedure to query metadata and results
@@ -129,7 +129,7 @@ class WASMBench extends AnyFlatSpec:
       acc
     })
 
-    val logger = new CsvLogger(rootDir.resolve("TaintTest.exceptions.histogram.csv"), StandardOpenOption.CREATE, true)
+    val logger = new FileLogger(rootDir.resolve("TaintTest.exceptions.histogram.csv"), StandardOpenOption.CREATE, true)
     logger.log("errMsg;count")
 
     for {
@@ -142,7 +142,10 @@ class WASMBench extends AnyFlatSpec:
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.{read,write}
 
-    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label])))
+    implicit val formats: Formats =
+      Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
+        + new WASMTypeSerializer
+        + new LabelSerializer
 
     val store: Store[String, WASMBenchBinary] = {
       val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -157,7 +160,10 @@ class WASMBench extends AnyFlatSpec:
   def metadataScripts() =
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.{read,write}
-    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label])))
+    implicit val formats: Formats =
+      Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
+        + new WASMTypeSerializer
+        + new LabelSerializer
 
     val rootDir: Path = Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI)
 
@@ -178,7 +184,7 @@ class WASMBench extends AnyFlatSpec:
       })
     }
 
-    val logger = new CsvLogger(rootDir.resolve("exports.histogram.csv"), StandardOpenOption.CREATE, true)
+    val logger = new FileLogger(rootDir.resolve("exports.histogram.csv"), StandardOpenOption.CREATE, true)
     logger.log("funName;count")
     for {
       (k,v) <- exportHistogram
@@ -311,34 +317,65 @@ class WASMBench extends AnyFlatSpec:
 
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.{read,write}
-    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label])))
+    implicit val formats: Formats =
+      Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
+        + new WASMTypeSerializer
+        + new LabelSerializer
 
     val mdPath = rootDir.resolve("sturdy.metadata.filtered.json")
 
     val mdStream: InputStream = Files.newInputStream(mdPath)
     val md = read[Map[String, Metadata]](mdStream)
     var erroneous = List.empty[String]
-    var funcDefs: Map[String, List[FuncDef]] = Map.empty
-    md.values.foreach(x => {
-      val binaryHash = x.hash
-      val md = x
+    val logger =
+      new FileLogger(
+        rootDir.resolve("sturdy.funcdefs.filtered.json"),
+        StandardOpenOption.CREATE,
+        true,
+        "")
+    logger.log("{\n")
+
+    val op: (() => Unit) => Metadata => Unit = sepFun => md => {
+      val binaryHash = md.hash
       val binPath = WASMBench.mkBinPath(binaryHash, filtering)
       try
-        funcDefs = funcDefs + (binaryHash -> FuncExtractor.extractFuncDefs(binPath, md, wasm2wat))
+        val funcDefs = FuncExtractor.extractFuncDefs(binPath, md, wasm2wat)
+        sepFun()
+        val serialized = write(funcDefs)
+        logger.log(s"\"${binaryHash}\":${serialized}")
       catch
         case e => erroneous = binaryHash :: erroneous; println(binaryHash)
-    })
-    val funcDefsPath = rootDir.resolve("sturdy.funcdefs.filtered.json")
-    val outStream = Files.newOutputStream(funcDefsPath)
-    val output = write(funcDefs)
-    outStream.write(output.getBytes())
+    }
+    op(() => ())(md.values.head)
+    md.values.drop(1).foreach(op(() => logger.log(",\n")))
+
+    logger.log("}\n")
     println(erroneous)
 
-
 object WASMBench:
+  import WASMBenchRunner.runnerConfig.{filtering, rootDir}
   def mkBinPath(hash: String, filtering: Filtering): Path =
     val uri: URI = this.getClass.getResource(s"/sturdy/language/wasm/wasmbench/${filtering}/${hash}.wasm").toURI
     Path.of(uri)
+
+  def mkMdStore: Store[String, WASMBenchBinary] =
+    import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.{read,write}
+
+    implicit val formats: Formats =
+      Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
+        + new WASMTypeSerializer
+        + new LabelSerializer
+
+    val store: Store[String, WASMBenchBinary] = {
+      val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
+      val exPath = rootDir.resolve(s"sturdy.funcdefs.$filtering.json")
+      new JSONStore(mdPath, exPath)
+    }
+    store
+
+  def mkResultStore(path: Path): Store[String, Result] =
+    new ResultStore[Result](path)
 
 enum OS:
   case Mac

@@ -25,47 +25,42 @@ import com.typesafe.config.ConfigFactory
 val config = ConfigFactory.load("wasmbench/runnerConfig")
 
 enum Analysis:
-  case Constant
-  case Taint
-  case Type
-  case All(constantCfg: WasmConfig, taintCfg: WasmConfig, typeCfg: WasmConfig)
+  case Constant(config: WasmConfig)
+  case Taint(config: WasmConfig)
+  case Type(config: WasmConfig)
 
-  def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, funcName: String, config: WasmConfig, binary: Boolean = false): Runnable =
+  def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, funcName: String, binary: Boolean = false): Runnable =
     val name = bin.md.hash
     val p = WASMBench.mkBinPath(name, Filtering.Filtered)
     val typeSig = bin.ex.find{
-      case FuncDef(_,ty,Some(str)) if str == funcName => true
+      case FuncDef(_,_,Some(str)) if str == funcName => true
+      case _ => false
     }.get.sig      
     this match
-      case Analysis.Type => 
+      case Analysis.Type(config) =>
         val args = 
           typeSig.param.map(
-            fd => fd.map(
-              x => WASMType.toTypeAnalysisValue(x))
-          ).getOrElse(List.empty)
+            ty => WASMType.toTypeAnalysisValue(ty)
+          )
         new TypeRunnable(set, p, funcName, args, config, binary)
-      case Analysis.Constant => 
+      case Analysis.Constant(config) =>
         val args =
           typeSig.param.map(
-            fd => fd.map(
-              x => WASMType.toConstantAnalysisValue(x))
-          ).getOrElse(List.empty)
-        new ConstantRunnable(set, p, funcName, getArgs(WASMType.toConstantAnalysisValue), config, binary)
-      case Analysis.Taint => 
+            ty => WASMType.toConstantAnalysisValue(ty)
+          )
+        new ConstantRunnable(set, p, funcName, args, config, binary)
+      case Analysis.Taint(config) =>
         val args =
           typeSig.param.map(
-            fd => fd.map(
-              x => WASMType.toTaintAnalysisValue(x))
-          ).getOrElse(List.empty)
-        new TaintRunnable(set, p, funcName, getArgs(WASMType.toTaintAnalysisValue), config, binary)
-      case All(_,_,_) => ???
+            ty =>  WASMType.toTaintAnalysisValue(ty)
+          )
+        new TaintRunnable(set, p, funcName, args, config, binary)
 
 
 type RunnerConfig = RRecord{
   val filtering: Filtering
   val timeLimit: Span
-  val analysis: Analysis
-  val wasmConfig: WasmConfig
+  val analyses: List[Analysis]
   val rootDir: Path
   val warmup: Boolean
   val logOpenOption: StandardOpenOption
@@ -80,20 +75,16 @@ type RunnerConfig = RRecord{
 object WASMBenchRunner:
   val runnerConfig: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(120).seconds,
-    "analysis" -> Analysis.Constant,
-//      Analysis.All(
-//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)),
-//      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost))
-//    ),
-    "wasmConfig" -> WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost())),
-    "rootDir" -> Path.of(this.getClass.getResource(s"/sturdy/language/wasm/wasmbench").toURI),
-    "warmup" -> true, // default: true
-    "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
+    "timeLimit" -> new GrainOfTime(300).seconds,
+    "analyses" -> List(Analysis.Constant(
+      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost()))
+    )),
+    "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
+    "warmup" -> false, // default: true
+    "logOpenOption" -> StandardOpenOption.APPEND, // default: CREATE
     "logErrors" -> true, // default: true
     "logResults" -> true, // default: true
-    "skipTestsIncludingIndex" -> -1,
+    "skipTestsIncludingIndex" -> (649 + 56),
     "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results"),
     "onlyBinariesInCSV" -> None, //Some(Paths.get("/home/code/thesis/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/onlyBinariesInCsv.csv")),
     "funcName" -> "main"
@@ -101,7 +92,7 @@ object WASMBenchRunner:
 
 class WASMBenchRunner extends AnyFunSpec:
   
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analysis, wasmConfig, rootDir, warmup, logOpenOption,
+  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analyses, rootDir, warmup, logOpenOption,
     logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir, onlyBinariesInCSV, funcName}
 
   val store: Store[String, WASMBenchBinary] = {
@@ -109,8 +100,8 @@ class WASMBenchRunner extends AnyFunSpec:
     val exPath = rootDir.resolve(s"sturdy.funcdefs.$filtering.json")
     new JSONStore(mdPath, exPath)
   }
-  println(funcName)
-  describe(s"Running $analysis on every binary exposing a \"$funcName\" function " +
+
+  describe(s"Running $analyses on every binary exposing a \"$funcName\" function " +
     s"in the $filtering WasmBench dataset") {
 
     val pred = (x: WASMBenchBinary) =>
@@ -134,50 +125,62 @@ class WASMBenchRunner extends AnyFunSpec:
     println(s"Considering ${binaries.size} binaries")
 
     saveResultsToDir.toFile.mkdirs()
-    analysis match {
-      case Analysis.All(constantCfg, taintCfg, typeCfg) =>
 
-        val (constantSuccLogger, constantExcLogger) = {
-          def s(string: String) = s"${Analysis.Constant}.$constantCfg.$string.csv".replace(' ', '-')
-          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
-          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
-          (a,b)
-        }
-        val (typeSuccLogger, typeExcLogger) = {
-          def s(string: String) = s"${Analysis.Type}.$typeCfg.$string.csv".replace(' ', '-')
-          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
-          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
-          (a,b)
-        }
-        val (taintSuccLogger, taintExcLogger) = {
-          def s(string: String) = s"${Analysis.Taint}.$taintCfg.$string.csv".replace(' ', '-')
-          val a = new CsvLogger(saveResultsToDir.resolve(s("results")), logOpenOption, logResults)
-          val b = new CsvLogger(saveResultsToDir.resolve(s("exceptions")), logOpenOption, logResults)
-          (a,b)
-        }
-        run(binaries, Analysis.Type, typeCfg, typeSuccLogger, typeExcLogger)
-        run(binaries, Analysis.Constant, constantCfg, constantSuccLogger, constantExcLogger)
-        run(binaries, Analysis.Taint, taintCfg, taintSuccLogger, taintExcLogger)
-      case _ =>
-        val succLogger: CsvLogger = new CsvLogger(saveResultsToDir.resolve(s"$analysis.$wasmConfig.results.csv".replace(' ', '-')), logOpenOption, logResults)
-        val excLogger: CsvLogger = new CsvLogger(saveResultsToDir.resolve(s"$analysis.$wasmConfig.exceptions.csv".replace(' ', '-')), logOpenOption, logErrors)
-        run(binaries, analysis, wasmConfig, succLogger, excLogger)
-    }
+    analyses.foreach(
+      analysis => analysis match
+        case Analysis.Type(config) =>
+          val succLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
+              logOpenOption,
+              logResults)
+          val excLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
+              logOpenOption,
+              logErrors)
+          run(binaries, analysis, succLogger, excLogger)
+        case Analysis.Constant(config) =>
+          val succLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
+              logOpenOption,
+              logResults)
+          val excLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
+              logOpenOption,
+              logErrors)
+          run(binaries, analysis, succLogger, excLogger)
+        case Analysis.Taint(config) =>
+          val succLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
+              logOpenOption,
+              logResults)
+          val excLogger: FileLogger =
+            new FileLogger(saveResultsToDir.resolve(
+              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
+              logOpenOption,
+              logErrors)
+          run(binaries, analysis, succLogger, excLogger)
+    )
 
-    def run(bins: List[WASMBenchBinary], an: Analysis, cfg: WasmConfig, sLogger: CsvLogger, eLogger: CsvLogger): Unit = {
+
+    def run(bins: List[WASMBenchBinary], an: Analysis, sLogger: FileLogger, eLogger: FileLogger): Unit = {
       if (warmup) {
         eLogger.log("hash;exceptionMsg")
         it(s"Warm-up until first successful run in $an") {
           val currBin = bins.iterator
           var cont = true
           while cont do
-            val md = currBin.next().md
+            val bin = currBin.next()
 
             var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
             val t = new Thread(an(v => {
               result = v
-            }, md, funcName, cfg, true))
+            }, bin, funcName, true))
 
             t.start()
             t.join(timeLimit.toMillis)
@@ -197,9 +200,10 @@ class WASMBenchRunner extends AnyFunSpec:
       }
 
       for {
-        (WASMBenchBinary(md, ex), num) <- bins.zipWithIndex
+        (bin, num) <- bins.zipWithIndex
       } do {
-        val name = md.hash;
+        val md = bin.md
+        val name = bin.md.hash
         val p = WASMBench.mkBinPath(name, filtering)
         //      println(s"Test nr.: $num, hash: $name")
         it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes} in $an") {
@@ -208,7 +212,7 @@ class WASMBenchRunner extends AnyFunSpec:
 
           var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
 
-          val t = new Thread(an(v => {result = v}, p, funcName, cfg, true))
+          val t = new Thread(an(v => {result = v}, bin, funcName, true))
 
           t.start()
           t.join(timeLimit.toMillis)
@@ -228,61 +232,10 @@ class WASMBenchRunner extends AnyFunSpec:
         }
       }
     }
-
-//    if warmup then
-//      excLogger.log("hash;exceptionMsg")
-//      it("Warm-up until first successful run") {
-//        val currBin = binaries.iterator
-//        var cont = true
-//        while cont do
-//          val md = currBin.next().md
-//          val name = md.hash;
-//          val p = WASMBench.mkBinPath(name, filtering)
-//
-//          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
-//
-//          val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
-//
-//          t.start()
-//          t.join(timeLimit.toMillis)
-//
-//          result match {
-//            case Left(e) => if t.isAlive then {t.interrupt; t.join}; println(e.toString)
-//            case Right(v) => cont = false; succLogger.log(v.getCsvHeaders); println("warmed-up!")
-//          }
-//      }
-//
-//    for {
-//      (WASMBenchBinary(md, ex), num) <- binaries.zipWithIndex
-//    } do {
-//      val name = md.hash;
-//      val p = WASMBench.mkBinPath(name, filtering)
-//      //      println(s"Test nr.: $num, hash: $name")
-//      it(s"Test nr. $num, $name: Size in bytes: ${md.sizeBytes}") {
-//        //        TimeLimitedTests does not always terminate test after the specified time,
-//        //        utilize 'Thread.join(millis)' instead
-//
-//        var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
-//
-//        val t = new Thread(analysis(v => {result = v}, p, "_start", wasmConfig, true))
-//
-//        t.start()
-//        t.join(timeLimit.toMillis)
-//
-//        result match {
-//          case Left(e) =>
-//            if t.isAlive then {t.interrupt(); t.join()}
-//            excLogger.log(s"$name;${e.toString}")
-//            throw e
-//          case Right(v) =>
-//            succLogger.log(v.toCsv)
-//        }
-//      }
-//    }
   }
 
 
-class CsvLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false):
+class FileLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false, newLine: String = System.lineSeparator()):
   import StandardOpenOption.*
 
   (oo, doLog) match
@@ -296,5 +249,5 @@ class CsvLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false):
 
   private def doLogFun(str: String): Unit =
     val logStream = Files.newOutputStream(p, StandardOpenOption.APPEND)
-    logStream.write(str.concat("\n").getBytes())
+    logStream.write(str.concat(newLine).getBytes())
     logStream.flush(); logStream.close()

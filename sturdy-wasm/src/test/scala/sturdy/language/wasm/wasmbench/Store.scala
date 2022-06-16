@@ -1,9 +1,8 @@
 package sturdy.language.wasm.wasmbench
 
-import java.net.URI
 
 trait Store[K,V]:
-  var wbbs: Map[K, V]
+  val wbbs: Map[K, V]
 
 //  def load(): List[V]
   def retrieve(predicate: V => Boolean): List[V] = wbbs.values.filter(predicate).toList

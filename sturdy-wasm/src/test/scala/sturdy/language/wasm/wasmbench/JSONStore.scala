@@ -10,34 +10,36 @@ import java.nio.file.{Files, Path, Paths}
 
 /*
   
-Contains classes to interface with metadata.json file and result.vsc files
+In memory store of metadata.
+Contains classes to read from metadata.json file and result.csv files.
 
 */
 
 
 class JSONStore(mdSource: Path, exSource: Path) extends Store[String, WASMBenchBinary]:
-
-  var wbbs: Map[String, WASMBenchBinary] = {
-
+  private lazy val cache : Map[String, WASMBenchBinary] =
     val nullSerializer = FieldSerializer[Metadata](
-      { case JField("instructionCount", JInt(0)) => Some(JField("instructionCount", JInt(0)))},
-      { case JField("instructionCount", JNull) => JField("instructionCount", JInt(0))},
+      { case JField("instructionCount", JInt(0)) => Some(JField("instructionCount", JInt(0))) },
+      { case JField("instructionCount", JNull) => JField("instructionCount", JInt(0)) },
     )
-    implicit val formats: Formats = Serialization.formats(ShortTypeHints(List(classOf[TypeDef], classOf[Label]))) + nullSerializer
+    implicit val formats: Formats =
+      Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
+        + new WASMTypeSerializer
+        + new LabelSerializer
 
     val mdStream: InputStream = Files.newInputStream(mdSource)
     val exStream: InputStream = Files.newInputStream(exSource)
 
     val md = read[Map[String, Metadata]](mdStream)
-    val ex = read[Map[String,List[FuncDef]]](exStream)
+    val ex = read[Map[String, List[FuncDef]]](exStream)
 
-    ex.foldLeft[Map[String, WASMBenchBinary]](Map.empty){
+    ex.foldLeft[Map[String, WASMBenchBinary]](Map.empty) {
       case (acc, (hash, lis)) => md.get(hash) match {
         case Some(datum) => acc + (hash -> WASMBenchBinary(md = datum, ex = lis))
         case None => acc
       }
     }
-  }
+  val wbbs: Map[String, WASMBenchBinary] = cache
 
   override def retrieve(predicate: WASMBenchBinary => Boolean): List[WASMBenchBinary] =
     wbbs.values.filter(predicate).toList
@@ -47,37 +49,35 @@ class JSONStore(mdSource: Path, exSource: Path) extends Store[String, WASMBenchB
       case None => acc)
   override def retrieve(key: String): Option[WASMBenchBinary] = wbbs.get(key)
 
-  override def store(data: List[WASMBenchBinary]): Unit =
-    for {
-      m <- data
-    } do {
-      if wbbs.isDefinedAt(m.md.hash) then
-        wbbs = wbbs.updated(m.md.hash, m)
-      else
-        this.store(m)
-    }
-  override def store(data: WASMBenchBinary): Unit = wbbs = wbbs + (data.md.hash -> data)
+  override def store(data: List[WASMBenchBinary]): Unit = ???
+//    for {
+//      m <- data
+//    } do {
+//      if wbbs.isDefinedAt(m.md.hash) then
+//        wbbs = wbbs.updated(m.md.hash, m)
+//      else
+//        this.store(m)
+//    }
+  override def store(data: WASMBenchBinary): Unit = ??? // wbbs = wbbs + (data.md.hash -> data)
 
 class ResultStore[A <: RRecord](src: Path) extends Store[String, A]:
   import scala.jdk.CollectionConverters.*
-
-  var wbbs: Map[String, A] = {
+  private lazy val cache : Map[String, A] =
     val in = Files.newBufferedReader(src).lines().iterator().asScala
     val headers = in.next().split(";")
-    
+
     in.map(s => {
       val d = s.split(";")
-      (d(0), RRecord(headers.zip(d):_*).asInstanceOf[A])
+      (d(0), RRecord(headers.zip(d): _*).asInstanceOf[A])
     }).toMap
-  }
+  val wbbs: Map[String, A] = cache
 
   def store(data: List[A]): Unit = ???
   def store(data: A): Unit = ???
 
 class ErrorStore(src: Path) extends Store[String, String]:
   import scala.jdk.CollectionConverters.*
-
-  var wbbs: Map[String, String] = {
+  private lazy val cache : Map[String, String] =
     val in = Files.newBufferedReader(src).lines().iterator().asScala
     val headers = in.next().split(";")
 
@@ -85,7 +85,8 @@ class ErrorStore(src: Path) extends Store[String, String]:
       val d = s.split(";")
       (d(0), d(1))
     }).toMap
-  }
+
+  val wbbs: Map[String, String] = cache
 
   def store(data: List[String]): Unit = ???
   def store(data: String): Unit = ???

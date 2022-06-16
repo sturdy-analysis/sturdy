@@ -28,7 +28,7 @@ trait AnalysisRunnable extends Runnable:
     }
 
 class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
-                    p: Path, funcName: String, funcArgs: List[Any],
+                    p: Path, funcName: String, funcArgs: List[ConstantTaintAnalysis.Value],
                     config: WasmConfig,
                     binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
@@ -37,8 +37,9 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
     val name = p.getFileName.toString
     val startTimeMillis = System.currentTimeMillis()
-    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
-
+    val module: swam.syntax.Module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+    
+    
     val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, config)
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantTaintAnalysis.constantInstructions(interp)
@@ -112,7 +113,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
 
 class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
-                   p: Path, funcName: String, funcArgs: List[Any],
+                   p: Path, funcName: String, funcArgs: List[TypeAnalysis.Value],
                    config: WasmConfig,
                    binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
@@ -177,7 +178,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     )
 
 class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
-                       p: Path, funcName: String, funcArgs: List[Any],
+                       p: Path, funcName: String, funcArgs: List[ConstantAnalysis.Value],
                        config: WasmConfig,
                        binary: Boolean = false) extends AnalysisRunnable{
 

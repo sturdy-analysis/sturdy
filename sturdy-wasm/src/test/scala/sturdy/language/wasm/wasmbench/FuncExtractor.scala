@@ -42,8 +42,10 @@ object FuncExtractor:
         else if l.startsWith("(export") then
           funcExStr = funcExStr + "\n" + line
       })
-
-      Files.delete(tmpFilePath)
+      if Files.isSymbolicLink(tmpFilePath) then
+        Files.delete(Files.readSymbolicLink(tmpFilePath))
+      else
+        Files.delete(tmpFilePath)
     }
 
     val typeDefs = typeDefRegex
@@ -144,7 +146,8 @@ object FuncExtractor:
       op("type")
         *> label ~ inParens(op("func") *> (param.backtrack.? ~ result.?))
     )).map{
-      case (lab, (param, result)) => TypeDef(lab, param, result)
+      case (lab, (param, result)) =>
+        TypeDef(lab, param.getOrElse(List.empty), result.getOrElse(List.empty))
     }
 
   val funcDef: P[(Label, Int)] =
@@ -165,10 +168,14 @@ object FuncExtractor:
     
 object test extends App:
   import FuncExtractor.*
-  val str =   "(export \"_start\" (func $_start))"
+  val str = "(export \"_start\" (func $_start))"
   val str2 = "(export \"main\" (func $main))"
+  val str3 = "(type (;1;) (func (param i32 i64 i32) (result i64)))"
+  val comment_str = "(;1;)"
 
-  println(parseFuncExport(str))
+  println(parseFuncExport(str2))
+  println(label.parse(comment_str))
+  println(parseTypeDef(str3))
 
 
 // (type (;1;) (func (param i32 i64 i32) (result i64)))

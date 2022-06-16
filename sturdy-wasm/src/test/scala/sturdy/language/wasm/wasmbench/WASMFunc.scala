@@ -1,10 +1,13 @@
 package sturdy.language.wasm.wasmbench
 
+import org.json4s.JsonAST.{JInt, JValue}
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis}
+import sturdy.language.wasm.generic.GenericInterpreter
 import sturdy.values.Topped
 import sturdy.values.taint.TaintProduct
 import sturdy.values.types.BaseType
+import org.json4s.{CustomSerializer, JField, JObject, JString, JInt}
 
 // (type (;1;) (func (param i32 i64 i32) (result i64)))
 
@@ -20,6 +23,32 @@ enum WASMType:
   case F32
   case F64
 
+  override def toString: String = this match
+    case I32 => "I32"
+    case I64 => "I64"
+    case F32 => "F32"
+    case F64 => "F64"
+
+  def toAnalysisValue[T <: Interpreter](analysis: T) = this match
+    case I32 => analysis.Value.Int32(analysis.topI32)
+    case I64 => analysis.Value.Int64(analysis.topI64)
+    case F32 => analysis.Value.Float32(analysis.topF32)
+    case F64 => analysis.Value.Float64(analysis.topF64)
+
+class WASMTypeSerializer extends CustomSerializer[WASMType](format => (
+  {
+    case JObject(JField("WASMType", JString(v)) :: Nil) =>
+      v match
+        case "I32" => WASMType.I32
+        case "I64" => WASMType.I64
+        case "F32" => WASMType.F32
+        case "F64" => WASMType.F64
+  },
+  {
+    case x: WASMType =>
+      JObject(JField("WASMType", JString(x.toString)) :: Nil)
+  }
+))
 
 object WASMType:
   def apply(s: String): WASMType = s match {
@@ -30,23 +59,25 @@ object WASMType:
     case _ => ???
   }
 
-  def toTaintAnalysisValue(wty: WASMType) = wty match
-    case I32 => TaintProduct[Topped[Int]]
-    case I64 => TaintProduct[Topped[Long]]
-    case F32 => TaintProduct[Topped[Float]]
-    case F64 => TaintProduct[Topped[Double]]
+  import WASMType.*
 
-  def toTypeAnalysisValue(wty: WASMType) = wty match
-    case I32 => BaseType[Int]
-    case I64 => BaseType[Long]
-    case F32 => BaseType[Float]
-    case F64 => BaseType[Double]
+  def toTaintAnalysisValue(wty: WASMType): ConstantTaintAnalysis.Value = wty match
+    case I32 => ConstantTaintAnalysis.Value.Int32(ConstantTaintAnalysis.topI32)
+    case I64 => ConstantTaintAnalysis.Value.Int64(ConstantTaintAnalysis.topI64)
+    case F32 => ConstantTaintAnalysis.Value.Float32(ConstantTaintAnalysis.topF32)
+    case F64 => ConstantTaintAnalysis.Value.Float64(ConstantTaintAnalysis.topF64)
 
-  def toConstantAnalysisValue(wty: WASMType) = wty match
-    case I32 => Topped[Int]
-    case I64 => Topped[Long]
-    case F32 => Topped[Float]
-    case F64 => Topped[Double]
+  def toTypeAnalysisValue(wty: WASMType): TypeAnalysis.Value = wty match
+    case I32 => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
+    case I64 => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
+    case F32 => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
+    case F64 => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+
+  def toConstantAnalysisValue(wty: WASMType): ConstantAnalysis.Value= wty match
+    case I32 => ConstantAnalysis.Value.Int32(Topped.Top)
+    case I64 => ConstantAnalysis.Value.Int64(Topped.Top)
+    case F32 => ConstantAnalysis.Value.Float32(Topped.Top)
+    case F64 => ConstantAnalysis.Value.Float64(Topped.Top)
 
 enum Label:
   case Numeric(i: Int)
@@ -65,12 +96,37 @@ enum Label:
     case _ => ???
   
 object Label:
-  def apply(s: String): Label =
-    Symbolic(s)
+  def apply(s: String, forceSymbolic: Boolean = true): Label =
+    if forceSymbolic then
+      return Symbolic(s)
+    try
+      Numeric(s.toInt)
+    catch
+      case _ => Symbolic(s)
   def apply(i: Int): Label =
     Numeric(i)
+
+class LabelSerializer extends CustomSerializer[Label](format => (
+  {
+    case JObject(JField("i", JInt(n)) :: Nil) =>
+      Label(n.toInt)
+    case JObject(JField("s", JString(s)) :: Nil) =>
+      Label(s)
+    case x =>
+      println(x)
+      ???
+  },
+  {
+    case x: Label =>
+      x match
+        case Label.Numeric(n) =>
+          JObject(JField("Label", JObject(JField("i", JInt(n)))))
+        case Label.Symbolic(s) =>
+          JObject(JField("label", JObject(JField("s", JString(s)))))
+  }
+))
     
-case class TypeDef(label: Label, param: Option[List[WASMType]], result: Option[List[WASMType]])
+case class TypeDef(label: Label, param: List[WASMType], result: List[WASMType])
 
 case class FuncExport(name: String, label: Label)
 
