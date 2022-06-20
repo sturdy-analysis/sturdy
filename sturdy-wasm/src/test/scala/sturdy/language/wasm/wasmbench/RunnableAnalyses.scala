@@ -1,54 +1,90 @@
 package sturdy.language.wasm.wasmbench
 
 import sturdy.fix.Fixpoint
+import sturdy.fix.cfg.ControlLogger
 import sturdy.language.wasm
 import sturdy.language.wasm.{Interpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, ModuleInstance}
+import sturdy.util.Profiler
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.nio.file.{Files, Path}
 
-trait AnalysisRunnable extends Runnable:
-  def setRes(v: Either[Throwable, RRecord]): Unit
-  def start(): RRecord
+trait AnalysisRunnable[A <: Interpreter with ControlFlow](analysis: A) extends Runnable:
+  private def start(): RRecord =
+    val (interp, cfg, modInst) = instantiate
+    interprete()
+    generateReportHook(interp. cfg, modInst)
 
-  def run(): Unit =
+  type InstructionLoggers;
+  type CfgType = (FixIn => Option[CfgNode]) => ((FixIn, FixOut[AnalysisRunnable.this.analysis.Value]) => Option[CfgNode]) => ControlLogger[AnalysisRunnable.this.analysis.Instance#fixpoint.Ctx, FixIn, FixOut[AnalysisRunnable.this.analysis.Value], WasmException[AnalysisRunnable.this.analysis.Value], CfgNode]
+
+  def setRes(v: Either[Throwable, RRecord]): Unit
+  def registerLoggersHook(interp: analysis.Instance): analysis.Instance => InstructionLoggers
+  def generateReportHook(interp: analysis.Instance, cfg: CfgType, modInst: ModuleInstance): RRecord
+
+  final def run(): Unit =
     try {
       val res = start()
       setRes(Right(res))
     }
     catch {
       case e: InterruptedException =>
-        println("time limited reached, terminating analysis.")
+        println("time limit reached, terminating analysis.")
         setRes(Left(e))
       case e =>
         setRes(Left(e))
     }
 
+  private def instantiate =
+
+    val interp = new analysis.Instance(FrameData.empty, Iterable.empty, config)
+    val cfg = analysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val modInst = interp.initializeModule({
+      if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+    })
+
+    (interp, cfg, modInst)
+
+  private def interprete(interp: analysis.Instance): analysis.Instance => InstructionLoggers =
+
+    val loggers = registerLoggersHook(interp)
+
+    interp.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp.invokeExported(modInst, id, funcArgs)
+        case AnalysisScope.MostGeneralClient =>
+          interp.runMostGeneralClient(modInst, analysis.typedTop)
+    })
+
+    loggers
+
 class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
-                    p: Path, funcName: String, funcArgs: List[ConstantTaintAnalysis.Value],
+                    p: Path, scope: AnalysisScope, funcArgs: List[ConstantTaintAnalysis.Value],
                     config: WasmConfig,
                     binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
   override def start(): RRecord =
     Fixpoint.DEBUG = false
+    val startTimeMillis = System.currentTimeMillis()
 
     val name = p.getFileName.toString
-    val startTimeMillis = System.currentTimeMillis()
-    val module: swam.syntax.Module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
-    
-    
     val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, config)
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
-    val constants = ConstantTaintAnalysis.constantInstructions(interp)
-    val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
+    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+    val constants = ConstantTaintAnalysis.constantInstructions(interp);val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
     val modInst = interp.initializeModule(module)
-    interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, funcArgs)
-    )
+    interp.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp.invokeExported(modInst, id, funcArgs)
+        case AnalysisScope.MostGeneralClient =>
+          interp.runMostGeneralClient(modInst, ConstantTaintAnalysis.typedTop)
+    })
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
@@ -113,7 +149,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
 
 class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
-                   p: Path, funcName: String, funcArgs: List[TypeAnalysis.Value],
+                   p: Path, scope: AnalysisScope, funcArgs: List[TypeAnalysis.Value],
                    config: WasmConfig,
                    binary: Boolean = false) extends AnalysisRunnable:
   override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
@@ -128,9 +164,13 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val modInst = interp.initializeModule(module)
-    interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, funcArgs)
-    )
+    interp.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp.invokeExported(modInst, id, funcArgs)
+        case AnalysisScope.MostGeneralClient =>
+          interp.runMostGeneralClient(modInst, TypeAnalysis.typedTop)
+    })
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
@@ -178,7 +218,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     )
 
 class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
-                       p: Path, funcName: String, funcArgs: List[ConstantAnalysis.Value],
+                       p: Path, scope: AnalysisScope, funcArgs: List[ConstantAnalysis.Value],
                        config: WasmConfig,
                        binary: Boolean = false) extends AnalysisRunnable{
 
@@ -197,9 +237,13 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val constants = ConstantAnalysis.constantInstructions(interp)
 
     val modInst = interp.initializeModule(module)
-    val res = interp.failure.fallible(
-      interp.invokeExported(modInst, funcName, funcArgs)
-    )
+    interp.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp.invokeExported(modInst, id, funcArgs)
+        case AnalysisScope.MostGeneralClient =>
+          interp.runMostGeneralClient(modInst, ConstantAnalysis.typedTop)
+    })
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)

@@ -11,6 +11,15 @@ package sturdy.language.wasm.wasmbench:
       res.dropRight(1)
     def getCsvHeaders: String =
       ordering.map(_._1).mkString(";")
+    def updated(new_elems: (String,Any)*): RRecord =
+      val new_ordering = this.ordering.appendedAll(new_elems.map(_._1).zipWithIndex.sortWith((l,r) => {l._2 < r._2}))
+      val new_fields = new_elems.foldLeft(fields)((acc,elem) => {
+        acc + elem
+      })
+      new RRecord{
+        private val ordering = new_ordering
+        private val fields = Map.empty
+      }
 
   type Result = RRecord {
     val hash: String;

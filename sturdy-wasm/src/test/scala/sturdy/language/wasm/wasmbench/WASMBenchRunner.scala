@@ -4,6 +4,7 @@ import org.scalatest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.SpanSugar.GrainOfTime
 import org.scalatest.time.Span
+import sturdy.fix
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
@@ -20,77 +21,116 @@ import scala.language.postfixOps
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.util.{Failure, Success, Try}
 
+enum AnalysisScope:
+  case SingleFunction(id: String)
+  case MostGeneralClient
+
+  override def toString: String = this match
+    case SingleFunction(id) => s"function \"$id\""
+    case MostGeneralClient => "MostGeneralClient"
 
 enum Analysis:
-  case Constant(config: WasmConfig)
-  case Taint(config: WasmConfig)
-  case Type(config: WasmConfig)
+  case Interval(conf: AnalysisConfig)
+  case Constant(conf: AnalysisConfig)
+  case Taint(conf: AnalysisConfig)
+  case Type(conf: AnalysisConfig)
 
-  def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, funcName: String, binary: Boolean = false): Runnable =
+  def config: AnalysisConfig = this match
+    case Interval(config) => config
+    case Constant(config) => config
+    case Taint(config) => config
+    case Type(config) => config
+  
+  override def toString: String = this match
+    case Interval(config) => s"IntervalAnalysis(config=${config.wasmConfig},scope=${config.scope})"
+    case Constant(config) => s"ConstantAnalysis(config=${config.wasmConfig},scope=${config.scope})"
+    case Taint(config) => s"ConstantTaintAnalysis(config=${config.wasmConfig},scope=${config.scope})"
+    case Type(config) => s"TypeAnalysis(config=${config.wasmConfig},scope=${config.scope})"
+
+  def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, config: AnalysisConfig, binary: Boolean = false): Runnable =
     val name = bin.md.hash
     val p = WASMBench.mkBinPath(name, Filtering.Filtered)
-    val typeSig = bin.ex.find{
-      case FuncDef(_,_,Some(str)) if str == funcName => true
-      case _ => false
-    }.get.sig
+    val params = config.scope match
+      case AnalysisScope.SingleFunction(id) =>
+        bin.ex.find {
+          case FuncDef(_, _, Some(str)) if str == id => true
+          case _ => false
+        }.get.sig.param
+      case AnalysisScope.MostGeneralClient =>
+        List.empty
+
     this match
+      case Analysis.Interval(config) =>
+        val args = params.map(WASMType.toIntervalAnalysisValue)
+        new IntervalRunnable(set, p, config.scope, args, config.wasmConfig, binary)
       case Analysis.Type(config) =>
-        val args =
-          typeSig.param.map(
-            ty => WASMType.toTypeAnalysisValue(ty)
-          )
-        new TypeRunnable(set, p, funcName, args, config, binary)
+        val args = params.map(WASMType.toTypeAnalysisValue)
+        new TypeRunnable(set, p, config.scope, args, config.wasmConfig, binary)
       case Analysis.Constant(config) =>
-        val args =
-          typeSig.param.map(
-            ty => WASMType.toConstantAnalysisValue(ty)
-          )
-        new ConstantRunnable(set, p, funcName, args, config, binary)
+        val args = params.map(WASMType.toConstantAnalysisValue)
+        new ConstantRunnable(set, p, config.scope, args, config.wasmConfig, binary)
       case Analysis.Taint(config) =>
-        val args =
-          typeSig.param.map(
-            ty =>  WASMType.toTaintAnalysisValue(ty)
-          )
-        new TaintRunnable(set, p, funcName, args, config, binary)
+        val args = params.map(WASMType.toTaintAnalysisValue)
+        new TaintRunnable(set, p, config.scope, args, config.wasmConfig, binary)
 
-
-type RunnerConfig = RRecord{
+type RunnerConfig = RRecord {
   val filtering: Filtering
-  val timeLimit: Span
   val analyses: List[Analysis]
   val rootDir: Path
+  val datasetFilter: WASMBenchBinary => Boolean
+  val skipTestsIncludingIndex: Int
+  val takeUntilIndex: Option[Int]
+  val onlyBinariesInCSV: Option[Path]
+}
+
+type AnalysisConfig = RRecord {
+  val timeLimit: Span
+  val wasmConfig: WasmConfig
+  val scope: AnalysisScope
   val warmup: Boolean
+  val saveResultsToDir: Path
   val logOpenOption: StandardOpenOption
   val logErrors: Boolean
   val logResults: Boolean
-  val skipTestsIncludingIndex: Int
-  val saveResultsToDir: Path
-  val onlyBinariesInCSV: Option[Path]
-  val funcName: String
 }
 
-object WASMBenchRunner:
-  val runnerConfig: RunnerConfig = RRecord(
+object RunnerConfig:
+  val default: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
-    "timeLimit" -> new GrainOfTime(300).seconds,
-    "analyses" -> List(Analysis.Constant(
-      WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost()))
-    )),
+    "analyses" -> List(
+      Analysis.Constant(AnalysisConfig.default)),
     "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
-    "warmup" -> false, // default: true
-    "logOpenOption" -> StandardOpenOption.APPEND, // default: CREATE
-    "logErrors" -> true, // default: true
-    "logResults" -> true, // default: true
-    "skipTestsIncludingIndex" -> (649 + 56),
-    "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results"),
+    "datasetFilter" -> ((x: WASMBenchBinary) => x.ex.exists {
+      case FuncDef(_, _, Some(name)) if name == "_start" => true
+      case _ => false
+    }),
+    "skipTestsIncludingIndex" -> (-1),
+    "takeUntilIndex" -> None, //default = None
     "onlyBinariesInCSV" -> None, //Some(Paths.get("/home/code/thesis/sturdy.scala/sturdy-wasm/src/test/scala/sturdy/language/wasm/wasmbench/onlyBinariesInCsv.csv")),
-    "funcName" -> "main"
   ).asInstanceOf[RunnerConfig]
 
-class WASMBenchRunner extends AnyFunSpec:
-  
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analyses, rootDir, warmup, logOpenOption,
-    logErrors, logResults, skipTestsIncludingIndex, saveResultsToDir, onlyBinariesInCSV, funcName}
+object AnalysisConfig:
+  val default: AnalysisConfig = RRecord(
+    "timeLimit" -> new GrainOfTime(300).seconds,
+    "wasmConfig" -> WasmConfig(
+      ctx = CallSites(1),
+      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
+    "scope" -> AnalysisScope.MostGeneralClient,
+    "warmup" -> true, // default: true
+    "saveResultsToDir" -> Path.of("/home/code/thesis/wasmbench/results/testrun"),
+    "logOpenOption" -> StandardOpenOption.CREATE, // default: CREATE
+    "logErrors" -> true, // default: true
+    "logResults" -> true // default: true
+  ).asInstanceOf[AnalysisConfig]
+
+  def apply() = default
+  def apply(kv_pairs: (String, Any)*): AnalysisConfig = default.updated().asInstanceOf[AnalysisConfig]
+
+class WASMBenchRunner extends AnyFunSpec :
+
+  import RunnerConfig.default.{
+    filtering, analyses, rootDir, datasetFilter,
+    onlyBinariesInCSV, skipTestsIncludingIndex, takeUntilIndex}
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")
@@ -98,19 +138,17 @@ class WASMBenchRunner extends AnyFunSpec:
     new JSONStore(mdPath, exPath)
   }
 
-  describe(s"Running $analyses on every binary exposing a \"$funcName\" function " +
-    s"in the $filtering WasmBench dataset") {
-
-    val pred = (x: WASMBenchBinary) =>
-      x.ex.exists {
-        case FuncDef(_, _, Some(x)) if x == funcName => true
-        case _ => false
-      }
+  describe(s"Running $analyses on every binary " +
+    s"in the $filtering WasmBench dataset.") {
 
     var binaries = {
       //      val timeOuts = List(
       //        "c1cfe409e18435f0371876cf25ca47621e0e59f73beb0284dbf1b61b7696f7ef")
-      store.retrieve(pred).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes)
+      val take =
+        takeUntilIndex.map({v => (x: List[WASMBenchBinary]) => x.take(v)})
+          .getOrElse(x => x)
+      take(
+        store.retrieve(datasetFilter).sortWith((x, y) => x.md.sizeBytes < y.md.sizeBytes))
     }.drop(skipTestsIncludingIndex + 1)
 
     if (onlyBinariesInCSV.isDefined) {
@@ -121,51 +159,17 @@ class WASMBenchRunner extends AnyFunSpec:
 
     println(s"Considering ${binaries.size} binaries")
 
-    saveResultsToDir.toFile.mkdirs()
-
     analyses.foreach(
-      analysis => analysis match
-        case Analysis.Type(config) =>
-          val succLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
-              logOpenOption,
-              logResults)
-          val excLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
-              logOpenOption,
-              logErrors)
-          run(binaries, analysis, succLogger, excLogger)
-        case Analysis.Constant(config) =>
-          val succLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
-              logOpenOption,
-              logResults)
-          val excLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
-              logOpenOption,
-              logErrors)
-          run(binaries, analysis, succLogger, excLogger)
-        case Analysis.Taint(config) =>
-          val succLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.results.csv".replace(' ', '-')),
-              logOpenOption,
-              logResults)
-          val excLogger: FileLogger =
-            new FileLogger(saveResultsToDir.resolve(
-              s"$analysis.$config.$funcName.exceptions.csv".replace(' ', '-')),
-              logOpenOption,
-              logErrors)
-          run(binaries, analysis, succLogger, excLogger)
+      analysis =>
+        val cfg = analysis.config
+        cfg.saveResultsToDir.toFile.mkdirs()
+        val (succLogger, excLogger) = FileLogger.succ_excLogger(analysis.toString, cfg)
+        run(binaries, analysis, succLogger, excLogger)
     )
 
-
     def run(bins: List[WASMBenchBinary], an: Analysis, sLogger: FileLogger, eLogger: FileLogger): Unit = {
-      if (warmup) {
+      val cfg = an.config
+      if (cfg.warmup) {
         eLogger.log("hash;exceptionMsg")
         it(s"Warm-up until first successful run in $an") {
           val currBin = bins.iterator
@@ -173,14 +177,15 @@ class WASMBenchRunner extends AnyFunSpec:
           while cont do
             val bin = currBin.next()
 
-            var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+            var result: Either[Throwable, RRecord] =
+              Left(TimeoutException(s"Test timed out after ${cfg.timeLimit.toSeconds} seconds"))
 
             val t = new Thread(an(v => {
               result = v
-            }, bin, funcName, true))
+            }, bin, cfg, true))
 
             t.start()
-            t.join(timeLimit.toMillis)
+            t.join(cfg.timeLimit.toMillis)
             if (t.isAlive) {
               t.interrupt()
               t.join()
@@ -189,15 +194,17 @@ class WASMBenchRunner extends AnyFunSpec:
 
             result match {
               case Left(e) => if t.isAlive then {
-                t.interrupt(); t.join()
-              }; println(e.toString)
+                t.interrupt();
+                t.join()
+              };
+                println(e.toString)
               case Right(v) => cont = false; sLogger.log(v.getCsvHeaders); println("warmed-up!")
             }
         }
       }
 
       for {
-        (bin, num) <- bins.zipWithIndex
+        (bin, num) <- bins.zip((skipTestsIncludingIndex + 1) to binaries.length)
       } do {
         val md = bin.md
         val name = bin.md.hash
@@ -207,12 +214,14 @@ class WASMBenchRunner extends AnyFunSpec:
           //        TimeLimitedTests does not always terminate test after the specified time,
           //        utilize 'Thread.join(millis)' instead
 
-          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${timeLimit.toSeconds} seconds"))
+          var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${cfg.timeLimit.toSeconds} seconds"))
 
-          val t = new Thread(an(v => {result = v}, bin, funcName, true))
+          val t = new Thread(an(v => {
+            result = v
+          }, bin, cfg, true))
 
           t.start()
-          t.join(timeLimit.toMillis)
+          t.join(cfg.timeLimit.toMillis)
           if (t.isAlive) {
             t.interrupt()
             t.join()
@@ -233,13 +242,15 @@ class WASMBenchRunner extends AnyFunSpec:
 
 
 class FileLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false, newLine: String = System.lineSeparator()):
+
   import StandardOpenOption.*
 
   (oo, doLog) match
     case (CREATE, true) | (CREATE_NEW, true) =>
       if Files.exists(p) then Files.delete(p)
       val init = Files.newOutputStream(p, oo)
-      init.flush(); init.close()
+      init.flush();
+      init.close()
     case _ => ()
 
   val log: String => Unit = if doLog then this.doLogFun else (x: String) => ()
@@ -247,4 +258,21 @@ class FileLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false, newLin
   private def doLogFun(str: String): Unit =
     val logStream = Files.newOutputStream(p, StandardOpenOption.APPEND)
     logStream.write(str.concat(newLine).getBytes())
-    logStream.flush(); logStream.close()
+    logStream.flush();
+    logStream.close()
+
+object FileLogger:
+  def succLogger(an: String, cfg: AnalysisConfig): FileLogger =
+    new FileLogger(cfg.saveResultsToDir.resolve(
+      s"$an.results.csv".replace(' ', '_')),
+      cfg.logOpenOption,
+      cfg.logResults)
+
+  def excLogger(an: String, cfg: AnalysisConfig): FileLogger =
+    new FileLogger(cfg.saveResultsToDir.resolve(
+      s"$an.exceptions.csv".replace(' ', '_')),
+      cfg.logOpenOption,
+      cfg.logErrors)
+
+  def succ_excLogger(an: String, cfg: AnalysisConfig): (FileLogger, FileLogger) =
+    (succLogger(an, cfg), excLogger(an, cfg))

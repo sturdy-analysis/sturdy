@@ -27,7 +27,7 @@ It includes
 */
 
 class WASMBench extends AnyFlatSpec:
-  import WASMBenchRunner.runnerConfig.{filtering, timeLimit, analyses, rootDir, warmup, logOpenOption, logErrors, logResults, saveResultsToDir}
+  import RunnerConfig.default.{filtering, analyses, rootDir}
 
   val MAXSIZE: Int = 10485760
 
@@ -353,7 +353,7 @@ class WASMBench extends AnyFlatSpec:
     println(erroneous)
 
 object WASMBench:
-  import WASMBenchRunner.runnerConfig.{filtering, rootDir}
+  import RunnerConfig.default.{filtering, rootDir}
   def mkBinPath(hash: String, filtering: Filtering): Path =
     val uri: URI = this.getClass.getResource(s"/sturdy/language/wasm/wasmbench/${filtering}/${hash}.wasm").toURI
     Path.of(uri)

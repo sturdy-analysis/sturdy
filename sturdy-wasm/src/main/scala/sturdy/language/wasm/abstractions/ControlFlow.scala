@@ -76,7 +76,7 @@ case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, end
 
 object CfgConfig:
   val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls, endNodes = true)
-  def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl, endNodes = true)
+  def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl, endNodes = true)Most
   def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes, endNodes = true)
 
 enum CfgGranularity:

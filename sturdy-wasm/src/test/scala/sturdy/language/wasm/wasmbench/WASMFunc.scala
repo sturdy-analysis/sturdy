@@ -7,7 +7,8 @@ import sturdy.language.wasm.generic.GenericInterpreter
 import sturdy.values.Topped
 import sturdy.values.taint.TaintProduct
 import sturdy.values.types.BaseType
-import org.json4s.{CustomSerializer, JField, JObject, JString, JInt}
+import org.json4s.{CustomSerializer, JField, JInt, JObject, JString}
+import swam.ValType
 
 // (type (;1;) (func (param i32 i64 i32) (result i64)))
 
@@ -34,6 +35,8 @@ enum WASMType:
     case I64 => analysis.Value.Int64(analysis.topI64)
     case F32 => analysis.Value.Float32(analysis.topF32)
     case F64 => analysis.Value.Float64(analysis.topF64)
+
+
 
 class WASMTypeSerializer extends CustomSerializer[WASMType](format => (
   {
