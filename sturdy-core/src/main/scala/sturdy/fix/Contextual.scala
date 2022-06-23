@@ -1,7 +1,6 @@
 
 package sturdy.fix
 
-import sturdy.effect.AnalysisState
 import sturdy.fix.context.Sensitivity
 import sturdy.values.Join
 

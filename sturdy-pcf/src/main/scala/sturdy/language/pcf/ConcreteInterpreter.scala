@@ -4,7 +4,7 @@ import sturdy.data.{NoJoin, given}
 import sturdy.effect.environment.Box
 import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.ConcreteCyclicEnvironment
-import sturdy.effect.failure.CFailure
+import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.failure.Failure
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
@@ -29,7 +29,7 @@ object ConcreteInterpreter extends Interpreter:
   class Instance(nextInput: () => Value) extends GenericInstance:
     override def jv: NoJoin[Value] = implicitly
 
-    override val failure: CFailure = new CFailure
+    override val failure: ConcreteFailure = new ConcreteFailure
     given Failure = failure
 
     override val intOps: IntegerOps[Int, Value] = implicitly

@@ -11,7 +11,7 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.generic.UnreachableInstruction
+import sturdy.language.wasm.generic.WasmFailure
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -66,7 +66,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
   testFunction(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
   testFunction(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-  testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
+  testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
   testFunction(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
   testFunction(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
 

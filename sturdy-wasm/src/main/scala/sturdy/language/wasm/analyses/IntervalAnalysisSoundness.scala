@@ -59,5 +59,5 @@ object IntervalAnalysisSoundness {
         a.memory.memoryIsSound(c.memory) &&
         a.globals.tableIsSound(c.globals) &&
         a.funTable.tableIsSound(c.funTable) &&
-        a.callFrame.joinedDecidableCallFrameIsSound(c.callFrame)
+        a.callFrame.isSound(c.callFrame)
 }

@@ -23,6 +23,7 @@ import swam.FuncType
 import swam.ValType
 
 import java.nio.ByteOrder
+import WasmFailure.*
 
 trait Interpreter:
   type J[A] <: MayJoin[A]

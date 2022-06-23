@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
 import sturdy.values.Abstractly
 import sturdy.language.tip.{ConcreteInterpreter, Function, given}
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, Field}
+import sturdy.language.tip.{AllocationSite, Field}
 import sturdy.values.PartialOrder
 import sturdy.{*, given}
 import sturdy.util.{*, given}
@@ -47,6 +47,6 @@ object SignAnalysisSoundness:
 
       // concrete environment is sound by construction
       a.store.storeIsSound(c.store) &&
-      a.print.printIsSound(c.print)
+      a.print.isSound(c.print)
     }
 

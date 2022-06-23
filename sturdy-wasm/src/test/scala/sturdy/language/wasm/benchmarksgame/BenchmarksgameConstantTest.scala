@@ -61,7 +61,7 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
       )
     }
     LinearStateOperationCounter.addToListAndReset()
-    println(interp.analysisState.getAllState)
+    println(interp.effectStack.getAllState)
     println(s"${LinearStateOperationCounter.toString} in the last tests")
     println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
     Profiler.printLastMeasured()

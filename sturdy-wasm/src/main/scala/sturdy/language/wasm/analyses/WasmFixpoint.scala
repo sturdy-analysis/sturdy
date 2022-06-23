@@ -2,9 +2,7 @@ package sturdy.language.wasm.analyses
 
 import sturdy.data.MayJoin
 import sturdy.data.finiteUnit
-import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
-import sturdy.effect.Effectful
 import sturdy.fix
 import sturdy.fix.{Combinator, Contextual, StackConfig}
 import sturdy.fix.context.Sensitivity
@@ -45,8 +43,8 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(Stac
       s"$iter-unwindLoop($loopUnwinding)"
 
   def get[V, In, Out, All, Ctx]
-    (using AnalysisState[FixIn, In, Out, All], EffectStack)
-    (using Widen[FixOut[V]], Widen[In], Widen[Out], Join[Out])
+    (using EffectStack)
+    (using Widen[V])
     (using Finite[Ctx])
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
 

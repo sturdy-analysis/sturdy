@@ -1,6 +1,6 @@
 package sturdy.fix.context
 
-import sturdy.effect.AnalysisState
+import sturdy.fix.State
 
 trait Sensitivity[Dom, Ctx] extends Function[Dom, Ctx]:
   def emptyContext: Ctx
@@ -25,8 +25,8 @@ final class Product[Dom, Ctx1, Ctx2](s1: Sensitivity[Dom, Ctx1], s2: Sensitivity
   override def apply(dom: Dom): (Ctx1, Ctx2) = (s1(dom), s2(dom))
 
 
-def full[Dom, In](using state: AnalysisState[Dom, In, _, _]) = new Sensitivity[Dom, In] {
-  override def emptyContext = null.asInstanceOf[In]
+def full[Dom, In](using state: State) = new Sensitivity[Dom, state.In] {
+  override def emptyContext = null.asInstanceOf[state.In]
   override def switchCall(dom: Dom): Boolean = true
   override def apply(dom: Dom) = state.getInState(dom)
 }

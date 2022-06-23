@@ -1,11 +1,12 @@
 package sturdy.effect.environment
 
 import sturdy.data.*
+import sturdy.effect.Concrete
 
 /*
  * A concrete environment.
  */
-class ConcreteEnvironment[Var, V](_init: Map[Var, V] = Map()) extends ClosableEnvironment[Var, V, Map[Var, V], NoJoin]:
+class ConcreteEnvironment[Var, V](_init: Map[Var, V] = Map()) extends ClosableEnvironment[Var, V, Map[Var, V], NoJoin], Concrete:
   protected var env: Map[Var, V] = _init
   def getEnv: Map[Var, V] = env
 
@@ -26,12 +27,8 @@ class ConcreteEnvironment[Var, V](_init: Map[Var, V] = Map()) extends ClosableEn
   override def closeEnvironment: Map[Var, V] = env
   override def loadClosedEnvironment(env: Map[Var, V]): Unit = this.env = env
 
-  override type State = Map[Var, V]
-  override def getState: State = env
-  override def setState(s: Map[Var, V]): Unit = this.env = env
 
-
-class ConcreteCyclicEnvironment[Var, V](_init: Map[Var, V] = Map()) extends CyclicEnvironment[Var, V, NoJoin] with ClosableEnvironment[Var, V, Map[Var, Box[V]], NoJoin]:
+class ConcreteCyclicEnvironment[Var, V](_init: Map[Var, V] = Map()) extends CyclicEnvironment[Var, V, NoJoin], ClosableEnvironment[Var, V, Map[Var, Box[V]], NoJoin], Concrete:
   protected var env: Map[Var, Box[V]] = _init.view.mapValues(Box.Eager.apply).toMap
 
   override def lookup(x: Var): JOptionC[V] =
@@ -52,6 +49,3 @@ class ConcreteCyclicEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Cycl
   override def closeEnvironment: Map[Var, Box[V]] = env
   override def loadClosedEnvironment(env: Map[Var, Box[V]]): Unit = this.env = env
 
-  override type State = Map[Var, Box[V]]
-  override def getState: State = env
-  override def setState(s: Map[Var, Box[V]]): Unit = this.env = env

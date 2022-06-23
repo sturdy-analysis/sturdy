@@ -5,12 +5,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
-import sturdy.effect.print.{APrintPrefix, Print, given}
+import sturdy.effect.print.{Print, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.language.tip.ConcreteInterpreter
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn}
+import sturdy.language.tip.{AllocationSite, FixIn}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}

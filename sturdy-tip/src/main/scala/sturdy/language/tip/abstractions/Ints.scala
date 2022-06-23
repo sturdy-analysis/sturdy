@@ -1,11 +1,11 @@
 package sturdy.language.tip.abstractions
 
 import sturdy.effect.failure.Failure
+import sturdy.language.tip.TipFailure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
 import sturdy.values.integer.{IntSign, NumericInterval, given}
 import sturdy.language.tip.Interpreter
-import sturdy.language.tip.GenericInterpreter.TypeError
 import sturdy.values.integer.NumericInterval.IsZero
 
 object Ints:
@@ -19,7 +19,7 @@ object Ints:
     final def asBoolean(v: Value)(using failure: Failure): VBool = v match
       case Value.IntValue(i) => i.isZero.toBoolean
       case Value.TopValue => Topped.Top
-      case _ => failure(TypeError, s"Expected Int but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
       case Topped.Top => NumericInterval(0, 1)
@@ -40,7 +40,7 @@ object Ints:
         case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
         case _ => Topped.Top
       case Value.TopValue => Topped.Top
-      case _ => failure(TypeError, s"Expected Int but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
       case Topped.Top => IntSign.ZeroOrPos

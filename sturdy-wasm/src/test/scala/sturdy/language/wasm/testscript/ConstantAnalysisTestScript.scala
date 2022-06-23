@@ -11,7 +11,7 @@ import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
 import sturdy.values.Abstractly
@@ -52,9 +52,9 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
   def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
     Iterator(
       () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
+//      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
 //      () => new ConstantAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )

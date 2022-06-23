@@ -1,9 +1,9 @@
 package sturdy.language.tutorial
 
-import sturdy.data.JOptionC
-import sturdy.data.MayJoin.NoJoin
-import sturdy.effect.{Stateless, SturdyFailure}
+import sturdy.data.{*, given}
+import sturdy.effect.*
 import sturdy.effect.failure.FailureKind
+import sturdy.values.*
 
 /* The numeric operations of the language. */
 class CNumericOps(using f: Failure) extends NumericOps[Int]:
@@ -13,7 +13,7 @@ class CNumericOps(using f: Failure) extends NumericOps[Int]:
   override def mul(v1: Int, v2: Int): Int = v1*v2
   override def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(DivisionByZero, "division by zero")
+      f.fail(Failures.DivisionByZero, "division by zero")
     else
       v1 / v2
   override def lt(v1: Int, v2: Int): Int =
@@ -33,17 +33,14 @@ class CBranching[R] extends Branching[Int, R]:
  * Since the store is an effect component it additionally needs to provide methods to read and write the internal
  * state (in our case the map).
  */
-class CStore(_init: Map[String,Int] = Map()) extends Store[Int, NoJoin]:
+class CStore(_init: Map[String,Int] = Map()) extends Store[Int, NoJoin], Concrete:
   protected var store: Map[String,Int] = _init
+  def entries: Map[String, Int] = store
   override def read(name: String): JOptionC[Int] = JOptionC(store.get(name))
   override def write(name: String, v: Int): Unit = store += (name -> v)
 
-  override type State = Map[String,Int]
-  override def getState: Map[String, Int] = store
-  override def setState(s: Map[String, Int]): Unit = store = s
-
 /* The concrete failure implementation. We simply throw an exception in case of a failure. */
-class CFailure extends Failure, Stateless:
+class CFailure extends Failure, Concrete:
   override def fail(kind: FailureKind, msg: String): Nothing =
     throw CFailureException(kind, msg)
 

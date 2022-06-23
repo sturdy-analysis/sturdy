@@ -2,7 +2,7 @@ package sturdy.effect.environment
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 
 /*
  * An abstract environment that assumes static scoping of bindings. In particular,
@@ -11,7 +11,7 @@ import sturdy.effect.Effectful
  *
  *     case If(e, thn, els) => boolBranch(eval(e), scoped(thn), scoped(els))
  */
-trait AEnvironmentStaticScope[Var, V] extends ConcreteEnvironment[Var, V], Effectful:
+trait AEnvironmentStaticScope[Var, V] extends ConcreteEnvironment[Var, V], Effect:
   def environmentIsSound[VC](c: ConcreteEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
     if (c.getEnv.keySet != env.keySet) {
       val different = (c.getEnv.keySet -- env.keySet) ++ (env.keySet -- c.getEnv.keySet)

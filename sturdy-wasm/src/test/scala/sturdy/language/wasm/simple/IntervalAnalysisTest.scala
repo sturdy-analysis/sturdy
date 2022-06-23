@@ -14,10 +14,10 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, IntervalAnalysis}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
-import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.language.wasm.generic.{FixIn, WasmFailure, FixOut, FrameData}
+import sturdy.util.{Profiler, LinearStateOperationCounter}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
@@ -67,7 +67,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-    testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
+    testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
@@ -101,7 +101,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(NumericInterval.constant(1)), Value.Int32(NumericInterval.top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(NumericInterval.top)), List(Value.Int32(NumericInterval.Bounded(-14, -6))))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(NumericInterval.constant(1))), List(Value.Int64(NumericInterval.constant(1))))
+//  testFunction(fact, "fac-rec", List(Value.Int64(NumericInterval.constant(1))), List(Value.Int64(NumericInterval.constant(1))))
   (2 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(NumericInterval.constant(arg))), List(Value.Int64(NumericInterval.top)))
   }

@@ -17,58 +17,59 @@ import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
-import sturdy.effect.{AnalysisState, EffectStack, Effectful}
+import sturdy.effect.EffectStack
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
 
-object GenericInterpreter:
-  enum AllocationSite:
-    case Alloc(e: Exp.Alloc)
-    case ParamBinding(fun: Function, name: String)
-    case LocalBinding(fun: Function, name: String)
-    case Record(r: Exp.Record)
-  
-  case class Field(name: String)
-  given Finite[Field] with {}
-  
-  case object UnboundVariable extends FailureKind
-  case object UnboundAddr extends FailureKind
-  case object UserError extends FailureKind
-  case object TypeError extends FailureKind
-  case object VariableReferencesNotSupported extends FailureKind
+enum AllocationSite:
+  case Alloc(e: Exp.Alloc)
+  case ParamBinding(fun: Function, name: String)
+  case LocalBinding(fun: Function, name: String)
+  case Record(r: Exp.Record)
 
-  enum FixIn:
-    case Eval(e: Exp)
-    case Run(s: Stm)
-    case EnterFunction(f: Function)
+case class Field(name: String)
+given Finite[Field] with {}
 
-    override def toString: String = this match
-      case Eval(e) => s"eval $e"
-      case Run(s) => s"run $s"
-      case EnterFunction(fun) => s"enter ${fun.name}"
+enum TipFailure extends FailureKind:
+  case UnboundVariable
+  case UnboundAddr
+  case UserError
+  case TypeError
+  case VariableReferencesNotSupported
+given Finite[TipFailure] with {}
 
-  enum FixOut[V]:
-    case Eval(v: V)
-    case Run()
-    case ExitFunction(ret: V)
+enum FixIn:
+  case Eval(e: Exp)
+  case Run(s: Stm)
+  case EnterFunction(f: Function)
 
-  given finiteFixIn: Finite[FixIn] with {}
-  given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
+  override def toString: String = this match
+    case Eval(e) => s"eval $e"
+    case Run(s) => s"run $s"
+    case EnterFunction(fun) => s"enter ${fun.name}"
 
-  given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
-    override def apply(out1: FixOut[V], out2: FixOut[V]): MaybeChanged[FixOut[V]] = (out1, out2) match
-      case (FixOut.Eval(v1), FixOut.Eval(v2)) => Combine[V, W](v1, v2).map(FixOut.Eval.apply)
-      case (FixOut.Run(), FixOut.Run()) => Unchanged(FixOut.Run())
-      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
-      case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
+enum FixOut[V]:
+  case Eval(v: V)
+  case Run()
+  case ExitFunction(ret: V)
 
-import GenericInterpreter.*
+given finiteFixIn: Finite[FixIn] with {}
+//given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
+
+given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
+  override def apply(out1: FixOut[V], out2: FixOut[V]): MaybeChanged[FixOut[V]] = (out1, out2) match
+    case (FixOut.Eval(v1), FixOut.Eval(v2)) => Combine[V, W](v1, v2).map(FixOut.Eval.apply)
+    case (FixOut.Run(), FixOut.Run()) => Unchanged(FixOut.Run())
+    case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
+    case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
+
+import TipFailure.*
 
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // fixpoint
-  val fixpoint: (AnalysisState[FixIn, InState, OutState, AllState], EffectStack) ?=> fix.Fixpoint[FixIn, FixOut[V]]
+  val fixpoint: EffectStack ?=> fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
   // joins
@@ -96,26 +97,6 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   given EffectStack = effectStack
 
   // analysis state
-  type InState = (callFrame.State, store.State)
-  type OutState = (store.State, print.State)
-  type AllState = (callFrame.State, store.State, print.State)
-  implicit val analysisState: AnalysisState[FixIn, InState, OutState, AllState] = new AnalysisState {
-    override def getInState(dom: FixIn): InState = (callFrame.getState, store.getState)
-    override def setInState(in: InState): Unit =
-      callFrame.setState(in._1)
-      store.setState(in._2)
-    override def getOutState(dom: FixIn): OutState = (store.getState, print.getState)
-    override def setOutState(out: OutState): Unit =
-      store.setState(out._1)
-      print.setState(out._2)
-    override def getAllState: AllState = (callFrame.getState, store.getState, print.getState)
-    override def setAllState(all: AllState): Unit =
-      callFrame.setState(all._1)
-      store.setState(all._2)
-      print.setState(all._3)
-  }
-
-
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 

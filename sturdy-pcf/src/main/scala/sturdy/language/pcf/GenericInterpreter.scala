@@ -1,7 +1,7 @@
 package sturdy.language.pcf
 
 import sturdy.data.MayJoin
-import sturdy.effect.{EffectStack, AnalysisState}
+import sturdy.effect.EffectStack
 import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.CyclicEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -39,18 +39,8 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   implicit def jv: J[V]
 
   // fixpoint
-  type State = environment.State
-  private implicit val analysisState: AnalysisState[Exp, State, State, State] = new AnalysisState {
-    override def getInState(dom: Exp): State = environment.getState
-    override def setInState(in: State): Unit = environment.setState(in)
-    override def getOutState(dom: Exp): State = environment.getState
-    override def setOutState(out: State): Unit = environment.setState(out)
-    override def getAllState: State = environment.getState
-    override def setAllState(all: State): Unit = environment.setState(all)
-  }
-
   type Fixed = Exp => V
-  val fixpoint: (AnalysisState[Exp, State, State, State], EffectStack) ?=> fix.Fixpoint[Exp, V]
+  val fixpoint: EffectStack ?=> fix.Fixpoint[Exp, V]
 
   private lazy val fixed = fixpoint(eval_open)
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)

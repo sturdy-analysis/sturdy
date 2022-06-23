@@ -1,7 +1,7 @@
 package sturdy.values.functions
 
 import sturdy.values.Topped
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.values.Top
 
 given ToppedFunctionOps[F, A, R, V]

@@ -1,10 +1,10 @@
 package sturdy.effect.store
 
-import sturdy.effect.AnalysisState
+import sturdy.data.given
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.TrySturdy
-import sturdy.values.Join
+import sturdy.values.{Finite, Join, Widen}
 
 import scala.collection.mutable.ListBuffer
 
@@ -12,8 +12,7 @@ import scala.collection.mutable.ListBuffer
  * An abstract threadded store. The store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreGenericThreadded[Addr, V](using j: Join[V])
-  extends Effectful:
+trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) extends Effect:
 
   protected var store: Map[Addr, V] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
@@ -22,9 +21,9 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
     dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
-      case Some(old) => j(old, v).ifChanged(store += x -> _)
+      case Some(old) => Join(old, v).ifChanged(store += x -> _)
 
-  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new AStoreGenericJoiner)
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new AStoreGenericJoiner)
   private class AStoreGenericJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = store
     private val snapshotDirtyAddrs = dirtyAddrs
@@ -60,4 +59,6 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
   override def setState(s: Map[Addr, V]): Unit =
     this.store = s
     this.dirtyAddrs = s.keySet
+  override def join: Join[Map[Addr, V]] = implicitly
+  override def widen: Widen[Map[Addr, V]] = implicitly
 

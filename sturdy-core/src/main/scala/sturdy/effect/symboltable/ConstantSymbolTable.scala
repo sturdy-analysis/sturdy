@@ -1,7 +1,7 @@
 package sturdy.effect.symboltable
 
-import sturdy.data.*
-import sturdy.effect.Effectful
+import sturdy.data.{*, given}
+import sturdy.effect.Effect
 import sturdy.values.{*, given}
 
 import scala.Either as Eith
@@ -12,7 +12,7 @@ import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
-class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
+class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
 
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -49,9 +49,21 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
   override type State = Tables[Key, Symbol, Entry]
   def getState: Tables[Key, Symbol, Entry] = tables
   def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
+  override def join: Join[Tables[Key, Symbol, Entry]] = JoinMap(using {
+    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+    case (v1@Right(_), Left(_)) => Unchanged(v1)
+    case (Left(_), v2@Right(_)) => Changed(v2)
+    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+  })
+  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
+    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+    case (v1@Right(_), Left(_)) => Unchanged(v1)
+    case (Left(_), v2@Right(_)) => Changed(v2)
+    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+  })
 
 
-  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
   class ToppedSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables
@@ -99,7 +111,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
     // - all tables in c are present in the abstract
     // - all abstract tables with at least one 'must' entry have a concrete counterpart
     // - for each key in c, tabs(key) is sound
-    val cTables = c.getState
+    val cTables = c.entries
     tables.filterNot { (key,_) => cTables.isDefinedAt(key) }.foreachEntry { (k, aTab) => aTab match
       case Left(tab) =>
         if (!tab.isAllMay)

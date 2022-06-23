@@ -1,9 +1,8 @@
 package sturdy.fix.iter
 
-import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames}
+import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Join, Widen}
@@ -15,21 +14,19 @@ import scala.util.Try
 def topmost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[Dom, In, Out, All])
-  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
-  (using Finite[Dom], Finite[Ctx])
+  (using state: State)
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Topmost[Dom, Codom, In, Out, All, Ctx] =
   new Topmost(config, state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
-  (config: StackConfig, state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
-  (using Finite[Dom], Finite[Ctx])
+  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 
   override def equals(obj: Any): Boolean = super.equals(obj)
 
-  private val stack: Stack[Dom, Codom, In, Out] = Stack(config, context)
+  private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
   private var someComponentIsLooping: Boolean = false
   private var iterationCount: Int = 1
 
@@ -38,7 +35,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     @tailrec
     def apply_(dom: Dom): Codom =
       if (stack.height == 0) {
-        val allState = state.getAllState
+        val allState: state.All = state.getAllState
         val result = step(f, dom)
         if (someComponentIsLooping) {
           if (Fixpoint.DEBUG) {
@@ -61,16 +58,16 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     val outBefore = state.getOutState(dom)
     stack.push(dom, in, outBefore) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
-        widenedOut.foreach(state.setOutState)
+        widenedOut.foreach(state.setOutState(dom, _))
         result
       case stack.PushResult.Continue(widenedIn) =>
-        widenedIn.foreach(state.setInState)
+        widenedIn.foreach(state.setInState(dom, _))
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
           case stack.PopResult.Stable =>
             result
           case stack.PopResult.Unstable(newresult, newout) =>
-            newout.foreach(state.setOutState)
+            newout.foreach(state.setOutState(dom, _))
             someComponentIsLooping = true
             newresult

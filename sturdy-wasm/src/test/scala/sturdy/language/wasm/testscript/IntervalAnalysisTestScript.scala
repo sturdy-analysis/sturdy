@@ -11,7 +11,7 @@ import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.analyses.{IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.values.integer.given
 import sturdy.values.relational.EqOps
 import sturdy.values.{*, given}

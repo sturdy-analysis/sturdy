@@ -1,7 +1,7 @@
 package sturdy.values.exceptions
 
 import sturdy.data.*
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.values.Powerset
 
 given PowersetExceptional[E]: Exceptional[E, Powerset[E], WithJoin] with

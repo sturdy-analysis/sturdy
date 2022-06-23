@@ -16,7 +16,7 @@ import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.TypeAnalysis
 import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.generic.UnreachableInstruction
+import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Topped
 import sturdy.values.integer.IntegerDivisionByZero
 

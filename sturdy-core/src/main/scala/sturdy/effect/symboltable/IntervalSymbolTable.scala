@@ -4,7 +4,7 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.symboltable.ConstantSymbolTable.Tables
 import sturdy.values.*
 import sturdy.values.integer.NumericInterval
@@ -12,7 +12,7 @@ import sturdy.values.integer.NumericInterval
 import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
-class IntervalSymbolTable[Key, I, Entry](rangeLimit: I)(using Join[Entry], Numeric[I]) extends SymbolTable[Key, NumericInterval[I], Entry, WithJoin], Effectful:
+class IntervalSymbolTable[Key, I, Entry](rangeLimit: I)(using Finite[Key], Join[Entry], Numeric[I]) extends SymbolTable[Key, NumericInterval[I], Entry, WithJoin], Effect:
   private val constantSymbolTable: ConstantSymbolTable[Key, I, Entry] = new ConstantSymbolTable
 
   private val one = summon[Numeric[I]].one
@@ -45,9 +45,11 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: I)(using Join[Entry], Numer
     constantSymbolTable.getState
   def setState(state: Tables[Key, I, Entry]): Unit =
     constantSymbolTable.setState(state)
+  override def join: Join[Tables[Key, I, Entry]] = constantSymbolTable.join
+  override def widen: Widen[Tables[Key, I, Entry]] = constantSymbolTable.widen
 
-  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] =
-    constantSymbolTable.getComputationJoiner
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
+    constantSymbolTable.makeComputationJoiner
 
   def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, I, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     constantSymbolTable.tableIsSound(c)

@@ -15,7 +15,7 @@ import reflect.Selectable.reflectiveSelectable
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V])
+class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
   extends Store[Powerset[Addr], V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -52,9 +52,9 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
     import sturdy.values
 
-    val abstractedKeys = c.getState.keySet.flatMap(k => varAbstractly.apply(k).set)
+    val abstractedKeys = c.entries.keySet.flatMap(k => varAbstractly.apply(k).set)
     if (!abstractedKeys.subsetOf(store.keySet)) {
-      val missing = c.getState.flatMap{ kv =>
+      val missing = c.entries.flatMap{ kv =>
         val k = kv._1
         val ak = varAbstractly.apply(k)
         if (ak.set.subsetOf(store.keySet))
@@ -64,7 +64,7 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       }
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
-      c.getState.foreachEntry { case (x, v) =>
+      c.entries.foreachEntry { case (x, v) =>
         val avs = this.read(varAbstractly.apply(x)) match
           case JOptionA.None() => Powerset()
           case JOptionA.NoneSome(a) => Powerset(a)

@@ -8,14 +8,14 @@ import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 
 object Stack:
-  def apply[Dom, Codom, In, Out, Ctx](config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
-                                     (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], joinOut: Join[Out], effectStack: EffectStack)
-                                     (using Finite[Dom], Finite[Ctx])
-                                     : Stack[Dom, Codom, In, Out] = config match
+  def apply[Dom, Codom, Ctx](state: State)
+                            (config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
+                            (using Finite[Dom], Finite[Ctx], Widen[Codom])
+                            : Stack[Dom, Codom, state.In, state.Out] = config match
     case StackConfig.StackedStates(readPriorOutput) =>
-      new StackedStates(new ContextualInStateWidening(contextual), readPriorOutput)
+      StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput)
     case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
-      new StackedFrames(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
+      StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
 
 trait Stack[Dom, Codom, In, Out]:
   enum PushResult:
