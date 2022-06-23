@@ -1,6 +1,6 @@
 package sturdy.fix
 
-import sturdy.effect.{AnalysisState, EffectStack, RecurrentCall, TrySturdy}
+import sturdy.effect.{EffectStack, RecurrentCall, TrySturdy}
 import sturdy.values.Finite
 import sturdy.values.{Widen, Join}
 import sturdy.data.JoinTuple2
@@ -12,18 +12,18 @@ import scala.reflect.ClassTag
 //  var outCache: Map[(Dom, In), (Codom, In)] = Map()
 
 
-class DAIFixpoint[Dom, Codom, In, Out, All]
+class DAIFixpoint[Dom, Codom]
 //  (filterFunc: Dom => Boolean)
   (filterFunc: Dom => Int)
 //  (comp: Map[(Dom, In), (Codom, Out)])
 //  (comp: OutCacheOwner[Dom, Codom, In, Out, All])
-  (using state: AnalysisState[Dom, In, Out, All])
-  (using Join[Codom], Join[In], Finite[Dom], Widen[Out])    // Join[Out]
+  (using val state: State)
+  (using Join[Codom], Finite[Dom])    // Join[Out]
   extends Fixpoint[Dom, Codom]:
 
-  type Conf = (Dom, In)
-  type InCache = Map[Conf, (Codom, In)]
-  type OutCache = Map[Conf, (Codom, In)]
+  type Conf = (Dom, state.In)
+  type InCache = Map[Conf, (Codom, state.In)]
+  type OutCache = Map[Conf, (Codom, state.In)]
 
   var inCache: InCache = Map()
   var outCache: OutCache = Map()
@@ -69,7 +69,7 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
         outCache.get(conf) match
           case Some(null) => throw RecurrentCall(dom)
           case Some((codom, out)) =>
-            state.setInState(out)    // setOut
+            state.setInState(dom, out)    // setOut
             codom
           case None =>
             val oldResult = inCache.getOrElse(conf, null)
@@ -80,7 +80,7 @@ class DAIFixpoint[Dom, Codom, In, Out, All]
             val joinedValueAndOut = outCache(conf) match
               case null => (codom, out)
               case (codomCached, outCached) =>
-                val widened = (Join(codomCached, codom).get, Join(outCached, out).get)
+                val widened = (Join(codomCached, codom).get, state.joinIn(dom)(outCached, out).get)
                 //                println(s"${widened._1}    $codom     $codomCached")
                 widened
 

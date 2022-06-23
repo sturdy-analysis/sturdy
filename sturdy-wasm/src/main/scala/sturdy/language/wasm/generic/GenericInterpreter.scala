@@ -3,23 +3,21 @@ package sturdy.language.wasm.generic
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.data.CombineUnit
-import sturdy.effect.AnalysisState
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.EffectStack
-import sturdy.effect.Effectful
 import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
-import sturdy.effect.failure.AFailureCollect
+import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
-import sturdy.effect.symboltable.JoinableConcreteSymbolTable
+import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.values.Combine
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
@@ -36,6 +34,7 @@ import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
+import WasmFailure.*
 
 case class FrameData(returnArity: Int, module: ModuleInstance):
   override def toString: String =
@@ -142,88 +141,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(List(stack, memory, globals, funTable, callFrame, except, failure))
+  val effectStack: EffectStack = new EffectStack(List(stack, memory, globals, funTable, callFrame, except, failure), {
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => List(memory, globals, callFrame)
+    case _: FixIn.Eval => List(stack, memory, globals, callFrame)
+  }, {
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => List(stack, memory, globals, failure)
+    case _: FixIn.Eval => List(stack, memory, globals, callFrame, except)
+  })
   given EffectStack = effectStack
-
-  // analysis state
-  enum InState:
-    case EnterFunState(vars: callFrame.Locals, mem: memory.State, globs: globals.State)
-    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
-  enum OutState:
-    case ExitFunState(ops: stack.OperandFrame, mem: memory.State, globs: globals.State)
-    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State, exc: except.State)
-
-  given CombineInState[W <: Widening]
-    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W]):
-    Combine[InState, W] with
-    override def apply(v1: InState, v2: InState): MaybeChanged[InState] = (v1, v2) match
-      case (s1: InState.EnterFunState, s2: InState.EnterFunState) =>
-        val vars = cVars(s1.vars, s2.vars)
-        val mem = cMem(s1.mem, s2.mem)
-        val globs = cGlobs(s1.globs, s2.globs)
-        MaybeChanged(InState.EnterFunState(vars.get, mem.get, globs.get), vars.hasChanged || mem.hasChanged || globs.hasChanged)
-      case (s1: InState.InstructionState, s2: InState.InstructionState) =>
-        val ops = cOps(s1.ops, s2.ops)
-        val vars = cVars(s1.vars, s2.vars)
-        val mem = cMem(s1.mem, s2.mem)
-        val globs = cGlobs(s1.globs, s2.globs)
-        MaybeChanged(InState.InstructionState(ops.get, vars.get, mem.get, globs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged)
-      case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
-  
-  given CombineOutState[W <: Widening]
-    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W], cExcs: Combine[except.State, W]):
-    Combine[OutState, W] with
-    override def apply(v1: OutState, v2: OutState): MaybeChanged[OutState] = (v1, v2) match
-      case (s1: OutState.ExitFunState, s2: OutState.ExitFunState) =>
-        val ops = cOps(s1.ops, s2.ops)
-        val mem = cMem(s1.mem, s2.mem)
-        val globs = cGlobs(s1.globs, s2.globs)
-        MaybeChanged(OutState.ExitFunState(ops.get, mem.get, globs.get), ops.hasChanged || mem.hasChanged || globs.hasChanged)
-      case (s1: OutState.InstructionState, s2: OutState.InstructionState) =>
-        val ops = cOps(s1.ops, s2.ops)
-        val vars = cVars(s1.vars, s2.vars)
-        val mem = cMem(s1.mem, s2.mem)
-        val globs = cGlobs(s1.globs, s2.globs)
-        val excs = cExcs(s1.exc, s2.exc)
-        MaybeChanged(OutState.InstructionState(ops.get, vars.get, mem.get, globs.get, excs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged || excs.hasChanged)
-      case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
-  
-  type State = (stack.OperandFrame, memory.State, globals.State, callFrame.Locals)
-  implicit def analysisState: AnalysisState[FixIn, InState, OutState, State] = new AnalysisState {
-    override def getInState(dom: FixIn): InState = dom match
-      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => InState.EnterFunState(callFrame.getLocals, memory.getState, globals.getState)
-      case _: FixIn.Eval => InState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
-    override def setInState(in: InState): Unit = in match
-      case InState.EnterFunState(vars, mem, globs) =>
-        callFrame.setLocals(vars)
-        memory.setState(mem)
-        globals.setState(globs)
-      case InState.InstructionState(ops, vars, mem, globs) =>
-        stack.setOperandFrame(ops)
-        callFrame.setLocals(vars)
-        memory.setState(mem)
-        globals.setState(globs)
-    override def getOutState(dom: FixIn): OutState = dom match
-      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
-      case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState, except.getState)
-    override def setOutState(out: OutState): Unit = out match
-      case OutState.ExitFunState(ops, mem, globs) =>
-        stack.setOperandFrame(ops)
-        memory.setState(mem)
-        globals.setState(globs)
-      case OutState.InstructionState(ops, vars, mem, globs, exc) =>
-        stack.setOperandFrame(ops)
-        callFrame.setLocals(vars)
-        memory.setState(mem)
-        globals.setState(globs)
-        except.setState(exc)
-    override def getAllState: State = (stack.getOperandFrame, memory.getState, globals.getState, callFrame.getLocals)
-    override def setAllState(in: State): Unit =
-      stack.setOperandFrame(in._1)
-      memory.setState(in._2)
-      globals.setState(in._3)
-      callFrame.setLocals(in._4)
-  }
 
   private given Failure = failure
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)

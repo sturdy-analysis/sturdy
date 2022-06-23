@@ -2,10 +2,9 @@ package sturdy.language.tip.abstractions
 
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
-import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.language.tip.{Program, Stm}
-import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut}
+import sturdy.language.tip.{FixIn, FixOut}
 import sturdy.fix.{*, given}
 import sturdy.language.tip.Exp
 import sturdy.effect.ObservableJoin
@@ -43,7 +42,6 @@ trait Fix extends Interpreter:
 
 
   def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]])
-                                      (using AnalysisState[FixIn, In, Out, All])
                                       (using Widen[Value], Widen[In], Widen[Out], Finite[Ctx], EffectStack)
     : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
     = conditional({

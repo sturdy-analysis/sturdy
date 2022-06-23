@@ -6,7 +6,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.values.Powerset
 import sturdy.values.references.AllocationSiteRef
 import sturdy.values.references.AllocationSiteAddr
-import sturdy.language.tip.GenericInterpreter.AllocationSite
+import sturdy.language.tip.AllocationSite
 
 import reflect.Selectable.reflectiveSelectable
 

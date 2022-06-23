@@ -19,7 +19,7 @@ class SignInterpreterTest extends AnyFlatSpec, Matchers:
   val fac: Path = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI)
 
   testFile(add1, Sign.Zero, Sign.Pos)
-  testFile(add1, Sign.Neg, Sign.Top)
+  testFile(add1, Sign.Neg, Sign.TopSign)
   testFile(fac, Sign.Zero, Sign.Pos)
 
   testSoundness(add1, 0)

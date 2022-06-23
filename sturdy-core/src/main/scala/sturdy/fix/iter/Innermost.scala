@@ -1,41 +1,38 @@
 package sturdy.fix.iter
 
-import sturdy.effect.AnalysisState
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, StackedStates}
+import sturdy.fix.{Stack, Combinator, Contextual, StackConfig, Fixpoint, StackedStates, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Widen, Join}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
-def innermost[Dom, Codom, In, Out, All, Ctx]
+def innermost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[Dom, In, Out, All])
-  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
-  (using Finite[Dom], Finite[Ctx])
-  : Innermost[Dom, Codom, In, Out, All, Ctx] =
+  (using state: State)
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
+  : Innermost[Dom, Codom, Ctx] =
   new Innermost(config, state, context)
 
-final class Innermost[Dom, Codom, In, Out, All, Ctx]
-  (config: StackConfig, state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using Widen[Codom], Widen[In], Widen[Out], Join[Out], EffectStack)
-  (using Finite[Dom], Finite[Ctx])
+final class Innermost[Dom, Codom, Ctx]
+  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 
-  private val stack: Stack[Dom, Codom, In, Out] = Stack(config, context)
+  private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
   private var iterationCounts: Map[Dom, Int] = Map()
 
   /** Runs `f` until a fixed point is reached as soon as something is looping. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
     def apply_(dom: Dom): Codom = {
-      val allState = state.getAllState
+      val allState: state.All = state.getAllState
       val (result, loop) = step(f, dom)
       if (loop) {
         if (Fixpoint.DEBUG) {
@@ -56,15 +53,15 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
     val outBefore = state.getOutState(dom)
     stack.push(dom, in, outBefore) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
-        widenedOut.foreach(state.setOutState)
+        widenedOut.foreach(state.setOutState(dom, _))
         (result, false)
       case stack.PushResult.Continue(widenedIn) =>
-        widenedIn.foreach(state.setInState)
+        widenedIn.foreach(state.setInState(dom, _))
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
           case stack.PopResult.Stable =>
             (result, false)
           case stack.PopResult.Unstable(newresult, newout) =>
-            newout.foreach(state.setOutState)
+            newout.foreach(state.setOutState(dom, _))
             (newresult, true)

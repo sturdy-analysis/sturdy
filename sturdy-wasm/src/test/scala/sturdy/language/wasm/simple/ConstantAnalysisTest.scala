@@ -14,10 +14,11 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
+import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, ConstantAnalysis}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, UnreachableInstruction}
-import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.language.wasm.generic.WasmFailure
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
+import sturdy.util.{Profiler, LinearStateOperationCounter}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
@@ -86,7 +87,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-    testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
+    testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))

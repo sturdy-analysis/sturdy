@@ -5,7 +5,7 @@ object Widening:
   final class Yes extends Widening
   final class No extends Widening
 
-enum MaybeChanged[A]:
+enum MaybeChanged[+A]:
   case Changed(a: A)
   case Unchanged(a: A)
 

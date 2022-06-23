@@ -1,6 +1,6 @@
 package sturdy.values.functions
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.values.Join
 import sturdy.values.Powerset
 

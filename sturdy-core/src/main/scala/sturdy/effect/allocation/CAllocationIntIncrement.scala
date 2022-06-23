@@ -1,8 +1,10 @@
 package sturdy.effect.allocation
 
+import sturdy.effect.Concrete
+
 import scala.collection.mutable.ListBuffer
 
-class CAllocationIntIncrement[Context] extends Allocation[Int, Context]:
+class CAllocationIntIncrement[Context] extends Allocation[Int, Context], Concrete:
   private var next = 0
 
   private val addressContexts: ListBuffer[(Int, Context)] = ListBuffer()
@@ -13,7 +15,3 @@ class CAllocationIntIncrement[Context] extends Allocation[Int, Context]:
     next = next + 1
     addressContexts += a -> ctx
     a
-
-  override type State = Int
-  override def getState: Int = next
-  override def setState(s: Int): Unit = next = s

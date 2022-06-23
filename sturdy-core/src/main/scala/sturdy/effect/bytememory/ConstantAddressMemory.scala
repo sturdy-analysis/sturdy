@@ -2,9 +2,9 @@ package sturdy.effect.bytememory
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.data.{WithJoin, JOptionA, JoinIntMap}
+import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.TrySturdy
 import sturdy.fix.*
 import sturdy.values.*
@@ -17,7 +17,7 @@ import scala.reflect.ClassTag
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
-class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], Seq[B], Topped[Int], WithJoin], Effectful:
+class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using Join[B], Widen[B], Finite[Key]) extends Memory[Key, Topped[Int], Seq[B], Topped[Int], WithJoin], Effect:
   import ConstantAddressMemory.{*, given}
 
   protected var memories: Map[Key, Mem[B]] = Map()
@@ -48,7 +48,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       case Topped.Actual(size) =>
         memories += key -> ImmutableByteMem.ofSize(size * pageSize, sizeLimit.flatMap(_.toOption), emptyB)
 
-  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ConstantAddressMemoryJoiner[A])
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ConstantAddressMemoryJoiner[A])
   private class ConstantAddressMemoryJoiner[A] extends ComputationJoiner[A] {
     val snapshot = memories
     var fmemories: Map[Key, Mem[B]] = _
@@ -80,13 +80,15 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
   override type State = Map[Key, Mem[B]]
   override def getState: Map[Key, Mem[B]] = memories
   override def setState(s: Map[Key, Mem[B]]): Unit = memories = s
+  override def join: Join[Map[Key, Mem[B]]] = implicitly
+  override def widen: Widen[Map[Key, Mem[B]]] = implicitly
 
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:
     //  - all concrete memories are present in abstract memories
     //  - all definite abstract memores have a concrete counterpart
     //  - for each key in concrete memories: mems(key) is sound
-    val cMemories = c.getState
+    val cMemories = c.getMemories
     memories.filterNot{ (key, _) => cMemories.isDefinedAt(key)}.foreachEntry { (k, aMem) =>
       if (aMem.isDefinite)
         return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")

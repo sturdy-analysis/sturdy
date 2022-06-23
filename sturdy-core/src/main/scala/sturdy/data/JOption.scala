@@ -1,6 +1,6 @@
 package sturdy.data
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.values.Combine
 import sturdy.values.Join
 import sturdy.values.MaybeChanged

@@ -2,7 +2,7 @@ package sturdy.language.tip
 
 import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, Field, TypeError, AllocationSite}
+import sturdy.language.tip.*
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
 import sturdy.values.{Finite, Top, Combine, Widening}
@@ -31,19 +31,19 @@ trait Interpreter:
     def asInt(using failure: Failure): VInt = this match
       case IntValue(i) => i
       case TopValue => topInt
-      case _ => failure(TypeError, s"Expected Int but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
     def asFunction(using inst: Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
-      case _ => inst.failure(TypeError, s"Expected Function but got $this")
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Function but got $this")
     def asReference(using inst: Instance): VRef = this match
       case RefValue(a) => a
       case TopValue => topReference
-      case _ => inst.failure(TypeError, s"Expected Reference but got $this")
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Reference but got $this")
     def asRecord(using failure: Failure): VRecord = this match
       case RecValue(rec) => rec
       case TopValue => topRecord
-      case _ => failure(TypeError, s"Expected Record but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Record but got $this")
 
   def topInt: VInt
   def topFun(using Instance): VFun

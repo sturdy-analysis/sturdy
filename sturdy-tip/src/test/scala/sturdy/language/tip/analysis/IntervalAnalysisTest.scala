@@ -10,7 +10,7 @@ import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
 import sturdy.language.tip.ConcreteInterpreter
-import sturdy.language.tip.GenericInterpreter.AllocationSite
+import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}

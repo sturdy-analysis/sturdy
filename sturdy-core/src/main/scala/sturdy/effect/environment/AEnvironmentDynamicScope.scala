@@ -3,7 +3,7 @@
 //import sturdy.IsSound
 //import sturdy.Soundness
 //import sturdy.data.*
-//import sturdy.effect.Effectful
+//import sturdy.effect.Effect
 //import sturdy.values.Abstractly
 //import sturdy.values.Join
 //import sturdy.values.MayMust
@@ -17,7 +17,7 @@
 // * variables need joining.
 // */
 //trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Join[V])
-//  extends Environment[Var, V, WithJoin], Effectful:
+//  extends Environment[Var, V, WithJoin], Effect:
 //
 //  protected var env: Map[Var, MayMust[V]] = _init
 //  protected var dirtyVars: Set[Var] = Set()

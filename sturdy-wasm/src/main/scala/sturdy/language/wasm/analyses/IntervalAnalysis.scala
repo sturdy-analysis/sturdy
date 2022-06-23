@@ -6,14 +6,14 @@ import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.bytememory.IntervalAddressMemory
-import sturdy.effect.callframe.{ConcreteCallFrame, JoinableConcreteCallFrame}
+import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
+import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, ConstantSymbolTable}
-import sturdy.effect.{EffectStack, AnalysisState}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
@@ -28,13 +28,14 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.values.{config, *, given}
+import sturdy.values.{*, given}
 import swam.FuncType
 import swam.syntax.*
 import swam.traversal.Traverser
 
 import java.nio.{ByteOrder, ByteBuffer}
 import scala.collection.IndexedSeqView
+import WasmFailure.*
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
@@ -74,7 +75,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>
         val exitCode = args.head
-        f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
@@ -101,13 +102,13 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
-    val stack: JoinableConcreteOperandStack[Value] = new JoinableConcreteOperandStack
+    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval.Bounded(0, 0), rangeLimit)
-    val globals: JoinableConcreteSymbolTable[Unit, GlobalAddr, Value] = new JoinableConcreteSymbolTable
+    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
-    val callFrame: JoinableConcreteCallFrame[FrameData, Int, Value] = new JoinableConcreteCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: AFailureCollect = new AFailureCollect
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =
@@ -170,7 +171,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       import config.ctx.finiteCtx
       override protected def contextFree = contextPreparation
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+      override protected def contextSensitive = config.fix.get
     }
 
     override val fixpointSuper = fixpoint

@@ -1,22 +1,23 @@
 package sturdy.effect.failure
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
+import sturdy.effect.Monotone
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyFailure
-import sturdy.values.Powerset
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
+import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 case object AFailureCollectException extends SturdyFailure
 
-class AFailureCollect extends Failure with Effectful:
+class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Monotone:
+  protected var failureKinds: Set[FailureKind] = Set()
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
 
   override def fail(kind: FailureKind, msg: String): Nothing =
-    failures += kind -> msg
+    failureKinds += kind
+    failures += ((kind, msg))
     throw AFailureCollectException
   
   def fallible[A](f: => A): AFallible[A] =
@@ -32,9 +33,9 @@ class AFailureCollect extends Failure with Effectful:
       case ex => throw ex
     }
 
-  override type State = List[(FailureKind,String)]
-  override def getState: List[(FailureKind,String)] = failures.toList
-  override def setState(s: List[(FailureKind, String)]): Unit =
-    failures.clear()
-    failures ++= s
+  override type State = Powerset[FailureKind]
+  override def getState: Powerset[FailureKind] = Powerset(failureKinds)
+  override def setState(s: Powerset[FailureKind]): Unit = failureKinds = s.set
+  override def join: Join[Powerset[FailureKind]] = implicitly
+  override def widen: Widen[Powerset[FailureKind]] = implicitly
 

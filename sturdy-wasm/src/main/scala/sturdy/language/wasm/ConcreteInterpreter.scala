@@ -6,9 +6,9 @@ import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
-import sturdy.effect.failure.CFailure
+import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.ConcreteSymbolTable
+import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -25,6 +25,8 @@ import sturdy.values.relational.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import WasmFailure.*
+import sturdy.effect.symboltable.ConcreteSymbolTable
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -70,7 +72,7 @@ object ConcreteInterpreter extends Interpreter:
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
       HostFunction.proc_exit -> { args =>
         val exitCode = args.head
-        f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       },
       HostFunction.fd_close -> { args => f.fail(FileError, s"Mock implementation of fd_close") },
       HostFunction.fd_read -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
@@ -105,7 +107,7 @@ object ConcreteInterpreter extends Interpreter:
     val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
-    val failure: CFailure = new CFailure
+    val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
     
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly

@@ -8,7 +8,7 @@ import sturdy.effect.failure.AFallible
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.ModuleInstance
-import sturdy.language.wasm.generic.UnboundGlobal
+import sturdy.language.wasm.generic.WasmFailure
 import sturdy.language.wasm.generic.ExternalValue.Global
 
 import java.nio.file.Files

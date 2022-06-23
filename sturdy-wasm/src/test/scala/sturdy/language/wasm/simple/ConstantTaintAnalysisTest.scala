@@ -12,7 +12,7 @@ import sturdy.language.wasm.analyses.ConstantTaintAnalysis
 import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{untaint, Value}
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.WasmConfig
-import sturdy.language.wasm.generic.{UnreachableInstruction, FrameData}
+import sturdy.language.wasm.generic.{WasmFailure, FrameData}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.taint.Taint

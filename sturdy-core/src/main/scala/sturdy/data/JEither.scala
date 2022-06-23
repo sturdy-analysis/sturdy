@@ -1,6 +1,6 @@
 package sturdy.data
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 
 trait JEither[J[_] <: MayJoin[_], A, B]:
   def either[C](f: A => C)(g: B => C): J[C] ?=> C

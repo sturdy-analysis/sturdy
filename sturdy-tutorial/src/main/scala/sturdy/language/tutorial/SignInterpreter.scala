@@ -23,7 +23,7 @@ class SignInterpreter extends GenericInterpreter[Sign, WithJoin]:
   override val branching: SignBranching[Unit] = new SignBranching[Unit]
   // effect components
   override val store: SignStore = new SignStore
-  override val failure: AFailure = new AFailure
+  override val failure: CollectedFailures[Failures] = new CollectedFailures
   // effect stack
   override val jv: WithJoin[Sign] = MayJoin.WithJoin(CombineSign[Widening.No], effectStack)
 

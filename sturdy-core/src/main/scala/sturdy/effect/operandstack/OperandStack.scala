@@ -1,6 +1,6 @@
 package sturdy.effect.operandstack
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.data.MayJoin
 import sturdy.data.JOption
@@ -9,7 +9,7 @@ import sturdy.data.SomeJOption
 
 object StackUnderflow extends FailureKind
 
-trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
+trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
   def push(v: V): Unit
   def pop(): JOption[J, V]
   def peek(): JOption[J, V]
@@ -80,15 +80,3 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
 
   inline def peekNOrAbort(n: Int)(using J[List[V]]): List[V] =
     peekN(n).getOrElse(throw new IllegalStateException(s"peekN($n) on stack with less than $n elements"))
-
-
-trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
-  def size: Int
-  def frameSize: Int
-  
-  
-object OperandStack:
-  trait Effectful extends sturdy.effect.Effectful:
-    type OperandFrame
-    def getOperandFrame: OperandFrame
-    def setOperandFrame(f: OperandFrame): Unit

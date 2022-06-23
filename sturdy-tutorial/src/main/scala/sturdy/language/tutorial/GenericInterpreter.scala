@@ -2,7 +2,7 @@ package sturdy.language.tutorial
 
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import MayJoin.*
-import sturdy.effect.{AnalysisState, EffectStack, Effectful, SturdyFailure}
+import sturdy.effect.*
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
 import sturdy.language.tutorial.GenericInterpreter.FixIn
@@ -63,17 +63,18 @@ trait Branching[V,R]:
  * In contrast, an abstract interpreter may not be sure if a read fails or not and thus additionally has a third
  * possibility NoneSome. The type parameter J configures the joining behaviour of the option type.
  */
-trait Store[V, J[_] <: MayJoin[_]] extends Effectful:
+trait Store[V, J[_] <: MayJoin[_]] extends Effect:
   def read(name: String): JOption[J, V]
   def write(name: String, v: V): Unit
 
 /* The interface for failures */
-trait Failure extends Effectful:
+trait Failure extends Effect:
   def fail(kind: FailureKind, msg: String): Nothing
 
-case object DivisionByZero extends FailureKind
-case object UninitializedVariable extends FailureKind
-
+enum Failures extends FailureKind:
+  case DivisionByZero
+  case UninitializedVariable
+given Finite[Failures] with {}
 
 /*
  * With these interface at hand we can now implement the generic interpreter. This is only the first try without
@@ -108,7 +109,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // For evaluating variabes we look them up in the store and call "fail" in case the variable in not initialized.
   def eval(e: Exp): V = e match
     case NumLit(n) => lit(n)
-    case Var(name) => store.read(name).getOrElse(fail(UninitializedVariable, s"uninitialized variable $name"))
+    case Var(name) => store.read(name).getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))
     case Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -132,7 +133,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   def runProg(arg: V, s: Stm): V =
     store.write("arg", arg)
     run(s)
-    store.read("result").getOrElse(fail(UninitializedVariable, s"uninitialized variable result"))
+    store.read("result").getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
 
 /*
  * We now refine the generic interpreter to abstract over the fixpoint algorithm. This way, abstract instances may
@@ -181,18 +182,6 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   // we require joining of values of type V
   implicit def jv: J[V]
   
-  // analysis state (required by fixpoint algorithms)
-  // the store is the only effect component with state relevant to the fixpoint algorithm (failures are just collected)
-  type State = store.State
-  implicit def analyisState: AnalysisState[FixIn, State,State,State] = new AnalysisState {
-    override def getInState(dom: FixIn): State = store.getState
-    override def setInState(in: State): Unit = store.setState(in)
-    override def getOutState(dom: FixIn): State = store.getState
-    override def setOutState(out: State): Unit = setInState(out)
-    override def getAllState: State = store.getState
-    override def setAllState(all: State): Unit = setInState(all)
-  }
-  
 
   import numericOps.*
   import branching.*
@@ -203,7 +192,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   // eval_open now calls eval instead of making a recursive call
   def eval_open(e: Exp)(using Fixed): V = e match
     case NumLit(n) => lit(n)
-    case Var(name) => store.read(name).getOrElse(fail(UninitializedVariable, s"uninitialized variable $name"))
+    case Var(name) => store.read(name).getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))
     case Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -243,5 +232,5 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   def runProg(arg: V, s: Stm): V = external {
     store.write("arg", arg)
     run(s)
-    store.read("result").getOrElse(fail(UninitializedVariable, s"uninitialized variable result"))
+    store.read("result").getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
   }

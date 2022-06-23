@@ -1,8 +1,8 @@
 package sturdy.effect.except
 
 import sturdy.data.{*, given}
-import sturdy.effect.{Effectful, SturdyException}
-import sturdy.values.Join
+import sturdy.effect.{Effect, SturdyException}
+import sturdy.values.{Join, Widen}
 import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
@@ -15,7 +15,7 @@ case object AbstractSturdyException extends SturdyException:
   override def toString: String = s"Abstract exception"
 
 
-class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin]:
+class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])(using Join[E], Widen[E]) extends Except[Exc, E, WithJoin]:
 
   protected var exception: JOptionA[E] = JOptionA.none
 
@@ -54,7 +54,7 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
       this.exception = originalException
     }
 
-  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ExceptJoiner)
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ExceptJoiner)
   private class ExceptJoiner[A] extends ComputationJoiner[A] {
     val snapshot = exception
     var fExcept: JOptionA[E] = null
@@ -78,3 +78,5 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
   override type State = JOptionA[E]
   override def getState: JOptionA[E] = exception
   override def setState(s: JOptionA[E]): Unit = exception = s
+  override def join: Join[JOptionA[E]] = implicitly
+  override def widen: Widen[JOptionA[E]] = implicitly

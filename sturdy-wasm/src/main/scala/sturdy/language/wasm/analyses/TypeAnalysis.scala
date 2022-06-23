@@ -2,14 +2,12 @@ package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.TopMemory
-import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.callframe.JoinableConcreteCallFrame
+import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinableConcreteOperandStack, given}
-import sturdy.effect.symboltable.{JoinableConcreteSymbolTable, UpperBoundSymbolTable}
+import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -33,6 +31,7 @@ import sturdy.values.{*, given}
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
+import WasmFailure.*
 
 object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
@@ -57,7 +56,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def invokeHostFunction(hostFunc: HostFunction, args: List[TypeAnalysis.Value]): List[TypeAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>
         val exitCode = args.head
-        f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
@@ -74,7 +73,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
       import config.ctx.finiteCtx
       override protected def contextFree = contextPreparation
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+      override protected def contextSensitive = config.fix.get
     }
 
     override val fixpointSuper = fixpoint
@@ -83,13 +82,13 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
 
-    val stack: JoinableConcreteOperandStack[Value] = new JoinableConcreteOperandStack
+    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
-    val globals: JoinableConcreteSymbolTable[Unit, GlobalAddr, Value] = new JoinableConcreteSymbolTable
+    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
-    val callFrame: JoinableConcreteCallFrame[FrameData, Int, Value] = new JoinableConcreteCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: AFailureCollect = new AFailureCollect
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly

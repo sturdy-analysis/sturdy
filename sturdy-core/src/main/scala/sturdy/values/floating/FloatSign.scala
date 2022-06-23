@@ -1,6 +1,6 @@
 package sturdy.values.floating
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.values.*
 import sturdy.values.relational.*
 

@@ -3,14 +3,14 @@ package sturdy.language.tip
 import sturdy.data.{NoJoin, noJoin, unit}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.failure.{CFailure, Failure}
+import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.Function
-import sturdy.language.tip.GenericInterpreter.*
+import sturdy.language.tip.*
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
@@ -36,7 +36,7 @@ object ConcreteInterpreter extends Interpreter:
 
   override def asBoolean(v: Value)(using failure: Failure): Boolean = v match
     case Value.IntValue(i) => i != 0
-    case _ => failure(TypeError, s"Expected Int but got $this")
+    case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
   override def boolean(b: Boolean): Value = Value.IntValue(if (b) 1 else 0)
 
   given Structural[VRecord] with {}
@@ -50,7 +50,7 @@ object ConcreteInterpreter extends Interpreter:
     def newInstance: Instance = new Instance(initEnvironment, initStore, nextInput)
     override def jv: NoJoin[Value] = implicitly
 
-    override val failure: CFailure = new CFailure
+    override val failure: ConcreteFailure = new ConcreteFailure
     given Failure = failure
 
     override val intOps: IntegerOps[Int, Value] = implicitly

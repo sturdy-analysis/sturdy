@@ -1,14 +1,17 @@
 package sturdy.effect.store
 
 import sturdy.data.*
+import sturdy.effect.Concrete
 
 import scala.collection.mutable.ListBuffer
 
 /*
  * A concrete store.
  */
-class CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin]:
+class CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin], Concrete:
   protected var store: Map[Addr, V] = _init
+  
+  def entries: Map[Addr, V] = store
 
   override def read(x: Addr): JOptionC[V] =
     JOptionC(store.get(x))
@@ -18,7 +21,3 @@ class CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin
 
   override def free(x: Addr): Unit =
     store -= x
-
-  override type State = Map[Addr, V]
-  override def getState: Map[Addr, V] = store
-  override def setState(s: Map[Addr, V]): Unit = store = s

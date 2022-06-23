@@ -36,7 +36,7 @@ trait ComputationJoiner[A]:
 //    sup.retainBoth(fRes, gRes)
 //  }
 //
-//class DelegatingComputationJoinerWithSuper[A](other: Effectful, sup: ComputationJoiner[A])
+//class DelegatingComputationJoinerWithSuper[A](other: Effect, sup: ComputationJoiner[A])
 //  extends ComputationJoinerWithSuper[A](sup):
 //
 //  val joiner = other.makeComputationJoiner[A]

@@ -1,9 +1,64 @@
 package sturdy.effect
 
-import sturdy.values.Join
+import sturdy.values.{Combine, Join, MaybeChanged, Widening, Widen}
+import sturdy.fix
 
-class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
+import scala.collection.mutable.ListBuffer
+
+
+class EffectStack(_effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty, outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty) extends fix.State, ObservableJoin:
   private lazy val effects = _effects
+
+  final override type All = List[Any]
+  final override type In = List[Any]
+  final override type Out = List[Any]
+
+  private inline def getEffectState(eff: List[Effect]): List[Any] =
+    eff.map(_.getState)
+  private def setEffectState(eff: List[Effect], st: List[Any]): Unit = {
+    var effs = eff
+    var s = st
+    while (effs.nonEmpty) {
+      val e = effs.head
+      e.setState(s.head.asInstanceOf[e.State])
+      effs = effs.tail
+      s = s.tail
+    }
+  }
+  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine {
+    override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
+      var effs = eff
+      var s1 = st1
+      var s2 = st2
+      val res = ListBuffer[Any]()
+      var changed = false
+      while (effs.nonEmpty) {
+        val e = effs.head
+        comb(e)(s1.head, s2.head) match
+          case MaybeChanged.Changed(a) =>
+            res += a
+            changed |= true
+          case MaybeChanged.Unchanged(a) =>
+            res += a
+        effs = effs.tail
+        s1 = s1.tail
+        s2 = s2.tail
+      }
+      MaybeChanged(res.toList, changed)
+  }
+
+  override def getAllState: All = getEffectState(effects)
+  override def getInState(dom: Any): In = getEffectState(inEffects.applyOrElse(dom, _ => effects))
+  override def getOutState(dom: Any): Out = getEffectState(outEffects.applyOrElse(dom, _ => effects))
+  override def setAllState(st: All): Unit = setEffectState(effects, st)
+  override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects.applyOrElse(dom, _ => effects), in)
+  override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects.applyOrElse(dom, _ => effects), out)
+
+  override def joinIn(dom: Any): Join[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
+  override def widenIn(dom: Any): Widen[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
+  override def joinOut(dom: Any): Join[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
+  override def widenOut(dom: Any): Widen[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
+
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
     joinStart()
     override def inbetween(): Unit = joinSwitch()
@@ -14,7 +69,7 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
   }
   
   def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
-    val joiners: Seq[ComputationJoiner[A]] = baseJoiner +: effects.flatMap(_.getComputationJoiner[A])
+    val joiners: Seq[ComputationJoiner[A]] = baseJoiner +: effects.flatMap(_.makeComputationJoiner[A])
     override def inbetween(): Unit = joiners.foreach(_.inbetween())
     override def retainNone(): Unit = joiners.foreach(_.retainNone())
     override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
@@ -78,7 +133,7 @@ class EffectStack(_effects: => List[Effectful]) extends ObservableJoin:
     }
 
 object EffectStack:
-  def localEffect(eff: Effectful): EffectStack =
+  def localEffect(eff: Effect): EffectStack =
     new EffectStack(List(eff))
 
   def pureJoinFold[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match

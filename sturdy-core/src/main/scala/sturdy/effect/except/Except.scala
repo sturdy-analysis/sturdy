@@ -2,12 +2,12 @@ package sturdy.effect.except
 
 import sturdy.data.JEither
 import sturdy.data.MayJoin
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
 
-trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effectful, ObservableExcept[Exc]:
+trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effect, ObservableExcept[Exc]:
   val exceptional: Exceptional[Exc, E, J]
 
   @throws[SturdyException]

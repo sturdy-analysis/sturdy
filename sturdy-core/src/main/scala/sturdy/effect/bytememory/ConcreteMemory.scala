@@ -1,14 +1,17 @@
 package sturdy.effect.bytememory
 
 import sturdy.data.*
+import sturdy.effect.Concrete
 
 import scala.collection.mutable
 
 
-class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
+class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Concrete:
   import ConcreteMemory.*
   
   protected val memories: mutable.Map[Key, Mem] = mutable.Map()
+  
+  def getMemories: Map[Key, Mem] = memories.toMap
 
   override def read(key: Key, addr: Int, length: Int): JOptionC[Seq[Byte]] =
     val mem = memories(key)
@@ -52,11 +55,6 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   override def putNew(key: Key, initSize: Int, sizeLimit: scala.Option[Int]): Unit =
     memories(key) = Mem(Array.ofDim[Byte](initSize*pageSize), sizeLimit)
 
-  override type State = Map[Key, Mem]
-  override def getState: Map[Key, Mem] = memories.view.mapValues(m => m.copy(bytes = m.bytes.clone())).toMap
-  override def setState(s: Map[Key, Mem]): Unit =
-    memories.clear()
-    memories ++= s
 
 object ConcreteMemory:
   case class Mem(bytes: Array[Byte], sizeLimit: scala.Option[Int]):

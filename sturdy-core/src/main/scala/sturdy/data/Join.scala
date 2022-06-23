@@ -32,6 +32,6 @@ inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using w: WithJoin[B]): B =
   w.eff.joinFold(as, f)(using w.j)
 
 //given JoinedJoin[A](using j: WithJoin[A]): Join[A] = j._1
-//given JoinedJoinEffects[A](using j: WithJoin[A]): Effectful = j._2
+//given JoinedJoinEffects[A](using j: WithJoin[A]): Effect = j._2
 given MakeJoined[A](using jv: Join[A], je: EffectStack): WithJoin[A] = MayJoin.WithJoin(jv, je)
 

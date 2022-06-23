@@ -1,12 +1,12 @@
 package sturdy.effect.failure
 
-import sturdy.effect.Effectful
+import sturdy.effect.Effect
 import sturdy.effect.SturdyFailure
 
 trait FailureKind
 object RuntimeFailure extends FailureKind
 
-trait Failure extends Effectful:
+trait Failure extends Effect:
   @throws[SturdyFailure]
   def fail(kind: FailureKind, msg: String): Nothing
   inline def apply(kind: FailureKind, msg: String): Nothing = fail(kind, msg)

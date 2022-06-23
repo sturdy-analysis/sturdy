@@ -7,7 +7,7 @@ import sturdy.effect.failure.CFallible
 import sturdy.fix.StackConfig
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.generic.ProcExit
+import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Topped
 
 import java.nio.file.Path
@@ -38,7 +38,9 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
       //println(res)
       assert(res.isFailing)
       val kind = res.asInstanceOf[CFallible.Failing[_]].kind
-      assert(kind == ProcExit(ConcreteInterpreter.Value.Int32(exitCode)))
+      val msg = res.asInstanceOf[CFallible.Failing[_]].msg
+      assert(kind == WasmFailure.ProcExit)
+      assert(msg.endsWith(ConcreteInterpreter.Value.Int32(exitCode).toString))
     }
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
@@ -46,9 +48,9 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
       val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedStates())
       //println(res)
       res match
-        case AFallible.Unfailing(vals) => assert(false, s"Expected $ProcExit but execution succeeded: $vals")
-        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == ProcExit(ConstantAnalysis.Value.Int32(exitCode))))
-        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == ProcExit(ConstantAnalysis.Value.Int32(exitCode))))
+        case AFallible.Unfailing(vals) => assert(false, s"Expected ${WasmFailure.ProcExit} but execution succeeded: $vals")
+        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == WasmFailure.ProcExit))
+        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == WasmFailure.ProcExit))
     }
 
 

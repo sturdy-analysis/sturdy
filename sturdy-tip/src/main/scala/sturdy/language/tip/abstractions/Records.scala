@@ -1,6 +1,6 @@
 package sturdy.language.tip.abstractions
 
-import sturdy.language.tip.GenericInterpreter.Field
+import sturdy.language.tip.Field
 import sturdy.language.tip.Interpreter
 import sturdy.values.records.ARecord
 import sturdy.values.Join
