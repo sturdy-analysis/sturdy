@@ -1,8 +1,8 @@
 package sturdy.language.wasm.wasmbench:
 
   class RRecord(elems: (String, Any)*) extends Selectable:
-    private val ordering = elems.map(_._1).zipWithIndex.sortWith((l,r) => {l._2 < r._2})
-    private val fields = elems.toMap
+    val ordering = elems.map(_._1).zipWithIndex.sortWith((l,r) => {l._2 < r._2})
+    val fields = elems.toMap
     def selectDynamic(name: String): Any = fields(name)
     def toCsv: String =
       val res = ordering.foldLeft("")((acc,el) => {
@@ -11,15 +11,41 @@ package sturdy.language.wasm.wasmbench:
       res.dropRight(1)
     def getCsvHeaders: String =
       ordering.map(_._1).mkString(";")
+    def keyValuePairs: Seq[(String, Any)] =
+      ordering.foldLeft(Seq.empty)((acc,el) => {
+        acc.appended(el._1 -> fields(el._1))
+      })
+    def updated(other: RRecord): RRecord =
+      this.updated(other.keyValuePairs*)
     def updated(new_elems: (String,Any)*): RRecord =
       val new_ordering = this.ordering.appendedAll(new_elems.map(_._1).zipWithIndex.sortWith((l,r) => {l._2 < r._2}))
       val new_fields = new_elems.foldLeft(fields)((acc,elem) => {
         acc + elem
       })
       new RRecord{
-        private val ordering = new_ordering
-        private val fields = Map.empty
+        override val ordering = new_ordering
+        override val fields = new_fields
       }
+    def without(key: String): RRecord =
+      var idx = -1
+      val new_ordering = ordering.foldLeft[Seq[(String,Int)]](Seq.empty)((acc,el) => {
+        if el._1 == key then {
+          idx = el._2
+          acc
+        }
+        else if el._2 >= idx && idx != -1 then {
+          acc.appended((el._1,el._2 - 1))
+        }
+        else acc.appended((el._1,el._2))
+      })
+      val new_fields = fields.filter(kv => {
+        if kv._1 == key then false else true
+      })
+      val res = new RRecord{
+        override val fields = new_fields
+        override val ordering = new_ordering
+      }
+      res
 
   type Result = RRecord {
     val hash: String;
@@ -47,41 +73,6 @@ package sturdy.language.wasm.wasmbench:
     val taintedAccesses: Int
     val taintedAccessesPercent: Double
   }
-//
-//  case class DeadCodeResult(hash: String,
-//                            duration: Double,
-//                            allInstructions: Int,
-//                            deadInstructions: Int,
-//                            deadInstructionPercent: Double,
-//                            deadLabels: Int,
-//                            deadLabelsPercent: Double,
-//                            allLabels: Int,
-//                            deadLabelsBlock: Int,
-//                            deadLabelLoop: Int,
-//                            deadLabelsIf: Int,
-//                            eliminatable: Int,
-//                            eliminatablePercent: Double
-//                           ):
-//    def toCsv: String =
-//      this.productIterator.mkString(";")
-//
-//  case class ConstantResult(constantInstructions: Int,
-//                            constantInstructionPercent: Double,
-//                            liveInstructions: Int
-//                           ):
-//    def toCsv: String =
-//      this.productIterator.mkString(";")
-//
-//  case class TaintResult(taintedAccesses: Int,
-//                         taintedAccessesPercent: Double):
-//    def toCsv: String =
-//      this.productIterator.mkString(";")
-//
-//  case class FailureReport(hash: String,
-//                           msg: String):
-//    def toCsv: String =
-//      this.productIterator.mkString(";")
-
 
   object Test extends App:
 

@@ -109,7 +109,7 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
   case MostGeneralClient()
-Most
+
 given finiteFixIn: Finite[FixIn] with {}
 
 

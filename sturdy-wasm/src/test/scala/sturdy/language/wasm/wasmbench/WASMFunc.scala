@@ -2,7 +2,8 @@ package sturdy.language.wasm.wasmbench
 
 import org.json4s.JsonAST.{JInt, JValue}
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis}
+import sturdy.values.integer.NumericInterval
+import sturdy.language.wasm.analyses.{ConstantAnalysis, IntervalAnalysis, ConstantTaintAnalysis, TypeAnalysis}
 import sturdy.language.wasm.generic.GenericInterpreter
 import sturdy.values.Topped
 import sturdy.values.taint.TaintProduct
@@ -81,6 +82,12 @@ object WASMType:
     case I64 => ConstantAnalysis.Value.Int64(Topped.Top)
     case F32 => ConstantAnalysis.Value.Float32(Topped.Top)
     case F64 => ConstantAnalysis.Value.Float64(Topped.Top)
+
+  def toIntervalAnalysisValue(wty: WASMType): IntervalAnalysis.Value= wty match
+    case I32 => IntervalAnalysis.Value.Int32(NumericInterval.top)
+    case I64 => IntervalAnalysis.Value.Int64(NumericInterval.top)
+    case F32 => IntervalAnalysis.Value.Float32(Topped.Top)
+    case F64 => IntervalAnalysis.Value.Float64(Topped.Top)
 
 enum Label:
   case Numeric(i: Int)

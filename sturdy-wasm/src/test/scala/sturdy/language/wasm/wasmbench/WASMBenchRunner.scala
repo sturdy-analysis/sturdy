@@ -98,7 +98,7 @@ object RunnerConfig:
   val default: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
-      Analysis.Constant(AnalysisConfig.default)),
+      Analysis.Type(AnalysisConfig.default)),
     "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
     "datasetFilter" -> ((x: WASMBenchBinary) => x.ex.exists {
       case FuncDef(_, _, Some(name)) if name == "_start" => true

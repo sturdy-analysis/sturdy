@@ -5,27 +5,18 @@ import sturdy.fix.cfg.ControlLogger
 import sturdy.language.wasm
 import sturdy.language.wasm.{Interpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, IntervalAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, ModuleInstance}
 import sturdy.util.Profiler
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.nio.file.{Files, Path}
 
-trait AnalysisRunnable[A <: Interpreter with ControlFlow](analysis: A) extends Runnable:
-  private def start(): RRecord =
-    val (interp, cfg, modInst) = instantiate
-    interprete()
-    generateReportHook(interp. cfg, modInst)
-
-  type InstructionLoggers;
-  type CfgType = (FixIn => Option[CfgNode]) => ((FixIn, FixOut[AnalysisRunnable.this.analysis.Value]) => Option[CfgNode]) => ControlLogger[AnalysisRunnable.this.analysis.Instance#fixpoint.Ctx, FixIn, FixOut[AnalysisRunnable.this.analysis.Value], WasmException[AnalysisRunnable.this.analysis.Value], CfgNode]
-
+trait AnalysisRunnable extends Runnable:
   def setRes(v: Either[Throwable, RRecord]): Unit
-  def registerLoggersHook(interp: analysis.Instance): analysis.Instance => InstructionLoggers
-  def generateReportHook(interp: analysis.Instance, cfg: CfgType, modInst: ModuleInstance): RRecord
+  def start(): RRecord
 
-  final def run(): Unit =
+  def run(): Unit =
     try {
       val res = start()
       setRes(Right(res))
@@ -37,30 +28,6 @@ trait AnalysisRunnable[A <: Interpreter with ControlFlow](analysis: A) extends R
       case e =>
         setRes(Left(e))
     }
-
-  private def instantiate =
-
-    val interp = new analysis.Instance(FrameData.empty, Iterable.empty, config)
-    val cfg = analysis.controlFlow(CfgConfig.AllNodes(false), interp)
-    val modInst = interp.initializeModule({
-      if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
-    })
-
-    (interp, cfg, modInst)
-
-  private def interprete(interp: analysis.Instance): analysis.Instance => InstructionLoggers =
-
-    val loggers = registerLoggersHook(interp)
-
-    interp.failure.fallible({
-      scope match
-        case AnalysisScope.SingleFunction(id) =>
-          interp.invokeExported(modInst, id, funcArgs)
-        case AnalysisScope.MostGeneralClient =>
-          interp.runMostGeneralClient(modInst, analysis.typedTop)
-    })
-
-    loggers
 
 class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
                     p: Path, scope: AnalysisScope, funcArgs: List[ConstantTaintAnalysis.Value],
@@ -216,6 +183,89 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
       "eliminatable" -> eliminatable,
       "eliminatablePercent" -> eliminatablePercent,
     )
+
+class IntervalRunnable(set: Either[Throwable, RRecord] => Unit,
+                       p: Path, scope: AnalysisScope, funcArgs: List[IntervalAnalysis.Value],
+                       config: WasmConfig,
+                       binary: Boolean = false) extends AnalysisRunnable{
+
+  override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
+
+  override def start(): RRecord =
+    Fixpoint.DEBUG = false
+
+    val name = p.getFileName.toString
+
+    val startTimeMillis = System.currentTimeMillis()
+    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+
+    val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val constants = IntervalAnalysis.constantInstructions(interp)
+
+    val modInst = interp.initializeModule(module)
+    interp.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp.invokeExported(modInst, id, funcArgs)
+        case AnalysisScope.MostGeneralClient =>
+          interp.runMostGeneralClient(modInst, IntervalAnalysis.typedTop)
+    })
+
+    val allNodes = ControlFlow.allCfgNodes(List(modInst))
+    val allInstructions = allNodes.filter(_.isInstruction)
+    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
+    val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
+
+    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
+    val deadLabels = ControlFlow.deadLabels(cfg)
+    val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
+    val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
+
+    val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
+    val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
+    val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
+
+    val liveInstructions = allInstructions.size - deadInstructions.size
+    val constantInstructions = constants.get.size
+    val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
+
+    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
+    val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
+
+    val endTimeMillis = System.currentTimeMillis()
+    val duration = endTimeMillis - startTimeMillis
+
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    println(s"Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
+    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
+    println(s"This analysis can eliminate $eliminatable instructions, $eliminatablePercent% of the ${allInstructions.size} instructions in $name")
+
+    // write CFG to .dot file
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val blockCfg = cfg.withBlocks(shortLabels = true)
+    Files.writeString(dotPath, blockCfg.toGraphViz)
+
+    RRecord(
+      "hash" -> name,
+      "duration" -> duration,
+      "allInstructions" -> allInstructions.size,
+      "deadInstructions" -> deadInstructions.size,
+      "deadInstructionPercent" -> deadInstructionPercent,
+      "deadLabels" -> deadLabels.size,
+      "deadLabelsPercent" -> deadLabelsPercent,
+      "allLabels" -> allLabels.size,
+      "deadLabelsBlock" -> deadLabelsBlock.size,
+      "deadLabelLoop" -> deadLabelLoop.size,
+      "deadLabelsIf" -> deadLabelsIf.size,
+      "eliminatable" -> eliminatable,
+      "eliminatablePercent" -> eliminatablePercent,
+      "constantInstructions" -> constantInstructions,
+      "constantInstructionPercent" -> constantInstructionPercent,
+      "liveInstructions" -> liveInstructions,
+    )
+}
 
 class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
                        p: Path, scope: AnalysisScope, funcArgs: List[ConstantAnalysis.Value],

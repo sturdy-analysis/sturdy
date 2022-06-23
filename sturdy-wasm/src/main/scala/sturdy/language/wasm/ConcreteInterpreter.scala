@@ -77,8 +77,7 @@ object ConcreteInterpreter extends Interpreter:
       HostFunction.fd_seek -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
       HostFunction.fd_write -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
       HostFunction.fd_fdstat_get -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") },
-      // TODO:
-      //  Implement hostfunctions with help of WASI libc headers:
+      // TODO: Implement hostfunctions with help of WASI libc headers:
       //  https://github.com/WebAssembly/wasi-libc/blob/main/libc-bottom-half/headers/public/wasi/api.h
       HostFunction.args_sizes_get -> { args => f.fail(MockError, s"Mock implementation of args_sizes_get") },
       HostFunction.args_get -> { args => f.fail(MockError, s"Mock implementation of") },
