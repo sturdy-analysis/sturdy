@@ -32,6 +32,8 @@ class JSONStore(mdSource: Path, exSource: Path) extends Store[String, WASMBenchB
 
     val md = read[Map[String, Metadata]](mdStream)
     val ex = read[Map[String, List[FuncDef]]](exStream)
+    mdStream.close()
+    exStream.close()
 
     ex.foldLeft[Map[String, WASMBenchBinary]](Map.empty) {
       case (acc, (hash, lis)) => md.get(hash) match {

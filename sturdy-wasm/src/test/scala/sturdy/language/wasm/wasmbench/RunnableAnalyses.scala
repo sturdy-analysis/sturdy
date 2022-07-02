@@ -113,6 +113,28 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
       "taintedAccesses" -> taintedAccesses.size,
       "taintedAccessesPercent" -> taintedAccessesPercent,
     )
+object TaintRunnable:
+  def getCsvHeadders: String =
+    RRecord(
+      "hash" -> 0,
+      "duration" -> 0,
+      "allInstructions" -> 0,
+      "deadInstructions" -> 0,
+      "deadInstructionPercent" -> 0,
+      "deadLabels" -> 0,
+      "deadLabelsPercent" -> 0,
+      "allLabels" -> 0,
+      "deadLabelsBlock" -> 0,
+      "deadLabelLoop" -> 0,
+      "deadLabelsIf" -> 0,
+      "eliminatable" -> 0,
+      "eliminatablePercent" -> 0,
+      "constantInstructions" -> 0,
+      "constantInstructionPercent" -> 0,
+      "liveInstructions" -> 0,
+      "taintedAccesses" -> 0,
+      "taintedAccessesPercent" -> 0,
+    ).getCsvHeaders
 
 
 class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
@@ -183,6 +205,25 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
       "eliminatable" -> eliminatable,
       "eliminatablePercent" -> eliminatablePercent,
     )
+object TypeRunnable:
+  def getCsvHeadders: String =
+    RRecord(
+      "hash" -> 0,
+      "duration" -> 0,
+      "allInstructions" -> 0,
+      "deadInstructions" -> 0,
+      "deadInstructionPercent" -> 0,
+      "deadLabels" -> 0,
+      "deadLabelsPercent" -> 0,
+      "allLabels" -> 0,
+      "deadLabelsBlock" -> 0,
+      "deadLabelLoop" -> 0,
+      "deadLabelsIf" -> 0,
+      "eliminatable" -> 0,
+      "eliminatablePercent" -> 0,
+    ).getCsvHeaders
+
+
 
 class IntervalRunnable(set: Either[Throwable, RRecord] => Unit,
                        p: Path, scope: AnalysisScope, funcArgs: List[IntervalAnalysis.Value],
@@ -266,6 +307,26 @@ class IntervalRunnable(set: Either[Throwable, RRecord] => Unit,
       "liveInstructions" -> liveInstructions,
     )
 }
+object IntervalRunnable:
+  def getCsvHeadders: String =
+    RRecord(
+      "hash" -> 0,
+      "duration" -> 0,
+      "allInstructions" -> 0,
+      "deadInstructions" -> 0,
+      "deadInstructionPercent" -> 0,
+      "deadLabels" -> 0,
+      "deadLabelsPercent" -> 0,
+      "allLabels" -> 0,
+      "deadLabelsBlock" -> 0,
+      "deadLabelLoop" -> 0,
+      "deadLabelsIf" -> 0,
+      "eliminatable" -> 0,
+      "eliminatablePercent" -> 0,
+      "constantInstructions" -> 0,
+      "constantInstructionPercent" -> 0,
+      "liveInstructions" -> 0,
+    ).getCsvHeaders
 
 class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
                        p: Path, scope: AnalysisScope, funcArgs: List[ConstantAnalysis.Value],
@@ -282,6 +343,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val startTimeMillis = System.currentTimeMillis()
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
+    println(s"Analyzing $p")
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
@@ -294,6 +356,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
         case AnalysisScope.MostGeneralClient =>
           interp.runMostGeneralClient(modInst, ConstantAnalysis.typedTop)
     })
+    println(s"Analyzed $p")
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
@@ -349,3 +412,23 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
       "liveInstructions" -> liveInstructions,
     )
 }
+object ConstantRunnable:
+  def getCsvHeadders: String =
+    RRecord(
+      "hash" -> 0,
+      "duration" -> 0,
+      "allInstructions" -> 0,
+      "deadInstructions" -> 0,
+      "deadInstructionPercent" -> 0,
+      "deadLabels" -> 0,
+      "deadLabelsPercent" -> 0,
+      "allLabels" -> 0,
+      "deadLabelsBlock" -> 0,
+      "deadLabelLoop" -> 0,
+      "deadLabelsIf" -> 0,
+      "eliminatable" -> 0,
+      "eliminatablePercent" -> 0,
+      "constantInstructions" -> 0,
+      "constantInstructionPercent" -> 0,
+      "liveInstructions" -> 0,
+    ).getCsvHeaders
