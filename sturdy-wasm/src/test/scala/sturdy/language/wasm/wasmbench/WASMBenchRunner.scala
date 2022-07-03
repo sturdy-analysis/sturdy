@@ -105,8 +105,8 @@ object RunnerConfig:
   val default: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
-      Analysis.Constant(AnalysisConfig.callSite1),
-//      Analysis.Type(AnalysisConfig.nocontext)
+//      Analysis.Constant(AnalysisConfig.callSite1),
+      Analysis.Type(AnalysisConfig.nocontext)
     ),
     "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
     "datasetFilter" -> ((x: WASMBenchBinary) => true),
@@ -176,6 +176,9 @@ class WASMBenchRunner extends AnyFunSpec :
 
     var binaries = allbinaries.drop(skipTestsIncludingIndex + 1)
 
+//    binaries.foreach(b => println(b.md.hash))
+//    System.exit(0)
+
     if (onlyBinariesInCSV.isDefined) {
       val csvStore = new ResultStore[Result](onlyBinariesInCSV.get)
       val hashes = csvStore.retrieve(_ => true).map(r => r.hash.split('.')(0)).toSet
@@ -189,7 +192,7 @@ class WASMBenchRunner extends AnyFunSpec :
         val cfg = analysis.config
         cfg.saveResultsToDir.toFile.mkdirs()
         val (succLogger, excLogger) = FileLogger.succ_excLogger(analysis.toString, cfg)
-        if (cfg.logOpenOption == StandardOpenOption.CREATE) {
+        if (cfg.logOpenOption == StandardOpenOption.CREATE || cfg.logOpenOption == StandardOpenOption.CREATE_NEW) {
           excLogger.log("hash;exceptionMsg")
           succLogger.log(analysis.csvHeader())
         }
