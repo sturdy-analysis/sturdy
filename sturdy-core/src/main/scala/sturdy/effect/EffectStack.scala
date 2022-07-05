@@ -6,8 +6,11 @@ import sturdy.fix
 import scala.collection.mutable.ListBuffer
 
 
-class EffectStack(_effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty, outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty) extends fix.State, ObservableJoin:
+class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty, _outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty) extends fix.State, ObservableJoin:
+
   private lazy val effects = _effects
+  private def inEffects(dom: Any): List[Effect] = _inEffects.applyOrElse(dom, _ => effects)
+  private def outEffects(dom: Any): List[Effect] = _outEffects.applyOrElse(dom, _ => effects)
 
   final override type All = List[Any]
   final override type In = List[Any]
@@ -48,11 +51,11 @@ class EffectStack(_effects: => List[Effect], inEffects: PartialFunction[Any, Lis
   }
 
   override def getAllState: All = getEffectState(effects)
-  override def getInState(dom: Any): In = getEffectState(inEffects.applyOrElse(dom, _ => effects))
-  override def getOutState(dom: Any): Out = getEffectState(outEffects.applyOrElse(dom, _ => effects))
+  override def getInState(dom: Any): In = getEffectState(inEffects(dom))
+  override def getOutState(dom: Any): Out = getEffectState(outEffects(dom))
   override def setAllState(st: All): Unit = setEffectState(effects, st)
-  override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects.applyOrElse(dom, _ => effects), in)
-  override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects.applyOrElse(dom, _ => effects), out)
+  override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects(dom), in)
+  override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects(dom), out)
 
   override def joinIn(dom: Any): Join[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
   override def widenIn(dom: Any): Widen[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
