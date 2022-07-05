@@ -106,7 +106,8 @@ object RunnerConfig:
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
 //      Analysis.Constant(AnalysisConfig.callSite1),
-      Analysis.Type(AnalysisConfig.nocontext)
+//      Analysis.Type(AnalysisConfig.nocontext),
+      Analysis.Taint(AnalysisConfig.callSite1)
     ),
     "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
     "datasetFilter" -> ((x: WASMBenchBinary) => true),
@@ -124,7 +125,7 @@ object AnalysisConfig:
     "timeLimit" -> new GrainOfTime(60).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = Insensitive,
-      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedCfgNodes()))),
+      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
     "saveResultsToDir" -> Path.of("/Users/seba/tmp/wasmbench-mgc"),
@@ -137,7 +138,7 @@ object AnalysisConfig:
     "timeLimit" -> new GrainOfTime(60).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = CallSites(1),
-      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedCfgNodes()))),
+      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
     "saveResultsToDir" -> Path.of("/Users/seba/tmp/wasmbench-mgc"),

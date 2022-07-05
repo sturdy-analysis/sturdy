@@ -108,6 +108,9 @@ trait ConstantTaintValues extends Interpreter:
   }
 
   class TaintedMemoryAccessLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionLogger[Powerset[Value], Value]:
+    def memoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo
+    def taintedMemoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo.filter(_._2.set.nonEmpty)
+    
     override def enterInfo(inst: Inst): Option[Powerset[Value]] =
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =
@@ -119,7 +122,7 @@ trait ConstantTaintValues extends Interpreter:
         if (maybeTainted(address))
           Some(Powerset(address))
         else
-          None
+          Some(Powerset())
       } else
         None
 

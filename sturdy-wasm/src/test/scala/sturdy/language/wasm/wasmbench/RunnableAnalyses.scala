@@ -40,9 +40,8 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
 
     val name = p.getFileName.toString
     val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, config)
-    val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
-    val constants = ConstantTaintAnalysis.constantInstructions(interp);val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
+    val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
     val modInst = interp.initializeModule(module)
     interp.failure.fallible({
@@ -53,63 +52,20 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
           interp.runMostGeneralClient(modInst, ConstantTaintAnalysis.typedTop)
     })
 
-    val allNodes = ControlFlow.allCfgNodes(List(modInst))
-    val allInstructions = allNodes.filter(_.isInstruction)
-    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-    val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-
-    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
-    val deadLabels = ControlFlow.deadLabels(cfg)
-    val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
-    val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
-
-    val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
-    val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
-    val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
-
-    val liveInstructions = allInstructions.size - deadInstructions.size
-    val constantInstructions = constants.get.size
-    val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
-
-    val allMemoryInstructions = allNodes.filter{
-      case CfgNode.Instruction(inst, _) => inst match
-        case _: LoadInst | _: LoadNInst | _: StoreInst | _: StoreNInst => true
-        case _ => false
-      case _ => false
-    }
-    val taintedAccesses = memory.instructions
+    val allMemoryInstructions = memory.memoryInstructions
+    val taintedAccesses = memory.taintedMemoryInstructions
     val taintedAccessesPercent = (10000.0 * taintedAccesses.size / allMemoryInstructions.size.toDouble).round / 100.0
 
-    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
-    val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
 
-    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
-    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
-    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
     println(s"Found ${taintedAccesses.size} tainted memory accesses, $taintedAccessesPercent% of all load and store instructions in $name.")
     println(s"  This means, ${100.0 - taintedAccessesPercent}% of all load and store instructions in $name are safe.")
-    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     RRecord(
       "hash" -> name,
       "duration" -> duration,
-      "allInstructions" -> allInstructions.size,
-      "deadInstructions" -> deadInstructions.size,
-      "deadInstructionPercent" -> deadInstructionPercent,
-      "deadLabels" -> deadLabels.size,
-      "deadLabelsPercent" -> deadLabelsPercent,
-      "allLabels" -> allLabels.size,
-      "deadLabelsBlock" -> deadLabelsBlock.size,
-      "deadLabelLoop" -> deadLabelLoop.size,
-      "deadLabelsIf" -> deadLabelsIf.size,
-      "eliminatable" -> eliminatable,
-      "eliminatablePercent" -> eliminatablePercent,
-      "constantInstructions" -> constantInstructions,
-      "constantInstructionPercent" -> constantInstructionPercent,
-      "liveInstructions" -> liveInstructions,
+      "memoryAccesses" -> allMemoryInstructions.size,
       "taintedAccesses" -> taintedAccesses.size,
       "taintedAccessesPercent" -> taintedAccessesPercent,
     )
@@ -118,20 +74,7 @@ object TaintRunnable:
     RRecord(
       "hash" -> 0,
       "duration" -> 0,
-      "allInstructions" -> 0,
-      "deadInstructions" -> 0,
-      "deadInstructionPercent" -> 0,
-      "deadLabels" -> 0,
-      "deadLabelsPercent" -> 0,
-      "allLabels" -> 0,
-      "deadLabelsBlock" -> 0,
-      "deadLabelLoop" -> 0,
-      "deadLabelsIf" -> 0,
-      "eliminatable" -> 0,
-      "eliminatablePercent" -> 0,
-      "constantInstructions" -> 0,
-      "constantInstructionPercent" -> 0,
-      "liveInstructions" -> 0,
+      "memoryAccesses" -> 0,
       "taintedAccesses" -> 0,
       "taintedAccessesPercent" -> 0,
     ).getCsvHeaders
