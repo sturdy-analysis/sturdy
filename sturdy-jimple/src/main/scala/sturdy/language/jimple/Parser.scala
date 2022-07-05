@@ -267,15 +267,19 @@ object Parser:
       keyword(KINFINITYF).map(_ => Constant.FloatInfinityC).backtrack |
       keyword(KINFINITY).map(_ => Constant.InfinityC)
 
+  val baseTypes: P[Type] =
+    keyword(KINT).map(_ => Type.IntT).backtrack |
+      keyword(KLONG).map(_ => Type.LongT).backtrack |
+      keyword(KFLOAT).map(_ => Type.FloatT).backtrack |
+      keyword(KDOUBLE).map(_ => Type.DoubleT).backtrack |
+      keyword(KVOID).map(_ => Type.VoidT).backtrack |
+      spaced(className).map(s => Type.RefT(s)).backtrack
+
   val types: P[Type] =
-    (keyword(KINT) <* not(op('[')).peek).map(_ => Type.IntT).backtrack |
-      (keyword(KLONG) <* not(op('[')).peek).map(_ => Type.LongT).backtrack |
-      (keyword(KFLOAT) <* not(op('[')).peek).map(_ => Type.FloatT).backtrack |
-      (keyword(KDOUBLE) <* not(op('[')).peek).map(_ => Type.DoubleT).backtrack |
-      (keyword(KVOID) <* not(op('[')).peek).map(_ => Type.VoidT).backtrack |
-      (spaced(className) ~ op("[]").rep0).map{
-        case (s, x) => Type.RefT(addBrackets(s, x.length))
-      }
+    (baseTypes ~ op("[]").rep).map {
+      case (t, x) => Type.ArrayT(t, x.length)
+    }.backtrack |
+      baseTypes
 
   val identityValues: P[IdentityVal] =
     keyword(KCAUGHTEXCEPTION).map(_ => IdentityVal.CaughtExcRef()) |
@@ -371,7 +375,7 @@ object Parser:
       (inParens(types) ~ immediates).map((t,i) => Exp.CastE(t,i)) |
       (immediates ~ (keyword(KINSTANCEOF) *> types))
         .backtrack.map {
-          case (i, t : Type.RefT) => Exp.InstanceOfE(i, t)
+          case (i, t : (Type.RefT | Type.ArrayT)) => Exp.InstanceOfE(i, t)
           case _ => throw new IllegalArgumentException } |
       keyword(KSTATICINVOKE) *> (inDiamonds(methodSignatures) ~ inParens((immediates <* op(',').?).rep0))
         .map((m, ls) => Exp.StaticInvokeE(m, ls)) |
@@ -382,7 +386,7 @@ object Parser:
       (keyword(KNEWARRAY) *> inParens(types) ~ inBrackets(immediates)).backtrack.map((t,i) => Exp.NewArrayE(t, i)) |
       (keyword(KNEW) *> types)
         .map{
-          case t : Type.RefT => Exp.NewE(t)
+          case t : (Type.RefT) => Exp.NewE(t)
           case _ => throw new IllegalArgumentException }
         .backtrack |
       (keyword(KNEWMULTIARRAY) *> inParens(types) ~ inBrackets(immediates.?).rep0)
