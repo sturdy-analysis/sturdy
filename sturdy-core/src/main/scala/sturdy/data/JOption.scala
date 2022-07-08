@@ -9,6 +9,8 @@ import sturdy.values.Widening
 
 trait JOption[J[_] <: MayJoin[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
+  inline def getOrFail(default: => Nothing): A =
+    option(default)(identity)(using null.asInstanceOf[J[A]])
   inline final def getOrElse(default: => A): J[A] ?=> A =
     option(default)(identity)
   inline final def orElseAndThen[B](default: => A)(f: A => B): J[B] ?=> B =
