@@ -7,12 +7,12 @@ import sturdy.values.Powerset
 
 case object NullDereference extends FailureKind
 
-trait ReferenceOps[Addr, V] {
+trait ReferenceOps[Addr, V]:
   def nullValue: V
   def refValue(addr: Addr): V
   def unmanagedRefValue(addr: Addr): V
   def refAddr(v: V): Addr
-}
+
 
 given ConcreteReferenceOps[Addr](using f: Failure): ReferenceOps[Addr, Option[Addr]] with
   def nullValue: Option[Addr] = None

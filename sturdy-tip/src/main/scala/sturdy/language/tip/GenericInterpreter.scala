@@ -1,5 +1,6 @@
 package sturdy.language.tip
 
+import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.DecidableMutableCallFrame
@@ -14,10 +15,12 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{EqOps, OrderingOps}
+import sturdy.values.relational.{OrderingOps, EqOps}
 import sturdy.fix
 import sturdy.data.unit
 import sturdy.effect.EffectStack
+import sturdy.effect.callframe.DecidableCallFrame
+import sturdy.effect.callframe.MutableCallFrame
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -85,7 +88,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableMutableCallFrame[Unit, String, V]
+  val callFrame: MutableCallFrame[Unit, String, V, NoJoin] with DecidableCallFrame[Unit, String, V]
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
@@ -105,7 +108,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
-      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      case None => callFrame.getLocalByName(x).getOrFail(failure(UnboundVariable, x))
     case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
     case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -127,7 +130,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
       val addr = refAddr(eval(e))
-      val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+      val result = store.read(addr).getOrFail(failure(UnboundAddr, addr.toString))
       result
     case Exp.NullRef() =>
       nullValue
@@ -140,7 +143,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       refValue(addr)
     case Exp.FieldAccess(rec, field) =>
       val addr = refAddr(eval(rec))
-      val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+      val recVal = store.read(addr).getOrFail(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
   }
 
@@ -161,20 +164,20 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
     case Assignable.AVar(x) =>
-      callFrame.setLocalByName(x, v).getOrElse(failure(UnboundVariable, x))
+      callFrame.setLocalByName(x, v).getOrFail(failure(UnboundVariable, x))
     case Assignable.ADeref(e) =>
       val addr = refAddr(eval(e))
       store.write(addr, v)
     case Assignable.AField(recVar, field) =>
       val recRef = eval(Exp.Var(recVar))
       val recAddr = refAddr(recRef)
-      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
+      val recVal = store.read(recAddr).getOrFail(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
     case Assignable.ADerefField(rec, field) =>
       val recRef = eval(rec)
       val recAddr = refAddr(recRef)
-      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
+      val recVal = store.read(recAddr).getOrFail(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
 

@@ -107,14 +107,14 @@ given IntervalIntegerOps[I](using ops: IntegerOps[I, I], strict: StrictIntegerOp
   def randomInteger(): NumericInterval[I] = NumericInterval.top
 
   def add(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    val addStrict = (i1: I, i2: I) => strict.addStrict(i1, i2).getOrElse(return NumericInterval.top)
+    val addStrict = (i1: I, i2: I) => strict.addStrict(i1, i2).getOrFail(return NumericInterval.top)
     v1.combine(v2, addStrict, addStrict)
   def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    val subStrict = (i1: I, i2: I) => strict.subStrict(i1, i2).getOrElse(return NumericInterval.top)
+    val subStrict = (i1: I, i2: I) => strict.subStrict(i1, i2).getOrFail(return NumericInterval.top)
     v1.combine(v2, subStrict, subStrict)
 
   def mul(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    val mulStrict = (i1: I, i2: I) => strict.mulStrict(i1, i2).getOrElse(return NumericInterval.top)
+    val mulStrict = (i1: I, i2: I) => strict.mulStrict(i1, i2).getOrFail(return NumericInterval.top)
     v1.combineCross(v2, mulStrict)
 
   def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = (v1, v2) match
