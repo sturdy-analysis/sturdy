@@ -18,8 +18,8 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers {
 
   val jdkUri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/jimple/jdk").toURI;
 
-  val classTable: ConcreteSymbolTable[Unit, String, Container] = new ConcreteSymbolTable[Unit, String, Container]
-  val runtimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit] = new ConcreteSymbolTable[Unit, String, RuntimeUnit]
+//  val classTable: ConcreteSymbolTable[Unit, String, Container] = new ConcreteSymbolTable[Unit, String, Container]
+//  val runtimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit] = new ConcreteSymbolTable[Unit, String, RuntimeUnit]
 
   def testFile(p: Path): Unit =
     it must s"correctly execute ${p.getFileName}" in {

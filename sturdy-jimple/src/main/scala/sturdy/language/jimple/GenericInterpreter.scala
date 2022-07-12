@@ -22,6 +22,7 @@ trait ObjectOps[F, V, O, T]:
   def makeObject(fields: Seq[(F, V)], objectType: T): O
   def lookupObjectField(obj: O, field: F): V
   def updateObjectField(obj: O, field: F, newVal: V): O
+  def nullObject: V
 
 trait Object[F, V, T]:
   def thisObject: (T, Seq[(F,V)])
@@ -46,7 +47,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   def addBrackets(s: String, i: Integer): String =
     var ret = ""
-    for(j <- (0 until i))
+    for(j <- 0 until i)
       ret = s.concat("[]")
     ret
 
@@ -75,16 +76,26 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   /* Effect components */
 
   val failure: Failure
-
+  import failure.*
   type CallFrameData = Unit
   val callFrame: MutableCallFrame[CallFrameData, Identifier, V, J]
 
   val classTable: SymbolTable[Unit, String, Container, J]
-  def getClass(name: String): JOption[J, Container] = classTable.get((), name)
+  def getClassOption(name: String): JOption[J, Container] = classTable.get((), name)
+  def getClass(name: String): Container =
+    val optionClass = getClassOption(name)
+    optionClass match
+      case c: Container => c
+      case _ => throw new ClassNotFoundException(name)
 
-  var methodParams: Seq[Immediate]
 
-  import failure.*
+  val runTimeTable: SymbolTable[Unit, String, RuntimeUnit, J]
+  def getMethod(name: QName): ClassBodyElement.MethodCB =
+    val optionRunTimeUnit = runTimeTable.get((), name._1)
+    optionRunTimeUnit match
+      case RuntimeUnit(_, _, methods, _) => methods.get(name).getOrElse(fail(MethodNotLoaded, name._2))
+
+
 
   def constant(c: Constant): V = c match
     case Constant.IntC(v) => longOps.integerLit(v)
@@ -101,12 +112,12 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     case Constant.NanC => doubleOps.floatingLit(Double.NaN)
 
     case Constant.StringC(v) => ???
-    case Constant.NullC => ??? //TODO: Will need this one
+    case Constant.NullC => objectOps.nullObject
 
   def evalImmediate(i: Immediate): V = i match
     case Immediate.ConstI(c) => constant(c)
     case Immediate.LocalI(l) => callFrame.getLocalByName(l.id).getOrElse(fail(UnboundLocal, l.id))
-    case Immediate.ClassI(name) => getClass(name).map(classValue).getOrElse(fail(UnboundClass, name))
+    case Immediate.ClassI(name) => getClassOption(name).map(classValue).getOrElse(fail(UnboundClass, name))
 
   def typeToString(t: Type): String = t match
     case Type.IntT => "Int"
@@ -128,7 +139,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 //          objectOps.lookupObjectField(obj, f.id)
     case RVal.StaticFieldRefR(f) => ???
     case RVal.LocalR(l) => callFrame.getLocalByName(l.id).getOrElse(fail(UnboundLocal, l.id))
-    case RVal.ClassR(s) => getClass(s).map(classValue).getOrElse(fail(UnboundClass, s))
+    case RVal.ClassR(s) => getClassOption(s).map(classValue).getOrElse(fail(UnboundClass, s))
 
   def evalBinop(v1: V, v2: V, op: BinOp): V = op match {
     case BinOp.Add => typeOf(v1, v2) {
@@ -302,7 +313,14 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     case ClassBodyElement.NativeCallCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isSynchronized, isNative, t, id, params, except) =>
       ???
     case  ClassBodyElement.MethodCB(header, locals, idStmts, stmts, excRanges) =>
-      ??? //TODO: Will need this one
+      evalMethodHeader(header)
+      for i <- 0 to locals.size do
+        evalLocalDec(locals(i))
+      for i <- 0 to idStmts.size do
+        evalStmt(idStmts(i))
+      for i <- 0 to stmts.size do
+        evalStmt(stmts(i))
+      callFrame.getLocalByName("return").getOrElse(fail(UnboundLocal, "return"))
     case  ClassBodyElement.MethodHeaderCB(header) =>
       ???
   }
@@ -319,11 +337,17 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     case Exp.CastE(t, i) => ???
     case Exp.InstanceOfE(i, ref) => ???
     case Exp.StaticInvokeE(s, l) => ???
-    case Exp.InvokeE(t, i, s, l) => ??? //TODO: Will need this one
+    case Exp.InvokeE(t, i, s, l) =>
+      evalImmediate(i) //FIXME: Is this needed?
+      val methodName = evalMethodSignature(s)
+      for i <- 0 to l.size do
+        callFrame.setLocalByName("@parameter"+i, evalImmediate(l(i))) //FIXME: Fully qualified param-name??
+      val method = getMethod(methodName)
+      evalClassBodyElement(method)
     case Exp.NewArrayE(t, i) => ???
-    case Exp.NewE(t) => //TODO: muss hier ein vor-laden aller Library Klassen geschehen?
+    case Exp.NewE(t) => //FIXME: muss hier ein vor-laden aller Library Klassen geschehen?
       val newType = typeToString(t)
-      val containerItem = getClass(newType).map(classValue).getOrElse(fail(UnboundClass, newType))
+      val containerItem = getClassOption(newType).map(classValue).getOrElse(fail(UnboundClass, newType))
       containerItem match
         case Container.ClassC(isPublic, isPrivate, isAbstract, isStatic, isFinal, isEnum, id, extend, implement, body) => ???
 //          val bodyIDs = body.map(el => el.getID)
@@ -360,13 +384,13 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
         case Var.LocalV(l) =>
           callFrame.getLocalByName(l.id).getOrElse(fail(UnboundLocal, l.id))
           callFrame.setLocalByName(l.id, rVal)
-    case Stmt.IdentityS(l, identityVal) => ??? //TODO: Will need this one
+    case Stmt.IdentityS(l, identityVal) => callFrame.setLocalByName(l.id, evalIdentityVal(identityVal))
     case Stmt.ExceptionIdentityS(l, identityVal) => ???
     case Stmt.EnterMonitorS(i) => ???
     case Stmt.ExitMonitorS(i) => ???
     case Stmt.GotoS(l) => ???
     case Stmt.IfS(cond, l) => ???
-    case Stmt.InvokeS(e) => ??? //TODO: Will need this one
+    case Stmt.InvokeS(e) => evalExp(e)
     case Stmt.LookupSwitchS(i, cases, l) => ???
     case Stmt.NopS => ???
     case Stmt.RetS(l) => ???
@@ -379,7 +403,12 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   def evalContainer(c: Container): Unit = c match {
     case Container.ClassC(isPublic, isPrivate, isAbstract, isStatic, isFinal, isEnum, id, extend, implement, body) =>
-      ??? //TODO: Will need this one
+      evalContainer(getClass(extend.get.s)) //FIXME: is this necessary?
+      for i <- 0 to implement.size do
+        evalContainer(getClass(implement(i).s)) //FIXME: is this necessary?
+      for i <- 0 to body.size do
+        evalClassBodyElement(body(i))
+        //FIXME: Do I need to start at main?
     case Container.InterfaceC(isPublic, isPrivate, id, extend, implement, body) => ???
   }
 
@@ -388,17 +417,16 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   def evalIdentityVal(iv: IdentityVal): V = iv match {
     case IdentityVal.CaughtExcRef() => ???
-    case IdentityVal.ParamRef(c, t) =>  //TODO: Will need this one
+    case IdentityVal.ParamRef(c, t) =>
       c match
-        case Constant.IntC(v) => evalImmediate(methodParams(v))
-        case _ => throw new IllegalArgumentException
-    case IdentityVal.ThisRef(t) => ??? //TODO: Will need this one
+        case Constant.IntC(v) => callFrame.getLocalByName("@parameter"+v).getOrElse(fail(UnboundLocal, "@parameter"+v))
+    case IdentityVal.ThisRef(t) => callFrame.getLocalByName("@this").getOrElse(fail(UnboundLocal, "@this"))
   }
 
   def evalMethodHeader(mh: MethodHeader): V = ??? //TODO: Will need this one
 
-  def evalMethodSignature(ms: MethodSignature): V = ??? //TODO: Will need this one
-
+  def evalMethodSignature(ms: MethodSignature): QName =
+    (ms.id, ms.classOrigin)
 
 
 
