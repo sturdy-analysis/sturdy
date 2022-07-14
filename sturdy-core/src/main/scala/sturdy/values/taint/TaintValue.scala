@@ -85,6 +85,7 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
   def countLeadingZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countLeadingZeros)
   def countTrailingZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailingZeros)
   def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
+  def invertBits(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.invertBits)
 
 given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[V]] with
   def floatingLit(f: B): TaintProduct[V] =  untainted(ops.floatingLit(f))

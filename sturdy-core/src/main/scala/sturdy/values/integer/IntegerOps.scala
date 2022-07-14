@@ -50,6 +50,7 @@ trait IntegerOps[B, V]:
   def countLeadingZeros(v: V): V
   def countTrailingZeros(v: V): V
   def nonzeroBitCount(v: V): V
+  def invertBits(v: V): V
 
 /** Overflow-aware integer operations for base type B, represented as V */
 trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:

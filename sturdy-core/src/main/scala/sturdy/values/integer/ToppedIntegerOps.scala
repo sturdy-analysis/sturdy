@@ -48,3 +48,4 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
   def countLeadingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countLeadingZeros)
   def countTrailingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countTrailingZeros)
   def nonzeroBitCount(v: Topped[T]): Topped[T] = v.unary(ops.nonzeroBitCount)
+  def invertBits(v: Topped[T]): Topped[T] = v.unary(ops.invertBits)

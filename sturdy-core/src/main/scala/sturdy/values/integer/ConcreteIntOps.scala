@@ -73,6 +73,7 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def countLeadingZeros(v: Int): Int = Integer.numberOfLeadingZeros(v)
   def countTrailingZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
+  def invertBits(v: Int): Int = ~v
 
 given ConcreteStrictIntegerOps: StrictIntegerOps[Int, Int, NoJoin] with
   override def addStrict(v1: Int, v2: Int): JOptionC[Int] =

@@ -149,6 +149,7 @@ given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): In
   def countLeadingZeros(v: IntSign): IntSign = ???
   def countTrailingZeros(v: IntSign): IntSign = ???
   def nonzeroBitCount(v: IntSign): IntSign = ???
+  def invertBits(v: IntSign): IntSign = ???
 
 given SignOrderingOps: OrderingOps[IntSign, Topped[Boolean]] with
   def lt(v1: IntSign, v2: IntSign): Topped[Boolean] = (v1, v2) match

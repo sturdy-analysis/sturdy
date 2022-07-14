@@ -76,6 +76,7 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def countLeadingZeros(v: Long): Long = JLong.numberOfLeadingZeros(v)
   def countTrailingZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
+  def invertBits(v: Long): Long = ~v
 
 given ConcreteStrictLongOps: StrictIntegerOps[Long, Long, NoJoin] with
   override def addStrict(v1: Long, v2: Long): JOptionC[Long] =

@@ -40,3 +40,4 @@ given TypeIntegerOps[B: ClassTag](using f: Failure, j: EffectStack, base: Integr
   def countLeadingZeros(v: BaseType[B]): BaseType[B] = BaseType[B]
   def countTrailingZeros(v: BaseType[B]): BaseType[B] = BaseType[B]
   def nonzeroBitCount(v: BaseType[B]): BaseType[B] = BaseType[B]
+  def invertBits(v: BaseType[B]): BaseType[B] = BaseType[B]
