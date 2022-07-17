@@ -76,10 +76,6 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
     val x2y2 = f(high, other.high)
     NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
 
-case class NumericIntervalTop[I](top: NumericInterval[I])
-given IntIntervalTop: NumericIntervalTop[Int] = NumericIntervalTop(NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE))
-given LongIntervalTop: NumericIntervalTop[Long] = NumericIntervalTop(NumericInterval(Long.MinValue, Long.MaxValue))
-
 given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictIntegerOps[I, I, NoJoin], Numeric[I], Top[NumericInterval[I]])
   (using Failure, EffectStack): IntervalIntegerOps[I] =
   new IntervalIntegerOps(20)
