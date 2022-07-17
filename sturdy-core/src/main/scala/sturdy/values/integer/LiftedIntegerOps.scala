@@ -3,10 +3,13 @@ package sturdy.values.integer
 import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.effect.failure.Failure
+import sturdy.values.Topped
 
 class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: IntegerOps[B, I]) extends IntegerOps[B, V]:
   def integerLit(i: B): V = inject(ops.integerLit(i))
   def randomInteger(): V = inject(ops.randomInteger())
+  def toBigInt(v: V): Topped[BigInt] = ???
+
   def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))
   def sub(v1: V, v2: V): V = inject(ops.sub(extract(v1), extract(v2)))
   def mul(v1: V, v2: V): V = inject(ops.mul(extract(v1), extract(v2)))

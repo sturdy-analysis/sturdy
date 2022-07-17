@@ -16,6 +16,7 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
 
   def integerLit(i: B): Topped[T] = Topped.Actual(ops.integerLit(i))
   def randomInteger(): Topped[T] = Topped.Top
+  def toBigInt(v: Topped[T]): Topped[BigInt] = v.flatMap(v => ops.toBigInt(v))
 
   def add(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.add, v2)
   def sub(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.sub, v2)

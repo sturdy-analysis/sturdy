@@ -5,10 +5,9 @@ import sturdy.data.JOptionC
 import sturdy.data.MayJoin
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
-import sturdy.values.Structural
+import sturdy.values.{Structural, Topped, config}
 import sturdy.values.convert.*
-import sturdy.values.relational.{UnsignedOrderingOps, OrderingOps, EqOps}
-import sturdy.values.config
+import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random
@@ -21,6 +20,7 @@ given Structural[Int] with {}
 given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def integerLit(i: Int): Int = i
   def randomInteger(): Int = Random.nextInt()
+  def toBigInt(v: Int): Topped[BigInt] = Topped.Actual(BigInt(v)) 
 
   def add(v1: Int, v2: Int): Int = v1 + v2
   def sub(v1: Int, v2: Int): Int = v1 - v2

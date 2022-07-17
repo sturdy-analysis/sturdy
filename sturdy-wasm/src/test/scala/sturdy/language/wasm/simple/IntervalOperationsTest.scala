@@ -31,8 +31,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 
   val test = Paths.get(this.getClass.getResource("/sturdy/language/wasm/intervalsTest.wast").toURI)
 
-  val top = NumericInterval.top[Int]
-  def b(l: Int, h: Int): NumericInterval.Bounded[Int] = NumericInterval.Bounded[Int](l, h)
+  def b(l: Int, h: Int): NumericInterval[Int] = NumericInterval(l, h)
   def c(constant: Int): NumericInterval[Int] = NumericInterval.constant(constant)
   def maybeFailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.MaybeFailing(List(Value.Int32(res)), Powerset())
   def unfailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.Unfailing(List(Value.Int32(res)))
@@ -46,27 +45,13 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
       // minValue / -1 creates an overflow exception
       (args.head, args.tail.head, res, expected) match
         case (first, second, MaybeFailing(resVals, _), Unfailing(expVals)) =>
-          val firstHasMinValue = first match {
-            case Top() => true
-            case Bounded(l1, h1) if l1 == -Integer.MIN_VALUE => true
-            case _ => false
-          }
-          val secondHasMinusOne = second match {
-            case Top() => true
-            case Bounded(l2, h2) if l2 <= -1 && h2 >= -1 => true
-            case _ => false
-          }
+          val firstHasMinValue = first.low == Integer.MIN_VALUE
+          val secondHasMinusOne = second.containsNum(-1)
 //          println(s"$firstHasMinValue $secondHasMinusOne ${resVals.head} ${expVals.head}")
           firstHasMinValue && secondHasMinusOne && resVals.head == expVals.head
         case (first, second, Failing(_), Unfailing(expVals)) =>
-          val firstIsMinValue = first match {
-            case Bounded(l1, h1) if h1 == -Integer.MIN_VALUE => true
-            case _ => false
-          }
-          val secondIsMinusOne = second match {
-            case Bounded(l2, h2) if l2 == -1 && h2 == -1 => true
-            case _ => false
-          }
+          val firstIsMinValue = first.low == Integer.MIN_VALUE && first.low == first.high
+          val secondIsMinusOne = first.low == -1 && first.low == first.high
           firstIsMinValue && secondIsMinusOne
         case _ => false
     } else {
@@ -78,8 +63,6 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
       var (e, r) = (expected, result) match {
         case (Value.Int32(exp), Value.Int32(res)) => (exp, res)
       }
-      e = if (e == top) NumericInterval.Bounded(Integer.MIN_VALUE, Integer.MAX_VALUE) else e
-      r = if (r == top) NumericInterval.Bounded(Integer.MIN_VALUE, Integer.MAX_VALUE) else r
       if (forcePrecise)
         assertResult(e, s"for $operationName of $args")(r)
       else
@@ -128,7 +111,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
         )
       )
 
-      val result = NumericInterval.Bounded(lower, upper)
+      val result = NumericInterval(lower, upper)
       if (!hasFailed)
         unfailing(result)
       else if (!hasSucceeded)
@@ -174,7 +157,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
           }
       )
 
-      val result = NumericInterval.Bounded(lower, upper)
+      val result = NumericInterval(lower, upper)
       if (!hasFailed)
         unfailing(result)
       else if (!hasSucceeded)
@@ -199,6 +182,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   {
 //    testOperation("shl", List(b(-2147483642,-2147483640), b(-3, -2)), unfailing(b(-2147483648,0)), true, true)
     bruteForceTestIntervalsOnBinaryOps(List(
+      TestConfigBinary("rem_s", _%_, false),
       TestConfigBinary("shl", _<<_, true),
       TestConfigBinary("shr_u", _>>>_, true),
       TestConfigBinary("shr_s", _>>_, true),
@@ -207,7 +191,6 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
       TestConfigBinary("xor",   _^_, true),
       TestConfigBinary("add",   _+_, true),
       TestConfigBinary("sub",   _-_, true),
-      TestConfigBinary("rem_s", _%_, false),
       TestConfigBinary("or",    _|_, true),
       TestConfigBinary("and",   _&_, true)
       ), 10
@@ -224,7 +207,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   case class TestConfigBinary(nameOfOp: String, opOnNums: (Int, Int) => Int, forcePrecise: Boolean)
   case class TestConfigUnary(nameOfOp: String, opOnNums: Int => Int, forcePrecise: Boolean)
 
-  def getTestIntervals(size: Int): List[NumericInterval.Bounded[Int]] = List(
+  def getTestIntervals(size: Int): List[NumericInterval[Int]] = List(
     b(Integer.MIN_VALUE, Integer.MIN_VALUE + size - 1),
     b(-size / 2, size / 2),
     b(Integer.MAX_VALUE - size + 1, Integer.MAX_VALUE),

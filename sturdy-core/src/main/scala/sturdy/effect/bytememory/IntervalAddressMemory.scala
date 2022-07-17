@@ -5,26 +5,26 @@ import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.{ComputationJoiner, EffectStack, Effect}
 import sturdy.values.*
-
 import scala.reflect.ClassTag
 import sturdy.values.integer.NumericInterval
-
+import sturdy.values.integer.{*, given}
+import sturdy.effect.failure.Failure
 /** A memory that tracks byte properties `B` for memory accesses via address ranges `NumericInterval[Int]`.
  */
 class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using tb: Top[B])(using Join[B], Widen[B], Finite[Key]) extends Memory[Key, NumericInterval[Int], Seq[B], Topped[Int], WithJoin], Effect:
   private val constantAddressMemory: ConstantAddressMemory[Key, B] = new ConstantAddressMemory(emptyB)
 
-  override def read(key: Key, addr: NumericInterval[Int], length: Int): JOptionA[Seq[B]] = addr match
-    case NumericInterval.Bounded(low, high) if high - low <= rangeLimit =>
-      EffectStack.pureJoinFold(low to high, addr => constantAddressMemory.read(key, Topped.Actual(addr), length))
-    case _ =>
+  override def read(key: Key, addr: NumericInterval[Int], length: Int): JOptionA[Seq[B]] =
+    if (addr.countOfNumsInInterval <= rangeLimit)
+      EffectStack.pureJoinFold(addr.low to addr.high, addr => constantAddressMemory.read(key, Topped.Actual(addr), length))
+    else
       constantAddressMemory.read(key, Topped.Top, length)
 
-  override def write(key: Key, addr: NumericInterval[Int], bytes: Seq[B]): JOptionA[Unit] = addr match
-    case NumericInterval.Bounded(low, high) if high - low <= rangeLimit =>
+  override def write(key: Key, addr: NumericInterval[Int], bytes: Seq[B]): JOptionA[Unit] =
+    if (addr.countOfNumsInInterval <= rangeLimit)
       EffectStack.localEffect(constantAddressMemory)
-        .joinFold(low to high, addr => constantAddressMemory.write(key, Topped.Actual(addr), bytes))
-    case _ =>
+        .joinFold(addr.low to addr.high, addr => constantAddressMemory.write(key, Topped.Actual(addr), bytes))
+    else
       constantAddressMemory.write(key, Topped.Top, bytes)
 
   override def size(key: Key): Topped[Int] =

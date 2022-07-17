@@ -84,8 +84,8 @@ object WASMType:
     case F64 => ConstantAnalysis.Value.Float64(Topped.Top)
 
   def toIntervalAnalysisValue(wty: WASMType): IntervalAnalysis.Value= wty match
-    case I32 => IntervalAnalysis.Value.Int32(NumericInterval.top)
-    case I64 => IntervalAnalysis.Value.Int64(NumericInterval.top)
+    case I32 => IntervalAnalysis.Value.Int32(NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE))
+    case I64 => IntervalAnalysis.Value.Int64(NumericInterval(Long.MinValue, Long.MaxValue))
     case F32 => IntervalAnalysis.Value.Float32(Topped.Top)
     case F64 => IntervalAnalysis.Value.Float64(Topped.Top)
 

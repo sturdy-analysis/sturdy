@@ -6,18 +6,17 @@ import sturdy.values.relational.EqOps
 import sturdy.values.Topped
 import sturdy.values.integer.{IntSign, NumericInterval, given}
 import sturdy.language.tip.Interpreter
-import sturdy.values.integer.NumericInterval.IsZero
 
 object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
     final type VInt = NumericInterval[Int]
 
-    final def topInt: NumericInterval[Int] = NumericInterval.top
+    final def topInt: NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
     final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using failure: Failure): VBool = v match
-      case Value.IntValue(i) => i.isZero.toBoolean
+      case Value.IntValue(i) => i.toBoolean
       case Value.TopValue => Topped.Top
       case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 

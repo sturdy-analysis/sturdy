@@ -12,29 +12,31 @@ import sturdy.values.integer.NumericInterval
 import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
-class IntervalSymbolTable[Key, I, Entry](rangeLimit: I)(using Finite[Key], Join[Entry], Numeric[I]) extends SymbolTable[Key, NumericInterval[I], Entry, WithJoin], Effect:
+class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[I]) extends SymbolTable[Key, NumericInterval[I], Entry, WithJoin], Effect:
   private val constantSymbolTable: ConstantSymbolTable[Key, I, Entry] = new ConstantSymbolTable
 
   private val one = summon[Numeric[I]].one
 
-  def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] = symbol match
-    case NumericInterval.Bounded(low, high) if high - low <= rangeLimit =>
-      var result = constantSymbolTable.get(key, Topped.Actual(low))
-      var i = low + one
-      while (i <= high)
+  def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] =
+    if (symbol.countOfNumsInInterval <= rangeLimit) {
+      var result = constantSymbolTable.get(key, Topped.Actual(symbol.low))
+      var i = symbol.low + one
+      while (i <= symbol.high) {
         result = Join(result, constantSymbolTable.get(key, Topped.Actual(i))).get
         i += one
+      }
       result
-    case _ =>
+    } else {
       constantSymbolTable.get(key, Topped.Top)
+    }
 
-  def set(key: Key, symbol: NumericInterval[I], newEntry: Entry): Unit = symbol match
-    case NumericInterval.Bounded(low, high) if high - low <= rangeLimit =>
-      var i = low
-      while (i <= high)
+  def set(key: Key, symbol: NumericInterval[I], newEntry: Entry): Unit =
+    if (symbol.countOfNumsInInterval <= rangeLimit)
+      var i = symbol.low
+      while (i <= symbol.high)
         constantSymbolTable.set(key, Topped.Actual(i), newEntry)
         i += one
-    case _ =>
+    else
       constantSymbolTable.set(key, Topped.Top, newEntry)
 
   def putNew(key: Key): Unit =

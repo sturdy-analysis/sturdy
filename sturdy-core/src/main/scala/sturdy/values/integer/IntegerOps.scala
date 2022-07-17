@@ -3,7 +3,7 @@ package sturdy.values.integer
 import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.effect.failure.FailureKind
-import sturdy.values.config
+import sturdy.values.{Topped, config}
 import sturdy.values.convert.&&
 import sturdy.values.convert.Convert
 import sturdy.values.convert.NilCC
@@ -19,6 +19,7 @@ case object IntegerOverflow extends FailureKind
 trait IntegerOps[B, V]:
   def integerLit(i: B): V
   def randomInteger(): V
+  def toBigInt(v: V): Topped[BigInt]
   
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
@@ -51,6 +52,10 @@ trait IntegerOps[B, V]:
   def countTrailingZeros(v: V): V
   def nonzeroBitCount(v: V): V
   def invertBits(v: V): V
+  
+
+trait OverflowIntegers[V]:
+  def wasOverflown(v: V): Topped[Boolean]
 
 /** Overflow-aware integer operations for base type B, represented as V */
 trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:

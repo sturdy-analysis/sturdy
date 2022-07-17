@@ -52,25 +52,19 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
-      ix.asInt32 match
-        case NumericInterval.Top() =>
-          if (vec.isEmpty)
-            JOptionPowerset.None()
-          else
-            JOptionPowerset.NoneSome(Powerset(vec.toSet))
-        case NumericInterval.Bounded(l, h) =>
-          val elems = for (i <- l.max(0) to h.min(vec.size - 1))
-            yield vec(i)
-          if (elems.isEmpty) {
-            // no elems in range
-            JOptionPowerset.None()
-          } else if (h < vec.size) {
-            // all indices in range
-            JOptionPowerset.Some(Powerset(elems.toSet))
-          } else {
-            // some indices in range, but not all
-            JOptionPowerset.NoneSome(Powerset(elems.toSet))
-          }
+      val NumericInterval(l, h) = ix.asInt32
+      val elems = for (i <- l.max(0) to h.min(vec.size - 1))
+        yield vec(i)
+      if (elems.isEmpty) {
+        // no elems in range
+        JOptionPowerset.None()
+      } else if (h < vec.size) {
+        // all indices in range
+        JOptionPowerset.Some(Powerset(elems.toSet))
+      } else {
+        // some indices in range, but not all
+        JOptionPowerset.NoneSome(Powerset(elems.toSet))
+      }
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>
@@ -103,7 +97,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
-    val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval.Bounded(0, 0), rangeLimit)
+    val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
