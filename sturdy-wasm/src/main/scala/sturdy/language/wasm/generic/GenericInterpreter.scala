@@ -164,14 +164,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
-      val v = callFrame.getLocal(ix).getOrElse(fail(UnboundLocal, ix.toString))
+      val v = callFrame.getLocalOrElse(ix, fail(UnboundLocal, ix.toString))
       stack.push(v)
     case LocalSet(ix) =>
       val v = stack.popOrAbort()
-      callFrame.setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
+      callFrame.setLocalOrElse(ix, v, fail(UnboundLocal, ix.toString))
     case LocalTee(ix) =>
       val v = stack.peekOrAbort()
-      callFrame.setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
+      callFrame.setLocalOrElse(ix, v, fail(UnboundLocal, ix.toString))
     case GlobalGet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val global = getGlobalValue(globalIdx)
@@ -204,11 +204,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val addr = effectiveAddr(inst.offset)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
-    memory.read(memIdx,addr,length).option
-      (fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory."))
-      {(b: Bytes) =>
-        val v = decode(b, SomeCC(inst, false))
-        stack.push(v)}
+    val bytes = memory.read(memIdx,addr,length).getOrFail(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory."))
+    val v = decode(bytes, SomeCC(inst, false))
+    stack.push(v)
 
   def store(inst: StoreInst | StoreNInst): Unit =
     val v = stack.popOrAbort()
@@ -219,7 +217,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
-    memory.write(memIdx, addr, bytes).getOrElse(
+    memory.write(memIdx, addr, bytes).getOrFail(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 
@@ -238,7 +236,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     TableAddr(0)
 
   def getGlobalValue(ga: GlobalAddr): V =
-    globals.get((), ga).getOrElse(fail(UnboundGlobal, ga.toString))
+    globals.getOrElse((), ga, fail(UnboundGlobal, ga.toString))
   def writeGlobalValue(ga: GlobalAddr, v: V): Unit =
     globals.set((), ga, v)
 
@@ -305,7 +303,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.popOrAbort()
-      val func = funTable.get(tableIndex, valueToFuncIx(funcIx)).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      val func = funTable.getOrElse(tableIndex, valueToFuncIx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
       invokeIndirect(func, ftExpected, funcIx)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
