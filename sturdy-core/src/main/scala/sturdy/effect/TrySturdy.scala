@@ -76,12 +76,8 @@ object TrySturdy:
     case (TrySturdy.Recurrent(_), _) => MaybeChanged.Changed(v2)
     case (TrySturdy.Exception(_), TrySturdy.Failure(_)) => MaybeChanged.Unchanged(v1)
     case (TrySturdy.Failure(_), TrySturdy.Exception(_)) => MaybeChanged.Changed(v2)
-    case (TrySturdy.Exception(e1), TrySturdy.Exception(e2)) =>
-      if (e1 == e2) MaybeChanged.Unchanged(v1)
-      else throw IllegalArgumentException(s"Cannot join conflicting exceptions $e1 and $e2")
-    case (TrySturdy.Failure(f1), TrySturdy.Failure(f2)) =>
-      if (f1 == f2) MaybeChanged.Unchanged(v1)
-      else throw IllegalArgumentException(s"Cannot join conflicting failures $f1 and $f2")
+    case (TrySturdy.Exception(_), TrySturdy.Exception(_)) => MaybeChanged.Unchanged(v1)
+    case (TrySturdy.Failure(_), TrySturdy.Failure(_)) => MaybeChanged.Unchanged(v1)
     case _ => throw new IllegalArgumentException(s"Cannot join $v1 and $v2")
 
 
