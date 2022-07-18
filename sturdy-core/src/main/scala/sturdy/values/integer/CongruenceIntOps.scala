@@ -149,6 +149,12 @@ given CongruenceIntegerOps(using f: Failure, j: EffectStack): IntegerOps[Int, Co
     case Congruence(c1, 0) => normalize(Congruence(Integer.bitCount(c1), 0))
     case _ => top
 
+  def invertBits(v : Congruence) : Congruence = v match
+    case Congruence(c1, 0) => normalize(Congruence(~c1, 0))
+    case _ => top
+
+  def toBigInt(v : Congruence) : Topped[BigInt] = ???
+
 given TopCongruence: Top[Congruence] with
   override def top: Congruence = Congruence.top
 
