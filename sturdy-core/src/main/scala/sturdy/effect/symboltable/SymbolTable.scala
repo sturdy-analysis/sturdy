@@ -10,3 +10,6 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   def set(key: Key, symbol: Symbol, newEntry: Entry): Unit
   def putNew(key: Key): Unit
 
+  final def getOrElse(key: Key, symbol: Symbol, default: => Entry)(using J[Entry]): Entry =
+    get(key, symbol).getOrElse(default)
+

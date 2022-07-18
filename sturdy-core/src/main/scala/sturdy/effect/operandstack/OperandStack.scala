@@ -48,10 +48,10 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
     }
 
   inline def popOrFail()(using J[V], Failure): V =
-    pop().getOrElse(Failure(StackUnderflow, "pop on empty stack"))
+    pop().getOrFail(Failure(StackUnderflow, "pop on empty stack"))
 
   inline def peekOrFail()(using J[V], Failure): V =
-    peek().getOrElse(Failure(StackUnderflow, "peek on empty stack"))
+    peek().getOrFail(Failure(StackUnderflow, "peek on empty stack"))
 
   inline def pop2OrFail()(using J[V], Failure): (V,V) =
     val v2 = popOrFail()
@@ -59,16 +59,16 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
     (v1, v2)
 
   inline def popNOrFail(n: Int)(using J[List[V]], Failure): List[V] =
-    popN(n).getOrElse(Failure(StackUnderflow, s"popN($n) on stack with less than $n elements"))
+    popN(n).getOrFail(Failure(StackUnderflow, s"popN($n) on stack with less than $n elements"))
 
   inline def peekNOrFail(n: Int)(using J[List[V]], Failure): List[V] =
-    peekN(n).getOrElse(Failure(StackUnderflow, s"peekN($n) on stack with less than $n elements"))
+    peekN(n).getOrFail(Failure(StackUnderflow, s"peekN($n) on stack with less than $n elements"))
 
   inline def popOrAbort()(using J[V]): V =
-    pop().getOrElse(throw new IllegalStateException("pop on empty stack"))
+    pop().getOrFail(throw new IllegalStateException("pop on empty stack"))
 
   inline def peekOrAbort()(using J[V]): V =
-    peek().getOrElse(throw new IllegalStateException("peek on empty stack"))
+    peek().getOrFail(throw new IllegalStateException("peek on empty stack"))
 
   inline def pop2OrAbort()(using J[V]): (V,V) =
     val v2 = popOrAbort()
@@ -76,7 +76,7 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
     (v1, v2)
 
   inline def popNOrAbort(n: Int)(using J[List[V]]): List[V] =
-    popN(n).getOrElse(throw new IllegalStateException(s"popN($n) on stack with less than $n elements"))
+    popN(n).getOrFail(throw new IllegalStateException(s"popN($n) on stack with less than $n elements"))
 
   inline def peekNOrAbort(n: Int)(using J[List[V]]): List[V] =
-    peekN(n).getOrElse(throw new IllegalStateException(s"peekN($n) on stack with less than $n elements"))
+    peekN(n).getOrFail(throw new IllegalStateException(s"peekN($n) on stack with less than $n elements"))
