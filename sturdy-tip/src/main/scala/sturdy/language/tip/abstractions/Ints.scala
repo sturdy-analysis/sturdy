@@ -4,7 +4,7 @@ import sturdy.effect.failure.Failure
 import sturdy.language.tip.TipFailure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
-import sturdy.values.integer.{IntSign, NumericInterval, given}
+import sturdy.values.integer.{IntSign, NumericInterval, Congruence, given}
 import sturdy.language.tip.Interpreter
 import sturdy.values.integer.NumericInterval.IsZero
 
@@ -46,4 +46,25 @@ object Ints:
       case Topped.Top => IntSign.ZeroOrPos
       case Topped.Actual(true) => IntSign.Pos
       case Topped.Actual(false) => IntSign.Zero
+    )
+
+  trait CongruenceClass extends Interpreter :
+    final type VBool = Topped[Boolean]
+    final type VInt = Congruence
+
+    final def topInt: Congruence = Congruence.top
+    final def topBool: Topped[Boolean] = Topped.Top
+
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
+      case Value.IntValue(i) => i match
+        case Congruence(0,0) => Topped.Actual(false)
+        case Congruence(0,_) => Topped.Top
+        case _ => Topped.Actual(true)
+      case Value.TopValue => Topped.Top
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
+
+    final def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
+      case Topped.Top => Congruence(0,1)
+      case Topped.Actual(true) => Congruence(1,0)
+      case Topped.Actual(false) => Congruence(0,0)
     )
