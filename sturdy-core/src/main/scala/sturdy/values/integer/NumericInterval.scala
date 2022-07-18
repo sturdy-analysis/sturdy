@@ -16,21 +16,14 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.control.Breaks.{break, breakable}
 
 
-
 object NumericInterval:
   def constant[I](i: I): NumericInterval[I] = NumericInterval(i, i)
-
-  case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Option[NumericInterval[I]],
-                              hasZero: Boolean,
-                              geqZero: Option[NumericInterval[I]], greaterZero: Option[NumericInterval[I]])
-
-  private inline def fromInt[I](i: Int)(using Numeric[I]): I = summon[Numeric[I]].fromInt(i)
 
 case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
   def containsNum(n: I)(using Ordering[I]): Boolean = low <= n && n <= high
-  
+
   def toBoolean(using ord: Ordering[I], num: Numeric[I]): Topped[Boolean] =
     val zero = num.fromInt(0)
     if (low == zero && low == high)
@@ -76,11 +69,20 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
     val x2y2 = f(high, other.high)
     NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
 
+case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Option[NumericInterval[I]],
+                            hasZero: Boolean,
+                            geqZero: Option[NumericInterval[I]], greaterZero: Option[NumericInterval[I]])
+
+
+
 given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictIntegerOps[I, I, NoJoin], Numeric[I], Top[NumericInterval[I]])
   (using Failure, EffectStack): IntervalIntegerOps[I] =
   new IntervalIntegerOps(20)
 
-class IntervalIntegerOps[I](val feasibleNumberOfOps: Int)(using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
+
+class IntervalIntegerOps[I]
+  (val feasibleNumberOfOps: Int)
+  (using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
   import NumericInterval.*
 
   private val zero = num.fromInt(0)
