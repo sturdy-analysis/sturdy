@@ -4,6 +4,7 @@ import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, jo
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
+import sturdy.values.config.Bits
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 
@@ -22,6 +23,9 @@ object NumericInterval:
 case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
+  def toHexString(using Numeric[I]): String =
+    s"NumericInterval(${java.lang.Long.toHexString(low.toLong)}, ${java.lang.Long.toHexString(high.toLong)})"
+
   def containsNum(n: I)(using Ordering[I]): Boolean = low <= n && n <= high
 
   def toBoolean(using ord: Ordering[I], num: Numeric[I]): Topped[Boolean] =
@@ -35,9 +39,10 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
 
   def countOfNumsInInterval(using Numeric[I]): BigInt = BigInt(high.toLong) - BigInt(low.toLong) + 1
 
-  def toUnsigned(using num: Numeric[I], ordUnsigned: UnsignedOrderingOps[I, Boolean]): NumericInterval[I] = {
-    if (ordUnsigned.gtUnsigned(low, high)) {
-      NumericInterval(num.zero, low)
+  def toUnsigned(using num: Numeric[I], ord: Ordering[I]): NumericInterval[I] = {
+    val zero = num.fromInt(0)
+    if (low < zero && high >= zero) {
+      NumericInterval(zero, num.fromInt(-1))
     } else {
       this
     }
@@ -1162,12 +1167,27 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
     else if (iv1.high < iv2.low || iv2.high < iv1.low) Topped.Actual(true)
     else Topped.Top
 
-given ConvertNumericIntervals[From, To, I1, I2, Config <: ConvertConfig[_]]
-(using convert: Convert[From, To, I1, I2, Config])(using Failure, EffectStack)
-: Convert[From, To, NumericInterval[I1], NumericInterval[I2], Config] with
 
-  def apply(i: NumericInterval[I1], conf: Config): NumericInterval[I2] =
-    NumericInterval(convert(i.low, conf), convert(i.high, conf))
+given ConvertNumericIntervalsIntLong[I, L](using convert: ConvertIntLong[I, L])(using Numeric[I], Ordering[I], Numeric[L], Ordering[L])
+  : ConvertIntLong[NumericInterval[I], NumericInterval[L]] with
+
+  def apply(from: NumericInterval[I], conf: Bits): NumericInterval[L] =
+    conf match
+      case Bits.Signed | Bits.Raw =>
+        NumericInterval(convert(from.low, conf), convert(from.high, conf))
+      case Bits.Unsigned =>
+        val unsigned = from.toUnsigned
+        NumericInterval(convert(unsigned.low, conf), convert(unsigned.high, conf))
+
+given ConvertNumericIntervalsLongInt[L, I](using Numeric[I], Numeric[L], Top[NumericInterval[I]])(using convert: ConvertLongInt[L, I]): ConvertLongInt[NumericInterval[L], NumericInterval[I]] with
+  def apply(from: NumericInterval[L], conf: NilCC.type): NumericInterval[I] =
+    val low32 = from.low.toLong >>> 32
+    val high32 = from.high.toLong >>> 32
+    if (low32 == high32) {
+      NumericInterval(convert(from.low, conf), convert(from.high, conf))
+    } else {
+      Top.top
+    }
 
 given ConvertNumericIntervalToConstant[From, To, I]: Convert[From, To, NumericInterval[I], Topped[I], NilCC.type] with
   def apply(i: NumericInterval[I], conf: NilCC.type): Topped[I] =

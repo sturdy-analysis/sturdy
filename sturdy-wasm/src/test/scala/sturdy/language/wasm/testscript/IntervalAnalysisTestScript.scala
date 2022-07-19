@@ -50,7 +50,7 @@ class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
   def analyses: IterableOnce[() => IntervalAnalysis.Instance] =
     Iterator(
       () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
@@ -62,7 +62,7 @@ class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     for (aInterp <- analyses) {
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
-        println(s"Executing TestScript constant analysis on ${p.getFileName}")
+        println(s"Executing TestScript interval analysis on ${p.getFileName}")
         val script = Parsing.testscript(p)
         val interp = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp())
         interp.run(script)
@@ -146,26 +146,26 @@ class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
       assert(!res.isFailing)
       val expected = constExprToVals(expectedRes)
       assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
-      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+      assertResult(IsSound.Sound, s"result after running action $action (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertReturnCanonicalNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
-      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+      assertResult(IsSound.Sound, s"result after running action $action (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertReturnArithmeticNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
-      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+      assertResult(IsSound.Sound, s"result after running action $action (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertTrap(action: Action, message: String) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
-      assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
-      assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
+      assertResult(IsSound.Sound, s"result after running action $action (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertModuleTrap(mod,_) =>
       val aRes = aInstantiate(mod)
       val res = instantiate(mod)

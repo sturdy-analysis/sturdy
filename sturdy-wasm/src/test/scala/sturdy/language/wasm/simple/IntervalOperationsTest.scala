@@ -73,7 +73,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 
     import AFallible.*
     def doTheTest() = {
-      val res = runIntervalAnalysis(test, operationName, args.map(Value.Int32), StackConfig.StackedStates())
+      val res = runIntervalAnalysis(test, operationName, args.map(Value.Int32.apply), StackConfig.StackedStates())
       (res, expected) match
         case (Unfailing(vals), Unfailing(expectedVals)) => assertCorrect(expectedVals.head, vals.head)
         case (MaybeFailing(vals, _), MaybeFailing(expectedVals, _)) => assertCorrect(expectedVals.head, vals.head)

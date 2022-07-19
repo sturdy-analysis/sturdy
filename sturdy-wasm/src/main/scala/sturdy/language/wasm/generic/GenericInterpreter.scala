@@ -158,7 +158,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   private var tabCount = 0
   private var globCount = 0
 
-  inline private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what in $module")
+  private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what in $module")
 
   def module: ModuleInstance = callFrame.data.module
 
@@ -204,9 +204,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val addr = effectiveAddr(inst.offset)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
-    val bytes = memory.read(memIdx,addr,length).getOrFail(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory."))
-    val v = decode(bytes, SomeCC(inst, false))
-    stack.push(v)
+    memory.read(memIdx,addr,length).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory.")) {
+      bytes =>
+        val v = decode(bytes, SomeCC(inst, false))
+        stack.push(v)
+    }
 
   def store(inst: StoreInst | StoreNInst): Unit =
     val v = stack.popOrAbort()
@@ -217,7 +219,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
-    memory.write(memIdx, addr, bytes).getOrFail(
+    memory.write(memIdx, addr, bytes).getOrElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 

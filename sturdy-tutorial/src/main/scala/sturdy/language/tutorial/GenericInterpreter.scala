@@ -109,7 +109,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // For evaluating variabes we look them up in the store and call "fail" in case the variable in not initialized.
   def eval(e: Exp): V = e match
     case NumLit(n) => lit(n)
-    case Var(name) => store.read(name).getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
+    case Var(name) => store.read(name).getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))
     case Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -133,7 +133,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   def runProg(arg: V, s: Stm): V =
     store.write("arg", arg)
     run(s)
-    store.read("result").getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
+    store.read("result").getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
 
 /*
  * We now refine the generic interpreter to abstract over the fixpoint algorithm. This way, abstract instances may
@@ -192,7 +192,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   // eval_open now calls eval instead of making a recursive call
   def eval_open(e: Exp)(using Fixed): V = e match
     case NumLit(n) => lit(n)
-    case Var(name) => store.read(name).getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
+    case Var(name) => store.read(name).getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))
     case Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -232,5 +232,5 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   def runProg(arg: V, s: Stm): V = external {
     store.write("arg", arg)
     run(s)
-    store.read("result").getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
+    store.read("result").getOrElse(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
   }
