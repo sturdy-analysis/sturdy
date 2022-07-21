@@ -92,16 +92,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case i32.Add => i32ops.add(v1, v2)
     case i32.Sub => i32ops.sub(v1, v2)
     case i32.Mul => i32ops.mul(v1, v2)
-    case i32.DivS =>
-      val v1IsMinValue = eqOps.equ(v1, i32ops.integerLit(Int.MinValue))
-      val v2IsMinusOne = eqOps.equ(v2, i32ops.integerLit(-1))
-      val isOverflow = i32ops.bitAnd(v1IsMinValue, v2IsMinusOne)
-      wasmOps.branchOpsV.boolBranch(isOverflow) {
-        Failure(IntegerOverflow, s"$v1 / $v2")
-      } {
-        i32ops.div(v1, v2)
-      }
-
+    case i32.DivS => i32ops.div(v1, v2)
     case i32.DivU => i32ops.divUnsigned(v1, v2)
     case i32.RemS => i32ops.remainder(v1, v2)
     case i32.RemU => i32ops.remainderUnsigned(v1, v2)
@@ -117,15 +108,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case i64.Add => i64ops.add(v1, v2)
     case i64.Sub => i64ops.sub(v1, v2)
     case i64.Mul => i64ops.mul(v1, v2)
-    case i64.DivS =>
-      val v1IsMinValue = eqOps.equ(v1, i64ops.integerLit(Long.MinValue))
-      val v2IsMinusOne = eqOps.equ(v2, i64ops.integerLit(-1))
-      val isOverflow = i32ops.bitAnd(v1IsMinValue, v2IsMinusOne)
-      wasmOps.branchOpsV.boolBranch(isOverflow) {
-        Failure(IntegerOverflow, s"$v1 / $v2")
-      } {
-        i64ops.div(v1, v2)
-      }
+    case i64.DivS => i64ops.div(v1, v2)
     case i64.DivU => i64ops.divUnsigned(v1, v2)
     case i64.RemS => i64ops.remainder(v1, v2)
     case i64.RemU => i64ops.remainderUnsigned(v1, v2)

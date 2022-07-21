@@ -499,7 +499,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val v2 = stack.popOrAbort()
     val res = i32ops.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
-    val v = branchOpsV.boolBranch(cmp, fail(IntegerOverflow, s"$v1 + $v2"), res)
+    val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
     valueToAddr(v)
 
   def resolveImports(module: Module, imports: Imports):

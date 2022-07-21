@@ -1,30 +1,41 @@
 package sturdy.values.integer
 
-import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
+import sturdy.data.{JOptionC, joinWithFailure, JOptionPowerset, noJoin, JOptionA, SomeJOption, joinComputations, NoJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.config.Bits
+import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 
-import java.nio.{ByteBuffer, ByteOrder}
-import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
+import java.nio.{ByteOrder, ByteBuffer}
+import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.util.control.Breaks.{break, breakable}
 
 
 object NumericInterval:
+  val DEBUG_INTERVALS = false
+
   def constant[I](i: I): NumericInterval[I] = NumericInterval(i, i)
+
+  inline def safe[I](low: I, high: I)(using Ordering[I]): NumericInterval[I] =
+    if (!DEBUG_INTERVALS || low <= high)
+      sturdy.values.integer.NumericInterval(low, high)
+    else
+      throw new IllegalArgumentException(s"Illegal interval bounds $low, $high")
 
 case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
+  override def toString: String = s"[$low, $high]"
+
   def toHexString(using Numeric[I]): String =
-    s"NumericInterval(${java.lang.Long.toHexString(low.toLong)}, ${java.lang.Long.toHexString(high.toLong)})"
+    s"[${java.lang.Long.toHexString(low.toLong)}, ${java.lang.Long.toHexString(high.toLong)}]"
 
   def containsNum(n: I)(using Ordering[I]): Boolean = low <= n && n <= high
 
@@ -39,12 +50,12 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
 
   def countOfNumsInInterval(using Numeric[I]): BigInt = BigInt(high.toLong) - BigInt(low.toLong) + 1
 
-  def toUnsigned(using num: Numeric[I], ord: Ordering[I]): NumericInterval[I] = {
-    val zero = num.fromInt(0)
+  def unsignedBounds(using num: Numeric[I], ord: Ordering[I]): (I, I) = {
+    val zero = num.zero
     if (low < zero && high >= zero) {
-      NumericInterval(zero, num.fromInt(-1))
+      (zero, num.fromInt(-1))
     } else {
-      this
+      (low, high)
     }
   }
 
@@ -52,11 +63,11 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
     val zero = num.fromInt(0)
     val one = num.fromInt(1)
     Decomposition(
-      lessZero = if (low <= -one) Some(NumericInterval(low, high.min(-one))) else None,
-      leqZero = if (low <= zero) Some(NumericInterval(low, high.min(zero))) else None,
+      lessZero = if (low <= -one) Some(NumericInterval.safe(low, high.min(-one))) else None,
+      leqZero = if (low <= zero) Some(NumericInterval.safe(low, high.min(zero))) else None,
       hasZero = containsNum(zero),
-      geqZero = if (high >= zero) Some(NumericInterval(low.max(zero), high)) else None,
-      greaterZero = if (high >= one) Some(NumericInterval(low.max(one), high)) else None
+      geqZero = if (high >= zero) Some(NumericInterval.safe(low.max(zero), high)) else None,
+      greaterZero = if (high >= one) Some(NumericInterval.safe(low.max(one), high)) else None
     )
 
   def map[J](f: I => J): NumericInterval[J] =
@@ -72,7 +83,7 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
     val x1y2 = f(low, other.high)
     val x2y1 = f(high, other.low)
     val x2y2 = f(high, other.high)
-    NumericInterval(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
+    NumericInterval.safe(x1y1.min(x1y2).min(x2y1).min(x2y2), x1y1.max(x1y2).max(x2y1).max(x2y2))
 
 case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Option[NumericInterval[I]],
                             hasZero: Boolean,
@@ -88,7 +99,8 @@ given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictI
 class IntervalIntegerOps[I]
   (val feasibleNumberOfOps: Int)
   (using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
-  import NumericInterval.*
+
+  import NumericInterval.constant
 
   private val zero = num.fromInt(0)
   private val one = num.fromInt(1)
@@ -106,7 +118,8 @@ class IntervalIntegerOps[I]
     (ops.shiftRightUnsigned(i, one), i, i, ops.bitXor(highestValue, i), bitCounter + one)
   }
 
-  val top = NumericInterval(minValue, maxValue)
+  val top: NumericInterval[I] = NumericInterval.safe(minValue, maxValue)
+
 
   def toBigInt(v: NumericInterval[I]): Topped[BigInt] = {
     if (v.low == v.high)
@@ -121,17 +134,17 @@ class IntervalIntegerOps[I]
     }
     var result = List[NumericInterval[I]]()
     if (num == minValue && i.low == minValue && i.high != minValue)
-      result = NumericInterval(minValue + one, i.high) :: result
+      result = NumericInterval.safe(minValue + one, i.high) :: result
     else if (num != minValue && num - one >= i.low)   // for num = minValue there would be an overflow in this condition
-      result = NumericInterval(i.low, num - one) :: result
+      result = NumericInterval.safe(i.low, num - one) :: result
     if (num == maxValue && i.high == maxValue && i.low != maxValue)
-      result = NumericInterval(i.low, maxValue - one) :: result
+      result = NumericInterval.safe(i.low, maxValue - one) :: result
     else if (num != maxValue && num + one <= i.high) // for num = maxValue there would be an overflow in this condition
-      result = NumericInterval(num + one, i.high) :: result
+      result = NumericInterval.safe(num + one, i.high) :: result
     result
   }
 
-  def integerLit(i: I): NumericInterval[I] = NumericInterval(i, i)
+  def integerLit(i: I): NumericInterval[I] = NumericInterval.safe(i, i)
   def randomInteger(): NumericInterval[I] = top
 
   def intervalToRange(x: NumericInterval[I]): ArrayBuffer[I] = {
@@ -161,8 +174,9 @@ class IntervalIntegerOps[I]
     }
   }
 
-  def joinMultipleIntervals(intervals: Iterable[NumericInterval[I]]): NumericInterval[I] =
-    assert(intervals.nonEmpty)
+  def joinMultipleIntervals(intervals: Iterable[NumericInterval[I]])(using num: Numeric[I]): NumericInterval[I] =
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(intervals.nonEmpty)
     intervals.tail.foldLeft(intervals.head) {
       (joinedInterval, currentInterval) => NumericIntervalJoin(joinedInterval, currentInterval).get
     }
@@ -184,12 +198,14 @@ class IntervalIntegerOps[I]
       lb = lb.min(result)
       ub = ub.max(result)
       if (lb <= worstLb && ub >= worstUb) {
-        assert(lb == worstLb && ub == worstUb)
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(lb == worstLb && ub == worstUb)
         return soundResult
       }
       if (x == v.high) {
-        assert(NumericIntervalOrdering.lteq(NumericInterval(lb, ub), soundResult))
-        return NumericInterval(lb, ub)
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(NumericIntervalOrdering.lteq(NumericInterval.safe(lb, ub), soundResult))
+        return NumericInterval.safe(lb, ub)
       }
 
       x = ops.add(x, one)
@@ -218,13 +234,15 @@ class IntervalIntegerOps[I]
         lb = lb.min(result)
         ub = ub.max(result)
         if (lb <= worstLb && ub >= worstUb) {
-          assert(lb == worstLb && ub == worstUb)
+          if (NumericInterval.DEBUG_INTERVALS)
+            assert(lb == worstLb && ub == worstUb)
           return soundResult
         }
 
         if (x == v1.high && y == v2.high) {
-          assert(NumericIntervalOrdering.lteq(NumericInterval(lb, ub), soundResult))
-          return NumericInterval(lb, ub)
+          if (NumericInterval.DEBUG_INTERVALS)
+            assert(NumericIntervalOrdering.lteq(NumericInterval.safe(lb, ub), soundResult))
+          return NumericInterval.safe(lb, ub)
         }
         if (y == v2.high) break
         y = ops.add(y, one)
@@ -254,12 +272,14 @@ class IntervalIntegerOps[I]
       lb = lb.min(result.low)
       ub = ub.max(result.high)
       if (lb <= worstLb && ub >= worstUb) {
-        assert(lb == worstLb && ub == worstUb)
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(lb == worstLb && ub == worstUb)
         return soundResult
       }
       if (x == v.high) {
-        assert(NumericIntervalOrdering.lteq(NumericInterval(lb, ub), soundResult))
-        return NumericInterval(lb, ub)
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(NumericIntervalOrdering.lteq(NumericInterval.safe(lb, ub), soundResult))
+        return NumericInterval.safe(lb, ub)
       }
       x = ops.add(x, one)
     }
@@ -308,7 +328,7 @@ class IntervalIntegerOps[I]
       t = maxValue
     }
 
-    NumericInterval(s, t)
+    NumericInterval.safe(s, t)
   }
 
   def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = {
@@ -319,25 +339,26 @@ class IntervalIntegerOps[I]
       (lowResult, highResult) match {
         case (JOptionC.None(), h) =>
           // every result will overflow in the positive direction
-          assert(h == JOptionC.None())
-          NumericInterval(ops.sub(v1.low, minValue), ops.sub(v1.high, minValue))
+          if (NumericInterval.DEBUG_INTERVALS)
+            assert(h == JOptionC.None())
+          NumericInterval.safe(ops.sub(v1.low, minValue), ops.sub(v1.high, minValue))
         case (JOptionC.Some(_), JOptionC.None()) =>
           // only v1.high - minValue overflows in the positive direction
           top
         case (JOptionC.Some(l), JOptionC.Some(h)) =>
           // no result will overflow
-          NumericInterval(l, h)
+          NumericInterval.safe(l, h)
         case _ =>
           sys.error("I thought StrictIntegerOps would only return Some and None...")
       }
     } else if (v2.low == minValue) {
       joinComputations(
-        sub(v1, NumericInterval(minValue, minValue))
+        sub(v1, NumericInterval.safe(minValue, minValue))
       )(
-        sub(v1, NumericInterval(minValue + one, v2.high))
+        sub(v1, NumericInterval.safe(minValue + one, v2.high))
       )
     } else {
-      add(v1, mul(v2, NumericInterval(-one, -one)))
+      add(v1, mul(v2, NumericInterval.safe(-one, -one)))
     }
   }
 
@@ -357,23 +378,23 @@ class IntervalIntegerOps[I]
   }
 
   def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    NumericInterval(ops.max(v1.low, v2.low), ops.max(v1.high, v2.high))
+    NumericInterval.safe(ops.max(v1.low, v2.low), ops.max(v1.high, v2.high))
 
   def min(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    NumericInterval(ops.min(v1.low, v2.low), ops.min(v1.high, v2.high))
+    NumericInterval.safe(ops.min(v1.low, v2.low), ops.min(v1.high, v2.high))
 
 
   def absolute(v: NumericInterval[I]): NumericInterval[I] =
     if (v.low == minValue) { // abs(minValue) = minValue * (-1) = minValue in Scala, C++, Java
-      return NumericInterval(minValue, v.high.abs)
+      return NumericInterval.safe(minValue, v.high.abs)
     }
     if (v.low < zero) {
       if (v.high < zero) {
         // neg, neg
-        NumericInterval(v.high.abs, v.low.abs)
+        NumericInterval.safe(v.high.abs, v.low.abs)
       } else {
         // neg, pos
-        NumericInterval(zero, v.low.abs.max(v.high))
+        NumericInterval.safe(zero, v.low.abs.max(v.high))
       }
     } else {
       // pos, pos
@@ -390,8 +411,8 @@ class IntervalIntegerOps[I]
       // minValue / (-1) = minValue, therefore combineCross does not work if (-1 is an interval limit of v2 && minValue is an interval limit of v1)
       // In this case we join the results of combineCross( { v1\{minValue}, minValue } x { v2\{-1}, -1} )
       if (b1.low == minValue && b2.high == -one) {
-        val newB1 = NumericInterval(minValue, minValue) :: deleteNumFromInterval(b1, minValue)
-        val newB2 = NumericInterval(-one, -one) :: deleteNumFromInterval(b2, -one)
+        val newB1 = NumericInterval.safe(minValue, minValue) :: deleteNumFromInterval(b1, minValue)
+        val newB2 = NumericInterval.safe(-one, -one) :: deleteNumFromInterval(b2, -one)
         joinMultipleIntervals(
           newB1.flatMap(x => newB2.map(y => x.combineCross(y, f)))
         )
@@ -405,7 +426,7 @@ class IntervalIntegerOps[I]
 
     if (!v2.containsNum(zero)) {
       divWithDivisorNotContainingZero(v1, v2)
-    } else{
+    } else {
       val v2sWithoutZero = deleteNumFromInterval(v2, zero)
 
       joinWithFailure(
@@ -440,11 +461,11 @@ class IntervalIntegerOps[I]
       val y_lt0 = decomp2.lessZero.get
       val x_lt0 = decomp1.lessZero
       if (x_lt0.nonEmpty && x_lt0.get.high >= y_lt0.low) {
-        possibleResults.append(NumericInterval(one, one))
+        possibleResults.append(NumericInterval.safe(one, one))
       }
       val x_geq0 = decomp1.geqZero
       if (x_geq0.nonEmpty || (x_lt0.nonEmpty && x_lt0.get.low < y_lt0.high)) {
-        possibleResults.append(NumericInterval(zero, zero))
+        possibleResults.append(NumericInterval.safe(zero, zero))
       }
     }
     val y_geq2Option = decomp2.greaterZero.flatMap(gt0 =>   // get interval of all y \in v2 with y >= 2
@@ -462,7 +483,7 @@ class IntervalIntegerOps[I]
       val y_geq2 = y_geq2Option.get
       if (decomp1.hasZero) {
         // 0 / y = 0
-        possibleResults.append(NumericInterval(zero, zero))
+        possibleResults.append(NumericInterval.safe(zero, zero))
       }
       if (decomp1.lessZero.nonEmpty) {
         // let x < 0 as signed (<=> x >= 2^(v-1) as unsigned)
@@ -472,7 +493,7 @@ class IntervalIntegerOps[I]
         // and monotonically decreasing in its second argument for the current domain.
         // Hence, the result is the following:
         val x_lt0 = decomp1.lessZero.get
-        possibleResults.append(NumericInterval(
+        possibleResults.append(NumericInterval.safe(
           ops.divUnsigned(x_lt0.low, y_geq2.high),
           ops.divUnsigned(x_lt0.high, y_geq2.low),
         ))
@@ -485,14 +506,15 @@ class IntervalIntegerOps[I]
         // and monotonically decreasing in its second argument for the current domain.
         // Hence, the result is the following:
         val x_gt0 = decomp1.greaterZero.get
-        possibleResults.append(NumericInterval(
+        possibleResults.append(NumericInterval.safe(
           ops.divUnsigned(x_gt0.low, y_geq2.high),
           ops.divUnsigned(x_gt0.high, y_geq2.low),
         ))
       }
     }
 
-    assert(possibleResults.nonEmpty, s"$v1 $v2       $y_geq2Option")
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(possibleResults.nonEmpty, s"$v1 $v2       $y_geq2Option")
     val result = joinMultipleIntervals(possibleResults)
     if (v2.containsNum(zero)) {
       joinWithFailure(result)(divByZero(v1, v2))
@@ -502,7 +524,7 @@ class IntervalIntegerOps[I]
   }
 
   def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    // a mod n has result in [0, |n| - 1]. Thus most imprecise result is NumericInterval(zero, maxValue)
+    // a mod n has result in [0, |n| - 1]. Thus most imprecise result is NumericInterval.safe(zero, maxValue)
 
     // if [a1, a2] \subseteq [0, maxValue]: result = a rem n
     // else if [-1, 0] \in [a1, a2]: result = [0, |n| - 1]   // mind n1 = minValue when calculating |n|. Also maybe divByZero if 0 \in n
@@ -527,7 +549,7 @@ class IntervalIntegerOps[I]
     val nAbsMinusOne = if (n1 == minValue) maxValue else n1.abs.max(n2.abs)
     val nContainsZero = v2.containsNum(zero)
     if (a1 <= -one && a2 >= zero) {
-      val result = NumericInterval(zero, nAbsMinusOne)
+      val result = NumericInterval.safe(zero, nAbsMinusOne)
       return
         if (nContainsZero)
           joinWithFailure(result)(divByZero(v1, v2))
@@ -536,24 +558,23 @@ class IntervalIntegerOps[I]
     }
     val remRes = remainder(v1, v2)
 
-    assert(remRes.high <= zero && remRes.low > minValue)
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(remRes.high <= zero && remRes.low > minValue)
     val high = if (remRes == zero) nAbsMinusOne else (remRes.high + nAbsMinusOne) + one    // nAbsMinusOne + one might be maxValue + 1
-    val result = computeOpBruteForceIfFeasibleElseTake(ops.modulo, v1, v2, NumericInterval(zero, high))
+    val result = computeOpBruteForceIfFeasibleElseTake(ops.modulo, v1, v2, NumericInterval.safe(zero, high))
     if (nContainsZero)
       joinWithFailure(result)(divByZero(v1, v2))
     else
       result
 
-  def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = divWith(ops.remainderUnsigned, v1, v2)
-
   private def negativeAbsolute(v: NumericInterval[I]): NumericInterval[I] = {
     if (v.high >= zero) {
       if (v.low >= zero) {
         // > 0, > 0
-        NumericInterval(ops.mul(v.high, -one), ops.mul(v.low, -one))
+        NumericInterval.safe(ops.mul(v.high, -one), ops.mul(v.low, -one))
       } else {
         // < 0, >= 0
-        NumericInterval(v.low.min(ops.mul(v.high, -one)), zero)
+        NumericInterval.safe(v.low.min(ops.mul(v.high, -one)), zero)
       }
     } else {
       // <= 0, <= 0
@@ -561,19 +582,20 @@ class IntervalIntegerOps[I]
     }
   }
 
-  def remainderWithConstDivisor(dividend: NumericInterval[I], divisor: I): NumericInterval[I] = {
-    assert(dividend.high <= zero && dividend.low <= dividend.high)
+  private def remainderWithConstDivisor(dividend: NumericInterval[I], divisor: I): NumericInterval[I] = {
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(dividend.high <= zero && dividend.low <= dividend.high)
     val negativeDivisor = if (divisor < zero) divisor else (-one) * divisor
     val positiveDivisor = ops.toBigInt(divisor).head * (-1)
     if (dividend.countOfNumsInInterval >= positiveDivisor) {
-      NumericInterval(negativeDivisor + one, zero)
+      NumericInterval.safe(negativeDivisor + one, zero)
     } else {
       val remOfLow = ops.remainder(dividend.low, divisor)
       val remOfHigh = ops.remainder(dividend.high, divisor)
       if (remOfLow <= remOfHigh) {
-        NumericInterval(remOfLow, remOfHigh)
+        NumericInterval.safe(remOfLow, remOfHigh)
       } else {
-        NumericInterval(negativeDivisor + one, zero)
+        NumericInterval.safe(negativeDivisor + one, zero)
       }
     }
   }
@@ -596,8 +618,10 @@ class IntervalIntegerOps[I]
 
       val NumericInterval(b1, b2) = dividend
       val NumericInterval(m1, m2) = divisor
-      assert(b2 <= zero && b1 <= b2)
-      assert(m2 < zero && m1 <= m2)
+      if (NumericInterval.DEBUG_INTERVALS) {
+        assert(b2 <= zero && b1 <= b2)
+        assert(m2 < zero && m1 <= m2)
+      }
 
       // The proofs in the comments are for [a1, a2] % [n1, n2] with [a1, a2] = [-v2, -v1] = |[v1, v2]| and [n1, n2] = [-m2, -m1] = |[m1, m2]|
       // so that we only have to deal with non negative numbers in the proofs.
@@ -608,26 +632,26 @@ class IntervalIntegerOps[I]
       if (m2 < b1)
       // a2 < n1
       // a % n = a for all a \in [a1, a2], n \in [n1, n2]
-      // => result = NumericInterval(a1, a2)
-        NumericInterval(b1, b2)
+      // => result = NumericInterval.safe(a1, a2)
+        NumericInterval.safe(b1, b2)
       else if (m1 < b1) // && m2 >= v1
       // a2 < n2 && n1 <= a2
       // result = [0, a2] = [a2 % a2, a2 % n2]. result cant be bigger than a2 bc of iii)
-        NumericInterval(b1, zero)
+        NumericInterval.safe(b1, zero)
       else if (b1 == b2 && b1 == m1 && isEven(m1))
       // a1 == a2 && a2 == m2 && isEven(n2)
       // result = [0, min(n2-n1, n2/2 - 1)]
       // n2 % (n2 - i) = i for i \in {0, 1, ..., n2/2 - 1},
       // bc n2 = 1*(n2 - i) + i and n2 - i >= n2/2 + 1 > i.
       // n2 % (n2 - i) <= n2/2 - 1 for i >= n2/2, bc. n2 - i <= n2/2 and iv)
-        NumericInterval(ops.max(m1 - m2, ops.div(m1, num.fromInt(2)) + one), zero)
+        NumericInterval.safe(ops.max(m1 - m2, ops.div(m1, num.fromInt(2)) + one), zero)
       else if (b1 == b2 && b1 == m1) // && isOdd(m1)
       // a1 == a2 && a2 == n2 && isOdd(n2)
       // result = [0, min(n2-n1, floor(n2/2))]
       // n2 % (n2 - i) = i for i \in {0, 1, ..., floor(n2/2)},
       // bc n2 = 1*(n2 - i) + i and n2 - i >= ceil(n2/2) > i.
       // n2 % (n2 - i) <= floor(n2/2) for i > ceil(n2/2), bc. n2 - i <= floor(n2/2) and iv)
-        NumericInterval(ops.max(m1 - m2, ops.div(m1, num.fromInt(2))), zero)
+        NumericInterval.safe(ops.max(m1 - m2, ops.div(m1, num.fromInt(2))), zero)
       else
       // returned result is [0, n2-1] in this case. In the following cases this is precise:
       // if (a2 - a1 + 1 >= n2) (#[a1, a2] >= n2 - 1  => All values are of Z/(n2)Z are taken)
@@ -637,22 +661,25 @@ class IntervalIntegerOps[I]
       //    result = [0, n2 - 1] = [n2 % n2, (n2-1) % n2]. result cant be bigger than n2-1 bc of iv)
       // The only imprecise case is n2 <= a1 && a2-a1+1 < n2
         if (m1 >= b2 && ops.mul(b2 - b1 + one, -one) > m1)
-          computeOpBruteForceIfFeasibleElseTakeWithOneOperandFixed(remainderWithConstDivisor(dividend, _), divisor, NumericInterval(m1 + one, zero))
+          computeOpBruteForceIfFeasibleElseTakeWithOneOperandFixed(remainderWithConstDivisor(dividend, _), divisor, NumericInterval.safe(m1 + one, zero))
         else
-          NumericInterval(m1 + one, zero)
+          NumericInterval.safe(m1 + one, zero)
     }
 
     def remainderPositiveDividendAndNegativeDivisor(dividend: NumericInterval[I], divisor: NumericInterval[I]): NumericInterval[I] = {
-      assert(dividend.low >= one && dividend.low <= dividend.high)
-      assert(divisor.high <= -one && divisor.low <= divisor.high)
+      if (NumericInterval.DEBUG_INTERVALS) {
+        assert(dividend.low >= one && dividend.low <= dividend.high)
+        assert(divisor.high <= -one && divisor.low <= divisor.high)
+      }
 
-      val negativeDividend: NumericInterval[I] = NumericInterval(ops.mul(dividend.high, -one), ops.mul(dividend.low, -one))
+      val negativeDividend: NumericInterval[I] = NumericInterval.safe(ops.mul(dividend.high, -one), ops.mul(dividend.low, -one))
       // using ii):
-      mul(NumericInterval.constant(num.fromInt(-1)), remainderNegativeDividendAndDivisor(negativeDividend, divisor))
+      mul(constant(num.fromInt(-1)), remainderNegativeDividendAndDivisor(negativeDividend, divisor))
     }
 
     def remainderNegativeDivisor(dividend: NumericInterval[I], divisor: NumericInterval[I]): NumericInterval[I] = {
-      assert(divisor.high < zero && divisor.low <= divisor.high)
+      if (NumericInterval.DEBUG_INTERVALS)
+        assert(divisor.high < zero && divisor.low <= divisor.high)
 
       val decomp = dividend.getDecomposition
       val possibleResults = ArrayBuffer[NumericInterval[I]]()
@@ -681,6 +708,13 @@ class IntervalIntegerOps[I]
     }
   }
 
+  def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = {
+    // TODO optimize aking to singed remainder
+    val q = divUnsigned(v1, v2)
+    val r = sub(v1, mul(q, v2))
+    r
+  }
+
   def gcd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = {
     computeOpBruteForceIfFeasibleElseTake(ops.gcd, v1, v2,
       top // the current implementation of ConcreteIntOps yields gcd(minValue, minValue) = minValue
@@ -690,9 +724,9 @@ class IntervalIntegerOps[I]
   // see Hacker's delight by Henry S. Warren, Jr., Chapter 4.3 (https://doc.lagout.org/security/Hackers%20Delight.pdf)
   def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
     // use of DeMorgan-Rules as explained in Hacker's Delight
-    invertBits(bitOr(NumericInterval(
+    invertBits(bitOr(NumericInterval.safe(
       ops.invertBits(v1.high),
-      ops.invertBits(v1.low)), NumericInterval(
+      ops.invertBits(v1.low)), NumericInterval.safe(
       ops.invertBits(v2.high),
       ops.invertBits(v2.low)
     )))
@@ -750,12 +784,12 @@ class IntervalIntegerOps[I]
     if (a >= zero) indicatorForSignsOfABCD |= 8
 
     indicatorForSignsOfABCD match
-      case 0 | 3 | 12 | 15 => NumericInterval(minOr(a, b, c, d), maxOr(a, b, c, d))
-      case 1 => NumericInterval(a                , -one)
-      case 4 => NumericInterval(c                , -one)
-      case 5 => NumericInterval(ops.min(a, c), maxOr(zero, b, zero, d))
-      case 7 => NumericInterval(minOr(a, -one, c, d), maxOr(zero, b, c, d))
-      case 13 => NumericInterval(minOr(a, b, c, -one), maxOr(a, b, zero, d))
+      case 0 | 3 | 12 | 15 => NumericInterval.safe(minOr(a, b, c, d), maxOr(a, b, c, d))
+      case 1 => NumericInterval.safe(a                , -one)
+      case 4 => NumericInterval.safe(c                , -one)
+      case 5 => NumericInterval.safe(ops.min(a, c), maxOr(zero, b, zero, d))
+      case 7 => NumericInterval.safe(minOr(a, -one, c, d), maxOr(zero, b, c, d))
+      case 13 => NumericInterval.safe(minOr(a, b, c, -one), maxOr(a, b, zero, d))
 
   def bitXor(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = {
     // see Hacker's delight by Henry S. Warren, Jr., Chapter 4.3 (https://doc.lagout.org/security/Hackers%20Delight.pdf)
@@ -816,7 +850,7 @@ class IntervalIntegerOps[I]
 
     val results: ArrayBuffer[NumericInterval[I]] = ArrayBuffer()
 
-    val xorForPosIntervals = (b1: NumericInterval[I], b2: NumericInterval[I]) => NumericInterval(minXorValueForPosInterval(b1, b2), maxXorValueForPosInterval(b1, b2))
+    val xorForPosIntervals = (b1: NumericInterval[I], b2: NumericInterval[I]) => NumericInterval.safe(minXorValueForPosInterval(b1, b2), maxXorValueForPosInterval(b1, b2))
 
     if (geq1.nonEmpty && geq2.nonEmpty)
       results.append(xorForPosIntervals(geq1.get, geq2.get))
@@ -837,18 +871,20 @@ class IntervalIntegerOps[I]
     joinMultipleIntervals(results)
   }
 
-  private inline def mapBounded[A](v: NumericInterval[I], mapFun: I => I): NumericInterval[I] = NumericInterval(mapFun(v.low), mapFun(v.high))
+  private inline def mapBounded[A](v: NumericInterval[I], mapFun: I => I): NumericInterval[I] = NumericInterval.safe(mapFun(v.low), mapFun(v.high))
 
   def shiftLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = {
     // it holds shiftLeft(v, s) = shiftLeft(v, s') if s mod numBits == s' mod numBits
 
     def shiftLeftWithPreprocessedShift(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = {
       // shift is preprocessed like this:
-      assert(shift.low > -numBits && shift.high < numBits && shift.countOfNumsInInterval <= numBits.toLong)
+      if (NumericInterval.DEBUG_INTERVALS)
+        assert(shift.low > -numBits && shift.high < numBits && shift.countOfNumsInInterval <= numBits.toLong)
       val vCount = v.countOfNumsInInterval
 
       def resultForConstantShift(shift: I): NumericInterval[I] = {
-        assert(shift >= zero && shift < numBits)
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(shift >= zero && shift < numBits)
         if (shift == zero)
           return v
 
@@ -857,16 +893,16 @@ class IntervalIntegerOps[I]
         val intervalsOfNotVanishedBits: List[NumericInterval[I]] = // all values that can appear when setting the bits to zero that overflow by the shift.
           if (vCount >= toUnsigned(firstBitShiftedOut)) {
             // all values are possible
-            List(NumericInterval(zero, allBitsThatWontVanishSetToOne))
+            List(NumericInterval.safe(zero, allBitsThatWontVanishSetToOne))
           } else {
             val lowNotVanishingBits = ops.bitAnd(v.low, allBitsThatWontVanishSetToOne)
             val highNotVanishingBits = ops.bitAnd(v.high, allBitsThatWontVanishSetToOne)
             if (lowNotVanishingBits <= highNotVanishingBits) {
-              List(NumericInterval(lowNotVanishingBits, highNotVanishingBits))
+              List(NumericInterval.safe(lowNotVanishingBits, highNotVanishingBits))
             } else {
               // e.g. v = [0110, 1010] and firstBitShiftedOut = 1000. Then we must return
               // [110, 111] for the numbers < 1000 and [000, 010] for the numbers > 1000
-              List(NumericInterval(lowNotVanishingBits, allBitsThatWontVanishSetToOne), NumericInterval(zero, highNotVanishingBits))
+              List(NumericInterval.safe(lowNotVanishingBits, allBitsThatWontVanishSetToOne), NumericInterval.safe(zero, highNotVanishingBits))
             }
           }
 
@@ -877,14 +913,14 @@ class IntervalIntegerOps[I]
         joinMultipleIntervals(
           intervalsOfNotVanishedBits.map { v =>
             if ((v.low >= bitThatWillBeSignBit) == (v.high >= bitThatWillBeSignBit)) {
-              NumericInterval(shiftByShift(v.low), shiftByShift(v.high))
+              NumericInterval.safe(shiftByShift(v.low), shiftByShift(v.high))
             } else {
               // now shift(v.low) >= 0 and shift(v.high) < 0.
               // Thus 10000...0 = minValue is a possible result and also
               // 01...10...0 is also in the interval where the number of ones is (#bits that don't vanish - 1). This is
               // the max value that can be achieved by a shiftLeft(_, shift). We compute it like this:
               // shift(allBitsThatWontVanishSetToOne) = 11...10...0, so we only have to remove the sign bit.
-              NumericInterval(minValue, ops.bitAnd(maxValue, shiftByShift(allBitsThatWontVanishSetToOne)))
+              NumericInterval.safe(minValue, ops.bitAnd(maxValue, shiftByShift(allBitsThatWontVanishSetToOne)))
             }
           }
         )
@@ -904,19 +940,20 @@ class IntervalIntegerOps[I]
         val remOfLow = ops.modulo(shift.low, numBits)
         val remOfHigh = ops.modulo(shift.high, numBits)
         if (remOfLow <= remOfHigh)
-          NumericInterval(remOfLow, remOfHigh)
+          NumericInterval.safe(remOfLow, remOfHigh)
         else
-          NumericInterval(remOfLow - numBits, remOfHigh)
+          NumericInterval.safe(remOfLow - numBits, remOfHigh)
       } else {
-        bitAnd(shift, NumericInterval(numBits - one, numBits - one))   // shift % numBits
+        bitAnd(shift, NumericInterval.safe(numBits - one, numBits - one))   // shift % numBits
       }
     shiftLeftWithPreprocessedShift(v, sh)
   }
 
   private inline def shiftRightOfPositiveNumberAndShiftBetween0AndNumBits(v: NumericInterval[I], shiftLtNumBits: NumericInterval[I]): NumericInterval[I] = {
-    assert(v.low >= zero && shiftLtNumBits.low >= zero && shiftLtNumBits.high < numBits)
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(v.low >= zero && shiftLtNumBits.low >= zero && shiftLtNumBits.high < numBits)
     // for v >= 0 and 0 <= s < numBits: v >>> s is monotonically increasing in v and monotonically decreasing in s
-    NumericInterval(
+    NumericInterval.safe(
       ops.shiftRight(v.low, shiftLtNumBits.high),
       ops.shiftRight(v.high, shiftLtNumBits.low)
     )
@@ -925,13 +962,14 @@ class IntervalIntegerOps[I]
   def shiftRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = {
     val decomp = v.getDecomposition
     val possibleResults = ArrayBuffer[NumericInterval[I]]() // elements will be joined in the end
-    val sh = bitAnd(shift, NumericInterval(numBits - one, numBits - one)) // = shift % [numBits, numBits]
-    assert(sh.low >= zero && sh.high < numBits)
+    val sh = bitAnd(shift, NumericInterval.safe(numBits - one, numBits - one)) // = shift % [numBits, numBits]
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(sh.low >= zero && sh.high < numBits)
 
     if (decomp.lessZero.nonEmpty) {
       val lt0 = decomp.lessZero.get
       // let x < 0, 0 <= s < numBits. Then shiftRight(x, s) is monotonically increasing in both arguments.
-      possibleResults.append(NumericInterval(
+      possibleResults.append(NumericInterval.safe(
         ops.shiftRight(lt0.low, sh.low),
         ops.shiftRight(lt0.high, sh.high)
       ))
@@ -946,25 +984,27 @@ class IntervalIntegerOps[I]
   }
 
   def shiftRightUnsigned(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = {
-    inline def modNumBits(interval: NumericInterval[I]) = bitAnd(interval, NumericInterval(numBits - one, numBits - one))
+    inline def modNumBits(interval: NumericInterval[I]) = bitAnd(interval, NumericInterval.safe(numBits - one, numBits - one))
     def getShiftMinusOne(shiftBetween0AndNumBitsMinusOne: NumericInterval[I]): NumericInterval[I] = {
       val countOfInterval = shift.countOfNumsInInterval
       if (countOfInterval >= 2 && countOfInterval < numBits.toLong && ops.bitAnd(shift.high, numBits - one) == zero) {
-        val shiftWithoutMod0 = modNumBits(NumericInterval(shift.low, shift.high - one))
-        assert(shiftWithoutMod0.low > zero)
-        NumericInterval(
+        val shiftWithoutMod0 = modNumBits(NumericInterval.safe(shift.low, shift.high - one))
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(shiftWithoutMod0.low > zero)
+        NumericInterval.safe(
           shiftWithoutMod0.low - one,
           shiftWithoutMod0.high - one
         )
       } else {
-        NumericInterval(ops.max(zero, shiftBetween0AndNumBitsMinusOne.low - one), shiftBetween0AndNumBitsMinusOne.high - one)
+        NumericInterval.safe(ops.max(zero, shiftBetween0AndNumBitsMinusOne.low - one), shiftBetween0AndNumBitsMinusOne.high - one)
       }
     }
 
     val decomp = v.getDecomposition
     val possibleResults = ArrayBuffer[NumericInterval[I]]() // elements will be joined in the end
     val sh = modNumBits(shift)    // (i) later we have to consider that sh contains too many numbers, e.g. when shift = [-1, 0]. Then sh = [0, numBits].
-    assert(sh.low >= zero && sh.high < numBits)
+    if (NumericInterval.DEBUG_INTERVALS)
+      assert(sh.low >= zero && sh.high < numBits)
 
     if (decomp.geqZero.nonEmpty) {
       possibleResults.append(shiftRightOfPositiveNumberAndShiftBetween0AndNumBits(decomp.geqZero.get, sh))
@@ -978,7 +1018,7 @@ class IntervalIntegerOps[I]
       val lt0 = decomp.lessZero.get
       // for l <= h < 0 it holds [l, h] >>> 1 = [l >>> 1, h >>> 1] >= 0
       // Thus [l, h] >>> sh = [l >>> 1, h >>> 1] >>> (sh - 1).
-      val intervalShiftedByOne: NumericInterval[I] = NumericInterval(ops.shiftRightUnsigned(lt0.low, one), ops.shiftRightUnsigned(lt0.high, one))
+      val intervalShiftedByOne: NumericInterval[I] = NumericInterval.safe(ops.shiftRightUnsigned(lt0.low, one), ops.shiftRightUnsigned(lt0.high, one))
       val shiftMinusOne: NumericInterval[I] = getShiftMinusOne(sh)    // getShiftMinusOne will consider (i) and the returned bound contains the correct min and max value
       // We only need to know the min and maxValue of sh because of the monotonicity argument in
       // shiftRightOfPositiveNumberAndShiftBetween0AndNumBits, which we will use now:
@@ -997,17 +1037,18 @@ class IntervalIntegerOps[I]
     val results = ArrayBuffer[NumericInterval[I]]()
     if (decomp.lessZero.nonEmpty)
     // bitSign is set to one
-      results.append(NumericInterval(zero, zero))
+      results.append(NumericInterval.safe(zero, zero))
     if (decomp.geqZero.nonEmpty)
       // if y >= x and x,y >= 0, then clz(y) <= clz(x)
       val geq0 = decomp.geqZero.get
-      results.append(NumericInterval(ops.countLeadingZeros(geq0.high), ops.countLeadingZeros(geq0.low)))
+      results.append(NumericInterval.safe(ops.countLeadingZeros(geq0.high), ops.countLeadingZeros(geq0.low)))
     joinMultipleIntervals(results)
 
   def countTrailingZeros(v: NumericInterval[I]): NumericInterval[I] = {
 
     def findPositionOfHighestOneFollowedByZeros(b: NumericInterval[I]): I = {
-      assert(b.high < zero || b.low > zero)
+      if (NumericInterval.DEBUG_INTERVALS)
+        assert(b.high < zero || b.low > zero)
       // find max. n s.t. the rightmost n bits of v.high can be set to zero and the resulting num is in v.
 
       // Call this num (that maximizes n) x. Suppose c2 = ctz(y) > ctz(x) and y \in v.
@@ -1033,22 +1074,23 @@ class IntervalIntegerOps[I]
     }
 
     if (v.low == v.high)
-      return NumericInterval.constant(ops.countTrailingZeros(v.low))
+      return constant(ops.countTrailingZeros(v.low))
     // now there will always be an odd number in the interval, so result.low = zero
 
     if (v.containsNum(zero))
-      return NumericInterval(zero, numBits)
+      return NumericInterval.safe(zero, numBits)
 
-    NumericInterval(zero, findPositionOfHighestOneFollowedByZeros(v))
+    NumericInterval.safe(zero, findPositionOfHighestOneFollowedByZeros(v))
   }
 
   def nonzeroBitCount(v: NumericInterval[I]): NumericInterval[I] = {
     def nonzeroBitCountForIntervalNotChangingSign(v: NumericInterval[I]): NumericInterval[I] = {
-      assert(v.high < zero || v.low >= zero)
+      if (NumericInterval.DEBUG_INTERVALS)
+        assert(v.high < zero || v.low >= zero)
       if (v.low == v.high)
-        NumericInterval.constant(ops.nonzeroBitCount(v.low))
+        constant(ops.nonzeroBitCount(v.low))
       else
-        NumericInterval(minimizeOnes(v), numBits - minimizeOnes(invertBits(v)))
+        NumericInterval.safe(minimizeOnes(v), numBits - minimizeOnes(invertBits(v)))
     }
 
     def minimizeOnes(b: NumericInterval[I]): I = {
@@ -1100,18 +1142,18 @@ class IntervalIntegerOps[I]
     => ~h = -h - 1 <= -x - 1 = ~x = -x - 1 <= -l - 1 = ~l
        and of course these bounds are tight for x=l and x=h
     */
-    NumericInterval(ops.invertBits(v.high), ops.invertBits(v.low))
+    NumericInterval.safe(ops.invertBits(v.high), ops.invertBits(v.low))
 
 given TopNumericIntervalInt: Top[NumericInterval[Int]] with
-  def top: NumericInterval[Int] = NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)
+  def top: NumericInterval[Int] = NumericInterval.safe(Integer.MIN_VALUE, Integer.MAX_VALUE)
 given TopNumericIntervalLong: Top[NumericInterval[Long]] with
-  def top: NumericInterval[Long] = NumericInterval(Long.MinValue, Long.MaxValue)
+  def top: NumericInterval[Long] = NumericInterval.safe(Long.MinValue, Long.MaxValue)
 given TopNumericIntervalByte: Top[NumericInterval[Byte]] with
-  def top: NumericInterval[Byte] = NumericInterval(Byte.MinValue, Byte.MaxValue)
+  def top: NumericInterval[Byte] = NumericInterval.safe(Byte.MinValue, Byte.MaxValue)
 
 given NumericIntervalAbstractly[I](using Ordering[I]): Abstractly[I, NumericInterval[I]] with
   override def apply(i: I): NumericInterval[I] =
-    NumericInterval(i, i)
+    NumericInterval.safe(i, i)
 
 given NumericIntervalOrdering[I](using Ordering[I]): PartialOrder[NumericInterval[I]] with
   override def lteq(x: NumericInterval[I], y: NumericInterval[I]): Boolean =
@@ -1120,7 +1162,7 @@ given NumericIntervalOrdering[I](using Ordering[I]): PartialOrder[NumericInterva
 given NumericIntervalJoin[I](using Ordering[I]): Join[NumericInterval[I]] with
   import NumericInterval.*
   override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] =
-    MaybeChanged(NumericInterval(v1.low.min(v2.low), v1.high.max(v2.high)), v1)
+    MaybeChanged(NumericInterval.safe(v1.low.min(v2.low), v1.high.max(v2.high)), v1)
 
 class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using Numeric[I]) extends Widen[NumericInterval[I]]:
   private lazy val treeSet: TreeSet[I] = TreeSet.from(bounds)
@@ -1131,7 +1173,7 @@ class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using
     val high =
       if (v1.high >= v2.high) v1.high
       else treeSet.minAfter(v2.high).getOrElse(maxValue)
-    MaybeChanged(NumericInterval(low, high), v1)
+    MaybeChanged(NumericInterval.safe(low, high), v1)
 
 given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInterval[I], Topped[Boolean]] with
   def lt(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] =
@@ -1145,16 +1187,16 @@ given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInter
 
 given NumericIntervalUnsignedOrderingOps[I](using ops: UnsignedOrderingOps[I, Boolean], num: Numeric[I]): UnsignedOrderingOps[NumericInterval[I], Topped[Boolean]] with
   def ltUnsigned(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] =
-    val u1 = iv1.toUnsigned
-    val u2 = iv2.toUnsigned
-    if (ops.ltUnsigned(u1.high, u2.low)) Topped.Actual(true)
-    else if (ops.leUnsigned(u2.high, u1.low)) Topped.Actual(false)
+    val (u1low, u1high) = iv1.unsignedBounds
+    val (u2low, u2high) = iv2.unsignedBounds
+    if (ops.ltUnsigned(u1high, u2low)) Topped.Actual(true)
+    else if (ops.leUnsigned(u2high, u1low)) Topped.Actual(false)
     else Topped.Top
   def leUnsigned(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] =
-    val u1 = iv1.toUnsigned
-    val u2 = iv2.toUnsigned
-    if (ops.leUnsigned(u1.high, u2.low)) Topped.Actual(true)
-    else if (ops.ltUnsigned(u2.high, u1.low)) Topped.Actual(false)
+    val (u1low, u1high) = iv1.unsignedBounds
+    val (u2low, u2high) = iv2.unsignedBounds
+    if (ops.leUnsigned(u1high, u2low)) Topped.Actual(true)
+    else if (ops.ltUnsigned(u2high, u1low)) Topped.Actual(false)
     else Topped.Top
 
 given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topped[Boolean]] with
@@ -1174,17 +1216,22 @@ given ConvertNumericIntervalsIntLong[I, L](using convert: ConvertIntLong[I, L])(
   def apply(from: NumericInterval[I], conf: Bits): NumericInterval[L] =
     conf match
       case Bits.Signed | Bits.Raw =>
-        NumericInterval(convert(from.low, conf), convert(from.high, conf))
+        NumericInterval.safe(convert(from.low, conf), convert(from.high, conf))
       case Bits.Unsigned =>
-        val unsigned = from.toUnsigned
-        NumericInterval(convert(unsigned.low, conf), convert(unsigned.high, conf))
+        val (unsignedLow, unsignedHigh) = from.unsignedBounds
+        NumericInterval.safe(convert(unsignedLow, conf), convert(unsignedHigh, conf))
 
 given ConvertNumericIntervalsLongInt[L, I](using Numeric[I], Numeric[L], Top[NumericInterval[I]])(using convert: ConvertLongInt[L, I]): ConvertLongInt[NumericInterval[L], NumericInterval[I]] with
   def apply(from: NumericInterval[L], conf: NilCC.type): NumericInterval[I] =
     val low32 = from.low.toLong >>> 32
     val high32 = from.high.toLong >>> 32
     if (low32 == high32) {
-      NumericInterval(convert(from.low, conf), convert(from.high, conf))
+      val low = convert(from.low, conf)
+      val high = convert(from.high, conf)
+      if (low <= high)
+        NumericInterval.safe(low, high)
+      else
+        Top.top
     } else {
       Top.top
     }
@@ -1199,54 +1246,76 @@ given ConvertConstantToNumericInterval[From, To, I](using Top[NumericInterval[I]
     case Topped.Actual(l) => NumericInterval(l, l)
 
 given ConvertNumericIntervalToBytes[From, To, I, B]
-(using convert: Convert[From, To, I, Seq[B], config.BytesSize && SomeCC[ByteOrder]], topB: Top[NumericInterval[B]])
-(using Failure, EffectStack, Ordering[B])
-: Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && SomeCC[ByteOrder]] with
+  (using convert: Convert[From, To, I, Seq[B], config.BytesSize && SomeCC[ByteOrder]], topB: Top[NumericInterval[B]], num: Numeric[I])
+  (using Failure, EffectStack, Ordering[B])
+  : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && SomeCC[ByteOrder]] with
+
   def apply(i: NumericInterval[I], conf: config.BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[B]] =
     val bigEndianConf = conf.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false)
-      val lowBytes = convert(i.low, bigEndianConf)
-      val highBytes = convert(i.high, bigEndianConf)
+    val lowBytes = convert(i.low, bigEndianConf)
+    val highBytes = convert(i.high, bigEndianConf)
 
-      val byteIntervals = new ListBuffer[NumericInterval[B]]
-      var equalPrefix = true
-      lowBytes.zip(highBytes).foreach { case (lowByte, highByte) =>
-        if (equalPrefix) {
-          if (lowByte == highByte)
-            byteIntervals += NumericInterval.constant(lowByte)
-          else {
-            equalPrefix = false
-            if (lowByte <= highByte)
-              byteIntervals += NumericInterval(lowByte, highByte)
-            else
-              throw new IllegalStateException(s"lowByte ($lowByte) > highByte ($highByte), but should have been smaller")
-          }
-        } else {
-          byteIntervals += topB.top
+    val lowPrefix = i.low.toLong >>> lowBytes.size * 8
+    val highPrefix = i.high.toLong >>> highBytes.size * 8
+    var equalPrefix = lowPrefix == highPrefix
+
+    val byteIntervals = new ListBuffer[NumericInterval[B]]
+    lowBytes.zip(highBytes).foreach { case (lowByte, highByte) =>
+      if (equalPrefix) {
+        if (lowByte == highByte)
+          byteIntervals += NumericInterval.constant(lowByte)
+        else {
+          equalPrefix = false
+          if (lowByte <= highByte)
+            byteIntervals += NumericInterval.safe(lowByte, highByte)
+          else
+            byteIntervals += topB.top
         }
+      } else {
+        byteIntervals += topB.top
       }
-      if (conf.c2.t == ByteOrder.BIG_ENDIAN)
-        byteIntervals.toSeq
-      else
-        byteIntervals.view.reverse.toSeq
+    }
+    val res = if (conf.c2.t == ByteOrder.BIG_ENDIAN)
+      byteIntervals.toSeq
+    else
+      byteIntervals.view.reverse.toSeq
+    println(s"$i => $res")
+    res
 
 
 given ConvertBytesToNumericInterval[From, To, I]
-(using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits], top: Top[NumericInterval[I]])
-(using Failure, EffectStack, Ordering[I])
-: Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+  (using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits], top: Top[NumericInterval[I]])
+  (using Failure, EffectStack, Ordering[I])
+  : Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+
   def apply(bytes: Seq[NumericInterval[Byte]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
     val lowBytes = new ListBuffer[Byte]
     val highBytes = new ListBuffer[Byte]
 
     val byteIntervals = if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) bytes else bytes.reverse
-    if (byteIntervals.exists(_.isTop))
-      return summon[Top[NumericInterval[I]]].top
-    byteIntervals.foreach { i =>
-      lowBytes += i.low
-      highBytes += i.high
+    val convertUnsigned = conf.c2 == config.Bits.Unsigned
+
+    // treat the sign of the most significant byte according to the conversion configuration
+    val mostSignificantByte = byteIntervals.head
+    if (!convertUnsigned) {
+      lowBytes += mostSignificantByte.low
+      highBytes += mostSignificantByte.high
+    } else {
+      val (low, high) = mostSignificantByte.unsignedBounds
+      lowBytes += low
+      highBytes += high
+    }
+
+    // all other bytes must treated as unsigned
+    byteIntervals.tail.foreach { i =>
+      val (low, high) = i.unsignedBounds
+      lowBytes += low
+      highBytes += high
     }
 
     val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
     val low = convert(lowBytes.toSeq, bigEndianConf)
     val high = convert(highBytes.toSeq, bigEndianConf)
-    NumericInterval(low, high)
+    println(s"$bytes => $byteIntervals => ($lowBytes, $highBytes) => ${(low, high)}   ($conf)")
+    val value = NumericInterval.safe(low, high)
+    value

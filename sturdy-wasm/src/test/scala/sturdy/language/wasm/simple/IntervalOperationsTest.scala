@@ -60,7 +60,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 
   def testOperation(operationName: String, args: List[NumericInterval[Int]], expected: AFallible[List[Value]], createExtraTest: Boolean, forcePrecise: Boolean): Unit =
     def assertCorrect(expected: Value, result: Value): Unit = {
-      var (e, r) = (expected, result) match {
+      val (e, r) = (expected, result) match {
         case (Value.Int32(exp), Value.Int32(res)) => (exp, res)
       }
       if (forcePrecise)
@@ -129,7 +129,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
             (y1 to upperBound2).foreach(y2 =>
               val y = b(y1, y2)
               val expected = findResultByBruteForce(x1, x2, y1, y2)
-                testOperation(intervalOperation, List(x, y), expected, false, forcePrecise)
+              testOperation(intervalOperation, List(x, y), expected, false, forcePrecise)
             )
           )
         )
@@ -183,6 +183,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 //    testOperation("shl", List(b(-2147483642,-2147483640), b(-3, -2)), unfailing(b(-2147483648,0)), true, true)
     bruteForceTestIntervalsOnBinaryOps(List(
       TestConfigBinary("rem_s", _%_, false),
+      TestConfigBinary("rem_u", Integer.remainderUnsigned, false),
       TestConfigBinary("shl", _<<_, true),
       TestConfigBinary("shr_u", _>>>_, true),
       TestConfigBinary("shr_s", _>>_, true),
@@ -197,9 +198,9 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
     )
 
     bruteForceTestIntervalsOnUnaryOps(List(
-      TestConfigUnary("popcnt", Integer.bitCount, true),
-      TestConfigUnary("ctz", Integer.numberOfTrailingZeros, true),
-      TestConfigUnary("clz", Integer.numberOfLeadingZeros, true)
+//      TestConfigUnary("popcnt", Integer.bitCount, true),
+//      TestConfigUnary("ctz", Integer.numberOfTrailingZeros, true),
+//      TestConfigUnary("clz", Integer.numberOfLeadingZeros, true)
     ), 50
     )
   }
