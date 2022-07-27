@@ -1,11 +1,14 @@
 package sturdy.effect.callframe
 
+import apron.Interval
+import apron.Tcons1
 import apron.{Environment, StringVar, Texpr1VarNode, Texpr1Node, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
 import org.eclipse.collections.api.factory.BiMaps
 import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
 import sturdy.data.*
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.ComputationJoiner
+import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
 import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
@@ -14,7 +17,7 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
   extends MutableCallFrame[Data, Var, Texpr1Node, NoJoin] with DecidableCallFrame[Data, Var, Texpr1Node]:
 
   private var _data: Data = initData
-  private var names: Map[Var, Int] = _
+  private var names: Map[Var, Int] = Map()
 
   private var apronEnv: Environment = new Environment()
   private var apronState: Abstract1 = new Abstract1(apronManager, apronEnv)
@@ -22,15 +25,17 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
   private var apronVarCount: Int = 0
   private var boundVars: Map[Int, ApronVar] = Map()
 
+  override def toString: String = apronState.toString(apronManager)
+
   def allocVars(newVars: Iterable[(Var, Texpr1Node)]): Unit = {
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
     val newApronVars = newVars.map { case (x, _) =>
-      val v = new StringVar(s"apronR_${apronVarCount}_$x")
+      val v = new StringVar(s"apronI_${apronVarCount}_$x")
       apronVarCount += 1
       v
     }.toArray[ApronVar]
     boundVars = newApronVars.zipWithIndex.map(_.swap).toMap
-    apronEnv = apronEnv.add(Array.empty[ApronVar], newApronVars)
+    apronEnv = apronEnv.add(newApronVars, Array.empty[ApronVar])
     apronState.changeEnvironment(apronManager, apronEnv, false)
     for (((_, v), av) <- newVars.zip(newApronVars)) {
       val vIntern = new Texpr1Intern(apronEnv, v)
@@ -41,14 +46,12 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
   override def withNew[A](d: Data, vars: Iterable[(Var, Texpr1Node)])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
-    val snapApronEnv = this.apronEnv
     val snapBoundVars = this.boundVars
     this._data = d
     allocVars(vars)
     try f finally {
       this._data = snapData
       this.names = snapNames
-      this.apronEnv = snapApronEnv
       this.boundVars = snapBoundVars
     }
   }
@@ -74,10 +77,20 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
     case None => JOptionC.none
     case Some(ix) => setLocal(ix, v)
 
+  def getBound(v: Texpr1Node): Interval =
+    val vIntern = new Texpr1Intern(apronEnv, v)
+    apronState.getBound(apronManager, vIntern)
+
+  def constrain(v: Texpr1Node, relOp: Int): Unit =
+    val c = new Tcons1(apronEnv, relOp, v)
+    apronState.meet(apronManager, c)
+    if (apronState.isBottom(apronManager))
+      throw new SturdyFailure {}
+
   type State = Abstract1
   /** state contains the constraints for the current frame only */
   override def getState: State = {
-    val frame = new Environment(Array.empty[ApronVar], boundVars.values.toArray)
+    val frame = new Environment(boundVars.values.toArray, Array.empty[ApronVar])
     // only retain bound vars
     apronState.changeEnvironmentCopy(apronManager, frame, true)
   }
