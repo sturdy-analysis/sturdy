@@ -1,15 +1,17 @@
 package sturdy.effect.callframe
 
-import apron.{Abstract1, Environment, Manager, StringVar, Texpr1Intern, Texpr1Node, Texpr1VarNode, Var as ApronVar}
+import apron.{Environment, StringVar, Texpr1VarNode, Texpr1Node, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
 import org.eclipse.collections.api.factory.BiMaps
-import org.eclipse.collections.api.bimap.{BiMap, ImmutableBiMap, MutableBiMap}
+import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
 import sturdy.data.*
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.ComputationJoiner
-import sturdy.values.{Join, Widen}
+import sturdy.effect.TrySturdy
+import sturdy.values.MaybeChanged
+import sturdy.values.{Widen, Join}
 
 class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
-  extends MutableCallFrame[Data, Var, Texpr1Node, WithJoin]:
+  extends MutableCallFrame[Data, Var, Texpr1Node, NoJoin] with DecidableCallFrame[Data, Var, Texpr1Node]:
 
   private var _data: Data = initData
   private var names: Map[Var, Int] = _
@@ -29,8 +31,7 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
     }.toArray[ApronVar]
     boundVars = newApronVars.zipWithIndex.map(_.swap).toMap
     apronEnv = apronEnv.add(Array.empty[ApronVar], newApronVars)
-    // create a copy because the fixpoint may reference the old state
-    apronState = apronState.changeEnvironmentCopy(apronManager, apronEnv, false)
+    apronState.changeEnvironment(apronManager, apronEnv, false)
     for (((_, v), av) <- newVars.zip(newApronVars)) {
       val vIntern = new Texpr1Intern(apronEnv, v)
       apronState.assign(apronManager, av, vIntern, null)
@@ -54,29 +55,64 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
 
   override def data: Data = _data
 
-  override def getLocal(x: Int): JOptionA[Texpr1Node] = boundVars.get(x) match
-    case None => JOptionA.none
-    case Some(av) => JOptionA.some(new Texpr1VarNode(av))
+  override def getLocal(x: Int): JOptionC[Texpr1Node] = boundVars.get(x) match
+    case None => JOptionC.none
+    case Some(av) => JOptionC.some(new Texpr1VarNode(av))
 
-  override def getLocalByName(x: Var): JOptionA[Texpr1Node] = names.get(x) match
-    case None => JOptionA.none
+  override def getLocalByName(x: Var): JOptionC[Texpr1Node] = names.get(x) match
+    case None => JOptionC.none
     case Some(ix) => getLocal(ix)
 
-  override def setLocal(x: Int, v: Texpr1Node): JOptionA[Unit] = boundVars.get(x) match
-    case None => JOptionA.none
+  override def setLocal(x: Int, v: Texpr1Node): JOptionC[Unit] = boundVars.get(x) match
+    case None => JOptionC.none
     case Some(av) =>
       val vIntern = new Texpr1Intern(apronEnv, v)
       apronState.assign(apronManager, av, vIntern, null)
-      JOptionA.some(())
+      JOptionC.some(())
 
-  override def setLocalByName(x: Var, v: Texpr1Node): JOptionA[Unit] = names.get(x) match
-    case None => JOptionA.none
+  override def setLocalByName(x: Var, v: Texpr1Node): JOptionC[Unit] = names.get(x) match
+    case None => JOptionC.none
     case Some(ix) => setLocal(ix, v)
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = ???
+  type State = Abstract1
+  /** state contains the constraints for the current frame only */
+  override def getState: State = {
+    val frame = new Environment(Array.empty[ApronVar], boundVars.values.toArray)
+    // only retain bound vars
+    apronState.changeEnvironmentCopy(apronManager, frame, true)
+  }
+  override def setState(st: State): Unit =
+    // set bound vars to [-inf, +inf]
+    apronState.forget(apronManager, boundVars.values.toArray, false)
+    // meet bound vars with st
+    apronState.meet(apronManager, st)
 
-  override def getState: State = ???
-  override def setState(st: State): Unit = ???
+  override def join: Join[State] = (s1, s2) => {
+    val joined = s1.joinCopy(apronManager, s2)
+    MaybeChanged(joined, s1.isEqual(apronManager, joined))
+  }
+  override def widen: Widen[State] = (s1, s2) => {
+    val joined = s1.widening(apronManager, s2)
+    MaybeChanged(joined, s1.isEqual(apronManager, joined))
+  }
 
-  override def join: Join[State] = ???
-  override def widen: Widen[State] = ???
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {
+    private val snapshot = new Abstract1(apronManager, apronState)
+    private var fState: Abstract1 = _
+
+    override def inbetween(): Unit =
+      fState = apronState
+      apronState = snapshot
+
+    override def retainNone(): Unit =
+      apronState = snapshot
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      apronState = fState
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      fState.join(apronManager, apronState)
+      apronState = fState
+  })
