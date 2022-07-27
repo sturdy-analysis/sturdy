@@ -31,6 +31,16 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     )
   )
 
+lazy val sturdy_apron_domain = (project in file("sturdy-apron-domain"))
+  .dependsOn(sturdy_core % "compile->compile")
+  .settings(
+    name := "sturdy_apron_domain",
+    libraryDependencies ++= Seq(
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile")
   .settings(
@@ -68,7 +78,6 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.json4s" %% "json4s-native" % "4.0.4" % "test",
-//      "com.typesafe" % "config" % "1.4.0" % "test",
       ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13) % "test",
       "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test"
     )
@@ -84,12 +93,3 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )
-
-//lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
-//  .dependsOn(sturdy_wasm % "compile->compile")
-//  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile")
-//  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile")
-//  .settings(
-//    name := "sturdy-wasm-benchmarks"
-//  )
-//  .enablePlugins(JmhPlugin)
