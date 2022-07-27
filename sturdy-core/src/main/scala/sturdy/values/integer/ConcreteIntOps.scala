@@ -20,7 +20,6 @@ given Structural[Int] with {}
 given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def integerLit(i: Int): Int = i
   def randomInteger(): Int = Random.nextInt()
-  def toBigInt(v: Int): Topped[BigInt] = Topped.Actual(BigInt(v)) 
 
   def add(v1: Int, v2: Int): Int = v1 + v2
   def sub(v1: Int, v2: Int): Int = v1 - v2

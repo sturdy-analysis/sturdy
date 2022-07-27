@@ -120,14 +120,6 @@ class IntervalIntegerOps[I]
 
   val top: NumericInterval[I] = NumericInterval.safe(minValue, maxValue)
 
-
-  def toBigInt(v: NumericInterval[I]): Topped[BigInt] = {
-    if (v.low == v.high)
-      Topped.Actual(BigInt(v.low.toLong))
-    else
-      Topped.Top
-  }
-
   def deleteNumFromInterval(i: NumericInterval[I], num: I): List[NumericInterval[I]] = {
     if (num > i.high || num < i.low) {
       return List(i)
@@ -586,7 +578,7 @@ class IntervalIntegerOps[I]
     if (NumericInterval.DEBUG_INTERVALS)
       assert(dividend.high <= zero && dividend.low <= dividend.high)
     val negativeDivisor = if (divisor < zero) divisor else (-one) * divisor
-    val positiveDivisor = ops.toBigInt(divisor).head * (-1)
+    val positiveDivisor = BigInt.long2bigInt(divisor.toLong) * (-1)
     if (dividend.countOfNumsInInterval >= positiveDivisor) {
       NumericInterval.safe(negativeDivisor + one, zero)
     } else {

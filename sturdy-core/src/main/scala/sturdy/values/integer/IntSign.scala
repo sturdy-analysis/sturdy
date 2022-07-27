@@ -58,7 +58,6 @@ given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): In
     else Zero
 
   def randomInteger(): IntSign = ZeroOrPos
-  def toBigInt(v: IntSign): Topped[BigInt] = Topped.Top
 
   def add(v1: IntSign, v2: IntSign): IntSign = (v1, v2) match
     case (TopSign, _) => TopSign

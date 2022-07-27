@@ -10,7 +10,6 @@ import scala.reflect.ClassTag
 given TypeIntegerOps[B: ClassTag](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, BaseType[B]] with
   def integerLit(i: B): BaseType[B] = BaseType[B]
   def randomInteger(): BaseType[B] = BaseType[B]
-  def toBigInt(v: BaseType[B]): Topped[BigInt] = Topped.Top
 
   def add(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
   def sub(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]

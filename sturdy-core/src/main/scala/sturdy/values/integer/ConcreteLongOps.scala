@@ -23,7 +23,6 @@ given Structural[Long] with {}
 given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def integerLit(l: Long): Long = l
   def randomInteger(): Long = Random.nextLong()
-  def toBigInt(v: Long): Topped[BigInt] = Topped.Actual(BigInt(v))
 
   def add(v1: Long, v2: Long): Long = v1 + v2
   def sub(v1: Long, v2: Long): Long = v1 - v2

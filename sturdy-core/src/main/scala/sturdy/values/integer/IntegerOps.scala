@@ -19,7 +19,6 @@ case object IntegerOverflow extends FailureKind
 trait IntegerOps[B, V]:
   def integerLit(i: B): V
   def randomInteger(): V
-  def toBigInt(v: V): Topped[BigInt]
   
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
