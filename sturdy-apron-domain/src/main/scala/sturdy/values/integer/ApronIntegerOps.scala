@@ -11,10 +11,9 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.Top
 
-given ApronIntegerOps[B, Data, Var](using Numeric[B], IntegerOps[B, B], StrictIntegerOps[B, B, NoJoin], Top[NumericInterval[B]], Failure)
-                                   (using callframe: ApronCallFrame[Data, Var], effects : EffectStack) : IntegerOps[B, Texpr1Node] with
-
-  private val intervalOps: IntervalIntegerOps[B] = StandardIntervalIntegerOps
+given ApronIntegerOps[B, Data, Var](using Numeric[B], Failure)
+                                   (using callframe: ApronCallFrame[Data, Var], effects : EffectStack, intervalOps: IntervalIntegerOps[B])
+      : IntegerOps[B, Texpr1Node] with
 
   def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[B] => NumericInterval[B]): Texpr1Node =
   // - convert both to NumericInterval
