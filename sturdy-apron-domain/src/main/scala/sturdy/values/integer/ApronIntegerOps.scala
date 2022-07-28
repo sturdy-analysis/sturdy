@@ -1,7 +1,7 @@
 package sturdy.values.integer
 
 import sturdy.data.CombineUnit
-import apron.{DoubleScalar, Environment, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
+import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -12,7 +12,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.Top
 
 given ApronIntegerOps[B, Data, Var](using Numeric[B], IntegerOps[B, B], StrictIntegerOps[B, B, NoJoin], Top[NumericInterval[B]], Failure)
-                                   (using callframe: ApronCallFrame[Data, Var], effects : EffectStack) : IntegerOps[Int, Texpr1Node] with
+                                   (using callframe: ApronCallFrame[Data, Var], effects : EffectStack) : IntegerOps[B, Texpr1Node] with
 
   private val intervalOps: IntervalIntegerOps[B] = StandardIntervalIntegerOps
 
@@ -21,7 +21,7 @@ given ApronIntegerOps[B, Data, Var](using Numeric[B], IntegerOps[B, B], StrictIn
   // - call interval operation
   // - make into constraints about a new result apron-variable
     ???
-  
+
   def binaryIntervalOp(v1: Texpr1Node, v2: Texpr1Node, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B]): Texpr1Node =
   // - convert both to NumericInterval
   // - call interval operation
@@ -29,11 +29,10 @@ given ApronIntegerOps[B, Data, Var](using Numeric[B], IntegerOps[B, B], StrictIn
     ???
 
 
-  override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new DoubleScalar(i.toDouble))
-  override def integerLit(i: Int): Texpr1Node = new Texpr1CstNode(new DoubleScalar(i.toDouble))
-  
+  override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(i.toInt))
+
   override def randomInteger(): Texpr1Node =
-    callframe.freshConstraintVariable("random")
+    callframe.freshConstraintVariable("randomZ")
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
