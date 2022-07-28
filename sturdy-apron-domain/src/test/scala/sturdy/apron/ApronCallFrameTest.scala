@@ -10,7 +10,8 @@ import sturdy.values.{Topped, given}
 
 class ApronCallFrameTest extends AnyFunSuite:
 
-  def integerLit(i: Int): Texpr1Node = new Texpr1CstNode(new DoubleScalar(i.toDouble))
+  def integerLit(i: Int): Texpr1Node =
+    new Texpr1CstNode(new DoubleScalar(i.toDouble))
 
   def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
@@ -82,6 +83,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val r = callFrame.withNew("frame 1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
+      println(callFrame)
       effects.joinComputations {
         callFrame.setLocalByName("z", add(x, y))
         ()
@@ -219,12 +221,18 @@ class ApronCallFrameTest extends AnyFunSuite:
     val falseCond = (add(neg(z), integerLit(5)), Tcons1.SUPEQ)
 
     val r = effects.joinComputations {
+      println(callFrame)
       callFrame.constrain(trueCond._1, trueCond._2)
+      println(callFrame)
       Topped.Actual(false)
     } {
+      println(callFrame)
       callFrame.constrain(falseCond._1, falseCond._2)
+      println(callFrame)
       Topped.Actual(true)
     }
+
+    println(callFrame)
 
     // r is Top
     println(r)
