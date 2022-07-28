@@ -2,7 +2,7 @@ package sturdy.language.tip.abstractions
 
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.TipFailure
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.Topped
 import sturdy.values.integer.{IntSign, NumericInterval, given}
 import sturdy.language.tip.Interpreter

@@ -10,7 +10,7 @@ import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.relational.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.values.ordering.{OrderingOps, EqOps, LiftedOrderingOps}
 
 trait Interpreter:
   type J[A] <: MayJoin[A]

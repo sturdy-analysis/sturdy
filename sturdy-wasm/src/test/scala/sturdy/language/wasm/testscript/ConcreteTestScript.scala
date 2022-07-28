@@ -24,7 +24,7 @@ import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.language.wasm.Parsing
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.text.unresolved.FreshId

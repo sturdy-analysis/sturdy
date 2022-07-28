@@ -1,4 +1,4 @@
-package sturdy.values.relational
+package sturdy.values.ordering
 
 import sturdy.values.Join
 import sturdy.values.Topped

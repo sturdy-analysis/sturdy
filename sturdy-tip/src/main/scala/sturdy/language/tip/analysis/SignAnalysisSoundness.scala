@@ -10,7 +10,7 @@ import sturdy.util.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.records.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}

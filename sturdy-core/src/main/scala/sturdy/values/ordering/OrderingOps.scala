@@ -1,4 +1,4 @@
-package sturdy.values.relational
+package sturdy.values.ordering
 
 trait OrderingOps[V, B]:
   def lt(v1: V, v2: V): B

@@ -28,7 +28,7 @@ import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
 import swam.syntax.*
 

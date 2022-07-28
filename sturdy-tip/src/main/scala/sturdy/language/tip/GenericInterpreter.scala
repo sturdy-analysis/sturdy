@@ -14,7 +14,7 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
 import sturdy.effect.EffectStack
