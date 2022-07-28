@@ -77,6 +77,7 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
     case None => JOptionC.none
     case Some(ix) => setLocal(ix, v)
 
+
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
@@ -86,6 +87,14 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
+
+  def freshConstraintVariable(purpose: String): Texpr1Node =
+    val newApronVar = new StringVar(s"apronI_${apronVarCount}_$purpose")
+    apronVarCount += 1
+    apronEnv = apronEnv.add(Array[ApronVar](newApronVar), Array.empty[ApronVar])
+    apronState.changeEnvironment(apronManager, apronEnv, false)
+    new Texpr1VarNode(newApronVar)
+
 
   type State = Abstract1
   /** state contains the constraints for the current frame only */
