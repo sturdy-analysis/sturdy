@@ -24,10 +24,11 @@ object SignAnalysisSoundness:
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.apply(d))
+      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Abstractly(b))
+      case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
-        case Some(ca) => Value.RefValue(Abstractly.apply(ca).map(AllocationSiteRef.Addr.apply))
+        case Some(ca) => Value.RefValue(Abstractly(ca).map(AllocationSiteRef.Addr.apply))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
       case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
 

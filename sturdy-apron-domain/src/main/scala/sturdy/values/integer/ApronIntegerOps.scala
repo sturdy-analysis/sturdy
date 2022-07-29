@@ -1,7 +1,8 @@
 package sturdy.values.integer
 
 import sturdy.data.CombineUnit
-import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
+import apron.{Environment, Var, Tcons1, Texpr1CstNode, Texpr1UnNode, MpqScalar, Texpr1Node, DoubleScalar, Texpr1BinNode, Texpr0Node}
+import sturdy.apron.Apron
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -11,8 +12,8 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.Top
 
-given ApronIntegerOps[B, Data, Var](using Numeric[B], Failure)
-                                   (using callframe: ApronCallFrame[Data, Var], effects : EffectStack, intervalOps: IntervalIntegerOps[B])
+given ApronIntegerOps[B](using Numeric[B], Failure)
+                                   (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[B])
       : IntegerOps[B, Texpr1Node] with
 
   def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[B] => NumericInterval[B]): Texpr1Node =
@@ -31,7 +32,7 @@ given ApronIntegerOps[B, Data, Var](using Numeric[B], Failure)
   override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(i.toInt))
 
   override def randomInteger(): Texpr1Node =
-    callframe.freshConstraintVariable("randomZ")
+    ap.freshConstraintVariable("randomZ")
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
@@ -46,30 +47,30 @@ given ApronIntegerOps[B, Data, Var](using Numeric[B], Failure)
     new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
 
   override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val result = callframe.freshConstraintVariable(s"max($v1, $v2)")
+    val result = ap.freshConstraintVariable(s"max($v1, $v2)")
     // result >= v  iff  result - v >= 0
-    callframe.constrain(sub(result, v1), Tcons1.SUPEQ)
-    callframe.constrain(sub(result, v2), Tcons1.SUPEQ)
+    ap.constrain(sub(result, v1), Tcons1.SUPEQ)
+    ap.constrain(sub(result, v2), Tcons1.SUPEQ)
     effects.joinComputations {
       // result == v1
-      callframe.constrain(sub(result, v1), Tcons1.EQ)
+      ap.constrain(sub(result, v1), Tcons1.EQ)
     } {
       // result == v2
-      callframe.constrain(sub(result, v2), Tcons1.EQ)
+      ap.constrain(sub(result, v2), Tcons1.EQ)
     }
     result
 
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val result = callframe.freshConstraintVariable(s"max($v1, $v2)")
+    val result = ap.freshConstraintVariable(s"max($v1, $v2)")
     // result <= v  iff  result - v <= 0  iff  -result + v > 0
-    callframe.constrain(add(neg(result), v1), Tcons1.SUP)
-    callframe.constrain(add(neg(result), v2), Tcons1.SUP)
+    ap.constrain(add(neg(result), v1), Tcons1.SUP)
+    ap.constrain(add(neg(result), v2), Tcons1.SUP)
     effects.joinComputations {
       // result == v1
-      callframe.constrain(sub(result, v1), Tcons1.EQ)
+      ap.constrain(sub(result, v1), Tcons1.EQ)
     } {
       // result == v2
-      callframe.constrain(sub(result, v2), Tcons1.EQ)
+      ap.constrain(sub(result, v2), Tcons1.EQ)
     }
     result
 

@@ -43,6 +43,7 @@ lazy val sturdy_apron_domain = (project in file("sturdy-apron-domain"))
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile")
+  .dependsOn(sturdy_apron_domain % "compile->compile")
   .settings(
     name := "sturdy_tip",
     libraryDependencies ++= Seq(

@@ -104,7 +104,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
     val manager = new Polka(false)
     val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
-    val effects = new EffectStack(List(callFrame))
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -129,14 +129,11 @@ class ApronCallFrameTest extends AnyFunSuite:
 
     // z < 1   iff   z - 1 < 0  iff  -z + 1 > 0
     // z >= 1  iff   z - 1 >= 0
-    val trueCond = (add(neg(z), integerLit(1)), Tcons1.SUP)
-    val falseCond = (sub(z, integerLit(1)), Tcons1.SUPEQ)
+    val cond = callFrame.makeConstraint(add(neg(z), integerLit(1)), Tcons1.SUP)
 
-    val r = effects.joinComputations {
-      callFrame.constrain(trueCond._1, trueCond._2)
+    val r = callFrame.ifThenElse(cond) {
       throw new Exception("unreachable")
     } {
-      callFrame.constrain(falseCond._1, falseCond._2)
       Topped.Actual(true)
     }
 
@@ -148,7 +145,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z > 20) unreachable else true") {
     val manager = new Polka(false)
     val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
-    val effects = new EffectStack(List(callFrame))
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -172,15 +169,11 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(callFrame.getBound(z))
 
     // z > 20   iff   z - 20 > 0
-    // z <= 20  iff   z - 20 <= 0  iff  -z + 20 > 0
-    val trueCond = (sub(z, integerLit(20)), Tcons1.SUP)
-    val falseCond = (add(neg(z), integerLit(20)), Tcons1.SUPEQ)
+    val cond = callFrame.makeConstraint(sub(z, integerLit(20)), Tcons1.SUP)
 
-    val r = effects.joinComputations {
-      callFrame.constrain(trueCond._1, trueCond._2)
+    val r = callFrame.ifThenElse(cond) {
       throw new Exception("unreachable")
     } {
-      callFrame.constrain(falseCond._1, falseCond._2)
       Topped.Actual(true)
     }
 
@@ -192,7 +185,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z > 5) false else true") {
     val manager = new Polka(false)
     val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
-    val effects = new EffectStack(List(callFrame))
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -217,17 +210,13 @@ class ApronCallFrameTest extends AnyFunSuite:
 
     // z > 5   iff   z - 5 > 0
     // z <= 5  iff   z - 5 <= 0  iff  -z + 5 > 0
-    val trueCond = (sub(z, integerLit(5)), Tcons1.SUP)
-    val falseCond = (add(neg(z), integerLit(5)), Tcons1.SUPEQ)
+    val cond = callFrame.makeConstraint(sub(z, integerLit(5)), Tcons1.SUP)
 
-    val r = effects.joinComputations {
-      println(callFrame)
-      callFrame.constrain(trueCond._1, trueCond._2)
+    println(callFrame)
+    val r = callFrame.ifThenElse(cond) {
       println(callFrame)
       Topped.Actual(false)
     } {
-      println(callFrame)
-      callFrame.constrain(falseCond._1, falseCond._2)
       println(callFrame)
       Topped.Actual(true)
     }
