@@ -3,9 +3,12 @@ package sturdy.apron
 import org.scalatest.funsuite.AnyFunSuite
 import apron.*
 import gmp.*
-import sturdy.data.{noJoin, JOptionC, CombineUnit}
+import sturdy.data.{JOptionC, CombineUnit, noJoin}
+import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.EffectStack
 import sturdy.effect.callframe.ApronCallFrame
+import sturdy.values.Join
+import sturdy.values.Widen
 import sturdy.values.{Topped, given}
 
 class ApronCallFrameTest extends AnyFunSuite:
@@ -25,9 +28,15 @@ class ApronCallFrameTest extends AnyFunSuite:
   def interval(from: Int, to: Int): Interval = new Interval(new MpqScalar(from), new MpqScalar(to))
 
 
+  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
+    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
+
   test("ApronCallFrame bound vars after frame push and pop") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -38,18 +47,21 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(r))
+    println(apron)
+    println(apron.getBound(r))
 
     // z is bound within the new frame
-    assert(callFrame.getBound(r) == interval(-1, -1))
+    assert(apron.getBound(r) == interval(-1, -1))
     // but now it is unbound
     assert(callFrame.getLocalByName("z") == JOptionC.none)
   }
 
   test("ApronCallFrame z = x + y") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -63,17 +75,19 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(r))
+    println(apron)
+    println(apron.getBound(r))
 
     // z is x + y
-    assert(callFrame.getBound(r) == interval(9, 9))
+    assert(apron.getBound(r) == interval(9, 9))
   }
 
   test("ApronCallFrame (z = x + y) join (z = x - y)") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
-    val effects = new EffectStack(List(callFrame))
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
+    implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -83,7 +97,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val r = callFrame.withNew("frame 1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
-      println(callFrame)
+      println(apron)
       effects.joinComputations {
         callFrame.setLocalByName("z", add(x, y))
         ()
@@ -94,17 +108,19 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(r))
+    println(apron)
+    println(apron.getBound(r))
 
     // z is (x + y) join (x - y)
-    assert(callFrame.getBound(r) == interval(1, 9))
+    assert(apron.getBound(r) == interval(1, 9))
   }
 
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -124,14 +140,14 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(z))
+    println(apron)
+    println(apron.getBound(z))
 
     // z < 1   iff   z - 1 < 0  iff  -z + 1 > 0
     // z >= 1  iff   z - 1 >= 0
-    val cond = callFrame.makeConstraint(add(neg(z), integerLit(1)), Tcons1.SUP)
+    val cond = apron.makeConstraint(add(neg(z), integerLit(1)), Tcons1.SUP)
 
-    val r = callFrame.ifThenElse(cond) {
+    val r = apron.ifThenElse(cond) {
       throw new Exception("unreachable")
     } {
       Topped.Actual(true)
@@ -144,8 +160,10 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 20) unreachable else true") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -165,13 +183,13 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(z))
+    println(apron)
+    println(apron.getBound(z))
 
     // z > 20   iff   z - 20 > 0
-    val cond = callFrame.makeConstraint(sub(z, integerLit(20)), Tcons1.SUP)
+    val cond = apron.makeConstraint(sub(z, integerLit(20)), Tcons1.SUP)
 
-    val r = callFrame.ifThenElse(cond) {
+    val r = apron.ifThenElse(cond) {
       throw new Exception("unreachable")
     } {
       Topped.Actual(true)
@@ -184,8 +202,10 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 5) false else true") {
     val manager = new Polka(false)
-    val callFrame = new ApronCallFrame[String, String](manager, "initial call frame")
+    implicit val apron: Apron = new Apron(manager)
+    var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
+    callFrame = new IntApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
@@ -205,23 +225,23 @@ class ApronCallFrameTest extends AnyFunSuite:
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
-    println(callFrame)
-    println(callFrame.getBound(z))
+    println(apron)
+    println(apron.getBound(z))
 
     // z > 5   iff   z - 5 > 0
     // z <= 5  iff   z - 5 <= 0  iff  -z + 5 > 0
-    val cond = callFrame.makeConstraint(sub(z, integerLit(5)), Tcons1.SUP)
+    val cond = apron.makeConstraint(sub(z, integerLit(5)), Tcons1.SUP)
 
-    println(callFrame)
-    val r = callFrame.ifThenElse(cond) {
-      println(callFrame)
+    println(apron)
+    val r = apron.ifThenElse(cond) {
+      println(apron)
       Topped.Actual(false)
     } {
-      println(callFrame)
+      println(apron)
       Topped.Actual(true)
     }
 
-    println(callFrame)
+    println(apron)
 
     // r is Top
     println(r)

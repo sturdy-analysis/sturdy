@@ -1,49 +1,98 @@
 package sturdy.effect.callframe
 
-import apron.{Environment, StringVar, Texpr1VarNode, Texpr1Node, Texpr1Intern, Manager, Abstract1, Tcons1, Interval, Var as ApronVar}
+import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Texpr1Intern, Tcons1, StringVar, Manager, Abstract1, Var as ApronVar}
 import org.eclipse.collections.api.factory.BiMaps
 import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
 import sturdy.apron.Apron
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
+import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Widen, Join}
 
-class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)
-  extends MutableCallFrame[Data, Var, Texpr1Node, NoJoin] with DecidableCallFrame[Data, Var, Texpr1Node] with Apron(apronManager):
+import scala.collection.mutable.ListBuffer
+
+abstract class ApronCallFrame[Data, Var, V](apron: Apron,
+                                            initData: Data,
+                                            getIntVal: V => Option[Texpr1Node],
+                                            getDoubleVal: V => Option[Texpr1Node],
+                                            makeIntVal: Texpr1Node => V,
+                                            makeDoubleVal: Texpr1Node => V,
+                                            initVars: Iterable[(Var, V)] = Iterable.empty)
+                                           (using Join[V], Widen[V])
+  extends MutableCallFrame[Data, Var, V, NoJoin] with DecidableCallFrame[Data, Var, V]:
+
+  import apron.*
+
+  enum Val:
+    case Int(v: ApronVar)
+    case Double(v: ApronVar)
+    case Other(v: V)
+
+  given Join[Val] = {
+    case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
+    case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
+    case (Val.Other(v1), Val.Other(v2)) => Join(v1, v2).map(Val.Other.apply)
+    case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
+  }
+  given Widen[Val] = {
+    case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
+    case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
+    case (Val.Other(v1), Val.Other(v2)) => Widen(v1, v2).map(Val.Other.apply)
+    case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
+  }
 
   private var _data: Data = initData
   private var names: Map[Var, Int] = Map()
 
-  private var boundVars: Map[Int, Either[ApronVar] = Map()
+  private var boundVars: Map[Int, Val] = Map()
 
-  private def allocVars(newVars: Iterable[(Var, Texpr1Node)]): Unit = {
+  private def setVars(newVars: Iterable[(Var, V)]): Unit = {
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
-    val newApronVars = newVars.map { case (x, _) =>
-      val v = new StringVar(s"apronI_${apronVarCount}_$x")
-      apronVarCount += 1
-      v
-    }.toArray[ApronVar]
-    boundVars = newApronVars.zipWithIndex.map(_.swap).toMap
-    apronEnv = apronEnv.add(newApronVars, Array.empty[ApronVar])
+
+    var newBoundVars: Map[Int, Val] = Map()
+    val newApronIntVars: ListBuffer[ApronVar] = ListBuffer()
+    val newApronDoubleVars: ListBuffer[ApronVar] = ListBuffer()
+    val newApronAssignments: ListBuffer[(ApronVar, Texpr1Node)] = ListBuffer()
+
+    newVars.zipWithIndex.foreach { case ((x, v), ix) =>
+      getIntVal(v) match
+        case Some(exp) =>
+          val av = new StringVar(s"apronI_${apronVarCount}_$x")
+          apronVarCount += 1
+          newApronIntVars += av
+          newApronAssignments += av -> exp
+          newBoundVars += ix -> Val.Int(av)
+        case None => getDoubleVal(v) match
+          case Some(exp) =>
+            val av = new StringVar(s"apronD_${apronVarCount}_$x")
+            apronVarCount += 1
+            newApronDoubleVars += av
+            newApronAssignments += av -> exp
+            newBoundVars += ix -> Val.Double(av)
+          case None =>
+            newBoundVars += ix -> Val.Other(v)
+    }
+    boundVars = newBoundVars
+    apronEnv = apronEnv.add(newApronIntVars.toArray, Array.empty[ApronVar])
     apronState.changeEnvironment(apronManager, apronEnv, false)
-    for (((_, v), av) <- newVars.zip(newApronVars)) {
-      val vIntern = new Texpr1Intern(apronEnv, v)
+    newApronAssignments.foreach { case (av, exp) =>
+      val vIntern = new Texpr1Intern(apronEnv, exp)
       apronState.assign(apronManager, av, vIntern, null)
     }
   }
 
-  allocVars(initVars)
+  setVars(initVars)
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Texpr1Node)])(f: => A): A = {
+  override def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
     val snapBoundVars = this.boundVars
     this._data = d
-    allocVars(vars)
+    setVars(vars)
     try f finally {
       this._data = snapData
       this.names = snapNames
@@ -53,45 +102,92 @@ class ApronCallFrame[Data, Var](apronManager: Manager, initData: Data, initVars:
 
   override def data: Data = _data
 
-  override def getLocal(x: Int): JOptionC[Texpr1Node] = boundVars.get(x) match
+  override def getLocal(x: Int): JOptionC[V] = boundVars.get(x) match
     case None => JOptionC.none
-    case Some(av) => JOptionC.some(new Texpr1VarNode(av))
+    case Some(e) => e match
+      case Val.Int(av) => JOptionC.some(makeIntVal(new Texpr1VarNode(av)))
+      case Val.Double(av) => JOptionC.some(makeDoubleVal(new Texpr1VarNode(av)))
+      case Val.Other(v) => JOptionC.some(v)
 
-  override def getLocalByName(x: Var): JOptionC[Texpr1Node] = names.get(x) match
+  override def getLocalByName(x: Var): JOptionC[V] = names.get(x) match
     case None => JOptionC.none
     case Some(ix) => getLocal(ix)
 
-  override def setLocal(x: Int, v: Texpr1Node): JOptionC[Unit] = boundVars.get(x) match
+  override def setLocal(x: Int, v: V): JOptionC[Unit] = boundVars.get(x) match
     case None => JOptionC.none
-    case Some(av) =>
-      val vIntern = new Texpr1Intern(apronEnv, v)
-      apronState.assign(apronManager, av, vIntern, null)
+    case Some(oldVal) => getIntVal(v) match
+      case Some(exp) =>
+        val vIntern = new Texpr1Intern(apronEnv, exp)
+        oldVal match
+          case Val.Int(av) =>
+            apronState.assign(apronManager, av, vIntern, null)
+          case Val.Double(av) =>
+            val intVar = new StringVar("apronI" + av.toString.substring("apronD".length))
+            if (!apronEnv.hasVar(intVar)) {
+              apronEnv = apronEnv.add(Array[ApronVar](intVar), null)
+              apronState.changeEnvironment(apronManager, apronEnv, false)
+            }
+            apronState.assign(apronManager, intVar, vIntern, null)
+            boundVars += x -> Val.Int(intVar)
+          case Val.Other(_) =>
+            val intVar = new StringVar(s"apronI_${apronVarCount}_$x")
+            apronVarCount += 1
+            if (!apronEnv.hasVar(intVar)) {
+              apronEnv = apronEnv.add(Array[ApronVar](intVar), null)
+              apronState.changeEnvironment(apronManager, apronEnv, false)
+            }
+            apronState.assign(apronManager, intVar, vIntern, null)
+            boundVars += x -> Val.Int(intVar)
+      case None => getDoubleVal(v) match
+        case Some(exp) =>
+          val vIntern = new Texpr1Intern(apronEnv, exp)
+          oldVal match
+            case Val.Int(av) =>
+              val doubleVar = new StringVar("apronD" + av.toString.substring("apronI".length))
+              if (!apronEnv.hasVar(doubleVar)) {
+                apronEnv = apronEnv.add(null, Array[ApronVar](doubleVar))
+                apronState.changeEnvironment(apronManager, apronEnv, false)
+              }
+              apronState.assign(apronManager, doubleVar, vIntern, null)
+              boundVars += x -> Val.Double(doubleVar)
+            case Val.Double(av) =>
+              apronState.assign(apronManager, av, vIntern, null)
+            case Val.Other(_) =>
+              val doubleVar = new StringVar(s"apronD_${apronVarCount}_$x")
+              apronVarCount += 1
+              if (!apronEnv.hasVar(doubleVar)) {
+                apronEnv = apronEnv.add(null, Array[ApronVar](doubleVar))
+                apronState.changeEnvironment(apronManager, apronEnv, false)
+              }
+              apronState.assign(apronManager, doubleVar, vIntern, null)
+              boundVars += x -> Val.Double(doubleVar)
+        case None =>
+          boundVars += x -> Val.Other(v)
       JOptionC.some(())
 
-  override def setLocalByName(x: Var, v: Texpr1Node): JOptionC[Unit] = names.get(x) match
+  override def setLocalByName(x: Var, v: V): JOptionC[Unit] = names.get(x) match
     case None => JOptionC.none
     case Some(ix) => setLocal(ix, v)
 
-  type State = Abstract1
+  type State = (Abstract1, Map[Int, Val])
   /** state contains the constraints for the current frame only */
-  override def getState: State = {
-    val frame = new Environment(boundVars.values.toArray, Array.empty[ApronVar])
-    // only retain bound vars
-    apronState.changeEnvironmentCopy(apronManager, frame, true)
-  }
+  override def getState: State =
+    (new Abstract1(apronManager, apronState), boundVars)
+
   override def setState(st: State): Unit =
-    // set bound vars to [-inf, +inf]
-    apronState.forget(apronManager, boundVars.values.toArray, false)
-    // meet bound vars with st
-    apronState.meet(apronManager, st)
+    apronState = st._1
+    this.boundVars = st._2
 
   override def join: Join[State] = (s1, s2) => {
-    val joined = s1.joinCopy(apronManager, s2)
-    MaybeChanged(joined, s1.isEqual(apronManager, joined))
+    val joinedState = s1._1.joinCopy(apronManager, s2._1)
+    val MaybeChanged(joinedBoundVars, changedBoundVars) = Join(s1._2, s2._2)
+    MaybeChanged((joinedState, joinedBoundVars), changedBoundVars || s1._1.isEqual(apronManager, joinedState))
   }
   override def widen: Widen[State] = (s1, s2) => {
-    val joined = s1.widening(apronManager, s2)
-    MaybeChanged(joined, s1.isEqual(apronManager, joined))
+    val widenedState = s1._1.widening(apronManager, s2._1)
+    given Finite[Int] with {}
+    val MaybeChanged(widenedBoundVars, changedBoundVars) = Widen(s1._2, s2._2)
+    MaybeChanged((widenedState, widenedBoundVars), changedBoundVars || s1._1.isEqual(apronManager, widenedState))
   }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {

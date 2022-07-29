@@ -2,18 +2,23 @@ package sturdy.apron
 
 import apron.Tcons0
 import apron.Texpr0UnNode
+import apron.Texpr1BinNode
 import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Texpr1Intern, Tcons1, StringVar, Manager, Abstract1, Var as ApronVar}
+import sturdy.data.CombineUnit
 import sturdy.effect.EffectStack
 import sturdy.effect.SturdyFailure
+import sturdy.values.Combine
 import sturdy.values.Join
+import sturdy.values.MaybeChanged
+import sturdy.values.Widening
 
-trait Apron(val apronManager: Manager):
+class Apron(val apronManager: Manager):
   override def toString: String = apronState.toString(apronManager)
 
-  protected var apronEnv: Environment = new Environment()
-  protected var apronState: Abstract1 = new Abstract1(apronManager, apronEnv)
+  var apronEnv: Environment = new Environment()
+  var apronState: Abstract1 = new Abstract1(apronManager, apronEnv)
   /** global var count, currently unbounded */
-  protected var apronVarCount: Int = 0
+  var apronVarCount: Int = 0
 
 
   def getBound(v: Texpr1Node): Interval =
@@ -42,7 +47,7 @@ trait Apron(val apronManager: Manager):
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
-  def freshConstraintVariable(purpose: String): Texpr1Node =
+  def freshConstraintVariable(purpose: String): Texpr1VarNode =
     val newApronVar = new StringVar(s"apronI_${apronVarCount}_$purpose")
     apronVarCount += 1
     apronEnv = apronEnv.add(Array[ApronVar](newApronVar), Array.empty[ApronVar])
@@ -61,3 +66,16 @@ trait Apron(val apronManager: Manager):
       ifFalse
     }
 
+given JoinTexpr1Node[W <: Widening] (using effects: EffectStack, ap: Apron): Combine[Texpr1Node, W] with
+  def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
+    val x = ap.freshConstraintVariable(s"join($v1, $v2)")
+    effects.joinComputations {
+      ap.constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
+      ()
+    } {
+      ap.constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
+      ()
+    }
+    val xBound = ap.getBound(x)
+    val v1Bound = ap.getBound(v1)
+    MaybeChanged(x, xBound.isEqual(v1Bound))
