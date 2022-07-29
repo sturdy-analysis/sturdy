@@ -19,24 +19,24 @@ given ApronIntegerOps[B](using Numeric[B])
   def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[Double] =
     val sup = new Array[Double](1)
     val inf = new Array[Double](1)
-    callframe.getBound(v).sup.toDouble(sup, 0)
-    callframe.getBound(v).inf.toDouble(inf, 0)
+    ap.getBound(v).sup.toDouble(sup, 0)
+    ap.getBound(v).inf.toDouble(inf, 0)
     NumericInterval[Double](inf(0), sup(0))
 
   def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[Double] => NumericInterval[Double]): Texpr1Node =
     val vInterval = f(apronIntervalToInterval(v))
-    val result = callframe.freshConstraintVariable(s"$f($v)")
-    callframe.constrain(sub(result, new Texpr1CstNode(new MpqScalar(vInterval.low.toInt))), Tcons1.SUPEQ)
-    callframe.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(vInterval.high.toInt))), Tcons1.SUPEQ)
+    val result = ap.freshConstraintVariable(s"$f($v)")
+    ap.constrain(sub(result, new Texpr1CstNode(new MpqScalar(vInterval.low.toInt))), Tcons1.SUPEQ)
+    ap.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(vInterval.high.toInt))), Tcons1.SUPEQ)
     result
 
   def binaryIntervalOp(v1: Texpr1Node, v2: Texpr1Node, f: (NumericInterval[Double], NumericInterval[Double]) => NumericInterval[Double]): Texpr1Node =
     val v1Interval = apronIntervalToInterval(v1)
     val v2Interval = apronIntervalToInterval(v2)
     val resInterval = f(v1Interval, v2Interval)
-    val result = callframe.freshConstraintVariable(s"$f($v1, $v2)")
-    callframe.constrain(sub(result, new Texpr1CstNode(new MpqScalar(resInterval.low.toInt))), Tcons1.SUPEQ)
-    callframe.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(resInterval.high.toInt))), Tcons1.SUPEQ)
+    val result = ap.freshConstraintVariable(s"$f($v1, $v2)")
+    ap.constrain(sub(result, new Texpr1CstNode(new MpqScalar(resInterval.low.toInt))), Tcons1.SUPEQ)
+    ap.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(resInterval.high.toInt))), Tcons1.SUPEQ)
     result
 
 
@@ -86,32 +86,29 @@ given ApronIntegerOps[B](using Numeric[B])
     result
 
   override def absolute(v: Texpr1Node): Texpr1Node =
-    val result = callframe.freshConstraintVariable(s"absolute($v)")
+    val result = ap.freshConstraintVariable(s"absolute($v)")
     // result >= v iff result - v >= 0
-    callframe.constrain(sub(result, v), Tcons1.SUPEQ)
+    ap.constrain(sub(result, v), Tcons1.SUPEQ)
     // result >= -v iff result + v >= 0
-    callframe.constrain(add(result, v), Tcons1.SUPEQ)
+    ap.constrain(add(result, v), Tcons1.SUPEQ)
     effects.joinComputations {
       // result == v iff result - v == 0
-      callframe.constrain(sub(result, v), Tcons1.EQ)
+      ap.constrain(sub(result, v), Tcons1.EQ)
     } {
       // result == -v iff result + v == 0
-      callframe.constrain(add(result, v), Tcons1.EQ)
+      ap.constrain(add(result, v), Tcons1.EQ)
     }
     result
 
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     // Use join computations for call frame test
-    val result = callframe.freshConstraintVariable(s"div($v1,$v2)")
-    effects.joinComputations{
-      callframe.constrain(v2, Tcons1.DISEQ)
+    effects.joinWithFailure{
+      ap.constrain(v2, Tcons1.DISEQ)
       Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
-    }
-    {
-      callframe.constrain(v2, Tcons1.EQ)
+    } {
+      ap.constrain(v2, Tcons1.EQ)
       f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     }
-    Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
 
 
   override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
