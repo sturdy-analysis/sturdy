@@ -22,16 +22,14 @@ trait Interpreter:
 
   enum Value:
     case TopValue
+    case BoolValue(b: VBool)
     case IntValue(i: VInt)
     case RefValue(addr: VRef)
     case FunValue(fun: VFun)
     case RecValue(rec: VRecord)
 
-    def asBoolean(using Failure): VBool = Interpreter.this.asBoolean(this)
-    def asInt(using failure: Failure): VInt = this match
-      case IntValue(i) => i
-      case TopValue => topInt
-      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
+    def asBoolean(using inst: Instance): VBool = Interpreter.this.asBoolean(this)
+    def asInt(using inst: Instance): VInt = Interpreter.this.asInt(this)
     def asFunction(using inst: Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
@@ -40,10 +38,10 @@ trait Interpreter:
       case RefValue(a) => a
       case TopValue => topReference
       case _ => inst.failure(TipFailure.TypeError, s"Expected Reference but got $this")
-    def asRecord(using failure: Failure): VRecord = this match
+    def asRecord(using inst: Instance): VRecord = this match
       case RecValue(rec) => rec
       case TopValue => topRecord
-      case _ => failure(TipFailure.TypeError, s"Expected Record but got $this")
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Record but got $this")
 
   def topInt: VInt
   def topFun(using Instance): VFun
@@ -51,8 +49,8 @@ trait Interpreter:
   def topRecord: VRecord
   def topBool: VBool
 
-  def asBoolean(v: Value)(using Failure): VBool
-  def boolean(b: VBool): Value
+  def asBoolean(v: Value)(using Instance): VBool
+  def asInt(v: Value)(using Instance): VInt
 
   given Top[Value] with
     def top = Value.TopValue
@@ -71,34 +69,34 @@ trait Interpreter:
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
-  given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
+  given ValueIntegerOps(using Instance, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
-  given ValueOrderingOps(using Failure, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
-    new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, boolean)
+  given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
+    new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
   given ValueEqOps(using EqOps[VInt, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => boolean(EqOps.equ(i1, i2))
-      case (RefValue(a1), RefValue(a2)) => boolean(EqOps.equ(a1, a2))
-      case (FunValue(f1), FunValue(f2)) => boolean(EqOps.equ(f1, f2))
-      case (RecValue(r1), RecValue(r2)) => boolean(EqOps.equ(r1, r2))
-      case (TopValue, _) | (_, TopValue) => boolean(topBool)
+      case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.equ(i1, i2))
+      case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.equ(a1, a2))
+      case (FunValue(f1), FunValue(f2)) => Value.BoolValue(EqOps.equ(f1, f2))
+      case (RecValue(r1), RecValue(r2)) => Value.BoolValue(EqOps.equ(r1, r2))
+      case (TopValue, _) | (_, TopValue) => Value.BoolValue(topBool)
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     def neq(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => boolean(EqOps.neq(i1, i2))
-      case (RefValue(a1), RefValue(a2)) => boolean(EqOps.neq(a1, a2))
-      case (FunValue(f1), FunValue(f2)) => boolean(EqOps.neq(f1, f2))
-      case (RecValue(r1), RecValue(r2)) => boolean(EqOps.neq(r1, r2))
-      case (TopValue, _) | (_, TopValue) => boolean(topBool)
+      case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.neq(i1, i2))
+      case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.neq(a1, a2))
+      case (FunValue(f1), FunValue(f2)) => Value.BoolValue(EqOps.neq(f1, f2))
+      case (RecValue(r1), RecValue(r2)) => Value.BoolValue(EqOps.neq(r1, r2))
+      case (TopValue, _) | (_, TopValue) => Value.BoolValue(topBool)
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
   given ValueFunctionOps(using Instance, FunctionOps[Function, Seq[Value], Value, VFun]): FunctionOps[Function, Seq[Value], Value, Value] =
     new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
   given ValueReferenceOps(using Instance, ReferenceOps[Addr, VRef]): ReferenceOps[Addr, Value] =
     new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)
-  given ValueRecordOps(using Failure, RecordOps[Field, Value, VRecord]): RecordOps[Field, Value, Value] =
+  given ValueRecordOps(using Instance, RecordOps[Field, Value, VRecord]): RecordOps[Field, Value, Value] =
     new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)
-  given ValueBranchingOps(using Failure, BooleanBranching[VBool, Unit]): BooleanBranching[Value, Unit] =
+  given ValueBranchingOps(using Instance, BooleanBranching[VBool, Unit]): BooleanBranching[Value, Unit] =
     new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean)
-  given ValueBooleanSelection(using Failure, BooleanSelection[VBool, VBool]): BooleanSelection[Value, VBool] =
+  given ValueBooleanSelection(using Instance, BooleanSelection[VBool, VBool]): BooleanSelection[Value, VBool] =
     new LiftedBooleanSelection(_.asBoolean)
 
   type Instance <: GenericInstance

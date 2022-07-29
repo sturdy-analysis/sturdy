@@ -1,6 +1,6 @@
 package sturdy.language.tip
 
-import sturdy.data.{NoJoin, noJoin, unit}
+import sturdy.data.{NoJoin, unit, noJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
@@ -34,10 +34,15 @@ object ConcreteInterpreter extends Interpreter:
   override def topRecord: VRecord = throw new UnsupportedOperationException
   override def topBool: Boolean = throw new UnsupportedOperationException
 
-  override def asBoolean(v: Value)(using failure: Failure): Boolean = v match
+  override def asBoolean(v: Value)(using inst: Instance): Boolean = v match
+    case Value.BoolValue(b) => b
     case Value.IntValue(i) => i != 0
-    case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
-  override def boolean(b: Boolean): Value = Value.IntValue(if (b) 1 else 0)
+    case _ => inst.failure(TipFailure.TypeError, s"Expected Boolean but got $this")
+
+  override def asInt(v: Value)(using inst: Instance): Int = v match
+    case Value.BoolValue(b) => if b then 1 else 0
+    case Value.IntValue(i) => i
+    case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
   given Structural[VRecord] with {}
 
