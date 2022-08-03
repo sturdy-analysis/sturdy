@@ -1,9 +1,6 @@
 package sturdy.apron
 
-import apron.Tcons0
-import apron.Texpr0UnNode
-import apron.Texpr1BinNode
-import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Texpr1Intern, Tcons1, StringVar, Manager, Abstract1, Var as ApronVar}
+import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1UnNode, Texpr1BinNode, Texpr1Intern, Texpr1Node, Texpr1VarNode, Var as ApronVar}
 import sturdy.data.CombineUnit
 import sturdy.effect.EffectStack
 import sturdy.effect.SturdyFailure
@@ -47,6 +44,9 @@ class Apron(val apronManager: Manager):
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
+  def assign(name: String, expr: Linexpr1): Unit =
+    apronState.assign(apronManager, name, expr, null)
+
   def freshConstraintVariable(purpose: String): Texpr1VarNode =
     val newApronVar = new StringVar(s"apronI_${apronVarCount}_$purpose")
     apronVarCount += 1
@@ -59,12 +59,17 @@ class Apron(val apronManager: Manager):
       constrain(cond)
       ifTrue
     } {
-      val exp = cond.getTcons0.toTexpr0Node
-      val negatedExp = new Texpr0UnNode(Texpr0UnNode.OP_NEG, exp)
-      val notCond = new Tcons1(apronEnv, new Tcons0(cond.getKind, negatedExp))
+      val notCond = negateExpr(cond)
       constrain(notCond)
       ifFalse
     }
+
+  def negateExpr(cond : Tcons1) : Tcons1 = cond.getKind match
+    case Tcons1.EQ => makeConstraint(cond.toTexpr1Node, Tcons1.DISEQ)
+    case Tcons1.DISEQ => makeConstraint(cond.toTexpr1Node, Tcons1.EQ)
+    case Tcons1.SUP => makeConstraint(Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node), Tcons1.SUPEQ)
+    case Tcons1.SUPEQ => makeConstraint(Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node), Tcons1.SUP)
+    case Tcons1.EQMOD => ??? // not useful
 
 given JoinTexpr1Node[W <: Widening] (using effects: EffectStack, ap: Apron): Combine[Texpr1Node, W] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
