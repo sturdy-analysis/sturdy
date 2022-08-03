@@ -1,7 +1,7 @@
 package sturdy.values.integer
 
 import sturdy.data.CombineUnit
-import apron.{Environment, Var, Tcons1, Texpr1CstNode, Texpr1UnNode, MpqScalar, Texpr1Node, DoubleScalar, Texpr1BinNode, Texpr0Node}
+import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 import sturdy.apron.Apron
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
@@ -10,7 +10,9 @@ import java.util
 import math.Numeric.Implicits.infixNumericOps
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
-import sturdy.values.Top
+import sturdy.values.{Top, Topped}
+import sturdy.values.ordering.{EqOps, OrderingOps}
+import sturdy.values.given
 
 given ApronIntegerOps[B](using Numeric[B])
                                    (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[Int], f : Failure)
@@ -104,14 +106,11 @@ given ApronIntegerOps[B](using Numeric[B])
 
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     // Use join computations for call frame test
-    effects.joinWithFailure{
-      ap.constrain(v2, Tcons1.DISEQ)
+    ap.ifThenElse(ap.makeConstraint(v2, Tcons1.DISEQ)) {
       Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
     } {
-      ap.constrain(v2, Tcons1.EQ)
       f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     }
-
 
   override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
@@ -170,3 +169,24 @@ given ApronIntegerOps[B](using Numeric[B])
     unaryIntervalOp(v, intervalOps.nonzeroBitCount)
   override def invertBits(v: Texpr1Node): Texpr1Node =
     unaryIntervalOp(v, intervalOps.invertBits)
+
+given ApronEqOps[B](using ap : Apron, effects : EffectStack, intOps : ApronIntegerOps[B]) : EqOps[Texpr1Node, Topped[Boolean]] with
+  override def equ(v1 : Texpr1Node, v2 : Texpr1Node) : Topped[Boolean] =
+    ap.ifThenElse(ap.makeConstraint(intOps.sub(v1, v2), Tcons1.EQ)) {Topped.Actual(true)} {Topped.Actual(false)}
+  override def neq(v1 : Texpr1Node, v2 : Texpr1Node) : Topped[Boolean] = equ(v1,v2).map(!_)
+
+given ApronOrderingOps[B](using ap : Apron, effects : EffectStack, intOps : ApronIntegerOps[B]) : OrderingOps[Texpr1Node, Topped[Boolean]] with
+  override def lt(v1: Texpr1Node, v2: Texpr1Node): Topped[Boolean] =
+    // v1 < v2 iff -v1 + v2 > 0
+    ap.ifThenElse(ap.makeConstraint(intOps.add(intOps.neg(v1), v2), Tcons1.SUP)) {
+        Topped.Actual(true)
+      } {
+        Topped.Actual(false)
+      }
+  override def le(v1: Texpr1Node, v2: Texpr1Node): Topped[Boolean] =
+  // v1 < v2 iff -v1 + v2 > 0
+    ap.ifThenElse(ap.makeConstraint(intOps.add(intOps.neg(v1), v2), Tcons1.SUPEQ)) {
+      Topped.Actual(true)
+    } {
+      Topped.Actual(false)
+    }
