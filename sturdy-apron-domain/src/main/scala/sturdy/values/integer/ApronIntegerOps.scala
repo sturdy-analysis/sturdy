@@ -2,7 +2,7 @@ package sturdy.values.integer
 
 import sturdy.data.CombineUnit
 import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
-import sturdy.apron.Apron
+import sturdy.apron.{Apron, given}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -11,11 +11,12 @@ import math.Numeric.Implicits.infixNumericOps
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Top, Topped}
-import sturdy.values.ordering.{EqOps, OrderingOps}
-import sturdy.values.given
+import sturdy.values.ordering.{ApronOrderingOps, ApronEqOps}
+
 
 given ApronIntegerOps[B](using Numeric[B])
-                                   (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[Int], f : Failure)
+                        (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[Int], f : Failure)
+                        (using order : ApronOrderingOps, eq : ApronEqOps)
       : IntegerOps[B, Texpr1Node] with
 
   def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[Int] =
@@ -62,88 +63,95 @@ given ApronIntegerOps[B](using Numeric[B])
     new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
 
   override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val result = ap.freshConstraintVariable(s"max($v1, $v2)")
-    // result >= v  iff  result - v >= 0
-    ap.constrain(sub(result, v1), Tcons1.SUPEQ)
-    ap.constrain(sub(result, v2), Tcons1.SUPEQ)
-    effects.joinComputations {
-      // result == v1
-      ap.constrain(sub(result, v1), Tcons1.EQ)
+    val r = ap.freshConstraintVariable(s"max($v1,$v2)")
+    ap.ifThenElse(order.lt(v1,v2)) {
+      ap.constrain(sub(r, v2), Tcons1.EQ)
     } {
-      // result == v2
-      ap.constrain(sub(result, v2), Tcons1.EQ)
+      ap.constrain(sub(r, v1), Tcons1.EQ)
     }
-    result
+    r
 
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val result = ap.freshConstraintVariable(s"max($v1, $v2)")
-    // result <= v  iff  result - v <= 0  iff  -result + v > 0
-    ap.constrain(add(neg(result), v1), Tcons1.SUPEQ)
-    ap.constrain(add(neg(result), v2), Tcons1.SUPEQ)
-    effects.joinComputations {
-      // result == v1
-      ap.constrain(sub(result, v1), Tcons1.EQ)
+    val r = ap.freshConstraintVariable(s"min($v1,$v2)")
+    ap.ifThenElse(order.lt(v1, v2)) {
+      ap.constrain(sub(r, v1), Tcons1.EQ)
     } {
-      // result == v2
-      ap.constrain(sub(result, v2), Tcons1.EQ)
+      ap.constrain(sub(r, v2), Tcons1.EQ)
     }
-    result
+    r
 
   override def absolute(v: Texpr1Node): Texpr1Node =
-    val result = ap.freshConstraintVariable(s"absolute($v)")
-    // result >= v iff result - v >= 0
-    ap.constrain(sub(result, v), Tcons1.SUPEQ)
-    // result >= -v iff result + v >= 0
-    ap.constrain(add(result, v), Tcons1.SUPEQ)
-    effects.joinComputations {
-      // result == v iff result - v == 0
-      ap.constrain(sub(result, v), Tcons1.EQ)
-    } {
-      // result == -v iff result + v == 0
-      ap.constrain(add(result, v), Tcons1.EQ)
-    }
-    result
+    max(v, neg(v))
 
+  def safediv (v1:  Texpr1Node, v2: Texpr1Node): Texpr1BinNode =
+    Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    // Use join computations for call frame test
-    ap.ifThenElse(ap.makeConstraint(v2, Tcons1.DISEQ)) {
-      Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
+    val r = ap.freshConstraintVariable(s"$v1 / $v2")
+    ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
+      println(ap.getBound(r))
+      println(ap.apronState)
+      ap.constrain(sub(r, safediv(v1, v2)), Tcons1.EQ)
+      println(ap.getBound(r))
+      println(ap.apronState)
     } {
-      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      println(ap.getBound(r))
+      println(ap.apronState)
+      ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), v2)) {
+        println(ap.getBound(r))
+        println(ap.apronState)
+        ap.constrain(sub(r, safediv(v1, v2)), Tcons1.EQ)
+        println(ap.getBound(r))
+        println(ap.apronState)
+      } {
+        println(ap.getBound(r))
+        println(ap.apronState)
+        println("FAIL")
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      }
     }
+    r
+
+  def test : Unit =
+    val x = ap.freshConstraintVariable("x")
+    ap.ifThenElse(ap.makeConstraint(x, Tcons1.SUP)) {
+      println(ap.getBound(x))
+      ()
+    } {
+    ap.ifThenElse(ap.makeConstraint(neg(x), Tcons1.SUP)) {
+      println(ap.getBound(x))
+      ()
+    } {
+      println(ap.getBound(x))
+      ()
+    }}
 
   override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
-  override def remainder(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    effects.joinWithFailure {
-      ap.constrain(v2, Tcons1.DISEQ)
-
-      val result = ap.freshConstraintVariable(s"remainder($v1,$v2)")
-
-      effects.joinComputations {
-        ap.constrain(v1, Tcons1.SUPEQ)
-        ap.constrain(Texpr1BinNode(Texpr1BinNode.OP_SUB, result, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
+  override def remainder(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
+    /*
+    ap.ifThenElse(ap.makeConstraint(v2, Tcons1.DISEQ)) {
+      ap.ifThenElse(ap.makeConstraint(v1, Tcons1.SUPEQ)){
+        new Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)
       } {
-        ap.constrain(neg(v1), Tcons1.SUP)
-        ap.constrain(Texpr1BinNode(Texpr1BinNode.OP_SUB, result, Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2), v1)), Tcons1.EQ)
+        new Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2), v2)
       }
-      result
     } {
-      ap.constrain(v2, Tcons1.EQ)
-      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 % $v2 (remainder)")
     }
+    */
 
   override def remainderUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
-  override def modulo(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    effects.joinWithFailure {
-      ap.constrain(v2, Tcons1.DISEQ)
-      Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)
-    } {
-      ap.constrain(v2, Tcons1.EQ)
-      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-    }
-  override def gcd(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
+  override def modulo(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
+  /*
+    ap.ifThenElse(ap.makeConstraint(v2, Tcons1.DISEQ)) {
+      new Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)
+    } {
+      f.fail(IntegerDivisionByZero, s"$v1 % $v2")
+    }
+  */
+
+  override def gcd(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
   override def bitAnd(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     binaryIntervalOp(v1, v2, intervalOps.bitAnd)
@@ -169,24 +177,3 @@ given ApronIntegerOps[B](using Numeric[B])
     unaryIntervalOp(v, intervalOps.nonzeroBitCount)
   override def invertBits(v: Texpr1Node): Texpr1Node =
     unaryIntervalOp(v, intervalOps.invertBits)
-
-given ApronEqOps[B](using ap : Apron, effects : EffectStack, intOps : ApronIntegerOps[B]) : EqOps[Texpr1Node, Topped[Boolean]] with
-  override def equ(v1 : Texpr1Node, v2 : Texpr1Node) : Topped[Boolean] =
-    ap.ifThenElse(ap.makeConstraint(intOps.sub(v1, v2), Tcons1.EQ)) {Topped.Actual(true)} {Topped.Actual(false)}
-  override def neq(v1 : Texpr1Node, v2 : Texpr1Node) : Topped[Boolean] = equ(v1,v2).map(!_)
-
-given ApronOrderingOps[B](using ap : Apron, effects : EffectStack, intOps : ApronIntegerOps[B]) : OrderingOps[Texpr1Node, Topped[Boolean]] with
-  override def lt(v1: Texpr1Node, v2: Texpr1Node): Topped[Boolean] =
-    // v1 < v2 iff -v1 + v2 > 0
-    ap.ifThenElse(ap.makeConstraint(intOps.add(intOps.neg(v1), v2), Tcons1.SUP)) {
-        Topped.Actual(true)
-      } {
-        Topped.Actual(false)
-      }
-  override def le(v1: Texpr1Node, v2: Texpr1Node): Topped[Boolean] =
-  // v1 < v2 iff -v1 + v2 > 0
-    ap.ifThenElse(ap.makeConstraint(intOps.add(intOps.neg(v1), v2), Tcons1.SUPEQ)) {
-      Topped.Actual(true)
-    } {
-      Topped.Actual(false)
-    }
