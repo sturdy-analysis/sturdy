@@ -1,18 +1,18 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
-import apron.*
+import apron.{Polka, Texpr1Node, *}
 import gmp.*
 import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.apron.JoinTexpr1Node
-import sturdy.effect.{ComputationJoiner, EffectStack}
-import sturdy.values.integer.{ApronIntegerOps, IntervalIntegerOps, given}
+import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
+import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
-import sturdy.values.integer.ConcreteIntegerOps
+import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 
 class ApronIntegerOpsTest extends AnyFunSuite:
 
@@ -27,6 +27,8 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
     implicit val intervalOps: IntervalIntegerOps[Int] = new IntervalIntegerOps[Int](50)
+    implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
+    implicit val eqOps: ApronEqOps = new ApronEqOps
     val intOps = new ApronIntegerOps[Int]
     (intOps, apron)
 
@@ -93,7 +95,8 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Max with unbounded") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.max(intOps.integerLit(4), intOps.randomInteger())) == Interval(4, Double.PositiveInfinity))
+    val r = apron.getBound(intOps.max(intOps.integerLit(4), intOps.randomInteger()))
+    assert(r== Interval(4, Double.PositiveInfinity))
   }
 
   test("Min") {
@@ -118,17 +121,57 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Division") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(1), intOps.integerLit(0))) == Interval(0, Double.PositiveInfinity))
+    assert(apron.getBound(intOps.div(intOps.integerLit(4), intOps.integerLit(1))) == Interval(4,4))
   }
+
+  test("Division negative denominator") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.integerLit(2), intOps.integerLit(-2))) == Interval(-1,-1))
+  }
+
+  test("Division negative numerator") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.integerLit(-4), intOps.integerLit(2))) == Interval(-2, -2))
+  }
+
+  test("Division negative numerator and negative denominator") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.integerLit(-4), intOps.integerLit(-4))) == Interval(1, 1))
+  }
+
 
   test("Division by zero") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.randomInteger(),intOps.randomInteger())) == Interval(0, Double.PositiveInfinity))
+    try {
+      intOps.div(intOps.integerLit(3),intOps.integerLit(0))
+      assert(false)
+    }
+    catch {
+      case e : SturdyFailure => assert(true)
+      case _ : Throwable => assert(false)
+    }
   }
 
   test("Division by unbounded") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == Interval(0, Double.PositiveInfinity))
+    assert(apron.getBound(intOps.div(intOps.integerLit(4), intOps.randomInteger())) == Interval(-4, 4))
+  }
+
+  test("Division zero by unbounded") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.integerLit(0), intOps.randomInteger())) == Interval(0,0))
+  }
+
+  test("Division unbounded by zero") {
+    val (intOps, apron) = instantiateIntOps()
+    try {
+      intOps.div(intOps.randomInteger(), intOps.integerLit(0))
+      assert(false)
+    }
+    catch {
+      case e: SturdyFailure => assert(true)
+      case _: Throwable => assert(false)
+    }
   }
 
   test("Negate EQ") {
