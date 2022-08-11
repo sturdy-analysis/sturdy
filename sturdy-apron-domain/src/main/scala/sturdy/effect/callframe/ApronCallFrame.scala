@@ -15,7 +15,7 @@ import sturdy.values.{Widen, Join}
 
 import scala.collection.mutable.ListBuffer
 
-abstract class ApronCallFrame[Data, Var, V](apron: Apron,
+class ApronCallFrame[Data, Var, V](apron: Apron,
                                             initData: Data,
                                             getIntVal: V => Option[Texpr1Node],
                                             getDoubleVal: V => Option[Texpr1Node],
@@ -38,6 +38,7 @@ abstract class ApronCallFrame[Data, Var, V](apron: Apron,
     case (Val.Other(v1), Val.Other(v2)) => Join(v1, v2).map(Val.Other.apply)
     case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
   }
+
   given Widen[Val] = {
     case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
     case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
