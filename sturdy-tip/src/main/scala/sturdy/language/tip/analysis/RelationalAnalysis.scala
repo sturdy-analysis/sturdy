@@ -55,7 +55,6 @@ object RelationalAnalysis extends Interpreter,
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
   final def asInt(v: Value)(using inst: Instance): VInt = v match
-
     case Value.BoolValue(b) =>
       import inst.{given_EffectStack, apron, failure}
       given Failure = failure
@@ -87,9 +86,10 @@ object RelationalAnalysis extends Interpreter,
     given EqOps[VFun, VBool] = LiftedEqOps[VFun, VBool, Value, Value](Value.FunValue(_), asBoolean)
     given EqOps[VRecord, VBool] = LiftedEqOps[VRecord, VBool, Value, Value](Value.RecValue(_), asBoolean)
 
-    given BooleanBranching[VBool, Unit] = ???
+    given BooleanBranching[VBool, Unit] = LiftedBooleanBranching[VBool, Value, Unit](Value.BoolValue(_))
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
