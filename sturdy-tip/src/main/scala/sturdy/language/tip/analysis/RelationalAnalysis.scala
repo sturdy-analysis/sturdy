@@ -83,7 +83,9 @@ object RelationalAnalysis extends Interpreter,
     private given Failure = failure
 
     given EqOps[Value, Value] = LiftedEqOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
-    given BooleanBranching[VBool, Unit] = LiftedBooleanBranching[VBool, Value, Unit](Value.BoolValue(_))
+
+    given BooleanBranching[VBool, Unit] with
+      def boolBranch(v: VBool, thn: => Unit, els: => Unit): Unit = apron.ifThenElse(v)(thn)(els)
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
