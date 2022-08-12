@@ -69,7 +69,7 @@ object RelationalAnalysis extends Interpreter,
       inst.apron.topInt
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
-  // can't use inst.apron.TopInt without modifying the signature
+  // TODO can't use inst.apron.TopInt without modifying the signature
   override def topInt: Texpr1Node = ???
   override def topBool : Tcons1 = ???
 
@@ -82,10 +82,7 @@ object RelationalAnalysis extends Interpreter,
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
-    given EqOps[VRef, VBool] = LiftedEqOps[VRef, VBool, Value, Value](Value.RefValue(_), asBoolean)
-    given EqOps[VFun, VBool] = LiftedEqOps[VFun, VBool, Value, Value](Value.FunValue(_), asBoolean)
-    given EqOps[VRecord, VBool] = LiftedEqOps[VRecord, VBool, Value, Value](Value.RecValue(_), asBoolean)
-
+    given EqOps[Value, Value] = LiftedEqOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
     given BooleanBranching[VBool, Unit] = LiftedBooleanBranching[VBool, Value, Unit](Value.BoolValue(_))
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
