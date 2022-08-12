@@ -82,8 +82,10 @@ object RelationalAnalysis extends Interpreter,
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
+    // TODO check
     given EqOps[Value, Value] = LiftedEqOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
 
+    // TODO check
     given BooleanBranching[VBool, Unit] with
       def boolBranch(v: VBool, thn: => Unit, els: => Unit): Unit = apron.ifThenElse(v)(thn)(els)
 
@@ -97,6 +99,8 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
+    // CallFrame should be DecidableMutableCallFrame, which shouldn't be a problem given the fact that ApronCallFrame extends both MutableCallFrame and DecidableCallFrame
+    // but reimplementation needed (?)
     override val callFrame: ApronCallFrame[Unit, String, Value] = new ApronCallFrame(
       apron,
       (),
@@ -112,6 +116,7 @@ object RelationalAnalysis extends Interpreter,
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(apron.topInt))
 
+    // TODO check
     given Widen[VInt] = new JoinTexpr1Node[Widening.Yes]
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
