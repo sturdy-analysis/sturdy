@@ -1,8 +1,8 @@
 package sturdy.effect.callframe
 
-import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Texpr1Intern, Tcons1, StringVar, Manager, Abstract1, Var as ApronVar}
+import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1Intern, Texpr1Node, Texpr1VarNode, Var as ApronVar}
 import org.eclipse.collections.api.factory.BiMaps
-import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
+import org.eclipse.collections.api.bimap.{BiMap, ImmutableBiMap, MutableBiMap}
 import sturdy.apron.Apron
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
@@ -11,9 +11,10 @@ import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
-import sturdy.values.{Widen, Join}
+import sturdy.values.{Join, Widen}
 
 import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
 
 class ApronCallFrame[Data, Var, V](apron: Apron,
                                             initData: Data,
@@ -22,8 +23,9 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
                                             makeIntVal: Texpr1Node => V,
                                             makeDoubleVal: Texpr1Node => V,
                                             initVars: Iterable[(Var, V)] = Iterable.empty)
-                                           (using Join[V], Widen[V])
-  extends MutableCallFrame[Data, Var, V, NoJoin] with DecidableCallFrame[Data, Var, V]:
+                                           (using Join[V], Widen[V], ClassTag[V])
+  extends DecidableMutableCallFrame[Data, Var, V](initData, initVars) :
+  //extends MutableCallFrame[Data, Var, V, NoJoin] with DecidableCallFrame[Data, Var, V]:
 
   import apron.*
 
@@ -46,12 +48,9 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
   }
 
-  private var _data: Data = initData
-  private var names: Map[Var, Int] = Map()
-
   private var boundVars: Map[Int, Val] = Map()
 
-  private def setVars(newVars: Iterable[(Var, V)]): Unit = {
+  override def setVars(newVars: Iterable[(Var, V)]): Unit = {
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
 
     var newBoundVars: Map[Int, Val] = Map()
