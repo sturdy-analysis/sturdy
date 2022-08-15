@@ -84,7 +84,7 @@ given ApronIntegerOps[B](using Numeric[B])
     max(v, neg(v))
 
   def safediv (v1:  Texpr1Node, v2: Texpr1Node): Texpr1BinNode =
-    Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
+    Texpr1BinNode(Texpr1BinNode.OP_DIV, Texpr1BinNode(Texpr1BinNode.OP_SUB,v1, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)),  v2)
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     val r = ap.freshConstraintVariable(s"$v1 / $v2")
     ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
