@@ -124,6 +124,11 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     assert(apron.getBound(intOps.div(intOps.integerLit(16), intOps.integerLit(4))) == Interval(4,4))
   }
 
+  test("Division : mod != 0 ") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.integerLit(3), intOps.integerLit(2))) == Interval(1, 1))
+  }
+
   test("Division : negative denominator") {
     val (intOps, apron) = instantiateIntOps()
     assert(apron.getBound(intOps.div(intOps.integerLit(2), intOps.integerLit(-2))) == Interval(-1,-1))
