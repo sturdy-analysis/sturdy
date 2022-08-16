@@ -207,6 +207,13 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+
+      // Least Environment Extending the two resulting environments
+      // TODO CHECK
+      val lceEnv = apronState.getEnvironment.lce(fState.getEnvironment)
+      apronState.changeEnvironment(apronManager, lceEnv, true)
+      fState.changeEnvironment(apronManager, lceEnv, true)
+
       fState.join(apronManager, apronState)
       apronState = fState
   })
