@@ -17,7 +17,6 @@ class Apron(val apronManager: Manager):
   /** global var count, currently unbounded */
   var apronVarCount: Int = 0
 
-
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
@@ -40,6 +39,7 @@ class Apron(val apronManager: Manager):
     constrain(makeConstraint(v, relOp))
 
   def constrain(c: Tcons1): Unit =
+    c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
@@ -65,11 +65,12 @@ class Apron(val apronManager: Manager):
     }
 
   def negateExpr(cond : Tcons1) : Tcons1 = cond.getKind match
-    case Tcons1.EQ => makeConstraint(cond.toTexpr1Node, Tcons1.DISEQ)
-    case Tcons1.DISEQ => makeConstraint(cond.toTexpr1Node, Tcons1.EQ)
-    case Tcons1.SUP => makeConstraint(Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node), Tcons1.SUPEQ)
-    case Tcons1.SUPEQ => makeConstraint(Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node), Tcons1.SUP)
+    case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
+    case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
+    case Tcons1.SUP => new Tcons1(cond.getEnvironment, Tcons1.SUPEQ, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
+    case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     case Tcons1.EQMOD => ??? // not useful
+
 
 given JoinTexpr1Node[W <: Widening] (using effects: EffectStack, ap: Apron): Combine[Texpr1Node, W] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
