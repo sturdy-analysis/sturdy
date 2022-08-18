@@ -39,7 +39,6 @@ class Apron(val apronManager: Manager):
     constrain(makeConstraint(v, relOp))
 
   def constrain(c: Tcons1): Unit =
-    c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
