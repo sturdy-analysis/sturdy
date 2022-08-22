@@ -70,17 +70,31 @@ class Apron(val apronManager: Manager):
     case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     case Tcons1.EQMOD => ??? // not useful
 
+  def joinWith(that: Abstract1, widen: Boolean): Unit =
+    apronEnv = apronEnv.lce(that.getEnvironment)
+    apronState.changeEnvironment(apronManager, apronEnv, false)
+    that.changeEnvironment(apronManager, apronEnv, false)
+    apronState.join(apronManager, that)
 
-given JoinTexpr1Node[W <: Widening] (using effects: EffectStack, ap: Apron): Combine[Texpr1Node, W] with
+  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
+    val x = freshConstraintVariable(s"join($v1, $v2)")
+    val snapshot = new Abstract1(apronManager, apronState)
+    val tried1 = TrySturdy(constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ))
+    val state1 = apronState
+    apronState = snapshot
+    val tried2 = TrySturdy(constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ))
+    if (tried1.isBottom || tried2.isBottom)
+      throw new IllegalStateException(s"Fresh constraint variable cannot lead to bottom")
+    joinWith(state1, widen)
+    val xBound = getBound(x)
+    val v1Bound = getBound(v1)
+    MaybeChanged(x, !xBound.isEqual(v1Bound))
+
+
+given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
-    val x = ap.freshConstraintVariable(s"join($v1, $v2)")
-    effects.joinComputations {
-      ap.constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
-      ()
-    } {
-      ap.constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
-      ()
-    }
-    val xBound = ap.getBound(x)
-    val v1Bound = ap.getBound(v1)
-    MaybeChanged(x, xBound.isEqual(v1Bound))
+    ap.joinValues(v1, v2, widen = false)
+
+given WideningTexpr1Node(using ap: Apron): Widen[Texpr1Node] with
+  def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
+    ap.joinValues(v1, v2, widen = true)

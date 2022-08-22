@@ -121,7 +121,7 @@ object RelationalAnalysis extends Interpreter,
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(apron.topInt))
 
     // TODO check
-    given Widen[VInt] = new JoinTexpr1Node[Widening.Yes]
+    given Widen[VInt] = new WideningTexpr1Node
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
