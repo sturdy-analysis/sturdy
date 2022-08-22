@@ -1,13 +1,11 @@
 package sturdy.apron
 
-import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1UnNode, Texpr1BinNode, Texpr1Intern, Texpr1Node, Texpr1VarNode, Var as ApronVar}
+import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1BinNode, Texpr1Intern, Texpr1Node, Texpr1UnNode, Texpr1VarNode, Var as ApronVar}
 import sturdy.data.CombineUnit
-import sturdy.effect.EffectStack
-import sturdy.effect.SturdyFailure
-import sturdy.values.Combine
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
-import sturdy.values.Widening
+import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy}
+import sturdy.values.{Combine, Join, MaybeChanged, Topped, Widen, Widening}
+
+import java.lang.IllegalStateException
 
 class Apron(val apronManager: Manager):
   override def toString: String = apronState.toString(apronManager)
@@ -52,6 +50,10 @@ class Apron(val apronManager: Manager):
     apronEnv = apronEnv.add(Array[ApronVar](newApronVar), Array.empty[ApronVar])
     apronState.changeEnvironment(apronManager, apronEnv, false)
     new Texpr1VarNode(newApronVar)
+
+  def ifThenElse[A](cond: Topped[Tcons1]) (ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
+    case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
+    case Topped.Top => effects.joinComputations (ifTrue)(ifFalse)
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
