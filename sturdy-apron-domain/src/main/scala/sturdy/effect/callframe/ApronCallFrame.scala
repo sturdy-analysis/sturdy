@@ -210,9 +210,9 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
 
       // Least Environment Extending the two resulting environments
       // TODO CHECK
-      val lceEnv = apronState.getEnvironment.lce(fState.getEnvironment)
-      apronState.changeEnvironment(apronManager, lceEnv, true)
-      fState.changeEnvironment(apronManager, lceEnv, true)
+      apronEnv = apronEnv.lce(fState.getEnvironment)
+      apronState.changeEnvironment(apronManager, apronEnv, false)
+      fState.changeEnvironment(apronManager, apronEnv, false)
 
       fState.join(apronManager, apronState)
       apronState = fState
