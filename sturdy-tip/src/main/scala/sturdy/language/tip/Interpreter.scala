@@ -73,9 +73,10 @@ trait Interpreter:
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
     new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
-  given ValueEqOps(using EqOps[VInt, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
+  given ValueEqOps(using EqOps[VInt, VBool], EqOps[VBool, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.equ(i1, i2))
+      case (BoolValue(i1), BoolValue(i2)) => Value.BoolValue(EqOps.equ(i1, i2))
       case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.equ(a1, a2))
       case (FunValue(f1), FunValue(f2)) => Value.BoolValue(EqOps.equ(f1, f2))
       case (RecValue(r1), RecValue(r2)) => Value.BoolValue(EqOps.equ(r1, r2))
@@ -83,6 +84,7 @@ trait Interpreter:
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     def neq(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.neq(i1, i2))
+      case (BoolValue(i1), BoolValue(i2)) => Value.BoolValue(EqOps.neq(i1, i2))
       case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.neq(a1, a2))
       case (FunValue(f1), FunValue(f2)) => Value.BoolValue(EqOps.neq(f1, f2))
       case (RecValue(r1), RecValue(r2)) => Value.BoolValue(EqOps.neq(r1, r2))
