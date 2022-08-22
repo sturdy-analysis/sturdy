@@ -43,7 +43,7 @@ trait Interpreter:
       case TopValue => topRecord
       case _ => inst.failure(TipFailure.TypeError, s"Expected Record but got $this")
 
-  def topInt: VInt
+  def topInt(using Instance): VInt
   def topFun(using Instance): VFun
   def topReference(using Instance): VRef
   def topRecord: VRecord

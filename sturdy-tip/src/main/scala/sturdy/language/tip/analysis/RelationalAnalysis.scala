@@ -43,19 +43,24 @@ object RelationalAnalysis extends Interpreter,
 
   override type J[A] = WithJoin[A]
   override type VInt = Texpr1Node
-  override type VBool = Tcons1
+  override type VBool = Topped[Tcons1]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
     case Value.BoolValue(b) => b
     case Value.IntValue(i) =>
-      // TODO Replace DISEQ
-      inst.apron.makeConstraint(i, Tcons1.DISEQ)
+     // TODO Replace DISEQ
+      Topped.Actual(inst.apron.makeConstraint(i, Tcons1.DISEQ))
     case Value.TopValue =>
-      inst.apron.makeConstraint(inst.apron.topInt, Tcons1.EQ)
+      Topped.Top
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
   final def asInt(v: Value)(using inst: Instance): VInt = v match
-    case Value.BoolValue(b) =>
+    case Value.BoolValue(Topped.Top) =>
+      import inst.{given_EffectStack, apron, failure}
+      given Failure = failure
+      val vIntOps = summon[IntegerOps[Int, VInt]]
+      Join(vIntOps.integerLit(1), vIntOps.integerLit(0)).get
+    case Value.BoolValue(Topped.Actual(b)) =>
       import inst.{given_EffectStack, apron, failure}
       given Failure = failure
       val vIntOps = summon[IntegerOps[Int, VInt]]
@@ -69,9 +74,8 @@ object RelationalAnalysis extends Interpreter,
       inst.apron.topInt
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
-  // TODO can't use inst.apron.TopInt without modifying the signature
-  override def topInt: Texpr1Node = ???
-  override def topBool : Tcons1 = ???
+  override def topInt(using inst: Instance): VInt = inst.apron.topInt
+  override def topBool: VBool = Topped.Top
 
   class Instance(apronManager: Manager, initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
