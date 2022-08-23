@@ -88,6 +88,18 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
+    given EqOps[VRef, VBool] with
+      override def equ(v1: Powerset[AllocationSiteRef], v2: Powerset[AllocationSiteRef]): Topped[Tcons1] = topBool
+      override def neq(v1: Powerset[AllocationSiteRef], v2: Powerset[AllocationSiteRef]): Topped[Tcons1] = topBool
+
+    given EqOps[VFun, VBool] with
+      override def equ(v1: Powerset[Function], v2: Powerset[Function]): Topped[Tcons1] = topBool
+      override def neq(v1: Powerset[Function], v2: Powerset[Function]): Topped[Tcons1] = topBool
+
+    given EqOps[VRecord, VBool] with
+      override def equ(v1: ARecord[Field, RelationalAnalysis.Value], v2: ARecord[Field, RelationalAnalysis.Value]): Topped[Tcons1] = topBool
+      override def neq(v1: ARecord[Field, RelationalAnalysis.Value], v2: ARecord[Field, RelationalAnalysis.Value]): Topped[Tcons1] = topBool
+
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
