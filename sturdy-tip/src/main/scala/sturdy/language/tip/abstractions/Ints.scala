@@ -12,7 +12,7 @@ object Ints:
     final type VBool = Topped[Boolean]
     final type VInt = NumericInterval[Int]
 
-    final def topInt: NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
+    final def topInt(using Instance): NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
     final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using inst: Instance): VBool = v match
@@ -34,7 +34,7 @@ object Ints:
     final type VBool = Topped[Boolean]
     final type VInt = IntSign
 
-    final def topInt: IntSign = IntSign.TopSign
+    final def topInt(using Instance): IntSign = IntSign.TopSign
     final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using inst: Instance): VBool = v match

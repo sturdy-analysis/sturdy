@@ -28,7 +28,7 @@ object ConcreteInterpreter extends Interpreter:
   override type VFun = Function
   override type VRecord = Map[Field, Value]
 
-  override def topInt: VInt = throw new UnsupportedOperationException
+  override def topInt(using Instance): VInt = throw new UnsupportedOperationException
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord: VRecord = throw new UnsupportedOperationException
