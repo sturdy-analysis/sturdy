@@ -7,3 +7,4 @@ object UnboundClass extends FailureKind
 object UnboundField extends FailureKind
 object ClassNotLoaded extends FailureKind
 object MethodNotLoaded extends FailureKind
+object TypeError extends FailureKind

@@ -28,7 +28,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers {
       parseJDK(classTable, runtimeTable)
       val program = parseAndLoad(p, classTable, runtimeTable)
 //      val refInterp = new ReferenceInterpreter
-      val concInterp = new ConcreteInterpreter
+//      val concInterp = new ConcreteInterpreter
 //      val resRef = fallible(refInterp.runProg(arg, program))
 //      val resConc = fallible(concInterp.runProg(arg, program))
 //      assertResult(resRef)(resConc)
