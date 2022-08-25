@@ -19,13 +19,15 @@ class Apron(val apronManager: Manager):
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
 
-  private val topIntVar: ApronVar = new StringVar("topInt")
-  def topInt: Texpr1Node =
+  // private val topIntVar: ApronVar = new StringVar("topInt")
+  def topInt: Texpr1Node = freshConstraintVariable("topInt")
+  /*
     if (!apronEnv.hasVar(topIntVar)) {
       apronEnv = apronEnv.add(Array[ApronVar](topIntVar), Array.empty[ApronVar])
       apronState.changeEnvironment(apronManager, apronEnv, false)
     }
     new Texpr1VarNode(topIntVar)
+  */
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)

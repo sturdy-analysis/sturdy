@@ -17,7 +17,7 @@ import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
-import sturdy.effect.userinput.AUserInput
+import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.apron.{Apron, given}
 import sturdy.fix
 import sturdy.fix.StackConfig
@@ -121,7 +121,7 @@ object RelationalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(apron.topInt))
+    override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value]({Value.IntValue(apron.freshConstraintVariable(s"UserInput${apron.apronVarCount}"))})
 
     // TODO check
     given Widen[VInt] = new WideningTexpr1Node
