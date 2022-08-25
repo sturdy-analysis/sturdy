@@ -53,23 +53,41 @@ class Apron(val apronManager: Manager):
     apronState.changeEnvironment(apronManager, apronEnv, false)
     new Texpr1VarNode(newApronVar)
 
-  def ifThenElse[A](cond: Topped[Tcons1]) (ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
+  def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =
+    val supCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node)
+    val infCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
+    effects.joinComputations {
+      constrain(supCond)
+      block
+    } {
+      constrain(infCond)
+      block
+    }
+
+  def ifThenElse[A](cond: Topped[Tcons1])(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
+    case Topped.Top => effects.joinComputations(ifTrue)(ifFalse)
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
-    case Topped.Top => effects.joinComputations (ifTrue)(ifFalse)
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
-      constrain(cond)
-      ifTrue
+      cond.getKind match
+        case Tcons1.DISEQ => joinDISEQ(cond, ifTrue)
+        case _ =>
+          constrain(cond)
+          ifTrue
+
     } {
       val notCond = negateExpr(cond)
-      constrain(notCond)
-      ifFalse
+      notCond.getKind match
+        case Tcons1.DISEQ => joinDISEQ(notCond, ifFalse)
+        case _ =>
+          constrain(notCond)
+          ifFalse
     }
 
   def negateExpr(cond : Tcons1) : Tcons1 = cond.getKind match
     case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
-    case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
+    case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
     case Tcons1.SUP => new Tcons1(cond.getEnvironment, Tcons1.SUPEQ, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     case Tcons1.EQMOD => ??? // not useful
