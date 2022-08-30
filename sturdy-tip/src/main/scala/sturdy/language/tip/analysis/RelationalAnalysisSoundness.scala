@@ -13,6 +13,10 @@ import sturdy.values.references.{*, given}
 import sturdy.values.*
 import sturdy.{*, given}
 
+//    given AbstractlyRelationalBoolean(using ap: Apron): Abstractly[Boolean, Topped[Tcons1]] with
+//      override def apply(c: Boolean): Topped[Tcons1] = ???
+    
+
 object RelationalAnalysisSoundness:
   given addrAbstractly(using calloc: CAllocationIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
     new AllocationContextAbstractly(calloc, fromAllocationSite)

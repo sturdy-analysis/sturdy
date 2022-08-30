@@ -1,9 +1,11 @@
 package sturdy.apron
 
-import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1BinNode, Texpr1Intern, Texpr1Node, Texpr1UnNode, Texpr1VarNode, Var as ApronVar}
+import apron.MpqScalar
+import apron.Texpr1CstNode
+import apron.{Texpr0UnNode, Environment, Texpr1UnNode, Interval, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
 import sturdy.data.CombineUnit
-import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy}
-import sturdy.values.{Combine, Join, MaybeChanged, Topped, Widen, Widening}
+import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy, CombineTrySturdy}
+import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
 
 import java.lang.IllegalStateException
 
@@ -34,6 +36,9 @@ class Apron(val apronManager: Manager):
 
   def makeConstraint(v: Texpr1Node, relOp: Int): Tcons1 =
     new Tcons1(apronEnv, relOp, v)
+
+  def makeConstantConstraint(b: Boolean): Tcons1 =
+    new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
 
   def constrain(v: Texpr1Node, relOp: Int): Unit =
     constrain(makeConstraint(v, relOp))
@@ -85,6 +90,35 @@ class Apron(val apronManager: Manager):
           ifFalse
     }
 
+  def ifThenElsePure[A](cond: Tcons1)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+    val snapshot = new Abstract1(apronManager, apronState)
+    val res1 = TrySturdy {
+      constrain(cond)
+      ifTrue
+    }
+    val state1 = apronState
+    apronState = snapshot
+    val res2 = TrySturdy {
+      constrain(negateExpr(cond))
+      ifFalse
+    }
+    (res1.isBottom, res2.isBottom) match
+      case (false, false) =>
+        apronEnv = apronEnv.lce(state1.getEnvironment)
+        apronState.changeEnvironment(apronManager, apronEnv, false)
+        state1.changeEnvironment(apronManager, apronEnv, false)
+        state1.join(apronManager, apronState)
+        apronState = state1
+      case (false, true) =>
+        apronState = state1
+      case (true, false) =>
+        // nothing
+      case (true, true) =>
+        apronState = snapshot
+
+    Join(res1, res2).get.getOrThrow
+
+
   def negateExpr(cond : Tcons1) : Tcons1 = cond.getKind match
     case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
     case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
@@ -96,7 +130,10 @@ class Apron(val apronManager: Manager):
     apronEnv = apronEnv.lce(that.getEnvironment)
     apronState.changeEnvironment(apronManager, apronEnv, false)
     that.changeEnvironment(apronManager, apronEnv, false)
-    apronState.join(apronManager, that)
+    if (widen)
+      apronState.widening(apronManager, that)
+    else
+      apronState.join(apronManager, that)
 
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
     val x = freshConstraintVariable(s"join($v1, $v2)")

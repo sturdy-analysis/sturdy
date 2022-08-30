@@ -64,11 +64,7 @@ object RelationalAnalysis extends Interpreter,
       import inst.{given_EffectStack, apron, failure}
       given Failure = failure
       val vIntOps = summon[IntegerOps[Int, VInt]]
-      inst.apron.ifThenElse(b) {
-        vIntOps.integerLit(1)
-      } {
-        vIntOps.integerLit(0)
-      }
+      inst.apron.ifThenElsePure(b)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
     case Value.IntValue(i) => i
     case Value.TopValue =>
       inst.apron.topInt
@@ -88,17 +84,9 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given EqOps[VRef, VBool] with
-      override def equ(v1: Powerset[AllocationSiteRef], v2: Powerset[AllocationSiteRef]): Topped[Tcons1] = topBool
-      override def neq(v1: Powerset[AllocationSiteRef], v2: Powerset[AllocationSiteRef]): Topped[Tcons1] = topBool
-
-    given EqOps[VFun, VBool] with
-      override def equ(v1: Powerset[Function], v2: Powerset[Function]): Topped[Tcons1] = topBool
-      override def neq(v1: Powerset[Function], v2: Powerset[Function]): Topped[Tcons1] = topBool
-
-    given EqOps[VRecord, VBool] with
-      override def equ(v1: ARecord[Field, RelationalAnalysis.Value], v2: ARecord[Field, RelationalAnalysis.Value]): Topped[Tcons1] = topBool
-      override def neq(v1: ARecord[Field, RelationalAnalysis.Value], v2: ARecord[Field, RelationalAnalysis.Value]): Topped[Tcons1] = topBool
+    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
+    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
+    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
 
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly

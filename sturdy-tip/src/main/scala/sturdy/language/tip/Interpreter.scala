@@ -76,7 +76,8 @@ trait Interpreter:
   given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.equ(i1, i2))
-      //case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.equ(a1, a2))
+      //case (BoolValue(i1), BoolValue(i2)) => Value.TopValue
+      case (RefValue(a1), RefValue(a2)) => Value.BoolValue(EqOps.equ(a1, a2))
       case (FunValue(f1), FunValue(f2)) => Value.BoolValue(EqOps.equ(f1, f2))
       case (RecValue(r1), RecValue(r2)) => Value.BoolValue(EqOps.equ(r1, r2))
       case (TopValue, _) | (_, TopValue) => Value.BoolValue(topBool)
@@ -97,7 +98,7 @@ trait Interpreter:
     new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)
   given ValueBranchingOps(using Instance, BooleanBranching[VBool, Unit]): BooleanBranching[Value, Unit] =
     new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean)
-  given ValueBooleanSelection(using Instance, BooleanSelection[VBool, VBool]): BooleanSelection[Value, VBool] =
+  given ValueBooleanSelection[R](using Instance, BooleanSelection[VBool, R]): BooleanSelection[Value, R] =
     new LiftedBooleanSelection(_.asBoolean)
 
   type Instance <: GenericInstance
