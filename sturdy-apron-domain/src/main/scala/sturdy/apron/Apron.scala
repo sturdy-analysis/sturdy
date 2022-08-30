@@ -21,7 +21,7 @@ class Apron(val apronManager: Manager):
   def apronEnv: Environment = apronState.getEnvironment
 
   def addDoubleVariable(name: String): StringVar =
-    val cname = s"apronD_${name}_$_apronVarCount"
+    val cname = s"D${name}_$_apronVarCount"
     val v = new StringVar(cname)
     if (!apronEnv.hasVar(v)) {
       _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
@@ -32,7 +32,7 @@ class Apron(val apronManager: Manager):
     v
 
   def addIntVariable(name: String): StringVar =
-    val cname = s"apronI_${name}_$_apronVarCount"
+    val cname = s"I${name}_$_apronVarCount"
     val v = new StringVar(cname)
     if (!apronEnv.hasVar(v)) {
       _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
@@ -80,6 +80,8 @@ class Apron(val apronManager: Manager):
     constrain(makeConstraint(v, relOp))
 
   def constrain(c: Tcons1): Unit =
+    if (apronState.isBottom(apronManager))
+      throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
     if (!apronEnv.isEqual(apronState.getEnvironment))
       throw new IllegalStateException()
     apronState.meet(apronManager, c)
@@ -87,7 +89,7 @@ class Apron(val apronManager: Manager):
       throw new SturdyFailure {}
 
   def assign(name: String, expr: Linexpr1): Unit =
-    // TODO
+    // TODO ???
     // strong update: overwrite old value
     // weak update: join with old
     apronState.assign(apronManager, name, expr, null)
@@ -128,23 +130,30 @@ class Apron(val apronManager: Manager):
           ifFalse
     }
 
-  def ifThenElsePure[A](cond: Tcons1)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+  def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean = true)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+    ifThenElsePure(condTrue, negateExpr(condTrue), widen)(ifTrue)(ifFalse)
+
+  def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = new Abstract1(apronManager, apronState)
     val res1 = TrySturdy {
-      constrain(cond)
+      constrain(condTrue)
       ifTrue
     }
     val state1 = apronState
     apronState = snapshot
     val res2 = TrySturdy {
-      constrain(negateExpr(cond))
+      constrain(condFalse)
       ifFalse
     }
     (res1.isBottom, res2.isBottom) match
       case (false, false) =>
         setLeastExtendingEnvironment(state1)
-        state1.join(apronManager, apronState)
-        apronState = state1
+        if (widen)
+          apronState = state1.widening(apronManager, apronState)
+        else {
+          state1.join(apronManager, apronState)
+          apronState = state1
+        }
       case (false, true) =>
         apronState = state1
       case (true, false) =>
@@ -162,26 +171,12 @@ class Apron(val apronManager: Manager):
     case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     case Tcons1.EQMOD => ??? // not useful
 
-  def joinWith(that: Abstract1, widen: Boolean): Unit =
-    setLeastExtendingEnvironment(that)
-    if (widen)
-      apronState.widening(apronManager, that)
-    else
-      apronState.join(apronManager, that)
-
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
-    if (v1.isEqual(v2))
-      return MaybeChanged.Unchanged(v1)
-
     val x = freshConstraintVariable(s"join")
-    val snapshot = new Abstract1(apronManager, apronState)
-    val tried1 = TrySturdy(constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ))
-    val state1 = apronState
-    apronState = snapshot
-    val tried2 = TrySturdy(constrain(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ))
-    if (tried1.isBottom || tried2.isBottom)
-      throw new IllegalStateException(s"Fresh constraint variable cannot lead to bottom")
-    joinWith(state1, widen)
+    val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
+    val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
+    ifThenElsePure(v1Cons, v2Cons, widen)(())(())
+
     val xBound = getBound(x)
     val v1Bound = getBound(v1)
     MaybeChanged(x, !xBound.isEqual(v1Bound))

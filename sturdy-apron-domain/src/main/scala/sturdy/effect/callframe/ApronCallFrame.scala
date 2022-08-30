@@ -143,8 +143,8 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
   override def setState(st: State): Unit =
     // TODO do we loose too much precision here?
     //    joinWith(st._1, false)
-    println(s"Old state $apronState")
-    println(s"New state ${st._1}")
+//    println(s"Old state $apronState")
+//    println(s"New state ${st._1}")
     setLeastExtendingEnvironment(st._1)
     apronState = st._1
     this.boundVars = st._2
