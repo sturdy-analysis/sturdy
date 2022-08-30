@@ -34,18 +34,36 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     case Double(v: ApronVar)
     case Other(v: V)
 
+    def asV: V = this match
+      case Int(v) => makeIntVal(Texpr1VarNode(v))
+      case Double(v) => makeIntVal(Texpr1VarNode(v))
+      case Other(v) => v
+  object Val:
+    def from(v: V): Val =
+      getIntVal(v) match
+        case Some(exp) =>
+          val av = addIntVariable("foo")
+          val expIntern = new Texpr1Intern(apronEnv, exp)
+          apronState.assign(apronManager, av, expIntern, null)
+          Val.Int(av)
+        case _ => getDoubleVal(v) match
+          case Some(exp) =>
+            val av = addDoubleVariable("foo")
+            val expIntern = new Texpr1Intern(apronEnv, exp)
+            apronState.assign(apronManager, av, expIntern, null)
+            Val.Double(av)
+          case _ => Other(v)
+
   given Join[Val] = {
     case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
     case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
-    case (Val.Other(v1), Val.Other(v2)) => Join(v1, v2).map(Val.Other.apply)
-    case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
+    case (v1, v2) => Join(v1.asV, v2.asV).map(Val.from)
   }
 
   given Widen[Val] = {
     case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
     case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
-    case (Val.Other(v1), Val.Other(v2)) => Widen(v1, v2).map(Val.Other.apply)
-    case (v1, v2) => throw new Exception(s"Cannot join $v1 and $v2")
+    case (v1, v2) => Widen(v1.asV, v2.asV).map(Val.from)
   }
 
   private var boundVars: Map[Int, Val] = Map()
