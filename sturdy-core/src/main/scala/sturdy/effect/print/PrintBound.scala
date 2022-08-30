@@ -15,7 +15,8 @@ class PrintBound[A](using Join[A], Widen[A]) extends Print[A], Monotone:
 
   override type State = Option[A]
   override def getState: Option[A] = symbol
-  override def setState(st: Option[A]): Unit = symbol = st
+  override def setState(st: Option[A]): Unit =
+    symbol = st
 
   def combineSymbols(v1: Option[A], v2: Option[A], comb: (A, A) => MaybeChanged[A]): MaybeChanged[Option[A]] = (v1, v2) match
     case (None, None) => Unchanged(None)

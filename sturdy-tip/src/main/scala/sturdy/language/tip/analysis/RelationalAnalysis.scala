@@ -109,7 +109,8 @@ object RelationalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value]({Value.IntValue(apron.freshConstraintVariable(s"UserInput${apron.apronVarCount}"))})
+    override val input: AUserInputFun[Value] =
+      new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(apron.topInt))
 
     // TODO check
     given Widen[VInt] = new WideningTexpr1Node

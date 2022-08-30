@@ -54,31 +54,23 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
 
     var newBoundVars: Map[Int, Val] = Map()
-    val newApronIntVars: ListBuffer[ApronVar] = ListBuffer()
-    val newApronDoubleVars: ListBuffer[ApronVar] = ListBuffer()
     val newApronAssignments: ListBuffer[(ApronVar, Texpr1Node)] = ListBuffer()
 
     newVars.zipWithIndex.foreach { case ((x, v), ix) =>
       getIntVal(v) match
         case Some(exp) =>
-          val av = new StringVar(s"apronI_${apronVarCount}_$x")
-          apronVarCount += 1
-          newApronIntVars += av
+          val av = addIntVariable(x.toString)
           newApronAssignments += av -> exp
           newBoundVars += ix -> Val.Int(av)
         case None => getDoubleVal(v) match
           case Some(exp) =>
-            val av = new StringVar(s"apronD_${apronVarCount}_$x")
-            apronVarCount += 1
-            newApronDoubleVars += av
+            val av = addDoubleVariable(x.toString)
             newApronAssignments += av -> exp
             newBoundVars += ix -> Val.Double(av)
           case None =>
             newBoundVars += ix -> Val.Other(v)
     }
     boundVars = newBoundVars
-    apronEnv = apronEnv.add(newApronIntVars.toArray, Array.empty[ApronVar])
-    apronState.changeEnvironment(apronManager, apronEnv, false)
     newApronAssignments.foreach { case (av, exp) =>
       val vIntern = new Texpr1Intern(apronEnv, exp)
       apronState.assign(apronManager, av, vIntern, null)
@@ -121,44 +113,18 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
         oldVal match
           case Val.Int(av) =>
             apronState.assign(apronManager, av, vIntern, null)
-          case Val.Double(av) =>
-            val intVar = new StringVar("apronI" + av.toString.substring("apronD".length))
-            if (!apronEnv.hasVar(intVar)) {
-              apronEnv = apronEnv.add(Array[ApronVar](intVar), null)
-              apronState.changeEnvironment(apronManager, apronEnv, false)
-            }
-            apronState.assign(apronManager, intVar, vIntern, null)
-            boundVars += x -> Val.Int(intVar)
-          case Val.Other(_) =>
-            val intVar = new StringVar(s"apronI_${apronVarCount}_$x")
-            apronVarCount += 1
-            if (!apronEnv.hasVar(intVar)) {
-              apronEnv = apronEnv.add(Array[ApronVar](intVar), null)
-              apronState.changeEnvironment(apronManager, apronEnv, false)
-            }
+          case _ =>
+            val intVar = apron.addIntVariable(x.toString)
             apronState.assign(apronManager, intVar, vIntern, null)
             boundVars += x -> Val.Int(intVar)
       case None => getDoubleVal(v) match
         case Some(exp) =>
           val vIntern = new Texpr1Intern(apronEnv, exp)
           oldVal match
-            case Val.Int(av) =>
-              val doubleVar = new StringVar("apronD" + av.toString.substring("apronI".length))
-              if (!apronEnv.hasVar(doubleVar)) {
-                apronEnv = apronEnv.add(null, Array[ApronVar](doubleVar))
-                apronState.changeEnvironment(apronManager, apronEnv, false)
-              }
-              apronState.assign(apronManager, doubleVar, vIntern, null)
-              boundVars += x -> Val.Double(doubleVar)
             case Val.Double(av) =>
               apronState.assign(apronManager, av, vIntern, null)
-            case Val.Other(_) =>
-              val doubleVar = new StringVar(s"apronD_${apronVarCount}_$x")
-              apronVarCount += 1
-              if (!apronEnv.hasVar(doubleVar)) {
-                apronEnv = apronEnv.add(null, Array[ApronVar](doubleVar))
-                apronState.changeEnvironment(apronManager, apronEnv, false)
-              }
+            case _ =>
+              val doubleVar = apron.addDoubleVariable(x.toString)
               apronState.assign(apronManager, doubleVar, vIntern, null)
               boundVars += x -> Val.Double(doubleVar)
         case None =>
@@ -175,19 +141,32 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     (new Abstract1(apronManager, apronState), boundVars)
 
   override def setState(st: State): Unit =
+    // TODO do we loose too much precision here?
+    //    joinWith(st._1, false)
+    println(s"Old state $apronState")
+    println(s"New state ${st._1}")
+    setLeastExtendingEnvironment(st._1)
     apronState = st._1
     this.boundVars = st._2
 
   override def join: Join[State] = (s1, s2) => {
-    val joinedState = s1._1.joinCopy(apronManager, s2._1)
+    val lce = s1._1.getEnvironment.lce(s2._1.getEnvironment)
+    val state1 = s1._1.changeEnvironmentCopy(apronManager, lce, false)
+    val state2 = s2._1.changeEnvironmentCopy(apronManager, lce, false)
+    val joined = state1.joinCopy(apronManager, state2)
     val MaybeChanged(joinedBoundVars, changedBoundVars) = Join(s1._2, s2._2)
-    MaybeChanged((joinedState, joinedBoundVars), changedBoundVars || s1._1.isEqual(apronManager, joinedState))
+    val changed = changedBoundVars || !joined.isEqual(apronManager, state1)
+    MaybeChanged((joined, joinedBoundVars), changed)
   }
   override def widen: Widen[State] = (s1, s2) => {
-    val widenedState = s1._1.widening(apronManager, s2._1)
+    val lce = s1._1.getEnvironment.lce(s2._1.getEnvironment)
+    val state1 = s1._1.changeEnvironmentCopy(apronManager, lce, false)
+    val state2 = s2._1.changeEnvironmentCopy(apronManager, lce, false)
+    val widened = state1.widening(apronManager, state2)
     given Finite[Int] with {}
     val MaybeChanged(widenedBoundVars, changedBoundVars) = Widen(s1._2, s2._2)
-    MaybeChanged((widenedState, widenedBoundVars), changedBoundVars || s1._1.isEqual(apronManager, widenedState))
+    val changed = changedBoundVars || !widened.isEqual(apronManager, state1)
+    MaybeChanged((state1, widenedBoundVars), changed)
   }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {
@@ -210,10 +189,7 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
 
       // Least Environment Extending the two resulting environments
       // TODO CHECK
-      apronEnv = apronEnv.lce(fState.getEnvironment)
-      apronState.changeEnvironment(apronManager, apronEnv, false)
-      fState.changeEnvironment(apronManager, apronEnv, false)
-
+      setLeastExtendingEnvironment(fState)
       fState.join(apronManager, apronState)
       apronState = fState
   })
