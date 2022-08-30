@@ -1,20 +1,21 @@
 package sturdy.language.tip.analysis
 
-import apron.{Polka, Texpr1Node}
-import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import apron.{Texpr1Node, Polka}
+import cats.parse.{Numbers, Parser0 as P0, Parser as P}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.{*, given}
 import sturdy.data.given
 import sturdy.Soundness
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.{AFallible, afallibleAbstractly, falliblePO, given}
+import sturdy.effect.failure.{AFallible, falliblePO, afallibleAbstractly, given}
 import sturdy.effect.print.given
 import sturdy.fix.StackConfig
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.abstractions.isFunOrWhile
 import sturdy.language.tip.*
-import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
+import sturdy.util.{Profiler, Labeled, LinearStateOperationCounter}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
@@ -23,10 +24,10 @@ import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths, Files}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.util.{Failure, Success, Try}
+import scala.util.{Try, Success, Failure}
 
 class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
@@ -86,11 +87,9 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
       println(s"CONCRETE : $cresult")
       println(s"ABSTRACT : $aresult")
-      (aresult, analysis)
-    } else {
-        null
-      }
-/*
+
+      val soundness = new RelationalAnalysisSoundness(analysis.apron)
+      import soundness.given
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       (aresult, analysis)
@@ -98,4 +97,3 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       null
     }
 
-*/

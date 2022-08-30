@@ -1,31 +1,31 @@
-/*
 package sturdy.language.tip.analysis
 
+import sturdy.apron.Apron
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
 import sturdy.language.tip.analysis.RelationalAnalysis.*
-import sturdy.language.tip.{AllocationSite, ConcreteInterpreter, Field, Function}
+import sturdy.language.tip.{Field, Function, ConcreteInterpreter, AllocationSite}
 import sturdy.util.{*, given}
 import sturdy.values.Topped.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.*
+import sturdy.values.{*, given}
 import sturdy.{*, given}
+import _root_.apron.Texpr1CstNode
+import _root_.apron.MpqScalar
 
-//    given AbstractlyRelationalBoolean(using ap: Apron): Abstractly[Boolean, Topped[Tcons1]] with
-//      override def apply(c: Boolean): Topped[Tcons1] = ???
-    
+class RelationalAnalysisSoundness(_apron: Apron):
+  implicit val apron: Apron = _apron
 
-object RelationalAnalysisSoundness:
   given addrAbstractly(using calloc: CAllocationIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
     new AllocationContextAbstractly(calloc, fromAllocationSite)
 
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Abstractly(b))
-      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Abstractly(i))
+      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Topped.Actual(apron.makeConstantConstraint(b)))
+      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(new Texpr1CstNode(new MpqScalar(i)))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
         case Some(ca) => Value.RefValue(Abstractly(ca).map(AllocationSiteRef.Addr.apply))
@@ -50,5 +50,3 @@ object RelationalAnalysisSoundness:
       a.store.storeIsSound(c.store) &&
       a.print.isSound(c.print)
     }
-
-*/
