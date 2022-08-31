@@ -139,6 +139,7 @@ class Apron(val apronManager: Manager):
       constrain(condTrue)
       ifTrue
     }
+    setLeastExtendingEnvironment(snapshot)
     val state1 = apronState
     apronState = snapshot
     val res2 = TrySturdy {
@@ -172,7 +173,7 @@ class Apron(val apronManager: Manager):
     case Tcons1.EQMOD => ??? // not useful
 
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
-    val x = freshConstraintVariable(s"join")
+    val x = freshConstraintVariable(if (widen) "widen" else "join")
     val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
     val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
     ifThenElsePure(v1Cons, v2Cons, widen)(())(())

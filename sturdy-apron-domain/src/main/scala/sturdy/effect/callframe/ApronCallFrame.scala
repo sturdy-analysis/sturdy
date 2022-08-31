@@ -161,10 +161,10 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
   override def setState(st: State): Unit =
     // TODO do we loose too much precision here?
     //    joinWith(st._1, false)
-//    println(s"Old state $apronState")
-//    println(s"New state ${st._1}")
+//    println(s"Old state $apron")
     setLeastExtendingEnvironment(st._1)
     apronState = st._1
+//    println(s"New state $apron")
     this.boundVars = st._2
 
   override def join: Join[State] = (s1, s2) => {
@@ -192,6 +192,7 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     private var fState: Abstract1 = _
 
     override def inbetween(): Unit =
+      setLeastExtendingEnvironment(snapshot)
       fState = apronState
       apronState = snapshot
 
@@ -204,9 +205,6 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-
-      // Least Environment Extending the two resulting environments
-      // TODO CHECK
       setLeastExtendingEnvironment(fState)
       fState.join(apronManager, apronState)
       apronState = fState
