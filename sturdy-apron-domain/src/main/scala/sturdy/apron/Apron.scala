@@ -7,6 +7,7 @@ import sturdy.data.CombineUnit
 import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy, CombineTrySturdy}
 import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
 
+import java.lang
 import java.lang.IllegalStateException
 
 val APRON_VAR_COUNT_LIMIT = 10
@@ -74,6 +75,8 @@ class Apron(val apronManager: Manager):
   def constrain(c: Tcons1): Unit =
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
+    if(c.getKind == Tcons1.DISEQ)
+      throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
     c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
