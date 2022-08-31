@@ -12,7 +12,8 @@ import java.lang.IllegalStateException
 val APRON_VAR_COUNT_LIMIT = 10
 
 class Apron(val apronManager: Manager):
-  override def toString: String = apronState.toString(apronManager)
+  override def toString: String =
+    apronEnv.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
 
   var apronState: Abstract1 = new Abstract1(apronManager, new Environment())
   /** global var count, currently unbounded */
@@ -82,8 +83,7 @@ class Apron(val apronManager: Manager):
   def constrain(c: Tcons1): Unit =
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
-    if (!apronEnv.isEqual(apronState.getEnvironment))
-      throw new IllegalStateException()
+    c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
