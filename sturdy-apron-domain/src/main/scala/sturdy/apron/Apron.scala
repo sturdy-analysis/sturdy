@@ -1,17 +1,15 @@
 package sturdy.apron
 
-import apron.MpqScalar
-import apron.Texpr1CstNode
-import apron.{Texpr0UnNode, Environment, Texpr1UnNode, Interval, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
+import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, MpqScalar, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1BinNode, Texpr1CstNode, Texpr1Intern, Texpr1Node, Texpr1UnNode, Texpr1VarNode, Var as ApronVar}
 import sturdy.data.CombineUnit
-import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy, CombineTrySturdy}
-import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
+import sturdy.effect.{CombineTrySturdy, EffectStack, SturdyFailure, TrySturdy}
+import sturdy.values.{Combine, Join, MaybeChanged, Topped, Widen, Widening}
 
 import java.lang.IllegalStateException
 
 val APRON_VAR_COUNT_LIMIT = 10
 
-class Apron(val apronManager: Manager):
+class Apron(val apronManager: Manager, val alloc: ApronAlloc):
   override def toString: String =
     apronEnv.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
 
@@ -20,33 +18,6 @@ class Apron(val apronManager: Manager):
   private var _apronVarCount: Int = 0
 
   def apronEnv: Environment = apronState.getEnvironment
-
-  def addDoubleVariable(name: String): StringVar =
-    val cname = s"D${name}_$_apronVarCount"
-    val v = new StringVar(cname)
-    if (!apronEnv.hasVar(v)) {
-      _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
-      setEnvironment(apronEnv.add(null, Array[ApronVar](v)))
-    }
-    if (!apronState.getEnvironment.hasVar(cname))
-      throw new IllegalStateException()
-    v
-
-  def addIntVariable(name: String): StringVar =
-    val cname = s"I${name}_$_apronVarCount"
-    val v = new StringVar(cname)
-    if (!apronEnv.hasVar(v)) {
-      _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
-      setEnvironment(apronEnv.add(Array[ApronVar](v), null))
-    }
-    if (!apronState.getEnvironment.hasVar(cname))
-      throw new IllegalStateException()
-    v
-
-  def setEnvironment(newEnv: Environment): Unit =
-    if (!apronEnv.getVars.toSet.subsetOf(newEnv.getVars.toSet))
-      throw new IllegalStateException()
-    apronState.changeEnvironment(apronManager, newEnv, false)
 
   def setLeastExtendingEnvironment(other: Abstract1): Unit = {
     val lce = apronEnv.lce(other.getEnvironment)
@@ -67,6 +38,12 @@ class Apron(val apronManager: Manager):
     }
     new Texpr1VarNode(topIntVar)
   */
+
+  def addDoubleVariable(name: String): ApronVar =
+    alloc.addDoubleVariable(name, apronState)
+
+  def addIntVariable(name: String): ApronVar =
+    alloc.addIntVariable(name, apronState)
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
@@ -95,7 +72,7 @@ class Apron(val apronManager: Manager):
     apronState.assign(apronManager, name, expr, null)
 
   def freshConstraintVariable(purpose: String): Texpr1VarNode =
-    val newApronVar = addIntVariable(purpose)
+    val newApronVar = alloc.addIntVariable(purpose, apronState)
     new Texpr1VarNode(newApronVar)
 
   def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =

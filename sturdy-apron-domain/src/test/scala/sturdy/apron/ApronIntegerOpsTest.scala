@@ -22,7 +22,8 @@ class ApronIntegerOpsTest extends AnyFunSuite:
   def instantiateIntOps() : (ApronIntegerOps[Int], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")

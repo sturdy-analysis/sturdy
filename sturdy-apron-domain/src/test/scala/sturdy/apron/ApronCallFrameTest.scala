@@ -33,7 +33,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame bound vars after frame push and pop") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
@@ -58,7 +59,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame z = x + y") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
@@ -84,7 +86,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x + y) join (z = x - y)") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
@@ -117,7 +120,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
@@ -160,7 +164,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 20) unreachable else true") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")
@@ -202,7 +207,8 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 5) false else true") {
     val manager = new Polka(false)
-    implicit val apron: Apron = new Apron(manager)
+    val alloc = new ApronAllocRoundRobin(manager)
+    implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: IntApronCallFrame[String, String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
     callFrame = new IntApronCallFrame(apron, "initial call frame")

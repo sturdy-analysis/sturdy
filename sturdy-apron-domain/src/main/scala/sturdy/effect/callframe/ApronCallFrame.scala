@@ -132,7 +132,7 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
           case Val.Int(av) =>
             apronState.assign(apronManager, av, vIntern, null)
           case _ =>
-            val intVar = apron.addIntVariable(x.toString)
+            val intVar = addIntVariable(x.toString)
             apronState.assign(apronManager, intVar, vIntern, null)
             boundVars += x -> Val.Int(intVar)
       case None => getDoubleVal(v) match
@@ -142,7 +142,7 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
             case Val.Double(av) =>
               apronState.assign(apronManager, av, vIntern, null)
             case _ =>
-              val doubleVar = apron.addDoubleVariable(x.toString)
+              val doubleVar = addDoubleVariable(x.toString)
               apronState.assign(apronManager, doubleVar, vIntern, null)
               boundVars += x -> Val.Double(doubleVar)
         case None =>
