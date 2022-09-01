@@ -7,9 +7,8 @@ import sturdy.effect.Stateful
 import sturdy.effect.{EffectStack, SturdyFailure, CombineTrySturdy, TrySturdy}
 import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
 
+import java.lang
 import java.lang.IllegalStateException
-
-val APRON_VAR_COUNT_LIMIT = 10
 
 class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   override def toString: String =
@@ -31,13 +30,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
 
   private val topIntVar: ApronVar = addIntVariable("topInt")
   def topInt: Texpr1Node = new Texpr1VarNode(topIntVar)
-  /*
-    if (!apronEnv.hasVar(topIntVar)) {
-      apronEnv = apronEnv.add(Array[ApronVar](topIntVar), Array.empty[ApronVar])
-      apronState.changeEnvironment(apronManager, apronEnv, false)
-    }
-    new Texpr1VarNode(topIntVar)
-  */
 
   def addDoubleVariable(name: String): ApronVar =
     alloc.addDoubleVariable(name, apronState)
@@ -54,12 +46,34 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   def makeConstantConstraint(b: Boolean): Tcons1 =
     new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
 
-  def constrain(v: Texpr1Node, relOp: Int): Unit =
-    constrain(makeConstraint(v, relOp))
+  def constrainPure[A](c: Tcons1)(a: A): Join[A] ?=> A =
+    if (c.getKind == Tcons1.DISEQ) {
+      val supCond = new Tcons1(c.getEnvironment, Tcons1.SUP, c.toTexpr1Node)
+      val infCond = new Tcons1(c.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, c.toTexpr1Node))
+      ifThenElsePure(supCond, infCond, widen = false)(a)(a)
+    } else {
+      assertConstrain(c)
+      a
+    }
 
-  def constrain(c: Tcons1): Unit =
+  def constrain[A](c: Tcons1)(a: => A)(using EffectStack): Join[A] ?=> A =
+    if (c.getKind == Tcons1.DISEQ) {
+      val supCond = new Tcons1(c.getEnvironment, Tcons1.SUP, c.toTexpr1Node)
+      val infCond = new Tcons1(c.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, c.toTexpr1Node))
+      ifThenElse(supCond, infCond)(a)(a)
+    } else {
+      assertConstrain(c)
+      a
+    }
+
+  def assertConstrain(v: Texpr1Node, relOp: Int): Unit =
+    assertConstrain(makeConstraint(v, relOp))
+
+  def assertConstrain(c: Tcons1): Unit =
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
+    if(c.getKind == Tcons1.DISEQ)
+      throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
     c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
@@ -86,54 +100,31 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     val newApronVar = alloc.addIntVariable(purpose, apronState)
     new Texpr1VarNode(newApronVar)
 
-  def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =
-    val supCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node)
-    val infCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
+  def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
+    ifThenElse(cond, negateExpr(cond))(ifTrue)(ifFalse)
+
+  def ifThenElse[A](condTrue: Tcons1, condFalse: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
-      constrain(supCond)
-      block
+      constrain(condTrue)(ifTrue)
     } {
-      constrain(infCond)
-      block
+      constrain(condFalse)(ifFalse)
     }
 
   def ifThenElse[A](cond: Topped[Tcons1])(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
     case Topped.Top => effects.joinComputations(ifTrue)(ifFalse)
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
 
-  def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
-    effects.joinComputations {
-      cond.getKind match
-        case Tcons1.DISEQ => joinDISEQ(cond, ifTrue)
-        case _ =>
-          constrain(cond)
-          ifTrue
-
-    } {
-      val notCond = negateExpr(cond)
-      notCond.getKind match
-        case Tcons1.DISEQ => joinDISEQ(notCond, ifFalse)
-        case _ =>
-          constrain(notCond)
-          ifFalse
-    }
-
-  def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean = true)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+  def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     ifThenElsePure(condTrue, negateExpr(condTrue), widen)(ifTrue)(ifFalse)
 
   def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = new Abstract1(apronManager, apronState)
-    val res1 = TrySturdy {
-      constrain(condTrue)
-      ifTrue
-    }
+    val res1 = TrySturdy(constrainPure(condTrue)(ifTrue))
     setLeastExtendingEnvironment(snapshot)
     val state1 = apronState
-    apronState = snapshot
-    val res2 = TrySturdy {
-      constrain(condFalse)
-      ifFalse
-    }
+    apronState = new Abstract1(apronManager, snapshot)
+    val res2 = TrySturdy(constrainPure(condFalse)(ifFalse))
+
     (res1.isBottom, res2.isBottom) match
       case (false, false) =>
         setLeastExtendingEnvironment(state1)
@@ -149,6 +140,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
         // nothing
       case (true, true) =>
         apronState = snapshot
+
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
     Join(res1, res2).get.getOrThrow
@@ -232,7 +224,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     override def inbetween(): Unit =
       setLeastExtendingEnvironment(snapshot)
       fState = apronState
-      apronState = snapshot
+      apronState = new Abstract1(apronManager, snapshot)
 
     override def retainNone(): Unit =
       apronState = snapshot

@@ -12,5 +12,5 @@ given ApronBooleanBranching(using apron: Apron, effects: EffectStack): BooleanBr
 
 given ApronBooleanSelection[R](using apron: Apron, jr: Join[R]): BooleanSelection[Tcons1, R] with
   override def boolSelect(v: Tcons1, ifTrue: R, ifFalse: R): R =
-    apron.ifThenElsePure(v)(ifTrue)(ifFalse)
+    apron.ifThenElsePure(v, widen = false)(ifTrue)(ifFalse)
     

@@ -302,7 +302,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
     println(cond)
     println(notCond)
-    apron.constrain(notCond)
+    apron.assertConstrain(notCond)
     assert(apron.getBound(x) == Interval(Double.NegativeInfinity, 4))
   }
 
@@ -314,6 +314,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
     println(cond)
     println(notCond)
-    apron.constrain(notCond)
+    apron.assertConstrain(notCond)
     assert(apron.getBound(x) == Interval(Double.NegativeInfinity, 1))
   }

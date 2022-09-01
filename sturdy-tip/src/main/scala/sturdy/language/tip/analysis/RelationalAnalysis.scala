@@ -64,7 +64,7 @@ object RelationalAnalysis extends Interpreter,
       import inst.{given_EffectStack, apron, failure}
       given Failure = failure
       val vIntOps = summon[IntegerOps[Int, VInt]]
-      inst.apron.ifThenElsePure(b)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
+      inst.apron.ifThenElsePure(b, widen = false)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
     case Value.IntValue(i) => i
     case Value.TopValue =>
       inst.apron.topInt
