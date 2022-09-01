@@ -147,6 +147,7 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
     case Some(ix) => setLocal(ix, v)
 
   type State = (apron.State, Map[Int, Val])
+  
   /** state contains the constraints for the current frame only */
   override def getState: State = (apron.getState, boundVars)
 

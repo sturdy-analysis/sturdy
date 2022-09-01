@@ -15,11 +15,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   override def toString: String =
     apronEnv.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
 
-  def printlndebug(s: String) = {} // println(s)
-  
   private var apronState: Abstract1 = new Abstract1(apronManager, new Environment())
-  /** global var count, currently unbounded */
-  private var _apronVarCount: Int = 0
 
   def apronEnv: Environment = apronState.getEnvironment
 
@@ -44,30 +40,24 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   */
 
   def addDoubleVariable(name: String): ApronVar =
-    printlndebug(s"addDvar($name)")
     alloc.addDoubleVariable(name, apronState)
 
   def addIntVariable(name: String): ApronVar =
-    printlndebug(s"addIvar($name)")
     alloc.addIntVariable(name, apronState)
 
   def makeConstraint(c: Tcons0): Unit =
-    printlndebug(s"makeConstraint($c)")
     new Tcons1(apronEnv, c)
 
   def makeConstraint(v: Texpr1Node, relOp: Int): Tcons1 =
-    printlndebug(s"makeConstraint($v, $relOp)")
     new Tcons1(apronEnv, relOp, v)
 
   def makeConstantConstraint(b: Boolean): Tcons1 =
-    printlndebug(s"makeConstraint($b)")
     new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
 
   def constrain(v: Texpr1Node, relOp: Int): Unit =
     constrain(makeConstraint(v, relOp))
 
   def constrain(c: Tcons1): Unit =
-    printlndebug(s"constrain($c)")
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
     c.extendEnvironment(apronEnv)
@@ -76,35 +66,27 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       throw new SturdyFailure {}
 
   def assign(v: ApronVar, exp: Texpr1Node): Unit =
-    printlndebug(s"assign($v, $exp)")
     // TODO ???
     // strong update: overwrite old value
     // weak update: join with old
     val expIntern = new Texpr1Intern(apronEnv, exp)
     apronState.assign(apronManager, v, expIntern, null)
-    printlndebug(s"assign($v, $exp) done")
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
-    printlndebug(s"assign($v, $exp) bottom done")
 
   def assign(v: ApronVar, exp: Linexpr1): Unit =
-    printlndebug(s"assign($v, $exp)")
     // TODO ???
     // strong update: overwrite old value
     // weak update: join with old
     apronState.assign(apronManager, v, exp, null)
-    printlndebug(s"assign($v, $exp) done")
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
-    printlndebug(s"assign($v, $exp) bottom done")
 
   def freshConstraintVariable(purpose: String): Texpr1VarNode =
-    printlndebug(s"fresh($purpose)")
     val newApronVar = alloc.addIntVariable(purpose, apronState)
     new Texpr1VarNode(newApronVar)
 
   def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =
-    printlndebug(s"joinDISEQ($cond)")
     val supCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node)
     val infCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
     effects.joinComputations {
@@ -120,7 +102,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
-    printlndebug(s"ifThenElse($cond)")
     effects.joinComputations {
       cond.getKind match
         case Tcons1.DISEQ => joinDISEQ(cond, ifTrue)
@@ -141,7 +122,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     ifThenElsePure(condTrue, negateExpr(condTrue), widen)(ifTrue)(ifFalse)
 
   def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
-    printlndebug(s"ifThenElsePure($condTrue, $condFalse, $ifTrue, $ifFalse)")
     val snapshot = new Abstract1(apronManager, apronState)
     val res1 = TrySturdy {
       constrain(condTrue)
@@ -175,7 +155,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
 
 
   def negateExpr(cond : Tcons1) : Tcons1 =
-    printlndebug(s"negateExpr($cond)")
     cond.getKind match
       case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
       case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
@@ -184,7 +163,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       case Tcons1.EQMOD => ??? // not useful
 
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
-    printlndebug(s"joinValues($v1, $v2, $widen)")
     val x = freshConstraintVariable(if (widen) "widen" else "join")
     val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
     val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
@@ -194,25 +172,24 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     val v1Bound = getBound(v1)
     MaybeChanged(x, !xBound.isEqual(v1Bound))
 
-  override type State = Abstract1
+  override type State = ApronState
 
-  override def getState: Abstract1 =
-    printlndebug(s"getState()")
-    new Abstract1(apronManager, apronState)
-  override def setState(st: Abstract1): Unit =
-    printlndebug(s"setState($st)")
+  override def getState: ApronState =
+    new ApronState(new Abstract1(apronManager, apronState), apronManager)
+  override def setState(as: ApronState): Unit =
+    val st = new Abstract1(apronManager, as.s)
     setLeastExtendingEnvironment(st)
     apronState = st
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
-    printlndebug(s"setState($st)")
 
-  override def join: Join[State] = (s1, s2) => {
-    printlndebug(s"join($s1, $s2)")
+  override def join: Join[State] = (as1, as2) => {
+    val s1 = as1.s
+    val s2 = as2.s
     if (s1.isBottom(apronManager))
-      MaybeChanged.Changed(s2)
+      MaybeChanged.Changed(as2)
     else if (s2.isBottom(apronManager))
-      MaybeChanged.Unchanged(s1)
+      MaybeChanged.Unchanged(as1)
     else {
       val lce = s1.getEnvironment.lce(s2.getEnvironment)
       val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
@@ -223,31 +200,28 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       val changed = !state2.isEqual(apronManager, state1)
       if (changed && apronState.toString(apronManager) == state1.toString(apronManager))
         throw new IllegalStateException()
-      MaybeChanged(state2, changed)
+      MaybeChanged(new ApronState(state2, apronManager), changed)
     }
   }
 
-  override def widen: Widen[State] = (s1, s2) => {
-    printlndebug(s"widen($s1, $s2)")
+  override def widen: Widen[State] = (as1, as2) => {
+    val s1 = as1.s
+    val s2 = as2.s
     if (s1.isBottom(apronManager))
-      MaybeChanged.Changed(s2)
+      MaybeChanged.Changed(as2)
     else if (s2.isBottom(apronManager))
-      MaybeChanged.Unchanged(s1)
+      MaybeChanged.Unchanged(as1)
     else {
       val lce = s1.getEnvironment.lce(s2.getEnvironment)
-      printlndebug(s"lce = $lce")
       val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
-      printlndebug(s"state1 = $state1")
       val state2 = s2.changeEnvironmentCopy(apronManager, lce, false)
-      printlndebug(s"state2 = $state2")
       val widened = state1.widening(apronManager, state2)
-      printlndebug(s"widened = $widened")
       if (widened.isBottom(apronManager))
         throw new SturdyFailure {}
       val changed = !widened.isEqual(apronManager, state1)
       if (changed && apronState.toString(apronManager) == state1.toString(apronManager))
         throw new IllegalStateException()
-      MaybeChanged(widened, changed)
+      MaybeChanged(new ApronState(widened, apronManager), changed)
     }
   }
 
@@ -275,6 +249,16 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       if (apronState.isBottom(apronManager))
         throw new SturdyFailure {}
   }
+
+class ApronState(val s: Abstract1, apronManager: Manager):
+  override def equals(obj: Any): Boolean = obj match
+    case other: ApronState => s.isEqual(apronManager, other.s)
+    case _ => false
+
+  override def hashCode(): Int =
+    s.hashCode(apronManager)
+
+  override def toString: String = s.toString(apronManager)
 
 given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
