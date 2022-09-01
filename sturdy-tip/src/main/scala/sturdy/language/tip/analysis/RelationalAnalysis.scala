@@ -42,35 +42,28 @@ object RelationalAnalysis extends Interpreter,
   Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type VInt = Texpr1Node
+  override type VInt = Topped[Texpr1Node]
   override type VBool = Topped[Tcons1]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
-    case Value.BoolValue(b) => b
-    case Value.IntValue(i) =>
-     // TODO Replace DISEQ
-      Topped.Actual(inst.apron.makeConstraint(i, Tcons1.DISEQ))
-    case Value.TopValue =>
-      Topped.Top
+    case Value.BoolValue(toppedBool) => toppedBool
+    case Value.IntValue(toppedInt) => toppedInt.map(inst.apron.makeConstraint(_, Tcons1.DISEQ))
+    case Value.TopValue => Topped.Top
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
   final def asInt(v: Value)(using inst: Instance): VInt = v match
-    case Value.BoolValue(Topped.Top) =>
-      import inst.{given_EffectStack, apron, failure}
-      given Failure = failure
-      val vIntOps = summon[IntegerOps[Int, VInt]]
-      Join(vIntOps.integerLit(1), vIntOps.integerLit(0)).get
-    case Value.BoolValue(Topped.Actual(b)) =>
-      import inst.{given_EffectStack, apron, failure}
-      given Failure = failure
-      val vIntOps = summon[IntegerOps[Int, VInt]]
-      inst.apron.ifThenElsePure(b, widen = false)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
+    case Value.BoolValue(toppedBool) =>
+      toppedBool.flatMap { bv =>
+        import inst.{given_EffectStack, apron, failure}
+        given Failure = failure
+        val vIntOps = summon[IntegerOps[Int, VInt]]
+        inst.apron.ifThenElsePure(bv, widen = false)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
+      }
     case Value.IntValue(i) => i
-    case Value.TopValue =>
-      inst.apron.topInt
+    case Value.TopValue => Topped.Top
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
-  override def topInt(using inst: Instance): VInt = inst.apron.topInt
+  override def topInt(using inst: Instance): VInt = Topped.Top
   override def topBool: VBool = Topped.Top
 
   class Instance(apronManager: Manager, initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
@@ -100,9 +93,9 @@ object RelationalAnalysis extends Interpreter,
     override val callFrame: ApronCallFrame[Unit, String, Value] = new ApronCallFrame(
       apron,
       (),
-      { case Value.IntValue(t) => Some(t); case _ => None },
+      { case Value.IntValue(t) => t.toOption; case _ => None },
       _ => None,
-      Value.IntValue.apply,
+      iv => Value.IntValue(Topped.Actual(iv)),
       _ => Value.TopValue,
       initEnvironment
     )
@@ -110,11 +103,10 @@ object RelationalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInputFun[Value] =
-      new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(apron.topInt))
+    override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
 
     // TODO check
-    given Widen[VInt] = new WideningTexpr1Node
+    given Widen[Texpr1Node] = new WideningTexpr1Node
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
