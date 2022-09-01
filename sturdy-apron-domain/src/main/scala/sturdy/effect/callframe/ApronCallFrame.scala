@@ -9,49 +9,54 @@ import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
-import sturdy.values.Finite
-import sturdy.values.MaybeChanged
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Finite, Join, MaybeChanged, Topped, Widen}
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 class ApronCallFrame[Data, Var, V](apron: Apron,
                                             initData: Data,
-                                            getIntVal: V => Option[Texpr1Node],
-                                            getDoubleVal: V => Option[Texpr1Node],
-                                            makeIntVal: Texpr1Node => V,
-                                            makeDoubleVal: Texpr1Node => V,
+                                            getIntVal: V => Option[Topped[Texpr1Node]],
+                                            getDoubleVal: V => Option[Topped[Texpr1Node]],
+                                            makeIntVal: Topped[Texpr1Node] => V,
+                                            makeDoubleVal: Topped[Texpr1Node] => V,
                                             initVars: Iterable[(Var, V)] = Iterable.empty)
                                            (using Join[V], Widen[V], ClassTag[V])
   extends DecidableMutableCallFrame[Data, Var, V](initData, initVars) :
-  //extends MutableCallFrame[Data, Var, V, NoJoin] with DecidableCallFrame[Data, Var, V]:
 
   import apron.*
 
   enum Val:
-    case Int(v: ApronVar)
-    case Double(v: ApronVar)
+    case Int(v: Topped[ApronVar])
+    case Double(v: Topped[ApronVar])
     case Other(v: V)
 
     def asV: V = this match
-      case Int(v) => makeIntVal(Texpr1VarNode(v))
-      case Double(v) => makeIntVal(Texpr1VarNode(v))
+      case Int(v) => v match
+        case Topped.Top => makeIntVal(Topped.Top)
+        case Topped.Actual(i) => makeIntVal(Topped.Actual(Texpr1VarNode(i)))
+      case Double(v) => v match
+        case Topped.Top => makeIntVal(Topped.Top)
+        case Topped.Actual(d) => makeIntVal(Topped.Actual(Texpr1VarNode(d)))
       case Other(v) => v
   object Val:
     def from(v: V): Val =
       getIntVal(v) match
-        case Some(exp) =>
+        case Some(Topped.Top) =>
+          Val.Int(Topped.Top)
+        case Some(Topped.Actual(exp)) =>
           val av = addIntVariable("foo")
           val expIntern = new Texpr1Intern(apronEnv, exp)
           apronState.assign(apronManager, av, expIntern, null)
-          Val.Int(av)
+          Val.Int(Topped.Actual(av))
         case _ => getDoubleVal(v) match
-          case Some(exp) =>
+          case Some(Topped.Top) =>
+            Val.Double(Topped.Top)
+          case Some(Topped.Actual(exp)) =>
             val av = addDoubleVariable("foo")
             val expIntern = new Texpr1Intern(apronEnv, exp)
             apronState.assign(apronManager, av, expIntern, null)
-            Val.Double(av)
+            Val.Double(Topped.Actual(av))
           case _ => Other(v)
 
   given Join[Val] = {
@@ -76,15 +81,17 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
 
     newVars.zipWithIndex.foreach { case ((x, v), ix) =>
       getIntVal(v) match
-        case Some(exp) =>
+        case Some(Topped.Top) => ()
+        case Some(Topped.Actual(exp)) =>
           val av = addIntVariable(x.toString)
           newApronAssignments += av -> exp
-          newBoundVars += ix -> Val.Int(av)
+          newBoundVars += ix -> Val.Int(Topped.Actual(av))
         case None => getDoubleVal(v) match
-          case Some(exp) =>
+          case Some(Topped.Top) => ()
+          case Some(Topped.Actual(exp)) =>
             val av = addDoubleVariable(x.toString)
             newApronAssignments += av -> exp
-            newBoundVars += ix -> Val.Double(av)
+            newBoundVars += ix -> Val.Double(Topped.Actual(av))
           case None =>
             newBoundVars += ix -> Val.Other(v)
     }
@@ -112,39 +119,55 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
 
   override def data: Data = _data
 
+  // TODO check if Topped should be handled differently
   override def getLocal(x: Int): JOptionC[V] = boundVars.get(x) match
     case None => JOptionC.none
     case Some(e) => e match
-      case Val.Int(av) => JOptionC.some(makeIntVal(new Texpr1VarNode(av)))
-      case Val.Double(av) => JOptionC.some(makeDoubleVal(new Texpr1VarNode(av)))
+      case Val.Int(tav) => tav match
+        case Topped.Top => JOptionC.some(makeIntVal(Topped.Top))
+        case Topped.Actual(av) => JOptionC.some(makeIntVal(Topped.Actual(Texpr1VarNode(av))))
+      case Val.Double(tav) => tav match
+        case Topped.Top => JOptionC.some(makeDoubleVal(Topped.Top))
+        case Topped.Actual(av) => JOptionC.some(makeDoubleVal(Topped.Actual(Texpr1VarNode(av))))
       case Val.Other(v) => JOptionC.some(v)
 
   override def getLocalByName(x: Var): JOptionC[V] = names.get(x) match
     case None => JOptionC.none
     case Some(ix) => getLocal(ix)
 
+  // not top var set to top : removed from the environment ?
   override def setLocal(x: Int, v: V): JOptionC[Unit] = boundVars.get(x) match
     case None => JOptionC.none
     case Some(oldVal) => getIntVal(v) match
-      case Some(exp) =>
+      case Some(Topped.Top) =>
+        oldVal match
+          case Val.Int(Topped.Top) => ()
+          case Val.Int(Topped.Actual(_)) => () // Remove ApronVar from Env
+          case _ => boundVars += x -> Val.Int(Topped.Top)
+      case Some(Topped.Actual(exp)) =>
         val vIntern = new Texpr1Intern(apronEnv, exp)
         oldVal match
-          case Val.Int(av) =>
+          case Val.Int(Topped.Actual(av)) =>
             apronState.assign(apronManager, av, vIntern, null)
           case _ =>
             val intVar = apron.addIntVariable(x.toString)
             apronState.assign(apronManager, intVar, vIntern, null)
-            boundVars += x -> Val.Int(intVar)
+            boundVars += x -> Val.Int(Topped.Actual(intVar))
       case None => getDoubleVal(v) match
-        case Some(exp) =>
+        case Some(Topped.Top) =>
+          oldVal match
+            case Val.Double(Topped.Top) => ()
+            case Val.Double(Topped.Actual(_)) => ()// Remove Var
+            case _ => boundVars += x -> Val.Double(Topped.Top)
+        case Some(Topped.Actual(exp)) =>
           val vIntern = new Texpr1Intern(apronEnv, exp)
           oldVal match
-            case Val.Double(av) =>
+            case Val.Double(Topped.Actual(av)) =>
               apronState.assign(apronManager, av, vIntern, null)
             case _ =>
               val doubleVar = apron.addDoubleVariable(x.toString)
               apronState.assign(apronManager, doubleVar, vIntern, null)
-              boundVars += x -> Val.Double(doubleVar)
+              boundVars += x -> Val.Double(Topped.Actual(doubleVar))
         case None =>
           boundVars += x -> Val.Other(v)
       JOptionC.some(())

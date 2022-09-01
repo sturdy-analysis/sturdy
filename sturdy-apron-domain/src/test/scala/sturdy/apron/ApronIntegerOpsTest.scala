@@ -6,7 +6,7 @@ import gmp.*
 import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
+import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntegerOps, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
 import sturdy.values.Join
@@ -16,10 +16,10 @@ import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 
 class ApronIntegerOpsTest extends AnyFunSuite:
 
-  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
+  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Topped[Texpr1Node])] = Iterable.empty)(using Join[Topped[Texpr1Node]], Widen[Topped[Texpr1Node]])
+    extends ApronCallFrame[Data, Var, Topped[Texpr1Node]](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
 
-  def instantiateIntOps() : (ApronIntegerOps[Int], Apron) =
+  def instantiateIntOps() : (IntegerOps[Int, Topped[Texpr1Node]], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
     implicit val apron: Apron = new Apron(manager)
@@ -29,7 +29,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     implicit val intervalOps: IntervalIntegerOps[Int] = new IntervalIntegerOps[Int](50)
     implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
     implicit val eqOps: ApronEqOps = new ApronEqOps
-    val intOps = new ApronIntegerOps[Int]
+    val intOps : IntegerOps[Int, Topped[Texpr1Node]] = implicitly
     (intOps, apron)
 
 
@@ -76,16 +76,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
   test("Multiplication : unconstrained and zero") {
     val (intOps, apron) = instantiateIntOps()
     assert(apron.getBound(intOps.mul(intOps.randomInteger(), intOps.integerLit(0))) == Interval(0,0))
-  }
-
-  test("Negative") {
-    val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.neg(intOps.integerLit(-6))) == Interval(6,6))
-  }
-
-  test("Negative : unconstrained") {
-    val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.neg(intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Maximum") {

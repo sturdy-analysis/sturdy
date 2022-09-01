@@ -22,15 +22,15 @@ given ApronIntegerOps[B](using Numeric[B])
   def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[Int] =
     val supArray = new Array[Double](1)
     val infArray = new Array[Double](1)
-    ap.getBound(v).sup.toDouble(supArray, 0)
-    ap.getBound(v).inf.toDouble(infArray, 0)
+    ap.getBound(Topped.Actual(v)).sup.toDouble(supArray, 0)
+    ap.getBound(Topped.Actual(v)).inf.toDouble(infArray, 0)
     val sup = supArray(0).toInt
     val inf = infArray(0).toInt
     NumericInterval[Int](inf, sup)
 
   def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[Int] => NumericInterval[Int]): Texpr1Node =
     val vInterval = f(apronIntervalToInterval(v))
-    val result = ap.freshConstraintVariable(s"$f($v)")
+    val result = ap.freshConstraintVariable(s"$f($v)").get
     ap.constrain(sub(result, new Texpr1CstNode(new MpqScalar(vInterval.low.toInt))), Tcons1.SUPEQ)
     ap.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(vInterval.high.toInt))), Tcons1.SUPEQ)
     result
@@ -39,7 +39,7 @@ given ApronIntegerOps[B](using Numeric[B])
     val v1Interval = apronIntervalToInterval(v1)
     val v2Interval = apronIntervalToInterval(v2)
     val resInterval = f(v1Interval, v2Interval)
-    val result = ap.freshConstraintVariable(s"$f($v1, $v2)")
+    val result = ap.freshConstraintVariable(s"$f($v1, $v2)").get
     ap.constrain(sub(result, new Texpr1CstNode(new MpqScalar(resInterval.low.toInt))), Tcons1.SUPEQ)
     ap.constrain(add(neg(result), new Texpr1CstNode(new MpqScalar(resInterval.high.toInt))), Tcons1.SUPEQ)
     result
@@ -48,7 +48,7 @@ given ApronIntegerOps[B](using Numeric[B])
   override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(i.toInt))
 
   override def randomInteger(): Texpr1Node =
-    ap.freshConstraintVariable("randomZ")
+    ap.freshConstraintVariable("randomZ").get
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
@@ -63,7 +63,7 @@ given ApronIntegerOps[B](using Numeric[B])
     new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
 
   override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"max($v1,$v2)")
+    val r = ap.freshConstraintVariable(s"max($v1,$v2)").get
     ap.ifThenElse(order.lt(v1,v2)) {
       ap.constrain(sub(r, v2), Tcons1.EQ)
     } {
@@ -72,7 +72,7 @@ given ApronIntegerOps[B](using Numeric[B])
     r
 
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"min($v1,$v2)")
+    val r = ap.freshConstraintVariable(s"min($v1,$v2)").get
     ap.ifThenElse(order.lt(v1, v2)) {
       ap.constrain(sub(r, v1), Tcons1.EQ)
     } {
@@ -86,7 +86,7 @@ given ApronIntegerOps[B](using Numeric[B])
   def safediv (v1:  Texpr1Node, v2: Texpr1Node): Texpr1BinNode =
     Texpr1BinNode(Texpr1BinNode.OP_DIV, Texpr1BinNode(Texpr1BinNode.OP_SUB,v1, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)),  v2)
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"$v1 / $v2")
+    val r = ap.freshConstraintVariable(s"$v1 / $v2").get
     ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
       ap.constrain(sub(r, safediv(v1, v2)), Tcons1.EQ)
     } {
@@ -101,7 +101,7 @@ given ApronIntegerOps[B](using Numeric[B])
   override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
   override def remainder(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"$v1 remainder $v2")
+    val r = ap.freshConstraintVariable(s"$v1 remainder $v2").get
     ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
       ap.constrain(sub(r, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
     } {
@@ -116,7 +116,7 @@ given ApronIntegerOps[B](using Numeric[B])
   override def remainderUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
   override def modulo(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"$v1 % $v2")
+    val r = ap.freshConstraintVariable(s"$v1 % $v2").get
     ap.constrain(r, Tcons1.SUPEQ)
     // cumbersome
     ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {

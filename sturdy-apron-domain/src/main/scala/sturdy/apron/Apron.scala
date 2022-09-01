@@ -54,33 +54,47 @@ class Apron(val apronManager: Manager):
     other.changeEnvironment(apronManager, lce, false)
   }
 
-  def getBound(v: Texpr1Node): Interval =
-    val vIntern = new Texpr1Intern(apronEnv, v)
-    apronState.getBound(apronManager, vIntern)
+  def getBound(v: Topped[Texpr1Node]): Interval = v match
+    case Topped.Top => Interval(Int.MinValue, Int.MaxValue) // TODO check if sound
+    case Topped.Actual(v) =>
+      val vIntern = new Texpr1Intern(apronEnv, v)
+      apronState.getBound(apronManager, vIntern)
 
-  def topInt: Texpr1Node = freshConstraintVariable("topInt")
+
+  def topInt: Topped[Texpr1Node] = Topped.Top
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
 
-  def makeConstraint(v: Texpr1Node, relOp: Int): Tcons1 =
-    new Tcons1(apronEnv, relOp, v)
+  def makeConstraint(v: Texpr1Node, relOp: Int): Topped[Tcons1] =
+    Topped.Actual(Tcons1(apronEnv, relOp, v))
 
-  def makeConstantConstraint(b: Boolean): Tcons1 =
-    new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
+  def makeConstraint(v: Topped[Texpr1Node], relOp: Int): Topped[Tcons1] = v match
+    case Topped.Top => Topped.Top
+    case Topped.Actual(v) => Topped.Actual(Tcons1(apronEnv, relOp, v))
+
+  def makeConstantConstraint(b: Boolean): Topped[Tcons1] =
+    Topped.Actual(Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1))))
+
+  def constrain(v: Topped[Texpr1Node], relOp: Int): Unit =
+    constrain(makeConstraint(v, relOp))
+
+  def constrain(c: Topped[Tcons1]): Unit = c match
+    case Topped.Actual(c) =>
+      if (apronState.isBottom(apronManager))
+        throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
+      if(c.getKind == Tcons1.DISEQ)
+        throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
+      c.extendEnvironment(apronEnv)
+      apronState.meet(apronManager, c)
+      if (apronState.isBottom(apronManager))
+        throw new SturdyFailure {}
+    case _ => ()
 
   def constrain(v: Texpr1Node, relOp: Int): Unit =
     constrain(makeConstraint(v, relOp))
 
-  def constrain(c: Tcons1): Unit =
-    if (apronState.isBottom(apronManager))
-      throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
-    if(c.getKind == Tcons1.DISEQ)
-      throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
-    c.extendEnvironment(apronEnv)
-    apronState.meet(apronManager, c)
-    if (apronState.isBottom(apronManager))
-      throw new SturdyFailure {}
+  def constrain(c: Tcons1): Unit = constrain(Topped.Actual(c))
 
   def assign(name: String, expr: Linexpr1): Unit =
     // TODO ???
@@ -88,13 +102,13 @@ class Apron(val apronManager: Manager):
     // weak update: join with old
     apronState.assign(apronManager, name, expr, null)
 
-  def freshConstraintVariable(purpose: String): Texpr1VarNode =
+  def freshConstraintVariable(purpose: String): Topped[Texpr1VarNode] =
     val newApronVar = addIntVariable(purpose)
-    new Texpr1VarNode(newApronVar)
+    Topped.Actual(Texpr1VarNode(newApronVar))
 
   def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =
-    val supCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node)
-    val infCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
+    val supCond = Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node))
+    val infCond = Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node)))
     effects.joinComputations {
       constrain(supCond)
       block
@@ -103,19 +117,19 @@ class Apron(val apronManager: Manager):
       block
     }
 
-  def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
+  private def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
       cond.getKind match
         case Tcons1.DISEQ => joinDISEQ(cond, ifTrue)
         case _ =>
-          constrain(cond)
+          constrain(Topped.Actual(cond))
           ifTrue
     } {
       val notCond = negateExpr(cond)
       notCond.getKind match
         case Tcons1.DISEQ => joinDISEQ(notCond, ifFalse)
         case _ =>
-          constrain(notCond)
+          constrain(Topped.Actual(notCond))
           ifFalse
     }
 
@@ -124,19 +138,18 @@ class Apron(val apronManager: Manager):
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
 
   def ifThenElsePureDISEQ[A](cond: Tcons1, widen: Boolean, value: A): Join[A] ?=> A =
-    val supCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node)
-    val infCond = new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
+    val supCond = Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUP, cond.toTexpr1Node))
+    val infCond = Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node)))
     ifThenElsePure(supCond, infCond, widen)(value)(value)
 
-
-  def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean = true)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+  def ifThenElsePure[A](condTrue: Topped[Tcons1], widen: Boolean = true)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     ifThenElsePure(condTrue, negateExpr(condTrue), widen)(ifTrue)(ifFalse)
 
-  def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+  def ifThenElsePure[A](condTrue: Topped[Tcons1], condFalse: Topped[Tcons1], widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = new Abstract1(apronManager, apronState)
     val res1 =
-      if condTrue.getKind == Tcons1.DISEQ then
-        TrySturdy {ifThenElsePureDISEQ(condTrue, widen, ifTrue)}
+      if condTrue.isActual && condTrue.get.getKind == Tcons1.DISEQ then
+        TrySturdy {ifThenElsePureDISEQ(condTrue.get, widen, ifTrue)}
       else
         TrySturdy {
           constrain(condTrue)
@@ -145,8 +158,8 @@ class Apron(val apronManager: Manager):
     val state1 = apronState
     apronState = snapshot
     val res2 =
-      if condFalse.getKind == Tcons1.DISEQ then
-        TrySturdy {ifThenElsePureDISEQ(condTrue, widen, ifTrue)}
+      if condFalse.isActual && condFalse.get.getKind == Tcons1.DISEQ then
+        TrySturdy {ifThenElsePureDISEQ(condTrue.get, widen, ifTrue)}
       else
         TrySturdy {
           constrain(condFalse)
@@ -170,24 +183,39 @@ class Apron(val apronManager: Manager):
 
     Join(res1, res2).get.getOrThrow
 
+  private def negateExpr(cond : Tcons1): Tcons1 = negateExpr(Topped.Actual(cond)).get
 
-  def negateExpr(cond : Tcons1) : Tcons1 = cond.getKind match
-    case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
-    case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
-    case Tcons1.SUP => new Tcons1(cond.getEnvironment, Tcons1.SUPEQ, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
-    case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
-    case Tcons1.EQMOD => ??? // not useful
+  def negateExpr(cond : Topped[Tcons1]) : Topped[Tcons1] = cond match
+    case Topped.Top => Topped.Top
+    case Topped.Actual(cond) => cond.getKind match
+      case Tcons1.EQ => Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node))
+      case Tcons1.DISEQ => Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node))
+      case Tcons1.SUP => Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUPEQ, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node)))
+      case Tcons1.SUPEQ => Topped.Actual(Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node)))
+      case Tcons1.EQMOD => ??? // not useful
 
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
-    val x = freshConstraintVariable(s"join")
-    val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
-    val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
+    val x = freshConstraintVariable(s"join").get
+    val v1Cons = makeConstraint(Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1)), Tcons1.EQ)
+    val v2Cons = makeConstraint(Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2)), Tcons1.EQ)
     ifThenElsePure(v1Cons, v2Cons, widen)(())(())
 
-    val xBound = getBound(x)
-    val v1Bound = getBound(v1)
+    val xBound = getBound(Topped.Actual(x))
+    val v1Bound = getBound(Topped.Actual(x))
     MaybeChanged(x, !xBound.isEqual(v1Bound))
 
+
+given JoinToppedTexpr1Node(using ap: Apron, j: Join[Texpr1Node]): Join[Topped[Texpr1Node]] with
+  override def apply(v1: Topped[Texpr1Node], v2: Topped[Texpr1Node]): MaybeChanged[Topped[Texpr1Node]] = (v1,v2) match
+    case (Topped.Top, _) => MaybeChanged.Unchanged(Topped.Top)
+    case (_, Topped.Top) => MaybeChanged.Changed(Topped.Top)
+    case (Topped.Actual(a), Topped.Actual(b)) => j(a,b).map(Topped.Actual(_))
+
+given WideningToppedTexpr1Node(using ap: Apron, j: Widen[Texpr1Node]): Widen[Topped[Texpr1Node]] with
+  override def apply(v1: Topped[Texpr1Node], v2: Topped[Texpr1Node]): MaybeChanged[Topped[Texpr1Node]] = (v1,v2) match
+    case (Topped.Top, _) => MaybeChanged.Unchanged(Topped.Top)
+    case (_, Topped.Top) => MaybeChanged.Changed(Topped.Top)
+    case (Topped.Actual(a), Topped.Actual(b)) => j(a,b).map(Topped.Actual(_))
 
 given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =

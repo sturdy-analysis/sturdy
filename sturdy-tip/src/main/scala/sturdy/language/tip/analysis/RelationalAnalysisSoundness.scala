@@ -24,8 +24,8 @@ class RelationalAnalysisSoundness(_apron: Apron):
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Topped.Actual(apron.makeConstantConstraint(b)))
-      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(new Texpr1CstNode(new MpqScalar(i)))
+      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(apron.makeConstantConstraint(b))
+      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Topped.Actual(Texpr1CstNode(new MpqScalar(i))))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
         case Some(ca) => Value.RefValue(Abstractly(ca).map(AllocationSiteRef.Addr.apply))

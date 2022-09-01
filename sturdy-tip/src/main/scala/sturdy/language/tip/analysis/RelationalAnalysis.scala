@@ -42,14 +42,15 @@ object RelationalAnalysis extends Interpreter,
   Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type VInt = Texpr1Node
+  override type VInt = Topped[Texpr1Node]
   override type VBool = Topped[Tcons1]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
     case Value.BoolValue(b) => b
-    case Value.IntValue(i) =>
+    case Value.IntValue(Topped.Top) => Topped.Top
+    case Value.IntValue(Topped.Actual(i)) =>
      // TODO Replace DISEQ
-      Topped.Actual(inst.apron.makeConstraint(i, Tcons1.DISEQ))
+      inst.apron.makeConstraint(i, Tcons1.DISEQ)
     case Value.TopValue =>
       Topped.Top
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
@@ -60,7 +61,7 @@ object RelationalAnalysis extends Interpreter,
       given Failure = failure
       val vIntOps = summon[IntegerOps[Int, VInt]]
       Join(vIntOps.integerLit(1), vIntOps.integerLit(0)).get
-    case Value.BoolValue(Topped.Actual(b)) =>
+    case Value.BoolValue(b) =>
       import inst.{given_EffectStack, apron, failure}
       given Failure = failure
       val vIntOps = summon[IntegerOps[Int, VInt]]
@@ -84,9 +85,9 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
-    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
-    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
+    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint).get)
+    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint).get)
+    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint).get)
 
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
@@ -110,10 +111,10 @@ object RelationalAnalysis extends Interpreter,
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] =
-      new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(apron.topInt))
+      new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
 
     // TODO check
-    given Widen[VInt] = new WideningTexpr1Node
+    given Widen[VInt] = new WideningToppedTexpr1Node
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =

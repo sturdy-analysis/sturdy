@@ -13,23 +13,28 @@ import sturdy.values.{Topped, given}
 
 class ApronCallFrameTest extends AnyFunSuite:
 
-  def integerLit(i: Int): Texpr1Node =
-    new Texpr1CstNode(new DoubleScalar(i.toDouble))
+  def integerLit(i: Int): Topped[Texpr1Node] =
+    Topped.Actual(Texpr1CstNode(new DoubleScalar(i.toDouble)))
 
-  def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
+  def add(v1: Topped[Texpr1Node], v2: Topped[Texpr1Node]): Topped[Texpr1Node] = (v1, v2) match
+    case (Topped.Top, _) => Topped.Top
+    case (_, Topped.Top) => Topped.Top
+    case (Topped.Actual(v1), Topped.Actual(v2)) => Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2))
 
-  def sub(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    new Texpr1BinNode(Texpr1BinNode.OP_SUB, v1, v2)
+  def sub(v1: Topped[Texpr1Node], v2: Topped[Texpr1Node]): Topped[Texpr1Node] = (v1, v2) match
+    case (Topped.Top, _) => Topped.Top
+    case (_, Topped.Top) => Topped.Top
+    case (Topped.Actual(v1), Topped.Actual(v2)) => Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_SUB, v1, v2))
 
-  def neg(v: Texpr1Node): Texpr1Node =
-    new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
+  def neg(v: Topped[Texpr1Node]): Topped[Texpr1Node] = v match
+    case Topped.Top => Topped.Top
+    case Topped.Actual(v) => Topped.Actual(Texpr1UnNode(Texpr1UnNode.OP_NEG, v))
 
   def interval(from: Int, to: Int): Interval = new Interval(new MpqScalar(from), new MpqScalar(to))
 
 
-  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
+  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Topped[Texpr1Node])] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
+    extends ApronCallFrame[Data, Var, Topped[Texpr1Node]](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
 
   test("ApronCallFrame bound vars after frame push and pop") {
     val manager = new Polka(false)
