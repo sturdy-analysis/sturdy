@@ -18,7 +18,7 @@ import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.apron.{Apron, given}
+import sturdy.apron.{Apron, ApronAllocRoundRobin, given}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context
@@ -77,7 +77,8 @@ object RelationalAnalysis extends Interpreter,
   class Instance(apronManager: Manager, initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-    implicit val apron: Apron = new Apron(apronManager)
+    val apronAlloc = new ApronAllocRoundRobin(apronManager)
+    implicit val apron: Apron = new Apron(apronManager, apronAlloc)
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures

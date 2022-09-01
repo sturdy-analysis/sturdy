@@ -1,52 +1,23 @@
 package sturdy.apron
 
-import apron.MpqScalar
-import apron.Texpr1CstNode
-import apron.{Texpr0UnNode, Environment, Texpr1UnNode, Interval, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
+import apron.{Texpr0UnNode, Environment, Texpr1CstNode, Texpr1UnNode, Interval, MpqScalar, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
 import sturdy.data.CombineUnit
-import sturdy.effect.{EffectStack, SturdyFailure, TrySturdy, CombineTrySturdy}
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.Stateful
+import sturdy.effect.{EffectStack, SturdyFailure, CombineTrySturdy, TrySturdy}
 import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
 
-import java.lang
-import java.lang.IllegalStateException
+import java.lang.{IllegalStateException, IllegalArgumentException}
 
 val APRON_VAR_COUNT_LIMIT = 10
 
-class Apron(val apronManager: Manager):
+class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   override def toString: String =
     apronEnv.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
 
-  var apronState: Abstract1 = new Abstract1(apronManager, new Environment())
-  private var _apronVarCount: Int = 0
+  private var apronState: Abstract1 = new Abstract1(apronManager, new Environment())
 
   def apronEnv: Environment = apronState.getEnvironment
-
-  def addDoubleVariable(name: String): StringVar =
-    val cname = s"D${name}_$_apronVarCount"
-    val v = new StringVar(cname)
-    if (!apronEnv.hasVar(v)) {
-      _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
-      setEnvironment(apronEnv.add(null, Array[ApronVar](v)))
-    }
-    if (!apronState.getEnvironment.hasVar(cname))
-      throw new IllegalStateException()
-    v
-
-  def addIntVariable(name: String): StringVar =
-    val cname = s"I${name}_$_apronVarCount"
-    val v = new StringVar(cname)
-    if (!apronEnv.hasVar(v)) {
-      _apronVarCount = (_apronVarCount + 1) % APRON_VAR_COUNT_LIMIT
-      setEnvironment(apronEnv.add(Array[ApronVar](v), null))
-    }
-    if (!apronState.getEnvironment.hasVar(cname))
-      throw new IllegalStateException()
-    v
-
-  def setEnvironment(newEnv: Environment): Unit =
-    if (!apronEnv.getVars.toSet.subsetOf(newEnv.getVars.toSet))
-      throw new IllegalStateException()
-    apronState.changeEnvironment(apronManager, newEnv, false)
 
   def setLeastExtendingEnvironment(other: Abstract1): Unit = {
     val lce = apronEnv.lce(other.getEnvironment)
@@ -62,6 +33,12 @@ class Apron(val apronManager: Manager):
 
 
   def topInt: Topped[Texpr1Node] = Topped.Top
+
+  def addDoubleVariable(name: String): ApronVar =
+    alloc.addDoubleVariable(name, apronState)
+
+  def addIntVariable(name: String): ApronVar =
+    alloc.addIntVariable(name, apronState)
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
@@ -96,14 +73,25 @@ class Apron(val apronManager: Manager):
 
   def constrain(c: Tcons1): Unit = constrain(Topped.Actual(c))
 
-  def assign(name: String, expr: Linexpr1): Unit =
+  def assign(v: ApronVar, exp: Texpr1Node): Unit =
     // TODO ???
     // strong update: overwrite old value
     // weak update: join with old
-    apronState.assign(apronManager, name, expr, null)
+    val expIntern = new Texpr1Intern(apronEnv, exp)
+    apronState.assign(apronManager, v, expIntern, null)
+    if (apronState.isBottom(apronManager))
+      throw new IllegalStateException(s"bottom state illegal here")
+
+  def assign(v: ApronVar, exp: Linexpr1): Unit =
+    // TODO ???
+    // strong update: overwrite old value
+    // weak update: join with old
+    apronState.assign(apronManager, v, exp, null)
+    if (apronState.isBottom(apronManager))
+      throw new IllegalStateException(s"bottom state illegal here")
 
   def freshConstraintVariable(purpose: String): Topped[Texpr1VarNode] =
-    val newApronVar = addIntVariable(purpose)
+    val newApronVar = alloc.addIntVariable(purpose, apronState)
     Topped.Actual(Texpr1VarNode(newApronVar))
 
   def joinDISEQ[A](cond: Tcons1, block: => A)(using effects: EffectStack): Join[A] ?=> A =
@@ -155,6 +143,7 @@ class Apron(val apronManager: Manager):
           constrain(condTrue)
           ifTrue
         }
+    setLeastExtendingEnvironment(snapshot)
     val state1 = apronState
     apronState = snapshot
     val res2 =
@@ -180,7 +169,8 @@ class Apron(val apronManager: Manager):
         // nothing
       case (true, true) =>
         apronState = snapshot
-
+    if (apronState.isBottom(apronManager))
+      throw new IllegalStateException(s"bottom state illegal here")
     Join(res1, res2).get.getOrThrow
 
   private def negateExpr(cond : Tcons1): Tcons1 = negateExpr(Topped.Actual(cond)).get
@@ -195,7 +185,7 @@ class Apron(val apronManager: Manager):
       case Tcons1.EQMOD => ??? // not useful
 
   def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
-    val x = freshConstraintVariable(s"join").get
+    val x = freshConstraintVariable(if (widen) "widen" else "join").get
     val v1Cons = makeConstraint(Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1)), Tcons1.EQ)
     val v2Cons = makeConstraint(Topped.Actual(Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2)), Tcons1.EQ)
     ifThenElsePure(v1Cons, v2Cons, widen)(())(())
@@ -204,6 +194,93 @@ class Apron(val apronManager: Manager):
     val v1Bound = getBound(Topped.Actual(x))
     MaybeChanged(x, !xBound.isEqual(v1Bound))
 
+  override type State = ApronState
+
+  override def getState: ApronState =
+    new ApronState(new Abstract1(apronManager, apronState), apronManager)
+  override def setState(as: ApronState): Unit =
+    val st = new Abstract1(apronManager, as.s)
+    setLeastExtendingEnvironment(st)
+    apronState = st
+    if (apronState.isBottom(apronManager))
+      throw new SturdyFailure {}
+
+  override def join: Join[State] = (as1, as2) => {
+    val s1 = as1.s
+    val s2 = as2.s
+    if (s1.isBottom(apronManager))
+      MaybeChanged.Changed(as2)
+    else if (s2.isBottom(apronManager))
+      MaybeChanged.Unchanged(as1)
+    else {
+      val lce = s1.getEnvironment.lce(s2.getEnvironment)
+      val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
+      val state2 = s2.changeEnvironmentCopy(apronManager, lce, false)
+      state2.join(apronManager, state1)
+      if (state2.isBottom(apronManager))
+        throw new SturdyFailure {}
+      val changed = !state2.isEqual(apronManager, state1)
+      if (changed && apronState.toString(apronManager) == state1.toString(apronManager))
+        throw new IllegalStateException()
+      MaybeChanged(new ApronState(state2, apronManager), changed)
+    }
+  }
+
+  override def widen: Widen[State] = (as1, as2) => {
+    val s1 = as1.s
+    val s2 = as2.s
+    if (s1.isBottom(apronManager))
+      MaybeChanged.Changed(as2)
+    else if (s2.isBottom(apronManager))
+      MaybeChanged.Unchanged(as1)
+    else {
+      val lce = s1.getEnvironment.lce(s2.getEnvironment)
+      val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
+      val state2 = s2.changeEnvironmentCopy(apronManager, lce, false)
+      val widened = state1.widening(apronManager, state2)
+      if (widened.isBottom(apronManager))
+        throw new SturdyFailure {}
+      val changed = !widened.isEqual(apronManager, state1)
+      if (changed && apronState.toString(apronManager) == state1.toString(apronManager))
+        throw new IllegalStateException()
+      MaybeChanged(new ApronState(widened, apronManager), changed)
+    }
+  }
+
+  def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
+    private val snapshot = new Abstract1(apronManager, apronState)
+    private var fState: Abstract1 = _
+
+    override def inbetween(): Unit =
+      setLeastExtendingEnvironment(snapshot)
+      fState = apronState
+      apronState = snapshot
+
+    override def retainNone(): Unit =
+      apronState = snapshot
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      apronState = fState
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      setLeastExtendingEnvironment(fState)
+      fState.join(apronManager, apronState)
+      apronState = fState
+      if (apronState.isBottom(apronManager))
+        throw new SturdyFailure {}
+  }
+
+class ApronState(val s: Abstract1, apronManager: Manager):
+  override def equals(obj: Any): Boolean = obj match
+    case other: ApronState => s.isEqual(apronManager, other.s)
+    case _ => false
+
+  override def hashCode(): Int =
+    s.hashCode(apronManager)
+
+  override def toString: String = s.toString(apronManager)
 
 given JoinToppedTexpr1Node(using ap: Apron, j: Join[Texpr1Node]): Join[Topped[Texpr1Node]] with
   override def apply(v1: Topped[Texpr1Node], v2: Topped[Texpr1Node]): MaybeChanged[Topped[Texpr1Node]] = (v1,v2) match
