@@ -2,7 +2,7 @@ package sturdy.apron
 
 import apron.{Abstract1, Dimchange, Environment, Manager, StringVar, Var}
 
-class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 10) extends ApronAlloc:
+class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
   private var varCount: Int = 0
 
   def addDoubleVariable(name: String, state: Abstract1): Var =
