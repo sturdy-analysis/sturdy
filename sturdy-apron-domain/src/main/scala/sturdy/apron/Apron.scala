@@ -24,6 +24,10 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     other.changeEnvironment(apronManager, lce, false)
   }
 
+
+  def getBound(v: ApronVar): Interval =
+    apronState.getBound(apronManager, v)
+
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
@@ -181,8 +185,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       if (state2.isBottom(apronManager))
         throw new SturdyFailure {}
       val changed = !state2.isEqual(apronManager, state1)
-      if (changed && apronState.toString(apronManager) == state1.toString(apronManager))
-        throw new IllegalStateException()
       MaybeChanged(new ApronState(state2, apronManager), changed)
     }
   }

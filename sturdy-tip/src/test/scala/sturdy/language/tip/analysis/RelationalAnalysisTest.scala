@@ -64,9 +64,9 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runRelationalAnalysis(p, StackConfig.StackedStates())
     }
-//    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-//      runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
-//    }
+    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+      runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
+    }
   }
 
   def runRelationalAnalysis(p: Path, stackConfig: StackConfig) =

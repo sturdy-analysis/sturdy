@@ -38,6 +38,18 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
       case Int(v) => makeIntVal(Texpr1VarNode(v))
       case Double(v) => makeIntVal(Texpr1VarNode(v))
       case Other(v) => v
+
+//    override def equals(obj: Any): Boolean = (this, obj) match
+//      case (Int(v1), Int(v2)) => apron.getBound(v1) == apron.getBound(v2)
+//      case (Double(v1), Double(v2)) => apron.getBound(v1) == apron.getBound(v2)
+//      case (Other(v1), Other(v2)) => v1 == v2
+//      case _ => false
+//
+//    override def hashCode: scala.Int = this match
+//      case Int(v) => apron.getBound(v).hashCode
+//      case Double(v) => apron.getBound(v).hashCode
+//      case Other(v) => v.hashCode
+
   object Val:
     def from(v: V): Val =
       getIntVal(v) match
