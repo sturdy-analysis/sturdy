@@ -244,7 +244,11 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
 
 class ApronState(val s: Abstract1, apronManager: Manager):
   override def equals(obj: Any): Boolean = obj match
-    case other: ApronState => s.isEqual(apronManager, other.s)
+    case other: ApronState =>
+      val lce = s.getEnvironment.lce(other.s.getEnvironment)
+      val s1 = s.changeEnvironmentCopy(apronManager, lce, false)
+      val s2 = other.s.changeEnvironmentCopy(apronManager, lce, false)
+      s1.isEqual(apronManager, s2)
     case _ => false
 
   override def hashCode(): Int =
