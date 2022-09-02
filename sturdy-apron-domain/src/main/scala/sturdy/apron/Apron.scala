@@ -28,9 +28,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
 
-  private val topIntVar: ApronVar = addIntVariable("topInt")
-  def topInt: Texpr1Node = new Texpr1VarNode(topIntVar)
-
   def addDoubleVariable(name: String): ApronVar =
     alloc.addDoubleVariable(name, apronState)
 
@@ -80,24 +77,18 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       throw new SturdyFailure {}
 
   def assign(v: ApronVar, exp: Texpr1Node): Unit =
-    // TODO ???
-    // strong update: overwrite old value
-    // weak update: join with old
     val expIntern = new Texpr1Intern(apronEnv, exp)
-    apronState.assign(apronManager, v, expIntern, null)
-    if (apronState.isBottom(apronManager))
-      throw new IllegalStateException(s"bottom state illegal here")
-
-  def assign(v: ApronVar, exp: Linexpr1): Unit =
-    // TODO ???
-    // strong update: overwrite old value
-    // weak update: join with old
-    apronState.assign(apronManager, v, exp, null)
+    if (alloc.useStrongUpdate(v)) {
+      apronState.assign(apronManager, v, expIntern, null)
+    } else {
+      val assigned = apronState.assignCopy(apronManager, v, expIntern, null)
+      apronState.join(apronManager, assigned)
+    }
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
   def freshConstraintVariable(purpose: String): Texpr1VarNode =
-    val newApronVar = alloc.addIntVariable(purpose, apronState)
+    val newApronVar = addIntVariable(purpose)
     new Texpr1VarNode(newApronVar)
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
@@ -154,7 +145,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
       case Tcons1.EQMOD => ??? // not useful
 
-  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
+  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1VarNode] =
     val x = freshConstraintVariable(if (widen) "widen" else "join")
     val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
     val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)

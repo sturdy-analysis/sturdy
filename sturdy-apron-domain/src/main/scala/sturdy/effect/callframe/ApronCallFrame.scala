@@ -53,13 +53,21 @@ class ApronCallFrame[Data, Var, V](apron: Apron,
           case _ => Other(v)
 
   given Join[Val] = {
-    case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
+    case (Val.Int(v1), Val.Int(v2)) =>
+      val n1 = new Texpr1VarNode(v1)
+      val n2 = new Texpr1VarNode(v2)
+      val joined = apron.joinValues(n1, n2, widen = false)
+      joined.map(t => Val.Int(t.`var`))
     case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
     case (v1, v2) => Join(v1.asV, v2.asV).map(Val.from)
   }
 
   given Widen[Val] = {
-    case (Val.Int(v1), Val.Int(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Int(v1))
+    case (Val.Int(v1), Val.Int(v2)) =>
+      val n1 = new Texpr1VarNode(v1)
+      val n2 = new Texpr1VarNode(v2)
+      val widened = apron.joinValues(n1, n2, widen = true)
+      widened.map(t => Val.Int(t.`var`))
     case (Val.Double(v1), Val.Double(v2)) if v1 == v2 => MaybeChanged.Unchanged(Val.Double(v1))
     case (v1, v2) => Widen(v1.asV, v2.asV).map(Val.from)
   }
