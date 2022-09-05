@@ -36,6 +36,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
+import sturdy.values.utils.{ConvertInterval, given}
 
 
 object RelationalAnalysis extends Interpreter,

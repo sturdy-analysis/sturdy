@@ -11,37 +11,39 @@ import math.Numeric.Implicits.infixNumericOps
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Top, Topped}
-import sturdy.values.ordering.{ApronOrderingOps, ApronEqOps}
+import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+import sturdy.values.utils.{ConvertInterval, given}
 
 
 given ApronIntegerOps[B](using Numeric[B])
-                        (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[Int], f : Failure)
+                        (using convertInterval : ConvertInterval[B])
+                        (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[B], f : Failure)
                         (using order : ApronOrderingOps, eq : ApronEqOps)
       : IntegerOps[B, Texpr1Node] with
 
-  def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[Int] =
+  def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[B] =
     val supArray = new Array[Double](1)
     val infArray = new Array[Double](1)
     ap.getBound(v).sup.toDouble(supArray, 0)
     ap.getBound(v).inf.toDouble(infArray, 0)
-    val sup = supArray(0).toInt
-    val inf = infArray(0).toInt
-    NumericInterval[Int](inf, sup)
+    val sup = convertInterval.convertTo(supArray(0))
+    val inf = convertInterval.convertTo(infArray(0))
+    NumericInterval[B](inf, sup)
 
-  def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[Int] => NumericInterval[Int]): Texpr1Node =
+  def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[B] => NumericInterval[B]): Texpr1Node =
     val vInterval = f(apronIntervalToInterval(v))
     val result = ap.freshConstraintVariable(s"$f($v)")
-    ap.assertConstrain(sub(result, new Texpr1CstNode(new MpqScalar(vInterval.low.toInt))), Tcons1.SUPEQ)
-    ap.assertConstrain(add(neg(result), new Texpr1CstNode(new MpqScalar(vInterval.high.toInt))), Tcons1.SUPEQ)
+    ap.assertConstrain(sub(result, new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(vInterval.low)))), Tcons1.SUPEQ)
+    ap.assertConstrain(add(neg(result), new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(vInterval.high)))), Tcons1.SUPEQ)
     result
 
-  def binaryIntervalOp(v1: Texpr1Node, v2: Texpr1Node, f: (NumericInterval[Int], NumericInterval[Int]) => NumericInterval[Int]): Texpr1Node =
+  def binaryIntervalOp(v1: Texpr1Node, v2: Texpr1Node, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B]): Texpr1Node =
     val v1Interval = apronIntervalToInterval(v1)
     val v2Interval = apronIntervalToInterval(v2)
     val resInterval = f(v1Interval, v2Interval)
     val result = ap.freshConstraintVariable(s"$f($v1, $v2)")
-    ap.assertConstrain(sub(result, new Texpr1CstNode(new MpqScalar(resInterval.low))), Tcons1.SUPEQ)
-    ap.assertConstrain(add(neg(result), new Texpr1CstNode(new MpqScalar(resInterval.high))), Tcons1.SUPEQ)
+    ap.assertConstrain(sub(result, new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(resInterval.low)))), Tcons1.SUPEQ)
+    ap.assertConstrain(add(neg(result), new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(resInterval.high)))), Tcons1.SUPEQ)
     result
 
 
