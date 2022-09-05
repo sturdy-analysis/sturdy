@@ -2,6 +2,7 @@ package sturdy.values.integer
 
 import sturdy.data.CombineUnit
 import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
+import gmp.Mpz
 import sturdy.apron.{Apron, given}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
@@ -46,11 +47,10 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.assertConstrain(add(neg(result), new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(resInterval.high)))), Tcons1.SUPEQ)
     result
 
-
-  override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(i.toInt))
+  override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(i)))
 
   override def randomInteger(): Texpr1Node =
-    ap.freshConstraintVariable("randomZ")
+    ap.freshConstraintVariable("randomInteger")
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)

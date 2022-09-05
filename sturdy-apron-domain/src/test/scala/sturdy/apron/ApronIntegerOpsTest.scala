@@ -55,11 +55,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     assert(apron.getBound(intOps.add(intOps.integerLit(3), intOps.integerLit(5))) == Interval(8,8))
   }
 
-  test("Addition : MaxValue ") {
-    val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.add(intOps.integerLit(Int.MaxValue), intOps.integerLit(1))) == Interval(Int.MinValue, Int.MinValue))
-  }
-
   test("Addition : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
     assert(apron.getBound(intOps.add(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
