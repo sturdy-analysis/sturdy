@@ -13,6 +13,7 @@ import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+import sturdy.values.utils.given
 
 class ApronIntegerOpsTest extends AnyFunSuite:
 
@@ -39,9 +40,24 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     assert(apron.getBound(intOps.randomInteger()) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
+  test("IntMax"){
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.integerLit(Int.MaxValue)) == Interval(Int.MaxValue, Int.MaxValue))
+  }
+
+  test("IntMin") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.integerLit(Int.MinValue)) == Interval(Int.MinValue, Int.MinValue))
+  }
+
   test("Addition"){
     val (intOps, apron) = instantiateIntOps()
     assert(apron.getBound(intOps.add(intOps.integerLit(3), intOps.integerLit(5))) == Interval(8,8))
+  }
+
+  test("Addition : MaxValue ") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.add(intOps.integerLit(Int.MaxValue), intOps.integerLit(1))) == Interval(Int.MinValue, Int.MinValue))
   }
 
   test("Addition : unconstrained") {
