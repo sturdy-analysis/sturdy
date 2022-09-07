@@ -19,6 +19,7 @@ trait Interpreter:
   type VRef
   type VFun
   type VRecord
+  type VString
 
   enum Value:
     case TopValue
@@ -26,6 +27,7 @@ trait Interpreter:
     case RefValue(addr: VRef)
     case FunValue(fun: VFun)
     case RecValue(rec: VRecord)
+    case StringValue(s: VString)
 
     def asBoolean(using Failure): VBool = Interpreter.this.asBoolean(this)
     def asInt(using failure: Failure): VInt = this match
