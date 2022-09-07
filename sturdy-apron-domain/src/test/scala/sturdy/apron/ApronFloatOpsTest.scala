@@ -276,7 +276,72 @@ class ApronFloatOpsTest extends AnyFunSuite:
     assert(apron.getBound(floatOps.ceil(floatOps.floatingLit(4.5))) == Interval(5,5))
   }
 
+  test("Ceiling : Top"){
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.ceil(floatOps.randomFloat())) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
+
   test("Floor") {
     val (floatOps, apron) = instantiateFloatOps()
     assert(apron.getBound(floatOps.floor(floatOps.floatingLit(4.5))) == Interval(4, 4))
+  }
+
+  test("Floor : Top") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.floor(floatOps.randomFloat())) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
+
+  test("Truncate") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.truncate(floatOps.floatingLit(4.5))) == Interval(4, 4))
+  }
+
+  test("Truncate : Top") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.truncate(floatOps.randomFloat())) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
+
+  test("Nearest") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.nearest(floatOps.floatingLit(4.6f))) == Interval(5, 5))
+  }
+
+  test("Nearest : Top") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.nearest(floatOps.randomFloat())) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
+
+  test("Copysign : Positive Negative") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.floatingLit(4.5), floatOps.floatingLit(-6))) == Interval(-4.5, -4.5))
+  }
+
+  test("Copysign : Positive Positive") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.floatingLit(4.5), floatOps.floatingLit(6))) == Interval(4.5, 4.5))
+  }
+
+  test("Copysign : Negative Negative") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.floatingLit(-4.5), floatOps.floatingLit(-6))) == Interval(-4.5, -4.5))
+  }
+
+  test("Copysign : Negative Positive") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.floatingLit(-4.5), floatOps.floatingLit(6))) == Interval(4.5, 4.5))
+  }
+
+  test("Copysign : Top negative") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.randomFloat(), floatOps.floatingLit(-1))) == Interval(Float.NegativeInfinity, 0))
+  }
+
+  test("Copysign : Top positive") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.randomFloat(), floatOps.floatingLit(8))) == Interval(0, Float.PositiveInfinity))
+  }
+
+  test("Copysign : Positive TOP") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.copysign(floatOps.floatingLit(-6), floatOps.randomFloat())) == Interval(-6f, 6f))
   }

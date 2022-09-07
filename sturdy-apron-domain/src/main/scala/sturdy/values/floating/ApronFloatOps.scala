@@ -11,7 +11,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 
-val PRECISION = 0
+val PRECISION = Texpr1Node.RTYPE_DOUBLE
 
 given ApronFloatOps[B](using Fractional[B])
                       (using ap: Apron, effects: EffectStack, f: Failure)
@@ -66,11 +66,10 @@ given ApronFloatOps[B](using Fractional[B])
   override def sqrt(v: Texpr1Node): Texpr1Node =
     var r : Texpr1Node = null
     ap.ifThenElse(order.ge(v, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
-      r = new Texpr1UnNode(Texpr1UnNode.OP_SQRT, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_ZERO, v)
+      r = new Texpr1UnNode(Texpr1UnNode.OP_SQRT, v)
     } {
       f.fail(IntegerDivisionByZero, s"sqrt($v)")
     }
-    r = new Texpr1UnNode(Texpr1UnNode.OP_SQRT, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_ZERO, v)
     r
 
   override def ceil(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_UP, v)
@@ -81,4 +80,19 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def nearest(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_NEAREST, v)
 
-  override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node = ???
+  override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node =
+    val r = ap.freshConstraintVariable(s"cs($v, $sign)")
+    ap.ifThenElse(order.lt(v, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
+      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
+        ap.assertConstrain(sub(r,v), Tcons1.EQ)
+      } {
+        ap.assertConstrain(sub(r,negated(v)), Tcons1.EQ)
+      }
+    } {
+      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
+        ap.assertConstrain(sub(r,negated(v)), Tcons1.EQ)
+      } {
+        ap.assertConstrain(sub(r,v), Tcons1.EQ)
+      }
+    }
+    r
