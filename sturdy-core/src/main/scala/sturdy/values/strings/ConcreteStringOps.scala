@@ -18,7 +18,7 @@ import java.nio.ByteOrder
 
 given Structural[String] with {}
 
-given ConcreteIntegerOps(using f: Failure): StringOps[String, String] with
+given ConcreteStringOps(using f: Failure): StringOps[String, String] with
   def stringLit(s: String): String = s
 
 /*

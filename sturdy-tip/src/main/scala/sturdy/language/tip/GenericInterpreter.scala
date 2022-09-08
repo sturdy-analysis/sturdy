@@ -19,6 +19,7 @@ import sturdy.fix
 import sturdy.data.unit
 import sturdy.effect.EffectStack
 import sturdy.values.references.ReferenceOps
+import sturdy.values.strings.StringOps
 
 import scala.collection.mutable.ListBuffer
 
@@ -76,6 +77,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   implicit def jv: J[V]
 
   // value components
+
+  val stringOps: StringOps[String, V]; import stringOps.*
   val intOps: IntegerOps[Int, V]; import intOps.*
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
@@ -101,6 +104,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   def getFunctions: Iterable[Function] = functions.values
 
   def eval_open(e: Exp)(using Fixed): V = e match {
+    case Exp.StringLit(s) => stringLit(s)
     case Exp.NumLit(n) => integerLit(n)
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match

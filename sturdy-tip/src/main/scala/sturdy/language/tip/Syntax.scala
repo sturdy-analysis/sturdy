@@ -6,6 +6,7 @@ import sturdy.values.{Structural, Finite}
 import cats.Monoid
 
 enum Exp extends Labeled:
+  case StringLit(s: String)
   case NumLit(n: Int)
   case Input()
   case Var(name: String)
@@ -24,6 +25,7 @@ enum Exp extends Labeled:
   case FieldAccess(rec: Exp, field: String)
 
   def fold[A](using f: Exp => A)(using m: Monoid[A]): A = this match
+    case StringLit(_) => f(this)
     case NumLit(_) => f(this)
     case Input() => f(this)
     case Var(_) => f(this)
@@ -43,6 +45,7 @@ enum Exp extends Labeled:
     case FieldAccess(rec, field) => m.combine(f(this), rec.fold)
 
   override def toString: String = this match
+    case StringLit(s) => s"$s@${this.label}"
     case NumLit(n) => s"$n@${this.label}"
     case Input() => s"Input@${this.label}"
     case Var(name) => s"$name@${this.label}"

@@ -17,22 +17,27 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
+import sturdy.values.strings.StringOps
 import sturdy.values.{*, given}
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
 
+  override type VString = String
   override type VBool = Boolean
   override type VInt = Int
   override type VRef = Option[Addr]
   override type VFun = Function
   override type VRecord = Map[Field, Value]
 
+
   override def topInt: VInt = throw new UnsupportedOperationException
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord: VRecord = throw new UnsupportedOperationException
   override def topBool: Boolean = throw new UnsupportedOperationException
+
+  override def topString: VString = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using failure: Failure): Boolean = v match
     case Value.IntValue(i) => i != 0
@@ -53,6 +58,7 @@ object ConcreteInterpreter extends Interpreter:
     override val failure: ConcreteFailure = new ConcreteFailure
     given Failure = failure
 
+    override val stringOps: StringOps[String, Value] = implicitly
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly

@@ -11,6 +11,7 @@ import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
 import sturdy.values.relational.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.values.strings.{StringOps, LiftedStringOps}
 
 trait Interpreter:
   type J[A] <: MayJoin[A]
@@ -34,6 +35,13 @@ trait Interpreter:
       case IntValue(i) => i
       case TopValue => topInt
       case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
+
+    def asString(using failure: Failure): VString = this match
+      case StringValue(s) => s
+      case TopValue => topString
+      case _ => failure(TipFailure.TypeError, s"Expected String but got $this")
+
+
     def asFunction(using inst: Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
@@ -52,6 +60,7 @@ trait Interpreter:
   def topReference(using Instance): VRef
   def topRecord: VRecord
   def topBool: VBool
+  def topString: VString
 
   def asBoolean(v: Value)(using Failure): VBool
   def boolean(b: VBool): Value
@@ -64,6 +73,7 @@ trait Interpreter:
   given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case (StringValue(i1), StringValue(i2)) => Combine[VString, W](i1, i2).map(StringValue.apply)
       case (IntValue(i1), IntValue(i2)) => Combine[VInt, W](i1, i2).map(IntValue.apply)
       case (FunValue(funs1), FunValue(funs2)) => Combine[VFun, W](funs1, funs2).map(FunValue.apply)
       case (RefValue(addrs1), RefValue(addrs2)) => Combine[VRef, W](addrs1, addrs2).map(RefValue.apply)
@@ -73,6 +83,8 @@ trait Interpreter:
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
+  given ValueStringOps(using Failure, StringOps[String, VString]): StringOps[String, Value] =
+    new LiftedStringOps[String, Value, VString](_.asString, StringValue.apply)
   given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Failure, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
@@ -92,6 +104,8 @@ trait Interpreter:
       case (RecValue(r1), RecValue(r2)) => boolean(EqOps.neq(r1, r2))
       case (TopValue, _) | (_, TopValue) => boolean(topBool)
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
+
   given ValueFunctionOps(using Instance, FunctionOps[Function, Seq[Value], Value, VFun]): FunctionOps[Function, Seq[Value], Value, Value] =
     new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
   given ValueReferenceOps(using Instance, ReferenceOps[Addr, VRef]): ReferenceOps[Addr, Value] =
@@ -102,6 +116,7 @@ trait Interpreter:
     new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean)
   given ValueBooleanSelection(using Failure, BooleanSelection[VBool, VBool]): BooleanSelection[Value, VBool] =
     new LiftedBooleanSelection(_.asBoolean)
+
 
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
