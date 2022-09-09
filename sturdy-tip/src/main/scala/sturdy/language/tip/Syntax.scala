@@ -7,6 +7,7 @@ import cats.Monoid
 
 enum Exp extends Labeled:
   case StringLit(s: String)
+  case StringConcat(s1: Exp, s2: Exp)
   case NumLit(n: Int)
   case Input()
   case Var(name: String)

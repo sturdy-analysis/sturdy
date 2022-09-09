@@ -18,8 +18,9 @@ import java.nio.ByteOrder
 
 given Structural[String] with {}
 
-given ConcreteStringOps(using f: Failure): StringOps[String, String] with
+given ConcreteStringOps(using f: Failure): StringOps[String] with
   def stringLit(s: String): String = s
+  def concat(s1: String, s2: String): String = s1 + s2
 
 /*
 given ConcreteStrictIntegerOps: StrictStringsOps[Int, Int, NoJoin] with

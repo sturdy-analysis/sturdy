@@ -70,7 +70,7 @@ trait Interpreter:
 
   type Addr
 
-  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
+  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W], Combine[VString, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
       case (StringValue(i1), StringValue(i2)) => Combine[VString, W](i1, i2).map(StringValue.apply)
@@ -83,8 +83,8 @@ trait Interpreter:
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
-  given ValueStringOps(using Failure, StringOps[String, VString]): StringOps[String, Value] =
-    new LiftedStringOps[String, Value, VString](_.asString, StringValue.apply)
+  given ValueStringOps(using Failure, StringOps[VString]): StringOps[Value] =
+    new LiftedStringOps[Value, VString](_.asString, StringValue.apply)
   given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Failure, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =

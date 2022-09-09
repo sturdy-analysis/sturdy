@@ -14,8 +14,9 @@ import java.nio.ByteOrder
 
 
 /** Integer operations for base type B, represented as V */
-trait StringOps[B, V]:
-  def stringLit(i: B): V
+trait StringOps[V]:
+  def stringLit(i: String): V
+  def concat(s1: V, s2: V) : V
 //def randomString(): V
 
 

@@ -34,6 +34,12 @@ trait NumericOps[V]:
   def div(v1: V, v2: V): V
   def lt(v1: V, v2: V): V
 
+
+
+trait StringOps[V]:
+  def sLit(i: String): V
+
+/*
 /*
  * We cannot in general decide the conditions of if and while statements in the generic interpreter. Therefore we need
  * an interface to abstract over decisions. Take for example the small program
@@ -82,6 +88,7 @@ given Finite[Failures] with {}
  */
 trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // value components - we require a NumericOps component and a Branching component
+  val stringOps: StringOps[V]
   val numericOps: NumericOps[V]
   val branching: Branching[V,Unit]
 
@@ -98,6 +105,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // we require joining of values of type V
   implicit def jv: J[V]
 
+  import stringOps.*
   import numericOps.*
   import branching.*
   import failure.*
@@ -108,6 +116,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
   // In most cases we simply use the numericOps component.
   // For evaluating variabes we look them up in the store and call "fail" in case the variable in not initialized.
   def eval(e: Exp): V = e match
+    case StringLit(s) => sLit(s)
     case NumLit(n) => lit(n)
     case Var(name) => store.read(name).getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))
@@ -134,7 +143,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
     store.write("arg", arg)
     run(s)
     store.read("result").getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable result"))
-
+*/
 /*
  * We now refine the generic interpreter to abstract over the fixpoint algorithm. This way, abstract instances may
  * configure the fixpoint algorithm and ensure termination.
@@ -166,6 +175,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   type Fixed = FixIn => FixOut[V]
 
   // value components - we require a NumericOps component and a Branching component
+  val stringOps: StringOps[V]
   val numericOps: NumericOps[V]
   val branching: Branching[V,Unit]
 
@@ -182,7 +192,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   // we require joining of values of type V
   implicit def jv: J[V]
   
-
+  import stringOps.*
   import numericOps.*
   import branching.*
   import failure.*
@@ -191,6 +201,7 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   // eval_open now calls eval instead of making a recursive call
   def eval_open(e: Exp)(using Fixed): V = e match
+    case StringLit(s) => sLit(s)
     case NumLit(n) => lit(n)
     case Var(name) => store.read(name).getOrFail(fail(Failures.UninitializedVariable, s"uninitialized variable $name"))
     case Add(e1, e2) => add(eval(e1), eval(e2))

@@ -76,6 +76,15 @@ object Parser:
   def inBraces[A](p: P0[A]): P[A] =
     op('{') *> p <* op('}')
 
+  def inQuotes[A](p: P0[A]): P[A] =
+    op('"') *> p <* op('"')
+
+  val stringChar: P[Unit] =
+    P.charWhere(_ != '"').void | P.string("\\\"")
+
+  val string: P[String] =
+    inQuotes(stringChar.rep0.void.string)
+
   def list0[A](p: P[A]): P0[List[A]] =
     p.repSep0(op(','))
 
@@ -116,7 +125,9 @@ object Parser:
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
     inParens(recExpression) |
     inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
-    variable
+    variable | 
+    string.map(Exp.StringLit.apply)
+    
 
   val access: P[Exp] =
     ((variable | deref | inParens(recExpression)) ~ (op('.') *> identifier).rep)

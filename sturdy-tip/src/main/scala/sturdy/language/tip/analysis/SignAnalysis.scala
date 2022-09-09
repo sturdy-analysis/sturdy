@@ -21,15 +21,16 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
+import sturdy.values.strings.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
 
-import sturdy.values.strings.{*, given}
+
 
 object SignAnalysis extends Interpreter,
-  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Strings.CharacterInclusion, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -42,7 +43,7 @@ object SignAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    //override val stringOps: StringOps[String, Value] = new StringOps[String]:
+    override val stringOps: StringOps[Value] = implicitly
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly

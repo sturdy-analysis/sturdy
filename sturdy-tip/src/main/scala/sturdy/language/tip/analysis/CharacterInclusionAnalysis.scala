@@ -1,4 +1,4 @@
-package sturdy.language.tip.analysis
+/*package sturdy.language.tip.analysis
 
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
@@ -29,7 +29,7 @@ import sturdy.language.tip.abstractions.*
 import sturdy.values.strings.{*, given}
 
 object CharacterInclusionAnalysis extends Interpreter,
-  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Strings.CharacterInclusion, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -42,7 +42,7 @@ object CharacterInclusionAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    //override val stringOps: StringOps[String, Value] = implicitly
+    override val stringOps: StringOps[Value] = implicitly
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
@@ -67,3 +67,4 @@ object CharacterInclusionAnalysis extends Interpreter,
   class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)
+*/

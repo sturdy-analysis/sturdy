@@ -3,6 +3,7 @@ package sturdy.language.tutorial
 import sturdy.util.Labeled
 
 enum Exp extends Labeled:
+  case StringLit(s: String)
   case NumLit(n: Int)
   case Var(name: String)
   case Add(e1: Exp, e2: Exp)

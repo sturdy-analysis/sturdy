@@ -17,6 +17,7 @@ import sturdy.fix.Fixpoint
  * be skipped when reusing existing components from the Sturdy library.
  */
 class ConcreteInterpreter extends GenericInterpreter[Int, NoJoin]:
+  override val stringOps: StringOps[Int] = new CStringOps()
   override val numericOps: CNumericOps = new CNumericOps()
   override val branching: CBranching[Unit] = new CBranching[Unit]()
   override val store: CStore = new CStore()

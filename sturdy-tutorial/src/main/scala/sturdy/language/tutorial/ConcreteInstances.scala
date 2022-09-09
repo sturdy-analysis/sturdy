@@ -2,8 +2,9 @@ package sturdy.language.tutorial
 
 import sturdy.data.{*, given}
 import sturdy.effect.*
-import sturdy.effect.failure.FailureKind
+import sturdy.effect.failure.*
 import sturdy.values.*
+
 
 /* The numeric operations of the language. */
 class CNumericOps(using f: Failure) extends NumericOps[Int]:
@@ -18,6 +19,10 @@ class CNumericOps(using f: Failure) extends NumericOps[Int]:
       v1 / v2
   override def lt(v1: Int, v2: Int): Int =
     if (v1 < v2) 1 else 0
+
+//class CStringOps(using f: Failure) extends StringOps[String]:
+//  override def sLit(s: String): String = s
+
 
 /*
  * The concrete branching implmentation. If the condition is 0 we evaluate the thn continuation, otherwise

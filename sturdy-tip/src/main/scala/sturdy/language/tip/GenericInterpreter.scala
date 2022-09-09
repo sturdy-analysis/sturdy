@@ -78,7 +78,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // value components
 
-  val stringOps: StringOps[String, V]; import stringOps.*
+  val stringOps: StringOps[V]; import stringOps.*
   val intOps: IntegerOps[Int, V]; import intOps.*
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
