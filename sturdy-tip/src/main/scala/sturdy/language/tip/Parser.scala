@@ -126,13 +126,22 @@ object Parser:
     inParens(recExpression) |
     inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
     variable | 
-    string.map(Exp.StringLit.apply)
-    
+    string.map(Exp.StringLit.apply) |
+    ((op("(") *> recExpression ~ (op(".concat") *> inParens(recExpression) <* op(")") ).?)).map {
+        case (e1, None) => e1
+        case (e1, Some(e2)) => Exp.StringConcat(e1, e2)}
+
+
 
   val access: P[Exp] =
     ((variable | deref | inParens(recExpression)) ~ (op('.') *> identifier).rep)
       .map { case (e, fields) => fields.foldLeft(e)(Exp.FieldAccess.apply) }
       .backtrack
+
+//  val stringOps: P[Exp] =
+//    (atom ~ op(".concat") *> P.defer(atom).map(e2 => Exp.StringConcat(_, e2)))
+//    //((variable | string | inParens(recExpression)) ~ (op(".concat") ~ inParens(variable | string | inParens(recExpression))))
+//    //  .map((b) => Exp.StringConcat(_,b))
 
   lazy val term: P[Exp] =
     access |
@@ -146,6 +155,7 @@ object Parser:
       (op('+') *> P.defer(operation)).map(e2 => Exp.Add(_, e2)) |
       (op('-') *> P.defer(operation)).map(e2 => Exp.Sub(_, e2))
     ).?).map(maybeBinOp)
+
 
   lazy val expression: P[Exp] =
     (operation ~ (
@@ -165,6 +175,7 @@ object Parser:
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
       .map { case ((c, t), e) => Stm.If(c, t, e) } |
+    //(keyword(KCONCAT) *> inParens(recExpression ~ op(',') ~ recExpression)).map{ case (lhs, rhs) => Exp.StringConcat(lhs._1, rhs)} |
     (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) |
     inBraces(recStatement.rep0).map(Stm.Block.apply) |
     (keyword(KOUTPUT) *> recExpression <* semi).map(Stm.Output.apply) |
