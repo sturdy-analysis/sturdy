@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Texpr0UnNode, Environment, Texpr1CstNode, Texpr1UnNode, Interval, MpqScalar, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1, Var as ApronVar}
+import apron.{Texpr0UnNode, Environment, Texpr1CstNode, Texpr1UnNode, Interval, MpqScalar, Texpr1VarNode, Linexpr1, Texpr1Node, Tcons0, Tcons1, StringVar, Texpr1BinNode, Texpr1Intern, Manager, Abstract1}
 import sturdy.data.CombineUnit
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Stateful
@@ -9,6 +9,7 @@ import sturdy.values.{Combine, MaybeChanged, Widening, Topped, Join, Widen}
 
 import java.lang
 import java.lang.IllegalStateException
+import scala.language.reflectiveCalls
 
 class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   override def toString: String =
@@ -25,18 +26,21 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
   }
 
 
-  def getBound(v: ApronVar): Interval =
-    apronState.getBound(apronManager, v)
+  def getBound(v: alloc.ApronVar): Interval =
+    apronState.getBound(apronManager, v.av)
+
+  def getBoundNode(v: alloc.ApronVar): Texpr1CstNode =
+    new Texpr1CstNode(apronState.getBound(apronManager, v.av))
 
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
 
-  def addDoubleVariable(name: String): ApronVar =
-    alloc.addDoubleVariable(name, apronState)
+  def addDoubleVariable(name: String, site: ApronAllocationSite): alloc.ApronVar =
+    alloc.addDoubleVariable(name, apronState, site)
 
-  def addIntVariable(name: String): ApronVar =
-    alloc.addIntVariable(name, apronState)
+  def addIntVariable(name: String, site: ApronAllocationSite): alloc.ApronVar =
+    alloc.addIntVariable(name, apronState, site)
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
@@ -80,20 +84,33 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
-  def assign(v: ApronVar, exp: Texpr1Node): Unit =
+  def assign(v: alloc.ApronVar, exp: Texpr1Node): Unit =
     val expIntern = new Texpr1Intern(apronEnv, exp)
     if (alloc.useStrongUpdate(v)) {
-      apronState.assign(apronManager, v, expIntern, null)
+      apronState.assign(apronManager, v.av, expIntern, null)
     } else {
-      val assigned = apronState.assignCopy(apronManager, v, expIntern, null)
+      val assigned = apronState.assignCopy(apronManager, v.av, expIntern, null)
       apronState.join(apronManager, assigned)
     }
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
-  def freshConstraintVariable(purpose: String): Texpr1VarNode =
-    val newApronVar = addIntVariable(purpose)
-    new Texpr1VarNode(newApronVar)
+  def freshConstraintVariable(purpose: String, site: ApronAllocationSite): alloc.ApronVar =
+    addIntVariable(purpose, site)
+
+  def withTemporaryIntVariable[A](f: alloc.ApronVar => A): A =
+    val v = alloc.addIntVariable("$$temporary", apronState, ApronAllocationSite.LocalIntVar("I$$temporary"))
+    try f(v)
+    finally {
+      alloc.freeVariable(v, apronState)
+    }
+
+  def withTemporaryDoubleVariable[A](f: alloc.ApronVar => A): A =
+    val v = alloc.addDoubleVariable("$$temporary", apronState, ApronAllocationSite.LocalIntVar("I$$temporary"))
+    try f(v)
+    finally {
+      alloc.freeVariable(v, apronState)
+    }
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
     ifThenElse(cond, negateExpr(cond))(ifTrue)(ifFalse)
@@ -149,15 +166,18 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Stateful:
       case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
       case Tcons1.EQMOD => ??? // not useful
 
-  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1VarNode] =
-    val x = freshConstraintVariable(if (widen) "widen" else "join")
-    val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v1), Tcons1.EQ)
-    val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x, v2), Tcons1.EQ)
+  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[alloc.ApronVar] =
+    val x = freshConstraintVariable(if (widen) "widen" else "join", ApronAllocationSite.Join(v1, v2, widen))
+    val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v1), Tcons1.EQ)
+    val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v2), Tcons1.EQ)
     ifThenElsePure(v1Cons, v2Cons, widen)(())(())
 
     val xBound = getBound(x)
     val v1Bound = getBound(v1)
     MaybeChanged(x, !xBound.isEqual(v1Bound))
+
+  def joinValuesVarNode(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1VarNode] =
+    joinValues(v1, v2, widen).map(av => av.node)
 
   override type State = ApronState
 
@@ -251,8 +271,8 @@ class ApronState(val s: Abstract1, apronManager: Manager):
 
 given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
-    ap.joinValues(v1, v2, widen = false)
+    ap.joinValuesVarNode(v1, v2, widen = false)
 
 given WideningTexpr1Node(using ap: Apron): Widen[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
-    ap.joinValues(v1, v2, widen = true)
+    ap.joinValuesVarNode(v1, v2, widen = true)

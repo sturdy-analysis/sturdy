@@ -1,8 +1,9 @@
 package sturdy.values.floating
 
+import apron.Texpr1VarNode
 import sturdy.data.CombineUnit
-import apron.{MpfrScalar, Tcons1, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode}
-import sturdy.apron.Apron
+import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1Node, Texpr1BinNode, MpfrScalar}
+import sturdy.apron.{JoinTexpr1Node, Apron}
 import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
@@ -10,6 +11,8 @@ import gmp.Mpfr
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+
+import scala.language.reflectiveCalls
 
 
 given ApronFloatOps[B](using Fractional[B])
@@ -19,7 +22,7 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def floatingLit(f: B): Texpr1Node = new Texpr1CstNode(new MpfrScalar(f.toDouble, 2))
 
-  override def randomFloat(): Texpr1Node = ap.freshConstraintVariable("randomFloat")
+  override def randomFloat(): Texpr1Node = throw new UnsupportedOperationException()
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
 
@@ -28,35 +31,38 @@ given ApronFloatOps[B](using Fractional[B])
   override def mul(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_MUL, v1, v2)
 
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"$v1 / $v2")
-    ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpfrScalar(0, 0)))) {
-      ap.assertConstrain(sub(r, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
-    } {
-      ap.ifThenElse(order.lt(Texpr1CstNode(MpfrScalar(0, 0)), v2)) {
-        ap.assertConstrain(sub(r, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
+    ap.withTemporaryIntVariable[Texpr1Node] { r =>
+      ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpfrScalar(0, 0)))) {
+        ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
       } {
-        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+        ap.ifThenElse(order.lt(Texpr1CstNode(MpfrScalar(0, 0)), v2)) {
+          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
+        } {
+          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+        }
       }
+      ap.getBoundNode(r)
     }
-    r
 
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"min($v1, $v2)")
-    ap.ifThenElse(order.lt(v1, v2)) {
-      ap.assertConstrain(sub(r, v1), Tcons1.EQ)
-    } {
-      ap.assertConstrain(sub(r, v2), Tcons1.EQ)
+    ap.withTemporaryIntVariable[Texpr1Node] { r =>
+      ap.ifThenElse(order.lt(v1, v2)) {
+        ap.assertConstrain(sub(r.node, v1), Tcons1.EQ)
+      } {
+        ap.assertConstrain(sub(r.node, v2), Tcons1.EQ)
+      }
+      ap.getBoundNode(r)
     }
-    r
 
   override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"max($v1, $v2)")
-    ap.ifThenElse(order.gt(v1, v2)) {
-      ap.assertConstrain(sub(r, v1), Tcons1.EQ)
-    } {
-      ap.assertConstrain(sub(r, v2), Tcons1.EQ)
+    ap.withTemporaryIntVariable[Texpr1Node] { r =>
+      ap.ifThenElse(order.gt(v1, v2)) {
+        ap.assertConstrain(sub(r.node, v1), Tcons1.EQ)
+      } {
+        ap.assertConstrain(sub(r.node, v2), Tcons1.EQ)
+      }
+      ap.getBoundNode(r)
     }
-    r
 
   override def absolute(v: Texpr1Node): Texpr1Node = max(v, negated(v))
 
@@ -80,18 +86,19 @@ given ApronFloatOps[B](using Fractional[B])
   override def nearest(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_NEAREST, v)
 
   override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node =
-    val r = ap.freshConstraintVariable(s"cs($v, $sign)")
-    ap.ifThenElse(order.lt(v, Texpr1CstNode(MpfrScalar(0, 0)))) {
-      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, 0)))) {
-        ap.assertConstrain(sub(r, v), Tcons1.EQ)
+    ap.withTemporaryDoubleVariable[Texpr1Node] { r =>
+      ap.ifThenElse(order.lt(v, Texpr1CstNode(MpfrScalar(0, 0)))) {
+        ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(sub(r.node, v), Tcons1.EQ)
+        } {
+          ap.assertConstrain(sub(r.node, negated(v)), Tcons1.EQ)
+        }
       } {
-        ap.assertConstrain(sub(r, negated(v)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(sub(r.node, negated(v)), Tcons1.EQ)
+        } {
+          ap.assertConstrain(sub(r.node, v), Tcons1.EQ)
+        }
       }
-    } {
-      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, 0)))) {
-        ap.assertConstrain(sub(r, negated(v)), Tcons1.EQ)
-      } {
-        ap.assertConstrain(sub(r, v), Tcons1.EQ)
-      }
+      ap.getBoundNode(r)
     }
-    r

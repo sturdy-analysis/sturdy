@@ -1,13 +1,17 @@
 package sturdy.apron
 
-import apron.{Abstract1, Dimchange, Environment, Manager, StringVar, Var}
+import apron.Texpr1VarNode
+import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
+  case class ApronVar(av: apron.Var):
+    def node = new Texpr1VarNode(av)
+
   private var varCount: Int = 0
 
   val STRONG_UPDATE_SUFFIX = "$STRONG"
 
-  def addDoubleVariable(name: String, state: Abstract1): Var =
+  def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): ApronVar =
     val cname = s"D${name}_$varCount"
     val v = new StringVar(cname)
     val env = state.getEnvironment
@@ -15,9 +19,9 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(null, Array[Var](v)), false)
     }
-    v
+    ApronVar(v)
 
-  def addIntVariable(name: String, state: Abstract1): Var =
+  def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): ApronVar =
     val cname = s"I${name}_$varCount"
     val v = new StringVar(cname)
     val env = state.getEnvironment
@@ -25,7 +29,16 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(Array[Var](v), null), false)
     }
-    v
+    ApronVar(v)
 
-  override def useStrongUpdate(v: Var): Boolean =
+  override def freeVariable(v: ApronVar, state: Abstract1): Unit =
+    if (useStrongUpdate(v)) {
+      state.forget(manager, v.av, false)
+      val newEnv = state.getEnvironment.remove(Array(v.av))
+      state.changeEnvironment(manager, newEnv, false)
+    } else {
+      // nothing
+    }
+
+  override def useStrongUpdate(v: ApronVar): Boolean =
     v.toString.endsWith(STRONG_UPDATE_SUFFIX)
