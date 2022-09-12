@@ -4,6 +4,8 @@ import org.eclipse.collections.impl.block.procedure.FastListSelectProcedure
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
+import sturdy.values.booleans.ToppedBooleanOps
+import sturdy.values.integer.{IntSign, NumericInterval}
 import sturdy.values.relational.*
 
 import java.security.KeyStore.TrustedCertificateEntry
@@ -43,8 +45,21 @@ given CombineStringCharacterInclusion[W <: Widening]: Combine[StringCharacterInc
       case (StringSets(c1, mc1), StringSets(c2, mc2)) => Changed(StringSets(c1.intersect(c2), mc1.union(mc2)))
 
 
-given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOps[StringCharacterInclusion] with
+given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOps[StringCharacterInclusion, IntSign, Boolean] with
   def stringLit(s: String): StringCharacterInclusion = StringSets(s.toString.toCharArray.toSet[Char], Set())
   override def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = (s1, s2) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) => StringSets(c1.union(c2), mc1.union(mc2))
+
+  override def substring(s: StringCharacterInclusion, begin: IntSign, end: IntSign): StringCharacterInclusion = (begin, end) match
+    case (IntSign.Zero, IntSign.Zero) => StringSets(Set[Char](), Set[Char]())
+//    case (IntSign.Neg, _) | (_, IntSign.Neg) => f.fail(StringNegativeIndex, s"substring of $s with indices $begin to $end")
+//    case (IntSign.NegOrZero, _) | (_, IntSign.NegOrZero) => s match
+//      case StringSets(c, mc) =>
+//        j.joinWithFailure(StringSets(Set[Char](), c.union(mc)))(f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end"))
+    case _ => s match
+      case StringSets(c, mc) =>
+        j.joinWithFailure(StringSets(Set[Char](), c.union(mc)))(f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end"))
+
+  override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Boolean = ???
+
 

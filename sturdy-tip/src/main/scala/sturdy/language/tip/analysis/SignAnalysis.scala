@@ -43,7 +43,7 @@ object SignAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    override val stringOps: StringOps[Value] = implicitly
+    override val stringOps: StringOps[Value, Value, Value] = implicitly
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly

@@ -125,11 +125,12 @@ object Parser:
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
     inParens(recExpression) |
     inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
-    variable | 
-    string.map(Exp.StringLit.apply) |
-    ((op("(") *> recExpression ~ (op(".concat") *> inParens(recExpression) <* op(")") ).?)).map {
-        case (e1, None) => e1
-        case (e1, Some(e2)) => Exp.StringConcat(e1, e2)}
+    variable
+
+  //string.map(Exp.StringLit.apply) |
+    //(op("(") *> recExpression ~ (op(".concat") *> inParens(recExpression) <* op(")") ).?).map {
+    //    case (e1, None) => e1
+    //    case (e1, Some(e2)) => Exp.StringConcat(e1, e2)}
 
 
 
@@ -139,10 +140,7 @@ object Parser:
       .backtrack
 
 //  val stringOps: P[Exp] =
-//    (atom ~ op(".concat") *> P.defer(atom).map(e2 => Exp.StringConcat(_, e2)))
-//    //((variable | string | inParens(recExpression)) ~ (op(".concat") ~ inParens(variable | string | inParens(recExpression))))
-//    //  .map((b) => Exp.StringConcat(_,b))
-
+    //(atom ~ (op(".concat") *> P.defer(stringOps).map(e2 => Exp.StringConcat(_, e2))).?).map(maybeBinOp)
   lazy val term: P[Exp] =
     access |
     (atom ~ (

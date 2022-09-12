@@ -1,3 +1,4 @@
+/*
 package sturdy.language.tip.analysis
 
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
@@ -50,3 +51,4 @@ object IntervalAnalysisSoundness:
       a.print.isSound(c.print)
     }
 
+*/

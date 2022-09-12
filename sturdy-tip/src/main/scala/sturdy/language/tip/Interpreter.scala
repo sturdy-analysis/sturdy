@@ -83,8 +83,8 @@ trait Interpreter:
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
-  given ValueStringOps(using Failure, StringOps[VString]): StringOps[Value] =
-    new LiftedStringOps[Value, VString](_.asString, StringValue.apply)
+  given ValueStringOps(using Failure, StringOps[VString, VInt, VBool]): StringOps[Value, Value, Value] =
+    new LiftedStringOps[Value, Value, Value, VString, VInt, VBool](_.asString, _.asInt, StringValue.apply, IntValue.apply, boolean)
   given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Failure, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
