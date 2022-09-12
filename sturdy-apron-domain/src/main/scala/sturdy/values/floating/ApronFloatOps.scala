@@ -10,15 +10,16 @@ import gmp.Mpfr
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+import sturdy.values.utils.{BitPrecision, given}
 
-val PRECISION = Texpr1Node.RTYPE_DOUBLE
 
 given ApronFloatOps[B](using Fractional[B])
+                      (using bitPrecision : BitPrecision[B])
                       (using ap: Apron, effects: EffectStack, f: Failure)
                       (using order: ApronOrderingOps, eq: ApronEqOps) : FloatOps[B, Texpr1Node] with
 
 
-  override def floatingLit(f: B): Texpr1Node = new Texpr1CstNode(new MpfrScalar(f.toDouble, PRECISION))
+  override def floatingLit(f: B): Texpr1Node = new Texpr1CstNode(new MpfrScalar(f.toDouble, bitPrecision.value))
 
   override def randomFloat(): Texpr1Node = ap.freshConstraintVariable("randomFloat")
 
@@ -30,10 +31,10 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     val r = ap.freshConstraintVariable(s"$v1 / $v2")
-    ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
+    ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpfrScalar(0, bitPrecision.value)))) {
       ap.assertConstrain(sub(r, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
     } {
-      ap.ifThenElse(order.lt(Texpr1CstNode(MpfrScalar(0, PRECISION)), v2)) {
+      ap.ifThenElse(order.lt(Texpr1CstNode(MpfrScalar(0, bitPrecision.value)), v2)) {
         ap.assertConstrain(sub(r, Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)), Tcons1.EQ)
       } {
         f.fail(IntegerDivisionByZero, s"$v1 / $v2")
@@ -64,8 +65,8 @@ given ApronFloatOps[B](using Fractional[B])
   override def negated(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
 
   override def sqrt(v: Texpr1Node): Texpr1Node =
-    var r : Texpr1Node = null
-    ap.ifThenElse(order.ge(v, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
+    var r: Texpr1Node = null
+    ap.ifThenElse(order.ge(v, Texpr1CstNode(MpfrScalar(0, bitPrecision.value)))) {
       r = new Texpr1UnNode(Texpr1UnNode.OP_SQRT, v)
     } {
       f.fail(IntegerDivisionByZero, s"sqrt($v)")
@@ -82,17 +83,17 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node =
     val r = ap.freshConstraintVariable(s"cs($v, $sign)")
-    ap.ifThenElse(order.lt(v, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
-      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
-        ap.assertConstrain(sub(r,v), Tcons1.EQ)
+    ap.ifThenElse(order.lt(v, Texpr1CstNode(MpfrScalar(0, bitPrecision.value)))) {
+      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, bitPrecision.value)))) {
+        ap.assertConstrain(sub(r, v), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r,negated(v)), Tcons1.EQ)
+        ap.assertConstrain(sub(r, negated(v)), Tcons1.EQ)
       }
     } {
-      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, PRECISION)))) {
-        ap.assertConstrain(sub(r,negated(v)), Tcons1.EQ)
+      ap.ifThenElse(order.lt(sign, Texpr1CstNode(MpfrScalar(0, bitPrecision.value)))) {
+        ap.assertConstrain(sub(r, negated(v)), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r,v), Tcons1.EQ)
+        ap.assertConstrain(sub(r, v), Tcons1.EQ)
       }
     }
     r
