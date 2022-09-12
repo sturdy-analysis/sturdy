@@ -35,10 +35,10 @@ class ApronFloatOpsTest extends AnyFunSuite:
     (floatOps, apron)
 
   def convertToFloat(x : Interval) : Interval =
-    val inf, sup = new Mpfr()
-    x.inf.toMpfr(inf, 64)
-    x.sup.toMpfr(sup, 64)
-    Interval(inf.doubleValue(64).toFloat, sup.doubleValue(64).toFloat)
+    val inf, sup = Mpfr(24)
+    x.inf.toMpfr(inf, 0)
+    x.sup.toMpfr(sup, 0)
+    Interval(inf.doubleValue(24).toFloat, sup.doubleValue(24).toFloat)
 
   test("Floating Lit : Positive"){
     val (floatOps, apron) = instantiateFloatOps()
@@ -60,14 +60,26 @@ class ApronFloatOpsTest extends AnyFunSuite:
     assert(convertToFloat(apron.getBound(floatOps.floatingLit(-10))) == Interval(-10f, -10f))
   }
 
-  test("Floating Lit : MaxInt"){
+  test("Floating Lit : MaxFloat"){
     val (floatOps, apron) = instantiateFloatOps()
     assert(convertToFloat(apron.getBound(floatOps.floatingLit(Float.MaxValue))) == Interval(Float.MaxValue, Float.MaxValue))
   }
 
-  test("Floating Lit : MinInt") {
+  test("Floating Lit : MinFloat") {
     val (floatOps, apron) = instantiateFloatOps()
     assert(convertToFloat(apron.getBound(floatOps.floatingLit(Float.MinValue))) == Interval(Float.MinValue, Float.MinValue))
+  }
+
+  test("Floating Lit : Smallest Float") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(convertToFloat(apron.getBound(floatOps.floatingLit(Float.MinPositiveValue))) == Interval(Float.MinPositiveValue, Float.MinPositiveValue))
+  }
+
+  // This failing test case show that it's not possible to approximate soundly the behavior of floating point operation because of the rational conversion done by apron
+  // This test should pass if the apron manager doesn't convert to rational
+  test("Floating Lit : Significand size") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(apron.getBound(floatOps.sub(floatOps.floatingLit(Math.pow(2,24).toFloat), floatOps.add(floatOps.floatingLit(Math.pow(2,24).toFloat), floatOps.floatingLit(1)))) == Interval(Math.pow(2,24).toFloat - (Math.pow(2,24)+1).toFloat, Math.pow(2,24).toFloat - (Math.pow(2,24)+1).toFloat))
   }
 
   test("Random Integer"){
@@ -234,7 +246,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Absolute : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.absolute(floatOps.randomFloat()))) == Interval(0, Double.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.absolute(floatOps.randomFloat()))) == Interval(0, Float.PositiveInfinity))
   }
 
   test("Negated : Positive") {
@@ -255,7 +267,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
   // ???
   test("Squareroot : Positive") {
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.sqrt(floatOps.floatingLit(8f)))) == Interval(Math.sqrt(10).toFloat, Math.sqrt(10).toFloat))
+    assert(convertToFloat(apron.getBound(floatOps.sqrt(floatOps.floatingLit(8f)))) == Interval(Math.sqrt(8).toFloat, Math.sqrt(8).toFloat))
   }
 
   test("Squareroot : Negative") {
