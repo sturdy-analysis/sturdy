@@ -106,6 +106,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   def eval_open(e: Exp)(using Fixed): V = e match {
     case Exp.StringLit(s) => stringLit(s)
     case Exp.NumLit(n) => integerLit(n)
+
+    //case Exp.StringOp(op, args) => op match
+    //  case "concat" => concat(eval(args(0)), eval(args(1)))
+    //  case "contains" =>  contains(eval(args(0)), eval(args(1)))
+    //  case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
+
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
@@ -119,8 +125,21 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val v1 = eval(e1)
       val v2 = eval(e2)
       equ(v1, v2)
-    case Exp.Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case Exp.Call(fun, args) => invokeFun(eval(fun), args.map(eval(_)))(call)
+      //eval(fun) match
+      //case Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp) =>
+      //  if (name.length > 7){
+      //    val (pre, op) = name.splitAt(7)
+      //    if (pre == "string_"){
+      //      op match
+      //        case "concat" => println("asfesaf"); concat(eval(args(0)), eval(args(1)))
+      //        case "contains" =>  contains(eval(args(0)), eval(args(1)))
+      //        case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
+      //    }
+      //    else invokeFun(eval(fun), args.map(eval(_)))(call)
+      //  }
+      //  else invokeFun(eval(fun), args.map(eval(_)))(call)
+
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
       store.write(addr, eval(e))

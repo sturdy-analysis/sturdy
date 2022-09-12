@@ -12,5 +12,5 @@ object Strings:
   trait CharacterInclusion extends Interpreter :
     final type VString = StringCharacterInclusion
 
-    override def topString: StringCharacterInclusion = StringCharacterInclusion.TopCharacterInclusion
+    override def topString: StringCharacterInclusion = StringCharacterInclusion.StringSets(Set[Char](), Topped.Top)
 

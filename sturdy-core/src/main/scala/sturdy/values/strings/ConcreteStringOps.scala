@@ -20,9 +20,14 @@ given Structural[String] with {}
 
 given ConcreteStringOps(using f: Failure): StringOps[String, Int, Boolean] with
   def stringLit(s: String): String = s
+
   def concat(s1: String, s2: String): String = s1 + s2
   def substring(s: String, begin: Int, end: Int): String = s.substring(begin, end)
   override def contains(s: String, w: String): Boolean = s.contains(w)
+
+  override def length(s: String): Int = s.length()
+
+  override def isEmpty(s: String): Boolean = s.isEmpty()
 
 /*
 given ConcreteStrictIntegerOps: StrictStringsOps[Int, Int, NoJoin] with

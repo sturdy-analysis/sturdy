@@ -22,6 +22,8 @@ trait StringOps[V, I, B]:
   def concat(s1: V, s2: V) : V
   def substring(s: V, begin: I, end: I) : V
   def contains(s: V, w : V) : B
+  def length(s: V): I
+  def isEmpty(s: V) : B
 //def randomString(): V
 
 
