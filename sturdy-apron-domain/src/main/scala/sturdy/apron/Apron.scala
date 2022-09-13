@@ -27,10 +27,11 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
 
   def getBound(v: alloc.ApronVar): Interval =
-    apronState.getBound(apronManager, v.av)
+    val intern = new Texpr1Intern(apronState.getEnvironment, v.node)
+    apronState.getBound(apronManager, intern)
 
   def getBoundNode(v: alloc.ApronVar): Texpr1CstNode =
-    new Texpr1CstNode(apronState.getBound(apronManager, v.av))
+    new Texpr1CstNode(getBound(v.node))
 
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
@@ -41,6 +42,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   def addIntVariable(name: String, site: ApronAllocationSite): alloc.ApronVar =
     alloc.addIntVariable(name, apronState, site)
+
+  def freeVariable(v: alloc.ApronVar): Unit =
+    alloc.freeVariable(v, apronState)
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
@@ -85,19 +89,21 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       throw new SturdyFailure {}
 
   def assign(v: alloc.ApronVar, exp: Texpr1Node): Unit =
+    val av = v.getOrElse(throw new IllegalStateException(s"Cannot assign to freed variable $v"))
     val expIntern = new Texpr1Intern(apronEnv, exp)
     if (alloc.useStrongUpdate(v)) {
-      apronState.assign(apronManager, v.av, expIntern, null)
+      apronState.assign(apronManager, av, expIntern, null)
     } else {
-      val assigned = apronState.assignCopy(apronManager, v.av, expIntern, null)
+      val assigned = apronState.assignCopy(apronManager, av, expIntern, null)
       apronState.join(apronManager, assigned)
     }
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
   def assignStrong(v: alloc.ApronVar, exp: Texpr1Node): Unit =
+    val av = v.getOrElse(throw new IllegalStateException(s"Cannot assign to freed variable $v"))
     val expIntern = new Texpr1Intern(apronEnv, exp)
-    apronState.assign(apronManager, v.av, expIntern, null)
+    apronState.assign(apronManager, av, expIntern, null)
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 

@@ -15,7 +15,8 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
     case IntTemp(ix: Int)
     case DoubleTemp(ix: Int)
 
-    val av: Var = this match
+    private[apron] def _av = av
+    protected val av: Var = this match
       case IntVar(local) => new StringVar(s"I_$local")
       case DoubleVar(local) => new StringVar(s"D_$local")
       case IntTemp(ix) => new StringVar(s"I_temp_$ix")
@@ -36,8 +37,8 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         varCount += x -> (varCount(x) + 1)
         x
 
-    if (!state.getEnvironment.hasVar(v.av)) {
-      state.changeEnvironment(manager, state.getEnvironment.add(Array[Var](v.av), null), false)
+    if (!state.getEnvironment.hasVar(v._av)) {
+      state.changeEnvironment(manager, state.getEnvironment.add(Array[Var](v._av), null), false)
     }
     v
 
@@ -52,7 +53,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         varCount += x -> (varCount(x) + 1)
         x
 
-    if (!state.getEnvironment.hasVar(v.av)) {
+    if (!state.getEnvironment.hasVar(v._av)) {
       state.changeEnvironment(manager, state.getEnvironment.add(null, Array[Var](v.av)), false)
     }
     v
@@ -66,7 +67,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       case _: ApronVar.IntTemp | _: ApronVar.DoubleTemp => true
 
     if (isStrong) {
-      state.forget(manager, v.av, false)
+      state.forget(manager, v._av, false)
       val newEnv = state.getEnvironment.remove(Array(v.av))
       state.changeEnvironment(manager, newEnv, false)
     } else {

@@ -4,7 +4,7 @@ import apron.Texpr1VarNode
 import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
-  case class ApronVar(av: apron.Var) extends ApronVarOps
+  case class ApronVar(protected val av: apron.Var) extends ApronVarOps
 
   private var varCount: Int = 0
 
@@ -36,12 +36,13 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
 
   override def freeVariable(v: ApronVar, state: Abstract1): Unit =
     if (useStrongUpdate(v)) {
-      state.forget(manager, v.av, false)
-      val newEnv = state.getEnvironment.remove(Array(v.av))
+      val av = v.getOrElse(throw new IllegalStateException(s"Cannot free variable $v, already freed"))
+      state.forget(manager, av, false)
+      val newEnv = state.getEnvironment.remove(Array(av))
       state.changeEnvironment(manager, newEnv, false)
     } else {
       // nothing
     }
 
   override def useStrongUpdate(v: ApronVar): Boolean =
-    v.av.toString.endsWith(STRONG_UPDATE_SUFFIX)
+    v.getOrElse(new StringVar("")).toString.endsWith(STRONG_UPDATE_SUFFIX)

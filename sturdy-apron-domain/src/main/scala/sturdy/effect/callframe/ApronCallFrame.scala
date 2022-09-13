@@ -1,6 +1,6 @@
 package sturdy.effect.callframe
 
-import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Tcons1, StringVar, Manager, Abstract1, Var as ApronVar}
+import apron.{Environment, Interval, Texpr1VarNode, Texpr1Node, Tcons1, StringVar, Manager, Abstract1}
 import org.eclipse.collections.api.factory.BiMaps
 import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
 import sturdy.apron.Apron
@@ -60,20 +60,6 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 //      case Double(v) => apron.getBound(v).hashCode
 //      case Other(v) => v.hashCode
 
-//  object Val:
-//    def from(v: V): Val =
-//      getIntVal(v) match
-//        case Some(exp) =>
-//          val av = addIntVariable("foo")
-//          apron.assign(av, exp)
-//          Val.Int(av)
-//        case _ => getDoubleVal(v) match
-//          case Some(exp) =>
-//            val av = addDoubleVariable("foo")
-//            assign(av, exp)
-//            Val.Double(av)
-//          case _ => Other(v)
-
   given Join[Val] = {
     case (Val.Int(v1), Val.Int(v2)) =>
       val joined = apron.joinValues(v1.node, v2.node, widen = false)
@@ -110,6 +96,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case (v1, v2) => Widen(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
+  private var allocatedVars: Set[alloc.ApronVar] = Set()
   private var boundVars: Map[Int, Val] = Map()
 
   override def setVars(newVars: Iterable[(Var, V)]): Unit = {
@@ -122,11 +109,13 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       getIntVal(v) match
         case Some(exp) =>
           val av = addIntVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+          allocatedVars += av
           newApronAssignments += av -> exp
           newBoundVars += ix -> Val.Int(av)
         case None => getDoubleVal(v) match
           case Some(exp) =>
             val av = addDoubleVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+            allocatedVars += av
             newApronAssignments += av -> exp
             newBoundVars += ix -> Val.Double(av)
           case None =>
@@ -141,12 +130,16 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
+    val snapAllocatedVars = this.allocatedVars
     val snapBoundVars = this.boundVars
     this._data = d
+    this.allocatedVars = Set()
     setVars(vars)
     try f finally {
       this._data = snapData
       this.names = snapNames
+      this.allocatedVars.foreach(apron.freeVariable)
+      this.allocatedVars = snapAllocatedVars
       this.boundVars = snapBoundVars
     }
   }
@@ -173,6 +166,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
             apron.assign(av, exp)
           case _ =>
             val intVar = addIntVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+            allocatedVars += intVar
             apron.assign(intVar, exp)
             boundVars += x -> Val.Int(intVar)
       case None => getDoubleVal(v) match
@@ -182,6 +176,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
               apron.assign(av, exp)
             case _ =>
               val doubleVar = addDoubleVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+              allocatedVars += doubleVar
               apron.assign(doubleVar, exp)
               boundVars += x -> Val.Double(doubleVar)
         case None =>
