@@ -34,23 +34,8 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def mul(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_MUL, v1, v2)
 
-  override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
-      ap.assign(x1, v1)
-      ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpfrScalar(0, 0)))) {
-        ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_DIV, x1.node, x2.node)), Tcons1.EQ)
-      } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpfrScalar(0, 0)), x2.node)) {
-          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_DIV, x1.node, x2.node)), Tcons1.EQ)
-        } {
-          // TODO float division should not produce div by zero errors
-          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-        }
-      }
-      ap.getBoundNode(r)
-    }
-
+  override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
+  
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)

@@ -203,15 +203,13 @@ class ApronDoubleOpsTest extends AnyFunSuite:
   }
 
   test("Division : by zero") {
-    val (doubleOps, _) = instantiateDoubleOps()
-    try {
-      doubleOps.div(doubleOps.randomFloat(), doubleOps.floatingLit(0))
-      assert(false)
-    }
-    catch {
-      case _: SturdyFailure => assert(true)
-      case _: Throwable => assert(false)
-    }
+    val(doubleOps, apron) = instantiateDoubleOps()
+    assert(apron.getBound(doubleOps.div(doubleOps.randomFloat(), doubleOps.floatingLit(0))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
+
+  test("Division : zero by zero") {
+    val(doubleOps, apron) = instantiateDoubleOps()
+    assert(apron.getBound(doubleOps.div(doubleOps.floatingLit(0), doubleOps.floatingLit(0))) == Interval(0, 0))
   }
 
   test("Min"){
