@@ -21,7 +21,7 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   def instantiateDoubleOps() : (ApronFloatOps[Double], Apron) =
     implicit val failure: Failure = new ConcreteFailure
-    val manager = new Box()
+    val manager = new Polka(false)
     val alloc = new ApronAllocRoundRobin(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
     var callFrame: DoubleApronCallFrame[String, String] = null
@@ -75,7 +75,7 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Floating Lit : Significand size") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(apron.getBound(doubleOps.sub(doubleOps.floatingLit(Math.pow(2,53)), doubleOps.add(doubleOps.floatingLit(Math.pow(2,53)), doubleOps.floatingLit(1)))) == Interval(Math.pow(2,53) + 1, Math.pow(2, 53) + 1))
+    assert(apron.getBound(doubleOps.sub(doubleOps.floatingLit(Math.pow(2,52) ), doubleOps.add(doubleOps.floatingLit(Math.pow(2,52)), doubleOps.floatingLit(1)))) == Interval(Math.pow(2,53) + 1, Math.pow(2, 53) + 1))
   }
 
   test("Random Integer"){
@@ -95,7 +95,7 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Addition : Negative"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-3.6d, -3.6d))
+    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-3.6, -3.6))
   }
 
   test("Addition : Top"){
@@ -115,7 +115,7 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Substraction : Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.floatingLit(-10f), doubleOps.floatingLit(6.4f)))) == Interval(-16.4, -16.4))
+    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-16.4, -16.4))
   }
 
   test("Substraction : Top") {
@@ -160,7 +160,7 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Multiplication : Positive Floats less than one"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(Interval(9d*0.3d, 9d*0.3d)) == convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(9), doubleOps.floatingLit(0.3)))) )
+    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(9), doubleOps.floatingLit(0.3)))) == convertToDouble(Interval(9d*0.3d, 9d*0.3d)))
   }
 
   test("blablabla"){
