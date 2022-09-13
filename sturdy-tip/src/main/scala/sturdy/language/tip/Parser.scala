@@ -60,7 +60,7 @@ object Parser:
 
   val letter: P[Unit] = P.ignoreCaseCharIn('a' to 'z').void
   val digit: P[Unit] = P.charIn('0' to '9').void
-  val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).void
+  val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ List('_')).void
 
   val id: P[String] =
     (letter ~ letterDigit.rep0)

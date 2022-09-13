@@ -9,6 +9,7 @@ import sturdy.{*, given}
 import sturdy.util.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.strings.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.references.{*, given}
@@ -31,6 +32,7 @@ object SignAnalysisSoundness:
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
       case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
 
+
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (_, Value.TopValue) => true
@@ -38,6 +40,7 @@ object SignAnalysisSoundness:
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[VRef].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
+      case (Value.StringValue(s1), Value.StringValue(s2)) => PartialOrder[StringCharacterInclusion].lteq(s1, s2)
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 

@@ -125,20 +125,22 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val v1 = eval(e1)
       val v2 = eval(e2)
       equ(v1, v2)
-    case Exp.Call(fun, args) => invokeFun(eval(fun), args.map(eval(_)))(call)
-      //eval(fun) match
-      //case Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp) =>
-      //  if (name.length > 7){
-      //    val (pre, op) = name.splitAt(7)
-      //    if (pre == "string_"){
-      //      op match
-      //        case "concat" => println("asfesaf"); concat(eval(args(0)), eval(args(1)))
-      //        case "contains" =>  contains(eval(args(0)), eval(args(1)))
-      //        case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
-      //    }
-      //    else invokeFun(eval(fun), args.map(eval(_)))(call)
-      //  }
-      //  else invokeFun(eval(fun), args.map(eval(_)))(call)
+    case Exp.Call(fun, args) =>
+    fun match
+        case Exp.Var(name) =>
+          if (name.length > 7){
+            val (pre, op) = name.splitAt(7)
+            if (pre == "string_"){
+              op match
+                case "concat" => concat(eval(args(0)), eval(args(1)))
+                case "contains" =>  contains(eval(args(0)), eval(args(1)))
+                case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "length" => length(eval(args(0)))
+                case "isEmpty" => isEmpty(eval(args(0)))
+            }
+          }
+          invokeFun(eval(fun), args.map(eval(_)))(call)
+        case _ => invokeFun(eval(fun), args.map(eval(_)))(call)
 
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))

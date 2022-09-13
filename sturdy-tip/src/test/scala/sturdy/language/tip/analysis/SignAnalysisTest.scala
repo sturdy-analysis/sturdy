@@ -22,6 +22,7 @@ import sturdy.data.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.strings.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
