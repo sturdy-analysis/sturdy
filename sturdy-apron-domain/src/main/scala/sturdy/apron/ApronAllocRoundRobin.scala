@@ -4,15 +4,16 @@ import apron.Texpr1VarNode
 import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
-  case class ApronVar(av: apron.Var):
-    def node = new Texpr1VarNode(av)
+  case class ApronVar(av: apron.Var) extends ApronVarOps
 
   private var varCount: Int = 0
 
   val STRONG_UPDATE_SUFFIX = "$STRONG"
 
   def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): ApronVar =
-    val cname = s"D${name}_$varCount"
+    var cname = s"D${name}_$varCount"
+    if (site == ApronAllocationSite.TemporaryVar)
+      cname += STRONG_UPDATE_SUFFIX
     val v = new StringVar(cname)
     val env = state.getEnvironment
     if (!env.hasVar(v)) {
@@ -22,7 +23,9 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
     ApronVar(v)
 
   def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): ApronVar =
-    val cname = s"I${name}_$varCount"
+    var cname = s"I${name}_$varCount"
+    if (site == ApronAllocationSite.TemporaryVar)
+      cname += STRONG_UPDATE_SUFFIX
     val v = new StringVar(cname)
     val env = state.getEnvironment
     if (!env.hasVar(v)) {
@@ -41,4 +44,4 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
     }
 
   override def useStrongUpdate(v: ApronVar): Boolean =
-    v.toString.endsWith(STRONG_UPDATE_SUFFIX)
+    v.av.toString.endsWith(STRONG_UPDATE_SUFFIX)

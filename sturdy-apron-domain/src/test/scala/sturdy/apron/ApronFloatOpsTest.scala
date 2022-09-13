@@ -20,17 +20,12 @@ import scala.language.reflectiveCalls
 
 class ApronFloatOpsTest extends AnyFunSuite:
 
-  class FloatApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), v => Some(v), identity, identity, initVars)
-
   def instantiateFloatOps() : (ApronFloatOps[Float], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: FloatApronCallFrame[String, String] = null
-    implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new FloatApronCallFrame(apron, "initial call frame")
+    implicit val effects: EffectStack = new EffectStack(List(failure, apron))
     implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
     implicit val eqOps: ApronEqOps = new ApronEqOps
     val floatOps = new ApronFloatOps[Float]
@@ -84,10 +79,10 @@ class ApronFloatOpsTest extends AnyFunSuite:
     assert(apron.getBound(floatOps.sub(floatOps.floatingLit(Math.pow(2,24).toFloat), floatOps.add(floatOps.floatingLit(Math.pow(2,24).toFloat), floatOps.floatingLit(1)))) == Interval(Math.pow(2,24).toFloat - (Math.pow(2,24)+1).toFloat, Math.pow(2,24).toFloat - (Math.pow(2,24)+1).toFloat))
   }
 
-//  test("Random Integer"){
-//    val (floatOps, apron) = instantiateFloatOps()
-//    assert(convertToFloat(apron.getBound(x.node)) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
-//  }
+  test("Random Integer"){
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(convertToFloat(apron.getBound(floatOps.randomFloat())) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+  }
 
   test("Addition"){
     val (floatOps, apron) = instantiateFloatOps()
@@ -106,8 +101,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Addition : Top"){
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.add(x.node, floatOps.floatingLit(3.3)))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.randomFloat(), floatOps.floatingLit(3.3)))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Substraction") {
@@ -127,14 +121,12 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Substraction : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.sub(x.node, floatOps.floatingLit(3.3)))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.randomFloat(), floatOps.floatingLit(3.3)))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Multiplication : Top"){
   val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(2), x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(2), floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Multiplication : Positive Integers"){
@@ -159,8 +151,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Multiplication : Top and Zero"){
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.mul(x.node, floatOps.floatingLit(0)))) == Interval(0f, 0f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.randomFloat(), floatOps.floatingLit(0)))) == Interval(0f, 0f))
   }
 
   test("Multiplication : Positive Floats"){
@@ -214,10 +205,9 @@ class ApronFloatOpsTest extends AnyFunSuite:
   }
 
   test("Division : by zero") {
-    val (floatOps, apron) = instantiateFloatOps()
+    val (floatOps, _) = instantiateFloatOps()
     try {
-      val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-      floatOps.div(x.node, floatOps.floatingLit(0))
+      floatOps.div(floatOps.randomFloat(), floatOps.floatingLit(0))
       assert(false)
     }
     catch {
@@ -233,8 +223,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Min : Top"){
     val(floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.min(floatOps.floatingLit(2.5), x.node))) == Interval(Float.NegativeInfinity, 2.5f))
+    assert(convertToFloat(apron.getBound(floatOps.min(floatOps.floatingLit(2.5), floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, 2.5f))
   }
 
   test("Max") {
@@ -244,8 +233,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Max : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.max(floatOps.floatingLit(2.5), x.node))) == Interval(2.5f, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.max(floatOps.floatingLit(2.5), floatOps.randomFloat()))) == Interval(2.5f, Float.PositiveInfinity))
   }
 
   test("Absolute") {
@@ -255,8 +243,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Absolute : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.absolute(x.node))) == Interval(0, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.absolute(floatOps.randomFloat()))) == Interval(0, Float.PositiveInfinity))
   }
 
   test("Negated : Positive") {
@@ -271,8 +258,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Negated : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.negated(x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.negated(floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   // ???
@@ -295,8 +281,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Squareroot : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.sqrt(x.node))) == Interval(0f, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.sqrt(floatOps.randomFloat()))) == Interval(0f, Float.PositiveInfinity))
   }
 
   test("Ceiling"){
@@ -306,8 +291,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Ceiling : Top"){
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.ceil(x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.ceil(floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Floor") {
@@ -317,8 +301,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Floor : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.floor(x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.floor(floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Truncate") {
@@ -328,8 +311,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Truncate : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.truncate(x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.truncate(floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Nearest") {
@@ -339,8 +321,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Nearest : Top") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.nearest(x.node))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.nearest(floatOps.randomFloat()))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Copysign : Positive Negative") {
@@ -365,18 +346,15 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Copysign : Top negative") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.copysign(x.node, floatOps.floatingLit(-1)))) == Interval(Float.NegativeInfinity, 0))
+    assert(convertToFloat(apron.getBound(floatOps.copysign(floatOps.randomFloat(), floatOps.floatingLit(-1)))) == Interval(Float.NegativeInfinity, 0))
   }
 
   test("Copysign : Top positive") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.copysign(x.node, floatOps.floatingLit(8)))) == Interval(0, Float.PositiveInfinity))
+    assert(convertToFloat(apron.getBound(floatOps.copysign(floatOps.randomFloat(), floatOps.floatingLit(8)))) == Interval(0, Float.PositiveInfinity))
   }
 
   test("Copysign : Positive TOP") {
     val (floatOps, apron) = instantiateFloatOps()
-    val x = apron.addDoubleVariable("x", ApronAllocationSite.LocalIntVar("x"))
-    assert(convertToFloat(apron.getBound(floatOps.copysign(floatOps.floatingLit(-6), x.node))) == Interval(-6f, 6f))
+    assert(convertToFloat(apron.getBound(floatOps.copysign(floatOps.floatingLit(-6), floatOps.randomFloat()))) == Interval(-6f, 6f))
   }

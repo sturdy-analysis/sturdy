@@ -12,12 +12,19 @@ import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
+import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.{Widen, Join}
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 import reflect.Selectable.reflectiveSelectable
 import scala.language.reflectiveCalls
+
+@FunctionalInterface
+trait CallFrameSite[D] extends (D => String):
+  def apply(d: D): String
+
+given CallFrameSite[String] = identity
 
 class ApronCallFrame[Data, Var, V](val apron: Apron,
                                    initData: Data,
@@ -26,9 +33,9 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
                                    makeIntVal: Texpr1Node => V,
                                    makeDoubleVal: Texpr1Node => V,
                                    initVars: Iterable[(Var, V)] = Iterable.empty)
+                                  (using site: CallFrameSite[Data])
                                   (using Join[V], Widen[V], ClassTag[V])
   extends DecidableMutableCallFrame[Data, Var, V](initData, initVars) :
-  //extends MutableCallFrame[Data, Var, V, NoJoin] with DecidableCallFrame[Data, Var, V]:
 
   import apron.*
 
@@ -70,20 +77,36 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   given Join[Val] = {
     case (Val.Int(v1), Val.Int(v2)) =>
       val joined = apron.joinValues(v1.node, v2.node, widen = false)
-      joined.map(Val.Int.apply)
+      joined.map { exp =>
+        if (!exp.equals(v1.node))
+          apron.assignStrong(v1, exp)
+        Val.Int(v1)
+      }
     case (Val.Double(v1), Val.Double(v2)) =>
       val joined = apron.joinValues(v1.node, v2.node, widen = false)
-      joined.map(Val.Double.apply)
+      joined.map { exp =>
+        if (!exp.equals(v1.node))
+          apron.assignStrong(v1, exp)
+        Val.Int(v1)
+      }
     case (v1, v2) => Join(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
   given Widen[Val] = {
     case (Val.Int(v1), Val.Int(v2)) =>
       val widened = apron.joinValues(v1.node, v2.node, widen = true)
-      widened.map(Val.Int.apply)
+      widened.map { exp =>
+        if (!exp.equals(v1.node))
+          apron.assignStrong(v1, exp)
+        Val.Int(v1)
+      }
     case (Val.Double(v1), Val.Double(v2)) =>
       val widened = apron.joinValues(v1.node, v2.node, widen = true)
-      widened.map(Val.Double.apply)
+      widened.map { exp =>
+        if (!exp.equals(v1.node))
+          apron.assignStrong(v1, exp)
+        Val.Int(v1)
+      }
     case (v1, v2) => Widen(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
@@ -98,12 +121,12 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     newVars.zipWithIndex.foreach { case ((x, v), ix) =>
       getIntVal(v) match
         case Some(exp) =>
-          val av = addIntVariable(x.toString, ApronAllocationSite.LocalIntVar(x.toString))
+          val av = addIntVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
           newApronAssignments += av -> exp
           newBoundVars += ix -> Val.Int(av)
         case None => getDoubleVal(v) match
           case Some(exp) =>
-            val av = addDoubleVariable(x.toString, ApronAllocationSite.LocalDoubleVar(x.toString))
+            val av = addDoubleVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
             newApronAssignments += av -> exp
             newBoundVars += ix -> Val.Double(av)
           case None =>
@@ -149,7 +172,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
           case Val.Int(av) =>
             apron.assign(av, exp)
           case _ =>
-            val intVar = addIntVariable(x.toString, ApronAllocationSite.LocalIntVar(x.toString))
+            val intVar = addIntVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
             apron.assign(intVar, exp)
             boundVars += x -> Val.Int(intVar)
       case None => getDoubleVal(v) match
@@ -158,7 +181,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
             case Val.Double(av) =>
               apron.assign(av, exp)
             case _ =>
-              val doubleVar = addDoubleVariable(x.toString, ApronAllocationSite.LocalDoubleVar(x.toString))
+              val doubleVar = addDoubleVariable(x.toString, ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
               apron.assign(doubleVar, exp)
               boundVars += x -> Val.Double(doubleVar)
         case None =>
@@ -189,4 +212,4 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     implicitly
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
-    Some(apron.makeComputationJoiner)
+    apron.makeComputationJoiner

@@ -5,11 +5,14 @@ import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Texpr1Node
 import sturdy.Executor
+import sturdy.apron.ApronAlloc
+import sturdy.apron.ApronAllocBoundPerSite
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{EffectStack, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.callframe.ApronCallFrame.given
+import sturdy.effect.callframe.given
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
@@ -18,13 +21,13 @@ import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.apron.{Apron, ApronAllocRoundRobin, given}
+import sturdy.apron.{ApronAllocRoundRobin, Apron, given}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
-import sturdy.language.tip.abstractions.{Fix, Functions, Records, References, isFunOrWhile}
+import sturdy.language.tip.abstractions.{Fix, References, Functions, isFunOrWhile, Records}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -70,7 +73,7 @@ object RelationalAnalysis extends Interpreter,
   class Instance(apronManager: Manager, initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-    val apronAlloc = new ApronAllocRoundRobin(apronManager)
+    val apronAlloc: ApronAlloc = ApronAlloc.default(apronManager)
     implicit val apron: Apron = new Apron(apronManager, apronAlloc)
     override def jv: WithJoin[Value] = implicitly
 
@@ -91,9 +94,9 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ApronCallFrame[Unit, String, Value] = new ApronCallFrame(
+    override val callFrame: ApronCallFrame[String, String, Value] = new ApronCallFrame(
       apron,
-      (),
+      "$main",
       { case Value.IntValue(t) => t.toOption; case _ => None },
       _ => None,
       iv => Value.IntValue(Topped.Actual(iv)),

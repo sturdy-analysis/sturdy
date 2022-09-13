@@ -46,7 +46,10 @@ given ApronIntegerOps[B](using Numeric[B])
 
   override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(i)))
 
-  override def randomInteger(): Texpr1Node = throw new UnsupportedOperationException()
+  override def randomInteger(): Texpr1Node =
+    val topIv = new Interval()
+    topIv.setTop()
+    new Texpr1CstNode(topIv)
 
   override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
     new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
@@ -61,38 +64,47 @@ given ApronIntegerOps[B](using Numeric[B])
     new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
 
   override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariable { r =>
-      ap.ifThenElse(order.lt(v1, v2)) {
-        ap.assertConstrain(sub(r.node, v2), Tcons1.EQ)
+    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+      ap.assign(x1, v1)
+      ap.assign(x2, v2)
+      ap.ifThenElse(order.lt(x1.node, x2.node)) {
+        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, v1), Tcons1.EQ)
+        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
       }
       ap.getBoundNode(r)
     }
 
   override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariable { r =>
-      ap.ifThenElse(order.lt(v1, v2)) {
-        ap.assertConstrain(sub(r.node, v1), Tcons1.EQ)
+    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+      ap.assign(x1, v1)
+      ap.assign(x2, v2)
+      ap.ifThenElse(order.lt(x1.node, x2.node)) {
+        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, v2), Tcons1.EQ)
+        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
       }
       ap.getBoundNode(r)
     }
 
   override def absolute(v: Texpr1Node): Texpr1Node =
-    max(v, neg(v))
+    ap.withTemporaryIntVariable { x =>
+      ap.assign(x, v)
+      max(x.node, neg(x.node))
+    }
 
   def safediv (v1:  Texpr1Node, v2: Texpr1Node): Texpr1BinNode =
     Texpr1BinNode(Texpr1BinNode.OP_DIV, Texpr1BinNode(Texpr1BinNode.OP_SUB,v1, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)),  v2)
 
   override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariable { r =>
-      ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.node, safediv(v1, v2)), Tcons1.EQ)
+    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+      ap.assign(x1, v1)
+      ap.assign(x2, v2)
+      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
+        ap.assertConstrain(sub(r.node, safediv(x1.node, x2.node)), Tcons1.EQ)
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), v2)) {
-          ap.assertConstrain(sub(r.node, safediv(v1, v2)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
+          ap.assertConstrain(sub(r.node, safediv(x1.node, x2.node)), Tcons1.EQ)
         } {
           f.fail(IntegerDivisionByZero, s"$v1 / $v2")
         }
@@ -103,12 +115,14 @@ given ApronIntegerOps[B](using Numeric[B])
   override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
   override def remainder(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariable { r =>
-      ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
+    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+      ap.assign(x1, v1)
+      ap.assign(x2, v2)
+      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
+        ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), v2)) {
-          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
+          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
         } {
           f.fail(IntegerDivisionByZero, s"$v1 remainder $v2")
         }
@@ -119,21 +133,23 @@ given ApronIntegerOps[B](using Numeric[B])
   override def remainderUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
 
   override def modulo(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    ap.withTemporaryDoubleVariable { r =>
+    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+      ap.assign(x1, v1)
+      ap.assign(x2, v2)
       ap.assertConstrain(r.node, Tcons1.SUPEQ)
       // cumbersome
-      ap.ifThenElse(order.lt(v2, Texpr1CstNode(MpqScalar(0)))) {
-        ap.ifThenElse(order.lt(v1, Texpr1CstNode(MpqScalar(0)))) {
-          ap.assertConstrain(sub(r.node, sub(Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2), v2)), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
+        ap.ifThenElse(order.lt(x1.node, Texpr1CstNode(MpqScalar(0)))) {
+          ap.assertConstrain(sub(r.node, sub(Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node), x2.node)), Tcons1.EQ)
         } {
-          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
+          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
         }
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), v2)) {
-          ap.ifThenElse(order.lt(v1, Texpr1CstNode(MpqScalar(0)))) {
-            ap.assertConstrain(sub(r.node, add(Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2), v2)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
+          ap.ifThenElse(order.lt(x1.node, Texpr1CstNode(MpqScalar(0)))) {
+            ap.assertConstrain(sub(r.node, add(Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node), x2.node)), Tcons1.EQ)
           } {
-            ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)), Tcons1.EQ)
+            ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
           }
         } {
           f.fail(IntegerDivisionByZero, s"$v1 % $v2")

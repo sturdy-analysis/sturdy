@@ -85,7 +85,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableMutableCallFrame[Unit, String, V]
+  val callFrame: DecidableMutableCallFrame[String, String, V]
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
@@ -183,7 +183,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       Map() ++
         fun.params.zip(args) ++
         fun.locals.map(x => (x, integerLit(-1)))
-    callFrame.withNew((), locals) {
+    callFrame.withNew(fun.name, locals) {
       enterFunction(fun)
     }
 
