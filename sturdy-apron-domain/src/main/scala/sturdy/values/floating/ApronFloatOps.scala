@@ -101,7 +101,7 @@ given ApronFloatOps[B](using Fractional[B])
   override def nearest(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_NEAREST, v)
 
   override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node =
-    ap.withTemporaryIntVariables(3) { case List(x, xsign, r) =>
+    ap.withTemporaryDoubleVariables(3) { case List(x, xsign, r) =>
       ap.assign(x, v)
       ap.assign(xsign, sign)
       ap.ifThenElse(order.lt(x.node, Texpr1CstNode(MpfrScalar(0, 0)))) {
