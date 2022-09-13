@@ -1,33 +1,30 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
-import apron.{Polka, Texpr1Node, *}
+import apron.{Texpr1Node, Polka, *}
 import gmp.*
-import sturdy.data.{CombineUnit, JOptionC, noJoin}
+import sturdy.data.{JOptionC, CombineUnit, noJoin}
 import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
+import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
-import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
+import sturdy.effect.failure.{FailureKind, CollectedFailures, ConcreteFailure, Failure, AFallible}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 import sturdy.values.utils.given
 
-class ApronIntegerOpsTest extends AnyFunSuite:
+import scala.language.reflectiveCalls
 
-  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
+class ApronIntegerOpsTest extends AnyFunSuite:
 
   def instantiateIntOps() : (ApronIntegerOps[Int], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
-    implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    implicit val effects: EffectStack = new EffectStack(List(failure, apron))
     implicit val intervalOps: IntervalIntegerOps[Int] = new IntervalIntegerOps[Int](50)
     implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
     implicit val eqOps: ApronEqOps = new ApronEqOps
@@ -284,31 +281,33 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Negate Expr : EQ") {
     val (intOps, apron) = instantiateIntOps()
-    val x = apron.freshConstraintVariable("x")
-    val cond = apron.makeConstraint(x, Tcons1.EQ)
+    val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
+    
+    val cond = apron.makeConstraint(x.node, Tcons1.EQ)
     val notCond = apron.negateExpr(cond)
 
     println(cond)
     println(notCond)
-    assert(notCond == apron.makeConstraint(x, Tcons1.DISEQ))
+    assert(notCond == apron.makeConstraint(x.node, Tcons1.DISEQ))
   }
 
   test("Negate Expr : DISEQ") {
     val (intOps, apron) = instantiateIntOps()
-    val x = apron.freshConstraintVariable("x")
-    val cond = apron.makeConstraint(x, Tcons1.DISEQ)
+    val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
+    
+    val cond = apron.makeConstraint(x.node, Tcons1.DISEQ)
     val notCond = apron.negateExpr(cond)
 
     println(cond)
     println(notCond)
-    assert(notCond == apron.makeConstraint(x, Tcons1.EQ))
+    assert(notCond == apron.makeConstraint(x.node, Tcons1.EQ))
   }
 
 
   test("Negate Expr : SUP") {
     val (intOps, apron) = instantiateIntOps()
-    val x = apron.freshConstraintVariable("x")
-    val cond = apron.makeConstraint(intOps.sub(x,intOps.integerLit(4)), Tcons1.SUP)
+    val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
+    val cond = apron.makeConstraint(intOps.sub(x.node,intOps.integerLit(4)), Tcons1.SUP)
     val notCond = apron.negateExpr(cond)
 
     println(cond)
@@ -319,8 +318,8 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Negate Expr : SUPEQ") {
     val (intOps, apron) = instantiateIntOps()
-    val x = apron.freshConstraintVariable("x")
-    val cond = apron.makeConstraint(intOps.sub(x,intOps.integerLit(2)), Tcons1.SUPEQ)
+    val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
+    val cond = apron.makeConstraint(intOps.sub(x.node,intOps.integerLit(2)), Tcons1.SUPEQ)
     val notCond = apron.negateExpr(cond)
 
     println(cond)

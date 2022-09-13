@@ -16,17 +16,12 @@ import sturdy.values.{Join, Topped, Widen, given}
 
 class ApronDoubleOpsTest extends AnyFunSuite:
 
-  class DoubleApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), v => Some(v), identity, identity, initVars)
-
   def instantiateDoubleOps() : (ApronFloatOps[Double], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: DoubleApronCallFrame[String, String] = null
-    implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new DoubleApronCallFrame(apron, "initial call frame")
+    implicit val effects: EffectStack = new EffectStack(List(failure, apron))
     implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
     implicit val eqOps: ApronEqOps = new ApronEqOps
     val doubleOps = new ApronFloatOps[Double]

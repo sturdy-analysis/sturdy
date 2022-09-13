@@ -6,7 +6,7 @@ import gmp.*
 import sturdy.data.{JOptionC, CombineUnit, noJoin}
 import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.EffectStack
-import sturdy.effect.callframe.ApronCallFrame
+import sturdy.effect.callframe.{ApronCallFrame, given}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
@@ -28,23 +28,23 @@ class ApronCallFrameTest extends AnyFunSuite:
   def interval(from: Int, to: Int): Interval = new Interval(new MpqScalar(from), new MpqScalar(to))
 
 
-  class IntApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
+  class SimpleApronCallFrame[Var](apron: Apron, initData: String, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
+    extends ApronCallFrame[String, Var, Texpr1Node](apron, initData, v => Some(v), _ => None, identity, identity, initVars)
 
-  test("ApronCallFrame bound vars after frame push and pop") {
+  test("ApronCallFrame bound vars after frame_push and pop") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val r = callFrame.withNew("frame 1", vars) {
+    val r = callFrame.withNew("frame_1", vars) {
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
@@ -59,18 +59,18 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame z = x + y") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val r = callFrame.withNew("frame 1", vars) {
+    val r = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       callFrame.setLocalByName("z", add(x, y))
@@ -86,18 +86,18 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x + y) join (z = x - y)") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val r = callFrame.withNew("frame 1", vars) {
+    val r = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       println(apron)
@@ -120,18 +120,18 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val z = callFrame.withNew("frame 1", vars) {
+    val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {
@@ -164,18 +164,18 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 20) unreachable else true") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val z = callFrame.withNew("frame 1", vars) {
+    val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {
@@ -207,18 +207,18 @@ class ApronCallFrameTest extends AnyFunSuite:
 
   test("ApronCallFrame (z = x +- y); if (z > 5) false else true") {
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: IntApronCallFrame[String, String] = null
+    var callFrame: SimpleApronCallFrame[String] = null
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new IntApronCallFrame(apron, "initial call frame")
+    callFrame = new SimpleApronCallFrame(apron, "initial call frame")
 
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
     val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
 
-    val z = callFrame.withNew("frame 1", vars) {
+    val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {

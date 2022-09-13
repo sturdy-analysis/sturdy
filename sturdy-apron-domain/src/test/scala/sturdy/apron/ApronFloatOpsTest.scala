@@ -1,14 +1,14 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
-import apron.{Polka, Texpr1Node, *}
+import apron.{Texpr1Node, Polka, *}
 import gmp.*
-import sturdy.data.{CombineUnit, JOptionC, noJoin}
+import sturdy.data.{JOptionC, CombineUnit, noJoin}
 import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
+import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
-import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
+import sturdy.effect.failure.{FailureKind, CollectedFailures, ConcreteFailure, Failure, AFallible}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.floating.ApronFloatOps
@@ -16,19 +16,16 @@ import sturdy.values.{Topped, given}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 import sturdy.values.utils.given
 
-class ApronFloatOpsTest extends AnyFunSuite:
+import scala.language.reflectiveCalls
 
-  class FloatApronCallFrame[Data, Var](apron: Apron, initData: Data, initVars: Iterable[(Var, Texpr1Node)] = Iterable.empty)(using Join[Texpr1Node], Widen[Texpr1Node])
-    extends ApronCallFrame[Data, Var, Texpr1Node](apron, initData, v => Some(v), v => Some(v), identity, identity, initVars)
+class ApronFloatOpsTest extends AnyFunSuite:
 
   def instantiateFloatOps() : (ApronFloatOps[Float], Apron) =
     implicit val failure: Failure = new ConcreteFailure
     val manager = new Polka(false)
-    val alloc = new ApronAllocRoundRobin(manager)
+    val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
-    var callFrame: FloatApronCallFrame[String, String] = null
-    implicit val effects: EffectStack = new EffectStack(List(callFrame))
-    callFrame = new FloatApronCallFrame(apron, "initial call frame")
+    implicit val effects: EffectStack = new EffectStack(List(failure, apron))
     implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
     implicit val eqOps: ApronEqOps = new ApronEqOps
     val floatOps = new ApronFloatOps[Float]
