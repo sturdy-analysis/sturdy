@@ -308,7 +308,8 @@ class ApronState(val s: Abstract1, apronManager: Manager):
   override def hashCode(): Int =
     s.hashCode(apronManager)
 
-  override def toString: String = s.toString(apronManager)
+  override def toString: String = 
+    "(env = " + s.getEnvironment.toString + ", state = " + s.toString(apronManager) + ")"
 
 given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
   def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =

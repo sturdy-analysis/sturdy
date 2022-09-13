@@ -4,6 +4,7 @@ import apron.Manager
 import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Texpr1Node
+import apron.Interval
 import sturdy.Executor
 import sturdy.apron.ApronAlloc
 import sturdy.apron.ApronAllocBoundPerSite
@@ -97,7 +98,15 @@ object RelationalAnalysis extends Interpreter,
     override val callFrame: ApronCallFrame[String, String, Value] = new ApronCallFrame(
       apron,
       "$main",
-      { case Value.IntValue(t) => t.toOption; case _ => None },
+      { 
+        case Value.IntValue(Topped.Top) =>
+          val topItv = new Interval()
+          topItv.setTop()
+          val apronTopItv = new Texpr1CstNode(topItv) 
+          scala.Some(apronTopItv)
+        case Value.IntValue(Topped.Actual(v)) => scala.Some(v)
+        case _ => None 
+      },
       _ => None,
       iv => Value.IntValue(Topped.Actual(iv)),
       _ => Value.TopValue,
