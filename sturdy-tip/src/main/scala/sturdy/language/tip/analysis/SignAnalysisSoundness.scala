@@ -16,6 +16,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}
 
+
 import SignAnalysis.*
 
 object SignAnalysisSoundness:
@@ -26,6 +27,7 @@ object SignAnalysisSoundness:
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
       case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.apply(d))
+      case ConcreteInterpreter.Value.StringValue(s) => Value.StringValue(Abstractly.apply(s))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
         case Some(ca) => Value.RefValue(Abstractly.apply(ca).map(AllocationSiteRef.Addr.apply))
