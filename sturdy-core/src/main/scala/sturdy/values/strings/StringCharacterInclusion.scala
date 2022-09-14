@@ -57,6 +57,44 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
     false
   }
 
+  def toppedCharSetUnion(toppedCharSet1: Topped[Set[Char]], toppedCharSet2: Topped[Set[Char]]): Topped[Set[Char]]={
+    (toppedCharSet1, toppedCharSet2) match
+      case (Topped.Top, _) | (_, Topped.Top) => Topped.Top
+      case (Topped.Actual(s1), Topped.Actual(s2)) => Topped.Actual(s1.union(s2))
+  }
+
+  def toppedCharSetUnion(toppedCharSet: Topped[Set[Char]], charSet: Set[Char]): Topped[Set[Char]]={
+    toppedCharSet match
+      case Topped.Top => Topped.Top
+      case Topped.Actual(s1) => Topped.Actual(charSet.union(s1))
+
+  }
+
+  def toppedCharSetUnion(charSet: Set[Char], toppedCharSet: Topped[Set[Char]]): Topped[Set[Char]]={
+    toppedCharSet match
+      case Topped.Top => Topped.Top
+      case Topped.Actual(s1) => Topped.Actual(charSet.union(s1))
+  }
+
+  def toppedCharSetDifference(charSet: Set[Char], toppedCharSet: Topped[Set[Char]]): Set[Char]={
+    toppedCharSet match
+      case Topped.Top => Set[Char]()
+      case Topped.Actual(s1) => (charSet -- s1)
+  }
+
+  def toppedCharSetSubsetOf(charSet: Set[Char], toppedCharSet: Topped[Set[Char]]): Boolean={
+    toppedCharSet match
+      case Topped.Top => true
+      case Topped.Actual(s) => charSet.subsetOf(s)
+  }
+
+
+  def toppedCharSetConatins(toppedCharSet: Topped[Set[Char]], char: Char): Boolean={
+    toppedCharSet match
+      case Topped.Top => true
+      case Topped.Actual(s) => s.contains(char)
+  }
+
   def stringLit(s: String): StringCharacterInclusion = StringSets(s.toString.toCharArray.toSet[Char], Topped.Actual(s.toString.toCharArray.toSet[Char]))
 
   override def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = (s1, s2) match
@@ -84,7 +122,7 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
     case (StringSets(c1, mc1), StringSets(c2, mc2)) => if (c2.isEmpty && mc2.isEmpty) {
       Topped.Actual(true)
     }  else{
-      if(!c2.subsetOf(c1) && c1 != c2)
+      if(!toppedCharSetSubsetOf(c2,mc1))
       {
         Topped.Actual(false)
       }
@@ -231,14 +269,37 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
     //}
     //IntSign.TopSign
 
-  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = ???
+  // Bei ungültigem Index wird false zurückgegeben (auch negativ)
+  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = offset match
+    case IntSign.Zero => (s, prefix) match
+      case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
+        if(toppedCharSetIsEmpty(mc2)){
+          Topped.Actual(true)
+        }
+        val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
+        if (!c2IsSubSetOfMc1)
+        {
+          Topped.Actual(false)
+        }
+        else Topped.Top
+
+    case IntSign.Pos =>
+      (s, prefix) match
+        case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
+          val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
+          if (!c2IsSubSetOfMc1)
+          {
+            Topped.Actual(false)
+          }
+          else Topped.Top
+
+    case  IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
+    case IntSign.Neg => Topped.Actual(false)
 
   override def endsWith(s: StringCharacterInclusion, suffix: StringCharacterInclusion): Topped[Boolean] = (s, suffix) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-      if(mc1.isActual && mc2.isActual) {
-        if(c1.isEmpty && c2.isEmpty && mc1.get.isEmpty && mc2.get.isEmpty){
-          Topped.Actual(true)
-        }
+      if(toppedCharSetIsEmpty(mc2)){
+        Topped.Actual(true)
       }
       val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
       if (!c2IsSubSetOfMc1)
@@ -248,13 +309,41 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
       else Topped.Top
 
 
-  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: IntSign): IntSign = ???
+  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: IntSign): IntSign = (s, word) match
+    case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
+      val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
+      if (!c2IsSubSetOfMc1){
+        return IntSign.Neg
+      }
+      IntSign.TopSign
 
-  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion = ???
+  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion =
+    (s, word, newWord) match
+      case (StringSets(sC, sMc), StringSets(wC, wMc), StringSets(nwC, nwMc)) =>
+        if(!toppedCharSetSubsetOf(wC,sMc)){
+          return s
+        }
+        if(toppedCharSetIsEmpty(wMc) && toppedCharSetIsEmpty(sMc)){
+          return newWord
+        }
+        StringSets(toppedCharSetDifference(sC, wMc), toppedCharSetUnion(sMc, nwMc))
+
+
+
 
   override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
+    //s match
+    //case StringSets(c, mc) =>
 
   override def toUpperCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
 
-  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = ???
+  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = s match
+    case StringSets(c, mc) =>
+      if (c == Set(' ')) {
+      return StringSets(Set[Char](), Topped.Actual(Set[Char]()))
+      }
+      if(!toppedCharSetConatins(mc, ' ')){
+        s
+      }
+      else StringSets(c -- Set(' '), mc)
 
