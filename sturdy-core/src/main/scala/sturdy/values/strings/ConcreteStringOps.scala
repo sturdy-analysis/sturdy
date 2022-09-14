@@ -29,6 +29,27 @@ given ConcreteStringOps(using f: Failure): StringOps[String, Int, Boolean] with
 
   override def isEmpty(s: String): Boolean = s.isEmpty()
 
+  override def charAt(s: String, i: Int): String = s.charAt(i).toString
+
+  override def equals(s1: String, s2: String): Boolean = s1.equals(s2)
+
+  override def compareTo(s1: String, s2: String): Int = s1.compareTo(s2)
+
+  override def startsWith(s: String, prefix: String, offset: Int): Boolean = s.startsWith(prefix, offset)
+
+  override def endsWith(s: String, suffix: String): Boolean = s.endsWith(suffix)
+
+  override def indexOf(s: String, word: String, fromIndex: Int): Int = s.indexOf(word, fromIndex)
+
+  override def replace(s: String, word: String, newWord: String): String = s.replace(word, newWord)
+
+  override def toLowerCase(s: String): String = s.toLowerCase
+
+  override def toUpperCase(s: String): String = s.toUpperCase
+
+  override def trim(s: String): String = s.trim
+
+
 /*
 given ConcreteStrictIntegerOps: StrictStringsOps[Int, Int, NoJoin] with
   override def addStrict(v1: Int, v2: Int): JOptionC[Int] =

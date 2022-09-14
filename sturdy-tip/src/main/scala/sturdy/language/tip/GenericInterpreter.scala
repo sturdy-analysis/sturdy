@@ -132,11 +132,23 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
             val (pre, op) = name.splitAt(7)
             if (pre == "string_"){
               op match
+                //TODO: args.map(eval(_)) nutzen
                 case "concat" => concat(eval(args(0)), eval(args(1)))
                 case "contains" =>  contains(eval(args(0)), eval(args(1)))
                 case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
                 case "length" => length(eval(args(0)))
                 case "isEmpty" => isEmpty(eval(args(0)))
+                case "charAt" => charAt(eval(args(0)), eval(args(1)))
+                case "equals" => equals(eval(args(0)), eval(args(1)))
+                case "compareTo" => compareTo(eval(args(0)), eval(args(1)))
+                case "startsWith" => startsWith(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "endsWith" => endsWith(eval(args(0)), eval(args(1)))
+                case "indexOf" => indexOf(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "replace" => replace(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "toLowerCase" => toLowerCase(eval(args(0)))
+                case "toUpperCase" => toUpperCase(eval(args(0)))
+                case "trim" => trim(eval(args(0)))
+
             }
           }
           invokeFun(eval(fun), args.map(eval(_)))(call)
