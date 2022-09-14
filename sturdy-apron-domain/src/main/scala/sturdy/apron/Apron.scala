@@ -83,7 +83,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
     if(c.getKind == Tcons1.DISEQ)
       throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
-    c.extendEnvironment(apronEnv)
+    c.extendEnvironment(apronEnv.lce(c.getEnvironment))
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}

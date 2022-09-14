@@ -14,6 +14,7 @@ import sturdy.values.{*, given}
 import sturdy.{*, given}
 import _root_.apron.Texpr1CstNode
 import _root_.apron.MpqScalar
+import sturdy.apron.ApronExpr
 
 class RelationalAnalysisSoundness(_apron: Apron):
   implicit val apron: Apron = _apron
@@ -25,7 +26,7 @@ class RelationalAnalysisSoundness(_apron: Apron):
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
       case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Topped.Actual(apron.makeConstantConstraint(b)))
-      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Topped.Actual(new Texpr1CstNode(new MpqScalar(i))))
+      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Topped.Actual(ApronExpr.Constant(new MpqScalar(i))))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
         case Some(ca) => Value.RefValue(Abstractly(ca).map(AllocationSiteRef.Addr.apply))

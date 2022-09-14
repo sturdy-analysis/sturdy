@@ -38,7 +38,6 @@ trait ApronVar:
     if (!freed) {
       bound = state.getBound(manager, av)
       freed = true
-      println(this)
     }
   def expr: ApronExpr = ApronExpr.Var(this)
   def node: Texpr1Node =
