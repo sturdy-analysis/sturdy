@@ -3,11 +3,9 @@ package sturdy.language.tip.analysis
 import apron.Manager
 import apron.Tcons1
 import apron.Texpr1CstNode
-import apron.Texpr1Node
 import apron.Interval
 import sturdy.Executor
-import sturdy.apron.ApronAlloc
-import sturdy.apron.ApronAllocBoundPerSite
+import sturdy.apron.*
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{EffectStack, given}
 import sturdy.effect.allocation.AAllocationFromContext
@@ -47,7 +45,7 @@ object RelationalAnalysis extends Interpreter,
   Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
-  override type VInt = Topped[Texpr1Node]
+  override type VInt = Topped[ApronExpr]
   override type VBool = Topped[Tcons1]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
@@ -99,11 +97,7 @@ object RelationalAnalysis extends Interpreter,
       apron,
       "$main",
       { 
-        case Value.IntValue(Topped.Top) =>
-          val topItv = new Interval()
-          topItv.setTop()
-          val apronTopItv = new Texpr1CstNode(topItv) 
-          scala.Some(apronTopItv)
+        case Value.IntValue(Topped.Top) => scala.Some(ApronExpr.top)
         case Value.IntValue(Topped.Actual(v)) => scala.Some(v)
         case _ => None 
       },
@@ -119,7 +113,7 @@ object RelationalAnalysis extends Interpreter,
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
 
     // TODO check
-    given Widen[Texpr1Node] = new WideningTexpr1Node
+    given Widen[ApronExpr] = new WidenApronExpr
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =

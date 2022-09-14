@@ -3,12 +3,13 @@ package sturdy.values.floating
 import apron.Interval
 import apron.Texpr1VarNode
 import sturdy.data.CombineUnit
-import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1Node, Texpr1BinNode, MpfrScalar}
-import sturdy.apron.{JoinTexpr1Node, Apron}
+import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1BinNode, MpfrScalar, Texpr1Node}
+import sturdy.apron.{JoinApronExpr, Apron}
 import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
+import sturdy.apron.{ApronExpr, BinOp, UnOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
@@ -18,89 +19,78 @@ import scala.language.reflectiveCalls
 
 given ApronFloatOps[B](using Fractional[B])
                       (using ap: Apron, effects: EffectStack, f: Failure)
-                      (using order: ApronOrderingOps, eq: ApronEqOps) : FloatOps[B, Texpr1Node] with
+                      (using order: ApronOrderingOps, eq: ApronEqOps) : FloatOps[B, ApronExpr] with
 
 
-  override def floatingLit(f: B): Texpr1Node = new Texpr1CstNode(new MpfrScalar(f.toDouble, 2))
+  override def floatingLit(f: B): ApronExpr = ApronExpr.Constant(new MpfrScalar(f.toDouble, 2))
 
-  override def randomFloat(): Texpr1Node =
-    val topIv = new Interval()
-    topIv.setTop()
-    new Texpr1CstNode(topIv)
+  override def randomFloat(): ApronExpr = ApronExpr.top
 
-  override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
-
-  override def sub(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_SUB, v1, v2)
-
-  override def mul(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_MUL, v1, v2)
-
-  override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = new Texpr1BinNode(Texpr1BinNode.OP_DIV, v1, v2)
+  override def add(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Add, v1, v2)
+  override def sub(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Sub, v1, v2)
+  override def mul(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Mul, v1, v2)
+  override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Div, v1, v2)
   
-  override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def min(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.node, x2.node)) {
-        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
+        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def max(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.node, x2.node)) {
-        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
+        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def absolute(v: Texpr1Node): Texpr1Node =
+  override def absolute(v: ApronExpr): ApronExpr =
     ap.withTemporaryDoubleVariable { x =>
       ap.assign(x, v)
-      max(x.node, negated(x.node))
+      max(x.expr, negated(x.expr))
     }
 
-  override def negated(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
+  override def negated(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Negate, v)
 
-  override def sqrt(v: Texpr1Node): Texpr1Node =
-    var r: Texpr1Node = null
-    ap.ifThenElse(order.ge(v, Texpr1CstNode(MpfrScalar(0, 0)))) {
-      r = new Texpr1UnNode(Texpr1UnNode.OP_SQRT, v)
+  override def sqrt(v: ApronExpr): ApronExpr =
+    ap.ifThenElse(order.ge(v, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+      ApronExpr.Unary(UnOp.Sqrt, v)
     } {
       f.fail(IntegerDivisionByZero, s"sqrt($v)")
     }
-    r
 
-  override def ceil(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_UP, v)
+  override def ceil(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Cast, v, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_UP)
+  override def floor(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Cast, v, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_DOWN)
+  override def truncate(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Cast, v, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_ZERO)
+  override def nearest(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Cast, v, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_NEAREST)
 
-  override def floor(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_DOWN, v)
-
-  override def truncate(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_ZERO, v)
-
-  override def nearest(v: Texpr1Node): Texpr1Node = new Texpr1UnNode(Texpr1UnNode.OP_CAST, Texpr1Node.RTYPE_INT, Texpr1Node.RDIR_NEAREST, v)
-
-  override def copysign(v: Texpr1Node, sign: Texpr1Node): Texpr1Node =
+  override def copysign(v: ApronExpr, sign: ApronExpr): ApronExpr =
     ap.withTemporaryDoubleVariables(3) { case List(x, xsign, r) =>
       ap.assign(x, v)
       ap.assign(xsign, sign)
-      ap.ifThenElse(order.lt(x.node, Texpr1CstNode(MpfrScalar(0, 0)))) {
-        ap.ifThenElse(order.lt(xsign.node, Texpr1CstNode(MpfrScalar(0, 0)))) {
-          ap.assertConstrain(sub(r.node, x.node), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+        ap.ifThenElse(order.lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(sub(r.expr, x.expr), Tcons1.EQ)
         } {
-          ap.assertConstrain(sub(r.node, negated(x.node)), Tcons1.EQ)
+          ap.assertConstrain(sub(r.expr, negated(x.expr)), Tcons1.EQ)
         }
       } {
-        ap.ifThenElse(order.lt(xsign.node, Texpr1CstNode(MpfrScalar(0, 0)))) {
-          ap.assertConstrain(sub(r.node, negated(x.node)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(sub(r.expr, negated(x.expr)), Tcons1.EQ)
         } {
-          ap.assertConstrain(sub(r.node, x.node), Tcons1.EQ)
+          ap.assertConstrain(sub(r.expr, x.expr), Tcons1.EQ)
         }
       }
-      ap.getBoundNode(r)
+      r.expr
     }

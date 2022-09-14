@@ -4,7 +4,7 @@ import apron.Interval
 import sturdy.data.CombineUnit
 import apron.{Environment, Var, Tcons1, Texpr1CstNode, Texpr1UnNode, MpqScalar, Texpr1Node, DoubleScalar, Texpr1BinNode, Texpr0Node}
 import gmp.Mpz
-import sturdy.apron.{JoinTexpr1Node, Apron}
+import sturdy.apron.{ApronExpr, JoinApronExpr, Apron, BinOp, UnOp}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -20,12 +20,12 @@ import scala.language.reflectiveCalls
 
 
 given ApronIntegerOps[B](using Numeric[B])
-                        (using convertInterval : ConvertInterval[B])
-                        (using ap: Apron, effects : EffectStack, intervalOps: IntervalIntegerOps[B], f : Failure)
-                        (using order : ApronOrderingOps, eq : ApronEqOps)
-      : IntegerOps[B, Texpr1Node] with
+                        (using convertInterval: ConvertInterval[B])
+                        (using ap: Apron, effects: EffectStack, intervalOps: IntervalIntegerOps[B], f: Failure)
+                        (using order: ApronOrderingOps, eq: ApronEqOps)
+      : IntegerOps[B, ApronExpr] with
 
-  def apronIntervalToInterval(v: Texpr1Node) : NumericInterval[B] =
+  def apronIntervalToInterval(v: ApronExpr) : NumericInterval[B] =
     val supArray = new Array[Double](1)
     val infArray = new Array[Double](1)
     ap.getBound(v).sup.toDouble(supArray, 0)
@@ -34,153 +34,149 @@ given ApronIntegerOps[B](using Numeric[B])
     val inf = convertInterval.convertTo(infArray(0))
     NumericInterval[B](inf, sup)
 
-  def unaryIntervalOp(v: Texpr1Node, f: NumericInterval[B] => NumericInterval[B]): Texpr1Node =
+  def unaryIntervalOp(v: ApronExpr, f: NumericInterval[B] => NumericInterval[B]): ApronExpr =
     val vInterval = f(apronIntervalToInterval(v))
-    new Texpr1CstNode(new Interval(convertInterval.convertFrom(vInterval.low), convertInterval.convertFrom(vInterval.high)))
+    ApronExpr.Constant(new Interval(convertInterval.convertFrom(vInterval.low), convertInterval.convertFrom(vInterval.high)))
 
-  def binaryIntervalOp(v1: Texpr1Node, v2: Texpr1Node, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B]): Texpr1Node =
+  def binaryIntervalOp(v1: ApronExpr, v2: ApronExpr, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B]): ApronExpr =
     val v1Interval = apronIntervalToInterval(v1)
     val v2Interval = apronIntervalToInterval(v2)
     val resInterval = f(v1Interval, v2Interval)
-    new Texpr1CstNode(new Interval(convertInterval.convertFrom(resInterval.low), convertInterval.convertFrom(resInterval.high)))
+    ApronExpr.Constant(new Interval(convertInterval.convertFrom(resInterval.low), convertInterval.convertFrom(resInterval.high)))
 
-  override def integerLit(i: B): Texpr1Node = new Texpr1CstNode(new MpqScalar(convertInterval.convertFrom(i)))
+  override def integerLit(i: B): ApronExpr = ApronExpr.Constant(new MpqScalar(convertInterval.convertFrom(i)))
 
-  override def randomInteger(): Texpr1Node =
-    val topIv = new Interval()
-    topIv.setTop()
-    new Texpr1CstNode(topIv)
+  override def randomInteger(): ApronExpr = ApronExpr.top
 
-  override def add(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    new Texpr1BinNode(Texpr1BinNode.OP_ADD, v1, v2)
+  override def add(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Add, v1, v2)
+  override def sub(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Sub, v1, v2)
+  override def mul(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Mul, v1, v2)
+  def neg(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Negate, v)
 
-  override def sub(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    new Texpr1BinNode(Texpr1BinNode.OP_SUB, v1, v2)
-
-  override def mul(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
-    new Texpr1BinNode(Texpr1BinNode.OP_MUL, v1, v2)
-
-  def neg(v: Texpr1Node): Texpr1Node =
-    new Texpr1UnNode(Texpr1UnNode.OP_NEG, v)
-
-  override def max(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def max(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.node, x2.node)) {
-        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
+        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def min(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def min(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.node, x2.node)) {
-        ap.assertConstrain(sub(r.node, x1.node), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
       } {
-        ap.assertConstrain(sub(r.node, x2.node), Tcons1.EQ)
+        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def absolute(v: Texpr1Node): Texpr1Node =
+  override def absolute(v: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariable { x =>
       ap.assign(x, v)
-      max(x.node, neg(x.node))
+      max(x.expr, neg(x.expr))
     }
 
-  def safediv (v1:  Texpr1Node, v2: Texpr1Node): Texpr1BinNode =
-    Texpr1BinNode(Texpr1BinNode.OP_DIV, Texpr1BinNode(Texpr1BinNode.OP_SUB,v1, Texpr1BinNode(Texpr1BinNode.OP_MOD, v1, v2)),  v2)
+  def safediv(v1: ApronExpr, v2: ApronExpr): ApronExpr =
+    ApronExpr.Binary(BinOp.Div,
+      ApronExpr.Binary(BinOp.Sub,
+        v1,
+        ApronExpr.Binary(BinOp.Mod,
+          v1,
+          v2)),
+      v2)
 
-  override def div(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.node, safediv(x1.node, x2.node)), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.assertConstrain(sub(r.expr, safediv(x1.expr, x2.expr)), Tcons1.EQ)
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
-          ap.assertConstrain(sub(r.node, safediv(x1.node, x2.node)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.assertConstrain(sub(r.expr, safediv(x1.expr, x2.expr)), Tcons1.EQ)
         } {
           f.fail(IntegerDivisionByZero, s"$v1 / $v2")
         }
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def divUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
+  override def divUnsigned(v1: ApronExpr, v2: ApronExpr): ApronExpr = ???
 
-  override def remainder(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def remainder(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
-          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
         } {
           f.fail(IntegerDivisionByZero, s"$v1 remainder $v2")
         }
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def remainderUnsigned(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
+  override def remainderUnsigned(v1: ApronExpr, v2: ApronExpr): ApronExpr = ???
 
-  override def modulo(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def modulo(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.assertConstrain(r.node, Tcons1.SUPEQ)
+      ap.assertConstrain(r.expr, Tcons1.SUPEQ)
       // cumbersome
-      ap.ifThenElse(order.lt(x2.node, Texpr1CstNode(MpqScalar(0)))) {
-        ap.ifThenElse(order.lt(x1.node, Texpr1CstNode(MpqScalar(0)))) {
-          ap.assertConstrain(sub(r.node, sub(Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node), x2.node)), Tcons1.EQ)
+      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.ifThenElse(order.lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
+          ap.assertConstrain(sub(r.expr, sub(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)), Tcons1.EQ)
         } {
-          ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
+          ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
         }
       } {
-        ap.ifThenElse(order.lt(Texpr1CstNode(MpqScalar(0)), x2.node)) {
-          ap.ifThenElse(order.lt(x1.node, Texpr1CstNode(MpqScalar(0)))) {
-            ap.assertConstrain(sub(r.node, add(Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node), x2.node)), Tcons1.EQ)
+        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.ifThenElse(order.lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
+            ap.assertConstrain(sub(r.expr, add(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)), Tcons1.EQ)
           } {
-            ap.assertConstrain(sub(r.node, Texpr1BinNode(Texpr1BinNode.OP_MOD, x1.node, x2.node)), Tcons1.EQ)
+            ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
           }
         } {
           f.fail(IntegerDivisionByZero, s"$v1 % $v2")
         }
       }
-      ap.getBoundNode(r)
+      r.expr
     }
 
-  override def gcd(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node = ???
+  override def gcd(v1: ApronExpr, v2: ApronExpr): ApronExpr = ???
 
-  override def bitAnd(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def bitAnd(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     binaryIntervalOp(v1, v2, intervalOps.bitAnd)
-  override def bitOr(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def bitOr(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     binaryIntervalOp(v1, v2, intervalOps.bitOr)
-  override def bitXor(v1: Texpr1Node, v2: Texpr1Node): Texpr1Node =
+  override def bitXor(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     binaryIntervalOp(v1, v2, intervalOps.bitXor)
-  override def shiftLeft(v: Texpr1Node, shift: Texpr1Node): Texpr1Node =
+  override def shiftLeft(v: ApronExpr, shift: ApronExpr): ApronExpr =
     binaryIntervalOp(v, shift, intervalOps.shiftLeft)
-  override def shiftRight(v: Texpr1Node, shift: Texpr1Node): Texpr1Node =
+  override def shiftRight(v: ApronExpr, shift: ApronExpr): ApronExpr =
     binaryIntervalOp(v, shift, intervalOps.shiftRight)
-  override def shiftRightUnsigned(v: Texpr1Node, shift: Texpr1Node): Texpr1Node =
+  override def shiftRightUnsigned(v: ApronExpr, shift: ApronExpr): ApronExpr =
     binaryIntervalOp(v, shift, intervalOps.shiftRightUnsigned)
-  override def rotateLeft(v: Texpr1Node, shift: Texpr1Node): Texpr1Node =
+  override def rotateLeft(v: ApronExpr, shift: ApronExpr): ApronExpr =
     binaryIntervalOp(v, shift, intervalOps.rotateLeft)
-  override def rotateRight(v: Texpr1Node, shift: Texpr1Node): Texpr1Node =
+  override def rotateRight(v: ApronExpr, shift: ApronExpr): ApronExpr =
     binaryIntervalOp(v, shift, intervalOps.rotateRight)
-  override def countLeadingZeros(v: Texpr1Node): Texpr1Node =
+  override def countLeadingZeros(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.countLeadingZeros)
-  override def countTrailingZeros(v: Texpr1Node): Texpr1Node =
+  override def countTrailingZeros(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.countTrailingZeros)
-  override def nonzeroBitCount(v: Texpr1Node): Texpr1Node =
+  override def nonzeroBitCount(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.nonzeroBitCount)
-  override def invertBits(v: Texpr1Node): Texpr1Node =
+  override def invertBits(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.invertBits)

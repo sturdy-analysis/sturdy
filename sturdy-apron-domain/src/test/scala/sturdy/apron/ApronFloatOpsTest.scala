@@ -4,7 +4,6 @@ import org.scalatest.funsuite.AnyFunSuite
 import apron.{Texpr1Node, Polka, *}
 import gmp.*
 import sturdy.data.{JOptionC, CombineUnit, noJoin}
-import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
 import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame

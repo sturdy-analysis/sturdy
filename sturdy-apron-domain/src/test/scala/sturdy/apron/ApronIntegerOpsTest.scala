@@ -4,7 +4,6 @@ import org.scalatest.funsuite.AnyFunSuite
 import apron.{Texpr1Node, Polka, *}
 import gmp.*
 import sturdy.data.{JOptionC, CombineUnit, noJoin}
-import sturdy.apron.JoinTexpr1Node
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
 import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
@@ -283,32 +282,32 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
     
-    val cond = apron.makeConstraint(x.node, Tcons1.EQ)
-    val notCond = apron.negateExpr(cond)
+    val cond = apron.makeConstraint(x.expr, Tcons1.EQ)
+    val notCond = apron.negateCons(cond)
 
     println(cond)
     println(notCond)
-    assert(notCond == apron.makeConstraint(x.node, Tcons1.DISEQ))
+    assert(notCond == apron.makeConstraint(x.expr, Tcons1.DISEQ))
   }
 
   test("Negate Expr : DISEQ") {
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
     
-    val cond = apron.makeConstraint(x.node, Tcons1.DISEQ)
-    val notCond = apron.negateExpr(cond)
+    val cond = apron.makeConstraint(x.expr, Tcons1.DISEQ)
+    val notCond = apron.negateCons(cond)
 
     println(cond)
     println(notCond)
-    assert(notCond == apron.makeConstraint(x.node, Tcons1.EQ))
+    assert(notCond == apron.makeConstraint(x.expr, Tcons1.EQ))
   }
 
 
   test("Negate Expr : SUP") {
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
-    val cond = apron.makeConstraint(intOps.sub(x.node,intOps.integerLit(4)), Tcons1.SUP)
-    val notCond = apron.negateExpr(cond)
+    val cond = apron.makeConstraint(intOps.sub(x.expr,intOps.integerLit(4)), Tcons1.SUP)
+    val notCond = apron.negateCons(cond)
 
     println(cond)
     println(notCond)
@@ -319,8 +318,8 @@ class ApronIntegerOpsTest extends AnyFunSuite:
   test("Negate Expr : SUPEQ") {
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
-    val cond = apron.makeConstraint(intOps.sub(x.node,intOps.integerLit(2)), Tcons1.SUPEQ)
-    val notCond = apron.negateExpr(cond)
+    val cond = apron.makeConstraint(intOps.sub(x.expr,intOps.integerLit(2)), Tcons1.SUPEQ)
+    val notCond = apron.negateCons(cond)
 
     println(cond)
     println(notCond)

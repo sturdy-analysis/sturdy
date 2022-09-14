@@ -26,27 +26,31 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   }
 
 
-  def getBound(v: alloc.ApronVar): Interval =
-    apronState.getBound(apronManager, v.av)
+  def getBound(v: alloc.Var): Interval =
+    val intern = new Texpr1Intern(apronState.getEnvironment, v.node)
+    apronState.getBound(apronManager, intern)
 
-  def getBoundNode(v: alloc.ApronVar): Texpr1CstNode =
-    new Texpr1CstNode(apronState.getBound(apronManager, v.av))
+  def getBound(v: ApronExpr): Interval =
+    getBound(v.toApron)
 
   def getBound(v: Texpr1Node): Interval =
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
 
-  def addDoubleVariable(name: String, site: ApronAllocationSite): alloc.ApronVar =
+  def addDoubleVariable(name: String, site: ApronAllocationSite): alloc.Var =
     alloc.addDoubleVariable(name, apronState, site)
 
-  def addIntVariable(name: String, site: ApronAllocationSite): alloc.ApronVar =
+  def addIntVariable(name: String, site: ApronAllocationSite): alloc.Var =
     alloc.addIntVariable(name, apronState, site)
+
+  def freeVariable(v: alloc.Var): Unit =
+    alloc.freeVariable(v, apronState)
 
   def makeConstraint(c: Tcons0): Unit =
     new Tcons1(apronEnv, c)
 
-  def makeConstraint(v: Texpr1Node, relOp: Int): Tcons1 =
-    new Tcons1(apronEnv, relOp, v)
+  def makeConstraint(v: ApronExpr, relOp: Int): Tcons1 =
+    new Tcons1(apronEnv, relOp, v.toApron)
 
   def makeConstantConstraint(b: Boolean): Tcons1 =
     new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
@@ -71,7 +75,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       a
     }
 
-  def assertConstrain(v: Texpr1Node, relOp: Int): Unit =
+  def assertConstrain(v: ApronExpr, relOp: Int): Unit =
     assertConstrain(makeConstraint(v, relOp))
 
   def assertConstrain(c: Tcons1): Unit =
@@ -84,48 +88,50 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
-  def assign(v: alloc.ApronVar, exp: Texpr1Node): Unit =
-    val expIntern = new Texpr1Intern(apronEnv, exp)
+  def assign(v: alloc.Var, exp: ApronExpr): Unit =
+    val av = v.getOrElse(throw new IllegalStateException(s"Cannot assign to freed variable $v"))
+    val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
     if (alloc.useStrongUpdate(v)) {
-      apronState.assign(apronManager, v.av, expIntern, null)
+      apronState.assign(apronManager, av, expIntern, null)
     } else {
-      val assigned = apronState.assignCopy(apronManager, v.av, expIntern, null)
+      val assigned = apronState.assignCopy(apronManager, av, expIntern, null)
       apronState.join(apronManager, assigned)
     }
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
-  def assignStrong(v: alloc.ApronVar, exp: Texpr1Node): Unit =
-    val expIntern = new Texpr1Intern(apronEnv, exp)
-    apronState.assign(apronManager, v.av, expIntern, null)
+  def assignStrong(v: alloc.Var, exp: ApronExpr): Unit =
+    val av = v.getOrElse(throw new IllegalStateException(s"Cannot assign to freed variable $v"))
+    val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
+    apronState.assign(apronManager, av, expIntern, null)
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
-  def freshConstraintVariable(purpose: String, site: ApronAllocationSite): alloc.ApronVar =
+  def freshConstraintVariable(purpose: String, site: ApronAllocationSite): alloc.Var =
     addIntVariable(purpose, site)
 
-  def withTemporaryIntVariable[A](f: alloc.ApronVar => A): A =
+  def withTemporaryIntVariable[A](f: alloc.Var => A): A =
     val v = alloc.addIntVariable("$$temporary", apronState, ApronAllocationSite.TemporaryVar)
     try f(v)
     finally {
       alloc.freeVariable(v, apronState)
     }
 
-  def withTemporaryIntVariables[A](n: Int)(f: PartialFunction[List[alloc.ApronVar], A]): A =
+  def withTemporaryIntVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
     val vs = (1 to n).toList.map(i => alloc.addIntVariable(s"$$temporary_$i", apronState, ApronAllocationSite.TemporaryVar))
     try f(vs)
     finally {
       vs.foreach(alloc.freeVariable(_, apronState))
     }
 
-  def withTemporaryDoubleVariable[A](f: alloc.ApronVar => A): A =
+  def withTemporaryDoubleVariable[A](f: alloc.Var => A): A =
     val v = alloc.addDoubleVariable("$$temporary", apronState, ApronAllocationSite.TemporaryVar)
     try f(v)
     finally {
       alloc.freeVariable(v, apronState)
     }
 
-  def withTemporaryDoubleVariables[A](n: Int)(f: PartialFunction[List[alloc.ApronVar], A]): A =
+  def withTemporaryDoubleVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
     val vs = (1 to n).toList.map(i => alloc.addDoubleVariable(s"$$temporary_$i", apronState, ApronAllocationSite.TemporaryVar))
     try f(vs)
     finally {
@@ -133,7 +139,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     }
 
   def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
-    ifThenElse(cond, negateExpr(cond))(ifTrue)(ifFalse)
+    ifThenElse(cond, negateCons(cond))(ifTrue)(ifFalse)
 
   def ifThenElse[A](condTrue: Tcons1, condFalse: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
@@ -147,7 +153,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
 
   def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
-    ifThenElsePure(condTrue, negateExpr(condTrue), widen)(ifTrue)(ifFalse)
+    ifThenElsePure(condTrue, negateCons(condTrue), widen)(ifTrue)(ifFalse)
 
   def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = new Abstract1(apronManager, apronState)
@@ -178,7 +184,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     Join(res1, res2).get.getOrThrow
 
 
-  def negateExpr(cond : Tcons1) : Tcons1 =
+  def negateCons(cond : Tcons1) : Tcons1 =
     cond.getKind match
       case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
       case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
@@ -186,25 +192,27 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
       case Tcons1.EQMOD => ??? // not useful
 
-  def joinValues(v1: Texpr1Node, v2: Texpr1Node, widen: Boolean): MaybeChanged[Texpr1Node] =
+  def joinValues(e1: ApronExpr, e2: ApronExpr, widen: Boolean): MaybeChanged[ApronExpr] =
+    val v1 = e1.toApron
+    val v2 = e2.toApron
     if (v1.isEqual(v2)) {
       if (widen) {
         val widened = apronState.widening(apronManager, apronState)
         val changed = !widened.isEqual(apronManager, apronState)
         apronState = widened
-        MaybeChanged(v1, changed)
+        MaybeChanged(e1, changed)
       } else {
-        MaybeChanged.Unchanged(v1)
+        MaybeChanged.Unchanged(e1)
       }
     } else {
       withTemporaryIntVariable { x =>
-        val v1Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v1), Tcons1.EQ)
-        val v2Cons = makeConstraint(new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v2), Tcons1.EQ)
+        val v1Cons = new Tcons1(apronEnv, Tcons1.EQ, new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v1))
+        val v2Cons = new Tcons1(apronEnv, Tcons1.EQ, new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v2))
         ifThenElsePure(v1Cons, v2Cons, widen)(())(())
 
         val xBound = getBound(x)
         val v1Bound = getBound(v1)
-        MaybeChanged(new Texpr1CstNode(xBound), !xBound.isEqual(v1Bound))
+        MaybeChanged(ApronExpr.Var(x), !xBound.isEqual(v1Bound))
       }
     }
 
@@ -311,10 +319,3 @@ class ApronState(val s: Abstract1, apronManager: Manager):
   override def toString: String = 
     "(env = " + s.getEnvironment.toString + ", state = " + s.toString(apronManager) + ")"
 
-given JoinTexpr1Node(using ap: Apron): Join[Texpr1Node] with
-  def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
-    ap.joinValues(v1, v2, widen = false)
-
-given WideningTexpr1Node(using ap: Apron): Widen[Texpr1Node] with
-  def apply(v1: Texpr1Node, v2: Texpr1Node): MaybeChanged[Texpr1Node] =
-    ap.joinValues(v1, v2, widen = true)

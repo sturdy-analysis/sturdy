@@ -3,7 +3,6 @@ package sturdy.apron
 import apron.*
 import gmp.*
 import org.scalatest.funsuite.AnyFunSuite
-import sturdy.apron.JoinTexpr1Node
 import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.failure.*
