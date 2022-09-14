@@ -91,18 +91,18 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
       else Topped.Top
     }
 
-  override def length(s: StringCharacterInclusion): IntSign = IntSign.Neg
-    //s match
-    //case (StringSets(c, mc)) =>
-    //  if(c.isEmpty){
-    //    if(mc.isActual){
-    //      if(mc.get.isEmpty){
-    //        return IntSign.Zero
-    //      }
-    //    }
-    //    return IntSign.ZeroOrPos
-    //  }
-    //  IntSign.Pos
+  override def length(s: StringCharacterInclusion): IntSign =
+    s match
+    case (StringSets(c, mc)) =>
+      if(c.isEmpty){
+        if(mc.isActual){
+          if(mc.get.isEmpty){
+            return IntSign.Zero
+          }
+        }
+        return IntSign.ZeroOrPos
+      }
+      IntSign.Pos
 
 
 

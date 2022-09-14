@@ -133,21 +133,21 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
             if (pre == "string_"){
               op match
                 //TODO: args.map(eval(_)) nutzen
-                case "concat" => concat(eval(args(0)), eval(args(1)))
-                case "contains" =>  contains(eval(args(0)), eval(args(1)))
-                case "substring" => substring(eval(args(0)), eval(args(1)), eval(args(2)))
-                case "length" => length(eval(args(0)))
-                case "isEmpty" => isEmpty(eval(args(0)))
-                case "charAt" => charAt(eval(args(0)), eval(args(1)))
-                case "equals" => equals(eval(args(0)), eval(args(1)))
-                case "compareTo" => compareTo(eval(args(0)), eval(args(1)))
-                case "startsWith" => startsWith(eval(args(0)), eval(args(1)), eval(args(2)))
-                case "endsWith" => endsWith(eval(args(0)), eval(args(1)))
-                case "indexOf" => indexOf(eval(args(0)), eval(args(1)), eval(args(2)))
-                case "replace" => replace(eval(args(0)), eval(args(1)), eval(args(2)))
-                case "toLowerCase" => toLowerCase(eval(args(0)))
-                case "toUpperCase" => toUpperCase(eval(args(0)))
-                case "trim" => trim(eval(args(0)))
+                case "concat" => return concat(eval(args(0)), eval(args(1)))
+                case "contains" =>  return contains(eval(args(0)), eval(args(1)))
+                case "substring" => return substring(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "length" => return length(eval(args(0)))
+                case "isEmpty" => return isEmpty(eval(args(0)))
+                case "charAt" => return charAt(eval(args(0)), eval(args(1)))
+                case "equals" => return stringOps.equals(eval(args(0)), eval(args(1)))
+                case "compareTo" => return compareTo(eval(args(0)), eval(args(1)))
+                case "startsWith" => return startsWith(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "endsWith" => return endsWith(eval(args(0)), eval(args(1)))
+                case "indexOf" => return indexOf(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "replace" => return replace(eval(args(0)), eval(args(1)), eval(args(2)))
+                case "toLowerCase" => return toLowerCase(eval(args(0)))
+                case "toUpperCase" => return toUpperCase(eval(args(0)))
+                case "trim" => return trim(eval(args(0)))
 
             }
           }
