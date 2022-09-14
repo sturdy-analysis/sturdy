@@ -1,5 +1,7 @@
 package sturdy.language.jimple
 
+import sturdy.language.jimple.ConcreteInterpreter
+
 import sturdy.effect.symboltable.{ConcreteSymbolTable, JoinedSymbolTable}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -15,8 +17,10 @@ import sturdy.data.NoJoin
 
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers {
+  behavior of "Jimple concrete interpreter"
 
   val jdkUri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/jimple/jdk").toURI;
+  val jdk = Paths.get(jdkUri)
 
 //  val classTable: ConcreteSymbolTable[Unit, String, Container] = new ConcreteSymbolTable[Unit, String, Container]
 //  val runtimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit] = new ConcreteSymbolTable[Unit, String, RuntimeUnit]
@@ -28,7 +32,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers {
       parseJDK(classTable, runtimeTable)
       val program = parseAndLoad(p, classTable, runtimeTable)
 //      val refInterp = new ReferenceInterpreter
-//      val concInterp = new ConcreteInterpreter
+      val concInterp = new ConcreteInterpreter.Instance(FrameDate.empty, Iterable.empty)
 //      val resRef = fallible(refInterp.runProg(arg, program))
 //      val resConc = fallible(concInterp.runProg(arg, program))
 //      assertResult(resRef)(resConc)
@@ -36,7 +40,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers {
 
 
   def parseJDK(classTable: ConcreteSymbolTable[Unit, String, Container], runtimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit]): Unit =
-    Files.list(Paths.get(jdkUri)).toScala(List).filter(p => p.toString.endsWith(".jimple")).sorted.foreach { p =>
+    Files.list(jdk).toScala(List).filter(p => p.toString.endsWith(".jimple")).sorted.foreach { p =>
       parseAndLoad(p, classTable, runtimeTable)
     }
 
