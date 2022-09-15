@@ -71,6 +71,11 @@ class ApronFloatOpsTest extends AnyFunSuite:
     assert(convertToFloat(apron.getBound(floatOps.floatingLit(Float.MinPositiveValue))) == Interval(Float.MinPositiveValue, Float.MinPositiveValue))
   }
 
+  test("Floating Lit : Too small") {
+    val (floatOps, apron) = instantiateFloatOps()
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(Float.MinPositiveValue), floatOps.floatingLit(2)))) == Interval(0, 0))
+  }
+
   // This failing test case show that it's not possible to approximate soundly the behavior of floating point operation because of the rational conversion done by apron
   // This test should pass if the apron manager doesn't convert to rational
   /*
@@ -87,17 +92,17 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Addition"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(-1), floatOps.floatingLit(1)))) == Interval(0f, 0f))
+    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(-1), floatOps.floatingLit(1)))) == Interval(-1f+1f, -1f+1f))
   }
 
   test("Addition : Positive"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(1.5), floatOps.floatingLit(0.25)))) == Interval(1.75f, 1.75f))
+    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(1.5), floatOps.floatingLit(0.25)))) == Interval(1.5f+.25f, 1.5f+.25f))
   }
 
   test("Addition : Negative"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(-10f), floatOps.floatingLit(6.4)))) == Interval(-3.6f, -3.6f))
+    assert(convertToFloat(apron.getBound(floatOps.add(floatOps.floatingLit(-10f), floatOps.floatingLit(6.4)))) == Interval(-10f+6.4f, -10f+6.4f))
   }
 
   test("Addition : Top"){
@@ -107,17 +112,17 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Substraction") {
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(-1), floatOps.floatingLit(1)))) == Interval(-2f, -2f))
+    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(-1), floatOps.floatingLit(1)))) == Interval(-1f-1f, -1f-1f))
   }
 
   test("Substraction : Positive") {
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(1.5), floatOps.floatingLit(0.25)))) == Interval(1.25f, 1.25f))
+    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(1.5), floatOps.floatingLit(0.25)))) == Interval(1.5f-.25f, 1.5f-.25f))
   }
 
   test("Substraction : Negative") {
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(-10f), floatOps.floatingLit(6.4f)))) == Interval(-16.4f, -16.4f))
+    assert(convertToFloat(apron.getBound(floatOps.sub(floatOps.floatingLit(-10f), floatOps.floatingLit(6.4f)))) == Interval(-10f-6.4f, -10f-6.4f))
   }
 
   test("Substraction : Top") {
@@ -132,22 +137,22 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Multiplication : Positive Integers"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1), floatOps.floatingLit(2)))) == Interval(2f, 2f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1), floatOps.floatingLit(2)))) == Interval(1f*2f, 1f*2f))
   }
 
   test("Multiplication : Negative Integers"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(-2), floatOps.floatingLit(7)))) == Interval(-14f, -14f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(-2), floatOps.floatingLit(7)))) == Interval(-2f*7f, -2f*7f))
   }
 
   test("Multiplication : Zero and Integer"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(0), floatOps.floatingLit(2)))) == Interval(0f, 0f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(0), floatOps.floatingLit(2)))) == Interval(0f*2f, 0f*2f))
   }
 
   test("Multiplication : Integer and Zero"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1), floatOps.floatingLit(0)))) == Interval(0f, 0f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1), floatOps.floatingLit(0)))) == Interval(1f*0f, 1f*0f))
   }
 
   test("Multiplication : Top and Zero"){
@@ -157,7 +162,7 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Multiplication : Positive Floats"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(4.5), floatOps.floatingLit(2)))) == Interval(9f, 9f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(4.5), floatOps.floatingLit(2)))) == Interval(4.5f*2f, 4.5f*2f))
   }
 
   test("Multiplication : Positive Floats less than one"){
@@ -167,42 +172,42 @@ class ApronFloatOpsTest extends AnyFunSuite:
 
   test("Multiplication : Negative Floats"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1f / 3), floatOps.floatingLit(-12f)))) == Interval(-4f, -4f))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(1f / 3f), floatOps.floatingLit(-12f)))) == Interval((1f/3f)*(-12f), (1f/3f)*(-12f)))
   }
 
   test("Multiplication : Negative Floats less than one"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(-0.5f), floatOps.floatingLit(math.Pi.toFloat)))) == Interval(-math.Pi.toFloat / 2, -math.Pi.toFloat / 2))
+    assert(convertToFloat(apron.getBound(floatOps.mul(floatOps.floatingLit(-0.5f), floatOps.floatingLit(math.Pi.toFloat)))) == Interval(math.Pi.toFloat * (-0.5f), math.Pi.toFloat * (-0.5f)))
   }
 
   test("Divison : Positive Integers"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(5), floatOps.floatingLit(2)))) == Interval(2.5f, 2.5f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(5), floatOps.floatingLit(2)))) == Interval(5f/2f, 5f/2f))
   }
 
   test("Divison : Negative Integers"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-3), floatOps.floatingLit(2)))) == Interval(-1.5f, -1.5f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-3), floatOps.floatingLit(2)))) == Interval(-3f/2f, -3f/2f))
   }
 
   test("Divison : Positive Floats"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(5.5), floatOps.floatingLit(2)))) == Interval(2.75f, 2.75f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(5.5), floatOps.floatingLit(2)))) == Interval(5.5f/2f, 5.5f/2f))
   }
 
   test("Divison : Positive Floats less than one"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(0.5), floatOps.floatingLit(0.25)))) == Interval(2f, 2f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(0.5), floatOps.floatingLit(0.25)))) == Interval(.5f/.25f, .5f/.25f))
   }
 
   test("Divison : Negative Floats"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-2.5), floatOps.floatingLit(10)))) == Interval(-0.25f, -0.25f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-2.5), floatOps.floatingLit(10)))) == Interval(-2.5f/10f, -2.5f/10f))
   }
 
   test("Divison : Negative Floats less than one"){
     val (floatOps, apron) = instantiateFloatOps()
-    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-0.1), floatOps.floatingLit(3)))) == Interval(-1 / 30f, -1 / 30f))
+    assert(convertToFloat(apron.getBound(floatOps.div(floatOps.floatingLit(-0.1), floatOps.floatingLit(3)))) == Interval(-.1f / 3f, -.1f / 3f))
   }
 
   test("Division : by zero") {
