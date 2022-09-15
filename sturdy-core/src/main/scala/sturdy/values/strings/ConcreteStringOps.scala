@@ -49,6 +49,10 @@ given ConcreteStringOps(using f: Failure): StringOps[String, Int, Boolean] with
 
   override def trim(s: String): String = s.trim
 
+  //override def split(s: String, splitChar: String): Map[Int, String] =
+  //  val splitList = s.split(splitChar)
+  //  (0 until splitList.length).zip(splitList).toMap
+
 
 /*
 given ConcreteStrictIntegerOps: StrictStringsOps[Int, Int, NoJoin] with

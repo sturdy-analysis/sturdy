@@ -32,8 +32,7 @@ trait StringOps[V, I, B]:
   def endsWith(s: V, suffix: V): B
   def indexOf(s: V, word: V, fromIndex: I): I
   def replace(s: V, word: V, newWord: V): V
-  //TODO: Add Split
-  //def split(s: V, splitChar: V): Seq[V]
+  //def split(s: V, splitChar: V): R
   def toLowerCase(s: V): V
   def toUpperCase(s: V): V
   def trim(s: V) :V
