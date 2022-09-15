@@ -59,7 +59,9 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
 
   override def substring(s: StringCharacterInclusion, begin: IntSign, end: IntSign): StringCharacterInclusion = (begin, end) match
     case (IntSign.Zero, IntSign.Zero) => StringSets(Set[Char](), Topped.Actual(Set[Char]()))
-    case (IntSign.Neg, _) | (_, IntSign.Neg) => j.joinWithFailure(f.fail(StringNegativeIndex, s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end"))
+    case (IntSign.Neg, _) | (_, IntSign.Neg) => j.joinWithFailure(f.fail(StringNegativeIndex,
+      s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
+      s"substring of $s with indices $begin to $end"))
     case (IntSign.NegOrZero, _) | (_, IntSign.NegOrZero) => s match
       case StringSets(c, mc) =>
         j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c,mc)))(j.joinWithFailure(f.fail(StringNegativeIndex,
@@ -67,8 +69,9 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
           s"substring of $s with indices $begin to $end")))
     case _ => s match
       case StringSets(c, mc) =>
-        var cUnionMc = if mc.isTop then Topped.Top else Topped.Actual(mc.get.union(c))
-        j.joinWithFailure(StringSets(Set[Char](), cUnionMc))(f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end"))
+        j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c, mc)))(f.fail(StringIndexOutOfBounds,
+          s"substring of $s with indices $begin to $end"))
+
 
   override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] = (s, w) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
@@ -155,10 +158,10 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
         IntSign.Zero
       }
       else{
-        val mc1Array = mc1.toArray[Char];
-        val mc2Array = mc2.toArray[Char];
-        var firstIteration = true;
-        var state = IntSign.TopSign;
+        val mc1Array = mc1.toArray[Char]
+        val mc2Array = mc2.toArray[Char]
+        var firstIteration = true
+        var state = IntSign.TopSign
         for(x <- mc1Array){
           for(y <- mc2Array){
             if(firstIteration) {
@@ -190,31 +193,6 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
         state
       }
 
-
-    //case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-    //  if (mc1.isActual && mc2.isActual) {
-    //    if(c1.isEmpty && c2.isEmpty && mc1.get.isEmpty && mc2.get.isEmpty){
-    //      return IntSign.Zero
-    //    }
-    //  }
-
-      //if(mc1.isTop && toppedCharSetIsEmpty(mc2)){
-      //  return IntSign.ZeroOrPos
-      //}
-      //if(mc2.isTop && toppedCharSetIsEmpty(mc1)){
-      //  return IntSign.NegOrZero
-      //}
-      //if(mc1.is)
-
-
-
-
-
-
-
-    //}
-    //IntSign.TopSign
-
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
   override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = offset match
     case IntSign.Zero => (s, prefix) match
@@ -239,7 +217,7 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
           }
           else Topped.Top
 
-    case  IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
+    case IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
     case IntSign.Neg => Topped.Actual(false)
 
   override def endsWith(s: StringCharacterInclusion, suffix: StringCharacterInclusion): Topped[Boolean] = (s, suffix) match
