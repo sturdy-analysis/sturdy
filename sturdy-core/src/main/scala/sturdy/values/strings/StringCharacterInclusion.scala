@@ -7,6 +7,7 @@ import sturdy.values.*
 import sturdy.values.booleans.ToppedBooleanOps
 import sturdy.values.integer.{IntSign, NumericInterval}
 import sturdy.values.integer.IntSign.*
+import sturdy.values.integer.NumericInterval.*
 import sturdy.values.strings.CharacterInclusionUtil.*
 import sturdy.values.relational.*
 import sturdy.values.records.ARecord
@@ -49,7 +50,8 @@ given CombineStringCharacterInclusion[W <: Widening]: Combine[StringCharacterInc
 
 
 
-given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOps[StringCharacterInclusion, IntSign, Topped[Boolean]] with
+
+given CharacterInclusionStringOps(using f: Failure, j: EffectStack): StringOps[StringCharacterInclusion, IntSign, Topped[Boolean]] with
 
   def stringLit(s: String): StringCharacterInclusion = StringSets(s.toCharArray.toSet[Char], Topped.Actual(s.toCharArray.toSet[Char]))
 
@@ -276,4 +278,74 @@ given CharacterInclusionStringOps[B](using f: Failure, j: EffectStack): StringOp
       else StringSets(c -- Set(' '), mc)
 
   //override def split(s: StringCharacterInclusion, splitChar: StringCharacterInclusion): ARecord[Int, StringCharacterInclusion] = ???
+
+given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectStack): StringOps[StringCharacterInclusion, NumericInterval[Int], Topped[Boolean]] with
+  def stringLit(s: String): StringCharacterInclusion = StringSets(s.toCharArray.toSet[Char], Topped.Actual(s.toCharArray.toSet[Char]))
+
+  override def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = ???
+
+  override def substring(s: StringCharacterInclusion, begin: NumericInterval[Int], end: NumericInterval[Int]): StringCharacterInclusion =
+    if (isIntervalZero(begin) && isIntervalZero(end)){
+      return StringSets(Set[Char](),Topped.Actual(Set[Char]()))
+    }
+    s match
+      case StringSets(c, mc) =>
+        if (mc.isActual){
+          if(c.size == 1 && mc.size == 1){
+            if(isIntervalOne(begin) && isIntervalOne(end)){
+              return StringSets(Set[Char](),Topped.Actual(Set[Char]()))
+            }
+            if (isIntervalZero(begin) && isIntervalOne(end)){
+              return s
+            }
+          }
+        }
+        if (isIntervalNegative(begin) || isIntervalNegative(end)){
+          return f.fail(StringNegativeIndex, s"substring of $s with indices $begin to $end")
+        }
+        if (isIntervalLTEQ(begin, end)){
+          return j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c, mc)))(f.fail(StringIndexOutOfBounds,
+            s"substring of $s with indices $begin to $end"))
+        }
+        f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end")
+
+  override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] = ???
+
+  override def length(s: StringCharacterInclusion): NumericInterval[Int] = s match
+    case StringSets(c, mc) => if toppedCharSetIsEmpty(mc) then NumericInterval[Int].tupled(0, 0) else NumericInterval[Int].tupled(c.size, Int.MaxValue)
+
+  override def charAt(s: StringCharacterInclusion, i: NumericInterval[Int]): StringCharacterInclusion =
+    i match
+      case Bounded(low, high) => s match
+        case StringSets(c, mc) =>
+          if (low >= 0 && high < c.size && high >= 0){
+            StringSets(Set[Char](), mc)
+          }
+          else CharacterInclusionStringOps.charAt(s, intervalAsSign(i))
+      case NumericInterval.Top() => CharacterInclusionStringOps.charAt(s, intervalAsSign(i))
+
+
+  override def equals(s1: StringCharacterInclusion, s2: StringCharacterInclusion): Topped[Boolean] = ???
+
+  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): NumericInterval[Int] = ???
+
+  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: NumericInterval[Int]): Topped[Boolean] =
+    CharacterInclusionStringOps.startsWith(s, prefix, intervalAsSign(offset))
+
+  override def endsWith(s: StringCharacterInclusion, suffix: StringCharacterInclusion): Topped[Boolean] = ???
+
+  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
+    signAsInterval(CharacterInclusionStringOps.indexOf(s, word, intervalAsSign(fromIndex)))
+
+  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion = ???
+
+  override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
+
+  override def toUpperCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
+
+  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = ???
+
+  override def isEmpty(s: StringCharacterInclusion): Topped[Boolean] = ???
+
+
 

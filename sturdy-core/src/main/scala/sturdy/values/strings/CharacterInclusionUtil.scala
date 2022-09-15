@@ -1,6 +1,8 @@
 package sturdy.values.strings
 
 import sturdy.values.Topped
+import sturdy.values.integer.{IntSign, NumericInterval}
+
 
 object CharacterInclusionUtil {
   def toppedCharSetIsEmpty(toppedCharSet: Topped[Set[Char]]): Boolean ={
@@ -45,5 +47,78 @@ object CharacterInclusionUtil {
     toppedCharSet match
       case Topped.Top => true
       case Topped.Actual(s) => s.contains(char)
+  }
+
+  def isIntervalZero(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low == 0 && high == 0
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalOne(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low == 1 && high == 1
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalZeroToOne(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low == 0 && high == 1
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalPositive(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low > 0 && high > 0
+      case NumericInterval.Top() => false
+  }
+  def isIntervalZeroOrPositive(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low >= 0 && high >= 0
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalNegative(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low < 0 && high < 0
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalNegativeOrZero(interval: NumericInterval[Int]): Boolean = {
+    interval match
+      case NumericInterval.Bounded(low, high) => low <= 0 && high <= 0
+      case NumericInterval.Top() => false
+  }
+
+  def isIntervalLTEQ(x: NumericInterval[Int], y: NumericInterval[Int]): Boolean = {(x, y) match
+      case (_, NumericInterval.Top()) => true
+      case (NumericInterval.Top(), _) => false
+      case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
+        l2 <= l1 && h1 <= h2
+  }
+  def intervalAsSign(x: NumericInterval[Int]): IntSign ={
+    if (isIntervalPositive(x)){
+      return IntSign.Pos
+    }
+    if (isIntervalZeroOrPositive(x)){
+      return IntSign.ZeroOrPos
+    }
+    if (isIntervalNegative(x)){
+      return IntSign.Neg
+    }
+    if (isIntervalNegativeOrZero(x)){
+      return IntSign.NegOrZero
+    }
+    IntSign.TopSign
+  }
+
+  def signAsInterval(sign: IntSign): NumericInterval[Int] ={
+    sign match
+      case IntSign.TopSign => NumericInterval.Top()
+      case IntSign.Pos => NumericInterval.Bounded(1, Int.MaxValue)
+      case IntSign.ZeroOrPos => NumericInterval.Bounded(0, Int.MaxValue)
+      case IntSign.Neg => NumericInterval.Bounded(Int.MinValue, -1)
+      case IntSign.NegOrZero => NumericInterval.Bounded(Int.MinValue, 0)
+      case IntSign.Zero => NumericInterval.Bounded(0,0)
   }
 }

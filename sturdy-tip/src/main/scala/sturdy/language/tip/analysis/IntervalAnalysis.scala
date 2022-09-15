@@ -1,4 +1,3 @@
-/*
 package sturdy.language.tip.analysis
 
 import sturdy.{Executor, fix, data}
@@ -47,7 +46,7 @@ object IntervalAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    override val stringOps: StringOps[Value, Value] = implicitly
+    override val stringOps: StringOps[Value, Value, Value] = implicitly
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
@@ -82,4 +81,3 @@ object IntervalAnalysis extends Interpreter,
 
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 
-*/

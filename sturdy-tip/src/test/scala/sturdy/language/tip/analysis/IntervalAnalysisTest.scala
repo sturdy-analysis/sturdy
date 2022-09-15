@@ -1,4 +1,3 @@
-/*
 package sturdy.language.tip.analysis
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
@@ -40,7 +39,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip interval analysis"
 
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[IntervalAnalysisTest].getResource("/strings").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.toString.contains("") && p.toString.endsWith(".tip")
@@ -84,5 +83,3 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     } else {
       null
     }
-
-*/
