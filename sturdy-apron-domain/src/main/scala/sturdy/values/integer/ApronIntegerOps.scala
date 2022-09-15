@@ -4,7 +4,8 @@ import apron.Interval
 import sturdy.data.CombineUnit
 import apron.{Environment, Var, Tcons1, Texpr1CstNode, Texpr1UnNode, MpqScalar, Texpr1Node, DoubleScalar, Texpr1BinNode, Texpr0Node}
 import gmp.Mpz
-import sturdy.apron.{ApronExpr, JoinApronExpr, Apron, BinOp, UnOp}
+import sturdy.apron.ApronCons
+import sturdy.apron.{JoinApronExpr, UnOp, BinOp, ApronExpr, Apron}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -22,9 +23,10 @@ import scala.language.reflectiveCalls
 given ApronIntegerOps[B](using Numeric[B])
                         (using convertInterval: ConvertInterval[B])
                         (using ap: Apron, effects: EffectStack, intervalOps: IntervalIntegerOps[B], f: Failure)
-                        (using order: ApronOrderingOps, eq: ApronEqOps)
       : IntegerOps[B, ApronExpr] with
 
+  import ApronOrderingOps.*
+  
   def apronIntervalToInterval(v: ApronExpr) : NumericInterval[B] =
     val supArray = new Array[Double](1)
     val infArray = new Array[Double](1)
@@ -57,10 +59,10 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
+      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
       } {
-        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
+        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
       }
       r.expr
     }
@@ -69,10 +71,10 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
+      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
       } {
-        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
+        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
       }
       r.expr
     }
@@ -96,11 +98,11 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.expr, safediv(x1.expr, x2.expr)), Tcons1.EQ)
+      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
       } {
-        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-          ap.assertConstrain(sub(r.expr, safediv(x1.expr, x2.expr)), Tcons1.EQ)
+        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
         } {
           f.fail(IntegerDivisionByZero, s"$v1 / $v2")
         }
@@ -114,11 +116,11 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-        ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
+      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
       } {
-        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-          ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
+        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
         } {
           f.fail(IntegerDivisionByZero, s"$v1 remainder $v2")
         }
@@ -132,20 +134,20 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.assertConstrain(r.expr, Tcons1.SUPEQ)
+      ap.assertConstrain(ApronCons.ge(r.expr, ApronExpr.num(0)))
       // cumbersome
-      ap.ifThenElse(order.lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-        ap.ifThenElse(order.lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
-          ap.assertConstrain(sub(r.expr, sub(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)), Tcons1.EQ)
+      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        ap.ifThenElse(lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
+          ap.assertConstrain(ApronCons.eq(r.expr, sub(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)))
         } {
-          ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
+          ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
         }
       } {
-        ap.ifThenElse(order.lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-          ap.ifThenElse(order.lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
-            ap.assertConstrain(sub(r.expr, add(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)), Tcons1.EQ)
+        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+          ap.ifThenElse(lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
+            ap.assertConstrain(ApronCons.eq(r.expr, add(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)))
           } {
-            ap.assertConstrain(sub(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)), Tcons1.EQ)
+            ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
           }
         } {
           f.fail(IntegerDivisionByZero, s"$v1 % $v2")

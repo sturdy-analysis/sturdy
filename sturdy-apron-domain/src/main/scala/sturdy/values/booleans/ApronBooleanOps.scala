@@ -4,17 +4,16 @@ import apron.MpqScalar
 import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Texpr1UnNode
-import sturdy.apron.{Apron, ApronExpr, UnOp}
+import sturdy.apron.ApronCons
+import sturdy.apron.{UnOp, ApronExpr, Apron}
 
-given ApronBooleanOps(using ap: Apron): BooleanOps[Tcons1] with
+given ApronBooleanOps: BooleanOps[ApronCons] with
 
-  override def boolLit(b: Boolean): Tcons1 =
-    val zeroIfTrue = if (b) 0 else 1
-    ap.makeConstraint(ApronExpr.Constant(new MpqScalar(zeroIfTrue)), Tcons1.EQ)
+  override def boolLit(b: Boolean): ApronCons = ApronCons.fromBool(b)
 
-  override def and(v1: Tcons1, v2: Tcons1): Tcons1 = ???
+  override def and(v1: ApronCons, v2: ApronCons): ApronCons = ???
 
-  override def or(v1: Tcons1, v2: Tcons1): Tcons1 = ???
+  override def or(v1: ApronCons, v2: ApronCons): ApronCons = ???
 
-  override def not(v: Tcons1): Tcons1 = ap.negateCons(v)
+  override def not(v: ApronCons): ApronCons = v.negated
   

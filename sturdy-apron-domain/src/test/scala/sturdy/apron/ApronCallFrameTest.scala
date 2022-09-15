@@ -146,7 +146,9 @@ class ApronCallFrameTest extends AnyFunSuite:
 
     // z < 1   iff   z - 1 < 0  iff  -z + 1 > 0
     // z >= 1  iff   z - 1 >= 0
-    val cond = apron.makeConstraint(add(neg(z), integerLit(1)), Tcons1.SUP)
+    val cond = ApronCons.gt(add(neg(z), integerLit(1)), ApronExpr.num(0))
+    println(cond)
+    println(cond.toApron(apron.apronEnv))
 
     val r = apron.ifThenElse(cond) {
       throw new Exception("unreachable")
@@ -188,7 +190,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(z)
 
     // z > 20   iff   z - 20 > 0
-    val cond = apron.makeConstraint(sub(z, integerLit(20)), Tcons1.SUP)
+    val cond = ApronCons.gt(sub(z, integerLit(20)), ApronExpr.num(0))
 
     val r = apron.ifThenElse(cond) {
       throw new Exception("unreachable")
@@ -231,7 +233,7 @@ class ApronCallFrameTest extends AnyFunSuite:
 
     // z > 5   iff   z - 5 > 0
     // z <= 5  iff   z - 5 <= 0  iff  -z + 5 > 0
-    val cond = apron.makeConstraint(sub(z, integerLit(5)), Tcons1.SUP)
+    val cond = ApronCons.gt(sub(z, integerLit(5)), ApronExpr.num(0))
 
     println(apron)
     val r = apron.ifThenElse(cond) {

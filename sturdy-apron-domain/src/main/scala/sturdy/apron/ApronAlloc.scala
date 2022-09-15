@@ -13,6 +13,8 @@ enum ApronAllocationSite:
 //  case Join(exp1: Texpr1Node, exp2: Texpr1Node, widen: Boolean)
 
 object ApronAlloc:
+  val DEBUG: Boolean = false
+
   def default(manager: Manager) = new ApronAllocBoundPerSite(manager)
 
 trait ApronAlloc:
@@ -24,6 +26,8 @@ trait ApronAlloc:
   def freeVariable(v: Var, state: Abstract1): Unit
   
   def useStrongUpdate(v: Var): Boolean
+
+  scala.collection.immutable.ArraySeq
 
 trait ApronVar:
   protected var freed: Boolean = false

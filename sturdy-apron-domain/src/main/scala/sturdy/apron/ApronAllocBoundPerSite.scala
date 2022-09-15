@@ -68,6 +68,9 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
 
     v.free(manager, state)
 
+    if (ApronAlloc.DEBUG)
+      println(s"freeing ${if (isStrong) "strong" else "weak"} $v")
+
     if (isStrong) {
       state.forget(manager, v._av, false)
       val newEnv = state.getEnvironment.remove(Array(v._av))

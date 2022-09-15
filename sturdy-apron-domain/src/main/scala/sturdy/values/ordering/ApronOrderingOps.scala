@@ -1,21 +1,17 @@
 package sturdy.values.ordering
 
-import apron.{Tcons1, Texpr1BinNode}
+import apron.Texpr1BinNode
 import sturdy.apron.Apron
+import sturdy.apron.ApronCons
 import sturdy.apron.ApronExpr
 import sturdy.apron.BinOp
-import sturdy.values.Topped
 
-given ApronOrderingOps(using ap: Apron): OrderingOps[ApronExpr, Topped[Tcons1]] with
-  override def lt(v1: ApronExpr, v2: ApronExpr): Topped[Tcons1] =
-    // v1 < v2 iff v2 - v1 > 0
-    Topped.Actual(ap.makeConstraint(ApronExpr.Binary(BinOp.Sub, v2, v1), Tcons1.SUP))
-  override def le(v1: ApronExpr, v2: ApronExpr): Topped[Tcons1] =
-    // v1 =< v2 iff v2 - v1 >= 0
-    Topped.Actual(ap.makeConstraint(ApronExpr.Binary(BinOp.Sub, v2, v1), Tcons1.SUPEQ))
+given ApronOrderingOps: OrderingOps[ApronExpr, ApronCons] with
+  override def lt(v1: ApronExpr, v2: ApronExpr): ApronCons = ApronCons.lt(v1, v2)
+  override def le(v1: ApronExpr, v2: ApronExpr): ApronCons = ApronCons.le(v1, v2)
+  override def ge(v1: ApronExpr, v2: ApronExpr): ApronCons = ApronCons.ge(v1, v2)
+  override def gt(v1: ApronExpr, v2: ApronExpr): ApronCons = ApronCons.gt(v1, v2)
 
-given ApronEqOps(using ap: Apron) : EqOps[ApronExpr, Topped[Tcons1]] with
-  override def equ(v1 : ApronExpr, v2 : ApronExpr) : Topped[Tcons1] =
-    Topped.Actual(ap.makeConstraint(ApronExpr.Binary(BinOp.Sub, v1, v2), Tcons1.EQ))
-  override def neq(v1 : ApronExpr, v2 : ApronExpr) : Topped[Tcons1] =
-    equ(v1,v2).map(ap.negateCons)
+given ApronEqOps: EqOps[ApronExpr, ApronCons] with
+  override def equ(v1 : ApronExpr, v2 : ApronExpr) : ApronCons = ApronCons.eq(v1, v2)
+  override def neq(v1 : ApronExpr, v2 : ApronExpr) : ApronCons = ApronCons.neq(v1, v2)

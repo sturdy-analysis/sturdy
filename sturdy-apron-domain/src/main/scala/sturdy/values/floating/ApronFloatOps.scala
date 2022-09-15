@@ -3,13 +3,14 @@ package sturdy.values.floating
 import apron.Interval
 import apron.Texpr1VarNode
 import sturdy.data.CombineUnit
-import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1BinNode, MpfrScalar, Texpr1Node}
+import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1Node, Texpr1BinNode, MpfrScalar}
 import sturdy.apron.{JoinApronExpr, Apron}
 import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
-import sturdy.apron.{ApronExpr, BinOp, UnOp}
+import sturdy.apron.ApronCons
+import sturdy.apron.{UnOp, ApronExpr, BinOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
@@ -19,8 +20,9 @@ import scala.language.reflectiveCalls
 
 given ApronFloatOps[B](using Fractional[B])
                       (using ap: Apron, effects: EffectStack, f: Failure)
-                      (using order: ApronOrderingOps, eq: ApronEqOps) : FloatOps[B, ApronExpr] with
+                      : FloatOps[B, ApronExpr] with
 
+  import ApronOrderingOps.*
 
   override def floatingLit(f: B): ApronExpr = ApronExpr.Constant(new MpfrScalar(f.toDouble, 2))
 
@@ -35,10 +37,10 @@ given ApronFloatOps[B](using Fractional[B])
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
+      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
       } {
-        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
+        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
       }
       r.expr
     }
@@ -47,10 +49,10 @@ given ApronFloatOps[B](using Fractional[B])
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(order.lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(sub(r.expr, x2.expr), Tcons1.EQ)
+      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
       } {
-        ap.assertConstrain(sub(r.expr, x1.expr), Tcons1.EQ)
+        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
       }
       r.expr
     }
@@ -64,7 +66,7 @@ given ApronFloatOps[B](using Fractional[B])
   override def negated(v: ApronExpr): ApronExpr = ApronExpr.Unary(UnOp.Negate, v)
 
   override def sqrt(v: ApronExpr): ApronExpr =
-    ap.ifThenElse(order.ge(v, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+    ap.ifThenElse(ge(v, ApronExpr.Constant(MpfrScalar(0, 0)))) {
       ApronExpr.Unary(UnOp.Sqrt, v)
     } {
       f.fail(IntegerDivisionByZero, s"sqrt($v)")
@@ -79,17 +81,17 @@ given ApronFloatOps[B](using Fractional[B])
     ap.withTemporaryDoubleVariables(3) { case List(x, xsign, r) =>
       ap.assign(x, v)
       ap.assign(xsign, sign)
-      ap.ifThenElse(order.lt(x.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
-        ap.ifThenElse(order.lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
-          ap.assertConstrain(sub(r.expr, x.expr), Tcons1.EQ)
+      ap.ifThenElse(lt(x.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+        ap.ifThenElse(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(ApronCons.eq(r.expr, x.expr))
         } {
-          ap.assertConstrain(sub(r.expr, negated(x.expr)), Tcons1.EQ)
+          ap.assertConstrain(ApronCons.eq(r.expr, negated(x.expr)))
         }
       } {
-        ap.ifThenElse(order.lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
-          ap.assertConstrain(sub(r.expr, negated(x.expr)), Tcons1.EQ)
+        ap.ifThenElse(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+          ap.assertConstrain(ApronCons.eq(r.expr, negated(x.expr)))
         } {
-          ap.assertConstrain(sub(r.expr, x.expr), Tcons1.EQ)
+          ap.assertConstrain(ApronCons.eq(r.expr, x.expr))
         }
       }
       r.expr

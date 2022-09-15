@@ -46,11 +46,11 @@ object RelationalAnalysis extends Interpreter,
 
   override type J[A] = WithJoin[A]
   override type VInt = Topped[ApronExpr]
-  override type VBool = Topped[Tcons1]
+  override type VBool = Topped[ApronCons]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
     case Value.BoolValue(toppedBool) => toppedBool
-    case Value.IntValue(toppedInt) => toppedInt.map(inst.apron.makeConstraint(_, Tcons1.DISEQ))
+    case Value.IntValue(toppedInt) => toppedInt.map(ApronCons.neq(_, ApronExpr.num(0)))
     case Value.TopValue => Topped.Top
     case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
@@ -81,9 +81,9 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
-    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
-    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, _.map(apron.makeConstantConstraint))
+    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, _.map(ApronCons.fromBool))
+    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, _.map(ApronCons.fromBool))
+    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, _.map(ApronCons.fromBool))
 
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly

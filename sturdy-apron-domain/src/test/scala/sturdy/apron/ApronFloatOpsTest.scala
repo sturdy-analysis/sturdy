@@ -25,8 +25,6 @@ class ApronFloatOpsTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val apron: Apron = new Apron(manager, alloc)
     implicit val effects: EffectStack = new EffectStack(List(failure, apron))
-    implicit val orderOps: ApronOrderingOps = new ApronOrderingOps
-    implicit val eqOps: ApronEqOps = new ApronEqOps
     val floatOps = new ApronFloatOps[Float]
     (floatOps, apron)
 

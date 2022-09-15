@@ -46,44 +46,27 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   def freeVariable(v: alloc.Var): Unit =
     alloc.freeVariable(v, apronState)
 
-  def makeConstraint(c: Tcons0): Unit =
-    new Tcons1(apronEnv, c)
-
-  def makeConstraint(v: ApronExpr, relOp: Int): Tcons1 =
-    new Tcons1(apronEnv, relOp, v.toApron)
-
-  def makeConstantConstraint(b: Boolean): Tcons1 =
-    new Tcons1(apronEnv, Tcons1.EQ, Texpr1CstNode(MpqScalar(if (b) 0 else 1)))
-
-  def constrainPure[A](c: Tcons1)(a: A): Join[A] ?=> A =
-    if (c.getKind == Tcons1.DISEQ) {
-      val supCond = new Tcons1(c.getEnvironment, Tcons1.SUP, c.toTexpr1Node)
-      val infCond = new Tcons1(c.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, c.toTexpr1Node))
-      ifThenElsePure(supCond, infCond, widen = false)(a)(a)
-    } else {
+  def constrainPure[A](c: ApronCons)(a: A): Join[A] ?=> A = c.splitNeq match
+    case Some((lt, gt)) =>
+      ifThenElsePure(lt, gt, widen = false)(a)(a)
+    case None =>
       assertConstrain(c)
       a
-    }
 
-  def constrain[A](c: Tcons1)(a: => A)(using EffectStack): Join[A] ?=> A =
-    if (c.getKind == Tcons1.DISEQ) {
-      val supCond = new Tcons1(c.getEnvironment, Tcons1.SUP, c.toTexpr1Node)
-      val infCond = new Tcons1(c.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, c.toTexpr1Node))
-      ifThenElse(supCond, infCond)(a)(a)
-    } else {
+  def constrain[A](c: ApronCons)(a: => A)(using EffectStack): Join[A] ?=> A = c.splitNeq match
+    case Some((lt, gt)) =>
+      ifThenElse(lt, gt)(a)(a)
+    case None =>
       assertConstrain(c)
       a
-    }
 
-  def assertConstrain(v: ApronExpr, relOp: Int): Unit =
-    assertConstrain(makeConstraint(v, relOp))
-
-  def assertConstrain(c: Tcons1): Unit =
+  def assertConstrain(ac: ApronCons): Unit =
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
+    val c = ac.toApron(apronEnv)
     if(c.getKind == Tcons1.DISEQ)
       throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
-    c.extendEnvironment(apronEnv.lce(c.getEnvironment))
+    c.extendEnvironment(apronEnv)
     apronState.meet(apronManager, c)
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
@@ -138,24 +121,24 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       vs.foreach(alloc.freeVariable(_, apronState))
     }
 
-  def ifThenElse[A](cond: Tcons1)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
-    ifThenElse(cond, negateCons(cond))(ifTrue)(ifFalse)
+  def ifThenElse[A](cond: ApronCons)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
+    ifThenElse(cond, cond.negated)(ifTrue)(ifFalse)
 
-  def ifThenElse[A](condTrue: Tcons1, condFalse: Tcons1)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
+  def ifThenElse[A](condTrue: ApronCons, condFalse: ApronCons)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
     effects.joinComputations {
       constrain(condTrue)(ifTrue)
     } {
       constrain(condFalse)(ifFalse)
     }
 
-  def ifThenElse[A](cond: Topped[Tcons1])(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
+  def ifThenElse[A](cond: Topped[ApronCons])(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
     case Topped.Top => effects.joinComputations(ifTrue)(ifFalse)
     case Topped.Actual(b) => ifThenElse(b)(ifTrue)(ifFalse)
 
-  def ifThenElsePure[A](condTrue: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
-    ifThenElsePure(condTrue, negateCons(condTrue), widen)(ifTrue)(ifFalse)
+  def ifThenElsePure[A](condTrue: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+    ifThenElsePure(condTrue, condTrue.negated, widen)(ifTrue)(ifFalse)
 
-  def ifThenElsePure[A](condTrue: Tcons1, condFalse: Tcons1, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+  def ifThenElsePure[A](condTrue: ApronCons, condFalse: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = new Abstract1(apronManager, apronState)
     val res1 = TrySturdy(constrainPure(condTrue)(ifTrue))
     setLeastExtendingEnvironment(snapshot)
@@ -184,14 +167,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     Join(res1, res2).get.getOrThrow
 
 
-  def negateCons(cond : Tcons1) : Tcons1 =
-    cond.getKind match
-      case Tcons1.EQ => new Tcons1(cond.getEnvironment, Tcons1.DISEQ, cond.toTexpr1Node)
-      case Tcons1.DISEQ => new Tcons1(cond.getEnvironment, Tcons1.EQ, cond.toTexpr1Node)
-      case Tcons1.SUP => new Tcons1(cond.getEnvironment, Tcons1.SUPEQ, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
-      case Tcons1.SUPEQ => new Tcons1(cond.getEnvironment, Tcons1.SUP, Texpr1UnNode(Texpr1UnNode.OP_NEG, cond.toTexpr1Node))
-      case Tcons1.EQMOD => ??? // not useful
-
   def joinValues(e1: ApronExpr, e2: ApronExpr, widen: Boolean): MaybeChanged[ApronExpr] =
     val v1 = e1.toApron
     val v2 = e2.toApron
@@ -206,9 +181,10 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       }
     } else {
       withTemporaryIntVariable { x =>
-        val v1Cons = new Tcons1(apronEnv, Tcons1.EQ, new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v1))
-        val v2Cons = new Tcons1(apronEnv, Tcons1.EQ, new Texpr1BinNode(Texpr1BinNode.OP_SUB, x.node, v2))
-        ifThenElsePure(v1Cons, v2Cons, widen)(())(())
+        ifThenElsePure(
+          ApronCons.eq(x.expr, e1),
+          ApronCons.eq(x.expr, e2),
+          widen)(())(())
 
         val xBound = getBound(x)
         val v1Bound = getBound(v1)
