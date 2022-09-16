@@ -90,11 +90,10 @@ object CharacterInclusionUtil {
       case NumericInterval.Top() => false
   }
 
-  def isIntervalLTEQ(x: NumericInterval[Int], y: NumericInterval[Int]): Boolean = {(x, y) match
-      case (_, NumericInterval.Top()) => true
+  def isIntervalGreater(x: NumericInterval[Int], y: NumericInterval[Int]): Boolean = {(x, y) match
       case (NumericInterval.Top(), _) => false
       case (NumericInterval.Bounded(l1, h1), NumericInterval.Bounded(l2, h2)) =>
-        l2 <= l1 && h1 <= h2
+        l1 > l2 && h1 > h2
   }
   def intervalAsSign(x: NumericInterval[Int]): IntSign ={
     if (isIntervalPositive(x)){

@@ -1,3 +1,4 @@
+/*
 package sturdy.values.strings
 
 import org.eclipse.collections.impl.block.procedure.FastListSelectProcedure
@@ -5,25 +6,24 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.booleans.ToppedBooleanOps
-import sturdy.values.integer.{IntSign, NumericInterval}
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.NumericInterval.*
-import sturdy.values.strings.CharacterInclusionUtil.*
-import sturdy.values.relational.*
+import sturdy.values.integer.{CombineIntSign, IntSign, NumericInterval}
 import sturdy.values.records.ARecord
-import sturdy.values.integer.CombineIntSign
+import sturdy.values.relational.*
+import sturdy.values.strings.CharacterInclusionUtil.*
 
 import java.security.KeyStore.TrustedCertificateEntry
 
-enum StringCharacterInclusion:
-  case StringSets(mustContain: Set[Char], mayContain: Topped[Set[Char]])
+enum StringPrefix:
+  case Top
+  case Prefix(s: String)
 
+import sturdy.values.strings.StringPrefix.*
 
-import sturdy.values.strings.StringCharacterInclusion.*
-
-given Abstractly[String, StringCharacterInclusion] with
-  override def apply(s: String): StringCharacterInclusion =
-    StringSets(s.toCharArray.toSet[Char], Topped.Actual(s.toCharArray.toSet[Char]))
+given Abstractly[String, StringPrefix] with
+  override def apply(s: String): StringPrefix =
+    Prefix(s)
 
 
 given PartialOrder[StringCharacterInclusion] with
@@ -56,7 +56,7 @@ given CombineStringCharacterInclusion[W <: Widening]: Combine[StringCharacterInc
 abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterInclusion, I, Topped[Boolean]]:
   def stringLit(s: String): StringCharacterInclusion = StringSets(s.toCharArray.toSet[Char], Topped.Actual(s.toCharArray.toSet[Char]))
 
-  override def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = (s1, s2) match
+  def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = (s1, s2) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) => StringSets(c1.union(c2), toppedCharSetUnion(mc1, mc2))
 
   override def substring(s: StringCharacterInclusion, begin: I, end: I): StringCharacterInclusion
@@ -285,42 +285,11 @@ given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): Charact
       }
       IntSign.TopSign
 
-  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion =
-    (s, word, newWord) match
-      case (StringSets(sC, sMc), StringSets(wC, wMc), StringSets(nwC, nwMc)) =>
-        if(!toppedCharSetSubsetOf(wC,sMc)){
-          return s
-        }
-        if(toppedCharSetIsEmpty(wMc) && toppedCharSetIsEmpty(sMc)){
-          return newWord
-        }
-        StringSets(toppedCharSetDifference(sC, wMc), toppedCharSetUnion(sMc, nwMc))
 
 
 
-  override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) => mc match
-      // Theoretisch könnte man aus mc noch alle Großbuchstaben entfernen, aber da mc Top und kein konkretes
-      // set ist, haben wir uns dagegen entschieden
-      case Topped.Top => StringSets(c.map(char => char.toLower), mc)
-      case Topped.Actual(amc) => StringSets(c.map(char => char.toLower), Topped.Actual(amc.map(char => char.toLower)))
 
-  override def toUpperCase(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) => mc match
-      case Topped.Top => StringSets(c.map(char => char.toUpper), mc)
-      case Topped.Actual(amc) => StringSets(c.map(char => char.toUpper), Topped.Actual(amc.map(char => char.toUpper)))
 
-  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) =>
-      if (c == Set(' ')) {
-      return StringSets(Set[Char](), Topped.Actual(Set[Char]()))
-      }
-      if(!toppedCharSetConatins(mc, ' ')){
-        s
-      }
-      else StringSets(c -- Set(' '), mc)
-
-  //override def split(s: StringCharacterInclusion, splitChar: StringCharacterInclusion): ARecord[Int, StringCharacterInclusion] = ???
 
 given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectStack): CharacterInclusionStringOps[NumericInterval[Int]] with
 
@@ -399,15 +368,9 @@ given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectSta
   override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
     signAsInterval(CharacterInclusionStringOpsSign.indexOf(s, word, intervalAsSign(fromIndex)))
 
-  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion = ???
-
-  override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
-
-  override def toUpperCase(s: StringCharacterInclusion): StringCharacterInclusion = ???
-
-  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = ???
-
-  override def isEmpty(s: StringCharacterInclusion): Topped[Boolean] = ???
 
 
+
+
+*/
 
