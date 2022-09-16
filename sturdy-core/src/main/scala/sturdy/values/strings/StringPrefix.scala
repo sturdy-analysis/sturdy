@@ -1,4 +1,3 @@
-/*
 package sturdy.values.strings
 
 import org.eclipse.collections.impl.block.procedure.FastListSelectProcedure
@@ -16,7 +15,6 @@ import sturdy.values.strings.CharacterInclusionUtil.*
 import java.security.KeyStore.TrustedCertificateEntry
 
 enum StringPrefix:
-  case Top
   case Prefix(s: String)
 
 import sturdy.values.strings.StringPrefix.*
@@ -26,40 +24,46 @@ given Abstractly[String, StringPrefix] with
     Prefix(s)
 
 
-given PartialOrder[StringCharacterInclusion] with
-  override def lteq(x: StringCharacterInclusion, y: StringCharacterInclusion): Boolean = (x,y) match
-    case (StringSets(c1 :Set[Char], mc1 : Topped[Set[Char]]), StringSets(c2 :Set[Char], mc2 : Topped[Set[Char]])) =>
-      (mc1, mc2) match
-        case (Topped.Actual(amc1), Topped.Actual(amc2)) => c2.subsetOf(c1) && amc1.subsetOf(amc2)
-        case (Topped.Top, Topped.Top) | (_, Topped.Top) => c2.subsetOf(c1)
-        case _ => false
+given PartialOrder[StringPrefix] with
+  override def lteq(x: StringPrefix, y: StringPrefix): Boolean = (x,y) match
+    case (Prefix(s), Prefix(t)) =>
+      if (t.length <= s.length){
+        s.substring(0, t.length) == t
+      }
+      else false
 
 
-given CombineStringCharacterInclusion[W <: Widening]: Combine[StringCharacterInclusion, W] with
-  override def apply(v1: StringCharacterInclusion, v2: StringCharacterInclusion): MaybeChanged[StringCharacterInclusion] =
+
+
+given CombineStringCharacterInclusion[W <: Widening]: Combine[StringPrefix, W] with
+  override def apply(v1: StringPrefix, v2: StringPrefix): MaybeChanged[StringPrefix] =
     if v1 == v2 then Unchanged(v1)
-    else if PartialOrder[StringCharacterInclusion].lteq(v1, v2) then Changed(v2)
-    else if PartialOrder[StringCharacterInclusion].lteq(v1, v2) then Unchanged(v1)
+    else if PartialOrder[StringPrefix].lteq(v1, v2) then Changed(v2)
+    else if PartialOrder[StringPrefix].lteq(v1, v2) then Unchanged(v1)
     else (v1, v2) match
-      case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-        if (mc1.isTop || mc2.isTop){
-          Changed(StringSets(c1.intersect(c2), Topped.Top))}
-        else{
-          Changed(StringSets(c1.intersect(c2), Topped.Actual(mc1.get.union(mc2.get))))
+      case (Prefix(p1), Prefix(p2)) =>
+        var joinedPrefix = ""
+        for(x <- p1){
+          for(y <- p2){
+            if (x==y){
+              joinedPrefix = joinedPrefix.appended(x)
+            }
+            else return Changed(Prefix(joinedPrefix))
+          }
         }
+        return Changed(Prefix(joinedPrefix))
 
 
 
 
 
 
-abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterInclusion, I, Topped[Boolean]]:
-  def stringLit(s: String): StringCharacterInclusion = StringSets(s.toCharArray.toSet[Char], Topped.Actual(s.toCharArray.toSet[Char]))
+abstract class PrefixStringOps[I] extends StringOps[StringPrefix, I, Topped[Boolean]]:
+  def stringLit(s: String): StringPrefix = Prefix(s)
 
-  def concat(s1: StringCharacterInclusion, s2: StringCharacterInclusion): StringCharacterInclusion = (s1, s2) match
-    case (StringSets(c1, mc1), StringSets(c2, mc2)) => StringSets(c1.union(c2), toppedCharSetUnion(mc1, mc2))
+  def concat(s1: StringPrefix, s2: StringPrefix): StringPrefix = s1
 
-  override def substring(s: StringCharacterInclusion, begin: I, end: I): StringCharacterInclusion
+  override def substring(s: StringPrefix, begin: I, end: I): StringPrefix
 
   override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] = (s, w) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
@@ -73,7 +77,7 @@ abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterI
         else Topped.Top
       }
 
-  override def length(s: StringCharacterInclusion): I
+  override def length(s: StringPrefix): I
 
   override def isEmpty(s: StringCharacterInclusion): Topped[Boolean] = s match
     case StringSets(c, mc) =>
@@ -85,53 +89,27 @@ abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterI
       }
       Topped.Top
 
-  override def charAt(s: StringCharacterInclusion, i: I): StringCharacterInclusion
+  override def charAt(s: StringPrefix, i: I): StringPrefix
 
-  override def equals(s1: StringCharacterInclusion, s2: StringCharacterInclusion): Topped[Boolean] = (s1, s2) match
-    case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-      if(toppedCharSetIsEmpty(mc1) && toppedCharSetIsEmpty(mc2)){
-        return Topped.Actual(true)
-      }
-      if (!toppedCharSetSubsetOf(c1, mc2) || !toppedCharSetSubsetOf(c2, mc1))
-      {
-        return Topped.Actual(false)
-      }
+  override def equals(s1: StringPrefix, s2: StringPrefix): Topped[Boolean] =
+    if(PartialOrder[StringPrefix].lteq(s1, s2) || PartialOrder[StringPrefix].lteq(s2, s1)) {
       Topped.Top
+    }
+    else Topped.Actual(false)
 
-
-
-  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): I
+  override def compareTo(s1: StringPrefix, s2: StringPrefix): I
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
-  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: I): Topped[Boolean]
+  override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: I): Topped[Boolean]
 
-  override def endsWith(s: StringCharacterInclusion, suffix: StringCharacterInclusion): Topped[Boolean] = (s, suffix) match
-    case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-      if(toppedCharSetIsEmpty(mc2)){
-        Topped.Actual(true)
-      }
-      val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
-      if (!c2IsSubSetOfMc1)
-      {
-        Topped.Actual(false)
-      }
-      else Topped.Top
+  override def endsWith(s: StringPrefix, suffix: StringPrefix): Topped[Boolean] = Topped.Top
 
+  override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: I): I
 
-  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: I): I
+  override def replace(s: StringPrefix, word: StringPrefix, newWord: StringPrefix): StringPrefix = Prefix("")
 
-  override def replace(s: StringCharacterInclusion, word: StringCharacterInclusion, newWord: StringCharacterInclusion): StringCharacterInclusion =
-    (s, word, newWord) match
-      case (StringSets(sC, sMc), StringSets(wC, wMc), StringSets(nwC, nwMc)) =>
-        if(!toppedCharSetSubsetOf(wC,sMc)){
-          return s
-        }
-        if(toppedCharSetIsEmpty(wMc) && toppedCharSetIsEmpty(sMc)){
-          return newWord
-        }
-        StringSets(toppedCharSetDifference(sC, wMc), toppedCharSetUnion(sMc, nwMc))
-
-
+  override def toLowerCase(s: StringPrefix): StringPrefix = s match
+    case Prefix(p) => Prefix(p.toLowerCase())
 
   override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = s match
     case StringSets(c, mc) => mc match
@@ -159,59 +137,60 @@ abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterI
 
 
 
-given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): CharacterInclusionStringOps[IntSign] with
-  override def substring(s: StringCharacterInclusion, begin: IntSign, end: IntSign): StringCharacterInclusion = (begin, end) match
-    case (IntSign.Zero, IntSign.Zero) => StringSets(Set[Char](), Topped.Actual(Set[Char]()))
+given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[IntSign] with
+
+  override def substring(s: StringPrefix, begin: IntSign, end: IntSign): StringPrefix = (begin, end) match
+    case (IntSign.Zero, IntSign.Zero) => Prefix("")
     case (IntSign.Neg, _) | (_, IntSign.Neg) => j.joinWithFailure(f.fail(StringNegativeIndex,
-      s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
-      s"substring of $s with indices $begin to $end"))
-    case (IntSign.NegOrZero, _) | (_, IntSign.NegOrZero) => s match
-      case StringSets(c, mc) =>
-        j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c,mc)))(j.joinWithFailure(f.fail(StringNegativeIndex,
-          s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
-          s"substring of $s with indices $begin to $end")))
-    case _ => s match
-      case StringSets(c, mc) =>
-        j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c, mc)))(f.fail(StringIndexOutOfBounds,
+    s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
+    s"substring of $s with indices $begin to $end"))
+
+    case (IntSign.Zero, IntSign.Pos) => s match
+      case Prefix("") => j.joinWithFailure(Prefix(""))(f.fail(StringIndexOutOfBounds,
+        s"substring of $s with indices $begin to $end"))
+      case Prefix(pre) => j.joinWithFailure(Prefix(pre.substring(0,1)))(f.fail(StringIndexOutOfBounds,
           s"substring of $s with indices $begin to $end"))
 
-  override def length(s: StringCharacterInclusion): IntSign = s match
-    case StringSets(c, mc) => if toppedCharSetIsEmpty(mc) then IntSign.Zero else IntSign.Pos
+    case (IntSign.NegOrZero, IntSign.Pos) => s match
+      case Prefix("") => j.joinWithFailure(Prefix(""))(j.joinWithFailure(f.fail(StringNegativeIndex,
+        s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
+        s"substring of $s with indices $begin to $end")))
+      case Prefix(pre) => j.joinWithFailure(Prefix(pre.substring(0,1)))(j.joinWithFailure(f.fail(StringNegativeIndex,
+        s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
+        s"substring of $s with indices $begin to $end")))
 
-  override def charAt(s: StringCharacterInclusion, i: IntSign): StringCharacterInclusion = s match
-    case StringSets(c, mc) =>
-      if(mc.isActual){
-          if (c.size == 1 && mc.get.size == 1){
-            i match
-              case IntSign.Zero => return s
-              case IntSign.Pos | IntSign.ZeroOrPos => j.joinWithFailure(s)(f.fail(StringIndexOutOfBounds,
-                s"Char at $i of $s is out of bounds"))
-              case IntSign.NegOrZero => j.joinWithFailure(s)(f.fail(StringNegativeIndex,
-                s"Char at $i of $s is out of bounds"))
-              case IntSign.Neg => f.fail(StringNegativeIndex,
-                s"Char at $i of $s is out of bounds")
-          }
-          if (mc.get.isEmpty){
-            i match
-              case IntSign.Zero | IntSign.ZeroOrPos | IntSign.Pos => f.fail(StringIndexOutOfBounds,
-                s"Char at $i of $s is out of bounds")
-              case IntSign.Neg => f.fail(StringNegativeIndex,
-                s"Char at $i of $s is out of bounds")
-              case IntSign.NegOrZero => j.joinWithFailure(f.fail(StringNegativeIndex,
-                s"Char at $i of $s is out of bounds"))(f.fail(StringIndexOutOfBounds,
-                s"Char at $i of $s is out of bounds"))
-          }
-        }
-      i match
-        case IntSign.Zero => StringCharacterInclusion.StringSets(Set[Char](), mc)
-        case IntSign.Pos | ZeroOrPos => j.joinWithFailure(StringCharacterInclusion.StringSets(Set[Char](), mc))(f.fail(StringIndexOutOfBounds,
-          s"Char at $i of $s is out of bounds"))
-        case IntSign.Neg => f.fail(StringNegativeIndex, s"Char at $i of $s is out of bounds")
-        case IntSign.NegOrZero => j.joinWithFailure(StringCharacterInclusion.StringSets(Set[Char](), mc))(f.fail(StringNegativeIndex,
-          s"Char at $i of $s is out of bounds"))
+    case (IntSign.NegOrZero, _) | (_, IntSign.NegOrZero) =>
+      j.joinWithFailure(Prefix(""))(j.joinWithFailure(f.fail(StringNegativeIndex,
+        s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
+        s"substring of $s with indices $begin to $end")))
+
+    case _ => j.joinWithFailure(Prefix(""))(f.fail(StringIndexOutOfBounds,
+        s"substring of $s with indices $begin to $end"))
 
 
-  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): IntSign = (s1, s2) match
+  override def length(s: StringPrefix): IntSign = s match
+    case Prefix("") => IntSign.ZeroOrPos
+    case _ => IntSign.Pos
+
+  override def charAt(s: StringPrefix, i: IntSign): StringPrefix = i match
+    case IntSign.Zero => s match
+      case Prefix("") => f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i")
+      case Prefix(pre) => Prefix(pre.charAt(0).toString)
+    case IntSign.NegOrZero => s match
+      case Prefix("") => j.joinWithFailure(f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i"))(f.fail(StringNegativeIndex,
+        s"charAt of $s with inex $i "))
+      case Prefix(pre) => j.joinWithFailure(Prefix(pre.charAt(0).toString))(f.fail(StringNegativeIndex,
+        s"charAt of $s with inex $i "))
+    case IntSign.Neg => f.fail(StringNegativeIndex, s"charAt of $s with index $i")
+    case IntSign.Pos => j.joinWithFailure(Prefix(""))(f.fail(StringIndexOutOfBounds,
+      s"charAt of $s with index $i"))
+    case IntSign.TopSign => j.joinWithFailure(Prefix(""))(j.joinWithFailure(f.fail(StringNegativeIndex,
+      s"charAt of $s with index $i"))(f.fail(StringIndexOutOfBounds,
+      s"charAt of $s with index $i")))
+
+
+
+  override def compareTo(s1: StringPrefix, s2: StringPrefix): IntSign = (s1, s2) match
     case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => IntSign.TopSign
     case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>
       if(mc1.isEmpty && mc2.isEmpty){
@@ -372,5 +351,5 @@ given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectSta
 
 
 
-*/
+
 
