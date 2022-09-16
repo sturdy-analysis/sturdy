@@ -5,6 +5,7 @@ import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.relational.CompareOps
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 
@@ -54,6 +55,9 @@ given OrderingOps[Double, Boolean] with
   def le(v1: Double, v2: Double): Boolean = v1 <= v2
   def ge(v1: Double, v2: Double): Boolean = v1 >= v2
   def gt(v1: Double, v2: Double): Boolean = v1 > v2
+
+given CompareOps[Double, Int] with
+  override def cmp(v1: Double, v2: Double): Int = v1.compareTo(v2)
 
 given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] with
   /*

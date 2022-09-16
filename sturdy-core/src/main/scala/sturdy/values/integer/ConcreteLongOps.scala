@@ -7,6 +7,7 @@ import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
+import sturdy.values.relational.CompareOps
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 
@@ -84,6 +85,9 @@ given OrderingOps[Long, Boolean] with
   def le(v1: Long, v2: Long): Boolean = v1 <= v2
   def ge(v1: Long, v2: Long): Boolean = v1 >= v2
   def gt(v1: Long, v2: Long): Boolean = v1 > v2
+
+given CompareOps[Long, Int] with
+  override def cmp(v1: Long, v2: Long): Int = v1.compareTo(v2)
 
 given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
   /*

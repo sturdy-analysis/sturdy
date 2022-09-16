@@ -7,6 +7,7 @@ import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
+import sturdy.values.relational.CompareOps
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 import sturdy.values.relational.UnsignedCompareOps
@@ -27,5 +28,7 @@ trait JimpleOps[V, Type, J[_] <: MayJoin[_]]:
   val convertLongFloat: ConvertLongFloat[V, V]
   val convertLongDouble: ConvertLongDouble[V, V]
   val convertFloatDouble: ConvertFloatDouble[V, V]
-  val compareLongOps: CompareLongOps[V, V]
-  val compareFloatingOps: CompareFloatingOps[V, V]
+//  val compareIntOps: CompareOps[V, V]
+  val compareLongOps: CompareOps[V, V]
+//  val compareFloatOps: CompareOps[V, V]
+  val compareDoubleOps: CompareOps[V, V]

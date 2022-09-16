@@ -2,6 +2,8 @@ package sturdy.language.jimple
 
 import sturdy.data.MayJoin
 import sturdy.data.MayJoin.NoJoin
+import sturdy.values.relational.CompareOps
+import sturdy.values.relational.LiftedCompareOps
 import sturdy.values.types.ConcreteTypeOfOps
 //import sturdy.language.jimple.ObjectOps//, ClassOps, GenericInterpreter}
 import sturdy.values.*
@@ -113,7 +115,6 @@ trait Interpreter:
      vfloatOps: FloatOps[Float, VFloatC],
      vdoubleOps: FloatOps[Double, VDoubleC],
      vclassOps: ClassOps[Container, VClass],
-     vtypeOfOps: ConcreteTypeOfOps[Value, Type],
      vobjectOps: ObjectOps[String, Value, VObject, Type],
      vconvertIntLong: ConvertIntLong[VIntC, VLongC],
      vconvertIntFloat: ConvertIntFloat[VIntC, VFloatC],
@@ -121,9 +122,9 @@ trait Interpreter:
      vconvertLongFloat: ConvertLongFloat[VLongC, VFloatC],
      vconvertLongDouble: ConvertLongDouble[VLongC, VDoubleC],
      vconvertFloatDouble: ConvertFloatDouble[VFloatC, VDoubleC],
-     vcompareLongOps: CompareLongOps[VLongC, VIntC],
-     vcompareFloatingOps: CompareFloatingOps[VDoubleC, VIntC]
-        ): JimpleOps[Value, Type, J] with
+     vcompareLongOps: CompareOps[VLongC, VIntC],
+     vcompareDoubleOps: CompareOps[VDoubleC, VIntC]
+    ): JimpleOps[Value, Type, J] with
 
     final val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt, IntConstValue.apply)
     final val longOps: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asLong, LongConstValue.apply)
@@ -153,13 +154,8 @@ trait Interpreter:
     final val convertLongDouble: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asLong, DoubleConstValue.apply)
     final val convertFloatDouble: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat, DoubleConstValue.apply)
 
-    final val compareLongOps = new CompareLongOps[Value, Value]:
-      def cmp(v1: Value, v2: Value): Value = IntConstValue(vcompareLongOps.cmp(v1.asLong, v2.asLong))
-    final val compareFloatingOps = new CompareFloatingOps[Value, Value]:
-      def cmpl(v1: Value, v2: Value): Value = (v1, v2) match
-        case (FloatConstValue(f1), FloatConstValue(f2)) => IntConstValue(vcompareFloatingOps.cmpl(vconvertFloatDouble(f1, NilCC), vconvertFloatDouble(f2, NilCC)))
-        case (DoubleConstValue(d1), DoubleConstValue(d2)) => IntConstValue(vcompareFloatingOps.cmpl(d1, d2))
-      def cmpg(v1: Value, v2: Value): Value = IntConstValue(vcompareFloatingOps.cmpg(v1.asDouble, v2.asDouble))
+    final val compareLongOps = new LiftedCompareOps(_.asLong, IntConstValue.apply)
+    final val compareDoubleOps = new LiftedCompareOps(_.asDouble, IntConstValue.apply)
 
   type Instance <: GenericInstance
 

@@ -6,6 +6,7 @@ import sturdy.values.convert.*
 import sturdy.values.relational.EqOps
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.relational.CompareOps
 import sturdy.values.relational.OrderingOps
 
 import scala.util.Random
@@ -80,6 +81,9 @@ given OrderingOps[Int, Boolean] with
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
   def ge(v1: Int, v2: Int): Boolean = v1 >= v2
   def gt(v1: Int, v2: Int): Boolean = v1 > v2
+
+given CompareOps[Int, Int] with
+  override def cmp(v1: Int, v2: Int): Int = v1.compareTo(v2)
 
 given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
   /*

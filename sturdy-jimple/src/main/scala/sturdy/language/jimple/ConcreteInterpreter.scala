@@ -11,6 +11,10 @@ import sturdy.fix
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
 
+import sturdy.values.integer.given
+import sturdy.values.floating.given
+
+
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -29,8 +33,8 @@ object ConcreteInterpreter extends Interpreter:
   //  type VExcRef
   //  type VParamRef
   //  type VThisRef
-  override type VClass = Value
-  override type VObject = Object[Type, String, Value]
+  override type VClass = RuntimeUnit
+//  override type VObject = Object[Type, String, Value]
 
   override def topInt: Int = throw new UnsupportedOperationException
   override def topDouble: Double = throw new UnsupportedOperationException
@@ -40,16 +44,20 @@ object ConcreteInterpreter extends Interpreter:
   override def topClass = throw new UnsupportedOperationException
   override def topObject = throw new UnsupportedOperationException
 
-  class Instance(rootFrameValues: Iterable[Value])
-    extends GenericInstance with fix.Concrete[FixIn, FixOut[Value]]:
+  class Instance extends GenericInstance:
 
     override def jvV: NoJoin[Value] = implicitly
 
-    val callFrame: ConcreteCallFrame[CallFrameData, Identifier, Value] = new ConcreteCallFrame[CallFrameData, Identifier, Value]((), rootFrameValues.view.zipWithIndex.map(_.swap))
-    val classTable: ConcreteSymbolTable[Unit, String, Container] = new ConcreteSymbolTable[Unit, String, Container]
-    val runTimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit] = new ConcreteSymbolTable[Unit, String, RuntimeUnit]
+    val callFrame: ConcreteCallFrame[CallFrameData, Identifier, Value] =
+      new ConcreteCallFrame[CallFrameData, Identifier, Value]((), Iterable.empty)
+    val classTable: ConcreteSymbolTable[Unit, String, Container] =
+      new ConcreteSymbolTable[Unit, String, Container]
+    val runTimeTable: ConcreteSymbolTable[Unit, String, RuntimeUnit] =
+      new ConcreteSymbolTable[Unit, String, RuntimeUnit]
     val failure: CFailure = new CFailure
     private given Failure = failure
 
-//    val jimpleOps: JimpleOps[Value, Type, NoJoin] = implicitly
-//    val objects: Object[Type, String, Value] = implicitly
+    given ClassOps[Container, RuntimeUnit] = ???
+
+
+    val jimpleOps: JimpleOps[Value, Type, NoJoin] = implicitly
