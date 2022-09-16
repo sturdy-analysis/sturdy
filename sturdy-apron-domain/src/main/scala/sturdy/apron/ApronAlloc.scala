@@ -13,8 +13,6 @@ enum ApronAllocationSite:
 //  case Join(exp1: Texpr1Node, exp2: Texpr1Node, widen: Boolean)
 
 object ApronAlloc:
-  val DEBUG: Boolean = false
-
   def default(manager: Manager) = new ApronAllocBoundPerSite(manager)
 
 trait ApronAlloc:
@@ -55,3 +53,4 @@ trait ApronVar:
       s"$bound (freed $av)"
     else
       av.toString
+  

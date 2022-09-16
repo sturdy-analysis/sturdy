@@ -27,35 +27,41 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   private var doubleTempCount = 0
 
   def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
-    val v = site match
+    val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
         val x = Var.IntTemp(intTempCount)
         intTempCount += 1
-        x
+        (x, true)
       case ApronAllocationSite.LocalVar(local) =>
         val x = Var.IntVar(local)
-        varCount += x -> (varCount(x) + 1)
-        x
+        val oldCount = varCount(x)
+        varCount += x -> (oldCount + 1)
+        (x, oldCount == 0)
 
     if (!state.getEnvironment.hasVar(v._av)) {
       state.changeEnvironment(manager, state.getEnvironment.add(Array(v._av), null), false)
     }
+    if (Apron.debugAlloc)
+      println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
     v
 
   def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
-    val v = site match
+    val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
         val x = Var.DoubleTemp(doubleTempCount)
         doubleTempCount += 1
-        x
+        (x, true)
       case ApronAllocationSite.LocalVar(local) =>
         val x = Var.DoubleVar(local)
-        varCount += x -> (varCount(x) + 1)
-        x
+        val oldCount = varCount(x)
+        varCount += x -> (oldCount + 1)
+        (x, oldCount == 0)
 
     if (!state.getEnvironment.hasVar(v._av)) {
       state.changeEnvironment(manager, state.getEnvironment.add(null, Array(v._av)), false)
     }
+    if (Apron.debugAlloc)
+      println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
     v
 
   override def freeVariable(v: Var, state: Abstract1): Unit =
@@ -68,7 +74,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
 
     v.free(manager, state)
 
-    if (ApronAlloc.DEBUG)
+    if (Apron.debugAlloc)
       println(s"freeing ${if (isStrong) "strong" else "weak"} $v")
 
     if (isStrong) {
