@@ -25,9 +25,7 @@ class LiftedStringOps[S, I, B, US, UI, UB](extractS: S => US, extractI: I => UI,
   override def indexOf(s: S, word: S, fromIndex: I): I = injectI(ops.indexOf(extractS(s), extractS(word), extractI(fromIndex)))
 
   override def replace(s: S, word: S, newWord: S): S = injectS(ops.replace(extractS(s), extractS(word), extractS(newWord)))
-
-  //override def split(s: S, splitChar: S): R = injectR(ops.split(extractS(s), extractS(splitChar)))
-
+  
   override def toLowerCase(s: S): S = injectS(ops.toLowerCase(extractS(s)))
 
   override def toUpperCase(s: S): S =  injectS(ops.toUpperCase(extractS(s)))

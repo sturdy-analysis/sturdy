@@ -148,7 +148,6 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
                 case "toLowerCase" => return toLowerCase(eval(args(0)))
                 case "toUpperCase" => return toUpperCase(eval(args(0)))
                 case "trim" => return trim(eval(args(0)))
-                //case "split" => return split(eval(args(0)), eval(args(1)))
 
             }
           }
