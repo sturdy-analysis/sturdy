@@ -55,9 +55,6 @@ given CombineStringCharacterInclusion[W <: Widening]: Combine[StringPrefix, W] w
 
 
 
-
-
-
 abstract class PrefixStringOps[I] extends StringOps[StringPrefix, I, Topped[Boolean]]:
   def stringLit(s: String): StringPrefix = Prefix(s)
 
@@ -65,29 +62,13 @@ abstract class PrefixStringOps[I] extends StringOps[StringPrefix, I, Topped[Bool
 
   override def substring(s: StringPrefix, begin: I, end: I): StringPrefix
 
-  override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] = (s, w) match
-    case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-      if (c2.isEmpty && toppedCharSetIsEmpty(mc2)) {
-        Topped.Actual(true)
-      }  else{
-        if(!toppedCharSetSubsetOf(c2,mc1))
-        {
-          Topped.Actual(false)
-        }
-        else Topped.Top
-      }
+  override def contains(s: StringPrefix, w: StringPrefix): Topped[Boolean] = Topped.Top
 
   override def length(s: StringPrefix): I
 
-  override def isEmpty(s: StringCharacterInclusion): Topped[Boolean] = s match
-    case StringSets(c, mc) =>
-      if(toppedCharSetIsEmpty(mc)){
-        return Topped.Actual(true)
-      }
-      if (!c.isEmpty){
-        return Topped.Actual(false)
-      }
-      Topped.Top
+  override def isEmpty(s: StringPrefix): Topped[Boolean] = s match
+    case Prefix("") => Topped.Top
+    case Prefix(_) => Topped.Actual(false)
 
   override def charAt(s: StringPrefix, i: I): StringPrefix
 
@@ -111,29 +92,11 @@ abstract class PrefixStringOps[I] extends StringOps[StringPrefix, I, Topped[Bool
   override def toLowerCase(s: StringPrefix): StringPrefix = s match
     case Prefix(p) => Prefix(p.toLowerCase())
 
-  override def toLowerCase(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) => mc match
-      // Theoretisch könnte man aus mc noch alle Großbuchstaben entfernen, aber da mc Top und kein konkretes
-      // set ist, haben wir uns dagegen entschieden
-      case Topped.Top => StringSets(c.map(char => char.toLower), mc)
-      case Topped.Actual(amc) => StringSets(c.map(char => char.toLower), Topped.Actual(amc.map(char => char.toLower)))
+  override def toUpperCase(s: StringPrefix): StringPrefix = s match
+    case Prefix(p) => Prefix(p.toUpperCase())
 
-  override def toUpperCase(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) => mc match
-      case Topped.Top => StringSets(c.map(char => char.toUpper), mc)
-      case Topped.Actual(amc) => StringSets(c.map(char => char.toUpper), Topped.Actual(amc.map(char => char.toUpper)))
-
-  override def trim(s: StringCharacterInclusion): StringCharacterInclusion = s match
-    case StringSets(c, mc) =>
-      if (c == Set(' ')) {
-        return StringSets(Set[Char](), Topped.Actual(Set[Char]()))
-      }
-      if(!toppedCharSetConatins(mc, ' ')){
-        s
-      }
-      else StringSets(c -- Set(' '), mc)
-
-
+  override def trim(s: StringPrefix): StringPrefix = s match
+    case Prefix(p) => Prefix(p.stripPrefix(" "))
 
 
 
@@ -231,7 +194,7 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
       }
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
-  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = offset match
+  override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: IntSign): Topped[Boolean] = offset match
     case IntSign.Zero => (s, prefix) match
       case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
         if(toppedCharSetIsEmpty(mc2)){
@@ -257,7 +220,7 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
     case IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
     case IntSign.Neg => Topped.Actual(false)
 
-  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: IntSign): IntSign = (s, word) match
+  override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: IntSign): IntSign = (s, word) match
     case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
       if (!toppedCharSetSubsetOf(c2, mc1)){
         return IntSign.Neg
