@@ -35,7 +35,7 @@ given PartialOrder[StringPrefix] with
 
 
 
-given CombineStringCharacterInclusion[W <: Widening]: Combine[StringPrefix, W] with
+given CombineStringPrefix[W <: Widening]: Combine[StringPrefix, W] with
   override def apply(v1: StringPrefix, v2: StringPrefix): MaybeChanged[StringPrefix] =
     if v1 == v2 then Unchanged(v1)
     else if PartialOrder[StringPrefix].lteq(v1, v2) then Changed(v2)
@@ -154,86 +154,30 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
 
 
   override def compareTo(s1: StringPrefix, s2: StringPrefix): IntSign = (s1, s2) match
-    case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => IntSign.TopSign
-    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>
-      if(mc1.isEmpty && mc2.isEmpty){
-        return IntSign.Zero
+    case (Prefix(pre1), Prefix(pre2)) =>
+      if (pre1.length == pre2.length && pre1 != pre2){
+        if pre1.compareTo(pre2) == 0 then IntSign.Zero
+        else if pre1.compareTo(pre2) > 0 then IntSign.Pos
+        else IntSign.Neg
       }
-      else{
-        val mc1Array = mc1.toArray[Char]
-        val mc2Array = mc2.toArray[Char]
-        var firstIteration = true
-        var state = IntSign.TopSign
-        for(x <- mc1Array){
-          for(y <- mc2Array){
-            if(x == y){
-              return IntSign.TopSign
-            }
+      else IntSign.TopSign
 
-            if(firstIteration) {
-              firstIteration = false
-              if(x < y){
-                state = IntSign.Neg
-              }
-              if(x > y){
-                state = IntSign.Pos
-              }
-            }
-            else{
-              if(x < y){
-                state = CombineIntSign(state, IntSign.Neg).get
-              }
-              if(x > y){
-                state = CombineIntSign(state, IntSign.Pos).get
-              }
-            }
-
-          }
-        }
-        state
-      }
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
   override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: IntSign): Topped[Boolean] = offset match
     case IntSign.Zero => (s, prefix) match
-      case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-        if(toppedCharSetIsEmpty(mc2)){
-          Topped.Actual(true)
+      case (Prefix(pre1), Prefix(pre2)) =>
+        if (pre1.startsWith(pre2) || pre2.startsWith(pre1)){
+          Topped.Top
         }
-        val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
-        if (!c2IsSubSetOfMc1)
-        {
-          Topped.Actual(false)
-        }
-        else Topped.Top
-
-    case IntSign.Pos =>
-      (s, prefix) match
-        case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-          val c2IsSubSetOfMc1 = if mc1.isActual then c2.subsetOf(mc1.get) else true
-          if (!c2IsSubSetOfMc1)
-          {
-            Topped.Actual(false)
-          }
-          else Topped.Top
-
-    case IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
+        else Topped.Actual(false)
+    case IntSign.Pos | IntSign.ZeroOrPos | IntSign.NegOrZero => Topped.Top
     case IntSign.Neg => Topped.Actual(false)
 
-  override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: IntSign): IntSign = (s, word) match
-    case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
-      if (!toppedCharSetSubsetOf(c2, mc1)){
-        return IntSign.Neg
-      }
-      IntSign.TopSign
+  override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: IntSign): IntSign = IntSign.TopSign
 
 
-
-
-
-
-
-given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectStack): CharacterInclusionStringOps[NumericInterval[Int]] with
+given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixStringOps[NumericInterval[Int]] with
 
   override def substring(s: StringCharacterInclusion, begin: NumericInterval[Int], end: NumericInterval[Int]): StringCharacterInclusion =
     s match
@@ -268,44 +212,44 @@ given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectSta
 
 
 
-  override def length(s: StringCharacterInclusion): NumericInterval[Int] = s match
-    case StringSets(c, mc) => if toppedCharSetIsEmpty(mc) then NumericInterval[Int].tupled(0, 0) else NumericInterval[Int].tupled(c.size, Int.MaxValue)
+  override def length(s: StringPrefix): NumericInterval[Int] = s match
+    case Prefix(pre) =>  NumericInterval[Int].tupled(pre.length, Int.MaxValue)
 
-  override def charAt(s: StringCharacterInclusion, i: NumericInterval[Int]): StringCharacterInclusion =
-    i match
-      case Bounded(low, high) => s match
-        case StringSets(c, mc) =>
-          if (low >= 0 && high < c.size && high >= 0){
-            StringSets(Set[Char](), mc)
-          }
-          else CharacterInclusionStringOpsSign.charAt(s, intervalAsSign(i))
-      case NumericInterval.Top() => CharacterInclusionStringOpsSign.charAt(s, intervalAsSign(i))
-
-  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): NumericInterval[Int] = (s1, s2) match
-    case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => NumericInterval.Top()
-    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>
-      if(mc1.isEmpty && mc2.isEmpty){
-        return NumericInterval.Bounded(0,0)
-      }
-      else{
-        if(mc1.intersect(mc2).nonEmpty){
-          return NumericInterval.Top()
+  override def charAt(s: StringPrefix, i: NumericInterval[Int]): StringPrefix = s match
+    case Prefix(pre) => i match
+      case NumericInterval.Bounded(low, high) =>
+        if (low == high && pre.length > high && pre.length > 0){
+          Prefix(pre.charAt(high).toString)
         }
+        else PrefixStringOpsSign.charAt(s, intervalAsSign(i))
+      case NumericInterval.Top() => PrefixStringOpsSign.charAt(s, IntSign.TopSign)
 
-        val mc1Array = mc1.toArray[Char]
-        val mc2Array = mc2.toArray[Char]
-        val s1Min = mc1Array.min
-        val s1Max = mc1Array.max
-        val s2Min = mc2Array.min
-        val s2Max = mc2Array.max
 
-        val val1 = s1Min.compareTo(s2Max)
-        val val2 = s1Max.compareTo(s2Min)
-        NumericInterval.Bounded(val1.min(val2), val1.max(val2))
-    }
+  override def compareTo(s1: StringPrefix, s2: StringPrefix): NumericInterval[Int] = (s1, s2) match
+    case (Prefix(pre1), Prefix(pre2)) =>
+      if (pre1.length == pre2.length && pre1 != pre2){
+        NumericInterval.Bounded(pre1.compareTo(pre2), pre1.compareTo(pre2))
+      }
+      else NumericInterval.Top()
 
-  override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: NumericInterval[Int]): Topped[Boolean] =
-    CharacterInclusionStringOpsSign.startsWith(s, prefix, intervalAsSign(offset))
+  override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: NumericInterval[Int]): Topped[Boolean] = (s, prefix) match
+    case (Prefix(pre1), Prefix(pre2)) => offset match
+      case NumericInterval.Bounded(low, high) =>
+        if (pre1.length < low && pre1.length < high){
+          for (x <- low to high) {
+            if (pre1.startsWith(pre2, x)){
+              return Topped.Top
+            }
+          }
+        return Topped.Actual(false)
+        }
+        else {
+          if (isIntervalNegative(offset)) {
+            return Topped.Actual(false)
+          }
+          else return Topped.Top
+        }
+      case NumericInterval.Top() => Topped.Top
 
   override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
     signAsInterval(CharacterInclusionStringOpsSign.indexOf(s, word, intervalAsSign(fromIndex)))
