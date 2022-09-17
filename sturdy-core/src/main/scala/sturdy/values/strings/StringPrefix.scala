@@ -179,37 +179,22 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
 
 given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixStringOps[NumericInterval[Int]] with
 
-  override def substring(s: StringCharacterInclusion, begin: NumericInterval[Int], end: NumericInterval[Int]): StringCharacterInclusion =
-    s match
-      case StringSets(c, mc) =>
-
-        if (isIntervalNegative(begin) || isIntervalNegative(end)){
-          return f.fail(StringNegativeIndex, s"substring of $s with indices $begin to $end")
-        }
-
-        if (isIntervalGreater(begin, end)){
-          return f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end")
-        }
-
-        if (mc.isActual){
-          if(c.size == 1 && mc.size == 1 && isIntervalZero(begin) && isIntervalOne(end)) {
-            return s
+  override def substring(s: StringPrefix, begin: NumericInterval[Int], end: NumericInterval[Int]): StringPrefix = (begin, end) match
+    case (_, NumericInterval.Top()) | (NumericInterval.Top(), _) => return PrefixStringOpsSign.substring(s, intervalAsSign(begin), intervalAsSign(end))
+    case (NumericInterval.Bounded(0,0), NumericInterval.Bounded(0,0)) => Prefix("")
+    case (NumericInterval.Bounded(beginLow, beginHigh), NumericInterval.Bounded(endLow, endHigh)) => s match
+      case Prefix(pre) =>
+        if (beginLow == beginHigh && beginLow < pre.length) {
+          if(endHigh < pre.length){
+            return Prefix(pre.substring(beginLow, endLow))
           }
+          else return j.joinWithFailure(Prefix(pre.substring(beginLow)))(f.fail(StringIndexOutOfBounds,
+            s"substring of $s with indices $begin to $end"))
         }
-
-        (begin, end) match
-          case (NumericInterval.Bounded(bLow, bHigh), NumericInterval.Bounded(endLow, endHigh)) =>
-            if (c.size - 1 >= endHigh){
-              if (bLow == bHigh && bHigh == endHigh && bLow == endLow){
-                return StringSets(Set[Char](),Topped.Actual(Set[Char]()))
-              }
-              else return StringSets(Set[Char](), mc)
-            }
-            else return j.joinWithFailure(StringSets(Set[Char](), mc))(f.fail(StringIndexOutOfBounds, s"substring of $s with indices $begin to $end"))
-          case _ => return j.joinWithFailure(StringSets(Set[Char](), toppedCharSetUnion(c, mc)))(j.joinWithFailure(f.fail(StringNegativeIndex,
-            s"substring of $s with indices $begin to $end"))(f.fail(StringIndexOutOfBounds,
-            s"substring of $s with indices $begin to $end")))
-
+        if(beginLow < pre.length && beginHigh < pre.length && endLow < pre.length && endHigh < pre.length){
+          return Prefix("")
+        }
+        else return PrefixStringOpsSign.substring(s, intervalAsSign(begin), intervalAsSign(end))
 
 
   override def length(s: StringPrefix): NumericInterval[Int] = s match
@@ -251,8 +236,8 @@ given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixS
         }
       case NumericInterval.Top() => Topped.Top
 
-  override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
-    signAsInterval(CharacterInclusionStringOpsSign.indexOf(s, word, intervalAsSign(fromIndex)))
+  override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
+    NumericInterval.Bounded(-1, Int.MaxValue)
 
 
 
