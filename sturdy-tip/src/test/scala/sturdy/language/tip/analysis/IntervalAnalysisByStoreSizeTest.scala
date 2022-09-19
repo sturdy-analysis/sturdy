@@ -72,7 +72,7 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val analysis = new IntervalAnalysis.Instance(stackConfig, 0)
 
       var aresult: AFallible[Value] = AFallible.Unfailing(Value.TopValue)
 //      while (true)

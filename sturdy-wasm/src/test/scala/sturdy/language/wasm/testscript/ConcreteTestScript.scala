@@ -53,7 +53,7 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
   }
 
 class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
-  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  val interp = new ConcreteInterpreter.Instance()
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
   val imports: mutable.Map[String, ModuleInstance] = mutable.Map()

@@ -66,8 +66,8 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
   type CValue = ConcreteInterpreter.Value
   type AValue = TypeAnalysis.Value
 
-  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val cInterp = new ConcreteInterpreter.Instance()
+  val aInterp = new TypeAnalysis.Instance(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

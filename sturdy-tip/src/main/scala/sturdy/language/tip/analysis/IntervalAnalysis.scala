@@ -38,7 +38,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+  class Instance(stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -53,8 +53,8 @@ object IntervalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[String, String, Value] = new JoinableDecidableCallFrame("$main", initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))
@@ -77,5 +77,5 @@ object IntervalAnalysis extends Interpreter,
         fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
       ).fixpoint
 
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
+    override def newInstance: sturdy.Executor = new Instance(stackConfig, callSites)
 

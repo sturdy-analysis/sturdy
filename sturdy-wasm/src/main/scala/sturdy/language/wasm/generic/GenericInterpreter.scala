@@ -359,8 +359,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popNOrAbort(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
-        val vars = args.view ++ func.locals.map(num.defaultValue)
-        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
+        val vars = args.view.map(Some.apply) ++ func.locals.map(ty => Some(num.defaultValue(ty)))
+        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap)) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
@@ -686,7 +686,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         func match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(funcType.t.size, mod)
-            val vars = func.locals.map(num.defaultValue)
+            val vars = func.locals.map(ty => Some(num.defaultValue(ty)))
             labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
               enterFunction(FuncId(mod, ix), func, funcType)
             }))

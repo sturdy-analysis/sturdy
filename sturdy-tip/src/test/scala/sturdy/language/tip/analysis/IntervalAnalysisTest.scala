@@ -59,7 +59,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val analysis = new IntervalAnalysis.Instance(stackConfig, 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -73,7 +73,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
 
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))

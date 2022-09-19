@@ -28,7 +28,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   def interval(from: Int, to: Int): Interval = new Interval(new MpqScalar(from), new MpqScalar(to))
 
 
-  def createCallFrame(apron: Apron, initData: String, initVars: Iterable[(String, ApronExpr)] = Iterable.empty)(using Join[ApronExpr], Widen[ApronExpr])
+  def createCallFrame(apron: Apron, initData: String, initVars: Iterable[(String, Option[ApronExpr])] = Iterable.empty)(using Join[ApronExpr], Widen[ApronExpr])
     : ApronCallFrame[String, String, ApronExpr]
     = new ApronCallFrame(apron, initData, Some.apply, _ => None, identity, identity, initVars)
 
@@ -42,7 +42,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val r = callFrame.withNew("frame_1", vars) {
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
@@ -67,7 +67,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val r = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -93,7 +93,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val r = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -126,7 +126,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -171,7 +171,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -213,7 +213,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val z = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -261,7 +261,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val (r1, r2) = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -296,7 +296,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val (r1, r2) = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
@@ -331,7 +331,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val xval = integerLit(5)
     val yval = add(integerLit(1), integerLit(3))
     val zval = integerLit(-1)
-    val vars = Iterable("x" -> xval, "y" -> yval, "z" -> zval)
+    val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
     val (r2, r3) = callFrame.withNew("frame_1", vars) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))

@@ -164,7 +164,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
+  val interp = new IntervalAnalysis.Instance(
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = IntervalAnalysis.constantInstructions(interp)

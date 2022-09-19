@@ -69,7 +69,7 @@ object RelationalAnalysis extends Interpreter,
   override def topInt(using inst: Instance): VInt = Topped.Top
   override def topBool: VBool = Topped.Top
 
-  class Instance(apronManager: Manager, initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+  class Instance(apronManager: Manager, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
     val apronAlloc: ApronAlloc = ApronAlloc.default(apronManager)
@@ -104,10 +104,10 @@ object RelationalAnalysis extends Interpreter,
       _ => None,
       iv => Value.IntValue(Topped.Actual(iv)),
       _ => Value.TopValue,
-      initEnvironment
+      Iterable.empty
     )
 
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
@@ -128,4 +128,4 @@ object RelationalAnalysis extends Interpreter,
         fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
       ).fixpoint
 
-    override def newInstance: sturdy.Executor = new Instance(apronManager, initEnvironment, initStore, stackConfig, callSites)
+    override def newInstance: sturdy.Executor = new Instance(apronManager, stackConfig, callSites)

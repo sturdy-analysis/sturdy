@@ -8,7 +8,7 @@ trait CallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends Effect:
   def data: Data
   def getLocal(x: Int): JOption[J, V]
   def getLocalByName(x: Var): JOption[J, V]
-  def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
+  def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A
 
   final def getLocalOrElse(x: Int, default:  => V)(using J[V]): V =
     getLocal(x).getOrElse(default)

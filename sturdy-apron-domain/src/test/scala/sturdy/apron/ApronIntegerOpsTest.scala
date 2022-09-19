@@ -279,7 +279,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
   test("Negate Expr : EQ") {
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
-    
+
     val cond = ApronCons.eq(x.expr, ApronExpr.num(0))
     val notCond = cond.negated
 
@@ -291,7 +291,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
   test("Negate Expr : DISEQ") {
     val (intOps, apron) = instantiateIntOps()
     val x = apron.freshConstraintVariable("x", ApronAllocationSite.LocalVar("x"))
-    
+
     val cond = ApronCons.neq(x.expr, ApronExpr.num(0))
     val notCond = cond.negated
 

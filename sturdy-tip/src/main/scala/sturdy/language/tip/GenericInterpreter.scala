@@ -179,10 +179,9 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       store.write(recAddr, updated)
 
   def call(fun: Function, args: Seq[V])(using Fixed): V =
-    val locals: Map[String, V] =
-      Map() ++
-        fun.params.zip(args) ++
-        fun.locals.map(x => (x, integerLit(-1)))
+    val locals: Iterable[(String, Option[V])] =
+      fun.params.zip(args.map(Some.apply)) ++
+      fun.locals.map(x => (x, None))
     callFrame.withNew(fun.name, locals) {
       enterFunction(fun)
     }

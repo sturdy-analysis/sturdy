@@ -54,7 +54,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
+    val interp = new TypeAnalysis.Instance(WasmConfig())
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
 
     val modInst = interp.initializeModule(module)

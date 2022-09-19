@@ -42,9 +42,9 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
     it must s"execute constant analysis stacked-states on benchmark ${p.getFileName}" in {
       run(p, binary = true, StackConfig.StackedStates())
     }
-    it must s"execute constant analysis stacked-frames on benchmark ${p.getFileName}" in {
-      run(p, binary = true, StackConfig.StackedCfgNodes())
-    }
+//    it must s"execute constant analysis stacked-frames on benchmark ${p.getFileName}" in {
+//      run(p, binary = true, StackConfig.StackedCfgNodes())
+//    }
   }
 
   def run(p: Path, binary: Boolean = false, stackConfig: StackConfig) =
@@ -53,7 +53,7 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
+    val interp = new ConstantAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 
@@ -89,5 +89,6 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(s"${p.getFileName}_frames-$stackConfig.dot")
-    val blockCfg = cfg.withBlocks(shortLabels = true)
-    Files.writeString(dotPath, blockCfg.toGraphViz)
+    val blockCfg = cfg.withBlocks(shortLabels = false)
+    Files.writeString(dotPath, cfg.toGraphViz)
+    println(s"Wrote CFG to $dotPath")

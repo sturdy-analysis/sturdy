@@ -59,7 +59,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
+      val analysis = new SignAnalysis.Instance(stackConfig)
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -69,7 +69,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))

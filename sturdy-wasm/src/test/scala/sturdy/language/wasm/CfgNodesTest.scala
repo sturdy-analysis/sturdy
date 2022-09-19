@@ -21,7 +21,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = Parsing.fromText(path)
-  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val interp = new ConstantAnalysis.Instance(WasmConfig.default)
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(

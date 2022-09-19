@@ -50,9 +50,9 @@ object ConcreteInterpreter extends Interpreter:
   type Environment = Map[String, Value]
   type Store = Map[Int, Value]
 
-  class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance:
+  class Instance(nextInput: () => Value) extends GenericInstance:
 
-    def newInstance: Instance = new Instance(initEnvironment, initStore, nextInput)
+    def newInstance: Instance = new Instance(nextInput)
     override def jv: NoJoin[Value] = implicitly
 
     override val failure: ConcreteFailure = new ConcreteFailure
@@ -66,13 +66,13 @@ object ConcreteInterpreter extends Interpreter:
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ConcreteCallFrame[String, String, Value] = new ConcreteCallFrame("$main", initEnvironment)
-    override val store: CStore[Addr, Value] = new CStore(initStore)
+    override val callFrame: ConcreteCallFrame[String, String, Value] = new ConcreteCallFrame("$main", Iterable.empty)
+    override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
 
-  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
-    new Instance(initEnvironment, initStore, nextInput)
+  def apply(nextInput: () => Value): Instance =
+    new Instance(nextInput)

@@ -33,7 +33,7 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance:
+  class Instance(stackConfig: StackConfig) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -48,8 +48,8 @@ object SignAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[String, String, Value] = new JoinableDecidableCallFrame("$main", initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
@@ -59,8 +59,8 @@ object SignAnalysis extends Interpreter,
     override val fixpoint =
       fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
         parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
+    override def newInstance: sturdy.Executor = new Instance(stackConfig)
 
-  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
+  class DAIInstance() extends Instance(StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
-    override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)
+    override def newInstance: sturdy.Executor = new DAIInstance()

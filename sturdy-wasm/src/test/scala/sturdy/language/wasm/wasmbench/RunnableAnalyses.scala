@@ -39,7 +39,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
     val startTimeMillis = System.currentTimeMillis()
 
     val name = p.getFileName.toString
-    val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val interp = new ConstantTaintAnalysis.Instance(config)
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
@@ -91,7 +91,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     val startTimeMillis = System.currentTimeMillis()
 
     val name = p.getFileName.toString
-    val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val interp = new TypeAnalysis.Instance(config)
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
@@ -183,7 +183,7 @@ class IntervalRunnable(set: Either[Throwable, RRecord] => Unit,
     val startTimeMillis = System.currentTimeMillis()
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val interp = new IntervalAnalysis.Instance(config)
     val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = IntervalAnalysis.constantInstructions(interp)
 
@@ -287,7 +287,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     println(s"Analyzing $p")
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val interp = new ConstantAnalysis.Instance(config)
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 

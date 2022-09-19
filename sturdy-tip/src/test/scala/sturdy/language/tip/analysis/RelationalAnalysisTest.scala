@@ -77,10 +77,10 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     val polyManager = new Polka(false)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new RelationalAnalysis.Instance(polyManager, Map(), Map(), stackConfig, 0)
+      val analysis = new RelationalAnalysis.Instance(polyManager, stackConfig, 0)
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
 
       given CAllocationIntIncrement[AllocationSite] = interp.alloc

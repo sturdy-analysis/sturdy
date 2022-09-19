@@ -180,7 +180,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig, mostGeneralClient: Boolean = false): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+  val interp = new ConstantAnalysis.Instance(
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
@@ -202,7 +202,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   println(s"Found ${deadInstructions.size} dead instructions")
   println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-//  println(cfg.withBlocks(shortLabels = false).toGraphViz)
+  println(cfg.toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
