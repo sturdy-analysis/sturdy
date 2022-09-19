@@ -10,6 +10,10 @@ enum ApronAllocationSite:
   case LocalVar(name: String)
   case TemporaryVar
 
+  override def toString: String = this match
+    case LocalVar(name) => name
+    case TemporaryVar => "$$temporary"
+
 //  case Join(exp1: Texpr1Node, exp2: Texpr1Node, widen: Boolean)
 
 object ApronAlloc:
@@ -18,8 +22,8 @@ object ApronAlloc:
 trait ApronAlloc:
   type Var <: ApronVar
 
-  def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var
-  def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var
+  def addDoubleVariable(state: Abstract1, site: ApronAllocationSite): Var
+  def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var
 
   def freeVariable(v: Var, state: Abstract1): Unit
   

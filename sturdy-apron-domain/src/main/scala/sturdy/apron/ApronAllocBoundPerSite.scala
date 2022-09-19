@@ -26,7 +26,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   private var intTempCount = 0
   private var doubleTempCount = 0
 
-  def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
+  def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var =
     val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
         val x = Var.IntTemp(intTempCount)
@@ -45,7 +45,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
     v
 
-  def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
+  def addDoubleVariable(state: Abstract1, site: ApronAllocationSite): Var =
     val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
         val x = Var.DoubleTemp(doubleTempCount)

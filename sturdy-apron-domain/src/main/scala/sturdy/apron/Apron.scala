@@ -44,11 +44,11 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     val vIntern = new Texpr1Intern(apronEnv, v)
     apronState.getBound(apronManager, vIntern)
 
-  def addDoubleVariable(name: String, site: ApronAllocationSite): alloc.Var =
-    alloc.addDoubleVariable(name, apronState, site)
+  def addDoubleVariable(site: ApronAllocationSite): alloc.Var =
+    alloc.addDoubleVariable(apronState, site)
 
-  def addIntVariable(name: String, site: ApronAllocationSite): alloc.Var =
-    alloc.addIntVariable(name, apronState, site)
+  def addIntVariable(site: ApronAllocationSite): alloc.Var =
+    alloc.addIntVariable(apronState, site)
 
   def freeVariable(v: alloc.Var): Unit =
     alloc.freeVariable(v, apronState)
@@ -111,32 +111,29 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
 
-  def freshConstraintVariable(purpose: String, site: ApronAllocationSite): alloc.Var =
-    addIntVariable(purpose, site)
-
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
-    val v = alloc.addIntVariable("$$temporary", apronState, ApronAllocationSite.TemporaryVar)
+    val v = alloc.addIntVariable(apronState, ApronAllocationSite.TemporaryVar)
     try f(v)
     finally {
       alloc.freeVariable(v, apronState)
     }
 
   def withTemporaryIntVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
-    val vs = (1 to n).toList.map(i => alloc.addIntVariable(s"$$temporary_$i", apronState, ApronAllocationSite.TemporaryVar))
+    val vs = (1 to n).toList.map(i => alloc.addIntVariable(apronState, ApronAllocationSite.TemporaryVar))
     try f(vs)
     finally {
       vs.foreach(alloc.freeVariable(_, apronState))
     }
 
   def withTemporaryDoubleVariable[A](f: alloc.Var => A): A =
-    val v = alloc.addDoubleVariable("$$temporary", apronState, ApronAllocationSite.TemporaryVar)
+    val v = alloc.addDoubleVariable(apronState, ApronAllocationSite.TemporaryVar)
     try f(v)
     finally {
       alloc.freeVariable(v, apronState)
     }
 
   def withTemporaryDoubleVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
-    val vs = (1 to n).toList.map(i => alloc.addDoubleVariable(s"$$temporary_$i", apronState, ApronAllocationSite.TemporaryVar))
+    val vs = (1 to n).toList.map(i => alloc.addDoubleVariable(apronState, ApronAllocationSite.TemporaryVar))
     try f(vs)
     finally {
       vs.foreach(alloc.freeVariable(_, apronState))

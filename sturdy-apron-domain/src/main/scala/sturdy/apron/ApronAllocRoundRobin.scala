@@ -10,8 +10,8 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
 
   val STRONG_UPDATE_SUFFIX = "$STRONG"
 
-  def addDoubleVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
-    var cname = s"D${name}_$varCount"
+  def addDoubleVariable(state: Abstract1, site: ApronAllocationSite): Var =
+    var cname = s"D${site}_$varCount"
     if (site == ApronAllocationSite.TemporaryVar)
       cname += STRONG_UPDATE_SUFFIX
     val v: apron.Var = new StringVar(cname)
@@ -22,8 +22,8 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
     }
     Var(v)
 
-  def addIntVariable(name: String, state: Abstract1, site: ApronAllocationSite): Var =
-    var cname = s"I${name}_$varCount"
+  def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var =
+    var cname = s"I${site}_$varCount"
     if (site == ApronAllocationSite.TemporaryVar)
       cname += STRONG_UPDATE_SUFFIX
     val v: apron.Var = new StringVar(cname)

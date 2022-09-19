@@ -38,8 +38,8 @@ object MaybeChanged:
     case Changed(a) => (a, true)
     case Unchanged(a) => (a, false)
 
-def Changed[A](a: A) = MaybeChanged.Changed(a)
-def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
+inline def Changed[A](a: A) = MaybeChanged.Changed(a)
+inline def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
 
 trait Combine[V, W <: Widening]:
   def apply(v1: V, v2: V): MaybeChanged[V]
