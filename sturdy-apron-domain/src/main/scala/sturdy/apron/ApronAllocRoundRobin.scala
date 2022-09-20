@@ -4,7 +4,7 @@ import apron.Texpr1VarNode
 import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
-  case class Var(protected val av: apron.Var) extends ApronVar
+  case class Var(protected val av: apron.Var, isInt: Boolean) extends ApronVar
 
   private var varCount: Int = 0
 
@@ -20,7 +20,7 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(null, Array(v)), false)
     }
-    Var(v)
+    Var(v, false)
 
   def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var =
     var cname = s"I${site}_$varCount"
@@ -32,7 +32,7 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(Array(v), null), false)
     }
-    Var(v)
+    Var(v, true)
 
   override def freeVariable(v: Var, state: Abstract1): Unit =
     if (useStrongUpdate(v)) {

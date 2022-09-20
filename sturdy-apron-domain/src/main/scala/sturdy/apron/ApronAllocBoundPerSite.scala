@@ -16,11 +16,16 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
     case DoubleTemp(ix: Int)
 
     private[apron] def _av: apron.Var = av
+
     protected val av: apron.Var = this match
       case IntVar(local) => new StringVar(s"I_$local")
       case DoubleVar(local) => new StringVar(s"D_$local")
       case IntTemp(ix) => new StringVar(s"I_temp_$ix")
       case DoubleTemp(ix) => new StringVar(s"D_temp_$ix")
+
+    override val isInt: Boolean = this match
+      case _: IntVar | _: IntTemp => true
+      case _ => false
 
   private var varCount: Map[Var, Int] = Map().withDefaultValue(0)
   private var intTempCount = 0
@@ -38,9 +43,6 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         varCount += x -> (oldCount + 1)
         (x, oldCount == 0)
 
-    if (!state.getEnvironment.hasVar(v._av)) {
-      state.changeEnvironment(manager, state.getEnvironment.add(Array(v._av), null), false)
-    }
     if (Apron.debugAlloc)
       println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
     v
@@ -57,9 +59,6 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         varCount += x -> (oldCount + 1)
         (x, oldCount == 0)
 
-    if (!state.getEnvironment.hasVar(v._av)) {
-      state.changeEnvironment(manager, state.getEnvironment.add(null, Array(v._av)), false)
-    }
     if (Apron.debugAlloc)
       println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
     v
@@ -72,12 +71,13 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         count == 1
       case _: Var.IntTemp | _: Var.DoubleTemp => true
 
-    v.free(manager, state)
+    v.free(state)
 
     if (Apron.debugAlloc)
       println(s"freeing ${if (isStrong) "strong" else "weak"} $v")
 
-    if (isStrong) {
+    if (isStrong && v.isInitialized(state)) {
+      // TODO forget obsolete if removing dimension?
       state.forget(manager, v._av, false)
       val newEnv = state.getEnvironment.remove(Array(v._av))
       state.changeEnvironment(manager, newEnv, false)

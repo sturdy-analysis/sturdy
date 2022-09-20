@@ -60,9 +60,9 @@ given ApronIntegerOps[B](using Numeric[B])
       ap.assign(x1, v1)
       ap.assign(x2, v2)
       ap.ifThenElse(lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
+        ap.assign(r, x2.expr)
       } {
-        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
+        ap.assign(r, x1.expr)
       }
       r.expr
     }
@@ -72,9 +72,9 @@ given ApronIntegerOps[B](using Numeric[B])
       ap.assign(x1, v1)
       ap.assign(x2, v2)
       ap.ifThenElse(lt(x1.expr, x2.expr)) {
-        ap.assertConstrain(ApronCons.eq(r.expr, x1.expr))
+        ap.assign(r, x1.expr)
       } {
-        ap.assertConstrain(ApronCons.eq(r.expr, x2.expr))
+        ap.assign(r, x2.expr)
       }
       r.expr
     }
@@ -85,7 +85,7 @@ given ApronIntegerOps[B](using Numeric[B])
       max(x.expr, neg(x.expr))
     }
 
-  def safediv(v1: ApronExpr, v2: ApronExpr): ApronExpr =
+  private def safediv(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ApronExpr.Binary(BinOp.Div,
       ApronExpr.Binary(BinOp.Sub,
         v1,
@@ -94,18 +94,33 @@ given ApronIntegerOps[B](using Numeric[B])
           v2)),
       v2)
 
+//  override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr =
+//    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
+//      ap.assign(x1, v1)
+//      ap.assign(x2, v2)
+//      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+////        ap.assign(r, safediv(x1.expr, x2.expr))
+//        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
+//      } {
+//        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
+////          ap.assign(r, safediv(x1.expr, x2.expr))
+//          ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
+//        } {
+//          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+//        }
+//      }
+//      r.expr
+//    }
+
   override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
+      ap.ifThenElse(ApronCons.eq(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
       } {
-        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-          ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
-        } {
-          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-        }
+//        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
+        ap.assign(r, safediv(x1.expr, x2.expr))
       }
       r.expr
     }
@@ -116,14 +131,10 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-        ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
+      ap.ifThenElse(ApronCons.eq(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+        f.fail(IntegerDivisionByZero, s"$v1 remainder $v2")
       } {
-        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-          ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
-        } {
-          f.fail(IntegerDivisionByZero, s"$v1 remainder $v2")
-        }
+        ap.assign(r, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr))
       }
       r.expr
     }
@@ -134,25 +145,25 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.assertConstrain(ApronCons.ge(r.expr, ApronExpr.num(0)))
       // cumbersome
       ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
         ap.ifThenElse(lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
-          ap.assertConstrain(ApronCons.eq(r.expr, sub(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)))
+          ap.assign(r, sub(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr))
         } {
-          ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
+          ap.assign(r, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr))
         }
       } {
         ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
           ap.ifThenElse(lt(x1.expr, ApronExpr.Constant(MpqScalar(0)))) {
-            ap.assertConstrain(ApronCons.eq(r.expr, add(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr)))
+            ap.assign(r, add(ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr), x2.expr))
           } {
-            ap.assertConstrain(ApronCons.eq(r.expr, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr)))
+            ap.assign(r, ApronExpr.Binary(BinOp.Mod, x1.expr, x2.expr))
           }
         } {
           f.fail(IntegerDivisionByZero, s"$v1 % $v2")
         }
       }
+      ap.assertConstrain(ApronCons.ge(r.expr, ApronExpr.num(0)))
       r.expr
     }
 

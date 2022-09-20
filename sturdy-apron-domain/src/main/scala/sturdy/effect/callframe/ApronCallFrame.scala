@@ -7,7 +7,6 @@ import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
 import sturdy.apron.Apron
 import sturdy.apron.ApronAllocationSite
 import sturdy.apron.ApronExpr
-import sturdy.apron.ApronState
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.ComputationJoiner
@@ -73,7 +72,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case (null, v2) => Changed(v2)
     case (Val.Int(v1), Val.Int(v2)) =>
       if (v1 != v2) {
-        val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot widen with freed variable $v1"))
+        val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot join with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
@@ -81,7 +80,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       Unchanged(Val.Int(v1))
     case (Val.Double(v1), Val.Double(v2)) =>
       if (v1 != v2) {
-        val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot widen with freed variable $v1"))
+        val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot join with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
@@ -223,26 +222,24 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case ((s1, vars1), (s2, vars2)) =>
       val MaybeChanged(as, changed) = apron.join(s1, s2)
       val state = new Abstract1(apronManager, as.s)
-      val manager = as.apronManager
       val MaybeChanged(vars, varsChanged) = JoinMap(using joinVal(state))(vars1, vars2)
-      val newApronState = new ApronState(state, manager)
-      MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(manager, state))
+      val newApronState = new ApronState(state)
+      MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
   }
 
   override def widen: Widen[State] = { case ((s1, vars1), (s2, vars2)) =>
     val MaybeChanged(as, changed) = apron.widen(s1, s2)
     val state = new Abstract1(apronManager, as.s)
-    val manager = as.apronManager
     val MaybeChanged(vars, varsChanged) = WidenFiniteKeyMap(using widenVal(state), new Finite[Int]{})(vars1, vars2)
-    val newApronState = new ApronState(state, manager)
-    if (Apron.debugWiden)
+    val newApronState = new ApronState(state)
+    if (Apron.debugJoinWiden)
       println(
         s"""Widening call frame
            |  vars1 = $vars1
            |  vars2 = $vars2
            |  vars = $vars
            |  changed = $varsChanged""".stripMargin)
-    MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(manager, state))
+    MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
   }
 
 

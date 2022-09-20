@@ -9,6 +9,7 @@ import apron.MpqScalar
 import apron.Tcons1
 import apron.Texpr1BinNode
 import apron.Texpr1CstNode
+import apron.Texpr1Intern
 import apron.Texpr1Node
 import apron.Texpr1UnNode
 import apron.Texpr1VarNode
@@ -21,15 +22,43 @@ trait ApronVar:
 
   private var bound: Interval = _
   protected val av: apron.Var
+  protected val isInt: Boolean
+
+  def getBound(apronState: Abstract1): Interval =
+    if (freed)
+      bound
+    else if (apronState.getEnvironment.hasVar(av)) {
+      apronState.getBound(apronState.getCreationManager, av)
+    } else {
+      null
+    }
+
+  def ensureInitialized(apronState: Abstract1): Unit =
+    if (!isInitialized(apronState))
+      initialize(apronState)
+  
+  def isInitialized(apronState: Abstract1): Boolean =
+    apronState.getEnvironment.hasVar(av)
+
+  def initialize(apronState: Abstract1): Unit =
+    if (!freed) {
+      val intAr = if (isInt) Array(av) else null
+      val floAr = if (isInt) null else Array(av)
+      apronState.changeEnvironment(apronState.getCreationManager, apronState.getEnvironment.add(intAr, floAr), false)
+      if (Apron.debugAlloc)
+        println(s"Initializing $this = [-oo,+oo]")
+    }
+
 
   def getOrElse(f: => apron.Var): apron.Var =
     if (freed)
       f
     else
       av
-  def free(manager: Manager, state: Abstract1): Unit =
+  def free(state: Abstract1): Unit =
     if (!freed) {
-      bound = state.getBound(manager, av)
+      if (isInitialized(state))
+        bound = state.getBound(state.getCreationManager, av)
       freed = true
     }
   def expr: ApronExpr = ApronExpr.Var(this)
@@ -51,6 +80,12 @@ enum ApronExpr:
   case Constant(coeff: Coeff)
   case Unary(op: UnOp, e: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr, r: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
+
+  def vars: Set[ApronVar] = this match
+    case Var(v) => Set(v)
+    case Constant(coeff) => Set()
+    case Unary(op, e, rtyp, rdir) => e.vars
+    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
   def toApron: Texpr1Node = this match
     case Var(v) => v.node
@@ -97,7 +132,12 @@ enum ApronCons:
   case Compare(op: CompareOp, e1: ApronExpr, e2: ApronExpr)
 
   import CompareOp.*
-  
+
+  def vars: Set[ApronVar] = this match
+    case True => Set()
+    case False => Set()
+    case Compare(_, e1, e2) => e1.vars ++ e2.vars
+
   def toApron(env: Environment): Tcons1 = this match
     case True => new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron)
     case False => new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron)
