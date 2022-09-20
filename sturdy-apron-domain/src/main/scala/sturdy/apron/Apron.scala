@@ -15,7 +15,7 @@ import scala.language.reflectiveCalls
 object Apron:
   val debugAlloc: Boolean = true
   val debugAssign: Boolean = true
-  val debugWiden: Boolean = true
+  val debugWiden: Boolean = false
 
 
 class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
@@ -31,7 +31,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     apronState.changeEnvironment(apronManager, lce, false)
     other.changeEnvironment(apronManager, lce, false)
   }
-
 
   def getBound(v: alloc.Var): Interval =
     val intern = new Texpr1Intern(apronState.getEnvironment, v.node)
@@ -235,11 +234,19 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       val lce = s1.getEnvironment.lce(s2.getEnvironment)
       val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
       val state2 = s2.changeEnvironmentCopy(apronManager, lce, false)
-      state2.join(apronManager, state1)
-      if (state2.isBottom(apronManager))
+      val joined = state2.joinCopy(apronManager, state1)
+      if (joined.isBottom(apronManager))
         throw new SturdyFailure {}
-      val changed = !state2.isEqual(apronManager, state1)
-      MaybeChanged(new ApronState(state2, apronManager), changed)
+      val changed = !joined.isEqual(apronManager, state1)
+      if (debugWiden) {
+        println(
+          s"""Joining apron
+             |  s1 = $s1
+             |  s2 = $s2
+             |  joined = $joined
+             |  changed = $changed""".stripMargin)
+      }
+      MaybeChanged(new ApronState(joined, apronManager), changed)
     }
   }
 
@@ -254,6 +261,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       val lce = s1.getEnvironment.lce(s2.getEnvironment)
       val state1 = s1.changeEnvironmentCopy(apronManager, lce, false)
       val state2 = s2.changeEnvironmentCopy(apronManager, lce, false)
+
+//      {x = a1, y = b} join {x = a2, z = c} = apronJoin({x=a1},{x=a2}) + {y=b,z=c}
+
       val widened = state1.widening(apronManager, state2)
       if (widened.isBottom(apronManager))
         throw new SturdyFailure {}

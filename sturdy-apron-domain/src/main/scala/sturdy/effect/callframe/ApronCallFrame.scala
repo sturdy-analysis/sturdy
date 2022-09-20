@@ -221,7 +221,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
   override def join: Join[State] = {
     case ((s1, vars1), (s2, vars2)) =>
-      val MaybeChanged(as, changed) = apron.widen(s1, s2)
+      val MaybeChanged(as, changed) = apron.join(s1, s2)
       val state = new Abstract1(apronManager, as.s)
       val manager = as.apronManager
       val MaybeChanged(vars, varsChanged) = JoinMap(using joinVal(state))(vars1, vars2)

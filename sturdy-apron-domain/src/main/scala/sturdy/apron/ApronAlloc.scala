@@ -14,8 +14,6 @@ enum ApronAllocationSite:
     case LocalVar(name) => name
     case TemporaryVar => "$$temporary"
 
-//  case Join(exp1: Texpr1Node, exp2: Texpr1Node, widen: Boolean)
-
 object ApronAlloc:
   def default(manager: Manager) = new ApronAllocBoundPerSite(manager)
 
@@ -30,31 +28,3 @@ trait ApronAlloc:
   def useStrongUpdate(v: Var): Boolean
 
   scala.collection.immutable.ArraySeq
-
-trait ApronVar:
-  protected var freed: Boolean = false
-  private var bound: Interval = _
-  protected def av: apron.Var
-  def getOrElse(f: => apron.Var): apron.Var =
-    if (freed)
-      f
-    else
-      av
-  def free(manager: Manager, state: Abstract1): Unit =
-    if (!freed) {
-      bound = state.getBound(manager, av)
-      freed = true
-    }
-  def expr: ApronExpr = ApronExpr.Var(this)
-  def node: Texpr1Node =
-    if (freed)
-      new Texpr1CstNode(bound)
-    else
-      new Texpr1VarNode(av)
-
-  override def toString: String =
-    if (freed)
-      s"$bound (freed $av)"
-    else
-      av.toString
-  

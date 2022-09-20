@@ -1,17 +1,50 @@
 package sturdy.apron
 
+import apron.Abstract1
 import apron.Coeff
 import apron.Environment
 import apron.Interval
+import apron.Manager
 import apron.MpqScalar
 import apron.Tcons1
 import apron.Texpr1BinNode
 import apron.Texpr1CstNode
 import apron.Texpr1Node
 import apron.Texpr1UnNode
+import apron.Texpr1VarNode
 import gmp.Mpz
 import sturdy.apron.ApronCons.False
 import sturdy.values.{Widen, MaybeChanged, Join}
+
+trait ApronVar:
+  protected var freed: Boolean = false
+
+  private var bound: Interval = _
+  protected val av: apron.Var
+
+  def getOrElse(f: => apron.Var): apron.Var =
+    if (freed)
+      f
+    else
+      av
+  def free(manager: Manager, state: Abstract1): Unit =
+    if (!freed) {
+      bound = state.getBound(manager, av)
+      freed = true
+    }
+  def expr: ApronExpr = ApronExpr.Var(this)
+  def node: Texpr1Node =
+    if (freed)
+      new Texpr1CstNode(bound)
+    else
+      new Texpr1VarNode(av)
+
+  override def toString: String =
+    if (freed)
+      s"$bound (freed $av)"
+    else
+      av.toString
+
 
 enum ApronExpr:
   case Var(v: ApronVar)

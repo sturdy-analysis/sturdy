@@ -30,7 +30,7 @@ class PrintBound[A](using Join[A], Widen[A]) extends Print[A], Monotone:
     cp.getPrinted.foreach { c =>
       val isSound = s.isSound(c, symbol.getOrElse(return IsSound.NotSound(s"Abstract semantic predicted no prints, but got ${cp.getPrinted}")))
       if (isSound.isNotSound)
-        return isSound
+        return IsSound.NotSound(s"Concretely printed symbol $c not approximated by ${symbol.get}")
     }
     IsSound.Sound
 
