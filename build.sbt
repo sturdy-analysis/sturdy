@@ -71,6 +71,7 @@ val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
+  .dependsOn(sturdy_apron_domain % "compile->compile")
   .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
   .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
   .settings(
