@@ -3,17 +3,21 @@ package sturdy.values.floating
 import apron.Interval
 import apron.Texpr1VarNode
 import sturdy.data.CombineUnit
-import apron.{Tcons1, Texpr1CstNode, Texpr1UnNode, Texpr1Node, Texpr1BinNode, MpfrScalar}
-import sturdy.apron.{JoinApronExpr, Apron}
+import apron.{MpfrScalar, Tcons1, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode}
+import sturdy.apron.{Apron, JoinApronExpr}
 import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
 import sturdy.apron.ApronCons
-import sturdy.apron.{UnOp, ApronExpr, BinOp}
+import sturdy.apron.{ApronExpr, BinOp, UnOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.values.Topped
+import sturdy.values.config.{Bits, Overflow}
+import sturdy.values.convert.{&&, LiftedConvert, NilCC, ToppedConvert}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+import sturdy.values.utils.{ConvertMpfr, convertToScalarMpfr, given}
 
 import scala.language.reflectiveCalls
 
@@ -96,3 +100,17 @@ given ApronFloatOps[B](using Fractional[B])
       }
       r.expr
     }
+
+given ApronConvertFloatInt(using Apron, EffectStack, Failure) : ConvertFloatInt[ApronExpr,ApronExpr] = new LiftedConvert[Float, Int, ApronExpr, ApronExpr, Topped[Float], Topped[Int], Overflow && Bits](extract, inject)
+given ApronConvertFloatLong(using Apron, EffectStack, Failure) : ConvertFloatLong[ApronExpr,ApronExpr] = new LiftedConvert[Float, Long, ApronExpr, ApronExpr, Topped[Float], Topped[Long], Overflow && Bits](extract, inject)
+given ApronConvertFloatDouble(using Apron, EffectStack, Failure) : ConvertFloatDouble[ApronExpr,ApronExpr] = new LiftedConvert[Float, Double, ApronExpr, ApronExpr, Topped[Float], Topped[Double], NilCC.type](extract, inject)
+
+given ApronConvertDoubleInt(using Apron, EffectStack, Failure) : ConvertDoubleInt[ApronExpr,ApronExpr] = new LiftedConvert[Double, Int, ApronExpr, ApronExpr, Topped[Double], Topped[Int], Overflow && Bits](extract, inject)
+given ApronConvertDoubleLong(using Apron, EffectStack, Failure) : ConvertDoubleLong[ApronExpr,ApronExpr] = new LiftedConvert[Double, Long, ApronExpr, ApronExpr, Topped[Double], Topped[Long], Overflow && Bits](extract, inject)
+given ApronConvertDoubleFloat(using Apron, EffectStack, Failure) : ConvertDoubleFloat[ApronExpr,ApronExpr] = new LiftedConvert[Double, Float, ApronExpr, ApronExpr, Topped[Double], Topped[Float], NilCC.type](extract, inject)
+
+def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertMpfr[B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
+
+def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
+  case Topped.Top => ApronExpr.top
+  case Topped.Actual(i) => ApronExpr.Constant(new MpfrScalar(i.toDouble, 0))
