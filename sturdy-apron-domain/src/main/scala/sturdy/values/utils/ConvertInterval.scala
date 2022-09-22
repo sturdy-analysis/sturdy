@@ -2,6 +2,9 @@ package sturdy.values.utils
 
 import gmp.Mpz
 
+
+
+
 trait ConvertInterval[B] {
   def convertTo(x : Double) : B
   def convertFrom(x : B) : Mpz
@@ -14,3 +17,5 @@ given ConvertIntervalInt: ConvertInterval[Int] with
 given ConvertIntervalLong: ConvertInterval[Long] with
   override def convertTo(x: Double): Long = x.toLong
   override def convertFrom(x: Long): Mpz = new Mpz(x)
+  
+  
