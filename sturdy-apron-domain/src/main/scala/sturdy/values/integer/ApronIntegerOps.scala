@@ -15,8 +15,9 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
+import sturdy.values.floating.FloatOps
 import sturdy.values.{Top, Topped, config}
-import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
 import sturdy.values.utils.{ConvertInterval, ConvertMpq, convertToScalarMpq, given}
 
 import java.nio.ByteOrder
@@ -197,11 +198,11 @@ given ApronIntegerOps[B](using Numeric[B])
   override def invertBits(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.invertBits)
 
-given ApronConvertIntLong(using Apron, EffectStack, Failure) : ConvertIntLong[ApronExpr,ApronExpr] = new LiftedConvert[Int, Long, ApronExpr, ApronExpr, Topped[Int], Topped[Long], Bits](extract[Int], inject[Long])
-given ApronConvertIntFloat(using Apron, EffectStack, Failure) : ConvertIntFloat[ApronExpr,ApronExpr] = new LiftedConvert[Int, Float, ApronExpr, ApronExpr, Topped[Int], Topped[Float], Bits](extract[Int], inject[Float])
-given ApronConvertIntDouble(using Apron, EffectStack, Failure) : ConvertIntDouble[ApronExpr,ApronExpr] = new LiftedConvert[Int, Double, ApronExpr, ApronExpr, Topped[Int], Topped[Double], Bits](extract[Int], inject[Double])
+//given ApronConvertIntLong(using Apron, EffectStack, Failure) : ConvertIntLong[ApronExpr,ApronExpr] = new LiftedConvert[Int, Long, ApronExpr, ApronExpr, Topped[Int], Topped[Long], Bits](extract[Int], inject[Long])
+//given ApronConvertIntFloat(using Apron, EffectStack, Failure) : ConvertIntFloat[ApronExpr,ApronExpr] = new LiftedConvert[Int, Float, ApronExpr, ApronExpr, Topped[Int], Topped[Float], Bits](extract[Int], inject[Float])
+//given ApronConvertIntDouble(using Apron, EffectStack, Failure) : ConvertIntDouble[ApronExpr,ApronExpr] = new LiftedConvert[Int, Double, ApronExpr, ApronExpr, Topped[Int], Topped[Double], Bits](extract[Int], inject[Double])
 
-given ApronConvertLongInt(using Apron, EffectStack, Failure) : ConvertLongInt[ApronExpr,ApronExpr] = new LiftedConvert[Long, Int, ApronExpr, ApronExpr, Topped[Long], Topped[Int], NilCC.type](extract[Long], inject[Int])
+//given ApronConvertLongInt(using Apron, EffectStack, Failure) : ConvertLongInt[ApronExpr,ApronExpr] = new LiftedConvert[Long, Int, ApronExpr, ApronExpr, Topped[Long], Topped[Int], NilCC.type](extract[Long], inject[Int])
 given ApronConvertLongFloat(using Apron, EffectStack, Failure) : ConvertLongFloat[ApronExpr,ApronExpr] = new LiftedConvert[Long, Float, ApronExpr, ApronExpr, Topped[Long], Topped[Float], Bits](extract[Long], inject[Float])
 given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDouble[ApronExpr,ApronExpr] = new LiftedConvert[Long, Double, ApronExpr, ApronExpr, Topped[Long], Topped[Double], Bits](extract[Long], inject[Double])
 
@@ -212,7 +213,6 @@ def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
   case Topped.Top => ApronExpr.top
   case Topped.Actual(i) => ApronExpr.Constant(new MpqScalar(new Mpq(i.toDouble)))
 
-/*
 given ApronConvertIntLong(using ops: IntegerOps[Long, ApronExpr]) : ConvertIntLong[ApronExpr, ApronExpr] with
   override def apply(from: ApronExpr, conf: Bits): ApronExpr = conf match
     case Bits.Signed => from
@@ -238,7 +238,5 @@ given ApronConvertIntDouble(using ops: IntegerOps[Long, ApronExpr]) : ConvertInt
     case Bits.Unsigned => ops.bitAnd(from, ops.integerLit(0x00000000ffffffffL))
     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
-
 given ApronConvertLongInt(using ops: IntegerOps[Long, ApronExpr]):  ConvertLongInt[ApronExpr, ApronExpr] with
   override def apply(from: ApronExpr, conf: NilCC.type): ApronExpr = ops.modulo(from, ops.shiftLeft(ops.integerLit(1), ops.integerLit(32)))
-*/
