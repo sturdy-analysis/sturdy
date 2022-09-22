@@ -17,7 +17,7 @@ import sturdy.values.config.{Bits, UnsupportedConfiguration}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
 import sturdy.values.{Top, Topped, config}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
-import sturdy.values.utils.{ConvertInterval, ConvertMpq, convertToScalar, given}
+import sturdy.values.utils.{ConvertInterval, ConvertMpq, convertToScalarMpq, given}
 
 import java.nio.ByteOrder
 import scala.language.reflectiveCalls
@@ -206,7 +206,7 @@ given ApronConvertLongFloat(using Apron, EffectStack, Failure) : ConvertLongFloa
 given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDouble[ApronExpr,ApronExpr] = new LiftedConvert[Long, Double, ApronExpr, ApronExpr, Topped[Long], Topped[Double], Bits](extract[Long], inject[Double])
 
 
-def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertMpq[B]) : Topped[B] = convertToScalar[B](ap.getBound(expr))
+def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertMpq[B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(expr))
 
 def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
   case Topped.Top => ApronExpr.top
