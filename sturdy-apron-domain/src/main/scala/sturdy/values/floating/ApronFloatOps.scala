@@ -17,7 +17,7 @@ import sturdy.values.Topped
 import sturdy.values.config.{Bits, Overflow}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC, ToppedConvert}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
-import sturdy.values.utils.{ConvertMpfr, convertToScalarMpfr, given}
+import sturdy.values.utils.{ConvertCoeff, convertToScalarMpfr, given}
 
 import scala.language.reflectiveCalls
 
@@ -109,7 +109,7 @@ given ApronConvertDoubleInt(using Apron, EffectStack, Failure) : ConvertDoubleIn
 given ApronConvertDoubleLong(using Apron, EffectStack, Failure) : ConvertDoubleLong[ApronExpr,ApronExpr] = new LiftedConvert[Double, Long, ApronExpr, ApronExpr, Topped[Double], Topped[Long], Overflow && Bits](extract, inject)
 given ApronConvertDoubleFloat(using Apron, EffectStack, Failure) : ConvertDoubleFloat[ApronExpr,ApronExpr] = new LiftedConvert[Double, Float, ApronExpr, ApronExpr, Topped[Double], Topped[Float], NilCC.type](extract, inject)
 
-def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertMpfr[B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
+def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpfr, B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
 
 def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
   case Topped.Top => ApronExpr.top

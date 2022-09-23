@@ -1,21 +1,31 @@
 package sturdy.values.utils
 
-import gmp.Mpz
-
-
-
+import apron.Interval
+import gmp.{Mpfr, Mpq, Mpz}
+import sturdy.values.integer.NumericInterval
+import sturdy.values.utils.{ConvertCoeff, given}
 
 trait ConvertInterval[B] {
-  def convertTo(x : Double) : B
-  def convertFrom(x : B) : Mpz
+  def apply(x: Interval): NumericInterval[B]
+  def apply(x: NumericInterval[B]): Interval
 }
 
-given ConvertIntervalInt: ConvertInterval[Int] with
-  override def convertTo(x: Double): Int = x.toInt
-  override def convertFrom(x: Int): Mpz = new Mpz(x)
+given ConvertInterval[Int] with
+  override def apply(x: Interval): NumericInterval[Int] =
+    val inf, sup = Mpq(32)
+    x.inf.toMpq(inf, 0)
+    x.sup.toMpq(sup, 0)
+    NumericInterval(inf.doubleValue().toInt, sup.doubleValue().toInt)
 
-given ConvertIntervalLong: ConvertInterval[Long] with
-  override def convertTo(x: Double): Long = x.toLong
-  override def convertFrom(x: Long): Mpz = new Mpz(x)
-  
-  
+  override def apply(x: NumericInterval[Int]): Interval =
+    Interval(x.low, x.high)
+
+given ConvertInterval[Long] with
+  override def apply(x: Interval): NumericInterval[Long] =
+    val inf, sup = Mpq(64)
+    x.inf.toMpq(inf, 0)
+    x.sup.toMpq(sup, 0)
+    NumericInterval(inf.doubleValue().toLong, sup.doubleValue().toLong)
+
+  override def apply(x: NumericInterval[Long]): Interval =
+    Interval(x.low, x.high)

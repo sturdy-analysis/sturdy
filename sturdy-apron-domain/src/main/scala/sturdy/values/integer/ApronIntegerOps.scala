@@ -18,39 +18,26 @@ import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
 import sturdy.values.floating.FloatOps
 import sturdy.values.{Top, Topped, config}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
-import sturdy.values.utils.{ConvertInterval, ConvertMpq, convertToScalarMpq, given}
+import sturdy.values.utils.{ConvertCoeff, ConvertInterval, convertToScalarMpq, given}
 
 import java.nio.ByteOrder
 import scala.language.reflectiveCalls
 
 
 given ApronIntegerOps[B](using Numeric[B])
-                        (using convertInterval: ConvertInterval[B])
+                        (using ConvertInterval[B])
                         (using ap: Apron, effects: EffectStack, intervalOps: IntervalIntegerOps[B], f: Failure)
       : IntegerOps[B, ApronExpr] with
 
   import ApronOrderingOps.*
-  
-  def apronIntervalToInterval(v: ApronExpr) : NumericInterval[B] =
-    val supArray = new Array[Double](1)
-    val infArray = new Array[Double](1)
-    ap.getBound(v).sup.toDouble(supArray, 0)
-    ap.getBound(v).inf.toDouble(infArray, 0)
-    val sup = convertInterval.convertTo(supArray(0))
-    val inf = convertInterval.convertTo(infArray(0))
-    NumericInterval[B](inf, sup)
 
-  def unaryIntervalOp(v: ApronExpr, f: NumericInterval[B] => NumericInterval[B]): ApronExpr =
-    val vInterval = f(apronIntervalToInterval(v))
-    ApronExpr.Constant(new Interval(convertInterval.convertFrom(vInterval.low), convertInterval.convertFrom(vInterval.high)))
+  def unaryIntervalOp(v: ApronExpr, f: NumericInterval[B] => NumericInterval[B])(using convert: ConvertInterval[B]): ApronExpr =
+    ApronExpr.Constant(convert(f(convert(ap.getBound(v)))))
 
-  def binaryIntervalOp(v1: ApronExpr, v2: ApronExpr, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B]): ApronExpr =
-    val v1Interval = apronIntervalToInterval(v1)
-    val v2Interval = apronIntervalToInterval(v2)
-    val resInterval = f(v1Interval, v2Interval)
-    ApronExpr.Constant(new Interval(convertInterval.convertFrom(resInterval.low), convertInterval.convertFrom(resInterval.high)))
+  def binaryIntervalOp(v1: ApronExpr, v2: ApronExpr, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B])(using convert: ConvertInterval[B]): ApronExpr =
+    ApronExpr.Constant(convert(f(convert(ap.getBound(v1)), convert(ap.getBound(v2)))))
 
-  override def integerLit(i: B): ApronExpr = ApronExpr.Constant(new MpqScalar(convertInterval.convertFrom(i)))
+  override def integerLit(i: B): ApronExpr = ApronExpr.Constant(new MpqScalar(new Mpz(i.toLong)))
 
   override def randomInteger(): ApronExpr = ApronExpr.top
 
@@ -207,7 +194,7 @@ given ApronConvertLongFloat(using Apron, EffectStack, Failure) : ConvertLongFloa
 given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDouble[ApronExpr,ApronExpr] = new LiftedConvert[Long, Double, ApronExpr, ApronExpr, Topped[Long], Topped[Double], Bits](extract[Long], inject[Double])
 
 
-def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertMpq[B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(expr))
+def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpq, B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(expr))
 
 def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
   case Topped.Top => ApronExpr.top
