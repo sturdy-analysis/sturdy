@@ -10,6 +10,16 @@ trait ConvertInterval[B] {
   def apply(x: NumericInterval[B]): Interval
 }
 
+given ConvertInterval[Byte] with
+  override def apply(x: Interval): NumericInterval[Byte] =
+    val inf, sup = Mpq(8)
+    x.inf.toMpq(inf, 0)
+    x.sup.toMpq(sup, 0)
+    NumericInterval(inf.doubleValue().toByte, sup.doubleValue().toByte)
+
+  override def apply(x: NumericInterval[Byte]): Interval =
+    Interval(x.low, x.high)
+
 given ConvertInterval[Int] with
   override def apply(x: Interval): NumericInterval[Int] =
     val inf, sup = Mpq(32)
