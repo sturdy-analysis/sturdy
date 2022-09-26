@@ -15,7 +15,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Topped, config}
 import sturdy.values.config.{Bits, Overflow}
-import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
+import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert, given}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 import sturdy.values.utils.{ConvertCoeff, convertToScalarMpfr, given}
 
@@ -105,14 +105,14 @@ given ApronFloatOps[B](using Fractional[B])
 given ApronConvertFloatInt(using Apron, EffectStack, Failure) : ConvertFloatInt[ApronExpr,ApronExpr] = new LiftedConvert[Float, Int, ApronExpr, ApronExpr, Topped[Float], Topped[Int], Overflow && Bits](extract, inject)
 given ApronConvertFloatLong(using Apron, EffectStack, Failure) : ConvertFloatLong[ApronExpr,ApronExpr] = new LiftedConvert[Float, Long, ApronExpr, ApronExpr, Topped[Float], Topped[Long], Overflow && Bits](extract, inject)
 given ApronConvertFloatDouble(using Apron, EffectStack, Failure) : ConvertFloatDouble[ApronExpr,ApronExpr] = new LiftedConvert[Float, Double, ApronExpr, ApronExpr, Topped[Float], Topped[Double], NilCC.type](extract, inject)
-given ApronConvertFloatBytes(using Apron, EffectStack, Failure) : ConvertFloatBytes[ApronExpr,ApronExpr] = new LiftedConvert[Float, Seq[Byte], ApronExpr, ApronExpr, Topped[Float], Topped[Seq[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => ApronExpr.top)
-given ApronConvertBytesFloat(using Apron, EffectStack, Failure) : ConvertBytesFloat[ApronExpr,ApronExpr] = new LiftedConvert[Seq[Byte], Float, ApronExpr, ApronExpr, Topped[Seq[Byte]], Topped[Float], SomeCC[ByteOrder]](x => Topped.Top, inject)
+given ApronConvertFloatBytes(using Apron, EffectStack, Failure) : ConvertFloatBytes[ApronExpr,Seq[ApronExpr]] = new LiftedConvert[Float, Seq[Byte], ApronExpr, Seq[ApronExpr], Topped[Float], Seq[Topped[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => x.map(inject))
+given ApronConvertBytesFloat(using Apron, EffectStack, Failure) : ConvertBytesFloat[Seq[ApronExpr],ApronExpr] = new LiftedConvert[Seq[Byte], Float, Seq[ApronExpr], ApronExpr, Seq[Topped[Byte]], Topped[Float], SomeCC[ByteOrder]](x => x.map(extract), inject)
 
 given ApronConvertDoubleInt(using Apron, EffectStack, Failure) : ConvertDoubleInt[ApronExpr,ApronExpr] = new LiftedConvert[Double, Int, ApronExpr, ApronExpr, Topped[Double], Topped[Int], Overflow && Bits](extract, inject)
 given ApronConvertDoubleLong(using Apron, EffectStack, Failure) : ConvertDoubleLong[ApronExpr,ApronExpr] = new LiftedConvert[Double, Long, ApronExpr, ApronExpr, Topped[Double], Topped[Long], Overflow && Bits](extract, inject)
 given ApronConvertDoubleFloat(using Apron, EffectStack, Failure) : ConvertDoubleFloat[ApronExpr,ApronExpr] = new LiftedConvert[Double, Float, ApronExpr, ApronExpr, Topped[Double], Topped[Float], NilCC.type](extract, inject)
-given ApronConvertDoubleBytes(using Apron, EffectStack, Failure) : ConvertDoubleBytes[ApronExpr,ApronExpr] = new LiftedConvert[Double, Seq[Byte], ApronExpr, ApronExpr, Topped[Double], Topped[Seq[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => ApronExpr.top)
-given ApronConvertBytesDouble(using Apron, EffectStack, Failure) : ConvertBytesDouble[ApronExpr,ApronExpr] = new LiftedConvert[Seq[Byte], Double, ApronExpr, ApronExpr, Topped[Seq[Byte]], Topped[Double], SomeCC[ByteOrder]](x => Topped.Top, inject)
+given ApronConvertDoubleBytes(using Apron, EffectStack, Failure) : ConvertDoubleBytes[ApronExpr,Seq[ApronExpr]] = new LiftedConvert[Double, Seq[Byte], ApronExpr, Seq[ApronExpr], Topped[Double], Seq[Topped[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => x.map(inject))
+given ApronConvertBytesDouble(using Apron, EffectStack, Failure) : ConvertBytesDouble[Seq[ApronExpr],ApronExpr] = new LiftedConvert[Seq[Byte], Double, Seq[ApronExpr], ApronExpr, Seq[Topped[Byte]], Topped[Double], SomeCC[ByteOrder]](x => x.map(extract), inject)
 
 def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpfr, B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
 
