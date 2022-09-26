@@ -185,45 +185,22 @@ given ApronIntegerOps[B](using Numeric[B])
   override def invertBits(v: ApronExpr): ApronExpr =
     unaryIntervalOp(v, intervalOps.invertBits)
 
-//given ApronConvertIntLong(using Apron, EffectStack, Failure) : ConvertIntLong[ApronExpr,ApronExpr] = new LiftedConvert[Int, Long, ApronExpr, ApronExpr, Topped[Int], Topped[Long], Bits](extract[Int], inject[Long])
-//given ApronConvertIntFloat(using Apron, EffectStack, Failure) : ConvertIntFloat[ApronExpr,ApronExpr] = new LiftedConvert[Int, Float, ApronExpr, ApronExpr, Topped[Int], Topped[Float], Bits](extract[Int], inject[Float])
-//given ApronConvertIntDouble(using Apron, EffectStack, Failure) : ConvertIntDouble[ApronExpr,ApronExpr] = new LiftedConvert[Int, Double, ApronExpr, ApronExpr, Topped[Int], Topped[Double], Bits](extract[Int], inject[Double])
+given ApronConvertIntLong(using Apron, EffectStack, Failure) : ConvertIntLong[ApronExpr,ApronExpr] = new LiftedConvert[Int, Long, ApronExpr, ApronExpr, NumericInterval[Int], NumericInterval[Long], Bits](extract, inject)
+given ApronConvertIntFloat(using Apron, EffectStack, Failure) : ConvertIntFloat[ApronExpr,ApronExpr] = new LiftedConvert[Int, Float, ApronExpr, ApronExpr, Topped[Int], Topped[Float], Bits](extract, inject)
+given ApronConvertIntDouble(using Apron, EffectStack, Failure) : ConvertIntDouble[ApronExpr,ApronExpr] = new LiftedConvert[Int, Double, ApronExpr, ApronExpr, Topped[Int], Topped[Double], Bits](extract, inject)
+given ApronConvertIntBytes(using Apron, EffectStack, Failure) : ConvertIntBytes[ApronExpr,ApronExpr] = new LiftedConvert[Int, Seq[Byte], ApronExpr, ApronExpr, Topped[Int], Topped[Seq[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => ApronExpr.top)
+given ApronConvertBytesInt(using Apron, EffectStack, Failure) : ConvertBytesInt[ApronExpr,ApronExpr] = new LiftedConvert[Seq[Byte], Int, ApronExpr, ApronExpr, Topped[Seq[Byte]], Topped[Int], config.BytesSize && SomeCC[ByteOrder] && config.Bits](x => Topped.Top, inject)
 
-//given ApronConvertLongInt(using Apron, EffectStack, Failure) : ConvertLongInt[ApronExpr,ApronExpr] = new LiftedConvert[Long, Int, ApronExpr, ApronExpr, Topped[Long], Topped[Int], NilCC.type](extract[Long], inject[Int])
-given ApronConvertLongFloat(using Apron, EffectStack, Failure) : ConvertLongFloat[ApronExpr,ApronExpr] = new LiftedConvert[Long, Float, ApronExpr, ApronExpr, Topped[Long], Topped[Float], Bits](extract[Long], inject[Float])
-given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDouble[ApronExpr,ApronExpr] = new LiftedConvert[Long, Double, ApronExpr, ApronExpr, Topped[Long], Topped[Double], Bits](extract[Long], inject[Double])
+given ApronConvertLongInt(using Apron, EffectStack, Failure) : ConvertLongInt[ApronExpr,ApronExpr] = new LiftedConvert[Long, Int, ApronExpr, ApronExpr, NumericInterval[Long], NumericInterval[Int], NilCC.type](extract, inject)
+given ApronConvertLongFloat(using Apron, EffectStack, Failure) : ConvertLongFloat[ApronExpr,ApronExpr] = new LiftedConvert[Long, Float, ApronExpr, ApronExpr, Topped[Long], Topped[Float], Bits](extract, inject)
+given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDouble[ApronExpr,ApronExpr] = new LiftedConvert[Long, Double, ApronExpr, ApronExpr, Topped[Long], Topped[Double], Bits](extract, inject)
+given ApronConvertLongBytes(using Apron, EffectStack, Failure) : ConvertLongBytes[ApronExpr,ApronExpr] = new LiftedConvert[Long, Seq[Byte], ApronExpr, ApronExpr, Topped[Long], Topped[Seq[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => ApronExpr.top)
+given ApronConvertBytesLong(using Apron, EffectStack, Failure) : ConvertBytesLong[ApronExpr,ApronExpr] = new LiftedConvert[Seq[Byte], Long, ApronExpr, ApronExpr, Topped[Seq[Byte]], Topped[Long], config.BytesSize && SomeCC[ByteOrder] && config.Bits](x => Topped.Top, inject)
 
+def extract[B: Numeric](from : ApronExpr)(using ap: Apron)(using ConvertCoeff[Mpq, B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(from.toApron))
+def extract[B: Numeric](from : ApronExpr)(using ap: Apron, c: ConvertInterval[B]) : NumericInterval[B] = c(ap.getBound(from.toApron))
 
-def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpq, B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(expr))
-
-def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
+def inject[B: Numeric](from : Topped[B]): ApronExpr = from match
   case Topped.Top => ApronExpr.top
   case Topped.Actual(i) => ApronExpr.Constant(new MpqScalar(new Mpq(i.toDouble)))
-
-given ApronConvertIntLong(using ops: IntegerOps[Long, ApronExpr]) : ConvertIntLong[ApronExpr, ApronExpr] with
-  override def apply(from: ApronExpr, conf: Bits): ApronExpr = conf match
-    case Bits.Signed => from
-    case Bits.Unsigned => ops.bitAnd(from, ops.integerLit(0x00000000ffffffffL))
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-
-given ApronConvertIntFloat(using ops: IntegerOps[Long, ApronExpr], opsFloat : FloatOps[Float, ApronExpr], ap: Apron, order: OrderingOps[ApronExpr, ApronCons])(using EffectStack) : ConvertIntFloat[ApronExpr, ApronExpr] with
-  override def apply(from: ApronExpr, conf: Bits): ApronExpr = conf match
-    case Bits.Signed => from
-    case Bits.Unsigned => ap.withTemporaryDoubleVariables(1) { case List(r) =>
-      ap.ifThenElse(order.ge(from, ops.integerLit(0))) {
-        ap.assign(r, from)
-      } {
-        ap.assign(r, opsFloat.mul(opsFloat.floatingLit(2f), ops.bitOr(ops.shiftRightUnsigned(from, ops.integerLit(1)), ops.bitAnd(from, ops.integerLit(1)))))
-      }
-      r.expr
-    }
-    case Bits.Raw => ???
-
-given ApronConvertIntDouble(using ops: IntegerOps[Long, ApronExpr]) : ConvertIntDouble[ApronExpr, ApronExpr] with
-  override def apply(from: ApronExpr, conf: Bits): ApronExpr = conf match
-    case Bits.Signed => from
-    case Bits.Unsigned => ops.bitAnd(from, ops.integerLit(0x00000000ffffffffL))
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-
-given ApronConvertLongInt(using ops: IntegerOps[Long, ApronExpr]):  ConvertLongInt[ApronExpr, ApronExpr] with
-  override def apply(from: ApronExpr, conf: NilCC.type): ApronExpr = ops.modulo(from, ops.shiftLeft(ops.integerLit(1), ops.integerLit(32)))
+def inject[B: Numeric](from : NumericInterval[B])(using c: ConvertInterval[B]): ApronExpr = ApronExpr.Constant(c(from))
