@@ -42,7 +42,7 @@ object SignAnalysisSoundness:
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[VRef].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
-      case (Value.StringValue(s1), Value.StringValue(s2)) => PartialOrder[StringCharacterInclusion].lteq(s1, s2)
+      case (Value.StringValue(s1), Value.StringValue(s2)) => PartialOrder[StringSuffix].lteq(s1, s2)
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 

@@ -33,7 +33,7 @@ import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
-  Strings.CharacterInclusion, Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Strings.Suffix, Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
 

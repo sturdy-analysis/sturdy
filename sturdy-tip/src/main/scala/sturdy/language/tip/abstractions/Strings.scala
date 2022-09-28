@@ -6,8 +6,7 @@ import sturdy.values.Topped
 import sturdy.values.integer.NumericInterval.IsZero
 import sturdy.values.integer.{IntSign, NumericInterval}
 import sturdy.values.relational.EqOps
-import sturdy.values.strings.StringCharacterInclusion
-import sturdy.values.strings.StringPrefix
+import sturdy.values.strings.{StringCharacterInclusion, StringPrefix, StringSuffix}
 
 object Strings:
   trait CharacterInclusion extends Interpreter :
@@ -20,5 +19,12 @@ object Strings:
     final type VString = StringPrefix
 
     override def topString: StringPrefix = StringPrefix.Prefix("")
+
+
+  trait Suffix extends Interpreter :
+    final type VString = StringSuffix
+
+    override def topString: StringSuffix = StringSuffix.Suffix("")
+
 
 

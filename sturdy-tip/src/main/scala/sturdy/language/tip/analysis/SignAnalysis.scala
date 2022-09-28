@@ -30,7 +30,7 @@ import sturdy.language.tip.abstractions.*
 
 
 object SignAnalysis extends Interpreter,
-  Strings.CharacterInclusion, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Strings.Suffix, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type J[A] = WithJoin[A]
 
