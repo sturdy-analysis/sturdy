@@ -43,13 +43,12 @@ given CombineStringPrefix[W <: Widening]: Combine[StringPrefix, W] with
     else (v1, v2) match
       case (Prefix(p1), Prefix(p2)) =>
         var joinedPrefix = ""
-        for(x <- p1){
-          for(y <- p2){
-            if (x==y){
-              joinedPrefix = joinedPrefix.appended(x)
-            }
-            else return Changed(Prefix(joinedPrefix))
+        for((x, y) <- p1.toCharArray.zip(p2.toCharArray)){
+          if (x==y){
+            joinedPrefix = joinedPrefix.appended(x)
           }
+          else return Changed(Prefix(joinedPrefix))
+
         }
         return Changed(Prefix(joinedPrefix))
 
@@ -137,11 +136,11 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
 
   override def charAt(s: StringPrefix, i: IntSign): StringPrefix = i match
     case IntSign.Zero => s match
-      case Prefix("") => f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i")
+      case Prefix("") => j.joinWithFailure(Prefix(""))(f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i"))
       case Prefix(pre) => Prefix(pre.charAt(0).toString)
     case IntSign.NegOrZero => s match
-      case Prefix("") => j.joinWithFailure(f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i"))(f.fail(StringNegativeIndex,
-        s"charAt of $s with inex $i "))
+      case Prefix("") => j.joinWithFailure(Prefix(""))(j.joinWithFailure(f.fail(StringIndexOutOfBounds, s"charAt of $s with index $i"))(f.fail(StringNegativeIndex,
+        s"charAt of $s with inex $i ")))
       case Prefix(pre) => j.joinWithFailure(Prefix(pre.charAt(0).toString))(f.fail(StringNegativeIndex,
         s"charAt of $s with inex $i "))
     case IntSign.Neg => f.fail(StringNegativeIndex, s"charAt of $s with index $i")
