@@ -111,10 +111,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
     case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
     case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
-    case Exp.Eq(e1, e2) =>
-      val v1 = eval(e1)
-      val v2 = eval(e2)
-      equ(v1, v2)
+    case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
     case Exp.Call(fun, args) =>
       invokeFun(eval(fun), args.map(eval(_)))(call)
     case a@Exp.Alloc(e) =>

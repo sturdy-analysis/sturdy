@@ -11,3 +11,17 @@ given PowersetFunctionOps[F, A, R, V]
   def funValue(fun: F): Powerset[V] = Powerset(ops.funValue(fun))
   def invokeFun(funs: Powerset[V], a: A)(invoke: (F, A) => R): R =
     mapJoin(funs.set, fun => ops.invokeFun(fun, a)(invoke))
+
+
+/**
+
+ 
+ var f;
+ if (..)
+   f = inc;    f = {inc}
+ else
+   f = dec;    f = {dec}
+ endif         f = {inc, dec}
+ f(0)          inc(0) join dec(0)   =  [-1,1]
+
+*/

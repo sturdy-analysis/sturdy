@@ -25,7 +25,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   val eqOps: EqOps[V, V]
   val orderingOps: OrderingOps[V, V]
   val branchOps: BooleanBranching[V, V]
-  val closureOps: ClosureOps[String, V, Exp, Env, V, V]
+  val closureOps: ClosureOps[String, Exp, Env, V, V]
 
   // effect operations
   val failure: Failure
@@ -73,17 +73,16 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
       branchOps.boolBranch(c, eval(thn), eval(els))
     case Exp.Lam(x, body) =>
       val env = environment.closeEnvironment
-      closureOps.closureValue(List(x), body, env)
+      closureOps.closureValue(x, body, env)
     case Exp.App(fun, arg) =>
       val cl = eval(fun)
       closureOps.invokeClosure(cl) {
-        case (List(x), body, env) => environment.scoped {
+        case (x, body, env) => environment.scoped {
           val a = eval(arg)
           environment.loadClosedEnvironment(env)
           environment.bind(x, a)
           eval(body)
         }
-        case c => throw MatchError(c)
       }
     case Exp.Rec(f, body) =>
       lazy val rec: V = {

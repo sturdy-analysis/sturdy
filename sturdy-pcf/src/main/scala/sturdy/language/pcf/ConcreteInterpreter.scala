@@ -36,7 +36,7 @@ object ConcreteInterpreter extends Interpreter:
     override val eqOps: EqOps[Value, Value] = implicitly
     override val orderingOps: OrderingOps[Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Value] = implicitly
-    override val closureOps: ClosureOps[String, Value, Exp, Env, Value, Value] = implicitly
+    override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
     override val input: CUserInput[Value] = new CUserInput(nextInput)
     override val environment = new ConcreteCyclicEnvironment[String, Value](Map.empty)

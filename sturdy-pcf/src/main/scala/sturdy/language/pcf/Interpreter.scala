@@ -48,7 +48,7 @@ trait Interpreter:
     new LiftedOrderingOps(_.asInt, boolean)
   given ValueBranchOps(using Failure, BooleanBranching[VBoolean, Value]): BooleanBranching[Value, Value] =
     new LiftedBooleanBranching(asBoolean)
-  given ValueClosureOps(using Failure, ClosureOps[String, Value, Exp, Env, Value, VClosure]): ClosureOps[String, Value, Exp, Env, Value, Value] =
+  given ValueClosureOps(using Failure, ClosureOps[String, Exp, Env, Value, VClosure]): ClosureOps[String, Exp, Env, Value, Value] =
     new LiftedClosureOps(_.asClosure, Value.Closure.apply)
 
   type Instance <: GenericInstance
