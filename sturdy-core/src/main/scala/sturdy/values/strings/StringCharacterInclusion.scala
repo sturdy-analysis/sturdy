@@ -61,7 +61,9 @@ abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterI
 
   override def substring(s: StringCharacterInclusion, begin: I, end: I): StringCharacterInclusion
 
-  override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] = (s, w) match
+  override def contains(s: StringCharacterInclusion, w: StringCharacterInclusion): Topped[Boolean] =
+    (s, w) match
+
     case (StringSets(c1, mc1), StringSets(c2, mc2)) =>
       if (c2.isEmpty && toppedCharSetIsEmpty(mc2)) {
         Topped.Actual(true)
