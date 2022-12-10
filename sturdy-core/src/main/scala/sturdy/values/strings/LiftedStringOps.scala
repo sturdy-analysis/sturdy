@@ -32,4 +32,6 @@ class LiftedStringOps[S, I, B, US, UI, UB](extractS: S => US, extractI: I => UI,
 
   override def trim(s: S): S =  injectS(ops.trim(extractS(s)))
 
+  override def toInt(s: S): I = injectI(ops.toInt(extractS(s)))
+
 

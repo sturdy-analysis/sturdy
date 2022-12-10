@@ -15,6 +15,7 @@ import java.nio.ByteOrder
 
 case object StringIndexOutOfBounds extends FailureKind
 case object StringNegativeIndex extends FailureKind
+case object NumberFormatException extends FailureKind
 
 /** String operations represented as V */
 trait StringOps[V, I, B]:
@@ -32,10 +33,11 @@ trait StringOps[V, I, B]:
   def endsWith(s: V, suffix: V): B
   def indexOf(s: V, word: V, fromIndex: I): I
   def replace(s: V, word: V, newWord: V): V
-  //def split(s: V, splitChar: V): R
+
   def toLowerCase(s: V): V
   def toUpperCase(s: V): V
   def trim(s: V) :V
+  def toInt(s: V): I
 
   /*
   matches

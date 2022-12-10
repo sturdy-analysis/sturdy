@@ -121,3 +121,9 @@ object CharacterInclusionUtil {
       case IntSign.Zero => NumericInterval.Bounded(0,0)
   }
 }
+
+def signValue(i: Int): IntSign = {
+  if i < 0 then IntSign.Neg
+  else if i > 0 then IntSign.Pos
+  else IntSign.Zero
+}

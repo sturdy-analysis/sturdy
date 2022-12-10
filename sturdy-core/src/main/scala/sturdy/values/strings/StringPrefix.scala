@@ -97,6 +97,8 @@ abstract class PrefixStringOps[I] extends StringOps[StringPrefix, I, Topped[Bool
   override def trim(s: StringPrefix): StringPrefix = s match
     case Prefix(p) => Prefix(p.stripPrefix(" "))
 
+  override def toInt(s: StringPrefix): I
+
 
 
 given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[IntSign] with
@@ -153,14 +155,15 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
 
 
   override def compareTo(s1: StringPrefix, s2: StringPrefix): IntSign = (s1, s2) match
-    case (Prefix(pre1), Prefix(pre2)) =>
-      if (pre1.length == pre2.length && pre1 != pre2){
-        if pre1.compareTo(pre2) == 0 then IntSign.Zero
-        else if pre1.compareTo(pre2) > 0 then IntSign.Pos
-        else IntSign.Neg
-      }
-      else IntSign.TopSign
+    case (Prefix(pre1), Prefix(pre2)) =>val length = (pre1.length).min(pre2.length)
+      val pre1Sub = pre1.substring(0, length)
+      val pre2Sub = pre2.substring(0, length)
 
+      val comp = pre1Sub.compareTo(pre2Sub)
+
+      if (comp > 0) return IntSign.Pos
+      else if (comp < 0) return IntSign.Neg
+      else return IntSign.TopSign
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
   override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: IntSign): Topped[Boolean] = offset match
@@ -174,6 +177,27 @@ given PrefixStringOpsSign(using f: Failure, j: EffectStack): PrefixStringOps[Int
     case IntSign.Neg => Topped.Actual(false)
 
   override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: IntSign): IntSign = IntSign.TopSign
+
+  override def toInt(s: StringPrefix): IntSign = s match
+    case Prefix(pre) =>
+      try
+      {
+        var x = pre.toInt
+        if(x == 0){
+          return j.joinWithFailure(ZeroOrPos)(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        if(x < 0){
+          return j.joinWithFailure(Neg)(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        return j.joinWithFailure(Pos)(f.fail(NumberFormatException, s"For input string: $s"))
+
+      }
+      finally {
+        return f.fail(NumberFormatException, s"For input string: $s")
+      }
+
+
+
 
 
 given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixStringOps[NumericInterval[Int]] with
@@ -210,11 +234,14 @@ given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixS
 
 
   override def compareTo(s1: StringPrefix, s2: StringPrefix): NumericInterval[Int] = (s1, s2) match
-    case (Prefix(pre1), Prefix(pre2)) =>
-      if (pre1.length == pre2.length && pre1 != pre2){
-        NumericInterval.Bounded(pre1.compareTo(pre2), pre1.compareTo(pre2))
-      }
-      else NumericInterval.Top()
+    case (Prefix(pre1), Prefix(pre2)) =>val length = (pre1.length).min(pre2.length)
+      val pre1Sub = pre1.substring(0, length)
+      val pre2Sub = pre2.substring(0, length)
+
+      val comp = pre1Sub.compareTo(pre2Sub)
+
+      if (comp != 0) return NumericInterval.Bounded(comp, comp)
+      else return NumericInterval.Top()
 
   override def startsWith(s: StringPrefix, prefix: StringPrefix, offset: NumericInterval[Int]): Topped[Boolean] = (s, prefix) match
     case (Prefix(pre1), Prefix(pre2)) => offset match
@@ -237,6 +264,25 @@ given PrefixStringOpsNumericIntervall(using f: Failure, j: EffectStack): PrefixS
 
   override def indexOf(s: StringPrefix, word: StringPrefix, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
     NumericInterval.Bounded(-1, Int.MaxValue)
+
+  override def toInt(s: StringPrefix): NumericInterval[Int] = s match
+    case Prefix(pre) =>
+      try
+      {
+        var x = pre.toInt
+        if(x == 0){
+          return j.joinWithFailure(signAsInterval(ZeroOrPos))(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        if(x < 0){
+          return j.joinWithFailure(NumericInterval.Bounded(Int.MinValue, x))(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        return j.joinWithFailure(NumericInterval.Bounded(x, Int.MaxValue))(f.fail(NumberFormatException, s"For input string: $s"))
+
+      }
+      catch {
+        case a: NumberFormatException =>
+      }
+      return f.fail(NumberFormatException, s"For input string: $s")
 
 
 

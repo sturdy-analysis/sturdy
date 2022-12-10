@@ -157,6 +157,8 @@ abstract class CharacterInclusionStringOps[I] extends StringOps[StringCharacterI
       }
       else StringSets(c -- Set(' '), mc)
 
+  override def toInt(s: StringCharacterInclusion): I
+
 
 
 
@@ -178,7 +180,7 @@ given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): Charact
           s"substring of $s with indices $begin to $end"))
 
   override def length(s: StringCharacterInclusion): IntSign = s match
-    case StringSets(c, mc) => if toppedCharSetIsEmpty(mc) then IntSign.Zero else IntSign.Pos
+    case StringSets(c, mc) => if toppedCharSetIsEmpty(mc) then return IntSign.Zero else if c.nonEmpty then return IntSign.Pos else return IntSign.ZeroOrPos
 
   override def charAt(s: StringCharacterInclusion, i: IntSign): StringCharacterInclusion = s match
     case StringSets(c, mc) =>
@@ -215,43 +217,23 @@ given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): Charact
 
   override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): IntSign = (s1, s2) match
     case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => IntSign.TopSign
-    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>
-      if(mc1.isEmpty && mc2.isEmpty){
-        return IntSign.Zero
-      }
-      else{
-        val mc1Array = mc1.toArray[Char]
-        val mc2Array = mc2.toArray[Char]
-        var firstIteration = true
-        var state = IntSign.TopSign
-        for(x <- mc1Array){
-          for(y <- mc2Array){
-            if(x == y){
-              return IntSign.TopSign
-            }
+    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>if (mc1.isEmpty && mc2.isEmpty) return IntSign.Zero
+      if (mc1.intersect(mc2).nonEmpty) return IntSign.TopSign
 
-            if(firstIteration) {
-              firstIteration = false
-              if(x < y){
-                state = IntSign.Neg
-              }
-              if(x > y){
-                state = IntSign.Pos
-              }
-            }
-            else{
-              if(x < y){
-                state = CombineIntSign(state, IntSign.Neg).get
-              }
-              if(x > y){
-                state = CombineIntSign(state, IntSign.Pos).get
-              }
-            }
+      val mc1Array = mc1.toArray[Char]
+      val mc2Array = mc2.toArray[Char]
+      val mc1Min = mc1Array.min
+      val mc1Max = mc1Array.max
+      val mc2Min = mc2Array.min
+      val mc2Max = mc2Array.max
 
-          }
-        }
-        state
-      }
+      val comp1 = mc1Min.compareTo(mc2Max)
+      val comp2 = mc1Max.compareTo(mc2Min)
+
+      if (comp1 == comp2) return signValue(comp1)
+      else if ((comp1 == -1 && comp2 == 0) || (comp1 == 0 && comp2 == -1)) return IntSign.NegOrZero
+      else if ((comp1 == 1 && comp2 == 0) || (comp1 == 0 && comp2 == 1)) return IntSign.ZeroOrPos
+      else return IntSign.TopSign
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
   override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = offset match
@@ -286,6 +268,51 @@ given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): Charact
         return IntSign.Neg
       }
       IntSign.TopSign
+
+  override def toInt(s: StringCharacterInclusion): IntSign = s match
+   case StringSets(c, mc) =>
+
+     // Falls MC leer ist, ist auch C leer und der String kann in keinen Integer umgewandelt werden
+     // Oder es kommt sicher ein Zeichen vor, das nicht Teil eines Integers sein kann
+     if(toppedCharSetIsEmpty(mc) || c.exists(x => !(Character.isDigit(x)|| x == '-' || x == '+'))){
+       return f.fail(NumberFormatException, s"For input string: $s")
+     }
+
+     if(mc.isActual){
+
+       if(!mc.get.exists(x => Character.isDigit(x))){
+         return f.fail(NumberFormatException, s"For input string: $s")
+       }
+       var sign = Pos
+       if(mc.get.contains('0')){
+         sign = Zero
+       }
+       if(mc.get.contains('0') && mc.get.exists(x => x == 1 || x == 2 || x == 3 || x == 4 ||x == 5 || x == 6 || x == 7 || x == 8 || x == 9)){
+         sign = ZeroOrPos
+       }
+       if(!mc.get.contains('0') && c.contains('-')){
+         sign = Neg
+       }
+       if(mc.get.contains('0') && c.contains('-')){
+         sign = NegOrZero
+       }
+       if(mc.get.contains('-') && !c.contains('-')){
+         sign = TopSign
+       }
+
+       if(mc.get.exists(x => !(Character.isDigit(x))) || c.isEmpty){
+         return j.joinWithFailure(sign)(f.fail(NumberFormatException, s"For input string: $s"))
+       }
+       else {
+         return sign
+       }
+     }
+     else{
+       return j.joinWithFailure(IntSign.TopSign)(f.fail(NumberFormatException, s"For input string: $s"))
+     }
+
+
+
 
 
 
@@ -343,32 +370,30 @@ given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectSta
 
   override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): NumericInterval[Int] = (s1, s2) match
     case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => NumericInterval.Top()
-    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>
-      if(mc1.isEmpty && mc2.isEmpty){
-        return NumericInterval.Bounded(0,0)
-      }
-      else{
-        if(mc1.intersect(mc2).nonEmpty){
-          return NumericInterval.Top()
-        }
+    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>if (mc1.isEmpty && mc2.isEmpty) return NumericInterval.Bounded(0,0)
+      if (mc1.intersect(mc2).nonEmpty) return NumericInterval.Top()
 
-        val mc1Array = mc1.toArray[Char]
-        val mc2Array = mc2.toArray[Char]
-        val s1Min = mc1Array.min
-        val s1Max = mc1Array.max
-        val s2Min = mc2Array.min
-        val s2Max = mc2Array.max
+      val mc1Array = mc1.toArray[Char]
+      val mc2Array = mc2.toArray[Char]
+      val mc1Min = mc1Array.min
+      val mc1Max = mc1Array.max
+      val mc2Min = mc2Array.min
+      val mc2Max = mc2Array.max
 
-        val val1 = s1Min.compareTo(s2Max)
-        val val2 = s1Max.compareTo(s2Min)
-        NumericInterval.Bounded(val1.min(val2), val1.max(val2))
-    }
+      val comp1 = mc1Min.compareTo(mc2Max)
+      val comp2 = mc1Max.compareTo(mc2Min)
+      NumericInterval.Bounded(comp1.min(comp2), comp1.max(comp2))
+
 
   override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: NumericInterval[Int]): Topped[Boolean] =
     CharacterInclusionStringOpsSign.startsWith(s, prefix, intervalAsSign(offset))
 
   override def indexOf(s: StringCharacterInclusion, word: StringCharacterInclusion, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
     signAsInterval(CharacterInclusionStringOpsSign.indexOf(s, word, intervalAsSign(fromIndex)))
+
+  override def toInt(s: StringCharacterInclusion): NumericInterval[Int] =
+    signAsInterval(CharacterInclusionStringOpsSign.toInt(s))
+
 
 
 

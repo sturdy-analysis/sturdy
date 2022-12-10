@@ -98,6 +98,7 @@ abstract class SuffixStringOps[I] extends StringOps[StringSuffix, I, Topped[Bool
   override def trim(s: StringSuffix): StringSuffix = s match
     case Suffix(p) => Suffix(p.stripSuffix(" "))
 
+  override def toInt(s: StringSuffix): I
 
 
 given SuffixStringOpsSign(using f: Failure, j: EffectStack): SuffixStringOps[IntSign] with
@@ -150,6 +151,19 @@ given SuffixStringOpsSign(using f: Failure, j: EffectStack): SuffixStringOps[Int
 
   override def indexOf(s: StringSuffix, word: StringSuffix, fromIndex: IntSign): IntSign = IntSign.TopSign
 
+  override def toInt(s: StringSuffix): IntSign = s match
+    case Suffix(suf) =>
+      try
+      {
+        var x = suf.toInt
+        if(x < 0){
+          return j.joinWithFailure(Neg)(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        return j.joinWithFailure(TopSign)(f.fail(NumberFormatException, s"For input string: $s"))
+      }
+      finally {
+        return f.fail(NumberFormatException, s"For input string: $s")
+      }
 
 given SuffixStringOpsNumericIntervall(using f: Failure, j: EffectStack): SuffixStringOps[NumericInterval[Int]] with
 
@@ -170,6 +184,22 @@ given SuffixStringOpsNumericIntervall(using f: Failure, j: EffectStack): SuffixS
 
   override def indexOf(s: StringSuffix, word: StringSuffix, fromIndex: NumericInterval[Int]): NumericInterval[Int] =
     NumericInterval.Bounded(-1, Int.MaxValue)
+
+  override def toInt(s: StringSuffix): NumericInterval[Int] = s match
+    case Suffix(suf) =>
+      try
+      {
+        var x = suf.toInt
+        if(x < 0){
+          return j.joinWithFailure(NumericInterval.Bounded(x,x))(f.fail(NumberFormatException, s"For input string: $s"))
+        }
+        return j.joinWithFailure(signAsInterval(TopSign))(f.fail(NumberFormatException, s"For input string: $s"))
+      }
+      catch {
+        case a: NumberFormatException => 
+      }
+      return f.fail(NumberFormatException, s"For input string: $s")
+
 
 
 
