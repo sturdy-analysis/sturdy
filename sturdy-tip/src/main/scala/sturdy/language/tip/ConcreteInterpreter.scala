@@ -5,11 +5,10 @@ import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.print.CPrint
-import sturdy.effect.assert.CAssert
+import sturdy.effect.assert.{Assert,CAssert}
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
-import sturdy.language.tip.Interpreter
 import sturdy.language.tip.Function
 import sturdy.language.tip.*
 import sturdy.values.booleans.{*, given}
