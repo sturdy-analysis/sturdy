@@ -73,6 +73,7 @@ enum Stm extends Labeled:
   case While(cond: Exp, body: Stm)
   case Block(body: Seq[Stm])
   case Output(e: Exp)
+  case Assert(e : Exp)
   case Error(e: Exp)
 
   def fold[A](using f: Stm => A, g: Exp => A)(using m: Monoid[A]): A = this match
@@ -84,6 +85,7 @@ enum Stm extends Labeled:
     case Block(body) =>
       m.combine(f(this), m.combineAll(body.view.map(_.fold)))
     case Output(e) => m.combine(f(this), e.fold)
+    case Assert(e) => m.combine(f(this), e.fold)
     case Error(e) => m.combine(f(this), e.fold)
 
   override def toString: String = this match
@@ -92,6 +94,7 @@ enum Stm extends Labeled:
     case While(c, b) => s"While($c)@${this.label}"
     case Block(body) => s"Block@${this.label}"
     case Output(e) => s"Output@${this.label}"
+    case Assert(e) => s"Assert@${this.label}"
     case Error(e) => s"Error@${this.label}"
 
   def intLiterals: Set[Int] =
