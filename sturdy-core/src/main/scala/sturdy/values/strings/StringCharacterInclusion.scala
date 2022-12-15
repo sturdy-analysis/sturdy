@@ -215,25 +215,7 @@ given CharacterInclusionStringOpsSign(using f: Failure, j: EffectStack): Charact
           s"Char at $i of $s is out of bounds"))
 
 
-  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): IntSign = (s1, s2) match
-    case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => IntSign.TopSign
-    case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>if (mc1.isEmpty && mc2.isEmpty) return IntSign.Zero
-      if (mc1.intersect(mc2).nonEmpty) return IntSign.TopSign
-
-      val mc1Array = mc1.toArray[Char]
-      val mc2Array = mc2.toArray[Char]
-      val mc1Min = mc1Array.min
-      val mc1Max = mc1Array.max
-      val mc2Min = mc2Array.min
-      val mc2Max = mc2Array.max
-
-      val comp1 = mc1Min.compareTo(mc2Max)
-      val comp2 = mc1Max.compareTo(mc2Min)
-
-      if (comp1 == comp2) return signValue(comp1)
-      else if ((comp1 == -1 && comp2 == 0) || (comp1 == 0 && comp2 == -1)) return IntSign.NegOrZero
-      else if ((comp1 == 1 && comp2 == 0) || (comp1 == 0 && comp2 == 1)) return IntSign.ZeroOrPos
-      else return IntSign.TopSign
+  override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): IntSign = intervalAsSign(CharacterInclusionStringOpsNumericIntervall.compareTo(s1,s2))
 
   // Bei ungültigem Index wird false zurückgegeben (auch negativ)
   override def startsWith(s: StringCharacterInclusion, prefix: StringCharacterInclusion, offset: IntSign): Topped[Boolean] = offset match
@@ -371,7 +353,7 @@ given CharacterInclusionStringOpsNumericIntervall(using f: Failure, j: EffectSta
   override def compareTo(s1: StringCharacterInclusion, s2: StringCharacterInclusion): NumericInterval[Int] = (s1, s2) match
     case (StringSets(_, _), StringSets(_, Topped.Top)) | (StringSets(_, Topped.Top), StringSets(_, _)) => NumericInterval.Top()
     case (StringSets(c1, Topped.Actual(mc1)), StringSets(c2, Topped.Actual(mc2))) =>if (mc1.isEmpty && mc2.isEmpty) return NumericInterval.Bounded(0,0)
-      if (mc1.intersect(mc2).nonEmpty) return NumericInterval.Top()
+      if (mc1.intersect(mc2).nonEmpty || c1.isEmpty || c2.isEmpty) return NumericInterval.Top()
 
       val mc1Array = mc1.toArray[Char]
       val mc2Array = mc2.toArray[Char]
