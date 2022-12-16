@@ -11,6 +11,7 @@ import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
+import sturdy.effect.assert.{Assert,CAssert,AAssert}
 import sturdy.effect.store
 import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -57,6 +58,7 @@ object IntervalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
+    override val assert: CAssert[Value] = new CAssert 
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))
 
     var bounds: Set[Int] = Set()
