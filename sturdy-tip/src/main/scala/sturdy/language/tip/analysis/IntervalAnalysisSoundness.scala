@@ -48,6 +48,7 @@ object IntervalAnalysisSoundness:
 
       // concrete environment is sound by construction
       a.store.storeIsSound(c.store) &&
-      a.print.isSound(c.print)
+      a.print.isSound(c.print) /* &&
+      a.assert.isSound(c.assert) */
     }
 
