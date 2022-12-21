@@ -53,7 +53,7 @@ object SignAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
-    override val assert: CAssert[Value] = new CAssert
+    override val assert: CAssert[Value, AllocationSite] = new CAssert
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)

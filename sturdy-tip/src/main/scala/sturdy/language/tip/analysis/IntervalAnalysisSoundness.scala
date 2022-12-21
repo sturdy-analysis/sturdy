@@ -45,7 +45,6 @@ object IntervalAnalysisSoundness:
   given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis.Instance): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.alloc
-
       // concrete environment is sound by construction
       a.store.storeIsSound(c.store) &&
       a.print.isSound(c.print) /* &&
