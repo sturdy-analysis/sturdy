@@ -18,6 +18,7 @@ import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
+import sturdy.util.Label
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -70,7 +71,7 @@ object ConcreteInterpreter extends Interpreter:
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint
-    override val assert: CAssert[Value, AllocationSite] = new CAssert
+    override val assert: CAssert[Value, Label] = new CAssert
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
