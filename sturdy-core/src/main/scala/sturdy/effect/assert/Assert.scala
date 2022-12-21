@@ -2,6 +2,5 @@ package sturdy.effect.assert
 
 import sturdy.effect.Effect
 
-// add context in apply
-trait Assert[A] extends Effect:
-  def apply(a: A): Unit
+trait Assert[A, -Context] extends Effect:
+  def apply(a: A, ctx: Context): Unit

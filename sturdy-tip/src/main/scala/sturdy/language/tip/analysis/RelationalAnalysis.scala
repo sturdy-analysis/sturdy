@@ -111,7 +111,7 @@ object RelationalAnalysis extends Interpreter,
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
-    override val assert: CAssert[Value] = new CAssert 
+    override val assert: CAssert[Value, AllocationSite] = new CAssert 
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
 
     // TODO check

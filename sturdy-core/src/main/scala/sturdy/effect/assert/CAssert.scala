@@ -8,10 +8,10 @@ import sturdy.effect.assert.Assert
 
 object AssertionFailure extends FailureKind
 
-class CAssert[A](using f: Failure, b: BooleanBranching[A, Unit]) extends Assert[A], Concrete:
+class CAssert[A, Context](using f: Failure, b: BooleanBranching[A, Unit]) extends Assert[A, Context], Concrete:
 
-  override def apply(a: A): Unit = 
+  override def apply(a: A, c: Context): Unit = 
     b.boolBranch(a, 
       {}, 
-      {f.fail(AssertionFailure, "failed to prove assertion...")}
+      {f.fail(AssertionFailure, "failed to prove assertion at " + c)}
     )
