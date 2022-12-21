@@ -90,7 +90,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
-  val assert: Assert[V, AllocationSite]
+  val assert: Assert[V, Label]
   val input: UserInput[V]
   val failure: Failure
 
@@ -159,7 +159,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Stm.Output(e) =>
       print(eval(e))
     case Stm.Assert(e) =>
-      assert(eval(e), AllocationSite.Alloc(Exp.Alloc(e)))
+      assert(eval(e), e.label)  
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
 
