@@ -24,7 +24,7 @@ trait ApronAlloc:
   def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var
 
   def freeVariable(v: Var, state: Abstract1): Unit
-  
   def useStrongUpdate(v: Var): Boolean
+  def freshReference(v: Var): Var
 
   scala.collection.immutable.ArraySeq

@@ -89,22 +89,31 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
-  def assign(v: alloc.Var, exp: ApronExpr): Unit =
+  /** Assigns v := exp. In case of a strong assignment, invalidates previous references of v and yields a fresh copy of v to use for future references. */
+  def assign(v: alloc.Var, exp: ApronExpr): Option[alloc.Var] =
     val av = v.getOrElse(throw new IllegalStateException(s"Cannot assign to freed variable $v"))
     val isStrong = alloc.useStrongUpdate(v)
     val isInitialized = v.isInitialized(apronState)
+    var newV: Option[alloc.Var] = None
+
     if (!isInitialized) {
       v.initialize(apronState)
+      val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
       if (Apron.debugAssign)
-        println(s"assigning uninitialized $v = $exp = ${getBound(exp)}, was uninitialized")
-      assertConstrain(ApronCons.eq(v.expr, exp))
+        println(s"assigning uninitialized $v = $exp = ${apronState.getBound(apronManager, expIntern)}, was uninitialized")
+      apronState.assign(apronManager, v.av, expIntern, null)
     } else if (isStrong) {
+      v.free(apronState)
+      if (Apron.debugAlloc)
+        println(s"freeing old references of $v (ref count ${v.refCount}) = ${v.getBound(apronState)}")
+
       val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
       if (Apron.debugAssign) {
         val old = getBound(v)
         println(s"assigning strong $v = $exp = ${apronState.getBound(apronManager, expIntern)}, was $old")
       }
       apronState.assign(apronManager, av, expIntern, null)
+      newV = Some(alloc.freshReference(v))
     } else {
       val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
       if (Apron.debugAssign) {
@@ -118,6 +127,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     }
     if (apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
+    newV
 
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
     val v = alloc.addIntVariable(apronState, ApronAllocationSite.TemporaryVar)
@@ -146,6 +156,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     finally {
       vs.foreach(alloc.freeVariable(_, apronState))
     }
+
+  def ifThenElseUnit[A, B](cond: ApronCons)(ifTrue: => A)(ifFalse: => B)(using EffectStack): Unit =
+    ifThenElse(cond, cond.negated)({ifTrue; ()})({ifFalse; ()})
 
   def ifThenElse[A](cond: ApronCons)(ifTrue: => A)(ifFalse: => A)(using EffectStack): Join[A] ?=> A =
     ifThenElse(cond, cond.negated)(ifTrue)(ifFalse)

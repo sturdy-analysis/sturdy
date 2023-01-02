@@ -42,7 +42,7 @@ given ApronFloatOps[B](using Fractional[B])
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+      ap.ifThenElseUnit(lt(x1.expr, x2.expr)) {
         ap.assign(r, x1.expr)
       } {
         ap.assign(r, x2.expr)
@@ -54,7 +54,7 @@ given ApronFloatOps[B](using Fractional[B])
     ap.withTemporaryDoubleVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElse(lt(x1.expr, x2.expr)) {
+      ap.ifThenElseUnit(lt(x1.expr, x2.expr)) {
         ap.assign(r, x2.expr)
       } {
         ap.assign(r, x1.expr)
@@ -87,13 +87,13 @@ given ApronFloatOps[B](using Fractional[B])
       ap.assign(x, v)
       ap.assign(xsign, sign)
       ap.ifThenElse(lt(x.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
-        ap.ifThenElse(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+        ap.ifThenElseUnit(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
           ap.assign(r, x.expr)
         } {
           ap.assign(r, negated(x.expr))
         }
       } {
-        ap.ifThenElse(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
+        ap.ifThenElseUnit(lt(xsign.expr, ApronExpr.Constant(MpfrScalar(0, 0)))) {
           ap.assign(r, negated(x.expr))
         } {
           ap.assign(r, x.expr)

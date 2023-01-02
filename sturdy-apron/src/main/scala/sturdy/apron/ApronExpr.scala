@@ -19,10 +19,13 @@ import sturdy.values.{Widen, MaybeChanged, Join}
 
 trait ApronVar:
   protected var freed: Boolean = false
-
   private var bound: Interval = _
-  protected val av: apron.Var
+  
+  val av: apron.Var
   protected val isInt: Boolean
+
+  protected var _refCount = 0
+  def refCount: Int = _refCount
 
   def getBound(apronState: Abstract1): Interval =
     if (freed)

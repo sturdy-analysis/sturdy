@@ -41,8 +41,13 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
   import apron.*
 
-  private var allocatedVars: Set[alloc.Var] = Set()
   private var boundVars: Map[Int, Val] = Map()
+
+  private def allocatedVars: Iterable[alloc.Var] = boundVars.values.flatMap {
+    case Val.Int(v) => Some(v)
+    case Val.Double(v) => Some(v)
+    case _ => None
+  }
 
   enum Val:
     case Int(v: alloc.Var)
@@ -126,13 +131,11 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
         getIntVal(v) match
           case Some(exp) =>
             val av = addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-            allocatedVars += av
             newApronAssignments += av -> exp
             boundVars += ix -> Val.Int(av)
           case None => getDoubleVal(v) match
             case Some(exp) =>
               val av = addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-              allocatedVars += av
               newApronAssignments += av -> exp
               boundVars += ix -> Val.Double(av)
             case None =>
@@ -147,16 +150,13 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
-    val snapAllocatedVars = this.allocatedVars
     val snapBoundVars = this.boundVars
     this._data = d
-    this.allocatedVars = Set()
     setVars(vars)
     try f finally {
       this._data = snapData
       this.names = snapNames
       this.allocatedVars.foreach(apron.freeVariable)
-      this.allocatedVars = snapAllocatedVars
       this.boundVars = snapBoundVars
     }
   }
@@ -181,21 +181,20 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       case Some(exp) =>
         oldVal match
           case Val.Int(av) =>
-            apron.assign(av, exp)
+            apron.assign(av, exp).foreach(av2 => boundVars += x -> Val.Int(av2))
           case _ =>
             val intVar = addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
-            allocatedVars += intVar
-            apron.assign(intVar, exp)
+            val maybeVar = apron.assign(intVar, exp)
+            maybeVar.foreach(_ => assert(false))
             boundVars += x -> Val.Int(intVar)
       case None => getDoubleVal(v) match
         case Some(exp) =>
           oldVal match
             case Val.Double(av) =>
-              apron.assign(av, exp)
+              apron.assign(av, exp).foreach(av2 => boundVars += x -> Val.Double(av2))
             case _ =>
               val doubleVar = addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
-              allocatedVars += doubleVar
-              apron.assign(doubleVar, exp)
+              apron.assign(doubleVar, exp).foreach(_ => assert(false))
               boundVars += x -> Val.Double(doubleVar)
         case None =>
           boundVars += x -> Val.Other(v)

@@ -4,7 +4,12 @@ import apron.Texpr1VarNode
 import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
-  case class Var(protected val av: apron.Var, isInt: Boolean) extends ApronVar
+  class Var(val av: apron.Var, val isInt: Boolean) extends ApronVar {
+    def copy: Var =
+      val newV = new Var(av, isInt)
+      newV._refCount = refCount + 1
+      newV
+  }
 
   private var varCount: Int = 0
 
@@ -20,7 +25,7 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(null, Array(v)), false)
     }
-    Var(v, false)
+    new Var(v, false)
 
   def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var =
     var cname = s"I${site}_$varCount"
@@ -32,7 +37,7 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
       varCount = (varCount + 1) % varCountLimit
       state.changeEnvironment(manager, env.add(Array(v), null), false)
     }
-    Var(v, true)
+    new Var(v, true)
 
   override def freeVariable(v: Var, state: Abstract1): Unit =
     if (useStrongUpdate(v)) {
@@ -46,3 +51,5 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
 
   override def useStrongUpdate(v: Var): Boolean =
     v.getOrElse(new StringVar("")).toString.endsWith(STRONG_UPDATE_SUFFIX)
+
+  override def freshReference(v: Var): Var = v.copy
