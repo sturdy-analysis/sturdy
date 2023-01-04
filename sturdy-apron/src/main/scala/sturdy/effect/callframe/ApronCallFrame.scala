@@ -1,9 +1,9 @@
 package sturdy.effect.callframe
 
 import apron.Texpr1Intern
-import apron.{Environment, Interval, Texpr1VarNode, Tcons1, StringVar, Manager, Abstract1}
+import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1VarNode}
 import org.eclipse.collections.api.factory.BiMaps
-import org.eclipse.collections.api.bimap.{ImmutableBiMap, MutableBiMap, BiMap}
+import org.eclipse.collections.api.bimap.{BiMap, ImmutableBiMap, MutableBiMap}
 import sturdy.apron.Apron
 import sturdy.apron.ApronAllocationSite
 import sturdy.apron.ApronExpr
@@ -13,9 +13,9 @@ import sturdy.effect.ComputationJoiner
 import sturdy.effect.SturdyFailure
 import sturdy.effect.TrySturdy
 import sturdy.values.Finite
-import sturdy.values.{MaybeChanged, Unchanged, Changed}
+import sturdy.values.{Changed, MaybeChanged, Unchanged}
 import sturdy.values.Widening
-import sturdy.values.{Widen, Join, Combine}
+import sturdy.values.{Combine, Join, Widen}
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
@@ -37,17 +37,17 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
                                    initVars: Iterable[(Var, Option[V])] = Iterable.empty)
                                   (using site: CallFrameSite[Data])
                                   (using Join[V], Widen[V], ClassTag[V])
-  extends DecidableMutableCallFrame[Data, Var, V](initData, initVars) :
+  extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
 
-  import apron.*
+  import apron.{apronManager, alloc}
 
-  private var boundVars: Map[Int, Val] = Map()
+  protected var _data: Data = initData
+  protected var vars: Array[Val] = _
+  protected var names: Map[Var, Int] = _
 
-  private def allocatedVars: Iterable[alloc.Var] = boundVars.values.flatMap {
-    case Val.Int(v) => Some(v)
-    case Val.Double(v) => Some(v)
-    case _ => None
-  }
+  setVars(initVars)
+
+  private def allocatedVars: Iterable[alloc.Var] = vars.toSeq.flatMap(Val.getVar)
 
   enum Val:
     case Int(v: alloc.Var)
@@ -59,6 +59,12 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       case Double(v) => makeIntVal(ApronExpr.Var(v))
       case Other(v) => v
       case null => null.asInstanceOf[V]
+
+  object Val:
+    def getVar(v: Val): Option[alloc.Var] = v match
+      case Val.Int(v) => Some(v)
+      case Val.Double(v) => Some(v)
+      case _ => None
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
 //      case (Int(v1), Int(v2)) => apron.getBound(v1) == apron.getBound(v2)
@@ -76,21 +82,32 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case (v1, null) => Unchanged(v1)
     case (null, v2) => Changed(v2)
     case (Val.Int(v1), Val.Int(v2)) =>
-      if (v1 != v2) {
+      if (v1 == v2) {
+        if (v1.refCount < v2.refCount)
+          Changed(Val.Int(v2))
+        else
+          Unchanged(Val.Int(v1))
+      } else {
         val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot join with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
+        Unchanged(Val.Int(v1))
       }
-      Unchanged(Val.Int(v1))
+
     case (Val.Double(v1), Val.Double(v2)) =>
-      if (v1 != v2) {
+      if (v1 == v2) {
+        if (v1.refCount < v2.refCount)
+          Changed(Val.Double(v2))
+        else
+          Unchanged(Val.Double(v1))
+      } else {
         val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot join with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
+        Unchanged(Val.Double(v1))
       }
-      Unchanged(Val.Int(v1))
     case (v1, v2) => Join(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
@@ -99,50 +116,61 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case(v1, null) => Unchanged(v1)
     case(null, v2) => Changed(v2)
     case (Val.Int(v1), Val.Int(v2)) =>
-      if (v1 != v2) {
+      if (v1 == v2) {
+        if (v1.refCount < v2.refCount)
+          Changed(Val.Int(v2))
+        else
+          Unchanged(Val.Int(v1))
+      } else {
+//        apron.joinValues(v1, v2, false)
         val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot widen with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
+        Unchanged(Val.Int(v1))
       }
-      Unchanged(Val.Int(v1))
     case (Val.Double(v1), Val.Double(v2)) =>
-      if (v1 != v2) {
+      if (v1 == v2) {
+        if (v1.refCount < v2.refCount)
+          Changed(Val.Double(v2))
+        else
+          Unchanged(Val.Double(v1))
+      } else {
         val av1 = v1.getOrElse(throw new IllegalStateException(s"Cannot widen with freed variable $v1"))
         val v2Intern = new Texpr1Intern(state.getEnvironment, v2.node)
         val assigned = state.assignCopy(apronManager, av1, v2Intern, null)
         state.join(apronManager, assigned)
+        Unchanged(Val.Double(v1))
       }
-      Unchanged(Val.Int(v1))
     case (v1, v2) => Widen(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
 
-  override def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
+  def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
 
-    boundVars = Map()
+    vars = Array.ofDim(newVars.size)
     val newApronAssignments: ListBuffer[(alloc.Var, ApronExpr)] = ListBuffer()
 
     newVars.zipWithIndex.foreach {
       case ((_, None), ix) =>
-        boundVars += ix -> null
+        vars(ix) = null
       case ((x, Some(v)), ix) =>
         getIntVal(v) match
           case Some(exp) =>
-            val av = addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+            val av = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
             newApronAssignments += av -> exp
-            boundVars += ix -> Val.Int(av)
+            vars(ix) = Val.Int(av)
           case None => getDoubleVal(v) match
             case Some(exp) =>
-              val av = addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
+              val av = apron.addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
               newApronAssignments += av -> exp
-              boundVars += ix -> Val.Double(av)
+              vars(ix) = Val.Double(av)
             case None =>
-              boundVars += ix -> Val.Other(v)
+              vars(ix) = Val.Other(v)
     }
 
-    newApronAssignments.foreach { case (av, exp) => assign(av, exp) }
+    newApronAssignments.foreach { case (av, exp) => apron.assign(av, exp) }
   }
 
   setVars(initVars)
@@ -150,97 +178,160 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
-    val snapBoundVars = this.boundVars
+    val snapVars = this.vars
     this._data = d
     setVars(vars)
     try f finally {
       this._data = snapData
       this.names = snapNames
       this.allocatedVars.foreach(apron.freeVariable)
-      this.boundVars = snapBoundVars
+      this.vars = snapVars
     }
   }
 
   override def data: Data = _data
 
-  override def getLocal(x: Int): JOptionC[V] = boundVars.get(x) match
-    case None => JOptionC.none
-    case Some(e) => e match
-      case Val.Int(av) => JOptionC.some(makeIntVal(ApronExpr.Var(av)))
-      case Val.Double(av) => JOptionC.some(makeDoubleVal(ApronExpr.Var(av)))
-      case Val.Other(v) => JOptionC.some(v)
-      case null => JOptionC.none
+  override def getLocal(ix: Int): JOptionC[V] =
+    if (ix >= 0 && ix < vars.length) {
+      val v = vars(ix)
+      v match
+        case Val.Int(av) => JOptionC.some(makeIntVal(ApronExpr.Var(av)))
+        case Val.Double(av) => JOptionC.some(makeDoubleVal(ApronExpr.Var(av)))
+        case Val.Other(v) => JOptionC.some(v)
+        case null => JOptionC.none
+    }
+    else
+      JOptionC.none
 
   override def getLocalByName(x: Var): JOptionC[V] = names.get(x) match
     case None => JOptionC.none
     case Some(ix) => getLocal(ix)
 
-  def setLocal(x: Int, name: Var, v: V): JOptionC[Unit] = boundVars.get(x) match
-    case None => JOptionC.none
-    case Some(oldVal) => getIntVal(v) match
-      case Some(exp) =>
-        oldVal match
-          case Val.Int(av) =>
-            apron.assign(av, exp).foreach(av2 => boundVars += x -> Val.Int(av2))
-          case _ =>
-            val intVar = addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
-            val maybeVar = apron.assign(intVar, exp)
-            maybeVar.foreach(_ => assert(false))
-            boundVars += x -> Val.Int(intVar)
-      case None => getDoubleVal(v) match
+
+  def setLocal(ix: Int, name: Var, v: V): JOptionC[Unit] =
+    if (ix >= 0 && ix < vars.length) {
+      val oldVal = vars(ix)
+      getIntVal(v) match
         case Some(exp) =>
           oldVal match
-            case Val.Double(av) =>
-              apron.assign(av, exp).foreach(av2 => boundVars += x -> Val.Double(av2))
+            case Val.Int(av) =>
+              apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Int(av2))
             case _ =>
-              val doubleVar = addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
-              apron.assign(doubleVar, exp).foreach(_ => assert(false))
-              boundVars += x -> Val.Double(doubleVar)
-        case None =>
-          boundVars += x -> Val.Other(v)
+              val intVar = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
+              val maybeVar = apron.assign(intVar, exp)
+              maybeVar.foreach(_ => assert(false))
+              vars(ix) = Val.Int(intVar)
+        case None => getDoubleVal(v) match
+          case Some(exp) =>
+            oldVal match
+              case Val.Double(av) =>
+                apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Double(av2))
+              case _ =>
+                val doubleVar = apron.addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$name"))
+                apron.assign(doubleVar, exp).foreach(_ => assert(false))
+                vars(ix) = Val.Double(doubleVar)
+          case None =>
+            vars(ix) = Val.Other(v)
       JOptionC.some(())
+    } else {
+      JOptionC.none
+    }
 
-  /** Assumes Var =:= Int. */
-  override def setLocal(x: Int, v: V): JOptionC[Unit] =
-    setLocal(x, x.asInstanceOf[Var], v)
+  override def setLocal(ix: Int, v: V): JOptionC[Unit] =
+    setLocal(ix, names.find(_._2 == ix).get._1, v)
 
   override def setLocalByName(x: Var, v: V): JOptionC[Unit] = names.get(x) match
     case None => JOptionC.none
     case Some(ix) => setLocal(ix, x, v)
 
-  type State = (apron.State, Map[Int, Val])
+  type State = (apron.ApronState, List[Val])
 
   /** state contains the constraints for the current frame only */
-  override def getState: State = (apron.getState, boundVars)
+  override def getState: State = (apron.getState, vars.toList)
+
+  private def setVarsConsistentWithState(vars: Array[Val]): Unit =
+    this.vars = vars.map {
+      case null => null
+      case v@Val.Int(av) => if (av.isFree) Val.Int(apron.alloc.freshReference(av)) else v
+      case v@Val.Double(av) => if (av.isFree) Val.Double(apron.alloc.freshReference(av)) else v
+      case v@Val.Other(_) => v
+    }
 
   override def setState(st: State): Unit =
+    val state = apron.apronState
+    for (v <- vars; av <- Val.getVar(v))
+      av.free(state)
     apron.setState(st._1)
-    this.boundVars = st._2
+    setVarsConsistentWithState(st._2.toArray)
+    println(s"Restored ApronCallFrame state $vars in $apron")
 
   override def join: Join[State] = {
     case ((s1, vars1), (s2, vars2)) =>
       val MaybeChanged(as, changed) = apron.join(s1, s2)
       val state = new Abstract1(apronManager, as.s)
-      val MaybeChanged(vars, varsChanged) = JoinMap(using joinVal(state))(vars1, vars2)
-      val newApronState = new ApronState(state)
+      val MaybeChanged(vars, varsChanged) = CombineEquiList(using joinVal(state))(vars1, vars2)
+      val newApronState = new apron.ApronState(state)
+      if (Apron.debugJoinWiden)
+        println(
+          s"""Joining call frame
+             |  vars1 = $vars1
+             |  vars2 = $vars2
+             |  vars = $vars
+             |  changed = ${changed || varsChanged}""".stripMargin)
       MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
   }
 
   override def widen: Widen[State] = { case ((s1, vars1), (s2, vars2)) =>
     val MaybeChanged(as, changed) = apron.widen(s1, s2)
     val state = new Abstract1(apronManager, as.s)
-    val MaybeChanged(vars, varsChanged) = WidenFiniteKeyMap(using widenVal(state), new Finite[Int]{})(vars1, vars2)
-    val newApronState = new ApronState(state)
+    val MaybeChanged(vars, varsChanged) = CombineEquiList(using widenVal(state))(vars1, vars2)
+    val newApronState = new apron.ApronState(state)
     if (Apron.debugJoinWiden)
       println(
         s"""Widening call frame
            |  vars1 = $vars1
            |  vars2 = $vars2
            |  vars = $vars
-           |  changed = $varsChanged""".stripMargin)
+           |  changed = ${changed || varsChanged}""".stripMargin)
     MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
   }
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
-    apron.makeComputationJoiner
+  protected class CallFrameJoiner[A] extends apron.ApronComputationJoiner[A] {
+    private val snapshot = vars.toList
+    private var fVars: Array[Val] = _
+
+    override def inbetween(): Unit =
+      super.inbetween()
+      fVars = vars
+      setVarsConsistentWithState(snapshot.toArray)
+
+    override def retainNone(): Unit =
+      super.retainNone()
+      setVarsConsistentWithState(snapshot.toArray)
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      super.retainFirst(fRes)
+      setVarsConsistentWithState(fVars)
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      super.retainSecond(gRes)
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      super.retainBoth(fRes, gRes)
+      if (vars.length != fVars.length)
+        throw IllegalStateException()
+      val join = joinVal(apron.getState.s)
+      val joinedVars = vars.zip(fVars).map(join(_, _).get)
+
+      if (Apron.debugJoinWiden)
+        println(
+          s"""Computation joiner call frame
+           |  vars1 = ${fVars.toList}
+           |  vars2 = ${vars.toList}
+           |  vars = ${joinedVars.toList}""".stripMargin)
+
+      setVarsConsistentWithState(joinedVars)
+  }
+

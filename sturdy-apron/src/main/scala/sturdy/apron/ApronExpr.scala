@@ -58,6 +58,8 @@ trait ApronVar:
       f
     else
       av
+  def isFree: Boolean =
+    freed
   def free(state: Abstract1): Unit =
     if (!freed) {
       if (isInitialized(state))
@@ -73,9 +75,25 @@ trait ApronVar:
 
   override def toString: String =
     if (freed)
-      s"$bound (freed $av)"
+      s"$bound (freed $av#$refCount)"
     else
-      av.toString
+      s"$av#$refCount"
+
+  override def equals(obj: Any): Boolean = obj match
+    case that: ApronVar =>
+      if (this.freed && that.freed)
+        this.bound == that.bound
+      else if (this.freed != that.freed)
+        false
+      else
+        this.av == that.av
+    case _ => false
+
+  override def hashCode(): Int =
+    if (this.freed)
+      bound.hashCode()
+    else
+      av.hashCode()
 
 
 enum ApronExpr:

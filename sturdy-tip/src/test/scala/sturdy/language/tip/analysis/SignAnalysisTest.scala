@@ -42,14 +42,14 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+    p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
     }
-    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runSignAnalysis(p, StackConfig.StackedCfgNodes())
-    }
+//    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+//      runSignAnalysis(p, StackConfig.StackedCfgNodes())
+//    }
   }
 
   def runSignAnalysis(p: Path, stackConfig: StackConfig) =

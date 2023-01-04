@@ -90,21 +90,21 @@ class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterabl
   override type State = List[V]
   override def getState: List[V] = vars.toList
   override def setState(s: List[V]): Unit =
-    s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+    vars = s.toArray
   override def join: Join[List[V]] = implicitly
   override def widen: Widen[List[V]] = implicitly
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
-  private class CallFrameJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = vars
+  protected class CallFrameJoiner[A] extends ComputationJoiner[A] {
+    private val snapshot = vars.toList
     private var fVars: Array[V] = _
 
     override def inbetween(): Unit =
       fVars = vars
-      vars = snapshot
+      vars = snapshot.toArray
 
     override def retainNone(): Unit =
-      vars = snapshot
+      vars = snapshot.toArray
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       vars = fVars

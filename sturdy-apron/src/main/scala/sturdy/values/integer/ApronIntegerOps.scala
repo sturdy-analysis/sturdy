@@ -85,23 +85,6 @@ given ApronIntegerOps[B](using Numeric[B])
           v2)),
       v2)
 
-//  override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr =
-//    ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
-//      ap.assign(x1, v1)
-//      ap.assign(x2, v2)
-//      ap.ifThenElse(lt(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
-////        ap.assign(r, safediv(x1.expr, x2.expr))
-//        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
-//      } {
-//        ap.ifThenElse(lt(ApronExpr.Constant(MpqScalar(0)), x2.expr)) {
-////          ap.assign(r, safediv(x1.expr, x2.expr))
-//          ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
-//        } {
-//          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-//        }
-//      }
-//      r.expr
-//    }
 
   override def div(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
