@@ -59,8 +59,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.toString.contains("testdiv") &&
-      p.toString.endsWith("rel_persistent_conditional2.tip")
+    p.toString.contains("rel_") &&
+      p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -88,6 +88,9 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
       println(s"CONCRETE : $cresult")
       println(s"ABSTRACT : $aresult")
+
+      println(s"CONCRETE : ${interp.store.entries}")
+      println(s"ABSTRACT : ${analysis.store.getState}")
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given

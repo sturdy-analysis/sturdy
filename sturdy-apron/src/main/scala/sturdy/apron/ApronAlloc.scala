@@ -20,11 +20,14 @@ object ApronAlloc:
 trait ApronAlloc:
   type Var <: ApronVar
 
-  def addDoubleVariable(state: Abstract1, site: ApronAllocationSite): Var
-  def addIntVariable(state: Abstract1, site: ApronAllocationSite): Var
+  def allocateDoubleVariable(site: ApronAllocationSite): Var
+  def allocateIntVariable(site: ApronAllocationSite): Var
 
-  def freeVariable(v: Var, state: Abstract1): Unit
+  /** returns true if the constraint variable should be freed as well */
+  def freeVariable(v: Var, apron: Apron): Boolean
   def useStrongUpdate(v: Var): Boolean
+  
   def freshReference(v: Var): Var
+  def frozenReference(v: Var): Var
 
   scala.collection.immutable.ArraySeq

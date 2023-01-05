@@ -53,10 +53,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
   override def getAllState: All = getEffectState(effects)
   override def getInState(dom: Any): In = getEffectState(inEffects(dom))
   override def getOutState(dom: Any): Out = getEffectState(outEffects(dom))
-  override def setAllState(st: All): Unit = {
-    println(s"Restoring all state $st")
-    setEffectState(effects, st)
-  }
+  override def setAllState(st: All): Unit = setEffectState(effects, st)
   override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects(dom), in)
   override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects(dom), out)
 

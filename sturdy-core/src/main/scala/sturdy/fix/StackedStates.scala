@@ -1,19 +1,23 @@
 package sturdy.fix
 
+import org.eclipse.collections.api.RichIterable
 import org.eclipse.collections.api.factory.Maps
 import org.eclipse.collections.api.map.MutableMap
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Finite
-import sturdy.values.{MaybeChanged, Unchanged, Join, Changed, Widen}
+import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
+import scala.jdk.CollectionConverters.*
+
 
 final class StackedStates[Dom, Codom](val state: State)
                                      (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean)
@@ -62,9 +66,11 @@ final class StackedStates[Dom, Codom](val state: State)
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
-    val widenedIn = inStateWidening.push(dom, in).get
-    val stateFrame = (dom, widenedIn)
-    Option(stack.get(stateFrame)) match
+    val widenedIn = inStateWidening.push(dom, in)
+    val stateFrame = (dom, widenedIn.get)
+    println(s"Find recurrent $stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
+    val info1 = stack.get(stateFrame)
+    Option(info1) match
       case None =>
         // call is not recurrent
         if (readPriorOutput) {
@@ -84,7 +90,7 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
-        PushResult.Continue(Some(widenedIn))
+        PushResult.Continue(widenedIn.toOption)
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
@@ -116,8 +122,9 @@ final class StackedStates[Dom, Codom](val state: State)
       PopResult.Stable
     }
     val previousInfo = stack.remove(stateFrame)
-    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
-      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
+    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null) {
+      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
+    }
     stackHeight = newStackHeight
     updatedResult
 

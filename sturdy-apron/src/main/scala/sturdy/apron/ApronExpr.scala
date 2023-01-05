@@ -17,85 +17,6 @@ import gmp.Mpz
 import sturdy.apron.ApronCons.False
 import sturdy.values.{Widen, MaybeChanged, Join}
 
-trait ApronVar:
-  protected var freed: Boolean = false
-  private var bound: Interval = _
-  
-  val av: apron.Var
-  protected val isInt: Boolean
-
-  protected var _refCount = 0
-  def refCount: Int = _refCount
-
-  def getBound(apronState: Abstract1): Interval =
-    if (freed)
-      bound
-    else if (apronState.getEnvironment.hasVar(av)) {
-      apronState.getBound(apronState.getCreationManager, av)
-    } else {
-      null
-    }
-
-  def ensureInitialized(apronState: Abstract1): Unit =
-    if (!isInitialized(apronState))
-      initialize(apronState)
-  
-  def isInitialized(apronState: Abstract1): Boolean =
-    apronState.getEnvironment.hasVar(av)
-
-  def initialize(apronState: Abstract1): Unit =
-    if (!freed) {
-      val intAr = if (isInt) Array(av) else null
-      val floAr = if (isInt) null else Array(av)
-      apronState.changeEnvironment(apronState.getCreationManager, apronState.getEnvironment.add(intAr, floAr), false)
-      if (Apron.debugAlloc)
-        println(s"Initializing $this = [-oo,+oo]")
-    }
-
-
-  def getOrElse(f: => apron.Var): apron.Var =
-    if (freed)
-      f
-    else
-      av
-  def isFree: Boolean =
-    freed
-  def free(state: Abstract1): Unit =
-    if (!freed) {
-      if (isInitialized(state))
-        bound = state.getBound(state.getCreationManager, av)
-      freed = true
-    }
-  def expr: ApronExpr = ApronExpr.Var(this)
-  def node: Texpr1Node =
-    if (freed)
-      new Texpr1CstNode(bound)
-    else
-      new Texpr1VarNode(av)
-
-  override def toString: String =
-    if (freed)
-      s"$bound (freed $av#$refCount)"
-    else
-      s"$av#$refCount"
-
-  override def equals(obj: Any): Boolean = obj match
-    case that: ApronVar =>
-      if (this.freed && that.freed)
-        this.bound == that.bound
-      else if (this.freed != that.freed)
-        false
-      else
-        this.av == that.av
-    case _ => false
-
-  override def hashCode(): Int =
-    if (this.freed)
-      bound.hashCode()
-    else
-      av.hashCode()
-
-
 enum ApronExpr:
   case Var(v: ApronVar)
   case Constant(coeff: Coeff)
@@ -115,7 +36,10 @@ enum ApronExpr:
     case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron, r.toApron)
 
 object ApronExpr:
-  def num(i: Int): Constant = Constant(new MpqScalar(new Mpz(i)))
+  def num(i: Int): Constant = 
+    Constant(new MpqScalar(new Mpz(i)))
+  def num(iv: Interval): Constant =
+    Constant(iv)
   def top: Constant =
     val topItv = new Interval()
     topItv.setTop()
