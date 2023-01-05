@@ -270,7 +270,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def setState(st: State): Unit =
     apron.setState(st._1)
     setVarsConsistentWithState(st._2.toArray)
-    println(s"Restored ApronCallFrame state ${vars.toList} in $apron")
+    if (Apron.debugJoinWiden)
+      println(s"Restored ApronCallFrame state ${vars.toList} in $apron")
 
   override def join: Join[State] = {
     case ((s1, vars1), (s2, vars2)) =>
@@ -331,14 +332,18 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
       super.retainBoth(fRes, gRes)
       val join = combineVal(apron.getState.s, widen = false)
+
+      val fVarsStr = fVars.toList.toString
+      val varsStr = vars.toList.toString
       val joinedVars = fVars.zip(vars).map(join(_, _).get)
 
-      if (Apron.debugJoinWiden)
+      if (Apron.debugJoinWiden) {
         println(
           s"""Computation joiner call frame
-           |  vars1 = ${fVars.toList}
-           |  vars2 = ${vars.toList}
-           |  vars = ${joinedVars.toList}""".stripMargin)
+             |  vars1 = $fVarsStr
+             |  vars2 = $varsStr
+             |  vars = ${joinedVars.toList}""".stripMargin)
+      }
 
       setVarsConsistentWithState(joinedVars)
   }

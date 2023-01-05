@@ -68,9 +68,16 @@ final class StackedStates[Dom, Codom](val state: State)
 
     val widenedIn = inStateWidening.push(dom, in)
     val stateFrame = (dom, widenedIn.get)
-//    println(s"Find recurrent $stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
-    val info1 = stack.get(stateFrame)
-    Option(info1) match
+
+    if (Fixpoint.DEBUG)
+      widenedIn.toOption.foreach(win => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
+    if (Fixpoint.DEBUG_INVARIANTS) {
+      val sameIn = in.toString == widenedIn.get.toString
+      if (widenedIn.hasChanged && sameIn || !widenedIn.hasChanged && !sameIn)
+        throw new IllegalStateException(s"Change flag of widening is wrong.")
+    }
+
+    Option(stack.get(stateFrame)) match
       case None =>
         // call is not recurrent
         if (readPriorOutput) {
@@ -83,7 +90,7 @@ final class StackedStates[Dom, Codom](val state: State)
             return PushResult.Recurrent(result, Some(out))
           }
         }
-        
+
         // push call to stack
         val info = new FrameInstanceInfo(stackHeight)
         stack.put(stateFrame, info)
@@ -179,7 +186,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in.head, in)}
+        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(in, ce.in.head)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 

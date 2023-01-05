@@ -31,7 +31,7 @@ trait ApronVar:
         instCount
       else
         Integer.toHexString(System.identityHashCode(this))
-    s"$av#$instDesc}"
+    s"$av#$instDesc"
 
   def getBound(apron: Apron): Interval =
     if (freed)

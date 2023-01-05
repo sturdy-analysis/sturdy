@@ -14,10 +14,10 @@ import java.lang.IllegalStateException
 import scala.language.reflectiveCalls
 
 object Apron:
-  val debugAlloc: Boolean = true
-  val debugAssign: Boolean = true
-  val debugJoinWiden: Boolean = true
-  val debugAssert: Boolean = true
+  val debugAlloc: Boolean = false
+  val debugAssign: Boolean = false
+  val debugJoinWiden: Boolean = false
+  val debugAssert: Boolean = false
 
   case class Bottom() extends SturdyFailure
 
@@ -145,8 +145,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (c.size != 1)
       throw new IllegalStateException(s"Cannot assert $ac here, since it translates to multiple constraints $c")
     assertConstrain(c.head)
-    if (debugAssert)
-      println(s"Asserting $ac yielding $_apronState")
 
   private def assertConstrain(c: Tcons1): Unit =
     if (_apronState.isBottom(apronManager))
@@ -155,6 +153,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
     c.extendEnvironment(apronEnv)
     _apronState.meetCopy(apronManager, c)
+    if (debugAssert)
+      println(s"Asserting $c yielding $_apronState")
     if (_apronState.isBottom(apronManager))
       throw Apron.Bottom()
 
