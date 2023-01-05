@@ -6,7 +6,7 @@ import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
-import sturdy.effect.assert.Assert
+import sturdy.effect.assert.CAssert
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
 import sturdy.util.Label
@@ -90,7 +90,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
-  val assert: Assert[V, Label]
+  val assert: CAssert[V, Exp]
   val input: UserInput[V]
   val failure: Failure
 
@@ -159,7 +159,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Stm.Output(e) =>
       print(eval(e))
     case Stm.Assert(e) =>
-      assert(eval(e), e.label)  
+      assert(eval(e), e)  
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
 
