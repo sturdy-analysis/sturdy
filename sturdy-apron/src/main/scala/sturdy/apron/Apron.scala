@@ -62,45 +62,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       _apronState.changeEnvironment(apronManager, newEnv, false)
     }
 
-  def constrainPure[A](c: ApronCons)(a: A): Join[A] ?=> A = c.splitNeq match
-    case Some((lt, gt)) =>
-      ifThenElsePure(lt, gt, widen = false)(a)(a)
-    case None =>
-      assertConstrain(c)
-      a
-
-  def constrain[A](c: ApronCons)(a: => A)(using EffectStack): Join[A] ?=> A = c.splitNeq match
-    case Some((lt, gt)) =>
-      ifThenElse(lt, gt)(a)(a)
-    case None =>
-      assertConstrain(c)
-      a
-
-  def assertConstrain(ac: ApronCons): Unit =
-    if (_apronState.isBottom(apronManager))
-      throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
-    ac.vars.foreach { _v =>
-      val v = _v.asInstanceOf[alloc.Var]
-      val isStrong = alloc.useStrongUpdate(v)
-      val isInitialized = apronState.getEnvironment.hasVar(v.av)
-      if (!isInitialized) {
-        initializeVar(v)
-      } else if (isStrong) {
-//        val oldVal = v.getBound(this)
-//        v.setDelegate(ApronExpr.Constant(oldVal))
-      }
-    }
-    val c = ac.toApron(apronEnv)
-    if(c.getKind == Tcons1.DISEQ)
-      throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
-    c.extendEnvironment(apronEnv)
-    val newState = _apronState.meetCopy(apronManager, c)
-    if (debugAssert)
-      println(s"Asserting $ac yielding $newState")
-    if (newState.isBottom(apronManager))
-      throw Apron.Bottom()
-    _apronState = newState
-
 
   /** Assigns v := exp. In case of a strong assignment, invalidates previous references of v and yields a fresh copy of v to use for future references. */
   def assign(v: alloc.Var, exp: ApronExpr): Option[alloc.Var] =
@@ -143,9 +104,11 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     newV
 
   private def initializeVar(v: ApronVar): Unit =
-    val intAr = if (v.isInt) Array(v.av) else null
-    val floAr = if (v.isInt) null else Array(v.av)
-    apronState.changeEnvironment(apronState.getCreationManager, apronState.getEnvironment.add(intAr, floAr), false)
+    if (!apronEnv.hasVar(v.av)) {
+      val intAr = if (v.isInt) Array(v.av) else null
+      val floAr = if (v.isInt) null else Array(v.av)
+      apronState.changeEnvironment(apronState.getCreationManager, apronState.getEnvironment.add(intAr, floAr), false)
+    }
 
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
     val v = alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar)
@@ -176,6 +139,25 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       vs.foreach(freeVariable)
     }
 
+  def assertConstrain(ac: ApronCons): Unit =
+    ac.vars.foreach(initializeVar)
+    val c = ac.toApron(apronEnv)
+    if (c.size != 1)
+      throw new IllegalStateException(s"Cannot assert $ac here, since it translates to multiple constraints $c")
+    assertConstrain(c.head)
+    if (debugAssert)
+      println(s"Asserting $ac yielding $_apronState")
+
+  private def assertConstrain(c: Tcons1): Unit =
+    if (_apronState.isBottom(apronManager))
+      throw new IllegalStateException(s"Apron state may not be bottom prior to constraining!")
+    if (c.getKind == Tcons1.DISEQ)
+      throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
+    c.extendEnvironment(apronEnv)
+    _apronState.meetCopy(apronManager, c)
+    if (_apronState.isBottom(apronManager))
+      throw Apron.Bottom()
+
   def ifThenElseUnit[A, B](cond: ApronCons)(ifTrue: => A)(ifFalse: => B)(using EffectStack): Unit =
     ifThenElse(cond, cond.negated)({ifTrue; ()})({ifFalse; ()})
 
@@ -183,13 +165,25 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     ifThenElse(cond, cond.negated)(ifTrue)(ifFalse)
 
   def ifThenElse[A](condTrue: ApronCons, condFalse: ApronCons)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
+    val cTrue = condTrue.toApron(apronEnv)
+    val condTrueStr = condTrue.toString
+    val cFalse = condFalse.toApron(apronEnv)
+    val condFalseStr = condFalse.toString
+
     effects.joinComputations {
       if (debugAssert)
-        println(s"if $condTrue then")
-      constrain(condTrue)(ifTrue)
+        println(s"if $condTrueStr then")
+      effects.joinFold(cTrue, c =>
+        assertConstrain(c)
+        ifTrue
+      )
     } {
-      println(s"if $condTrue else")
-      constrain(condFalse)(ifFalse)
+      if (debugAssert)
+        println(s"else ($condFalseStr)")
+      effects.joinFold(cFalse, c =>
+        assertConstrain(c)
+        ifFalse
+      )
     }
 
   def ifThenElse[A](cond: Topped[ApronCons])(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A = cond match
@@ -199,27 +193,25 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   def ifThenElsePure[A](condTrue: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     ifThenElsePure(condTrue, condTrue.negated, widen)(ifTrue)(ifFalse)
 
-  def ifThenElsePure[A](condTrue: ApronCons, condFalse: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
-    val snapshot = new Abstract1(apronManager, _apronState)
-    val res1 = TrySturdy(constrainPure(condTrue)(ifTrue))
-    val state1 = _apronState
-    _apronState = new Abstract1(apronManager, snapshot)
-    val res2 = TrySturdy(constrainPure(condFalse)(ifFalse))
+  private def ifThenElsePure[A](condTrue: ApronCons, condFalse: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+    val snapshot = _apronState
 
-    (res1.isBottom, res2.isBottom) match
-      case (false, false) =>
-        val state2 = _apronState
-        _apronState = combineApronStates(state1, state2, widen).get
-      case (false, true) =>
-        _apronState = state1
-      case (true, false) =>
-        // nothing
-      case (true, true) =>
-        _apronState = snapshot
+    val cTrue = condTrue.toApron(apronEnv)
+    val cFalse = condFalse.toApron(apronEnv)
 
-    if (_apronState.isBottom(apronManager))
-      throw new IllegalStateException(s"bottom state illegal here")
-    Join(res1, res2).get.getOrThrow
+    val resTrue = cTrue.map(c => TrySturdy {
+      _apronState = new Abstract1(apronManager, snapshot)
+      assertConstrain(c)
+      ifTrue
+    }.get)
+    val resFalse = cFalse.map(c => TrySturdy {
+      _apronState = new Abstract1(apronManager, snapshot)
+      assertConstrain(c)
+      ifFalse
+    }.get)
+    // restore original state, since no effect can have changed it and because (condTrue = not condFalse).
+    _apronState = snapshot
+    (resTrue ++ resFalse).flatten.reduce(Join(_, _).get)
 
   def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
     val vars1 = s1.getEnvironment.getVars.toSet

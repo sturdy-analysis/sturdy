@@ -83,15 +83,15 @@ enum ApronCons:
     case False => Set()
     case Compare(_, e1, e2) => e1.vars ++ e2.vars
 
-  def toApron(env: Environment): Tcons1 = this match
-    case True => new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron)
-    case False => new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron)
-    case Compare(Eq, e1, e2) => new Tcons1(env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron)
-    case Compare(Neq, e1, e2) => new Tcons1(env, Tcons1.DISEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron)
-    case Compare(Lt, e1, e2) => new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron)
-    case Compare(Le, e1, e2) => new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron)
-    case Compare(Ge, e1, e2) => new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron)
-    case Compare(Gt, e1, e2) => new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron)
+  def toApron(env: Environment): Seq[Tcons1] = this match
+    case True => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron))
+    case False => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron))
+    case Compare(Eq, e1, e2) => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
+    case Compare(Neq, e1, e2) => Compare(Lt, e1, e2).toApron(env) ++ Compare(Gt, e1, e2).toApron(env)
+    case Compare(Lt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron))
+    case Compare(Le, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron))
+    case Compare(Ge, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
+    case Compare(Gt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
 
 
   def negated: ApronCons = this match
@@ -103,10 +103,6 @@ enum ApronCons:
     case Compare(Le, e1, e2) => Compare(Gt, e1, e2)
     case Compare(Ge, e1, e2) => Compare(Lt, e1, e2)
     case Compare(Gt, e1, e2) => Compare(Le, e1, e2)
-
-  def splitNeq: Option[(ApronCons, ApronCons)] = this match
-    case Compare(Neq, e1, e2) => Some((Compare(Lt, e1, e2), Compare(Gt, e1, e2)))
-    case _ => None
 
 object ApronCons:
   import CompareOp.*
