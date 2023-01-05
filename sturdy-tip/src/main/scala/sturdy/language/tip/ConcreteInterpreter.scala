@@ -71,7 +71,7 @@ object ConcreteInterpreter extends Interpreter:
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint
-    override val assert: CAssert[Value, Label] = new CAssert
+    override val assert: CAssert[Value, Exp] = new CAssert()
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
