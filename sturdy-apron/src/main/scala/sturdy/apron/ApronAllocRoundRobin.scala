@@ -5,10 +5,7 @@ import apron.{Environment, Var, StringVar, Dimchange, Manager, Abstract1}
 
 class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends ApronAlloc:
   class Var(val av: apron.Var, val isInt: Boolean) extends ApronVar {
-    def copy: Var =
-      val newV = new Var(av, isInt)
-      newV._refCount = refCount + 1
-      newV
+    def copy: Var = new Var(av, isInt)
   }
 
   private var varCount: Int = 0

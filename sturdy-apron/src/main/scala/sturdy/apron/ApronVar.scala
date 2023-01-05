@@ -4,6 +4,10 @@ import apron.{Abstract1, Interval, Texpr1CstNode, Texpr1Node, Texpr1VarNode}
 
 import java.util.Objects
 
+object ApronVar:
+  val DEBUG: Boolean = true
+  private var instCount: Int = 0
+
 trait ApronVar:
   private var freed: Boolean = false
   private var _delegate: ApronExpr = _
@@ -15,9 +19,19 @@ trait ApronVar:
 
   val av: apron.Var
   val isInt: Boolean
+  private val instCount = {
+    val c = ApronVar.instCount
+    ApronVar.instCount += 1
+    c
+  }
 
-  protected var _refCount = 0
-  def refCount: Int = _refCount
+  private def internalName: String =
+    val instDesc =
+      if (ApronVar.DEBUG)
+        instCount
+      else
+        Integer.toHexString(System.identityHashCode(this))
+    s"$av#$instDesc}"
 
   def getBound(apron: Apron): Interval =
     if (freed)
@@ -60,7 +74,7 @@ trait ApronVar:
     this._delegate = delegate
     freed = true
     if (Apron.debugAssert) {
-      println(s"Delegating $av#$refCount = $_delegate")
+      println(s"Delegating $internalName = $_delegate")
     }
 
   def frozen(): this.type =
@@ -82,11 +96,11 @@ trait ApronVar:
 
   override def toString: String =
     if (_delegate != null)
-      s"$_delegate (freed $av#$refCount)"
+      s"$_delegate (freed $internalName)"
     else if (freed)
       s"$av"
     else
-      s"$av#$refCount"
+      internalName
 
   override def equals(obj: Any): Boolean = obj match
     case that: ApronVar =>

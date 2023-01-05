@@ -21,14 +21,11 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       case IntTemp(ix) => new StringVar(s"I_temp_$ix")
       case DoubleTemp(ix) => new StringVar(s"D_temp_$ix")
 
-    def copy: Var =
-      val newV = this match
-        case IntVar(local) => IntVar(local)
-        case DoubleVar(local) => DoubleVar(local)
-        case IntTemp(ix) => IntTemp(ix)
-        case DoubleTemp(ix) => DoubleTemp(ix)
-      newV._refCount = this._refCount + 1
-      newV
+    def copy: Var = this match
+      case IntVar(local) => IntVar(local)
+      case DoubleVar(local) => DoubleVar(local)
+      case IntTemp(ix) => IntTemp(ix)
+      case DoubleTemp(ix) => DoubleTemp(ix)
 
     override val isInt: Boolean = this match
       case _: IntVar | _: IntTemp => true
