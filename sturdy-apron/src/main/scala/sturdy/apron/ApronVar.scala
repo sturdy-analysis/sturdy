@@ -44,7 +44,7 @@ trait ApronVar:
 
   def isOpen: Boolean =
     !freed
-  
+
   def isDelegated: Boolean =
     freed && _delegate != null
 
@@ -59,7 +59,7 @@ trait ApronVar:
       throw new IllegalStateException(s"Cannot delegate freed variable $this")
     this._delegate = delegate
     freed = true
-    if (Apron.debugAlloc) {
+    if (Apron.debugAssert) {
       println(s"Delegating $av#$refCount = $_delegate")
     }
 
@@ -71,7 +71,7 @@ trait ApronVar:
 
   def expr: ApronExpr =
     if (_delegate != null)
-      _delegate  
+      _delegate
     else
       ApronExpr.Var(this)
   def node: Texpr1Node =

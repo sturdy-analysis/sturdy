@@ -68,7 +68,7 @@ final class StackedStates[Dom, Codom](val state: State)
 
     val widenedIn = inStateWidening.push(dom, in)
     val stateFrame = (dom, widenedIn.get)
-    println(s"Find recurrent $stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
+//    println(s"Find recurrent $stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
     val info1 = stack.get(stateFrame)
     Option(info1) match
       case None =>
