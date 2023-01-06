@@ -172,7 +172,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     try f finally {
       this._data = snapData
       this.names = snapNames
-      this.allocatedVars.foreach(apron.freeVariable)
+      val vs = this.allocatedVars
+      vs.foreach(apron.freeVariable)
       this.vars = snapVars
     }
   }
@@ -235,11 +236,11 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   private def addNewVariable(ix: Int, isInt: Boolean, name: Var, exp: ApronExpr): Unit = {
     val varSite = ApronAllocationSite.LocalVar(s"${site(_data)}:$name")
     val v = if (isInt) apron.addIntVariable(varSite) else apron.addDoubleVariable(varSite)
-    apron.assign(v, exp).foreach(_ => assert(false))
+    val x = apron.assign(v, exp).getOrElse(v)
     if (isInt)
-      vars(ix) = Val.Int(v)
+      vars(ix) = Val.Int(x)
     else
-      vars(ix) = Val.Double(v)
+      vars(ix) = Val.Double(x)
   }
 
   override def setLocal(ix: Int, v: V): JOptionC[Unit] =

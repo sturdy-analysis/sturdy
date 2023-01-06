@@ -104,13 +104,21 @@ trait ApronVar:
 
   override def equals(obj: Any): Boolean = obj match
     case that: ApronVar =>
-      val sameAV = this.av == that.av
-      val bothFreed = this.freed == that.freed
-      val sameDelegate = this._delegate == that._delegate
-      val bool = sameAV && bothFreed && sameDelegate
+      val bool = if (this.freed && that.freed) {
+        this._delegate == that._delegate
+      } else {
+        val sameAV = this.av == that.av
+        val bothFreed = this.freed == that.freed
+        val sameDelegate = this._delegate == that._delegate
+        sameAV && bothFreed && sameDelegate
+      }
+
 //      println(s"$bool:   $this == $obj")
       bool
     case _ => false
 
   override def hashCode(): Int =
-    av.hashCode()
+    if (freed)
+      Objects.hashCode(_delegate)
+    else
+      av.hashCode()

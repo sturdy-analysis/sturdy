@@ -14,10 +14,11 @@ import java.lang.IllegalStateException
 import scala.language.reflectiveCalls
 
 object Apron:
-  val debugAlloc: Boolean = false
-  val debugAssign: Boolean = false
-  val debugJoinWiden: Boolean = false
-  val debugAssert: Boolean = false
+  val debugAll: Boolean = true
+  val debugAlloc: Boolean = debugAll
+  val debugAssign: Boolean = debugAll
+  val debugJoinWiden: Boolean = debugAll
+  val debugAssert: Boolean = debugAll
 
   case class Bottom() extends SturdyFailure
 
@@ -34,7 +35,13 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     v.getBound(this)
 
   def getAVBound(av: apron.Var): Interval =
-    _apronState.getBound(apronManager, av)
+    if (apronEnv.hasVar(av))
+      _apronState.getBound(apronManager, av)
+    else {
+      val iv = new Interval()
+      iv.setTop()
+      iv
+    }
 
   def getBound(v: ApronExpr): Interval =
     getBound(v.toApron)
@@ -56,7 +63,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   def freeVariable(v: alloc.Var): Unit =
     val freeAV = alloc.freeVariable(v, this)
-    if (freeAV) {
+    if (freeAV && apronEnv.hasVar(v.av)) {
       _apronState.forget(apronManager, v.av, false)
       val newEnv = _apronState.getEnvironment.remove(Array(v.av))
       _apronState.changeEnvironment(apronManager, newEnv, false)
@@ -71,6 +78,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     val isStrong = alloc.useStrongUpdate(v)
     val isInitialized = apronState.getEnvironment.hasVar(v.av)
     var newV: Option[alloc.Var] = None
+
+    exp.vars.foreach(initializeVar)
 
     if (!isInitialized) {
       initializeVar(v)
@@ -92,19 +101,21 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       newV = Some(vnew)
     } else {
       val expIntern = new Texpr1Intern(apronEnv, exp.toApron)
-      if (Apron.debugAssign) {
-        val old = getBound(v)
-        print(s"assigning weak $v = old join $exp = $old join ${_apronState.getBound(apronManager, expIntern)} = ")
-      }
+      println(this)
+      val old = getBound(v)
+      val expBound = _apronState.getBound(apronManager, expIntern)
       val assigned = _apronState.assignCopy(apronManager, v.av, expIntern, null)
       _apronState.join(apronManager, assigned)
+      if (Apron.debugAssign) {
+        println(s"assigning weak $v = old join $exp = $old join $expBound = ${getBound(v)}")
+      }
     }
     if (_apronState.isBottom(apronManager))
       throw new IllegalStateException(s"bottom state illegal here")
     newV
 
   private def initializeVar(v: ApronVar): Unit =
-    if (!apronEnv.hasVar(v.av)) {
+    if (v.isOpen && !apronEnv.hasVar(v.av)) {
       val intAr = if (v.isInt) Array(v.av) else null
       val floAr = if (v.isInt) null else Array(v.av)
       apronState.changeEnvironment(apronState.getCreationManager, apronState.getEnvironment.add(intAr, floAr), false)
@@ -152,9 +163,10 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (c.getKind == Tcons1.DISEQ)
       throw new IllegalArgumentException("DISEQ constraints should be handled outside of the function!")
     c.extendEnvironment(apronEnv)
-    _apronState.meetCopy(apronManager, c)
+    val newState = _apronState.meetCopy(apronManager, c)
     if (debugAssert)
-      println(s"Asserting $c yielding $_apronState")
+      println(s"Asserting $c\n  was $_apronState\n  now $newState")
+    _apronState = newState
     if (_apronState.isBottom(apronManager))
       throw Apron.Bottom()
 
@@ -165,6 +177,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     ifThenElse(cond, cond.negated)(ifTrue)(ifFalse)
 
   def ifThenElse[A](condTrue: ApronCons, condFalse: ApronCons)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
+    condTrue.vars.foreach(initializeVar)
+    condFalse.vars.foreach(initializeVar)
+
     val cTrue = condTrue.toApron(apronEnv)
     val condTrueStr = condTrue.toString
     val cFalse = condFalse.toApron(apronEnv)
@@ -194,6 +209,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     ifThenElsePure(condTrue, condTrue.negated, widen)(ifTrue)(ifFalse)
 
   private def ifThenElsePure[A](condTrue: ApronCons, condFalse: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
+    condTrue.vars.foreach(initializeVar)
+    condFalse.vars.foreach(initializeVar)
+
     val snapshot = _apronState
 
     val cTrue = condTrue.toApron(apronEnv)
@@ -209,11 +227,12 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       assertConstrain(c)
       ifFalse
     }.get)
-    // restore original state, since no effect can have changed it and because (condTrue = not condFalse).
+    // restore original state, since no effect can have changed it and because (condTrue || condFalse = true).
     _apronState = snapshot
     (resTrue ++ resFalse).flatten.reduce(Join(_, _).get)
 
   def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
+    // TODO review this code on first widening in cfgloop.tip
     val vars1 = s1.getEnvironment.getVars.toSet
     val vars2 = s2.getEnvironment.getVars.toSet
     val inboth = (vars1 intersect vars2).toArray
@@ -252,14 +271,19 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       MaybeChanged.Unchanged(e1)
     } else {
       withTemporaryIntVariable { x =>
-        ifThenElsePure(
-          ApronCons.eq(x.expr, e1),
-          ApronCons.eq(x.expr, e2),
-          widen)(())(())
+        val oldBound = getBound(e1)
 
-        val xBound = getBound(x)
-        val v1Bound = getBound(e1)
-        MaybeChanged(x.expr, !xBound.isEqual(v1Bound))
+        initializeVar(x)
+        val e1Intern = new Texpr1Intern(apronEnv, e1.toApron)
+        val a1 = _apronState.assignCopy(apronManager, x.av, e1Intern, null)
+        val e2Intern = new Texpr1Intern(apronEnv, e2.toApron)
+        val a2 = _apronState.assignCopy(apronManager, x.av, e2Intern, null)
+        a1.join(apronManager, a2)
+
+        val xBound = a1.getBound(apronManager, x.av)
+        if (Apron.debugJoinWiden)
+          println(s"Join values $e1 and $e2 is ${x.expr}, widen = $widen")
+        MaybeChanged(x.expr, !xBound.isEqual(oldBound))
       }
     }
 
@@ -328,12 +352,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   class ApronState(val s: Abstract1):
     override def equals(obj: Any): Boolean = obj match
       case other: ApronState =>
-        val bool1 = s.getEnvironment.isEqual(other.s.getEnvironment)
-        val bool2 = s.isEqual(apronManager, other.s)
-        val bool = bool1 && bool2
-//        println(s"$bool:   $this == $obj")
-        bool
-      case _ => false
+        s.getEnvironment.isEqual(other.s.getEnvironment) && s.isEqual(apronManager, other.s)
+      case _ =>
+        false
 
     override def hashCode(): Int =
       s.hashCode(apronManager)

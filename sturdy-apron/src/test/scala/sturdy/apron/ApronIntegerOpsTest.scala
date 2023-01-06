@@ -158,7 +158,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     }
     catch {
       case e : SturdyFailure => assert(true)
-      case _ : Throwable => assert(false)
     }
   }
 
@@ -180,7 +179,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     }
     catch {
       case e: SturdyFailure => assert(true)
-      case _: Throwable => assert(false)
     }
   }
 
@@ -206,7 +204,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
       assert(false)
     } catch {
       case e: SturdyFailure => assert(true)
-      case _: Throwable => assert(false)
       }
     }
 
@@ -252,7 +249,6 @@ class ApronIntegerOpsTest extends AnyFunSuite:
       assert(false)
     } catch {
       case e: SturdyFailure => assert(true)
-      case _: Throwable => assert(false)
     }
   }
 

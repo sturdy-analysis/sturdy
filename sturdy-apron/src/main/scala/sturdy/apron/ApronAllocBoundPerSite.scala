@@ -31,7 +31,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       case _: IntVar | _: IntTemp => true
       case _ => false
 
-  private var intVarCount: Map[String, Int] = Map().withDefaultValue(0)
+  private var intVarCount: Map[String, (Int, Var)] = Map().withDefaultValue((0, null))
   private var doubleVarCount: Map[String, Int] = Map().withDefaultValue(0)
   private var intTempCount = 0
   private var doubleTempCount = 0
@@ -43,10 +43,15 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         intTempCount += 1
         (x, true)
       case ApronAllocationSite.LocalVar(local) =>
-        val oldCount = intVarCount(local)
-        intVarCount += local -> (oldCount + 1)
-        val x = Var.IntVar(local)
+        val (oldCount, oldX) = intVarCount(local)
+        val x = if (oldCount == 0) {
+          Var.IntVar(local)
+        } else {
+          oldX
+        }
+        intVarCount += local -> (oldCount + 1, x)
         (x, oldCount == 0)
+
 
     if (Apron.debugAlloc)
       println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
@@ -71,8 +76,8 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   override def freeVariable(v: Var, apron: Apron): Boolean =
     val isStrong = v match
       case v: Var.IntVar =>
-        val count = intVarCount(v.local)
-        intVarCount += v.local -> (count - 1)
+        val (count, x) = intVarCount(v.local)
+        intVarCount += v.local -> (count - 1, x)
         count == 1
       case v: Var.DoubleVar =>
         val count = doubleVarCount(v.local)
@@ -80,21 +85,37 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         count == 1
       case _: Var.IntTemp | _: Var.DoubleTemp => true
 
-    v.free(apron)
+    if (isStrong)
+      v.free(apron)
 
+    if (Apron.debugAlloc)
+      println(s"freeing ${if (isStrong) "strong" else "weak"} $v")
     isStrong
 
   override def useStrongUpdate(v: Var): Boolean = v match
-    case v: Var.IntVar => intVarCount(v.local) == 1
+    case v: Var.IntVar => intVarCount(v.local)._1 == 1
     case v: Var.DoubleVar => doubleVarCount(v.local) == 1
     case _: Var.IntTemp | _: Var.DoubleTemp => true
 
-  override def freshReference(v: Var): Var = {
-    val newV = v.copy
-    if (Apron.debugAlloc)
-      println(s"fresh reference box $newV")
-    newV
-  }
+  override def freshReference(v: Var): Var = v match
+    case v: Var.IntVar =>
+      val (count, x) = intVarCount(v.local)
+      if (count <= 1) {
+        val newV = v.copy
+        if (Apron.debugAlloc)
+          println(s"fresh reference box $newV")
+        intVarCount += v.local -> (count, newV)
+        newV
+      } else {
+        if (Apron.debugAlloc)
+          println(s"reuse weak reference box $x")
+        x
+      }
+    case _ =>
+      val newV = v.copy
+      if (Apron.debugAlloc)
+        println(s"fresh reference box $newV")
+      newV
 
   override def frozenReference(v: Var): Var = v.copy.frozen()
 

@@ -71,11 +71,6 @@ final class StackedStates[Dom, Codom](val state: State)
 
     if (Fixpoint.DEBUG)
       widenedIn.toOption.foreach(win => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
-    if (Fixpoint.DEBUG_INVARIANTS) {
-      val sameIn = in.toString == widenedIn.get.toString
-      if (widenedIn.hasChanged && sameIn || !widenedIn.hasChanged && !sameIn)
-        throw new IllegalStateException(s"Change flag of widening is wrong.")
-    }
 
     Option(stack.get(stateFrame)) match
       case None =>
@@ -97,7 +92,7 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
-        PushResult.Continue(widenedIn.toOption)
+        PushResult.Continue(Some(widenedIn.get))
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
@@ -186,7 +181,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(in, ce.in.head)}
+        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in.head, in)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 
