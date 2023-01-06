@@ -76,7 +76,8 @@ given ApronIntegerOps[B](using Numeric[B])
       max(x.expr, neg(x.expr))
     }
 
-  private def safediv(v1: ApronExpr, v2: ApronExpr): ApronExpr =
+  /** The default div of apron produces rationals rather than integers. */
+  private def integerDiv(v1: ApronExpr, v2: ApronExpr): ApronExpr =
     ApronExpr.Binary(BinOp.Div,
       ApronExpr.Binary(BinOp.Sub,
         v1,
@@ -90,11 +91,21 @@ given ApronIntegerOps[B](using Numeric[B])
     ap.withTemporaryIntVariables(3) { case List(x1, x2, r) =>
       ap.assign(x1, v1)
       ap.assign(x2, v2)
-      ap.ifThenElseUnit(ApronCons.eq(x2.expr, ApronExpr.Constant(MpqScalar(0)))) {
+      ap.ifThenElseUnit(ApronCons.eq(x2.expr, ApronExpr.num(0))) {
+        // x2 == 0
         f.fail(IntegerDivisionByZero, s"$v1 / $v2")
       } {
-//        ap.assertConstrain(ApronCons.eq(r.expr, safediv(x1.expr, x2.expr)))
-        ap.assign(r, safediv(x1.expr, x2.expr))
+        ap.ifThenElseUnit(ApronCons.gt(x2.expr, ApronExpr.num(0))) {
+          // x2 > 0
+          ap.assign(r, integerDiv(x1.expr, x2.expr))
+        } {
+          // x2 < 0
+          ap.assign(r,
+            ApronExpr.Unary(UnOp.Negate,
+              integerDiv(
+                x1.expr,
+                ApronExpr.Unary(UnOp.Negate, x2.expr))))
+        }
       }
       r.expr
     }

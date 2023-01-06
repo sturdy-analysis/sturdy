@@ -182,6 +182,27 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     }
   }
 
+  test("Division : unconstrained positive") {
+    val (intOps, apron) = instantiateIntOps()
+    val posInf = new MpqScalar()
+    posInf.setInfty(1)
+    val posIV = new Interval(new MpqScalar(new Mpz(1)), posInf)
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(posIV))) == ApronExpr.top.coeff)
+  }
+
+  test("Division : unconstrained negative") {
+    val (intOps, apron) = instantiateIntOps()
+    val negInf = new MpqScalar()
+    negInf.setInfty(-1)
+    val negIV = new Interval(negInf, new MpqScalar(new Mpz(-1)))
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(negIV))) == ApronExpr.top.coeff)
+  }
+
+  test("Division : unconstrained") {
+    val (intOps, apron) = instantiateIntOps()
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == ApronExpr.top.coeff)
+  }
+
   test("Modulo") {
     val (intOps, apron) = instantiateIntOps()
     assert(apron.getBound(intOps.modulo(intOps.integerLit(4), intOps.integerLit(3))) == Interval(1,1))

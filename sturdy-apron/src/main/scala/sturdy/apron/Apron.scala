@@ -37,11 +37,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   def getAVBound(av: apron.Var): Interval =
     if (apronEnv.hasVar(av))
       _apronState.getBound(apronManager, av)
-    else {
-      val iv = new Interval()
-      iv.setTop()
-      iv
-    }
+    else 
+      ApronExpr.top.coeff.asInstanceOf[Interval]
 
   def getBound(v: ApronExpr): Interval =
     getBound(v.toApron)
