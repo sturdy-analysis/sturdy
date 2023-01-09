@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import cats.Monoid
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -78,6 +79,16 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
       println("Concrete " + cresult)
       println("Abstract " + aresult)
+
+      // compute number of assertions in program
+      val unprovedAsserts = aresult match 
+        case AFallible.Failing(msgs) => msgs.size
+        case AFallible.MaybeFailing(_, msgs) => msgs.size
+        case _ => 0
+      // subtract number of maybefailing assertions
+      // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
+      println("=> #assertions proved or unreachable" + (program.assertCount - unprovedAsserts))
+
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
