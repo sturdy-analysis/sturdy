@@ -27,12 +27,10 @@ class ApronAllocRoundRobin(manager: Manager, varCountLimit: Int = 3) extends Apr
     new Var(v, false)
 
   override def freeVariable(v: Var, apron: Apron): Boolean =
-    v.free(apron)
     useStrongUpdate(v)
 
   override def useStrongUpdate(v: Var): Boolean =
-    !v.isDelegated && v.av.toString.endsWith(STRONG_UPDATE_SUFFIX)
+    v.av.toString.endsWith(STRONG_UPDATE_SUFFIX)
 
   override def freshReference(v: Var): Var = v.copy
 
-  override def frozenReference(v: Var): Var = v.copy.frozen()

@@ -77,60 +77,14 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 //      case Double(v) => apron.getBound(v).hashCode
 //      case Other(v) => v.hashCode
 
-  private def combineVars(joinedApronState: Abstract1, v1: alloc.Var, v2: alloc.Var, widen: Boolean): MaybeChanged[alloc.Var] =
-    if ((v1 eq v2) || v1.isFrozen && v2.isFrozen && v1.av == v2.av)
-      Unchanged(v1)
-    else if (v1.av == v2.av) {
-      if (v1.isOpen) {
-        v1.setDelegate(v2.expr)
-        Changed(v2)
-      } else if (v2.isOpen) {
-        v2.setDelegate(v1.expr)
-        Changed(v1)
-      } else {
-        ???
-      }
-
-
-//      if (v1.refCount < v2.refCount) {
-//        assert(v1.isDelegated)
-//        if (widen && false) {
-//          Unchanged(v2)
-//        } else {
-//          val bound1 = joinedApronState.getBound(apron.apronManager, new Texpr1Intern(apron.apronEnv, v1.delegate.toApron))
-//          val bound2 = joinedApronState.getBound(apron.apronManager, v2.av)
-//          val changed = !bound1.isEqual(bound2)
-//          MaybeChanged(v2, changed)
-//        }
-//      } else if (v1.refCount > v2.refCount) {
-//        assert(v2.isDelegated)
-//        Unchanged(v1)
-//      } else {
-//        Unchanged(v1)
-//      }
-    } else {
-      ???
-      if (v1.isDelegated)
-        throw new IllegalStateException(s"Cannot join with freed variable $v1")
-      val v2Intern = new Texpr1Intern(joinedApronState.getEnvironment, v2.node)
-      val assigned = joinedApronState.assignCopy(apronManager, v1.av, v2Intern, null)
-      if (widen) {
-        joinedApronState.widening(apronManager, assigned)
-      } else {
-        joinedApronState.join(apronManager, assigned)
-      }
-      v2.setDelegate(ApronExpr.Var(v1))
-      Unchanged(v1)
-    }
-
   /** Changes state */
   def combineVal(joinedApronState: Abstract1, widen: Boolean): Join[Val] = {
     case (v1, null) => Unchanged(v1)
     case (null, v2) => Changed(v2)
     case (Val.Int(v1), Val.Int(v2)) =>
-      combineVars(joinedApronState, v1, v2, widen).map(Val.Int.apply)
+      apron.combineVars(joinedApronState, v1, v2, widen).map(Val.Int.apply)
     case (Val.Double(v1), Val.Double(v2)) =>
-      combineVars(joinedApronState, v1, v2, widen).map(Val.Double.apply)
+      apron.combineVars(joinedApronState, v1, v2, widen).map(Val.Double.apply)
     case (v1, v2) => Join(v1.asV, v2.asV).map(Val.Other.apply)
   }
 
@@ -206,7 +160,6 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
             case Val.Int(av) =>
               apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Int(av2))
             case Val.Double(av) =>
-              av.free(apron)
               addNewVariable(ix, isInt = true, name, exp)
             case _ =>
               addNewVariable(ix, isInt = true, name, exp)
@@ -216,17 +169,10 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
               case Val.Double(av) =>
                 apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Double(av2))
               case Val.Int(av) =>
-                av.free(apron)
                 addNewVariable(ix, isInt = false, name, exp)
               case _ =>
                 addNewVariable(ix, isInt = false, name, exp)
           case None =>
-            oldVal match
-              case Val.Double(av) =>
-                av.free(apron)
-              case Val.Int(av) =>
-                av.free(apron)
-              case _ =>
             vars(ix) = Val.Other(v)
       JOptionC.some(())
     } else {
@@ -255,17 +201,13 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   private def setVarsConsistentWithState(vars: Array[Val]): Unit =
     this.vars = vars.map {
       case null => null
-      case v@Val.Int(av) => if (!av.isOpen) Val.Int(apron.alloc.freshReference(av)) else v
-      case v@Val.Double(av) => if (!av.isOpen) Val.Double(apron.alloc.freshReference(av)) else v
+      case v@Val.Int(av) => if (!apron.inScope(av)) Val.Int(apron.alloc.freshReference(av)) else v
+      case v@Val.Double(av) => if (!apron.inScope(av)) Val.Double(apron.alloc.freshReference(av)) else v
       case v => v
     }
 
   override def getState: State =
-    val frozenVars = vars.toList.map {
-      case Val.Int(v) => Val.Int(alloc.frozenReference(v))
-      case Val.Double(v) => Val.Double(alloc.frozenReference(v))
-      case v => v
-    }
+    val frozenVars = vars.toList
     (apron.getState, frozenVars)
 
   override def setState(st: State): Unit =

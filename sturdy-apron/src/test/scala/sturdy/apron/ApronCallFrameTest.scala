@@ -148,7 +148,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     // z >= 1  iff   z - 1 >= 0
     val cond = ApronCons.gt(add(neg(z), integerLit(1)), ApronExpr.num(0))
     println(cond)
-    println(cond.toApron(apron.apronEnv))
+    println(apron)
 
     val r = apron.ifThenElse(cond) {
       throw new Exception("unreachable")

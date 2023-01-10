@@ -85,11 +85,6 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         count == 1
       case _: Var.IntTemp | _: Var.DoubleTemp => true
 
-    if (isStrong)
-      v.free(apron)
-
-    if (Apron.debugAlloc)
-      println(s"freeing ${if (isStrong) "strong" else "weak"} $v")
     isStrong
 
   override def useStrongUpdate(v: Var): Boolean = v match
@@ -116,6 +111,4 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       if (Apron.debugAlloc)
         println(s"fresh reference box $newV")
       newV
-
-  override def frozenReference(v: Var): Var = v.copy.frozen()
 

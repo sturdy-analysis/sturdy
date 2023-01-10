@@ -28,6 +28,5 @@ trait ApronAlloc:
   def useStrongUpdate(v: Var): Boolean
   
   def freshReference(v: Var): Var
-  def frozenReference(v: Var): Var
 
   scala.collection.immutable.ArraySeq

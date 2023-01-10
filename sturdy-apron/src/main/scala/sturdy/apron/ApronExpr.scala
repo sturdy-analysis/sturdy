@@ -15,7 +15,8 @@ import apron.Texpr1UnNode
 import apron.Texpr1VarNode
 import gmp.Mpz
 import sturdy.apron.ApronCons.False
-import sturdy.values.{Widen, MaybeChanged, Join}
+import sturdy.apron.ApronExpr.{Binary, Unary}
+import sturdy.values.{Join, MaybeChanged, Widen}
 
 enum ApronExpr:
   case Var(v: ApronVar)
@@ -23,17 +24,19 @@ enum ApronExpr:
   case Unary(op: UnOp, e: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr, r: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
 
-  def vars: Set[ApronVar] = this match
-    case Var(v) => Set(v)
-    case Constant(coeff) => Set()
-    case Unary(op, e, rtyp, rdir) => e.vars
-    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
+//  def vars: Set[ApronVar] = this match
+//    case Var(v) => Set(v)
+//    case Constant(coeff) => Set()
+//    case Unary(op, e, rtyp, rdir) => e.vars
+//    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
-  def toApron: Texpr1Node = this match
-    case Var(v) => v.node
+  def toApron(apron: Apron): Texpr1Node = this match
+    case Var(v) => apron._freedReferences.get(v) match
+      case Some(e) => e.toApron(apron)
+      case None => apron.initializeVar(v).node
     case Constant(coeff) => new Texpr1CstNode(coeff)
-    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron)
-    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron, r.toApron)
+    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron(apron))
+    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(apron), r.toApron(apron))
 
 object ApronExpr:
   def num(i: Int): Constant = 
@@ -78,20 +81,20 @@ enum ApronCons:
 
   import CompareOp.*
 
-  def vars: Set[ApronVar] = this match
-    case True => Set()
-    case False => Set()
-    case Compare(_, e1, e2) => e1.vars ++ e2.vars
+//  def vars: Set[ApronVar] = this match
+//    case True => Set()
+//    case False => Set()
+//    case Compare(_, e1, e2) => e1.vars ++ e2.vars
 
-  def toApron(env: Environment): Seq[Tcons1] = this match
-    case True => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron))
-    case False => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron))
-    case Compare(Eq, e1, e2) => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
-    case Compare(Neq, e1, e2) => Compare(Lt, e1, e2).toApron(env) ++ Compare(Gt, e1, e2).toApron(env)
-    case Compare(Lt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron))
-    case Compare(Le, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron))
-    case Compare(Ge, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
-    case Compare(Gt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron))
+  def toApron(apron: Apron): Seq[Tcons1] = this match
+    case True => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.num(0).toApron(apron)))
+    case False => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.num(1).toApron(apron)))
+    case Compare(Eq, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
+    case Compare(Neq, e1, e2) => Compare(Lt, e1, e2).toApron(apron) ++ Compare(Gt, e1, e2).toApron(apron)
+    case Compare(Lt, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(apron)))
+    case Compare(Le, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(apron)))
+    case Compare(Ge, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
+    case Compare(Gt, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
 
 
   def negated: ApronCons = this match
@@ -127,8 +130,8 @@ enum CompareOp:
 
 given JoinApronExpr(using ap: Apron): Join[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joinValues(v1, v2, widen = false)
+    ap.joinApronExpr(v1, v2, widen = false)
 
 given WidenApronExpr(using ap: Apron): Widen[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joinValues(v1, v2, widen = true)
+    ap.joinApronExpr(v1, v2, widen = true)
