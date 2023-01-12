@@ -216,36 +216,25 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     if (Apron.debugJoinWiden)
       println(s"Restored ApronCallFrame state ${vars.toList} in $apron")
 
-  override def join: Join[State] = {
-    case ((s1, vars1), (s2, vars2)) =>
-      val MaybeChanged(as, changed) = apron.join(s1, s2)
-      val state = new Abstract1(apronManager, as.s)
-      val MaybeChanged(vars, varsChanged) = CombineEquiList(using combineVal(state, widen = false))(vars1, vars2)
-      val newApronState = new apron.ApronState(state)
-      if (Apron.debugJoinWiden)
-        println(
-          s"""Joining call frame
-             |  vars1 = $vars1
-             |  vars2 = $vars2
-             |  vars = $vars
-             |  changed = ${changed || varsChanged}""".stripMargin)
-      MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
-  }
-
-  override def widen: Widen[State] = { case ((s1, vars1), (s2, vars2)) =>
-    val MaybeChanged(as, changed) = apron.widen(s1, s2)
-    val state = new Abstract1(apronManager, as.s)
-    val MaybeChanged(vars, varsChanged) = CombineEquiList(using combineVal(state, widen = true))(vars1, vars2)
-    val newApronState = new apron.ApronState(state)
+  def combine(st1: State, st2: State, widen: Boolean): MaybeChanged[State] =
+    val MaybeChanged(as, apronChanged) = if (widen) apron.widen(st1._1, st2._1) else apron.join(st1._1, st2._1)
+    val combinedState = new Abstract1(apronManager, as.s)
+    val MaybeChanged(vars, varsChanged) = CombineEquiList(using combineVal(combinedState, widen))(st1._2, st2._2)
     if (Apron.debugJoinWiden)
       println(
-        s"""Widening call frame
-           |  vars1 = $vars1
-           |  vars2 = $vars2
-           |  vars = $vars
-           |  changed = ${changed || varsChanged}""".stripMargin)
-    MaybeChanged((newApronState, vars), changed || varsChanged || !as.s.isEqual(apronManager, state))
-  }
+        s"""${if (widen) "Widening" else "Joining"} apron call frame
+           |  vars1 = ${st1._2}
+           |  vars2 = ${st2._2}
+           |  vars  = $vars
+           |  apronChanged = $apronChanged
+           |  varsChanged = $varsChanged""".stripMargin)
+
+    val newApronState = new apron.ApronState(combinedState)
+    MaybeChanged((newApronState, vars), apronChanged || varsChanged)
+
+  override def join: Join[State] = combine(_, _, widen = false)
+
+  override def widen: Widen[State] = combine(_, _, widen = true)
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
 

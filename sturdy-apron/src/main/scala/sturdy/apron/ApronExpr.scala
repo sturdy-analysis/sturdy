@@ -31,7 +31,7 @@ enum ApronExpr:
 //    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
   def toApron(apron: Apron): Texpr1Node = this match
-    case Var(v) => apron._freedReferences.get(v) match
+    case Var(v) => apron.getFreedReference(v) match
       case Some(e) => e.toApron(apron)
       case None => apron.initializeVar(v).node
     case Constant(coeff) => new Texpr1CstNode(coeff)

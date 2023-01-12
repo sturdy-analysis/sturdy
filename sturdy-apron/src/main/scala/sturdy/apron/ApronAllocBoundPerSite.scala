@@ -95,7 +95,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   override def freshReference(v: Var): Var = v match
     case v: Var.IntVar =>
       val (count, x) = intVarCount(v.local)
-      if (count <= 1) {
+      if (count <= 1 || true) {
         val newV = v.copy
         if (Apron.debugAlloc)
           println(s"fresh reference box $newV")

@@ -31,13 +31,14 @@ trait ApronVar:
   def node: Texpr1Node = new Texpr1VarNode(av)
 
   override def toString: String =
-    s"$av#$instCount"
+    toString(Apron.latest)
+//    s"$av#$instCount"
 
   def toString(apron: Apron): String =
-    if (apron.inScope(this))
-      this.toString
+    if (Apron.debugAlloc && !apron.inScope(this))
+      s"$av#$instCount=${apron.getBound(this)}"
     else
-      apron.getBound(this).toString
+      s"$av#$instCount"
 
   override def equals(obj: Any): Boolean = obj match
     case that: ApronVar =>

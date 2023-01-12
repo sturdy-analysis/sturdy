@@ -59,7 +59,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.contains("_conditional3") &&
+    p.toString.contains("rel_") &&
       p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
@@ -92,7 +92,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"CONCRETE : ${interp.store.entries}")
       println(s"ABSTRACT : ${analysis.store.getState}")
 
-      println(s"ABSTRACT : ${analysis.callFrame.apron.freedReferences}")
+      println(s"ABSTRACT : ${analysis.callFrame.apron.getFreedReferences}")
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given
