@@ -46,7 +46,7 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
       val (os, ext) = System.getProperty("os.name").toLowerCase match {
         case s if s.contains("darwin") || s.contains("mac") => ("darwin", "dylib")
         case s if s.contains("win") => ("win", "dll")
-        case s if s.contains("nix") => ("unix", "so")
+        case s if s.contains("nix") || s.contains("linux") => ("unix", "so")
       }
       val arch = System.getProperty("os.arch")
       val nativeDir = baseDirectory.value / "lib_extra" / s"$os-$arch"
